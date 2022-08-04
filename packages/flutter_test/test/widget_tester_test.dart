@@ -361,6 +361,30 @@ void main() {
         matchRoot: true,
       ), findsOneWidget);
     });
+
+    testWidgets('is fast in deep tree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: _deepWidgetTree(
+            depth: 1000,
+            child: Row(
+              children: <Widget>[
+                _deepWidgetTree(
+                  depth: 1000,
+                  child: Column(children: fooBarTexts),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(find.ancestor(
+        of: find.text('bar'),
+        matching: find.byType(Row),
+      ), findsOneWidget);
+    });
   });
 
   group('pageBack', () {
@@ -853,4 +877,13 @@ class _AlwaysRepaint extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     onPaint();
   }
+}
+
+/// Wraps [child] in [depth] layers of [SizedBox]
+Widget _deepWidgetTree({required int depth, required Widget child}) {
+  Widget tree = child;
+  for (int i = 0; i < depth; i += 1) {
+    tree = SizedBox(child: tree);
+  }
+  return tree;
 }

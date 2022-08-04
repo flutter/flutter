@@ -21,6 +21,7 @@ import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
+import 'default_text_editing_shortcuts.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
@@ -636,6 +637,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1546,6 +1548,13 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
+
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2629,6 +2638,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
+      magnifierConfiguration: widget.magnifierConfiguration,
     );
   }
 
@@ -3216,6 +3226,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     setState(() {
       _placeholderLocation = -1;
     });
+  }
+
+  @override
+  void performSelector(String selectorName) {
+    final Intent? intent = intentForMacOSSelector(selectorName);
+
+    if (intent != null) {
+      final BuildContext? primaryContext = primaryFocus?.context;
+      if (primaryContext != null) {
+        Actions.invoke(primaryContext, intent);
+      }
+    }
   }
 
   @override
@@ -4412,7 +4434,16 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     }
 
     final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+
+    // "textBoundary's selection is only updated after rebuild; if the text
+    // is the same, use the selection from state, which is more recent.
+    // This is necessary on macOS where alt+up sends the moveBackward:
+    // and moveToBeginningOfParagraph: selectors at the same time.
+    final TextSelection textBoundarySelection =
+        textBoundary.textEditingValue.text == state._value.text
+            ? state._value.selection
+            : textBoundary.textEditingValue.selection;
+
     if (!textBoundarySelection.isValid) {
       return null;
     }

@@ -5961,6 +5961,148 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
+
+    group('magnifier builder', () {
+      testWidgets('should build custom magnifier if given', (WidgetTester tester) async {
+        final Widget customMagnifier = Container(
+          key: UniqueKey(),
+        );
+        final CupertinoTextField defaultCupertinoTextField = CupertinoTextField(
+          magnifierConfiguration: TextMagnifierConfiguration(magnifierBuilder: (_, __, ___) => customMagnifier),
+        );
+
+        await tester.pumpWidget(const CupertinoApp(
+          home: Placeholder(),
+        ));
+
+        final BuildContext context =
+            tester.firstElement(find.byType(Placeholder));
+
+        expect(
+            defaultCupertinoTextField.magnifierConfiguration!.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isA<Widget>().having(
+                (Widget widget) => widget.key, 'key', equals(customMagnifier.key)));
+      });
+
+      group('defaults', () {
+        testWidgets('should build CupertinoMagnifier on iOS and Android', (WidgetTester tester) async {
+          await tester.pumpWidget(const CupertinoApp(
+            home: CupertinoTextField(),
+          ));
+
+        final BuildContext context = tester.firstElement(find.byType(CupertinoTextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+          expect(
+              editableText.magnifierConfiguration.magnifierBuilder(
+                  context,
+                  MagnifierController(),
+                  ValueNotifier<MagnifierOverlayInfoBearer>(
+                    const MagnifierOverlayInfoBearer.empty(),
+                  )),
+              isA<CupertinoTextMagnifier>());
+        },
+            variant: const TargetPlatformVariant(
+                <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}));
+      });
+
+      testWidgets('should build nothing on all platforms but iOS and Android', (WidgetTester tester) async {
+        await tester.pumpWidget(const CupertinoApp(
+          home: CupertinoTextField(),
+        ));
+
+        final BuildContext context = tester.firstElement(find.byType(CupertinoTextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+        expect(
+            editableText.magnifierConfiguration.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isNull);
+      },
+          variant: TargetPlatformVariant.all(
+              excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}));
+    });
+
+    testWidgets('Can drag handles to show, unshow, and update magnifier',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Builder(
+              builder: (BuildContext context) => CupertinoTextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                    magnifierBuilder: (_,
+                        MagnifierController controller,
+                        ValueNotifier<MagnifierOverlayInfoBearer>
+                            localInfoBearer) {
+                  infoBearer = localInfoBearer;
+                  return fakeMagnifier;
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+      // Double tap the 'e' to select 'def'.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+
+      final TextSelection selection = controller.selection;
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+
+      // Drag the right handle 2 letters to the right.
+      final Offset handlePos = endpoints.last.point + const Offset(1.0, 1.0);
+      final TestGesture gesture =
+          await tester.startGesture(handlePos, pointer: 7);
+
+      Offset? firstDragGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
+      await tester.pump();
+
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition,
+          isNot(infoBearer.value.globalGesturePosition));
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   group('TapRegion integration', () {
     testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
@@ -6073,31 +6215,34 @@ void main() {
       variant: TargetPlatformVariant.all(),
       skip: kIsWeb, // [intended] The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
     );
-    testWidgets("Tapping on border doesn't lose focus", (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: CupertinoTextField(
-                autofocus: true,
-                focusNode: focusNode,
+
+      testWidgets("Tapping on border doesn't lose focus",
+          (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: CupertinoTextField(
+                  autofocus: true,
+                  focusNode: focusNode,
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
-      expect(focusNode.hasPrimaryFocus, isTrue);
+        );
+        await tester.pump();
+        expect(focusNode.hasPrimaryFocus, isTrue);
 
-      final Rect borderBox = tester.getRect(find.byType(CupertinoTextField));
-      // Tap just inside the border, but not inside the EditableText.
-      await tester.tapAt(borderBox.topLeft + const Offset(1, 1));
-      await tester.pump();
+        final Rect borderBox = tester.getRect(find.byType(CupertinoTextField));
+        // Tap just inside the border, but not inside the EditableText.
+        await tester.tapAt(borderBox.topLeft + const Offset(1, 1));
+        await tester.pump();
 
-      expect(focusNode.hasPrimaryFocus, isTrue);
-    }, variant: TargetPlatformVariant.all());
+        expect(focusNode.hasPrimaryFocus, isTrue);
+      }, variant: TargetPlatformVariant.all());
+    });
   });
 }

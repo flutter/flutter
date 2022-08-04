@@ -115,20 +115,20 @@ platform_properties:
   windows:
     properties:
       dependencies: >-
-          [
-            {"dependency": "certs", "version": "version:9563bb"}
-          ]
+        [
+          {"dependency": "certs", "version": "version:9563bb"}
+        ]
       os: Windows-10
       device_type: none
   windows_android:
     properties:
       dependencies: >-
-          [
-            {"dependency": "android_sdk", "version": "version:32v1"},
-            {"dependency": "certs", "version": "version:9563bb"},
-            {"dependency": "chrome_and_driver", "version": "version:96.2"},
-            {"dependency": "open_jdk", "version": "11"}
-          ]
+        [
+          {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "certs", "version": "version:9563bb"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "11"}
+        ]
       os: Windows-10
       device_type: "msm8952"
 
@@ -153,9 +153,9 @@ targets:
       tags: >
         ["framework","hostonly"]
       dependencies: >-
-          [
-            {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
-          ]
+        [
+          {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
+        ]
 
   - name: Linux android views
     recipe: flutter/android_views
@@ -1349,7 +1349,6 @@ targets:
       task_name: channels_integration_test
 
   - name: Linux_android clipper_cache_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2251,6 +2250,17 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
+  - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      openpay: "true"
+      tags: >
+        ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
+      task_name: openpay_benchmarks__scroll_perf
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -2302,8 +2312,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -2591,8 +2599,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -2645,8 +2651,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -2703,8 +2707,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode", "version": "13a233"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
@@ -3061,10 +3063,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_ios__compile
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3074,10 +3072,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_ios__start_up
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3087,10 +3081,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3344,6 +3334,7 @@ targets:
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
     timeout: 60
     properties:
       tags: >
