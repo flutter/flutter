@@ -39,9 +39,7 @@ void testMain() {
     expect(MouseCursor.instance, isNotNull);
     expect(KeyboardBinding.instance, isNotNull);
     expect(PointerBinding.instance, isNotNull);
-
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }
 
 DomElement? findGlassPane() {

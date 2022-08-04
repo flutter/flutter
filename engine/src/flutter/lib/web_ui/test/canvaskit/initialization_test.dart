@@ -22,6 +22,5 @@ void testMain() {
           'canvaskit (requested explicitly)');
       expect(domDocument.body!.getAttribute('flt-build-mode'), 'debug');
     });
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+  });
 }
