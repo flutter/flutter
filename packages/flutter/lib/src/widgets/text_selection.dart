@@ -101,7 +101,7 @@ class TextMagnifierConfiguration {
   /// null.
   final MagnifierBuilder? _magnifierBuilder;
 
-  /// {@macro flutter.widgets.textSelection.MagnifierBuilder}
+  /// {@macro flutter.widgets.magnifier.MagnifierBuilder}
   MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
 
   /// Determines whether a magnifier should show the text editing handles or not.
