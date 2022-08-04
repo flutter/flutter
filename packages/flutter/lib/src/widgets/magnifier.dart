@@ -15,6 +15,85 @@ import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 
+/// {@template flutter.widgets.magnifier.MagnifierBuilder}
+/// Signature for a builder that builds a Widget with a [MagnifierController].
+///
+/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
+/// required, although if a Widget intends to have entry or exit animations, it should take
+/// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
+/// can wait before removing it from the overlay.
+/// {@endtemplate}
+///
+/// See also:
+///
+/// - [MagnifierOverlayInfoBearer], the dataclass that updates the
+///   magnifier.
+typedef MagnifierBuilder = Widget? Function(
+    BuildContext context,
+    MagnifierController controller,
+    ValueNotifier<MagnifierOverlayInfoBearer> textSelectionData
+);
+
+/// A data class that allows the [SelectionOverlay] to delegate
+/// the magnifier's positioning to the magnifier itself, based on the
+/// info in [MagnifierOverlayInfoBearer].
+@immutable
+class MagnifierOverlayInfoBearer {
+  /// Construct a [MagnifierOverlayInfoBearer] from raw values.
+  const MagnifierOverlayInfoBearer({
+    required this.globalGesturePosition,
+    required this.caretRect,
+    required this.fieldBounds,
+    required this.currentLineBoundries,
+  });
+
+  /// Construct an empty [MagnifierOverlayInfoBearer], with all
+  /// values set to 0.
+  const MagnifierOverlayInfoBearer.empty() :
+    globalGesturePosition = Offset.zero,
+    caretRect = Rect.zero,
+    currentLineBoundries = Rect.zero,
+    fieldBounds = Rect.zero;
+
+  /// The offset of the gesture position that the magnifier should be shown at.
+  final Offset globalGesturePosition;
+
+  /// The rect of the current line the magnifier should be shown at. Do not take
+  /// into account any padding of the field; only the position of the first
+  /// and last character.
+  final Rect currentLineBoundries;
+
+  /// The rect of the handle that the magnifier should follow.
+  final Rect caretRect;
+
+  /// The bounds of the entire text field that the magnifier is bound to.
+  final Rect fieldBounds;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (other is! MagnifierOverlayInfoBearer) {
+      return false;
+    }
+
+    return other.globalGesturePosition == globalGesturePosition &&
+        other.caretRect == caretRect &&
+        other.currentLineBoundries == currentLineBoundries &&
+        other.fieldBounds == fieldBounds;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    globalGesturePosition,
+    caretRect,
+    fieldBounds,
+    currentLineBoundries
+  );
+}
+
 /// [MagnifierController]'s main benefit over holding a raw [OverlayEntry] is that
 /// [MagnifierController] will handle logic around waiting for a magnifier to animate in or out.
 ///
