@@ -74,15 +74,11 @@ class MagnifierOverlayInfoBearer {
     if (identical(this, other)) {
       return true;
     }
-
-    if (other is! MagnifierOverlayInfoBearer) {
-      return false;
-    }
-
-    return other.globalGesturePosition == globalGesturePosition &&
-        other.caretRect == caretRect &&
-        other.currentLineBoundries == currentLineBoundries &&
-        other.fieldBounds == fieldBounds;
+    return other is MagnifierOverlayInfoBearer
+        && other.globalGesturePosition == globalGesturePosition
+        && other.caretRect == caretRect
+        && other.currentLineBoundries == currentLineBoundries
+        && other.fieldBounds == fieldBounds;
   }
 
   @override
