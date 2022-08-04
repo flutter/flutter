@@ -421,7 +421,7 @@ void main() {
     await tester.tap(find.text('Group 2'));
     await tester.pumpAndSettle();
 
-    // Now that we are in the second group drag to the end and 
+    // Now that we are in the second group drag to the end and
     // click the last tab.
     expect(find.text('Tab 1-0'), findsOneWidget);
 
@@ -4962,7 +4962,7 @@ class _GroupOfTabsState extends State<GroupOfTabs> with TickerProviderStateMixin
     _tabGroups = [];
     _tabContents = [];
     for (int i = 0; i < 5; i++) {
-      
+
       final List<Tab> tabs = List<Tab>.generate(10, (j) => Tab(text: 'Tab $i-$j'));
       final List<Widget> contents = List<Widget>.generate(10, (j) => Text('Content $i-$j'));
 
