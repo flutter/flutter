@@ -49,8 +49,6 @@ class ExpansionTileThemeData with Diagnosticable {
     this.collapsedIconColor,
     this.textColor,
     this.collapsedTextColor,
-    this.borderColor,
-    this.collapsedBorderColor,
   });
 
   /// Overrides the default value of [ExpansionTile.backgroundColor].
@@ -80,12 +78,6 @@ class ExpansionTileThemeData with Diagnosticable {
   /// Overrides the default value of [ExpansionTile.collapsedTextColor].
   final Color? collapsedTextColor;
 
-  /// Overrides the default value of [ExpansionTile.borderColor].
-  final Color? borderColor;
-
-  /// Overrides the default value of [ExpansionTile.collapseBorderColor].
-  final Color? collapsedBorderColor;
-
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ExpansionTileThemeData copyWith({
@@ -98,8 +90,6 @@ class ExpansionTileThemeData with Diagnosticable {
     Color? collapsedIconColor,
     Color? textColor,
     Color? collapsedTextColor,
-    Color? borderColor,
-    Color? collapsedBorderColor,
   }) {
     return ExpansionTileThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -111,8 +101,6 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedIconColor: collapsedIconColor ?? this.collapsedIconColor,
       textColor: textColor ?? this.textColor,
       collapsedTextColor: collapsedTextColor ?? this.collapsedTextColor,
-      borderColor: borderColor ?? this.borderColor,
-      collapsedBorderColor: collapsedBorderColor ?? this.collapsedBorderColor,
     );
   }
 
@@ -132,8 +120,6 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedIconColor: Color.lerp(a?.collapsedIconColor, b?.collapsedIconColor, t),
       textColor: Color.lerp(a?.textColor, b?.textColor, t),
       collapsedTextColor: Color.lerp(a?.collapsedTextColor, b?.collapsedTextColor, t),
-      borderColor: Color.lerp(a?.borderColor, b?.borderColor, t),
-      collapsedBorderColor: Color.lerp(a?.collapsedBorderColor, b?.collapsedBorderColor, t),
     );
   }
 
@@ -149,8 +135,6 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedIconColor,
       textColor,
       collapsedTextColor,
-      borderColor,
-      collapsedBorderColor,
     );
   }
 
@@ -171,9 +155,7 @@ class ExpansionTileThemeData with Diagnosticable {
       && other.iconColor == iconColor
       && other.collapsedIconColor == collapsedIconColor
       && other.textColor == textColor
-      && other.collapsedTextColor == collapsedTextColor
-      && other.borderColor == borderColor
-      && other.collapsedBorderColor == collapsedBorderColor;
+      && other.collapsedTextColor == collapsedTextColor;
   }
 
   @override
@@ -188,8 +170,6 @@ class ExpansionTileThemeData with Diagnosticable {
     properties.add(ColorProperty('collapsedIconColor', collapsedIconColor, defaultValue: null));
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(ColorProperty('collapsedTextColor', collapsedTextColor, defaultValue: null));
-    properties.add(ColorProperty('borderColor', borderColor, defaultValue: null));
-    properties.add(ColorProperty('collapsedBorderColor', collapsedBorderColor, defaultValue: null));
   }
 }
 

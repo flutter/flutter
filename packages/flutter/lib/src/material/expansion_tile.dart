@@ -68,8 +68,8 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedTextColor,
     this.iconColor,
     this.collapsedIconColor,
-    this.borderColor,
-    this.collapsedBorderColor,
+    this.border,
+    this.collapsedBorder,
     this.controlAffinity,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
@@ -256,29 +256,13 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final Color? collapsedTextColor;
 
-  /// The color of the tile's vertical border when the sublist is expanded.
-  ///
-  /// Used to override to the [Theme.dividerColor].
-  ///
-  /// If this property is null then [ExpansionTileThemeData.borderColor] is used. If that
-  /// is also null then the value of [Theme.dividerColor] is used.
-  ///
-  /// See also:
-  ///
-  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
-  ///   [ExpansionTileThemeData].
-  final Color? borderColor;
+  /// Tile's border when the sublist is expanded.
+  /// If this property is null then a [Border] with vertical direction sides default to Color [Theme.divider] is used
+  final Border? border;
 
-  /// The color of the tile's vertical border when the sublist is collapsed.
-  ///
-  /// If this property is null then [ExpansionTileThemeData.collapsedBorderColor] is used. If that
-  /// is also null then [Colors.transparent] is used.
-  ///
-  /// See also:
-  ///
-  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
-  ///   [ExpansionTileThemeData].
-  final Color? collapsedBorderColor;
+  /// Tile's border when the sublist is collapsed.
+  /// If this property is null then a [Border] with all the sides default to [BorderSide.none] is used
+  final Border? collapsedBorder;
 
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
   ///
@@ -295,7 +279,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
 
-  final ColorTween _borderColorTween = ColorTween();
+  final BorderTween _borderTween = BorderTween();
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
@@ -303,7 +287,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   late AnimationController _controller;
   late Animation<double> _iconTurns;
   late Animation<double> _heightFactor;
-  late Animation<Color?> _borderColor;
+  late Animation<Border?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
@@ -316,7 +300,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _controller = AnimationController(duration: _kExpand, vsync: this);
     _heightFactor = _controller.drive(_easeInTween);
     _iconTurns = _controller.drive(_halfTween.chain(_easeInTween));
-    _borderColor = _controller.drive(_borderColorTween.chain(_easeOutTween));
+    _border = _controller.drive(_borderTween.chain(_easeOutTween));
     _headerColor = _controller.drive(_headerColorTween.chain(_easeInTween));
     _iconColor = _controller.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
@@ -387,15 +371,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final Color borderSideColor = _borderColor.value ?? Colors.transparent;
+    final Border expansionTileBorder = _border.value ?? const Border();
 
     return Container(
       decoration: BoxDecoration(
         color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
-        border: Border(
-          top: BorderSide(color: borderSideColor),
-          bottom: BorderSide(color: borderSideColor),
-        ),
+        border: expansionTileBorder,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -431,11 +412,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    _borderColorTween
-      ..begin = widget.collapsedBorderColor
-        ?? expansionTileTheme.collapsedBorderColor
-        ?? theme.dividerColor
-      ..end = widget.borderColor ?? expansionTileTheme.borderColor ?? Colors.transparent;
+    _borderTween
+      ..begin = widget.collapsedBorder ?? const Border()
+      ..end = widget.border ?? Border(
+        top: BorderSide(color: theme.dividerColor),
+        bottom: BorderSide(color: theme.dividerColor),
+      );
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor
