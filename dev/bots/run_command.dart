@@ -149,8 +149,8 @@ Future<Command> startCommand(String executable, List<String> arguments, {
 
 /// Runs the `executable` and waits until the process exits.
 ///
-/// If the process exits with a non-zero exit code, exits this process with
-/// exit code 1, unless `expectNonZeroExit` is set to true.
+/// If the process exits with a non-zero exit code and `expectNonZeroExit` is
+/// false, calls foundError (which does not terminate execution!).
 ///
 /// `outputListener` is called for every line of standard output from the
 /// process, and is given the [Process] object. This can be used to interrupt
@@ -195,7 +195,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
         io.stdout.writeln(result.flattenedStderr);
         break;
     }
-    exitWithError(<String>[
+    foundError(<String>[
       if (failureMessage != null)
         failureMessage
       else
@@ -203,8 +203,9 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
       '${bold}Command: $green$commandDescription$reset',
       '${bold}Relative working directory: $cyan$relativeWorkingDir$reset',
     ]);
+  } else {
+    print('$clock ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');
   }
-  print('$clock ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');
   return result;
 }
 

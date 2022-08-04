@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:core' hide print;
+import 'dart:io' hide exit;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -170,52 +171,52 @@ String get shuffleSeed {
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
 Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
-  try {
-    flutterTestArgs.addAll(args);
-    final Set<String> removeArgs = <String>{};
-    for (final String arg in args) {
-      if (arg.startsWith('--local-engine=')) {
-        localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
-      }
-      if (arg.startsWith('--local-engine-src-path=')) {
-        localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
-      }
-      if (arg.startsWith('--test-randomize-ordering-seed=')) {
-        _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
-        removeArgs.add(arg);
-      }
-      if (arg == '--no-smoke-tests') {
-        // This flag is deprecated, ignore it.
-        removeArgs.add(arg);
-      }
+  flutterTestArgs.addAll(args);
+  final Set<String> removeArgs = <String>{};
+  for (final String arg in args) {
+    if (arg.startsWith('--local-engine=')) {
+      localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
     }
-    flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
-    if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
-      print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+    if (arg.startsWith('--local-engine-src-path=')) {
+      localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
     }
-    print('═' * 80);
-    await selectShard(<String, ShardRunner>{
-      'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
-      'build_tests': _runBuildTests,
-      'framework_coverage': _runFrameworkCoverage,
-      'framework_tests': _runFrameworkTests,
-      'tool_tests': _runToolTests,
-      // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
-      'web_tool_tests': _runWebToolTests,
-      'tool_integration_tests': _runIntegrationToolTests,
-      'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
-      // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
-      'web_tests': _runWebHtmlUnitTests,
-      // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
-      'web_canvaskit_tests': _runWebCanvasKitUnitTests,
-      // All web integration tests
-      'web_long_running_tests': _runWebLongRunningTests,
-      'flutter_plugins': _runFlutterPluginsTests,
-      'skp_generator': _runSkpGeneratorTests,
-      kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script.
-    });
-  } on ExitException catch (error) {
-    error.apply();
+    if (arg.startsWith('--test-randomize-ordering-seed=')) {
+      _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
+      removeArgs.add(arg);
+    }
+    if (arg == '--no-smoke-tests') {
+      // This flag is deprecated, ignore it.
+      removeArgs.add(arg);
+    }
+  }
+  flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
+  if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
+    print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+  }
+  print('═' * 80);
+  await selectShard(<String, ShardRunner>{
+    'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
+    'build_tests': _runBuildTests,
+    'framework_coverage': _runFrameworkCoverage,
+    'framework_tests': _runFrameworkTests,
+    'tool_tests': _runToolTests,
+    // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
+    'web_tool_tests': _runWebToolTests,
+    'tool_integration_tests': _runIntegrationToolTests,
+    'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
+    // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
+    'web_tests': _runWebHtmlUnitTests,
+    // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
+    'web_canvaskit_tests': _runWebCanvasKitUnitTests,
+    // All web integration tests
+    'web_long_running_tests': _runWebLongRunningTests,
+    'flutter_plugins': _runFlutterPluginsTests,
+    'skp_generator': _runSkpGeneratorTests,
+    kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script.
+  });
+  if (hasError) {
+    print('$clock ${bold}Test failed.$reset');
+    reportErrorsAndExit();
   }
   print('$clock ${bold}Test successful.$reset');
 }
@@ -241,9 +242,7 @@ Future<void> _validateEngineHash() async {
     return line.startsWith('Flutter Engine Version:');
   });
   if (!actualVersion.contains(expectedVersion)) {
-    print('${red}Expected "Flutter Engine Version: $expectedVersion", '
-          'but found "$actualVersion".');
-    exit(1);
+    foundError(<String>['${red}Expected "Flutter Engine Version: $expectedVersion", but found "$actualVersion".']);
   }
 }
 
@@ -332,7 +331,7 @@ Future<void> _runTestHarnessTests() async {
   // Verify that we correctly generated the version file.
   final String? versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
   if (versionError != null) {
-    exitWithError(<String>[versionError]);
+    foundError(<String>[versionError]);
   }
 }
 
@@ -652,9 +651,10 @@ Future<void> _flutterBuild(
     );
     final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
     if (!_allTargetsCached(file)) {
-      print('${red}Not all build targets cached after second run.$reset');
-      print('The target performance data was: ${file.readAsStringSync().replaceAll('},', '},\n')}');
-      exit(1);
+      foundError(<String>[
+        '${red}Not all build targets cached after second run.$reset',
+        'The target performance data was: ${file.readAsStringSync().replaceAll('},', '},\n')}',
+      ]);
     }
   }
 }
@@ -840,8 +840,7 @@ Future<void> _runFrameworkTests() async {
       },
     ));
     if (results.isNotEmpty) {
-      print(results.join('\n'));
-      exit(1);
+      foundError(results);
     }
   }
 
@@ -941,20 +940,24 @@ Future<void> _runFrameworkTests() async {
 Future<void> _runFrameworkCoverage() async {
   final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
-    print('${red}Coverage file not found.$reset');
-    print('Expected to find: $cyan${coverageFile.absolute}$reset');
-    print('This file is normally obtained by running `${green}flutter update-packages$reset`.');
-    exit(1);
+    foundError(<String>[
+      '${red}Coverage file not found.$reset',
+      'Expected to find: $cyan${coverageFile.absolute}$reset',
+      'This file is normally obtained by running `${green}flutter update-packages$reset`.',
+    ]);
+    return;
   }
   coverageFile.deleteSync();
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
     options: const <String>['--coverage'],
   );
   if (!coverageFile.existsSync()) {
-    print('${red}Coverage file not found.$reset');
-    print('Expected to find: $cyan${coverageFile.absolute}$reset');
-    print('This file should have been generated by the `${green}flutter test --coverage$reset` script, but was not.');
-    exit(1);
+    foundError(<String>[
+      '${red}Coverage file not found.$reset',
+      'Expected to find: $cyan${coverageFile.absolute}$reset',
+      'This file should have been generated by the `${green}flutter test --coverage$reset` script, but was not.',
+    ]);
+    return;
   }
 }
 
@@ -1496,12 +1499,11 @@ Future<void> _runWebStackTraceTest(String buildMode, String entrypoint) async {
     browserDebugPort: browserDebugPort,
   );
 
-  if (result.contains('--- TEST SUCCEEDED ---')) {
-    print('${green}Web stack trace integration test passed.$reset');
-  } else {
-    print(result);
-    print('${red}Web stack trace integration test failed.$reset');
-    exit(1);
+  if (!result.contains('--- TEST SUCCEEDED ---')) {
+    foundError(<String>[
+      result,
+      '${red}Web stack trace integration test failed.$reset',
+    ]);
   }
 }
 
@@ -1545,12 +1547,11 @@ Future<void> _runWebReleaseTest(String target, {
     browserDebugPort: browserDebugPort,
   );
 
-  if (result.contains('--- TEST SUCCEEDED ---')) {
-    print('${green}Web release mode test passed.$reset');
-  } else {
-    print(result);
-    print('${red}Web release mode test failed.$reset');
-    exit(1);
+  if (!result.contains('--- TEST SUCCEEDED ---')) {
+    foundError(<String>[
+      result,
+      '${red}Web release mode test failed.$reset',
+    ]);
   }
 }
 
@@ -1599,13 +1600,12 @@ Future<void> _runWebDebugTest(String target, {
     environment: environment,
   );
 
-  if (success) {
-    print('${green}Web stack trace integration test passed.$reset');
-  } else {
-    print(result.flattenedStdout!);
-    print(result.flattenedStderr!);
-    print('${red}Web stack trace integration test failed.$reset');
-    exit(1);
+  if (!success) {
+    foundError(<String>[
+      result.flattenedStdout!,
+      result.flattenedStderr!,
+      '${red}Web stack trace integration test failed.$reset',
+    ]);
   }
 }
 
@@ -1652,9 +1652,11 @@ Future<void> _dartRunTest(String workingDirectory, {
   if (cpuVariable != null) {
     cpus = int.tryParse(cpuVariable, radix: 10);
     if (cpus == null) {
-      print('${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset');
-      print('Actual value: "$cpuVariable"');
-      exit(1);
+      foundError(<String>[
+        '${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset',
+        'Actual value: "$cpuVariable"',
+      ]);
+      return;
     }
   } else {
     cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
@@ -1762,13 +1764,14 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
     if (!FileSystemEntity.isFileSync(fullScriptPath)) {
-      print('${red}Could not find test$reset: $green$fullScriptPath$reset');
-      print('Working directory: $cyan$workingDirectory$reset');
-      print('Script: $green$script$reset');
-      if (!printOutput) {
-        print('This is one of the tests that does not normally print output.');
-      }
-      exit(1);
+      foundError(<String>[
+        '${red}Could not find test$reset: $green$fullScriptPath$reset',
+        'Working directory: $cyan$workingDirectory$reset',
+        'Script: $green$script$reset',
+        if (!printOutput)
+          'This is one of the tests that does not normally print output.',
+      ]);
+      return;
     }
     args.add(script);
   }
@@ -1792,7 +1795,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
     if (outputChecker != null) {
       final String? message = outputChecker(result);
       if (message != null) {
-        exitWithError(<String>[message]);
+        foundError(<String>[message]);
       }
     }
     return;
@@ -1906,15 +1909,19 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
   final RegExp pattern = RegExp(r'^(\d+)_(\d+)$');
   final Match? match = pattern.firstMatch(subshardName);
   if (match == null || match.groupCount != 2) {
-    print('${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"');
-    exit(1);
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
+    ]);
+    return <T>[];
   }
   // One-indexed.
-  final int index = int.parse(match!.group(1)!);
+  final int index = int.parse(match.group(1)!);
   final int total = int.parse(match.group(2)!);
   if (index > total) {
-    print('${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.');
-    exit(1);
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
+    ]);
+    return <T>[];
   }
 
   final int testsPerShard = (tests.length / total).ceil();
@@ -1965,9 +1972,11 @@ Future<void> _runFromList(Map<String, ShardRunner> items, String key, String nam
     }
   } else {
     if (!items.containsKey(item)) {
-      print('${red}Invalid $name: $item$reset');
-      print('The available ${name}s are: ${items.keys.join(", ")}');
-      exit(1);
+      foundError(<String>[
+        '${red}Invalid $name: $item$reset',
+        'The available ${name}s are: ${items.keys.join(", ")}',
+      ]);
+      return;
     }
     print('$bold$key=$item$reset');
     await items[item]!();
