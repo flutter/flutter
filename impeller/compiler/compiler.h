@@ -57,8 +57,6 @@ class Compiler {
 
   std::string GetDependencyNames(std::string separator) const;
 
-  void SetBindingBase(shaderc::CompileOptions& compiler_opts) const;
-
   FML_DISALLOW_COPY_AND_ASSIGN(Compiler);
 };
 
