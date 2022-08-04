@@ -71,7 +71,7 @@ void main(List<String> args) async {
         try {
           goldenFile = File(join(screenshotPath, fileName))..writeAsBytesSync(fileContent, flush: true);
         } on FileSystemException catch (err) {
-          panic(<String>['failed to create screenshot $fileName: ${err.toString()}']);
+          panic(<String>['failed to create screenshot $fileName: $err']);
         }
         log('wrote ${goldenFile.absolute.path}');
         if (isSkiaGoldClientAvailable) {
@@ -79,13 +79,13 @@ void main(List<String> args) async {
             .addImg(fileName, goldenFile,
                     screenshotSize: screenshot.pixelCount)
             .catchError((dynamic err) {
-              panic(<String>['skia gold comparison failed: ${err.toString()}']);
+              panic(<String>['skia gold comparison failed: $err']);
             });
           pendingComparisons.add(comparison);
         }
       },
       onError: (dynamic err) {
-        panic(<String>['error while receiving bytes: ${err.toString()}']);
+        panic(<String>['error while receiving bytes: $err']);
       },
       cancelOnError: true);
     });
