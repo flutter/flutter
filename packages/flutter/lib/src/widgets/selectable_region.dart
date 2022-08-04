@@ -18,6 +18,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
