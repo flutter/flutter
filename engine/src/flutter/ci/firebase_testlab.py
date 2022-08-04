@@ -11,7 +11,16 @@ import os
 import subprocess
 import sys
 
-BUCKET = 'gs://flutter_firebase_testlab'
+if 'STORAGE_BUCKET' not in os.environ:
+  print('The GCP storage bucket must be provided as an environment variable.')
+  sys.exit(1)
+BUCKET = os.environ['STORAGE_BUCKET']
+
+if 'GCP_PROJECT' not in os.environ:
+  print('The GCP project must be provided as an environment variable.')
+  sys.exit(1)
+PROJECT = os.environ['GCP_PROJECT']
+
 script_dir = os.path.dirname(os.path.realpath(__file__))
 buildroot_dir = os.path.abspath(os.path.join(script_dir, '..', '..'))
 out_dir = os.path.join(buildroot_dir, 'out')
@@ -28,7 +37,7 @@ def run_firebase_test(apk, results_dir):
       [
           'gcloud',
           '--project',
-          'flutter-infra',
+          PROJECT,
           'firebase',
           'test',
           'android',
