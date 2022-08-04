@@ -195,8 +195,32 @@ class ShaderCompiler {
       }
       return false;
     }
+    await _ensureGloballyReadable(outputPath);
     ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     return true;
+  }
+
+  // Uploading to the app store can fail with default permissions `600`, see
+  // https://github.com/flutter/flutter/issues/108737.
+  Future<void> _ensureGloballyReadable(String path) async {
+    final File file = _fs.file(path);
+
+    if (!file.existsSync()) {
+      throw ShaderCompilerException._(
+        'Shader compilation completed with 0 exit code but the output file $path does not exist',
+      );
+    }
+
+    final List<String> args = <String>['chmod', '644', path];
+    final ProcessResult result = await _processManager.run(args);
+    if (result.exitCode != 0) {
+      throw ProcessException(
+        args.first,
+        args.sublist(1),
+        'Received exit code ${result.exitCode} from command `${args.join(' ')}`',
+        result.exitCode,
+      );
+    }
   }
 }
 
