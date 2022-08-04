@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -166,6 +167,8 @@ class _TestAppState extends State<TestApp> {
     () => basicStringMessageToUnknownChannel(),
     () => basicJsonMessageToUnknownChannel(),
     () => basicStandardMessageToUnknownChannel(),
+    if (Platform.isIOS)
+      () => basicBackgroundStandardEcho(123),
   ];
   Future<TestStepResult>? _result;
   int _step = 0;
