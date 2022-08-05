@@ -702,7 +702,9 @@ void DisplayListDispatcher::drawPaint() {
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawLine(const SkPoint& p0, const SkPoint& p1) {
   auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
-  canvas_.DrawPath(std::move(path), paint_);
+  Paint paint = paint_;
+  paint.style = Paint::Style::kStroke;
+  canvas_.DrawPath(std::move(path), std::move(paint));
 }
 
 // |flutter::Dispatcher|
