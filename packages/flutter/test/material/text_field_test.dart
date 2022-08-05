@@ -94,8 +94,9 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({ required Widget child }) {
+Widget boilerplate({ required Widget child, ThemeData? theme }) {
   return MaterialApp(
+    theme: theme,
     home: Localizations(
       locale: const Locale('en', 'US'),
       delegates: <LocalizationsDelegate<dynamic>>[
@@ -4655,6 +4656,38 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
+  testWidgets('maxLength shows warning in Material 3', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+    final ThemeData theme = ThemeData.from(
+      colorScheme: const ColorScheme.light().copyWith(error: Colors.deepPurpleAccent),
+      useMaterial3: true,
+    );
+    await tester.pumpWidget(boilerplate(
+      theme: theme,
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforcement: MaxLengthEnforcement.none,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pump();
+
+    expect(textController.text, '0123456789101112');
+    expect(find.text('16/10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16/10'));
+    expect(counterTextWidget.style!.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '0123456789');
+    await tester.pump();
+
+    expect(textController.text, '0123456789');
+    expect(find.text('10/10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10/10'));
+    expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
+  });
+
   testWidgets('maxLength shows warning when maxLengthEnforcement.none with surrogate pairs.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
@@ -6082,6 +6115,60 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  // Regressing test for https://github.com/flutter/flutter/issues/99763
+  testWidgets('Update textField semantics when obscureText changes', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(_ObscureTextTestWidget(controller: controller));
+
+    controller.text = 'Hello';
+    await tester.pump();
+
+    expect(
+        semantics,
+        includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          value: 'Hello',
+        )
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        textDirection: TextDirection.ltr,
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isObscured,
+        ],
+      )
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(
+        semantics,
+        includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          value: 'Hello',
+        )
+    );
 
     semantics.dispose();
   });
@@ -11785,6 +11872,170 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
+  group('magnifier builder', () {
+    testWidgets('should build custom magnifier if given',
+        (WidgetTester tester) async {
+      final Widget customMagnifier = Container(
+        key: UniqueKey(),
+      );
+      final TextField textField = TextField(
+        magnifierConfiguration: TextMagnifierConfiguration(
+          magnifierBuilder: (_, __, ___) => customMagnifier,
+        ),
+      );
+
+      await tester.pumpWidget(const MaterialApp(
+        home: Placeholder(),
+      ));
+
+      final BuildContext context =
+          tester.firstElement(find.byType(Placeholder));
+
+      expect(
+          textField.magnifierConfiguration!.magnifierBuilder(
+              context,
+              MagnifierController(),
+              ValueNotifier<MagnifierOverlayInfoBearer>(
+                const MagnifierOverlayInfoBearer.empty(),
+              )),
+          isA<Widget>().having(
+              (Widget widget) => widget.key,
+              'built magnifier key equal to passed in magnifier key',
+              equals(customMagnifier.key)));
+    });
+
+    group('defaults', () {
+      testWidgets('should build Magnifier on Android', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(body: TextField()))
+        );
+
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+        expect(
+            editableText.magnifierConfiguration.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isA<TextMagnifier>());
+      }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+      testWidgets('should build CupertinoMagnifier on iOS',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(body: TextField()))
+        );
+
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+        expect(
+            editableText.magnifierConfiguration.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isA<CupertinoTextMagnifier>());
+      }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+      testWidgets('should build nothing on Android and iOS',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(body: TextField()))
+        );
+
+        final BuildContext context = tester.firstElement(find.byType(TextField));
+        final EditableText editableText = tester.widget(find.byType(EditableText));
+
+        expect(
+            editableText.magnifierConfiguration.magnifierBuilder(
+                context,
+                MagnifierController(),
+                ValueNotifier<MagnifierOverlayInfoBearer>(
+                  const MagnifierOverlayInfoBearer.empty(),
+                )),
+            isNull);
+      },
+      variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.android
+      }));
+    });
+  });
+
+  group('magnifier', () {
+    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    final Widget fakeMagnifier = Container(key: UniqueKey());
+
+    testWidgets(
+        'Can drag handles to show, unshow, and update magnifier',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            magnifierConfiguration: TextMagnifierConfiguration(
+              magnifierBuilder: (
+                  _,
+                  MagnifierController controller,
+                  ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                ) {
+                  infoBearer = localInfoBearer;
+                  return fakeMagnifier;
+                },
+              ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Double tap the 'e' to select 'def'.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump(const Duration(milliseconds: 30));
+
+      final TextSelection selection = controller.selection;
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+
+      // Drag the right handle 2 letters to the right.
+      final Offset handlePos = endpoints.last.point + const Offset(1.0, 1.0);
+      final TestGesture gesture = await tester.startGesture(handlePos);
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length - 2));
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      final Offset firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
+      await tester.pump();
+
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition,
+          isNot(infoBearer.value.globalGesturePosition));
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    });
+
   group('TapRegion integration', () {
     testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
@@ -12001,8 +12252,46 @@ void main() {
           case PointerDeviceKind.unknown:
             expect(focusNode.hasPrimaryFocus, isFalse);
             break;
-        }
-    }, variant: TargetPlatformVariant.all());
-  }
+          }
+        }, variant: TargetPlatformVariant.all());
+      }
+    });
   });
+}
+
+/// A Simple widget for testing the obscure text.
+class _ObscureTextTestWidget extends StatefulWidget {
+   const _ObscureTextTestWidget({ required this.controller });
+
+  final TextEditingController controller;
+  @override
+  _ObscureTextTestWidgetState createState() => _ObscureTextTestWidgetState();
+}
+
+class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
+
+  bool _obscureText = false;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (_) {
+            return Column(
+              children: <Widget>[
+                TextField(
+                    obscureText: _obscureText,
+                    controller: widget.controller,
+                ),
+                ElevatedButton(
+                  onPressed: () => setState(() {_obscureText = !_obscureText;}),
+                  child: const SizedBox.shrink(),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 }

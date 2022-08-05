@@ -286,5 +286,10 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
     latestMethodCall = 'showToolbar';
   }
 
+  @override
+  void performSelector(String selectorName) {
+    latestMethodCall = 'performSelector';
+  }
+
   TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
 }

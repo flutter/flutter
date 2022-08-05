@@ -672,7 +672,6 @@ void main() {
       selectedRowColor: Colors.black,
       shadowColor: Colors.black,
       splashColor: Colors.black,
-      toggleableActiveColor: Colors.black,
       unselectedWidgetColor: Colors.black,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: ThemeData.dark().iconTheme,
@@ -698,6 +697,7 @@ void main() {
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
+      iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.pink)),
       listTileTheme: const ListTileThemeData(),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
@@ -723,6 +723,7 @@ void main() {
       fixTextFieldOutlineLabel: false,
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
+      toggleableActiveColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -782,7 +783,6 @@ void main() {
       selectedRowColor: Colors.white,
       shadowColor: Colors.white,
       splashColor: Colors.white,
-      toggleableActiveColor: Colors.white,
       unselectedWidgetColor: Colors.white,
 
       // TYPOGRAPHY & ICONOGRAPHY
@@ -810,6 +810,7 @@ void main() {
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
+      iconButtonTheme: const IconButtonThemeData(),
       listTileTheme: const ListTileThemeData(),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
@@ -836,6 +837,7 @@ void main() {
       fixTextFieldOutlineLabel: true,
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
+      toggleableActiveColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -880,7 +882,6 @@ void main() {
       selectedRowColor: otherTheme.selectedRowColor,
       shadowColor: otherTheme.shadowColor,
       splashColor: otherTheme.splashColor,
-      toggleableActiveColor: otherTheme.toggleableActiveColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
 
       // TYPOGRAPHY & ICONOGRAPHY
@@ -908,6 +909,7 @@ void main() {
       elevatedButtonTheme: otherTheme.elevatedButtonTheme,
       expansionTileTheme: otherTheme.expansionTileTheme,
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
+      iconButtonTheme: otherTheme.iconButtonTheme,
       listTileTheme: otherTheme.listTileTheme,
       navigationBarTheme: otherTheme.navigationBarTheme,
       navigationRailTheme: otherTheme.navigationRailTheme,
@@ -934,6 +936,7 @@ void main() {
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
+      toggleableActiveColor: otherTheme.toggleableActiveColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -977,7 +980,6 @@ void main() {
     expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
-    expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
 
     // TYPOGRAPHY & ICONOGRAPHY
@@ -1005,6 +1007,7 @@ void main() {
     expect(themeDataCopy.elevatedButtonTheme, equals(otherTheme.elevatedButtonTheme));
     expect(themeDataCopy.expansionTileTheme, equals(otherTheme.expansionTileTheme));
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
+    expect(themeDataCopy.iconButtonTheme, equals(otherTheme.iconButtonTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.navigationBarTheme, equals(otherTheme.navigationBarTheme));
     expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
@@ -1036,6 +1039,7 @@ void main() {
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
+    expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1115,7 +1119,6 @@ void main() {
       'indicatorColor',
       'hintColor',
       'errorColor',
-      'toggleableActiveColor',
       // TYPOGRAPHY & ICONOGRAPHY
       'typography',
       'textTheme',
@@ -1139,6 +1142,7 @@ void main() {
       'drawerTheme',
       'elevatedButtonTheme',
       'floatingActionButtonTheme',
+      'iconButtonTheme',
       'listTileTheme',
       'navigationBarTheme',
       'navigationRailTheme',
@@ -1165,6 +1169,7 @@ void main() {
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',
+      'toggleableActiveColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();

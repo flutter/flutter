@@ -21,6 +21,7 @@ import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
@@ -90,6 +91,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   late final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
     platform: platform,
+    featureFlags: featureFlags,
+  );
+
+  late final CustomDeviceWorkflow customDeviceWorkflow = CustomDeviceWorkflow(
     featureFlags: featureFlags,
   );
 
@@ -200,6 +205,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows!.add(webWorkflow);
       }
 
+      if (customDeviceWorkflow.appliesToHostPlatform) {
+        _workflows!.add(customDeviceWorkflow);
+      }
     }
     return _workflows!;
   }

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
@@ -258,6 +259,34 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   // The macOS shortcuts uses different word/line modifiers than most other
   // platforms.
   static final Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
+    const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
+    const SingleActivator(LogicalKeyboardKey.keyV, meta: true): const PasteTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): const UndoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, meta: true): const RedoTextIntent(SelectionChangedCause.keyboard),
+
+    // On desktop these keys should go to the IME when a field is focused, not to other
+    // Shortcuts.
+    if (!kIsWeb) ...<ShortcutActivator, Intent>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
+      const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    },
+  };
+
+  // There is no complete documentation of iOS shortcuts.
+  static final Map<ShortcutActivator, Intent> _iOSShortcuts = <ShortcutActivator, Intent>{
     for (final bool pressShift in const <bool>[true, false])
       ...<SingleActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DeleteCharacterIntent(forward: false),
@@ -296,8 +325,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
     const SingleActivator(LogicalKeyboardKey.keyT, control: true): const TransposeCharactersIntent(),
 
@@ -331,9 +360,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     //   * Control + shift? + Z
   };
 
-  // There is no complete documentation of iOS shortcuts. Use mac shortcuts for
-  // now.
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
@@ -460,4 +486,68 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       child: result
     );
   }
+}
+
+/// Maps the selector from NSStandardKeyBindingResponding to the Intent if the
+/// selector is recognized.
+Intent? intentForMacOSSelector(String selectorName) {
+  const Map<String, Intent> selectorToIntent = <String, Intent>{
+    'deleteBackward:': DeleteCharacterIntent(forward: false),
+    'deleteWordBackward:': DeleteToNextWordBoundaryIntent(forward: false),
+    'deleteToBeginningOfLine:': DeleteToLineBreakIntent(forward: false),
+    'deleteForward:': DeleteCharacterIntent(forward: true),
+    'deleteWordForward:': DeleteToNextWordBoundaryIntent(forward: true),
+    'deleteToEndOfLine:': DeleteToLineBreakIntent(forward: true),
+
+    'moveLeft:': ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    'moveRight:': ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    'moveForward:': ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    'moveBackward:': ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+
+    'moveUp:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    'moveDown:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+
+    'moveLeftAndModifySelection:': ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+    'moveRightAndModifySelection:': ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+    'moveUpAndModifySelection:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    'moveDownAndModifySelection:': ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+
+    'moveWordLeft:': ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+    'moveWordRight:': ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+    'moveToBeginningOfParagraph:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    'moveToEndOfParagraph:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+
+    'moveWordLeftAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
+    'moveWordRightAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
+    'moveParagraphBackwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
+    'moveParagraphForwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+
+    'moveToLeftEndOfLine:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    'moveToRightEndOfLine:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    'moveToBeginningOfDocument:': ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    'moveToEndOfDocument:': ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+
+    'moveToLeftEndOfLineAndModifySelection:': ExpandSelectionToLineBreakIntent(forward: false),
+    'moveToRightEndOfLineAndModifySelection:': ExpandSelectionToLineBreakIntent(forward: true),
+    'moveToBeginningOfDocumentAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: false),
+    'moveToEndOfDocumentAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
+
+    'transpose:': TransposeCharactersIntent(),
+
+    'scrollToBeginningOfDocument:': ScrollToDocumentBoundaryIntent(forward: false),
+    'scrollToEndOfDocument:': ScrollToDocumentBoundaryIntent(forward: true),
+
+    // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
+    'scrollPageUp:': ScrollToDocumentBoundaryIntent(forward: false),
+    'scrollPageDown:': ScrollToDocumentBoundaryIntent(forward: true),
+    'pageUpAndModifySelection': ExpandSelectionToDocumentBoundaryIntent(forward: false),
+    'pageDownAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
+
+    // Escape key when there's no IME selection popup.
+    'cancelOperation:': DismissIntent(),
+    // Tab when there's no IME selection.
+    'insertTab:': NextFocusIntent(),
+    'insertBacktab:': PreviousFocusIntent(),
+  };
+  return selectorToIntent[selectorName];
 }
