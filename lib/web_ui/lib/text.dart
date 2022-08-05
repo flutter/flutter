@@ -19,17 +19,18 @@ enum PlaceholderAlignment {
 }
 
 class FontWeight {
-  const FontWeight._(this.index);
+  const FontWeight._(this.index, this.value);
   final int index;
-  static const FontWeight w100 = FontWeight._(0);
-  static const FontWeight w200 = FontWeight._(1);
-  static const FontWeight w300 = FontWeight._(2);
-  static const FontWeight w400 = FontWeight._(3);
-  static const FontWeight w500 = FontWeight._(4);
-  static const FontWeight w600 = FontWeight._(5);
-  static const FontWeight w700 = FontWeight._(6);
-  static const FontWeight w800 = FontWeight._(7);
-  static const FontWeight w900 = FontWeight._(8);
+  final int value;
+  static const FontWeight w100 = FontWeight._(0, 100);
+  static const FontWeight w200 = FontWeight._(1, 200);
+  static const FontWeight w300 = FontWeight._(2, 300);
+  static const FontWeight w400 = FontWeight._(3, 400);
+  static const FontWeight w500 = FontWeight._(4, 500);
+  static const FontWeight w600 = FontWeight._(5, 600);
+  static const FontWeight w700 = FontWeight._(6, 700);
+  static const FontWeight w800 = FontWeight._(7, 800);
+  static const FontWeight w900 = FontWeight._(8, 900);
   static const FontWeight normal = w400;
   static const FontWeight bold = w700;
   static const List<FontWeight> values = <FontWeight>[
