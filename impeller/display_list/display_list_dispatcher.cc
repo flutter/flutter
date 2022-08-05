@@ -13,6 +13,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/display_list/display_list_image_impeller.h"
+#include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
@@ -827,6 +828,24 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
   return desc;
 }
 
+static impeller::SamplerDescriptor ToSamplerDescriptor(
+    const flutter::DlFilterMode options) {
+  impeller::SamplerDescriptor desc;
+  switch (options) {
+    case flutter::DlFilterMode::kNearest:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.label = "Nearest Sampler";
+      break;
+    case flutter::DlFilterMode::kLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.label = "Linear Sampler";
+      break;
+    default:
+      break;
+  }
+  return desc;
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawImageRect(
     const sk_sp<flutter::DlImage> image,
@@ -837,7 +856,7 @@ void DisplayListDispatcher::drawImageRect(
     SkCanvas::SrcRectConstraint constraint) {
   canvas_.DrawImageRect(
       std::make_shared<Image>(image->impeller_texture()),  // image
-      ToRect(src),                                         // source  rect
+      ToRect(src),                                         // source rect
       ToRect(dst),                                         // destination rect
       paint_,                                              // paint
       ToSamplerDescriptor(sampling)                        // sampling
@@ -850,8 +869,11 @@ void DisplayListDispatcher::drawImageNine(const sk_sp<flutter::DlImage> image,
                                           const SkRect& dst,
                                           flutter::DlFilterMode filter,
                                           bool render_with_attributes) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
+  NinePatchConverter converter = {};
+  converter.DrawNinePatch(
+      std::make_shared<Image>(image->impeller_texture()),
+      Rect::MakeLTRB(center.fLeft, center.fTop, center.fRight, center.fBottom),
+      ToRect(dst), ToSamplerDescriptor(filter), &canvas_, &paint_);
 }
 
 // |flutter::Dispatcher|
@@ -862,6 +884,9 @@ void DisplayListDispatcher::drawImageLattice(
     flutter::DlFilterMode filter,
     bool render_with_attributes) {
   // Needs https://github.com/flutter/flutter/issues/95434
+  // Don't implement this one since it is not exposed by flutter,
+  // Skia internally converts calls to drawImageNine into this method,
+  // which is then converted back to drawImageNine by display list.
   UNIMPLEMENTED;
 }
 
