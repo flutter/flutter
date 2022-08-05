@@ -795,10 +795,6 @@ class CupertinoTextField extends StatefulWidget {
   /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
   /// platforms. If it is desired to supress the magnifier, consider passing
   /// [TextMagnifierConfiguration.disabled].
-  ///
-  // TODO(antholeole): https://github.com/flutter/flutter/issues/108041
-  // once the magnifier PR lands, I should enrich this area of the
-  // docs with images of what a magnifier is.
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
@@ -850,7 +846,7 @@ class CupertinoTextField extends StatefulWidget {
     magnifierBuilder: (
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer
+    ValueNotifier<MagnifierTextSelectionInfo> magnifierOverlayInfoBearer
   ) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

@@ -28,7 +28,7 @@ void main() {
   Future<void> showMagnifier(
     BuildContext context,
     WidgetTester tester,
-    ValueNotifier<MagnifierOverlayInfoBearer> infoBearer,
+    ValueNotifier<MagnifierTextSelectionInfo> infoBearer,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
         context: context,
@@ -62,8 +62,8 @@ void main() {
           TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
         MagnifierController(),
-        ValueNotifier<MagnifierOverlayInfoBearer>(
-          const MagnifierOverlayInfoBearer.empty(),
+        ValueNotifier<MagnifierTextSelectionInfo>(
+          const MagnifierTextSelectionInfo.empty(),
         ),
       );
 
@@ -83,8 +83,8 @@ void main() {
           TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty()));
+              ValueNotifier<MagnifierTextSelectionInfo>(
+                  const MagnifierTextSelectionInfo.empty()));
 
       expect(builtWidget, isA<CupertinoTextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
@@ -102,8 +102,8 @@ void main() {
             TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
           context,
           MagnifierController(),
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            const MagnifierOverlayInfoBearer.empty(),
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            const MagnifierTextSelectionInfo.empty(),
           ),
         );
 
@@ -154,9 +154,9 @@ void main() {
             tapPointRenderBox.localToGlobal(Offset.zero) &
                 tapPointRenderBox.size;
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierInfo =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-                MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierTextSelectionInfo> magnifierInfo =
+            ValueNotifier<MagnifierTextSelectionInfo>(
+                MagnifierTextSelectionInfo(
           currentLineBoundries: fakeTextFieldRect,
           fieldBounds: fakeTextFieldRect,
           caretRect: fakeTextFieldRect,
@@ -189,8 +189,8 @@ void main() {
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
@@ -222,8 +222,8 @@ void main() {
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
               // current line boundries, not anything else.
@@ -250,8 +250,8 @@ void main() {
         await showMagnifier(
             context,
             tester,
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-                MagnifierOverlayInfoBearer(
+            ValueNotifier<MagnifierTextSelectionInfo>(
+                MagnifierTextSelectionInfo(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -277,8 +277,8 @@ void main() {
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
               caretRect: topOfScreenTextFieldRect,
@@ -310,8 +310,8 @@ void main() {
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -341,8 +341,8 @@ void main() {
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
               caretRect: topOfScreenTextFieldRect,
@@ -374,8 +374,8 @@ void main() {
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -396,9 +396,9 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierTextSelectionInfo> magnifierPositioner =
+            ValueNotifier<MagnifierTextSelectionInfo>(
+          MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -409,7 +409,7 @@ void main() {
         await showMagnifier(context, tester, magnifierPositioner);
 
         // New position has a horizontal shift.
-        magnifierPositioner.value = MagnifierOverlayInfoBearer(
+        magnifierPositioner.value = MagnifierTextSelectionInfo(
           currentLineBoundries: reasonableTextField,
           fieldBounds: reasonableTextField,
           caretRect: reasonableTextField,
@@ -432,9 +432,9 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierTextSelectionInfo> magnifierPositioner =
+            ValueNotifier<MagnifierTextSelectionInfo>(
+          MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -445,7 +445,7 @@ void main() {
         await showMagnifier(context, tester, magnifierPositioner);
 
         // New position has a vertical shift.
-        magnifierPositioner.value = MagnifierOverlayInfoBearer(
+        magnifierPositioner.value = MagnifierTextSelectionInfo(
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),
@@ -468,9 +468,9 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierPositioner =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierTextSelectionInfo> magnifierPositioner =
+            ValueNotifier<MagnifierTextSelectionInfo>(
+          MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -481,7 +481,7 @@ void main() {
         await showMagnifier(context, tester, magnifierPositioner);
 
         // New position has a vertical shift.
-        magnifierPositioner.value = MagnifierOverlayInfoBearer(
+        magnifierPositioner.value = MagnifierTextSelectionInfo(
           currentLineBoundries: reasonableTextField.shift(verticalShift),
           fieldBounds: Rect.fromPoints(reasonableTextField.topLeft,
               reasonableTextField.bottomRight + verticalShift),

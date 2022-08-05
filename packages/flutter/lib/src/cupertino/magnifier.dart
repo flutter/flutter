@@ -63,8 +63,8 @@ class CupertinoTextMagnifier extends StatefulWidget {
   final double horizontalScreenEdgePadding;
 
   /// [CupertinoTextMagnifier] will determine its own positioning
-  /// based on the [MagnifierOverlayInfoBearer] of this notifier.
-  final ValueNotifier<MagnifierOverlayInfoBearer>
+  /// based on the [MagnifierTextSelectionInfo] of this notifier.
+  final ValueNotifier<MagnifierTextSelectionInfo>
       magnifierOverlayInfoBearer;
 
   /// The duration that the magnifier drags behind its final position.
@@ -132,7 +132,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   }
 
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierOverlayInfoBearer textEditingContext =
+    final MagnifierTextSelectionInfo textEditingContext =
         widget.magnifierOverlayInfoBearer.value;
 
     // The exact Y of the center of the current line.
@@ -228,7 +228,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 ///
 /// * [RawMagnifier], the backing implementation.
 /// * [CupertinoTextMagnifier], a widget that positions [CupertinoMagnifier] based on
-/// [MagnifierOverlayInfoBearer].
+/// [MagnifierTextSelectionInfo].
 /// * [MagnifierController], the controller for this magnifier.
 class CupertinoMagnifier extends StatelessWidget {
   /// Creates a [RawMagnifier] in the Cupertino style.

@@ -11809,8 +11809,8 @@ void main() {
           textField.magnifierConfiguration!.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(
-                const MagnifierOverlayInfoBearer.empty(),
+              ValueNotifier<MagnifierTextSelectionInfo>(
+                const MagnifierTextSelectionInfo.empty(),
               )),
           isA<Widget>().having(
               (Widget widget) => widget.key,
@@ -11831,8 +11831,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
+                ValueNotifier<MagnifierTextSelectionInfo>(
+                  const MagnifierTextSelectionInfo.empty(),
                 )),
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
@@ -11850,8 +11850,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
+                ValueNotifier<MagnifierTextSelectionInfo>(
+                  const MagnifierTextSelectionInfo.empty(),
                 )),
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
@@ -11869,8 +11869,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
+                ValueNotifier<MagnifierTextSelectionInfo>(
+                  const MagnifierTextSelectionInfo.empty(),
                 )),
             isNull);
       },
@@ -11882,7 +11882,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    late ValueNotifier<MagnifierTextSelectionInfo> infoBearer;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     testWidgets(
@@ -11898,7 +11898,7 @@ void main() {
               magnifierBuilder: (
                   _,
                   MagnifierController controller,
-                  ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                  ValueNotifier<MagnifierTextSelectionInfo> localInfoBearer
                 ) {
                   infoBearer = localInfoBearer;
                   return fakeMagnifier;

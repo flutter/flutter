@@ -75,7 +75,7 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// {@template flutter.widgets.textSelection.MagnifierBuilder}
 /// Signature for a builder that builds a Widget with a [MagnifierController].
 ///
-/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
+/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierTextSelectionInfo]> is not
 /// required, although if a Widget intends to have entry or exit animations, it should take
 /// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
 /// can wait before removing it from the overlay.
@@ -83,28 +83,28 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// See also:
 ///
-/// - [MagnifierOverlayInfoBearer], the dataclass that updates the
+/// - [MagnifierTextSelectionInfo], the dataclass that updates the
 ///   magnifier.
 typedef MagnifierBuilder = Widget? Function(
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierOverlayInfoBearer> textSelectionData
+    ValueNotifier<MagnifierTextSelectionInfo> textSelectionData
 );
 
 /// A data class that allows the [SelectionOverlay] to delegate
 /// the magnifier's positioning to the magnifier itself, based on the
-/// info in [MagnifierOverlayInfoBearer].
+/// info in [MagnifierTextSelectionInfo].
 @immutable
-class MagnifierOverlayInfoBearer {
-  /// Construct a [MagnifierOverlayInfoBearer] from raw values.
-  const MagnifierOverlayInfoBearer({
+class MagnifierTextSelectionInfo {
+  /// Construct a [MagnifierTextSelectionInfo] from raw values.
+  const MagnifierTextSelectionInfo({
     required this.globalGesturePosition,
     required this.caretRect,
     required this.fieldBounds,
     required this.currentLineBoundries,
   });
 
-  factory MagnifierOverlayInfoBearer._fromRenderEditable({
+  factory MagnifierTextSelectionInfo._fromRenderEditable({
     required RenderEditable renderEditable,
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
@@ -128,7 +128,7 @@ class MagnifierOverlayInfoBearer {
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter
     );
 
-    return MagnifierOverlayInfoBearer(
+    return MagnifierTextSelectionInfo(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
       caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
@@ -136,9 +136,9 @@ class MagnifierOverlayInfoBearer {
     );
   }
 
-  /// Construct an empty [MagnifierOverlayInfoBearer], with all
+  /// Construct an empty [MagnifierTextSelectionInfo], with all
   /// values set to 0.
-  const MagnifierOverlayInfoBearer.empty() :
+  const MagnifierTextSelectionInfo.empty() :
     globalGesturePosition = Offset.zero,
     caretRect = Rect.zero,
     currentLineBoundries = Rect.zero,
@@ -164,7 +164,7 @@ class MagnifierOverlayInfoBearer {
       return true;
     }
 
-    if (other is! MagnifierOverlayInfoBearer) {
+    if (other is! MagnifierTextSelectionInfo) {
       return false;
     }
 
@@ -620,7 +620,7 @@ class TextSelectionOverlay {
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
-    _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+    _selectionOverlay.showMagnifier(MagnifierTextSelectionInfo._fromRenderEditable(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -637,7 +637,7 @@ class TextSelectionOverlay {
     final TextSelection currentSelection = TextSelection.fromPosition(position);
 
     if (_selection.isCollapsed) {
-      _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+      _selectionOverlay.updateMagnifier(MagnifierTextSelectionInfo._fromRenderEditable(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -676,7 +676,7 @@ class TextSelectionOverlay {
 
     _handleSelectionHandleChanged(newSelection, isEnd: true);
 
-     _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+     _selectionOverlay.updateMagnifier(MagnifierTextSelectionInfo._fromRenderEditable(
       currentTextPosition: newSelection.extent,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -695,7 +695,7 @@ class TextSelectionOverlay {
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
-    _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+    _selectionOverlay.showMagnifier(MagnifierTextSelectionInfo._fromRenderEditable(
       currentTextPosition: position,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -710,7 +710,7 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     if (_selection.isCollapsed) {
-      _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+      _selectionOverlay.updateMagnifier(MagnifierTextSelectionInfo._fromRenderEditable(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
@@ -747,7 +747,7 @@ class TextSelectionOverlay {
         break;
     }
 
-    _selectionOverlay.updateMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
+    _selectionOverlay.updateMagnifier(MagnifierTextSelectionInfo._fromRenderEditable(
       currentTextPosition: newSelection.extent.offset < newSelection.base.offset ? newSelection.extent : newSelection.base,
       globalGesturePosition: details.globalPosition,
       renderEditable: renderObject,
@@ -836,8 +836,8 @@ class SelectionOverlay {
   final BuildContext context;
 
 
-  final ValueNotifier<MagnifierOverlayInfoBearer> _magnifierOverlayInfoBearer =
-          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty());
+  final ValueNotifier<MagnifierTextSelectionInfo> _magnifierOverlayInfoBearer =
+          ValueNotifier<MagnifierTextSelectionInfo>(const MagnifierTextSelectionInfo.empty());
 
   /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
   /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,
@@ -862,7 +862,7 @@ class SelectionOverlay {
   /// This is NOT the souce of truth for if the magnifier is up or not,
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
-  void showMagnifier(MagnifierOverlayInfoBearer initalInfoBearer) {
+  void showMagnifier(MagnifierTextSelectionInfo initalInfoBearer) {
     if (_toolbar != null) {
       hideToolbar();
     }
@@ -1325,7 +1325,7 @@ class SelectionOverlay {
   /// itself.
   ///
   /// If there is no magnifier in the overlay, this does nothing,
-  void updateMagnifier(MagnifierOverlayInfoBearer magnifierOverlayInfoBearer) {
+  void updateMagnifier(MagnifierTextSelectionInfo magnifierOverlayInfoBearer) {
     if (_magnifierController.overlayEntry == null) {
       return;
     }

@@ -45,7 +45,7 @@ class TextMagnifier extends StatefulWidget {
     magnifierBuilder: (
       BuildContext context,
       MagnifierController controller,
-      ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
+      ValueNotifier<MagnifierTextSelectionInfo> magnifierOverlayInfoBearer,
     ) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -75,7 +75,7 @@ class TextMagnifier extends StatefulWidget {
   /// [TextMagnifier] positions itself based on [magnifierInfo].
   ///
   /// {@macro widgets.material.magnifier.positionRules}
-  final ValueNotifier<MagnifierOverlayInfoBearer>
+  final ValueNotifier<MagnifierTextSelectionInfo>
       magnifierInfo;
 
   @override
@@ -132,7 +132,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
 
   /// {@macro widgets.material.magnifier.positionRules}
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierOverlayInfoBearer selectionInfo =
+    final MagnifierTextSelectionInfo selectionInfo =
         widget.magnifierInfo.value;
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 

@@ -5962,7 +5962,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    late ValueNotifier<MagnifierTextSelectionInfo> infoBearer;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     group('magnifier builder', () {
@@ -5985,8 +5985,8 @@ void main() {
             defaultCupertinoTextField.magnifierConfiguration!.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
+                ValueNotifier<MagnifierTextSelectionInfo>(
+                  const MagnifierTextSelectionInfo.empty(),
                 )),
             isA<Widget>().having(
                 (Widget widget) => widget.key, 'key', equals(customMagnifier.key)));
@@ -6005,8 +6005,8 @@ void main() {
               editableText.magnifierConfiguration.magnifierBuilder(
                   context,
                   MagnifierController(),
-                  ValueNotifier<MagnifierOverlayInfoBearer>(
-                    const MagnifierOverlayInfoBearer.empty(),
+                  ValueNotifier<MagnifierTextSelectionInfo>(
+                    const MagnifierTextSelectionInfo.empty(),
                   )),
               isA<CupertinoTextMagnifier>());
         },
@@ -6026,8 +6026,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
+                ValueNotifier<MagnifierTextSelectionInfo>(
+                  const MagnifierTextSelectionInfo.empty(),
                 )),
             isNull);
       },
@@ -6048,7 +6048,7 @@ void main() {
                 magnifierConfiguration: TextMagnifierConfiguration(
                     magnifierBuilder: (_,
                         MagnifierController controller,
-                        ValueNotifier<MagnifierOverlayInfoBearer>
+                        ValueNotifier<MagnifierTextSelectionInfo>
                             localInfoBearer) {
                   infoBearer = localInfoBearer;
                   return fakeMagnifier;

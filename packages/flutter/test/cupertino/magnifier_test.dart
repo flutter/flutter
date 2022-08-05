@@ -19,7 +19,7 @@ void main() {
   Future<void> showCupertinoMagnifier(
     BuildContext context,
     WidgetTester tester,
-    ValueNotifier<MagnifierOverlayInfoBearer> infoBearer,
+    ValueNotifier<MagnifierTextSelectionInfo> infoBearer,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
         context: context,
@@ -76,9 +76,9 @@ void main() {
         final Rect fakeTextFieldRect =
             tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifier =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierTextSelectionInfo> magnifier =
+            ValueNotifier<MagnifierTextSelectionInfo>(
+          MagnifierTextSelectionInfo(
             currentLineBoundries: fakeTextFieldRect,
             fieldBounds: fakeTextFieldRect,
             caretRect: fakeTextFieldRect,
@@ -110,8 +110,8 @@ void main() {
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -143,8 +143,8 @@ void main() {
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
+          ValueNotifier<MagnifierTextSelectionInfo>(
+            MagnifierTextSelectionInfo(
               currentLineBoundries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
@@ -176,9 +176,9 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierinfo =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierTextSelectionInfo> magnifierinfo =
+            ValueNotifier<MagnifierTextSelectionInfo>(
+          MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -192,7 +192,7 @@ void main() {
         await showCupertinoMagnifier(context, tester, magnifierinfo);
 
         // Move the gesture to one that should hide it.
-        magnifierinfo.value = MagnifierOverlayInfoBearer(
+        magnifierinfo.value = MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -216,9 +216,9 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierInfo =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierTextSelectionInfo> magnifierInfo =
+            ValueNotifier<MagnifierTextSelectionInfo>(
+          MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -231,7 +231,7 @@ void main() {
         await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.
-        magnifierInfo.value = MagnifierOverlayInfoBearer(
+        magnifierInfo.value = MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -243,7 +243,7 @@ void main() {
         expect(magnifierController.overlayEntry, isNotNull);
 
         // Return the gesture to one that shows it.
-        magnifierInfo.value = MagnifierOverlayInfoBearer(
+        magnifierInfo.value = MagnifierTextSelectionInfo(
             currentLineBoundries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,

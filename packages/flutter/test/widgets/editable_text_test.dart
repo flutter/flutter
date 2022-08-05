@@ -12670,7 +12670,7 @@ void main() {
         editableText.magnifierConfiguration.magnifierBuilder(
           context,
           MagnifierController(),
-          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty())
+          ValueNotifier<MagnifierTextSelectionInfo>(const MagnifierTextSelectionInfo.empty())
         ),
         isNull
       );
