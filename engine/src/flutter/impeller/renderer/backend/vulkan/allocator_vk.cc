@@ -10,6 +10,8 @@ _Pragma("GCC diagnostic ignored \"-Wthread-safety-analysis\"");
 #define VMA_IMPLEMENTATION
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
 
 #include <memory>
 
@@ -61,7 +63,47 @@ bool AllocatorVK::IsValid() const {
 std::shared_ptr<Texture> AllocatorVK::CreateTexture(
     StorageMode mode,
     const TextureDescriptor& desc) {
-  FML_UNREACHABLE();
+  auto image_create_info = vk::ImageCreateInfo{};
+  image_create_info.imageType = vk::ImageType::e2D;
+  image_create_info.format = ToVKImageFormat(desc.format);
+  image_create_info.extent.width = desc.size.width;
+  image_create_info.extent.height = desc.size.height;
+  image_create_info.samples = ToVKSampleCount(desc.sample_count);
+  image_create_info.mipLevels = desc.mip_count;
+
+  // TODO (kaushikiska): should we read these from desc?
+  image_create_info.extent.depth = 1;
+  image_create_info.arrayLayers = 1;
+
+  image_create_info.tiling = vk::ImageTiling::eOptimal;
+  image_create_info.initialLayout = vk::ImageLayout::eUndefined;
+  image_create_info.usage = vk::ImageUsageFlagBits::eSampled |
+                            vk::ImageUsageFlagBits::eColorAttachment;
+
+  VmaAllocationCreateInfo alloc_create_info = {};
+  alloc_create_info.usage = VMA_MEMORY_USAGE_AUTO;
+  // docs recommend using `VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT` for image
+  // allocations, but setting them to be host visible for now.
+  alloc_create_info.flags =
+      VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+      VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+  auto create_info_native =
+      static_cast<vk::ImageCreateInfo::NativeType>(image_create_info);
+
+  VkImage img;
+  VmaAllocation allocation;
+  VmaAllocationInfo allocation_info;
+  auto result = vk::Result{vmaCreateImage(allocator_, &create_info_native,
+                                          &alloc_create_info, &img, &allocation,
+                                          &allocation_info)};
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Unable to allocate an image";
+    return nullptr;
+  }
+
+  return std::make_shared<TextureVK>(desc, context_, allocator_, img,
+                                     allocation, allocation_info);
 }
 
 // |Allocator|

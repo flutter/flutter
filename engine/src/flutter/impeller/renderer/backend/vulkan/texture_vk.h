@@ -6,18 +6,31 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {
 
 class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
  public:
-  TextureVK(TextureDescriptor desc);
+  TextureVK(TextureDescriptor desc,
+            ContextVK& context,
+            const VmaAllocator& allocator,
+            VkImage image,
+            VmaAllocation allocation,
+            VmaAllocationInfo allocation_info);
 
   // |Texture|
   ~TextureVK() override;
 
  private:
+  ContextVK& context_;
+  const VmaAllocator& allocator_;
+  VkImage image_;
+  VmaAllocation allocation_;
+  VmaAllocationInfo allocation_info_;
+
   // |Texture|
   void SetLabel(std::string_view label) override;
 

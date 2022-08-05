@@ -132,4 +132,32 @@ constexpr std::optional<vk::ShaderStageFlagBits> ToVKShaderStageFlagBits(
   FML_UNREACHABLE();
 }
 
+constexpr vk::Format ToVKImageFormat(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kUnknown:
+      return vk::Format::eUndefined;
+    case PixelFormat::kA8UNormInt:
+      return vk::Format::eA8B8G8R8UnormPack32;
+    case PixelFormat::kR8G8B8A8UNormInt:
+      return vk::Format::eR8G8B8A8Unorm;
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+      return vk::Format::eR8G8B8A8Srgb;
+    case PixelFormat::kB8G8R8A8UNormInt:
+      return vk::Format::eB8G8R8A8Unorm;
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
+      return vk::Format::eB8G8R8A8Srgb;
+    case PixelFormat::kS8UInt:
+      return vk::Format::eS8Uint;
+  }
+}
+
+constexpr vk::SampleCountFlagBits ToVKSampleCount(SampleCount sample_count) {
+  switch (sample_count) {
+    case SampleCount::kCount1:
+      return vk::SampleCountFlagBits::e1;
+    case SampleCount::kCount4:
+      return vk::SampleCountFlagBits::e4;
+  }
+}
+
 }  // namespace impeller
