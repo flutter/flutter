@@ -1773,10 +1773,15 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
 
   auto asset_manager = std::make_shared<AssetManager>();
 
-  asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
-      fml::OpenDirectory(params.at("assetDirectory").data(), false,
-                         fml::FilePermission::kRead),
-      false));
+  if (!asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
+          fml::OpenDirectory(params.at("assetDirectory").data(), false,
+                             fml::FilePermission::kRead),
+          false))) {
+    // The new asset directory path was invalid.
+    FML_DLOG(ERROR) << "Could not update asset directory.";
+    ServiceProtocolFailureError(response, "Could not update asset directory.");
+    return false;
+  }
 
   // Preserve any original asset resolvers to avoid syncing unchanged assets
   // over the DevFS connection.
