@@ -26,7 +26,7 @@ void main() {
 
       dynamic error;
       try {
-        final vms.Response setAssetDirectoryPath = await vmService.callMethod(
+        await vmService.callMethod(
           '_flutter.setAssetBundlePath',
           args: <String, Object>{
             'viewId': viewId,
