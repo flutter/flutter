@@ -256,31 +256,27 @@ class _OverlayLocationInheritedWidget extends InheritedWidget {
 }
 
 class _LocationOccupants {
-  _LocationOccupants(_RenderDeferredLayoutBox initialChild)
-    : _firstChild = initialChild,
-      _lastChild = initialChild;
+  _LocationOccupants();
 
-  late final Set<RenderBox> _debugMembers = <RenderBox>{ _firstChild };
+  late final Set<RenderBox> _debugMembers = <RenderBox>{ };
 
-  _RenderDeferredLayoutBox _firstChild;
-  _RenderDeferredLayoutBox _lastChild;
+  _RenderDeferredLayoutBox? _firstChild;
+  _RenderDeferredLayoutBox? _lastChild;
 
   void add(_RenderDeferredLayoutBox child) {
     assert(_debugMembers.add(child), '$child was already in $_debugMembers');
     final StackParentData childParentData = child.parentData! as StackParentData;
-    final StackParentData prevParentData = _lastChild.parentData! as StackParentData;
-    prevParentData.nextSibling = child;
+    assert(childParentData.previousSibling == null);
+    assert(childParentData.nextSibling == null);
+    final StackParentData? prevParentData = _lastChild?.parentData! as StackParentData?;
+    prevParentData?.nextSibling = child;
     childParentData.previousSibling = _lastChild;
+    _firstChild ??= child;
     _lastChild = child;
   }
 
-  _LocationOccupants? remove(_RenderDeferredLayoutBox child) {
+  void remove(_RenderDeferredLayoutBox child) {
     assert(_debugMembers.remove(child), 'Attempt to remove a non-existent member $child from $_debugMembers');
-
-    if (_firstChild == _lastChild) {
-      return null;
-    }
-
     final StackParentData childParentData = child.parentData! as StackParentData;
     final StackParentData? prevParentData = childParentData.previousSibling?.parentData as StackParentData?;
     final StackParentData? nextParentData = childParentData.nextSibling?.parentData as StackParentData?;
@@ -296,67 +292,78 @@ class _LocationOccupants {
     }
     childParentData.previousSibling = null;
     childParentData.nextSibling = null;
-    return this;
+  }
+
+  RenderBox? childAfter(RenderBox child) {
+    assert(_debugMembers.contains(child));
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    return childParentData.nextSibling;
+  }
+
+  RenderBox? childBefore(RenderBox child) {
+    assert(_debugMembers.contains(child));
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    return childParentData.previousSibling;
   }
 }
 
-class _OverlayChildIterator extends Iterator<_RenderDeferredLayoutBox> {
-  _OverlayChildIterator(this.location, this.currentChild);
-
-  OverlayLocation location;
-  _RenderDeferredLayoutBox currentChild;
-
-  @override
-  _RenderDeferredLayoutBox get current => currentChild;
-
-  @override
-  bool moveNext() {
-    final StackParentData childParentData = currentChild.parentData! as StackParentData;
-    final _RenderDeferredLayoutBox? localNext = childParentData.nextSibling as _RenderDeferredLayoutBox?;
-    if (localNext != null) {
-      currentChild = localNext;
-      return true;
-    }
-    OverlayLocation? nextLocation = location._after;
-    while (nextLocation != null && nextLocation._children == null) {
-      nextLocation = nextLocation._after;
-    }
-    final _LocationOccupants? nextLocationChildren = nextLocation?._children;
-    if (nextLocation != null && nextLocationChildren != null) {
-      location = nextLocation;
-      currentChild = nextLocationChildren._firstChild;
-      return true;
-    }
-    return false;
-  }
-
-  bool movePrev() {
-    final StackParentData childParentData = currentChild.parentData! as StackParentData;
-    final _RenderDeferredLayoutBox? localPrev = childParentData.previousSibling as _RenderDeferredLayoutBox?;
-    if (localPrev != null) {
-      currentChild = localPrev;
-      return true;
-    }
-    OverlayLocation? prevLocation = location._before;
-    while (prevLocation != null && prevLocation._children == null) {
-      prevLocation = prevLocation._before;
-    }
-    final _LocationOccupants? prevLocationChildren = prevLocation?._children;
-    if (prevLocation != null && prevLocationChildren != null) {
-      location = prevLocation;
-      currentChild = prevLocationChildren._lastChild;
-      return true;
-    }
-    return false;
-  }
-}
+//class _OverlayChildIterator extends Iterator<_RenderDeferredLayoutBox> {
+//  _OverlayChildIterator(this.location, this.currentChild);
+//
+//  OverlayLocation location;
+//  _RenderDeferredLayoutBox currentChild;
+//
+//  @override
+//  _RenderDeferredLayoutBox get current => currentChild;
+//
+//  @override
+//  bool moveNext() {
+//    final StackParentData childParentData = currentChild.parentData! as StackParentData;
+//    final _RenderDeferredLayoutBox? localNext = childParentData.nextSibling as _RenderDeferredLayoutBox?;
+//    if (localNext != null) {
+//      currentChild = localNext;
+//      return true;
+//    }
+//    OverlayLocation? nextLocation = location._links.next;
+//    while (nextLocation != null && nextLocation._children == null) {
+//      nextLocation = nextLocation._links.next;
+//    }
+//    final _LocationOccupants? nextLocationChildren = nextLocation?._children;
+//    if (nextLocation != null && nextLocationChildren != null) {
+//      location = nextLocation;
+//      currentChild = nextLocationChildren._firstChild;
+//      return true;
+//    }
+//    return false;
+//  }
+//
+//  bool movePrev() {
+//    final StackParentData childParentData = currentChild.parentData! as StackParentData;
+//    final _RenderDeferredLayoutBox? localPrev = childParentData.previousSibling as _RenderDeferredLayoutBox?;
+//    if (localPrev != null) {
+//      currentChild = localPrev;
+//      return true;
+//    }
+//    OverlayLocation? prevLocation = location._before;
+//    while (prevLocation != null && prevLocation._children == null) {
+//      prevLocation = prevLocation._before;
+//    }
+//    final _LocationOccupants? prevLocationChildren = prevLocation?._children;
+//    if (prevLocation != null && prevLocationChildren != null) {
+//      location = prevLocation;
+//      currentChild = prevLocationChildren._lastChild;
+//      return true;
+//    }
+//    return false;
+//  }
+//}
 
 T Function(T) _fix<T>(T Function(T) Function(T Function(T)) f) => f(_fix(f));
 
-abstract class _DoublyLinked<T extends _DoublyLinked<T>> {
+abstract class _DoublyLinked<T extends _DoublyLinked<T, V>, V extends _LinksBase<T, V>  > {
   _DoublyLinked();
 
-  _Links<T> get _links;
+  V get _links;
 
   U _fold<U>(U initial, U Function(U, T) f) {
     final U newValue = f(initial, this as T);
@@ -369,16 +376,45 @@ abstract class _DoublyLinked<T extends _DoublyLinked<T>> {
   bool _any(bool Function(T) f) {
     return f(this as T) || (_links.prev?._any(f) ?? false);
   }
+
+  // Override this to manage the start and the end of the linked list.
+  //void _insertAfter(T newEntry) {
+  //  assert(_links.linked);
+  //  assert(!newEntry._links.linked);
+  //  final T? next = _links.next;
+  //  newEntry._links.prev = this as T;
+  //  newEntry._links.next = next;
+  //  _links.next = newEntry;
+  //  next?._links.prev = newEntry;
+  //}
+
+  //// Override this to manage the start and the end of the linked list.
+  //void _unlink() {
+  //  assert(_links.linked);
+  //  final T? next = _links.next;
+  //  final T? prev = _links.prev;
+  //  prev?._links.next = next;
+  //  next?._links.prev = prev;
+  //}
 }
 
-class _Links<T extends _DoublyLinked<T>> {
-  _Links(this.prev);
-  final T? prev;
+abstract class _LinksBase<T extends _DoublyLinked<T, V>, V extends _LinksBase<T, V>> {
+  T? get prev;
   T? next;
+
+  bool get linked => prev != null || next != null;
 }
 
-class _LocationIterator extends _Links<OverlayLocation> {
-  _LocationIterator(super.prev);
+class _Links<T extends _DoublyLinked<T, V>, V extends _Links<T, V>> extends _LinksBase<T, V> {
+  _Links(this.prev);
+  @override
+  T? prev;
+}
+
+class _LocationLinks extends _LinksBase<OverlayLocation, _LocationLinks> {
+  _LocationLinks(this.prev);
+  @override
+  final OverlayLocation? prev;
 }
 
 /// A location in a particular [Overlay].
@@ -390,20 +426,20 @@ class _LocationIterator extends _Links<OverlayLocation> {
 /// An [OverlayLocation] created for one [Overlay] can not be used in another
 /// [Overlay]. If multiple children in the same [Overlay] occupy the same
 /// [OverlayLocation], their paint order relative to one another is undefined.
-class OverlayLocation implements _DoublyLinked<OverlayLocation> {
+class OverlayLocation extends _DoublyLinked<OverlayLocation, _LocationLinks> {
   OverlayLocation._above({
     required OverlayLocation referenceLocation,
   }) : //_overlayEntryIdentifier = referenceLocation._overlayEntryIdentifier,
        _overlayRenderObject = referenceLocation._overlayRenderObject,
        _relativeZIndex = referenceLocation._relativeZIndex + 1,
-       _links = _LocationIterator(referenceLocation);
+       _links = _LocationLinks(referenceLocation);
 
   OverlayLocation._root(
     //this._overlayEntryIdentifier,
     this._overlayRenderObject, {
     String? debugLabel,
   }) : _relativeZIndex = 0,
-       _links = _LocationIterator(null) {
+       _links = _LocationLinks(null) {
     assert(() {
       _debugLabel = debugLabel;
       return true;
@@ -431,7 +467,9 @@ class OverlayLocation implements _DoublyLinked<OverlayLocation> {
   final int _relativeZIndex;
 
   @override
-  final _LocationIterator _links;
+  final _LocationLinks _links;
+
+  OverlayLocation get _next => _links.next ??= OverlayLocation._above(referenceLocation: this);
 
   /// Returns an [OverlayLocation] that represents a location in the same
   /// [Overlay] as the enclosing [OverlayEntry] or [OverlayPortal], but later in
@@ -450,14 +488,13 @@ class OverlayLocation implements _DoublyLinked<OverlayLocation> {
   }
 
   bool _debugDisposed = false;
-  _LocationOccupants? _children;
+  final _LocationOccupants _children = _LocationOccupants();
 
   void _add(_RenderDeferredLayoutBox child) {
     assert(!_debugDisposed);
     _overlayRenderObject.addDeferredChild(child, this);
     print('$this adding $child');
-    _children?.add(child);
-    _children ??= _LocationOccupants(child);
+    _children.add(child);
   }
 
   void _move(_RenderDeferredLayoutBox child, OverlayLocation oldLocation) {
@@ -471,28 +508,65 @@ class OverlayLocation implements _DoublyLinked<OverlayLocation> {
     }
 
     assert(oldLocation._children != null);
-    oldLocation._children = oldLocation._children?.remove(child);
-    _children?.add(child);
-    _children ??= _LocationOccupants(child);
+    oldLocation._children.remove(child);
+    _children.add(child);
   }
 
   void _remove(_RenderDeferredLayoutBox child) {
     print('REMOVED: $child from $this');
     assert(!_debugDisposed);
     assert(_children != null);
-    _children = _children?.remove(child);
+    _children.remove(child);
     _overlayRenderObject.removeDeferredChild(child, this);
   }
 
-  _OverlayChildIterator? get _forwardIterator {
-    final _LocationOccupants? children = _children;
-    return children == null ? _after?._forwardIterator : _OverlayChildIterator(this, children._firstChild);
+  _RenderDeferredLayoutBox? Function() _forwardIterator() {
+    _RenderDeferredLayoutBox? box = _children._firstChild;
+    if (box == null) {
+      return _links.next?._forwardIterator() ?? () => null;
+    }
+    return () {
+      final _RenderDeferredLayoutBox? currentBox = box;
+      if (currentBox != null) {
+        final StackParentData childParentData = currentBox.parentData! as StackParentData;
+        box = childParentData.nextSibling as _RenderDeferredLayoutBox?;
+        return currentBox;
+      } else {
+        return _links.next?._forwardIterator()();
+      }
+    };
   }
 
-  _OverlayChildIterator? get _backwardIterator {
-    final _LocationOccupants? children = _children;
-    return children == null ? _before?._backwardIterator : _OverlayChildIterator(this, children._lastChild);
+  _RenderDeferredLayoutBox? Function() _backwardIterator() {
+    _RenderDeferredLayoutBox? box = _children._lastChild;
+    if (box == null) {
+      return _links.prev?._backwardIterator() ?? () => null;
+    }
+    return () {
+      final _RenderDeferredLayoutBox? currentBox = box;
+      if (currentBox != null) {
+        final StackParentData childParentData = currentBox.parentData! as StackParentData;
+        box = childParentData.previousSibling as _RenderDeferredLayoutBox?;
+        return currentBox;
+      } else {
+        return _links.prev?._backwardIterator()();
+      }
+    };
   }
+
+  T _foldl<T>(T initialValue, T Function(_RenderDeferredLayoutBox Function(), T) combine) {
+    combine( initialValue, )
+  }
+
+  //_OverlayChildIterator? get _forwardIterator {
+  //  final _LocationOccupants? children = _children;
+  //  return children == null ? _after?._forwardIterator : _OverlayChildIterator(this, children._firstChild);
+  //}
+
+  //_OverlayChildIterator? get _backwardIterator {
+  //  final _LocationOccupants? children = _children;
+  //  return children == null ? _before?._backwardIterator : _OverlayChildIterator(this, children._lastChild);
+  //}
 
   void activate(_RenderDeferredLayoutBox child) {
     assert(!_debugDisposed);
@@ -503,7 +577,7 @@ class OverlayLocation implements _DoublyLinked<OverlayLocation> {
   }
 
   void _dispose() {
-    _after?._dispose();
+    _links.next?._dispose();
     _debugDisposed = true;
   }
 
@@ -516,7 +590,7 @@ class OverlayLocation implements _DoublyLinked<OverlayLocation> {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}[$_children] -> ${describeIdentity(_after)}';
+    return '${describeIdentity(this)}[$_children] -> ${describeIdentity(_links.next)}';
   }
 }
 
