@@ -347,6 +347,8 @@ static void PersistentCacheStore(fml::RefPtr<fml::TaskRunner> worker,
                                  std::shared_ptr<fml::UniqueFD> cache_directory,
                                  std::string key,
                                  std::unique_ptr<fml::Mapping> value) {
+  // The static leak checker gets confused by the use of fml::MakeCopyable.
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   auto task = fml::MakeCopyable([cache_directory,             //
                                  file_name = std::move(key),  //
                                  mapping = std::move(value)   //
