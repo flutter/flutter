@@ -1,4 +1,4 @@
-Signature: ec7e163e434e5dee311adfcd1fcd2d19
+Signature: bbf8e39570bc829b72496e3934c2ae6c
 
 UNUSED LICENSES:
 
@@ -5581,6 +5581,9 @@ FILE: ../../../third_party/skia/src/gpu/graphite/AttachmentTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack_graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandTypes.h
+FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipeline.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipeline.h
+FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipelineDesc.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawCommands.h
@@ -5613,6 +5616,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Geometry.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/SubRunData.h
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputePipeline.h
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputePipeline.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
@@ -6586,6 +6591,8 @@ FILE: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
+FILE: ../../../third_party/skia/src/codec/SkAvifCodec.cpp
+FILE: ../../../third_party/skia/src/codec/SkAvifCodec.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.h
