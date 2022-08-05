@@ -1047,6 +1047,7 @@ class HotRunner extends ResidentRunner {
             assetsDirectory: deviceAssetsDirectoryUri,
             uiIsolateId: view.uiIsolate!.id,
             viewId: view.id,
+            windows: device.targetPlatform == TargetPlatform.windows_x64,
           )
         ));
         for (final FlutterView view in views) {
