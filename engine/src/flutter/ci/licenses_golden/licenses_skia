@@ -1,4 +1,4 @@
-Signature: ca946366708220961a75355aa20d865e
+Signature: 10224790db3e447870f26f9112b8da30
 
 UNUSED LICENSES:
 
@@ -5586,6 +5586,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/CommandTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipeline.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipeline.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipelineDesc.h
+FILE: ../../../third_party/skia/src/gpu/graphite/ComputeTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawAtlas.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawCommands.h
@@ -6595,6 +6596,7 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.h
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputeCommandEncoder.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.h
