@@ -1268,7 +1268,7 @@ void main() {
   });
 
   testWidgets('scheduleBuild while debugBuildingDirtyElements is true', (WidgetTester tester) async {
-    /// ignore here is required for testing purpose because changing the flag properly is hard
+    // ignore here is required for testing purpose because changing the flag properly is hard
     // ignore: invalid_use_of_protected_member
     tester.binding.debugBuildingDirtyElements = true;
     late FlutterError error;
