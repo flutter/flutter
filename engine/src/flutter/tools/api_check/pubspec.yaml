@@ -28,13 +28,13 @@ environment:
 dependencies:
   analyzer: any
   _fe_analyzer_shared: any
+  pub_semver: any
 
 dev_dependencies:
   async_helper: any
   expect: any
   litetest: any
   path: any
-  pub_semver: any
   smith: any
 
 dependency_overrides:

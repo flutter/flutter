@@ -10,8 +10,8 @@ import 'package:path/path.dart' as path;
 final ArgParser argParser = ArgParser()
   ..addOption('output-dir')
   ..addOption('input-dir')
-  ..addFlag('ui', defaultsTo: false)
-  ..addFlag('engine', defaultsTo: false)
+  ..addFlag('ui')
+  ..addFlag('engine')
   ..addMultiOption('input')
   ..addOption('stamp');
 
@@ -170,7 +170,7 @@ String _preprocessEnginePartFile(String source) {
     // Do nothing.
   } else {
     // Insert the part directive at the beginning of the file.
-    source = 'part of engine;\n' + source;
+    source = 'part of engine;\n$source';
   }
   return source;
 }

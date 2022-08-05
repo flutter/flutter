@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:pub_semver/pub_semver.dart';
 
 // Ignore members defined on Object.
 const Set<String> _kObjectMembers = <String>{
@@ -187,8 +188,8 @@ void main() {
         // check nullability
         if (uiParam is SimpleFormalParameter &&
             webParam is SimpleFormalParameter) {
-          bool isUiNullable = uiParam.type?.question != null;
-          bool isWebNullable = webParam.type?.question != null;
+          final bool isUiNullable = uiParam.type?.question != null;
+          final bool isWebNullable = webParam.type?.question != null;
           if (isUiNullable != isWebNullable) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$methodName parameter $i '
@@ -263,8 +264,8 @@ void main() {
             '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
       }
 
-      bool isUiNullable = uiParam.type?.question != null;
-      bool isWebNullable = webParam.type?.question != null;
+      final bool isUiNullable = uiParam.type?.question != null;
+      final bool isWebNullable = webParam.type?.question != null;
       if (isUiNullable != isWebNullable) {
         failed = true;
         print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
