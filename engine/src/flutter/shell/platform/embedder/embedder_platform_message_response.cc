@@ -24,6 +24,8 @@ void EmbedderPlatformMessageResponse::Complete(
   }
 
   runner_->PostTask(
+      // The static leak checker gets confused by the use of fml::MakeCopyable.
+      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       fml::MakeCopyable([data = std::move(data), callback = callback_]() {
         callback(data->GetMapping(), data->GetSize());
       }));
