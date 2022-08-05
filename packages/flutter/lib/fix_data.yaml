@@ -17,9 +17,9 @@
 
 version: 1
 transforms:
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109070
   - title: "Remove 'selectedRowColor'"
-    date: 2021-11-11
+    date: 2022-08-05
     element:
       uris: [ 'material.dart' ]
       method: 'copyWith'
@@ -28,9 +28,9 @@ transforms:
       - kind: 'removeParameter'
         name: 'selectedRowColor'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109070
   - title: "Remove 'selectedRowColor'"
-    date: 2021-11-11
+    date: 2022-08-05
     element:
       uris: [ 'material.dart' ]
       constructor: 'raw'
@@ -39,9 +39,9 @@ transforms:
       - kind: 'removeParameter'
         name: 'selectedRowColor'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109070
   - title: "Remove 'selectedRowColor'"
-    date: 2021-11-11
+    date: 2022-08-05
     element:
       uris: [ 'material.dart' ]
       constructor: ''
