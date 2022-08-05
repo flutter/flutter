@@ -193,7 +193,7 @@ void main() {
     expect(scheme.errorContainer, const Color(0xffffdad6));
     expect(scheme.onErrorContainer, const Color(0xff410002));
     expect(scheme.outline, const Color(0xff73777f));
-    expect(scheme.outlineVariant, const Color(0xff000000));
+    expect(scheme.outlineVariant, const Color(0xffc3c7cf));
     expect(scheme.background, const Color(0xfffdfcff));
     expect(scheme.onBackground, const Color(0xff1a1c1e));
     expect(scheme.surface, const Color(0xfffdfcff));
@@ -302,7 +302,7 @@ void main() {
     expect(scheme.errorContainer, const Color(0xff93000a));
     expect(scheme.onErrorContainer, const Color(0xffffb4ab));
     expect(scheme.outline, const Color(0xff8d9199));
-    expect(scheme.outlineVariant, const Color(0xff8d9199));
+    expect(scheme.outlineVariant, const Color(0xff43474e));
     expect(scheme.background, const Color(0xff1a1c1e));
     expect(scheme.onBackground, const Color(0xffe2e2e6));
     expect(scheme.surface, const Color(0xff1a1c1e));
@@ -343,7 +343,7 @@ void main() {
     expect(scheme.errorContainer, baseScheme.errorContainer);
     expect(scheme.onErrorContainer, baseScheme.onErrorContainer);
     expect(scheme.outline, baseScheme.outline);
-    expect(scheme.outlineVariant, baseScheme.outline);
+    expect(scheme.outlineVariant, baseScheme.outlineVariant);
     expect(scheme.background, baseScheme.background);
     expect(scheme.onBackground, baseScheme.onBackground);
     expect(scheme.surface, baseScheme.surface);
