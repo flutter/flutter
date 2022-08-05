@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -18,6 +19,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FileSystem fileSystem;
+  ProcessManager processManager;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -25,6 +27,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    processManager = FakeProcessManager.any();
   });
 
   testUsingContext('default l10n settings', () async {
@@ -41,6 +44,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: Artifacts.test(),
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
@@ -75,6 +80,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: Artifacts.test(),
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>[
       'gen-l10n',
@@ -107,6 +114,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: Artifacts.test(),
+      processManager: processManager,
     );
     expect(
       () => createTestCommandRunner(command).run(<String>[
@@ -138,6 +147,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: Artifacts.test(),
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
@@ -170,6 +181,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: Artifacts.test(),
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
     expect(command.usage, contains(' If this value is set to false, then '));
