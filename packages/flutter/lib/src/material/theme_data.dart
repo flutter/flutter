@@ -1808,7 +1808,8 @@ class ThemeData with Diagnosticable {
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v2.13.0-0.4.pre.',
     )
-    Color? toggleableActiveColor,@Deprecated(
+    Color? toggleableActiveColor,
+    @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
@@ -1907,6 +1908,7 @@ class ThemeData with Diagnosticable {
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
+      selectedRowColor: selectedRowColor ?? this.selectedRowColor,
     );
   }
 
