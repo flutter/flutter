@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: undefined_class, undefined_getter, undefined_setter
+
 import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
@@ -9,21 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'selectable_region_test.dart';
-
 void main() {
-  if (!kIsWeb) {
-    return;
-  }
   html.Element? element;
-  final RegisterViewFactory originalFactory = WebSelectableRegionContextMenu.factory;
-  WebSelectableRegionContextMenu.factory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
+  final RegisterViewFactory originalFactory = PlatformSelectableRegionContextMenu.registerViewFactory;
+  PlatformSelectableRegionContextMenu.registerViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
     element = fn(0) as html.Element;
     html.document.body!.append(element!);
   };
   // This force register the dom element.
-  WebSelectableRegionContextMenu(child: const Placeholder());
-  WebSelectableRegionContextMenu.factory = originalFactory;
+  PlatformSelectableRegionContextMenu(child: const Placeholder());
+  PlatformSelectableRegionContextMenu.registerViewFactory = originalFactory;
 
   test('DOM element is set up correctly', () async {
     expect(element, isNotNull);
@@ -83,5 +80,89 @@ void main() {
     expect(selectWordEvent, isNotNull);
     expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
-  }, skip: !kIsWeb);
+  });
+}
+
+class SelectionSpy extends LeafRenderObjectWidget {
+  const SelectionSpy({
+    super.key,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderSelectionSpy(
+      SelectionContainer.maybeOf(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+}
+
+class RenderSelectionSpy extends RenderProxyBox
+    with Selectable, SelectionRegistrant {
+  RenderSelectionSpy(
+      SelectionRegistrar? registrar,
+      ) {
+    this.registrar = registrar;
+  }
+
+  final Set<VoidCallback> listeners = <VoidCallback>{};
+  List<SelectionEvent> events = <SelectionEvent>[];
+
+  @override
+  Size get size => _size;
+  Size _size = Size.zero;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    _size = Size(constraints.maxWidth, constraints.maxHeight);
+    return _size;
+  }
+
+  @override
+  void addListener(VoidCallback listener) => listeners.add(listener);
+
+  @override
+  void removeListener(VoidCallback listener) => listeners.remove(listener);
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    events.add(event);
+    return SelectionResult.end;
+  }
+
+  @override
+  SelectedContent? getSelectedContent() {
+    return const SelectedContent(plainText: 'content');
+  }
+
+  @override
+  SelectionGeometry get value => _value;
+  SelectionGeometry _value = SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: const SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: const SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+  set value(SelectionGeometry other) {
+    if (other == _value) {
+      return;
+    }
+    _value = other;
+    for (final VoidCallback callback in listeners) {
+      callback();
+    }
+  }
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
 }

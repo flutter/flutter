@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 
-import '_dart_ui_io.dart' if(dart.library.html) 'dart:ui' as ui;
 import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
@@ -14,7 +14,7 @@ import 'selection_container.dart';
 
 const String _viewType = 'Browser__WebContextMenuViewType__';
 const String _kClassName = 'web-electable-region-context-menu';
-// The below css rule makes sure the hidden dom element is invisible to the user.
+// These css rules hides the dom element with the class name.
 const String _kClassSelectionRule = '.$_kClassName::selection { background: transparent; }';
 const String _kClassRule = '''
 .$_kClassName {
@@ -33,18 +33,11 @@ typedef _WebSelectionCallBack = void Function(html.Element, html.MouseEvent);
 @visibleForTesting
 typedef RegisterViewFactory = void Function(String, Object Function(int viewId), {bool isVisible});
 
-/// A widget that provides browser selection context menu for the child subtree
-///
-/// This widget can only be used in flutter web.
-///
-/// This widget register a platform view, i.e. a html dom element, with the web
-/// platform. The platform view is a singleton shared between all
-/// [WebSelectableRegionContextMenu]s. Only one [SelectionContainerDelegate]
-/// can attach to the the platform view at a time. Use [attach] method to make
-/// a [SelectionContainerDelegate] to be the active client.
-class WebSelectableRegionContextMenu extends StatelessWidget {
-  /// Creates a BrowserContextMenu for the web.
-  WebSelectableRegionContextMenu({
+/// See `_platform_selectable_region_context_menu_io.dart` for full
+/// documentation.
+class PlatformSelectableRegionContextMenu extends StatelessWidget {
+  /// See `_platform_selectable_region_context_menu_io.dart`.
+  PlatformSelectableRegionContextMenu({
     required this.child,
     super.key,
   }) {
@@ -53,16 +46,16 @@ class WebSelectableRegionContextMenu extends StatelessWidget {
     }
   }
 
-  /// The `Widget` that is being wrapped by this `WebSelectableRegionContextMenu`.
+  /// See `_platform_selectable_region_context_menu_io.dart`.
   final Widget child;
 
-  /// Attaches the `client` to be able to open browser selection context menu.
+  /// See `_platform_selectable_region_context_menu_io.dart`.
   // ignore: use_setters_to_change_properties
   static void attach(SelectionContainerDelegate client) {
     _activeClient = client;
   }
 
-  /// Detaches the `client` from the browser selection context menu.
+  /// See `_platform_selectable_region_context_menu_io.dart`.
   static void detach(SelectionContainerDelegate client) {
     if (_activeClient != client) {
       _activeClient = null;
@@ -74,9 +67,10 @@ class WebSelectableRegionContextMenu extends StatelessWidget {
   // Keeps track if this widget has already registered its view factories or not.
   static String? _registeredViewType;
 
-  /// The factory to create a dom element.
+  /// See `_platform_selectable_region_context_menu_io.dart`.
   @visibleForTesting
-  static RegisterViewFactory factory = ui.platformViewRegistry.registerViewFactory;
+  // ignore: undefined_prefixed_name, invalid_assignment, avoid_dynamic_calls
+  static RegisterViewFactory registerViewFactory = ui.platformViewRegistry.registerViewFactory;
 
   // Registers the view factories for the interceptor widgets.
   static void _register() {
@@ -106,7 +100,7 @@ class WebSelectableRegionContextMenu extends StatelessWidget {
   }
 
   static String _registerWebSelectionCallback(_WebSelectionCallBack callback) {
-    factory(_viewType, (int viewId) {
+    registerViewFactory(_viewType, (int viewId) {
       final html.Element htmlElement = html.DivElement();
       htmlElement
         ..style.width = '100%'
@@ -142,7 +136,7 @@ class WebSelectableRegionContextMenu extends StatelessWidget {
             viewType: _viewType,
           ),
         ),
-        Positioned.fill(child: child),
+        child,
       ],
     );
   }
