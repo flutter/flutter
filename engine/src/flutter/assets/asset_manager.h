@@ -22,9 +22,23 @@ class AssetManager final : public AssetResolver {
 
   ~AssetManager() override;
 
-  void PushFront(std::unique_ptr<AssetResolver> resolver);
+  //--------------------------------------------------------------------------
+  /// @brief      Adds an asset resolver to the front of the resolver queue.
+  ///             Assets would be loaded from this resolver before any follwing
+  ///             resolvers.
+  ///
+  /// @return     Returns whether this resolver is valid and has been added to
+  ///             the resolver queue.
+  bool PushFront(std::unique_ptr<AssetResolver> resolver);
 
-  void PushBack(std::unique_ptr<AssetResolver> resolver);
+  //--------------------------------------------------------------------------
+  /// @brief      Adds an asset resolver to the end of the resolver queue.
+  ///             Assets would be loaded from this resolver after any previous
+  ///             resolvers.
+  ///
+  /// @return     Returns whether this resolver is valid and has been added to
+  ///             the resolver queue.
+  bool PushBack(std::unique_ptr<AssetResolver> resolver);
 
   //--------------------------------------------------------------------------
   /// @brief      Replaces an asset resolver of the specified `type` with
