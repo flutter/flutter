@@ -398,6 +398,8 @@ InferMetalPlatformViewCreationCallback(
               config->metal.present_command_queue),
           metal_dispatch_table, view_embedder);
 
+  // The static leak checker gets confused by the use of fml::MakeCopyable.
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return fml::MakeCopyable(
       [embedder_surface = std::move(embedder_surface), platform_dispatch_table,
        external_view_embedder = view_embedder](flutter::Shell& shell) mutable {

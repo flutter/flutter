@@ -136,6 +136,8 @@ Dart_Handle Picture::RasterizeToImage(
   auto picture_bounds = SkISize::Make(width, height);
 
   auto ui_task =
+      // The static leak checker gets confused by the use of fml::MakeCopyable.
+      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       fml::MakeCopyable([image_callback = std::move(image_callback),
                          unref_queue](sk_sp<SkImage> raster_image) mutable {
         auto dart_state = image_callback->dart_state().lock();

@@ -169,6 +169,8 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
   }
   nextFrameIndex_ = (nextFrameIndex_ + 1) % frameCount_;
 
+  // The static leak checker gets confused by the use of fml::MakeCopyable.
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   ui_task_runner->PostTask(fml::MakeCopyable([callback = std::move(callback),
                                               image = std::move(image),
                                               duration, trace_id]() mutable {
