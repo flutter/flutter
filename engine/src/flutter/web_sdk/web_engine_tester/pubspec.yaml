@@ -9,5 +9,6 @@ dependencies:
   stream_channel: 2.1.0
   test: 1.17.7
   webkit_inspection_protocol: 1.0.0
+  stack_trace: 1.10.0
   ui:
     path: ../../lib/web_ui

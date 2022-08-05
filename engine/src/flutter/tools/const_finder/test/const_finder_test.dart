@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:convert' show jsonEncode;
 import 'dart:io';
 
@@ -175,7 +177,7 @@ Future<void> main(List<String> args) async {
   final String frontendServer = args[0];
   final String sdkRoot = args[1];
   try {
-    void _checkProcessResult(ProcessResult result) {
+    void checkProcessResult(ProcessResult result) {
       if (result.exitCode != 0) {
         stdout.writeln(result.stdout);
         stderr.writeln(result.stderr);
@@ -186,7 +188,7 @@ Future<void> main(List<String> args) async {
     stdout.writeln('Generating kernel fixtures...');
     stdout.writeln(consts);
 
-    _checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dart, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',
@@ -197,7 +199,7 @@ Future<void> main(List<String> args) async {
       box,
     ]));
 
-    _checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dart, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',
@@ -208,7 +210,7 @@ Future<void> main(List<String> args) async {
       consts,
     ]));
 
-    _checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dart, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',

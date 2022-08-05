@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:test/test.dart';
 // ignore: implementation_imports
-import 'package:ui/src/engine.dart' show operatingSystem, OperatingSystem, useCanvasKit;
+import 'package:ui/src/engine.dart' show OperatingSystem, operatingSystem, useCanvasKit;
 // ignore: implementation_imports
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/ui.dart';

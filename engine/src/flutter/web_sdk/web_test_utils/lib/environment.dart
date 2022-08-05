@@ -36,6 +36,16 @@ class Environment {
     return _prepareEnvironmentFromEngineDir(script, directory);
   }
 
+  Environment._({
+    required this.self,
+    required this.webUiRootDir,
+    required this.engineSrcDir,
+    required this.engineToolsDir,
+    required this.outDir,
+    required this.hostDebugUnoptDir,
+    required this.dartSdkDir,
+  });
+
   static Environment _prepareEnvironmentFromEngineDir(
       io.File self, io.Directory engineSrcDir) {
     final io.Directory engineToolsDir =
@@ -71,16 +81,6 @@ class Environment {
       dartSdkDir: dartSdkDir,
     );
   }
-
-  Environment._({
-    required this.self,
-    required this.webUiRootDir,
-    required this.engineSrcDir,
-    required this.engineToolsDir,
-    required this.outDir,
-    required this.hostDebugUnoptDir,
-    required this.dartSdkDir,
-  });
 
   /// The Dart script that's currently running.
   final io.File self;

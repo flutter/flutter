@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 /// Checks that JavaScript API is accessed properly.
 ///
 /// JavaScript access needs to be audited to make sure it follows security best

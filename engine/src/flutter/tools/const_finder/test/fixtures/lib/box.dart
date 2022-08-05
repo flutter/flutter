@@ -9,9 +9,9 @@
 // https://github.com/dart-lang/sdk/blob/ca3ad264a64937d5d336cd04dbf2746d1b7d8fc4/tests/language_2/canonicalize/hashing_memoize_instance_test.dart
 
 class Box {
+  const Box(this.content1, this.content2);
   final Object content1;
   final Object content2;
-  const Box(this.content1, this.content2);
 }
 
 const Box box1_0 = Box(null, null);
@@ -217,7 +217,7 @@ const Box box2_98 = Box(box2_97, box2_97);
 const Box box2_99 = Box(box2_98, box2_98);
 
 Object confuse(Box x) {
-  try { throw x; } catch (e) { return e; }
+  try { throw x; } catch (e) { return e; } // ignore: only_throw_errors
 }
 
 void main() {

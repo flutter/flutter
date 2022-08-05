@@ -1,9 +1,12 @@
 name: web_sdk_tests
-author: Flutter Authors <flutter-dev@googlegroups.com>
 
 # Keep the SDK version range in sync with lib/web_ui/pubspec.yaml
 environment:
   sdk: ">=2.12.0-0 <3.0.0"
+
+dependencies:
+  args: 2.3.1
+  path: 1.8.2
 
 dev_dependencies:
   analyzer: 4.3.1

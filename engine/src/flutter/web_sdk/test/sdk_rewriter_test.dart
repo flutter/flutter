@@ -78,7 +78,7 @@ export 'engine/file3.dart';
       '$caught',
       'Exception: on line 3: unexpected code in /path/to/lib/web_ui/lib/src/engine.dart. '
       'This file may only contain comments and exports. Found:\n'
-      'import \'dart:something\';',
+      "import 'dart:something';",
     );
   });
 
