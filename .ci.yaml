@@ -118,7 +118,7 @@ targets:
       - DEPS
       - .ci.yaml
       - testing/**
-      - shell/platforms/android/**
+      - shell/platform/android/**
 
   - name: Linux Benchmarks
     enabled_branches:
