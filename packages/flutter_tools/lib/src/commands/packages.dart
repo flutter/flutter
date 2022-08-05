@@ -171,10 +171,12 @@ class PackagesGetCommand extends FlutterCommand {
     }
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
+    // This will also resolve dependencies for the example folder,
     await _runPubGet(target, rootProject);
-    await rootProject.regeneratePlatformSpecificTooling();
 
-    // Get/upgrade packages in example app as well
+    // We need to regenerate the platform specific tooling for both the project
+    // itself and example (if present).
+    await rootProject.regeneratePlatformSpecificTooling();
     if (rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
       final FlutterProject exampleProject = rootProject.example;
       await exampleProject.regeneratePlatformSpecificTooling();
