@@ -46,7 +46,7 @@ const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 /// This signature is different from [GestureDragUpdateCallback] to make it
 /// easier for various text fields to use [TextSelectionGestureDetector] without
 /// having to store the start position.
-typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
+typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails, int tapCount);
 
 /// The type for a Function that builds a toolbar's container with the given
 /// child.
@@ -2030,7 +2030,7 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
-  void onTapDown(TapDownDetails details) {
+  void onTapDown(TapDownDetails details, int tapCount) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2493,7 +2493,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
+  void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails, int tapCount) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2644,7 +2644,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
-  final GestureTapDownCallback? onTapDown;
+  final GestureTapAndDragDownCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
@@ -2728,8 +2728,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
-  void _handleTapDown(TapDownDetails details) {
-    widget.onTapDown?.call(details);
+  void _handleTapDown(TapDownDetails details, int tapCount) {
+    print('tap down?');
+    widget.onTapDown?.call(details, tapCount);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
@@ -2763,13 +2764,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   DragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart(DragStartDetails details, int tapCount) {
     assert(_lastDragStartDetails == null);
+    print(tapCount);
     _lastDragStartDetails = details;
     widget.onDragSelectionStart?.call(details);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(DragUpdateDetails details, int tapCount) {
+    print(tapCount);
     _lastDragUpdateDetails = details;
     // Only schedule a new timer if there's no one pending.
     _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
@@ -2784,20 +2787,22 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _handleDragUpdateThrottled() {
     assert(_lastDragStartDetails != null);
     assert(_lastDragUpdateDetails != null);
-    widget.onDragSelectionUpdate?.call(_lastDragStartDetails!, _lastDragUpdateDetails!);
+    widget.onDragSelectionUpdate?.call(_lastDragStartDetails!, _lastDragUpdateDetails!, 0);
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(TapUpDetails upDetails, DragEndDetails endDetails, int tapCount) {
     assert(_lastDragStartDetails != null);
+    print(tapCount);
+    _handleTapUp(upDetails);
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
       _dragUpdateThrottleTimer!.cancel();
       _handleDragUpdateThrottled();
     }
-    widget.onDragSelectionEnd?.call(details);
+    widget.onDragSelectionEnd?.call(endDetails);
     _dragUpdateThrottleTimer = null;
     _lastDragStartDetails = null;
     _lastDragUpdateDetails = null;
@@ -2851,17 +2856,17 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-      () => TapGestureRecognizer(debugOwner: this),
-      (TapGestureRecognizer instance) {
-        instance
-          ..onSecondaryTap = widget.onSecondaryTap
-          ..onSecondaryTapDown = widget.onSecondaryTapDown
-          ..onTapDown = _handleTapDown
-          ..onTapUp = _handleTapUp
-          ..onTapCancel = _handleTapCancel;
-      },
-    );
+    // gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+    //   () => TapGestureRecognizer(debugOwner: this),
+    //   (TapGestureRecognizer instance) {
+    //     instance
+    //       ..onSecondaryTap = widget.onSecondaryTap
+    //       ..onSecondaryTapDown = widget.onSecondaryTapDown
+    //       ..onTapDown = _handleTapDown
+    //       ..onTapUp = _handleTapUp
+    //       ..onTapCancel = _handleTapCancel;
+    //   },
+    // );
 
     if (widget.onSingleLongTapStart != null ||
         widget.onSingleLongTapMoveUpdate != null ||
@@ -2880,16 +2885,17 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (widget.onDragSelectionStart != null ||
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
-      gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-        () => PanGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
-        (PanGestureRecognizer instance) {
+      gestures[TapAndDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndDragGestureRecognizer>(
+        () => TapAndDragGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+        (TapAndDragGestureRecognizer instance) {
           instance
             // Text selection should start from the position of the first pointer
             // down event.
             ..dragStartBehavior = DragStartBehavior.down
+            ..onDown = _handleTapDown
             ..onStart = _handleDragStart
             ..onUpdate = _handleDragUpdate
-            ..onEnd = _handleDragEnd;
+            ..onUpAndEnd = _handleDragEnd;
         },
       );
     }
