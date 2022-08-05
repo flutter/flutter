@@ -42,6 +42,7 @@ test_fixtures("file_fixtures") {
     "boston.jpg",
     "embarcadero.jpg",
     "kalimba.jpg",
+    "resources_limit.vert",
     "sample.comp",
     "sample.tesc",
     "sample.tese",

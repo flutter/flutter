@@ -50,6 +50,12 @@ TEST_P(CompilerTest, CanCompileComputeShader) {
   ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader));
 }
 
+TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
+  ScopedValidationDisable disable_validation;
+  ASSERT_FALSE(
+      CanCompileAndReflect("resources_limit.vert", SourceType::kVertexShader));
+}
+
 TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
   if (GetParam() == TargetPlatform::kFlutterSPIRV) {
     // This is a failure of reflection which this target doesn't perform.
