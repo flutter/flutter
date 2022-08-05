@@ -741,7 +741,7 @@ class ColorScheme with Diagnosticable {
   final Color? _outline;
   /// A utility color that creates boundaries and emphasis to improve usability.
   Color get outline => _outline ?? onBackground;
-  
+
   final Color? _outlineVariant;
   /// A utility color that creates boundaries for decorative elements when a
   /// 3:1 contrast isn’t required, such as for dividers or decorative elements.
