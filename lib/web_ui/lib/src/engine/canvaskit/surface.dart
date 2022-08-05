@@ -161,6 +161,7 @@ class Surface {
       // The existing surface is still reusable.
       if (window.devicePixelRatio != _currentDevicePixelRatio) {
         _updateLogicalHtmlCanvasSize();
+        _translateCanvas();
       }
       return _surface!;
     }
