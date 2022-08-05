@@ -586,6 +586,8 @@ class _InteractiveViewerState extends State<InteractiveViewer>
         alignedTranslation = _alignAxis(translation, widget.panningDirection!);
       } else if (widget.alignPanAxis) {
         alignedTranslation = _alignAxis(translation, _panAxis!);
+      } else {
+        alignedTranslation = translation;
       }
     } else {
       alignedTranslation = translation;
