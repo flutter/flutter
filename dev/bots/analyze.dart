@@ -45,10 +45,10 @@ Future<void> main(List<String> arguments) async {
   dart = path.join(dartSdk, 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
   pub = path.join(dartSdk, 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
   print('$clock STARTING ANALYSIS');
-  try {
-    await run(arguments);
-  } on ExitException catch (error) {
-    error.apply();
+  await run(arguments);
+  if (hasError) {
+    print('$clock ${bold}Test failed.$reset');
+    reportErrorsAndExit();
   }
   print('$clock ${bold}Analysis successful.$reset');
 }
@@ -60,17 +60,20 @@ String? _getDartSdkFromArguments(List<String> arguments) {
   for (int i = 0; i < arguments.length; i += 1) {
     if (arguments[i] == '--dart-sdk') {
       if (result != null) {
-        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+        foundError(<String>['The --dart-sdk argument must not be used more than once.']);
+        return null;
       }
       if (i + 1 < arguments.length) {
         result = arguments[i + 1];
       } else {
-        exitWithError(<String>['--dart-sdk must be followed by a path.']);
+        foundError(<String>['--dart-sdk must be followed by a path.']);
+        return null;
       }
     }
     if (arguments[i].startsWith('--dart-sdk=')) {
       if (result != null) {
-        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+        foundError(<String>['The --dart-sdk argument must not be used more than once.']);
+        return null;
       }
       result = arguments[i].substring('--dart-sdk='.length);
     }
@@ -82,7 +85,7 @@ Future<void> run(List<String> arguments) async {
   bool assertsEnabled = false;
   assert(() { assertsEnabled = true; return true; }());
   if (!assertsEnabled) {
-    exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
+    foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
   print('$clock No Double.clamp');
@@ -268,7 +271,7 @@ Future<void> verifyNoDoubleClamp(String workingDirectory) async {
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
     ]);
@@ -315,7 +318,7 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
     violations.add(file.path);
   }
   if (violations.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       '${bold}Found flutter_tools tests that do not end in `_test.dart`; these will not be run by the test runner$reset',
       ...violations,
     ]);
@@ -354,7 +357,7 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
       ...errors,
     ]);
@@ -420,7 +423,7 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
     ]);
@@ -529,7 +532,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset',
     ]);
@@ -561,7 +564,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
   failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'frag', overrideMinimumMatches ?? 1, _generateLicense('// '), header: r'#version 320 es(\n)+');
   if (failed > 0) {
-    exitWithError(<String>['License check failed.']);
+    foundError(<String>['License check failed.']);
   }
 }
 
@@ -670,7 +673,7 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
 
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
     ]);
@@ -700,7 +703,7 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   // Fail if any errors
   if (errors.isNotEmpty) {
     final String s = errors.length == 1 ? '' : 's';
-    exitWithError(<String>[
+    foundError(<String>[
       '${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset',
       ...errors,
     ]);
@@ -769,7 +772,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       if (errors.length == 1)
         '${bold}An error was detected when looking at import dependencies within the Flutter package:$reset'
       else
@@ -789,7 +792,7 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       if (errors.length == 1)
         '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
       else
@@ -814,7 +817,7 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       if (errors.length == 1)
         '${bold}An error was detected when looking at integration test timeouts:$reset'
       else
@@ -850,7 +853,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
   if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
-    exitWithError(<String>[
+    foundError(<String>[
       '<<<<<<< $materialLocalizationsFile',
       expectedMaterialResult.trim(),
       '=======',
@@ -862,7 +865,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     ]);
   }
   if (cupertinoGenResult.stdout.trim() != expectedCupertinoResult.trim()) {
-    exitWithError(<String>[
+    foundError(<String>[
       '<<<<<<< $cupertinoLocalizationsFile',
       expectedCupertinoResult.trim(),
       '=======',
@@ -893,7 +896,7 @@ Future<void> verifyNoCheckedMode(String workingDirectory) async {
     }
   }
   if (problems.isNotEmpty) {
-    exitWithError(problems);
+    foundError(problems);
   }
 }
 
@@ -947,7 +950,7 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
     }
   }
   if (problems.isNotEmpty) {
-    exitWithError(problems);
+    foundError(problems);
   }
 }
 
@@ -977,7 +980,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     }
   }
   if (problems.isNotEmpty) {
-    exitWithError(problems);
+    foundError(problems);
   }
 }
 
@@ -1050,7 +1053,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   }
   assert(problems.isEmpty == suggestions.isEmpty);
   if (problems.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...problems,
       ...suggestions,
     ]);
@@ -1507,7 +1510,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
       }
     }
     if (problems.isNotEmpty) {
-      exitWithError(<String>[
+      foundError(<String>[
         ...problems,
         'All files in this repository must be UTF-8. In particular, images and other binaries',
         'must not be checked into this repository. This is because we are very sensitive to the',
@@ -1545,7 +1548,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
     runSilently: runSilently,
   );
   if (evalResult.exitCode != 0) {
-    exitWithError(<String>[
+    foundError(<String>[
       'git ls-files failed with exit code ${evalResult.exitCode}',
       '${bold}stdout:$reset',
       evalResult.stdout,
@@ -1671,7 +1674,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
-    exitWithError(<String>[
+    foundError(<String>[
       '${bold}ERROR:$red Last command exited with $exitCode.$reset',
       '${bold}Command:$red $commandDescription$reset',
       '${bold}Relative working directory:$red $relativeWorkingDir$reset',
@@ -1702,9 +1705,11 @@ Future<void> _checkConsumerDependencies() async {
       '--directory=${path.join(flutterRoot, 'packages', package)}',
     ]);
     if (result.exitCode != 0) {
-      print(result.stdout as Object);
-      print(result.stderr as Object);
-      exit(result.exitCode);
+      foundError(<String>[
+        result.stdout.toString(),
+        result.stderr.toString(),
+      ]);
+      return;
     }
     final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
     final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
@@ -1734,7 +1739,7 @@ Future<void> _checkConsumerDependencies() async {
   String plural(int n, String s, String p) => n == 1 ? s : p;
 
   if (added.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       'The transitive closure of package dependencies contains ${plural(added.length, "a non-allowlisted package", "non-allowlisted packages")}:',
       '  ${added.join(', ')}',
       'We strongly desire to keep the number of dependencies to a minimum and',
@@ -1745,7 +1750,7 @@ Future<void> _checkConsumerDependencies() async {
   }
 
   if (removed.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       'Excellent news! ${plural(removed.length, "A package dependency has been removed!", "Multiple package dependencies have been removed!")}',
       '  ${removed.join(', ')}',
       'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
@@ -1778,7 +1783,7 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
   }
 
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
      '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
      'to ensure both the field and initializer are removed from profile/release mode.',
      'These fields should be written as:\n',

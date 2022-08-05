@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:io';
+import 'dart:core' hide print;
+import 'dart:io' hide exit;
 
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
@@ -43,6 +43,10 @@ Future<void> main() async {
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent);
   await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
+  if (hasError) {
+    print('One or more tests failed.');
+    reportErrorsAndExit();
+  }
 }
 
 Future<void> _setAppVersion(int version) async {
