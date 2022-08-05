@@ -8,6 +8,7 @@ tests = [
   "skp_test.dart",
   "tracing_test.dart",
   "shader_reload_test.dart",
+  "vmservice_methods_test.dart",
 ]
 
 foreach(test, tests) {
