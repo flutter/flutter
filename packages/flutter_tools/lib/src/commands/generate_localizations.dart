@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -21,9 +24,13 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
     required FileSystem fileSystem,
     required Logger logger,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
   }) :
     _fileSystem = fileSystem,
-    _logger = logger {
+    _logger = logger,
+    _artifacts = artifacts,
+    _processManager = processManager {
     argParser.addOption(
       'arb-dir',
       defaultsTo: globals.fs.path.join('lib', 'l10n'),
@@ -184,6 +191,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   final FileSystem _fileSystem;
   final Logger _logger;
+  final Artifacts _artifacts;
+  final ProcessManager _processManager;
 
   @override
   String get description => 'Generate localizations for the current project.';
@@ -212,6 +221,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         options: options,
         projectDir: _fileSystem.currentDirectory,
         fileSystem: _fileSystem,
+        artifacts: _artifacts,
+        processManager: _processManager,
       );
       return FlutterCommandResult.success();
     }
@@ -237,6 +248,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     try {
       final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: _fileSystem,
+        artifacts: _artifacts,
+        processManager: _processManager,
         inputPathString: inputPathString,
         outputPathString: outputPathString,
         templateArbFileName: templateArbFileName,

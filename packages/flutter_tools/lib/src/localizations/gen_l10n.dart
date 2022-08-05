@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
@@ -23,6 +24,8 @@ Future<LocalizationsGenerator> generateLocalizations({
   required LocalizationOptions options,
   required Logger logger,
   required FileSystem fileSystem,
+  required Artifacts artifacts,
+  required ProcessManager processManager,
 }) async {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
@@ -51,6 +54,8 @@ Future<LocalizationsGenerator> generateLocalizations({
   try {
     generator = LocalizationsGenerator(
       fileSystem: fileSystem,
+      artifacts: artifacts,
+      processManager: processManager,
       inputsAndOutputsListPath: dependenciesDir?.path,
       projectPathString: projectDir.path,
       inputPathString: inputPathString,
@@ -685,6 +690,8 @@ class LocalizationsGenerator {
   /// up the [LocalizationsGenerator] cannot be completed.
   factory LocalizationsGenerator({
     required FileSystem fileSystem,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
     required String inputPathString,
     String? outputPathString,
     required String templateArbFileName,
@@ -706,7 +713,9 @@ class LocalizationsGenerator {
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
     final Directory outputDirectory = outputDirectoryFromPath(fileSystem, outputPathString ?? inputPathString, useSyntheticPackage, projectDirectory);
     return LocalizationsGenerator._(
-      fileSystem,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      processManager: processManager,
       useSyntheticPackage: useSyntheticPackage,
       usesNullableGetter: usesNullableGetter,
       className: classNameFromString(classNameString),
@@ -728,7 +737,10 @@ class LocalizationsGenerator {
   /// Creates an instance of the localizations generator class.
   ///
   /// It takes in a [FileSystem] representation that the class will act upon.
-  LocalizationsGenerator._(this._fs, {
+  LocalizationsGenerator._({
+    required FileSystem fileSystem,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
     required this.inputDirectory,
     required this.outputDirectory,
     required this.templateArbFile,
@@ -744,9 +756,13 @@ class LocalizationsGenerator {
     this.untranslatedMessagesFile,
     this.usesNullableGetter = true,
     required this.logger,
-  });
+  }) : _fs = fileSystem,
+       _artifacts = artifacts,
+       _processManager = processManager;
 
   final FileSystem _fs;
+  final Artifacts _artifacts;
+  final ProcessManager _processManager;
   Iterable<Message> _allMessages = <Message>[];
   late final AppResourceBundleCollection _allBundles = AppResourceBundleCollection(inputDirectory);
 
@@ -1440,9 +1456,10 @@ class LocalizationsGenerator {
     if (_formatFileList.isEmpty) {
       return;
     }
-    final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String dartBinary = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[dartBinary, 'format', ..._formatFileList];
-    final int result = await (await globals.processUtils.start(command)).exitCode;
+    final Process process = await _processManager.start(command);
+    final int result = await process.exitCode;
     if (result != 0) {
       throwToolExit('Formatting failed: $result', exitCode: result);
     }

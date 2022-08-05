@@ -59,6 +59,8 @@ class GenerateLocalizationsTarget extends Target {
       projectDir: environment.projectDir,
       dependenciesDir: environment.buildDir,
       fileSystem: environment.fileSystem,
+      artifacts: environment.artifacts,
+      processManager: environment.processManager,
     );
 
     final Map<String, Object> dependencies = json.decode(
