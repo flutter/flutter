@@ -1899,16 +1899,16 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: accentColor ?? this.accentColor,
-      accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
-      accentTextTheme: accentTextTheme ?? this.accentTextTheme,
-      accentIconTheme: accentIconTheme ?? this.accentIconTheme,
-      buttonColor: buttonColor ?? this.buttonColor,
-      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
-      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      accentColor: accentColor ?? _accentColor,
+      accentColorBrightness: accentColorBrightness ?? _accentColorBrightness,
+      accentTextTheme: accentTextTheme ?? _accentTextTheme,
+      accentIconTheme: accentIconTheme ?? _accentIconTheme,
+      buttonColor: buttonColor ?? _buttonColor,
+      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? _fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness ?? _primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
-      toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
-      selectedRowColor: selectedRowColor ?? this.selectedRowColor,
+      toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
+      selectedRowColor: selectedRowColor ?? _selectedRowColor,
     );
   }
 
