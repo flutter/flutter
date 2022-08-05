@@ -54,29 +54,21 @@ echo ""
 
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/flutter_frontend_server"
 
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools/licenses"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools"
 
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/litetest"
-
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/benchmark"
-
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/smoke_test_failure"
-
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/dart"
-
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/scenario_app"
-
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing/symbols"
-
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools/githooks"
-
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools/clang_tidy"
+(cd "$FLUTTER_DIR/testing/skia_gold_client"; "$DART" pub get)
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing"
 
 echo ""
 
 # Check that dart libraries conform.
 echo "Checking the integrity of the Web SDK"
 (cd "$FLUTTER_DIR/web_sdk"; "$DART" pub get)
+(cd "$FLUTTER_DIR/web_sdk/web_test_utils"; "$DART" pub get)
+(cd "$FLUTTER_DIR/web_sdk/web_engine_tester"; "$DART" pub get)
+
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/web_sdk"
+
 WEB_SDK_TEST_FILES="$FLUTTER_DIR/web_sdk/test/*"
 for testFile in $WEB_SDK_TEST_FILES
 do

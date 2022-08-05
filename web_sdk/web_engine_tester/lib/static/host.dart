@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_dynamic_calls
+
 @JS()
 library test.host;
 
@@ -22,7 +24,7 @@ class _TestRunner {
 
 /// Returns the current content shell runner, or `null` if none exists.
 @JS()
-external _TestRunner? get testRunner;
+external _TestRunner? get testRunner; // ignore: library_private_types_in_public_api
 
 /// A class that exposes the test API to JS.
 ///
@@ -31,6 +33,8 @@ external _TestRunner? get testRunner;
 @JS()
 @anonymous
 class _JSApi {
+  external factory _JSApi({void Function() resume, void Function() restartCurrent});
+
   /// Causes the test runner to resume running, as though the user had clicked
   /// the "play" button.
   external Function get resume;
@@ -38,8 +42,6 @@ class _JSApi {
   /// Causes the test runner to restart the current test once it finishes
   /// running.
   external Function get restartCurrent;
-
-  external factory _JSApi({void Function() resume, void Function() restartCurrent});
 }
 
 /// Sets the top-level `dartTest` object so that it's visible to JS.
@@ -160,7 +162,7 @@ void main() {
       }));
     },
     (dynamic error, StackTrace stackTrace) {
-      print('$error\n${Trace.from(stackTrace).terse}');
+      print('$error\n${Trace.from(stackTrace).terse}'); // ignore: avoid_print
     },
   );
 }
