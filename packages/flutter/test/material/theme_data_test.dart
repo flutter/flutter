@@ -669,7 +669,6 @@ void main() {
       primaryColorLight: Colors.black,
       scaffoldBackgroundColor: Colors.black,
       secondaryHeaderColor: Colors.black,
-      selectedRowColor: Colors.black,
       shadowColor: Colors.black,
       splashColor: Colors.black,
       unselectedWidgetColor: Colors.black,
@@ -780,7 +779,6 @@ void main() {
       primaryColorLight: Colors.white,
       scaffoldBackgroundColor: Colors.white,
       secondaryHeaderColor: Colors.white,
-      selectedRowColor: Colors.white,
       shadowColor: Colors.white,
       splashColor: Colors.white,
       unselectedWidgetColor: Colors.white,
@@ -879,7 +877,6 @@ void main() {
       primaryColorLight: otherTheme.primaryColorLight,
       scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
       secondaryHeaderColor: otherTheme.secondaryHeaderColor,
-      selectedRowColor: otherTheme.selectedRowColor,
       shadowColor: otherTheme.shadowColor,
       splashColor: otherTheme.splashColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
@@ -977,7 +974,6 @@ void main() {
     expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
     expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
     expect(themeDataCopy.secondaryHeaderColor, equals(otherTheme.secondaryHeaderColor));
-    expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
@@ -1110,7 +1106,6 @@ void main() {
       'dividerColor',
       'highlightColor',
       'splashColor',
-      'selectedRowColor',
       'unselectedWidgetColor',
       'disabledColor',
       'secondaryHeaderColor',
@@ -1170,6 +1165,7 @@ void main() {
       'primaryColorBrightness',
       'androidOverscrollIndicator',
       'toggleableActiveColor',
+      'selectedRowColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
