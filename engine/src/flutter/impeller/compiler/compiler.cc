@@ -4,6 +4,7 @@
 
 #include "impeller/compiler/compiler.h"
 
+#include <array>
 #include <filesystem>
 #include <memory>
 #include <sstream>
@@ -104,6 +105,124 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
   return compiler;
 }
 
+static void SetLimitations(shaderc::CompileOptions& compiler_opts) {
+  using Limit = std::pair<shaderc_limit, int>;
+  static constexpr std::array<Limit, 83> limits = {
+      Limit{shaderc_limit::shaderc_limit_max_lights, 8},
+      Limit{shaderc_limit::shaderc_limit_max_clip_planes, 6},
+      Limit{shaderc_limit::shaderc_limit_max_texture_units, 2},
+      Limit{shaderc_limit::shaderc_limit_max_texture_coords, 8},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_attribs, 16},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_uniform_components, 4096},
+      Limit{shaderc_limit::shaderc_limit_max_varying_floats, 60},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_texture_image_units, 16},
+      Limit{shaderc_limit::shaderc_limit_max_combined_texture_image_units, 80},
+      Limit{shaderc_limit::shaderc_limit_max_texture_image_units, 16},
+      Limit{shaderc_limit::shaderc_limit_max_fragment_uniform_components, 1024},
+      Limit{shaderc_limit::shaderc_limit_max_draw_buffers, 8},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_uniform_vectors, 256},
+      Limit{shaderc_limit::shaderc_limit_max_varying_vectors, 15},
+      Limit{shaderc_limit::shaderc_limit_max_fragment_uniform_vectors, 256},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_output_vectors, 16},
+      Limit{shaderc_limit::shaderc_limit_max_fragment_input_vectors, 15},
+      Limit{shaderc_limit::shaderc_limit_min_program_texel_offset, -8},
+      Limit{shaderc_limit::shaderc_limit_max_program_texel_offset, 7},
+      Limit{shaderc_limit::shaderc_limit_max_clip_distances, 8},
+      Limit{shaderc_limit::shaderc_limit_max_compute_work_group_count_x, 65535},
+      Limit{shaderc_limit::shaderc_limit_max_compute_work_group_count_y, 65535},
+      Limit{shaderc_limit::shaderc_limit_max_compute_work_group_count_z, 65535},
+      Limit{shaderc_limit::shaderc_limit_max_compute_work_group_size_x, 1024},
+      Limit{shaderc_limit::shaderc_limit_max_compute_work_group_size_y, 1024},
+      Limit{shaderc_limit::shaderc_limit_max_compute_work_group_size_z, 64},
+      Limit{shaderc_limit::shaderc_limit_max_compute_uniform_components, 512},
+      Limit{shaderc_limit::shaderc_limit_max_compute_texture_image_units, 16},
+      Limit{shaderc_limit::shaderc_limit_max_compute_image_uniforms, 8},
+      Limit{shaderc_limit::shaderc_limit_max_compute_atomic_counters, 8},
+      Limit{shaderc_limit::shaderc_limit_max_compute_atomic_counter_buffers, 1},
+      Limit{shaderc_limit::shaderc_limit_max_varying_components, 60},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_output_components, 64},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_input_components, 64},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_output_components, 128},
+      Limit{shaderc_limit::shaderc_limit_max_fragment_input_components, 128},
+      Limit{shaderc_limit::shaderc_limit_max_image_units, 8},
+      Limit{shaderc_limit::
+                shaderc_limit_max_combined_image_units_and_fragment_outputs,
+            8},
+      Limit{shaderc_limit::shaderc_limit_max_combined_shader_output_resources,
+            8},
+      Limit{shaderc_limit::shaderc_limit_max_image_samples, 0},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_image_uniforms, 0},
+      Limit{shaderc_limit::shaderc_limit_max_tess_control_image_uniforms, 0},
+      Limit{shaderc_limit::shaderc_limit_max_tess_evaluation_image_uniforms, 0},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_image_uniforms, 0},
+      Limit{shaderc_limit::shaderc_limit_max_fragment_image_uniforms, 8},
+      Limit{shaderc_limit::shaderc_limit_max_combined_image_uniforms, 8},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_texture_image_units, 16},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_output_vertices, 256},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_total_output_components,
+            1024},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_uniform_components, 512},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_varying_components, 60},
+      Limit{shaderc_limit::shaderc_limit_max_tess_control_input_components,
+            128},
+      Limit{shaderc_limit::shaderc_limit_max_tess_control_output_components,
+            128},
+      Limit{shaderc_limit::shaderc_limit_max_tess_control_texture_image_units,
+            16},
+      Limit{shaderc_limit::shaderc_limit_max_tess_control_uniform_components,
+            1024},
+      Limit{
+          shaderc_limit::shaderc_limit_max_tess_control_total_output_components,
+          4096},
+      Limit{shaderc_limit::shaderc_limit_max_tess_evaluation_input_components,
+            128},
+      Limit{shaderc_limit::shaderc_limit_max_tess_evaluation_output_components,
+            128},
+      Limit{
+          shaderc_limit::shaderc_limit_max_tess_evaluation_texture_image_units,
+          16},
+      Limit{shaderc_limit::shaderc_limit_max_tess_evaluation_uniform_components,
+            1024},
+      Limit{shaderc_limit::shaderc_limit_max_tess_patch_components, 120},
+      Limit{shaderc_limit::shaderc_limit_max_patch_vertices, 32},
+      Limit{shaderc_limit::shaderc_limit_max_tess_gen_level, 64},
+      Limit{shaderc_limit::shaderc_limit_max_viewports, 16},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_atomic_counters, 0},
+      Limit{shaderc_limit::shaderc_limit_max_tess_control_atomic_counters, 0},
+      Limit{shaderc_limit::shaderc_limit_max_tess_evaluation_atomic_counters,
+            0},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_atomic_counters, 0},
+      Limit{shaderc_limit::shaderc_limit_max_fragment_atomic_counters, 8},
+      Limit{shaderc_limit::shaderc_limit_max_combined_atomic_counters, 8},
+      Limit{shaderc_limit::shaderc_limit_max_atomic_counter_bindings, 1},
+      Limit{shaderc_limit::shaderc_limit_max_vertex_atomic_counter_buffers, 0},
+      Limit{
+          shaderc_limit::shaderc_limit_max_tess_control_atomic_counter_buffers,
+          0},
+      Limit{shaderc_limit::
+                shaderc_limit_max_tess_evaluation_atomic_counter_buffers,
+            0},
+      Limit{shaderc_limit::shaderc_limit_max_geometry_atomic_counter_buffers,
+            0},
+      Limit{shaderc_limit::shaderc_limit_max_fragment_atomic_counter_buffers,
+            0},
+      Limit{shaderc_limit::shaderc_limit_max_combined_atomic_counter_buffers,
+            1},
+      Limit{shaderc_limit::shaderc_limit_max_atomic_counter_buffer_size, 32},
+      Limit{shaderc_limit::shaderc_limit_max_transform_feedback_buffers, 4},
+      Limit{shaderc_limit::
+                shaderc_limit_max_transform_feedback_interleaved_components,
+            64},
+      Limit{shaderc_limit::shaderc_limit_max_cull_distances, 8},
+      Limit{shaderc_limit::shaderc_limit_max_combined_clip_and_cull_distances,
+            8},
+      Limit{shaderc_limit::shaderc_limit_max_samples, 4},
+  };
+  for (auto& [limit, value] : limits) {
+    compiler_opts.SetLimit(limit, value);
+  }
+}
+
 Compiler::Compiler(const fml::Mapping& source_mapping,
                    SourceOptions source_options,
                    Reflector::Options reflector_options)
@@ -139,6 +258,8 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
       shaderc_source_language::shaderc_source_language_glsl);
   spirv_options.SetForcedVersionProfile(460,
                                         shaderc_profile::shaderc_profile_core);
+  SetLimitations(spirv_options);
+
   switch (source_options.target_platform) {
     case TargetPlatform::kMetalDesktop:
     case TargetPlatform::kMetalIOS:
