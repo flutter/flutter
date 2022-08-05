@@ -788,4 +788,11 @@ void main() {
     ),
   );
   themeData.toggleableActiveColor; // Removing field reference not supported.
+
+  // Changes made in TBD
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.selectedRowColor; // Removing field reference not supported.
 }

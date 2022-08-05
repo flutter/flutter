@@ -313,7 +313,6 @@ class ThemeData with Diagnosticable {
     MaterialColor? primarySwatch,
     Color? scaffoldBackgroundColor,
     Color? secondaryHeaderColor,
-    Color? selectedRowColor,
     Color? shadowColor,
     Color? splashColor,
     Color? unselectedWidgetColor,
@@ -415,6 +414,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.4.pre.',
     )
     Color? toggleableActiveColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
+    Color? selectedRowColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -622,7 +626,6 @@ class ThemeData with Diagnosticable {
       primaryColorLight: primaryColorLight,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       secondaryHeaderColor: secondaryHeaderColor,
-      selectedRowColor: selectedRowColor,
       shadowColor: shadowColor,
       splashColor: splashColor,
       unselectedWidgetColor: unselectedWidgetColor,
@@ -677,6 +680,7 @@ class ThemeData with Diagnosticable {
       primaryColorBrightness: primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor,
+      selectedRowColor: selectedRowColor,
     );
   }
 
@@ -728,7 +732,6 @@ class ThemeData with Diagnosticable {
     required this.primaryColorLight,
     required this.scaffoldBackgroundColor,
     required this.secondaryHeaderColor,
-    required this.selectedRowColor,
     required this.shadowColor,
     required this.splashColor,
     required this.unselectedWidgetColor,
@@ -829,6 +832,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.4.pre.',
     )
     Color? toggleableActiveColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
+    Color? selectedRowColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
@@ -839,6 +847,7 @@ class ThemeData with Diagnosticable {
        _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
        _primaryColorBrightness = primaryColorBrightness,
        _toggleableActiveColor = toggleableActiveColor,
+       _selectedRowColor = selectedRowColor,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -870,7 +879,6 @@ class ThemeData with Diagnosticable {
        assert(primaryColorLight != null),
        assert(scaffoldBackgroundColor != null),
        assert(secondaryHeaderColor != null),
-       assert(selectedRowColor != null),
        assert(shadowColor != null),
        assert(splashColor != null),
        assert(toggleableActiveColor != null),
@@ -1341,7 +1349,12 @@ class ThemeData with Diagnosticable {
   final Color secondaryHeaderColor;
 
   /// The color used to highlight selected rows.
-  final Color selectedRowColor;
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
+  Color get selectedRowColor => _selectedRowColor!;
+  final Color? _selectedRowColor;
 
   /// The color that the [Material] widget uses to draw elevation shadows.
   ///
@@ -1696,7 +1709,6 @@ class ThemeData with Diagnosticable {
     Color? primaryColorLight,
     Color? scaffoldBackgroundColor,
     Color? secondaryHeaderColor,
-    Color? selectedRowColor,
     Color? shadowColor,
     Color? splashColor,
     Color? unselectedWidgetColor,
@@ -1796,7 +1808,11 @@ class ThemeData with Diagnosticable {
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v2.13.0-0.4.pre.',
     )
-    Color? toggleableActiveColor,
+    Color? toggleableActiveColor,@Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
+    Color? selectedRowColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1837,7 +1853,6 @@ class ThemeData with Diagnosticable {
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
-      selectedRowColor: selectedRowColor ?? this.selectedRowColor,
       shadowColor: shadowColor ?? this.shadowColor,
       splashColor: splashColor ?? this.splashColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
@@ -2036,7 +2051,6 @@ class ThemeData with Diagnosticable {
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t)!,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
-      selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t)!,
       shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
       splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
@@ -2091,6 +2105,7 @@ class ThemeData with Diagnosticable {
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
+      selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
     );
   }
 
@@ -2137,7 +2152,6 @@ class ThemeData with Diagnosticable {
         other.primaryColorLight == primaryColorLight &&
         other.scaffoldBackgroundColor == scaffoldBackgroundColor &&
         other.secondaryHeaderColor == secondaryHeaderColor &&
-        other.selectedRowColor == selectedRowColor &&
         other.shadowColor == shadowColor &&
         other.splashColor == splashColor &&
         other.unselectedWidgetColor == unselectedWidgetColor &&
@@ -2191,7 +2205,8 @@ class ThemeData with Diagnosticable {
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
         other.primaryColorBrightness == primaryColorBrightness &&
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
-        other.toggleableActiveColor == toggleableActiveColor;
+        other.toggleableActiveColor == toggleableActiveColor &&
+        other.selectedRowColor == selectedRowColor;
   }
 
   @override
@@ -2235,7 +2250,6 @@ class ThemeData with Diagnosticable {
       primaryColorLight,
       scaffoldBackgroundColor,
       secondaryHeaderColor,
-      selectedRowColor,
       shadowColor,
       splashColor,
       unselectedWidgetColor,
@@ -2290,6 +2304,7 @@ class ThemeData with Diagnosticable {
       primaryColorBrightness,
       androidOverscrollIndicator,
       toggleableActiveColor,
+      selectedRowColor,
     ];
     return Object.hashAll(values);
   }
@@ -2335,7 +2350,6 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.debug));
@@ -2390,6 +2404,7 @@ class ThemeData with Diagnosticable {
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
   }
 }
 
