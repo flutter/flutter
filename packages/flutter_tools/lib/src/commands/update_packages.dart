@@ -33,7 +33,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'video_player': '2.2.11',
   // Could potentially break color scheme tests on upgrade,
   // so pin and manually update as needed.
-  'material_color_utilities': '0.1.5',
+  'material_color_utilities': '0.2.0',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
