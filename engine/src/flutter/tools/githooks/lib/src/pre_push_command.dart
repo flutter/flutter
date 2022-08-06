@@ -20,10 +20,18 @@ class PrePushCommand extends Command<bool> {
   Future<bool> run() async {
     final Stopwatch sw = Stopwatch()..start();
     final bool verbose = globalResults!['verbose']! as bool;
+    final bool enableClangTidy = globalResults!['enable-clang-tidy']! as bool;
     final String flutterRoot = globalResults!['flutter']! as String;
+
+    if (!enableClangTidy) {
+      print('The clang-tidy check is disabled. To enable set the environment '
+            'variable PRE_PUSH_CLANG_TIDY to any value.');
+    }
+
     final List<bool> checkResults = <bool>[
       await _runFormatter(flutterRoot, verbose),
-      await _runClangTidy(flutterRoot, verbose),
+      if (enableClangTidy)
+        await _runClangTidy(flutterRoot, verbose),
     ];
     sw.stop();
     io.stdout.writeln('pre-push checks finished in ${sw.elapsed}');
@@ -51,7 +59,8 @@ class PrePushCommand extends Command<bool> {
         'compile_commands.json',
       ));
       if (!compileCommands.existsSync()) {
-        io.stderr.writeln('clang-tidy requires a fully built host_debug or host_debug_unopt build directory');
+        io.stderr.writeln('clang-tidy requires a fully built host_debug or '
+                          'host_debug_unopt build directory');
         return false;
       }
     }
