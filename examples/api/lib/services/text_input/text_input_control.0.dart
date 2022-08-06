@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   MyStatefulWidgetState createState() => MyStatefulWidgetState();
@@ -65,7 +65,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 }
 
 class MyVirtualKeyboard extends StatefulWidget {
-  const MyVirtualKeyboard({Key? key}) : super(key: key);
+  const MyVirtualKeyboard({super.key});
 
   @override
   MyVirtualKeyboardState createState() => MyVirtualKeyboardState();
