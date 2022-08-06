@@ -433,5 +433,38 @@ TEST_P(DisplayListTest, CanDrawNinePatchImageCornersScaledDown) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, CanDrawPoints) {
+  flutter::DisplayListBuilder builder;
+  SkPoint points[7] = {
+      {0, 0},      //
+      {100, 100},  //
+      {100, 0},    //
+      {0, 100},    //
+      {0, 0},      //
+      {48, 48},    //
+      {52, 52},    //
+  };
+  std::vector<flutter::DlStrokeCap> caps = {
+      flutter::DlStrokeCap::kButt,
+      flutter::DlStrokeCap::kRound,
+      flutter::DlStrokeCap::kSquare,
+  };
+  flutter::DlPaint paint = flutter::DlPaint().setStrokeWidth(20);
+  builder.translate(50, 50);
+  for (auto cap : caps) {
+    paint.setStrokeCap(cap);
+    paint.setColor(flutter::DlColor::kYellow().withAlpha(127));
+    builder.save();
+    builder.drawPoints(SkCanvas::kPoints_PointMode, 7, points, paint);
+    builder.translate(150, 0);
+    builder.drawPoints(SkCanvas::kLines_PointMode, 5, points, paint);
+    builder.translate(150, 0);
+    builder.drawPoints(SkCanvas::kPolygon_PointMode, 5, points, paint);
+    builder.restore();
+    builder.translate(0, 150);
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
