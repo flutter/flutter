@@ -2115,7 +2115,7 @@ class TextInput {
 /// implementations should call [TextInput.updateEditingValue] to send user
 /// input to the attached input client.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example illustrates a basic [TextInputControl] implementation:
 ///
 /// ```dart imports
