@@ -514,7 +514,12 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     return SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: _itemsCount,
-      findChildIndexCallback: widget.findChildIndexCallback,
+      findChildIndexCallback: widget.findChildIndexCallback == null
+          ? null
+          : (Key key) {
+              final int? index = widget.findChildIndexCallback!(key);
+              return index != null ? _indexToItemIndex(index) : null;
+            },
     );
   }
 

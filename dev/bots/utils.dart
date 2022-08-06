@@ -4,8 +4,10 @@
 
 import 'dart:core' as core_internals show print;
 import 'dart:core' hide print;
-import 'dart:io' as io_internals show exit;
+import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
+
+import 'package:meta/meta.dart';
 
 final bool hasColor = stdout.supportsAnsiEscapes;
 
@@ -16,36 +18,41 @@ final String yellow = hasColor ? '\x1B[33m' : ''; // used for skips
 final String cyan = hasColor ? '\x1B[36m' : ''; // used for paths
 final String reverse = hasColor ? '\x1B[7m' : ''; // used for clocks
 final String reset = hasColor ? '\x1B[0m' : '';
-
-class ExitException implements Exception {
-  ExitException(this.exitCode);
-
-  final int exitCode;
-
-  void apply() {
-    io_internals.exit(exitCode);
-  }
-}
-
-// We actually reimplement exit() so that it uses exceptions rather
-// than truly immediately terminating the application, so that we can
-// test the exit code in unit tests (see test/analyze_test.dart).
-void exit(int exitCode) {
-  throw ExitException(exitCode);
-}
-
-void exitWithError(List<String> messages) {
-  final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
-  print(redLine);
-  messages.forEach(print);
-  print(redLine);
-  exit(1);
-}
+final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
 
 typedef PrintCallback = void Function(Object line);
 
 // Allow print() to be overridden, for tests.
 PrintCallback print = core_internals.print;
+
+bool get hasError => _hasError;
+bool _hasError = false;
+
+Iterable<String> get errorMessages => _errorMessages;
+List<String> _errorMessages = <String>[];
+
+void foundError(List<String> messages) {
+  assert(messages.isNotEmpty);
+  print(redLine);
+  messages.forEach(print);
+  print(redLine);
+  _errorMessages.addAll(messages);
+  _hasError = true;
+}
+
+@visibleForTesting
+void resetErrorStatus() {
+  _hasError = false;
+  _errorMessages.clear();
+}
+
+Never reportErrorsAndExit() {
+  print(redLine);
+  print('For your convenience, the error messages reported above are repeated here:');
+  _errorMessages.forEach(print);
+  print(redLine);
+  system.exit(1);
+}
 
 String get clock {
   final DateTime now = DateTime.now();
