@@ -889,7 +889,7 @@ class FlutterVmService {
   }) async {
     await callMethodWrapper(
       kReloadAssetFonts,
-      isolateId: isolateId, args: {
+      isolateId: isolateId, args: <String, Object?>{
         'viewId': viewId,
       },
     );
