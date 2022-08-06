@@ -762,7 +762,41 @@ void DisplayListDispatcher::drawArc(const SkRect& oval_bounds,
 void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
                                        uint32_t count,
                                        const SkPoint points[]) {
-  UNIMPLEMENTED;
+  // auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
+  Paint paint = paint_;
+  paint.style = Paint::Style::kStroke;
+  switch (mode) {
+    case SkCanvas::kPoints_PointMode:
+      if (paint.stroke_cap == SolidStrokeContents::Cap::kButt) {
+        paint.stroke_cap = SolidStrokeContents::Cap::kSquare;
+      }
+      for (uint32_t i = 0; i < count; i++) {
+        SkPoint p0 = points[i];
+        // kEhCloseEnough works around a bug where Impeller does not draw
+        // anything for zero-length lines.
+        // See: https://github.com/flutter/flutter/issues/109077
+        SkPoint p1 = points[i] + SkPoint{kEhCloseEnough, 0.0};
+        auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
+        canvas_.DrawPath(std::move(path), paint);
+      }
+      break;
+    case SkCanvas::kLines_PointMode:
+      for (uint32_t i = 1; i < count; i += 2) {
+        SkPoint p0 = points[i - 1];
+        SkPoint p1 = points[i];
+        auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
+        canvas_.DrawPath(std::move(path), paint);
+      }
+      break;
+    case SkCanvas::kPolygon_PointMode:
+      for (uint32_t i = 1; i < count; i++) {
+        SkPoint p0 = points[i - 1];
+        SkPoint p1 = points[i];
+        auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
+        canvas_.DrawPath(std::move(path), paint);
+      }
+      break;
+  }
 }
 
 // |flutter::Dispatcher|
