@@ -130,15 +130,18 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
       blur_direction_ * blur_sigma_.sigma);
 
   VS::FrameInfo frame_info;
-  frame_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
-  frame_info.blur_sigma = transformed_blur.GetLength();
-  frame_info.blur_radius = Radius{Sigma{frame_info.blur_sigma}}.radius;
-  frame_info.blur_direction = input_snapshot->transform.Invert()
-                                  .TransformDirection(transformed_blur)
-                                  .Normalize();
-  frame_info.src_factor = src_color_factor_;
-  frame_info.inner_blur_factor = inner_blur_factor_;
-  frame_info.outer_blur_factor = outer_blur_factor_;
+  frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+
+  FS::FragInfo frag_info;
+  frag_info.blur_sigma = transformed_blur.GetLength();
+  frag_info.blur_radius = Radius{Sigma{frag_info.blur_sigma}}.radius;
+  frag_info.blur_direction = input_snapshot->transform.Invert()
+                                 .TransformDirection(transformed_blur)
+                                 .Normalize();
+  frag_info.src_factor = src_color_factor_;
+  frag_info.inner_blur_factor = inner_blur_factor_;
+  frag_info.outer_blur_factor = outer_blur_factor_;
+  frag_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
 
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
@@ -155,10 +158,8 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
 
   FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
   FS::BindAlphaMaskSampler(cmd, source_snapshot->texture, sampler);
-
-  frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-  VS::BindFrameInfo(cmd, uniform_view);
+  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+  FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
   return pass.AddCommand(cmd);
 }
