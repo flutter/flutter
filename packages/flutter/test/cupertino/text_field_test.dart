@@ -3670,7 +3670,7 @@ void main() {
 
     // The ListView has scrolled to keep the TextField and cursor handle
     // visible.
-    expect(scrollController.offset, 26.0);
+    expect(scrollController.offset, 28.0);
   });
 
   testWidgets('disabled state golden', (WidgetTester tester) async {
