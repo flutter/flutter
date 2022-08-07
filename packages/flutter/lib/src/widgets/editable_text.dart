@@ -2167,17 +2167,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
+    if (_cursorActive && _cursorTimer != null) {
+      // To keep the cursor from blinking while typing, restart the timer here.
+      _stopCursorBlink(resetCharTicks: false);
+      _startCursorBlink();
+    }
+
     // Wherever the value is changed by the user, schedule a showCaretOnScreen
     // to make sure the user can see the changes they just made. Programmatical
     // changes to `textEditingValue` do not trigger the behavior even if the
     // text field is focused.
     _scheduleShowCaretOnScreen(withAnimation: true);
-    if (_hasInputConnection) {
-      // To keep the cursor from blinking while typing, we want to restart the
-      // cursor timer every time a new character is typed.
-      _stopCursorBlink(resetCharTicks: false);
-      _startCursorBlink();
-    }
   }
 
   @override
@@ -2702,7 +2702,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
-    if (_cursorTimer != null) {
+    if (_cursorActive && _cursorTimer != null) {
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
