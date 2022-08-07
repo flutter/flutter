@@ -458,7 +458,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   // Caret Painters:
   // A single painter for both the regular caret and the floaring cursor.
-  late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter();
+  late final _CaretPainter _caretPainter = _CaretPainter();
 
   // Text Highlight painters:
   final _TextHighlightPainter _selectionPainter = _TextHighlightPainter();
@@ -2816,8 +2816,8 @@ class _TextHighlightPainter extends RenderEditablePainter {
   }
 }
 
-class _FloatingCursorPainter extends RenderEditablePainter {
-  _FloatingCursorPainter();
+class _CaretPainter extends RenderEditablePainter {
+  _CaretPainter();
 
   bool get shouldPaint => _shouldPaint;
   bool _shouldPaint = true;
@@ -2984,7 +2984,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     if (oldDelegate == null) {
       return shouldPaint;
     }
-    return oldDelegate is! _FloatingCursorPainter
+    return oldDelegate is! _CaretPainter
         || oldDelegate.shouldPaint != shouldPaint
         || oldDelegate.showRegularCaret != showRegularCaret
         || oldDelegate.caretColor != caretColor
