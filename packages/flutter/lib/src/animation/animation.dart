@@ -229,7 +229,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// of red.
   ///
   /// ```dart
-  /// Animation<Color> _offset1 = Animation.fromValueListenable(_scrollPosition)
+  /// Animation<Color> _offset1 = Animation<double>.fromValueListenable(_scrollPosition)
   ///   .drive(Animatable<Color>.fromCallback((double value) {
   ///     return Color.fromRGBO(value.round() % 255, 0, 0, 1);
   ///   }));
