@@ -36,9 +36,6 @@ typedef AnimationStatusListener = void Function(AnimationStatus status);
 /// Signature for method used to transform values in [Animation.fromValueListenable].
 typedef ValueListenableTransformer<T> = T Function(T);
 
-/// Signature for method used to transform animations in [Animation.map].
-typedef AnimationMapper<S, T> = T Function(S);
-
 /// An animation with a value of type `T`.
 ///
 /// An animation consists of a value (of type `T`) together with a status. The
