@@ -2946,9 +2946,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     assert(renderEditable != null);
     final TextSelection? selection = renderEditable.selection;
 
-    // TODO(LongCatIsLooong): skip painting the caret when the selection is
-    // (-1, -1).
-    if (selection == null || !selection.isCollapsed) {
+    if (selection == null || !selection.isValid || !selection.isCollapsed) {
       return;
     }
 
