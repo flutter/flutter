@@ -2708,12 +2708,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  Rect? _currentCaretRect;
-  // ignore: use_setters_to_change_properties, (this is used as a callback, can't be a setter)
-  void _handleCaretChanged(Rect caretRect) {
-    _currentCaretRect = caretRect;
-  }
-
   // Animation configuration for scrolling the caret back on screen.
   static const Duration _caretAnimationDuration = Duration(milliseconds: 100);
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
@@ -2727,7 +2721,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-      if (_currentCaretRect == null || !_scrollController.hasClients) {
+      if (!mounted || !_cursorActive || !_scrollController.hasClients) {
         return;
       }
 
@@ -2758,7 +2752,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final EdgeInsets caretPadding = widget.scrollPadding
         .copyWith(bottom: bottomSpacing);
 
-      final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
+      final Rect caretRect = renderEditable.getLocalRectForCaret(renderEditable.selection!.extent);
+      final RevealedOffset targetOffset = _getOffsetToRevealCaret(caretRect);
 
       if (withAnimation) {
         _scrollController.animateTo(
@@ -3643,7 +3638,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                           obscuringCharacter: widget.obscuringCharacter,
                           obscureText: widget.obscureText,
                           offset: offset,
-                          onCaretChanged: _handleCaretChanged,
                           rendererIgnoresPointer: widget.rendererIgnoresPointer,
                           cursorWidth: widget.cursorWidth,
                           cursorHeight: widget.cursorHeight,
@@ -3749,7 +3743,6 @@ class _Editable extends MultiChildRenderObjectWidget {
     required this.obscuringCharacter,
     required this.obscureText,
     required this.offset,
-    this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
     this.cursorHeight,
@@ -3805,7 +3798,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final ViewportOffset offset;
-  final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final double? cursorHeight;
@@ -3844,7 +3836,6 @@ class _Editable extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
-      onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
@@ -3888,7 +3879,6 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
-      ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior
       ..textWidthBasis = textWidthBasis

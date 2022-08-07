@@ -29,11 +29,6 @@ const EdgeInsets _kFloatingCaretSizeIncrease = EdgeInsets.symmetric(horizontal: 
 // The corner radius of the floating cursor in pixels.
 const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 
-/// Signature for the callback that reports when the caret location changes.
-///
-/// Used by [RenderEditable.onCaretChanged].
-typedef CaretChangedHandler = void Function(Rect caretRect);
-
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
 /// holds the selection.
@@ -216,9 +211,6 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
 /// position. The cursor is shown while [showCursor] is true. It is painted in
 /// the [cursorColor].
 ///
-/// If, when the render object paints, the caret is found to have changed
-/// location, [onCaretChanged] is called.
-///
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
@@ -255,7 +247,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     double textScaleFactor = 1.0,
     TextSelection? selection,
     required ViewportOffset offset,
-    this.onCaretChanged,
     this.ignorePointer = false,
     bool readOnly = false,
     bool forceLine = true,
@@ -466,8 +457,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   // Caret Painters:
-  // The floating painter. This painter paints the regular caret as well.
-  late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter(_onCaretChanged);
+  // A single painter for both the regular caret and the floaring cursor.
+  late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter();
 
   // Text Highlight painters:
   final _TextHighlightPainter _selectionPainter = _TextHighlightPainter();
@@ -505,19 +496,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
-  }
-
-  Rect? _lastCaretRect;
-  // TODO(LongCatIsLooong): currently EditableText uses this callback to keep
-  // the text field visible. But we don't always paint the caret, for example
-  // when the selection is not collapsed.
-  /// Called during the paint phase when the caret location changes.
-  CaretChangedHandler? onCaretChanged;
-  void _onCaretChanged(Rect caretRect) {
-    if (_lastCaretRect != caretRect) {
-      onCaretChanged?.call(caretRect);
-    }
-    _lastCaretRect = onCaretChanged == null ? null : caretRect;
   }
 
   /// Whether the [handleEvent] will propagate pointer events to selection
@@ -2839,7 +2817,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
 }
 
 class _FloatingCursorPainter extends RenderEditablePainter {
-  _FloatingCursorPainter(this.caretPaintCallback);
+  _FloatingCursorPainter();
 
   bool get shouldPaint => _shouldPaint;
   bool _shouldPaint = true;
@@ -2850,8 +2828,6 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     _shouldPaint = value;
     notifyListeners();
   }
-
-  CaretChangedHandler caretPaintCallback;
 
   bool showRegularCaret = false;
 
@@ -2961,7 +2937,6 @@ class _FloatingCursorPainter extends RenderEditablePainter {
         canvas.drawRRect(caretRRect, caretPaint);
       }
     }
-    caretPaintCallback(integralRect);
   }
 
   @override
