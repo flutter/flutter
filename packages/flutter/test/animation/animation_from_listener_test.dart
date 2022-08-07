@@ -49,12 +49,12 @@ void main() {
     expect(animation.value, 1.0);
   });
 
-  test('Animation created from ValueListenable can be transformed via map', () {
+  test('Animation created from ValueListenable can be transformed via drive', () {
     final ValueNotifier<double> listenable = ValueNotifier<double>(0.0);
     final Animation<double> animation = Animation<double>.fromValueListenable(listenable);
-    final Animation<Offset> offset = animation.map((double value) {
+    final Animation<Offset> offset = animation.drive(Animatable<Offset>.fromCallback((double value) {
       return Offset(0.0, value);
-    });
+    }));
 
     expect(offset.value, Offset.zero);
     expect(offset.status, AnimationStatus.forward);

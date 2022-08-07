@@ -219,6 +219,25 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///   ));
   /// ```
   /// {@end-tool}
+  /// {@tool snippet}
+  ///
+  /// This method can be paired with an [Animatable] created via
+  /// [Animatable.fromCallback] in order to transform an animation with a
+  /// callback function. This can be useful for performing animations that
+  /// do not have well defined start or end points. This example transforms
+  /// the current scroll position into a color that cycles through values
+  /// of red.
+  ///
+  /// ```dart
+  /// Animation<Color> _offset1 = Animation.fromValueListenable(_scrollPosition)
+  ///   .drive(Animatable<Color>.fromCallback((double value) {
+  ///     return Color.fromRGBO(value.round() % 255, 0, 0, 1);
+  ///   }));
+  ///
+  ///
+  /// ```
+  ///
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -227,36 +246,12 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///  * [CurvedAnimation], an alternative to [CurveTween] for applying easing
   ///    curves, which supports distinct curves in the forward direction and the
   ///    reverse direction.
+  ///  * [Animatable.fromCallback], which allows creating an animatable from an
+  ///    arbitrary transformation.
   @optionalTypeArgs
   Animation<U> drive<U>(Animatable<U> child) {
     assert(this is Animation<double>);
     return child.animate(this as Animation<double>);
-  }
-
-  /// Create a new [Animation] that transforms this animation using the provided
-  /// [mapper].
-  ///
-  /// This method can be used to change the type of an animation without using
-  /// a [Tween]. This can be useful if the animation does not have a meaningful
-  /// start or end, or is controlled such that it does not have a given duration.
-  ///
-  /// {@tool snippet}
-  ///
-  /// The following code uses [Animation.fromValueListenable] to construct an
-  /// [Animation] that is controlled by a scroll position. Then [Animation.map]
-  /// is used to transform this animation value from a [double] to an [Offset].
-  ///
-  /// ```dart
-  /// Animation<Offset> _offsetAnimation = Animation
-  ///   .fromValueListenable(_scrollPosition)
-  ///   .map((double position) {
-  ///     return Offset(0.0, position / 100.0);
-  ///   });
-  /// ```
-  ///
-  /// {@end-tool}
-  Animation<S> map<S>(AnimationMapper<T, S> mapper) {
-    return _MappedAnimation<T, S>(this, mapper);
   }
 
   @override
@@ -327,31 +322,4 @@ class _ValueListenableDelegateAnimation<T> extends Animation<T> {
 
   @override
   T get value => _transformer?.call(_listenable.value) ?? _listenable.value;
-}
-
-// An implementation of an animation that delegates to a parent animation and applies a
-// potentially type-changing transform.
-class _MappedAnimation<S, T> extends Animation<T> {
-  _MappedAnimation(this.source, this.mapper);
-
-  final AnimationMapper<S, T> mapper;
-  final Animation<S> source;
-
-  @override
-  void addListener(VoidCallback listener) => source.addListener(listener);
-
-  @override
-  void addStatusListener(AnimationStatusListener listener) => source.addStatusListener(listener);
-
-  @override
-  void removeListener(VoidCallback listener) => source.removeListener(listener);
-
-  @override
-  void removeStatusListener(AnimationStatusListener listener) => source.removeStatusListener(listener);
-
-  @override
-  AnimationStatus get status => source.status;
-
-  @override
-  T get value => mapper(source.value);
 }
