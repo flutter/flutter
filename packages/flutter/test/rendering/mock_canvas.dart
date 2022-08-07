@@ -318,7 +318,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style });
+  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap });
 
   /// Indicates that a paragraph is expected next.
   ///
@@ -769,8 +769,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style }) {
-    _predicates.add(_ArcPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) {
+    _predicates.add(_ArcPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, strokeCap: strokeCap));
   }
 
   @override
@@ -891,6 +891,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     this.strokeWidth,
     this.hasMaskFilter,
     this.style,
+    this.strokeCap,
   });
 
   final Symbol symbol;
@@ -901,6 +902,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   final double? strokeWidth;
   final bool? hasMaskFilter;
   final PaintingStyle? style;
+  final StrokeCap? strokeCap;
 
   String get methodName => _symbolName(symbol);
 
@@ -934,6 +936,9 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     }
     if (style != null && paintArgument.style != style) {
       throw 'It called $methodName with a paint whose style, ${paintArgument.style}, was not exactly the expected style ($style).';
+    }
+    if(strokeCap != null && paintArgument.strokeCap != strokeCap) {
+      throw 'It called $methodName with a paint whose strokeCap, ${paintArgument.strokeCap}, was not exactly the expected strokeCap ($strokeCap).';
     }
   }
 
@@ -1268,8 +1273,8 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
 }
 
 class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
-  _ArcPaintPredicate({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style }) : super(
-    #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
+  _ArcPaintPredicate({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) : super(
+    #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, strokeCap: strokeCap,
   );
 }
 
