@@ -685,9 +685,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // Returns the delta that should result from applying [event] with axis and
   // direction taken into account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    double delta = widget.axis == Axis.horizontal
-      ? event.scrollDelta.dx
-      : event.scrollDelta.dy;
+    double delta = event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
