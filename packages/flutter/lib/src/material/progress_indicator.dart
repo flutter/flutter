@@ -49,6 +49,7 @@ abstract class ProgressIndicator extends StatefulWidget {
     this.valueColor,
     this.semanticsLabel,
     this.semanticsValue,
+    this.strokeCap = StrokeCap.square,
   });
 
   /// If non-null, the value of this progress indicator.
@@ -107,6 +108,11 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// become '10%'.
   /// {@endtemplate}
   final String? semanticsValue;
+
+  /// The Progress Indicator's line endings
+  ///
+  /// Defaults to [StrokeCap.square]
+  final StrokeCap strokeCap;
 
   Color _getValueColor(BuildContext context) {
     return
@@ -385,6 +391,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     required this.offsetValue,
     required this.rotationValue,
     required this.strokeWidth,
+    required this.strokeCap,
   }) : arcStart = value != null
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
@@ -402,6 +409,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   final double strokeWidth;
   final double arcStart;
   final double arcSweep;
+  final StrokeCap strokeCap;
 
   static const double _twoPi = math.pi * 2.0;
   static const double _epsilon = .001;
@@ -423,9 +431,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
     }
 
-    if (value == null) { // Indeterminate
-      paint.strokeCap = StrokeCap.square;
-    }
+    paint.strokeCap = strokeCap;
 
     canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
   }
@@ -488,6 +494,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     super.semanticsLabel,
     super.semanticsValue,
+    super.strokeCap,
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
@@ -506,6 +513,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     super.semanticsLabel,
     super.semanticsValue,
+    super.strokeCap,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
@@ -599,6 +607,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
             offsetValue: offsetValue,
             rotationValue: rotationValue,
             strokeWidth: widget.strokeWidth,
+            strokeCap: widget.strokeCap,
           ),
         ),
       ),
@@ -658,6 +667,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     required super.rotationValue,
     required super.strokeWidth,
     required this.arrowheadScale,
+    required super.strokeCap,
   });
 
   final double arrowheadScale;
@@ -727,6 +737,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     super.strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
     super.semanticsLabel,
     super.semanticsValue,
+    super.strokeCap,
   });
 
   /// Default stroke width.
@@ -856,6 +867,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
                     rotationValue: rotationValue,
                     strokeWidth: widget.strokeWidth,
                     arrowheadScale: arrowheadScale,
+                    strokeCap: widget.strokeCap,
                   ),
                 ),
               ),
