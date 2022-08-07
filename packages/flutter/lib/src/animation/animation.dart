@@ -233,8 +233,6 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///   .drive(Animatable<Color>.fromCallback((double value) {
   ///     return Color.fromRGBO(value.round() % 255, 0, 0, 1);
   ///   }));
-  ///
-  ///
   /// ```
   ///
   /// {@end-tool}
