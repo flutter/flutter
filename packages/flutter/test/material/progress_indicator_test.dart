@@ -390,7 +390,7 @@ void main() {
     expect(layers1, isNot(equals(layers2)));
   });
 
-  testWidgets('CircularProgressIndicator stoke width', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator stroke width', (WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator());
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
