@@ -24,10 +24,10 @@ const double _kCaretHeightOffset = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
-const EdgeInsets _kFloatingCaretSizeIncrease = EdgeInsets.symmetric(horizontal: 0.5, vertical: 1.0);
+const EdgeInsets _kFloatingCursorSizeIncrease = EdgeInsets.symmetric(horizontal: 0.5, vertical: 1.0);
 
 // The corner radius of the floating cursor in pixels.
-const Radius _kFloatingCaretRadius = Radius.circular(1.0);
+const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
@@ -2418,8 +2418,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _floatingCursorTextPosition = lastTextPosition;
       final double? animationValue = _resetFloatingCursorAnimationValue;
       final EdgeInsets sizeAdjustment = animationValue != null
-        ? EdgeInsets.lerp(_kFloatingCaretSizeIncrease, EdgeInsets.zero, animationValue)!
-        : _kFloatingCaretSizeIncrease;
+        ? EdgeInsets.lerp(_kFloatingCursorSizeIncrease, EdgeInsets.zero, animationValue)!
+        : _kFloatingCursorSizeIncrease;
       _caretPainter.floatingCursorRect = sizeAdjustment.inflateRect(_caretPrototype).shift(boundedOffset);
     } else {
       _caretPainter.floatingCursorRect = null;
@@ -2970,7 +2970,7 @@ class _CaretPainter extends RenderEditablePainter {
     }
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(floatingCursorRect.shift(renderEditable._paintOffset), _kFloatingCaretRadius),
+      RRect.fromRectAndRadius(floatingCursorRect.shift(renderEditable._paintOffset), _kFloatingCursorRadius),
       floatingCursorPaint..color = floatingCursorColor,
     );
   }
