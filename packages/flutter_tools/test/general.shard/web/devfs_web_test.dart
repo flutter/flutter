@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'dart:io' hide Directory, File;
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,13 +11,16 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:logging/logging.dart' as logging;
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
@@ -67,10 +68,10 @@ void main() {
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
-        fileSystem: null,
-        flutterRoot: null,
-        platform: null,
-        webBuildDirectory: null,
+        fileSystem: null, // ignore: avoid_redundant_argument_values
+        flutterRoot: null, // ignore: avoid_redundant_argument_values
+        platform: null, // ignore: avoid_redundant_argument_values
+        webBuildDirectory: null, // ignore: avoid_redundant_argument_values
         basePath: null,
       );
     }, overrides: <Type, Generator>{
@@ -661,7 +662,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -677,8 +678,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -721,6 +722,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: 'out.dill',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -773,7 +775,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -788,8 +790,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -832,6 +834,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: '',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -878,7 +881,7 @@ void main() {
       hostname: 'any',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -887,8 +890,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
@@ -913,7 +916,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -931,8 +934,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -956,7 +959,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -974,8 +977,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1066,7 +1069,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1077,8 +1080,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1120,7 +1123,20 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     FileSystem fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File dartPluginRegistrant,
   }) async {
     return output;
+  }
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
   }
 }

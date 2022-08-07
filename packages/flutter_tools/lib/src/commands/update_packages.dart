@@ -29,11 +29,11 @@ import '../runner/flutter_command.dart';
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
-  'flutter_template_images': '4.1.0', // Must always exactly match flutter_tools template.
+  'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
   // Could potentially break color scheme tests on upgrade,
   // so pin and manually update as needed.
-  'material_color_utilities': '0.1.5',
+  'material_color_utilities': '0.2.0',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1439,7 +1439,7 @@ String generateFakePubspec(
 /// It ends up holding the full graph of dependencies, and the version number for
 /// each one.
 class PubDependencyTree {
-  final Map<String, String?> _versions = <String, String>{};
+  final Map<String, String?> _versions = <String, String?>{};
   final Map<String, Set<String>> _dependencyTree = <String, Set<String>>{};
 
   /// Handles the output from "pub deps --style=compact".

@@ -12,8 +12,11 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/xcode_project_object_version_migration.dart';
+import '../migrations/xcode_script_build_phase_migration.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
+import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
@@ -45,6 +48,9 @@ Future<void> buildMacOS({
       globals.logger,
       globals.flutterUsage,
     ),
+    MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
+    XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
+    XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);

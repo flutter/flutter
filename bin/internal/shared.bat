@@ -11,7 +11,7 @@ REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
-SETLOCAL ENABLEDELAYEDEXPANSION
+SETLOCAL
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
@@ -84,11 +84,11 @@ GOTO :after_subroutine
   IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
-  IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
+  IF %dart_required_version% NEQ %dart_installed_version% GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
-  IF !stamp_value! NEQ !compilekey! GOTO do_snapshot
+  IF %stamp_value% NEQ %compilekey% GOTO do_snapshot
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
@@ -104,7 +104,7 @@ GOTO :after_subroutine
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
-    SET "update_dart_bin=!update_dart_bin:'=''!"
+    SET "update_dart_bin=%update_dart_bin:'=''%"
     REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
     REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
     REM no subsequent retries.
