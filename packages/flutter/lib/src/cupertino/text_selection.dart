@@ -202,6 +202,14 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     );
   }
 
+  /// Returns the offset from text selection handle to actual location in text line.
+  ///
+  /// To Cupertino text selection style,handle overlaps the text line, return [Offset.zero].
+  @override
+  Offset getOffsetFromHandleToTextPosition(Size handleSize) {
+    return Offset.zero;
+  }
+
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(

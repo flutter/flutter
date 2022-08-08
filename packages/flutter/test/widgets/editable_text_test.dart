@@ -12755,6 +12755,11 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     return Offset.zero;
   }
 
+  @override
+  Offset getOffsetFromHandleToTextPosition(Size handleSize) {
+    return Offset.zero;
+  }
+
   bool testCanCut = false;
   bool testCanCopy = false;
   bool testCanPaste = false;
@@ -12851,6 +12856,11 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   @override
   Size getHandleSize(double textLineHeight) {
     return Size.zero;
+  }
+
+  @override
+  Offset getOffsetFromHandleToTextPosition(Size handleSize) {
+    return Offset.zero;
   }
 
   @override

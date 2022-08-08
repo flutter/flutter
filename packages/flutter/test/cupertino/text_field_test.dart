@@ -59,6 +59,11 @@ class MockTextSelectionControls extends TextSelectionControls {
   Size getHandleSize(double textLineHeight) {
     throw UnimplementedError();
   }
+
+  @override
+  Offset getOffsetFromHandleToTextPosition(Size handleSize) {
+    throw UnimplementedError();
+  }
 }
 
 class PathBoundsMatcher extends Matcher {
