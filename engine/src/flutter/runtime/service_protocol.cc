@@ -40,6 +40,8 @@ const std::string_view
 const std::string_view
     ServiceProtocol::kRenderFrameWithRasterStatsExtensionName =
         "_flutter.renderFrameWithRasterStats";
+const std::string_view ServiceProtocol::kReloadAssetFonts =
+    "_flutter.reloadAssetFonts";
 
 static constexpr std::string_view kViewIdPrefx = "_flutterView/";
 static constexpr std::string_view kListViewsExtensionName =
@@ -60,6 +62,7 @@ ServiceProtocol::ServiceProtocol()
           kGetSkSLsExtensionName,
           kEstimateRasterCacheMemoryExtensionName,
           kRenderFrameWithRasterStatsExtensionName,
+          kReloadAssetFonts,
       }),
       handlers_mutex_(fml::SharedMutex::Create()) {}
 
