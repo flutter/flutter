@@ -42,6 +42,9 @@ std::optional<Rect> Entity::GetCoverage() const {
 }
 
 bool Entity::ShouldRender(const ISize& target_size) const {
+  if (BlendModeShouldCoverWholeScreen(blend_mode_)) {
+    return true;
+  }
   return contents_->ShouldRender(*this, target_size);
 }
 
@@ -71,6 +74,23 @@ void Entity::SetBlendMode(BlendMode blend_mode) {
 
 Entity::BlendMode Entity::GetBlendMode() const {
   return blend_mode_;
+}
+
+bool Entity::BlendModeShouldCoverWholeScreen(BlendMode blend_mode) {
+  switch (blend_mode) {
+    case BlendMode::kClear:
+    case BlendMode::kSource:
+    case BlendMode::kSourceIn:
+    case BlendMode::kDestinationIn:
+    case BlendMode::kSourceOut:
+    case BlendMode::kDestinationOut:
+    case BlendMode::kDestinationATop:
+    case BlendMode::kXor:
+    case BlendMode::kModulate:
+      return true;
+    default:
+      return false;
+  }
 }
 
 bool Entity::Render(const ContentContext& renderer,
