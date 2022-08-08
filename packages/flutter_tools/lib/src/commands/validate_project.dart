@@ -76,6 +76,7 @@ class ValidateProject {
       case StatusProjectValidator.error:
         icon = '[✗]';
         break;
+      case StatusProjectValidator.info:
       case StatusProjectValidator.success:
         icon = '[✓]';
         break;

@@ -71,7 +71,7 @@ void main() {
       const String expected = 'dep1, dep2 are not hosted';
       expect(result.length, 1);
       expect(result[0].value, expected);
-      expect(result[0].status, StatusProjectValidator.warning);
+      expect(result[0].status, StatusProjectValidator.info);
     });
   });
 }
