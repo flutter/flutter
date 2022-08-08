@@ -35,7 +35,6 @@ if (pluginsFile.exists()) {
     }
 }
 
-String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
         p.subprojects { sp ->
