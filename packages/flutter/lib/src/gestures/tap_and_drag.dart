@@ -42,6 +42,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   GestureTapAndDragCancelCallback? onCancel;
 
+  // Drag related state
+  late OffsetPair _initialPosition;
   _DragState _state = _DragState.ready;
 
   // For consecutive tap
@@ -123,11 +125,14 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
           primaryDelta: null,
           globalPosition: event.position,
           localPosition: event.localPosition,
+          offsetFromOrigin: event.position - _initialPosition.global,
+          localOffsetFromOrigin: event.localPosition - _initialPosition.local,
         );
         invokeCallback<void>('onUpdate', () => onUpdate!(details, _dragTapCount!));
       } else if (_state == _DragState.possible) {
         print('is zoom start ${event is PointerPanZoomStartEvent}');
         _state = _DragState.accepted;
+        _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
         DragStartDetails details = DragStartDetails(
           sourceTimeStamp: event.timeStamp,
           globalPosition: event.position,
