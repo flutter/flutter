@@ -10,6 +10,12 @@ import 'drag_details.dart';
 import 'recognizer.dart';
 import 'tap.dart' show TapUpDetails, TapDownDetails;
 
+enum _DragState {
+  ready,
+  possible,
+  accepted,
+}
+
 typedef GestureTapAndDragDownCallback  = void Function(TapDownDetails details, int tapCount);
 typedef GestureTapAndDragStartCallback = void Function(DragStartDetails details, int tapCount);
 typedef GestureTapAndDragUpdateCallback = void Function(DragUpdateDetails details, int tapCount);
@@ -36,6 +42,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   GestureTapAndDragCancelCallback? onCancel;
 
+  _DragState _state = _DragState.ready;
+
   // For consecutive tap
   RestartableTimer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
@@ -52,6 +60,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _consecutiveTapTimeout() {
+    print('consecutive tap timeout');
     _consecutiveTapTimer = null;
     _lastTapOffset = null;
     _tapCount = 0;
@@ -72,7 +81,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void acceptGesture(int pointer) {
     // TODO: implement acceptGesture
-    print(pointer);
+    print('accept gesture $pointer');
   }
 
   @override
@@ -83,9 +92,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
   void handleEvent(PointerEvent event) {
     if (event is PointerDownEvent) {
       print('handle PointerDownEvent $event');
-      // DragDownDetails details = DragDownDetails(globalPosition: event.position, localPosition: event.localPosition);
-      DragStartDetails details = DragStartDetails(
-        sourceTimeStamp: event.timeStamp,
+      _state = _DragState.possible;
+      TapDownDetails details = TapDownDetails(
         globalPosition: event.position,
         localPosition: event.localPosition,
         kind: getKindForPointer(event.pointer),
@@ -101,26 +109,40 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
         }
       }
 
-      invokeCallback<void>('onStart', () => onStart!(details, 0));
-    } else if (event is PointerMoveEvent) {
+      invokeCallback('onDown', () => onDown!(details, _tapCount));
+    } else if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       print('handle PointerMoveEvent $event');
-      DragUpdateDetails details =  DragUpdateDetails(
-        sourceTimeStamp: event.timeStamp,
-        delta: event.delta,
-        primaryDelta: null,
-        globalPosition: event.position,
-        localPosition: event.localPosition,
-      );
-      invokeCallback<void>('onUpdate', () => onUpdate!(details, 0));
+
+      if (_state == _DragState.accepted) {
+        DragUpdateDetails details =  DragUpdateDetails(
+          sourceTimeStamp: event.timeStamp,
+          delta: event.delta,
+          primaryDelta: null,
+          globalPosition: event.position,
+          localPosition: event.localPosition,
+        );
+        invokeCallback<void>('onUpdate', () => onUpdate!(details, _tapCount));
+      } else if (_state == _DragState.possible) {
+        _state = _DragState.accepted;
+        DragStartDetails details = DragStartDetails(
+          sourceTimeStamp: event.timeStamp,
+          globalPosition: event.position,
+          localPosition: event.localPosition,
+          kind: getKindForPointer(event.pointer),
+        );
+
+        invokeCallback<void>('onStart', () => onStart!(details, _tapCount));
+      }
     } else if (event is PointerUpEvent) {
       print('handle PointerUpEvent $event');
+      _state = _DragState.ready;
       TapUpDetails upDetails = TapUpDetails(
         kind: event.kind,
         globalPosition: event.position,
         localPosition: event.localPosition,
       );
       DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
-      invokeCallback<void>('onUpAndEnd', () => onUpAndEnd!(upDetails, endDetails, 0));
+      invokeCallback<void>('onUpAndEnd', () => onUpAndEnd!(upDetails, endDetails, _tapCount));
       _consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, _consecutiveTapTimeout);
     } else {
       print('handle unknown pointer $event');
@@ -134,6 +156,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void rejectGesture(int pointer) {
     // TODO: implement rejectGesture
-    print(pointer);
+    print('reject gesture $pointer');
   }
 }

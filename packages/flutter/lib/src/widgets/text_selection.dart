@@ -2712,16 +2712,12 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  // Counts down for a short duration after a previous tap. Null otherwise.
-  Timer? _doubleTapTimer;
-  Offset? _lastTapOffset;
   // True if a second tap down of a double tap is detected. Used to discard
   // subsequent tap up / tap hold of the same tap.
   bool _isDoubleTap = false;
 
   @override
   void dispose() {
-    _doubleTapTimer?.cancel();
     _dragUpdateThrottleTimer?.cancel();
     super.dispose();
   }
@@ -2735,25 +2731,18 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
-      // If there was already a previous tap, the second down hold/tap is a
-      // double tap down.
+    if (tapCount == 2) {
+      print('double tap');
       widget.onDoubleTapDown?.call(details);
-
-      _doubleTapTimer!.cancel();
-      _doubleTapTimeout();
-      _isDoubleTap = true;
     }
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    if (!_isDoubleTap) {
+  void _handleTapUp(TapUpDetails details, int tapCount) {
+    print('tap up');
+    if (tapCount != 2) {
+      print('running tap up');
       widget.onSingleTapUp?.call(details);
-      _lastTapOffset = details.globalPosition;
-      _doubleTapTimer?.cancel();
-      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
     }
-    _isDoubleTap = false;
   }
 
   void _handleTapCancel() {
@@ -2765,14 +2754,17 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   Timer? _dragUpdateThrottleTimer;
 
   void _handleDragStart(DragStartDetails details, int tapCount) {
+    print('drag start');
     assert(_lastDragStartDetails == null);
-    print(tapCount);
+    print('passed assert');
+    print('tap count $tapCount');
     _lastDragStartDetails = details;
     widget.onDragSelectionStart?.call(details);
   }
 
   void _handleDragUpdate(DragUpdateDetails details, int tapCount) {
-    print(tapCount);
+    print('drag update');
+    print('tap count $tapCount');
     _lastDragUpdateDetails = details;
     // Only schedule a new timer if there's no one pending.
     _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
@@ -2794,8 +2786,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _handleDragEnd(TapUpDetails upDetails, DragEndDetails endDetails, int tapCount) {
     assert(_lastDragStartDetails != null);
-    print(tapCount);
-    _handleTapUp(upDetails);
+    print('drag end');
+    print('tap count $tapCount');
+    _handleTapUp(upDetails, tapCount);
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
@@ -2809,8 +2802,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _forcePressStarted(ForcePressDetails details) {
-    _doubleTapTimer?.cancel();
-    _doubleTapTimer = null;
     widget.onForcePressStart?.call(details);
   }
 
@@ -2819,37 +2810,28 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
+    print('long press start');
     if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+      print('long press start run');
       widget.onSingleLongTapStart!(details);
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    print('long press update');
     if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
+      print('long press update run');
       widget.onSingleLongTapMoveUpdate!(details);
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
+    print('long press end');
     if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
+      print('long press end run');
       widget.onSingleLongTapEnd!(details);
     }
     _isDoubleTap = false;
-  }
-
-  void _doubleTapTimeout() {
-    _doubleTapTimer = null;
-    _lastTapOffset = null;
-  }
-
-  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
-    assert(secondTapOffset != null);
-    if (_lastTapOffset == null) {
-      return false;
-    }
-
-    final Offset difference = secondTapOffset - _lastTapOffset!;
-    return difference.distance <= kDoubleTapSlop;
   }
 
   @override
