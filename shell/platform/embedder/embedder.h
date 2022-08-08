@@ -2510,6 +2510,26 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineScheduleFrame(FLUTTER_API_SYMBOL(FlutterEngine)
                                                    engine);
 
+//------------------------------------------------------------------------------
+/// @brief      Schedule a callback to be called after the next frame is drawn.
+///             This must be called from the platform thread. The callback is
+///             executed only once from the raster thread; embedders must
+///             re-thread if necessary. Performing blocking calls
+///             in this callback may introduce application jank.
+///
+/// @param[in]  engine     A running engine instance.
+/// @param[in]  callback   The callback to execute.
+/// @param[in]  user_data  A baton passed by the engine to the callback. This
+///                        baton is not interpreted by the engine in any way.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSetNextFrameCallback(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    VoidCallback callback,
+    void* user_data);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -2628,6 +2648,10 @@ typedef FlutterEngineResult (*FlutterEngineNotifyDisplayUpdateFnPtr)(
     size_t display_count);
 typedef FlutterEngineResult (*FlutterEngineScheduleFrameFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine);
+typedef FlutterEngineResult (*FlutterEngineSetNextFrameCallbackFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    VoidCallback callback,
+    void* user_data);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -2673,6 +2697,7 @@ typedef struct {
       PostCallbackOnAllNativeThreads;
   FlutterEngineNotifyDisplayUpdateFnPtr NotifyDisplayUpdate;
   FlutterEngineScheduleFrameFnPtr ScheduleFrame;
+  FlutterEngineSetNextFrameCallbackFnPtr SetNextFrameCallback;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

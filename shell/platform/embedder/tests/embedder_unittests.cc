@@ -2126,6 +2126,44 @@ TEST_F(EmbedderTest, CanScheduleFrame) {
   check_latch.Wait();
 }
 
+TEST_F(EmbedderTest, CanSetNextFrameCallback) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Register the callback that is executed once the next frame is drawn.
+  fml::AutoResetWaitableEvent callback_latch;
+  VoidCallback callback = [](void* user_data) {
+    fml::AutoResetWaitableEvent* callback_latch =
+        static_cast<fml::AutoResetWaitableEvent*>(user_data);
+
+    callback_latch->Signal();
+  };
+
+  auto result = FlutterEngineSetNextFrameCallback(engine.get(), callback,
+                                                  &callback_latch);
+  ASSERT_EQ(result, kSuccess);
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  callback_latch.Wait();
+}
+
 #if defined(FML_OS_MACOSX)
 
 static void MockThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
