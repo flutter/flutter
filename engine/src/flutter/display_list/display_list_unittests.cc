@@ -21,6 +21,17 @@ namespace testing {
 static std::vector<testing::DisplayListInvocationGroup> allGroups =
     CreateAllGroups();
 
+#ifndef NDEBUG
+TEST(DisplayList, CallMethodAfterBuild) {
+  DisplayListCanvasRecorder recorder(kTestBounds);
+  recorder.drawRect(kTestBounds, SkPaint());
+  recorder.Build();
+  EXPECT_DEATH_IF_SUPPORTED(
+      recorder.drawRect(kTestBounds, SkPaint()),
+      "Calling method on DisplayListCanvasRecorder after Build\\(\\)");
+}
+#endif  // NDEBUG
+
 TEST(DisplayList, SingleOpSizes) {
   for (auto& group : allGroups) {
     for (size_t i = 0; i < group.variants.size(); i++) {
