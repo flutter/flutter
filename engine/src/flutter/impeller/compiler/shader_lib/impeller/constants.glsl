@@ -6,5 +6,6 @@
 #define CONSTANTS_GLSL_
 
 const float kEhCloseEnough = 0.000001;
+const float k1Over2Pi = 0.1591549430918;
 
 #endif

@@ -18,6 +18,7 @@
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
+#include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -254,7 +255,7 @@ void DisplayListDispatcher::setColorSource(
     case flutter::DlColorSourceType::kRadialGradient: {
       const flutter::DlRadialGradientColorSource* radialGradient =
           source->asRadialGradient();
-      FML_CHECK(radialGradient);
+      FML_DCHECK(radialGradient);
       auto contents = std::make_shared<RadialGradientContents>();
       contents->SetCenterAndRadius(ToPoint(radialGradient->center()),
                                    radialGradient->radius());
@@ -268,9 +269,26 @@ void DisplayListDispatcher::setColorSource(
       paint_.contents = std::move(contents);
       return;
     }
+    case flutter::DlColorSourceType::kSweepGradient: {
+      const flutter::DlSweepGradientColorSource* sweepGradient =
+          source->asSweepGradient();
+      FML_DCHECK(sweepGradient);
+      auto contents = std::make_shared<SweepGradientContents>();
+      contents->SetCenterAndAngles(ToPoint(sweepGradient->center()),
+                                   Degrees(sweepGradient->start()),
+                                   Degrees(sweepGradient->end()));
+      std::vector<Color> colors;
+      for (auto i = 0; i < sweepGradient->stop_count(); i++) {
+        colors.emplace_back(ToColor(sweepGradient->colors()[i]));
+      }
+      contents->SetColors(std::move(colors));
+      contents->SetTileMode(
+          static_cast<Entity::TileMode>(sweepGradient->tile_mode()));
+      paint_.contents = std::move(contents);
+      return;
+    }
     case flutter::DlColorSourceType::kImage:
     case flutter::DlColorSourceType::kConicalGradient:
-    case flutter::DlColorSourceType::kSweepGradient:
     case flutter::DlColorSourceType::kUnknown:
       UNIMPLEMENTED;
       break;

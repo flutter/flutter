@@ -155,6 +155,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<SolidFillPipeline>(*context_);
   radial_gradient_fill_pipelines_[{}] =
       CreateDefaultPipeline<RadialGradientFillPipeline>(*context_);
+  sweep_gradient_fill_pipelines_[{}] =
+      CreateDefaultPipeline<SweepGradientFillPipeline>(*context_);
   rrect_blur_pipelines_[{}] =
       CreateDefaultPipeline<RRectBlurPipeline>(*context_);
   texture_blend_pipelines_[{}] =

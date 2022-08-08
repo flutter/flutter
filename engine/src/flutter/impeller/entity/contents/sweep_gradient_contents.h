@@ -14,14 +14,15 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
-class RadialGradientContents final : public PathContents {
+class SweepGradientContents final : public PathContents {
  public:
-  RadialGradientContents();
+  SweepGradientContents();
 
-  ~RadialGradientContents() override;
+  ~SweepGradientContents() override;
 
   void SetPath(Path path) override;
 
@@ -33,7 +34,7 @@ class RadialGradientContents final : public PathContents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  void SetCenterAndRadius(Point center, Scalar radius);
+  void SetCenterAndAngles(Point center, Degrees start_angle, Degrees end_angle);
 
   void SetColors(std::vector<Color> colors);
 
@@ -44,11 +45,12 @@ class RadialGradientContents final : public PathContents {
  private:
   Path path_;
   Point center_;
-  Scalar radius_;
+  Scalar bias_;
+  Scalar scale_;
   std::vector<Color> colors_;
   Entity::TileMode tile_mode_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RadialGradientContents);
+  FML_DISALLOW_COPY_AND_ASSIGN(SweepGradientContents);
 };
 
 }  // namespace impeller

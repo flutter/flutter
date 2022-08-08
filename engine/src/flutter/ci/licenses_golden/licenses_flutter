@@ -581,6 +581,8 @@ FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.h
 FILE: ../../../flutter/impeller/entity/contents/solid_stroke_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/solid_stroke_contents.h
+FILE: ../../../flutter/impeller/entity/contents/sweep_gradient_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/sweep_gradient_contents.h
 FILE: ../../../flutter/impeller/entity/contents/text_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/text_contents.h
 FILE: ../../../flutter/impeller/entity/contents/texture_contents.cc
@@ -635,6 +637,8 @@ FILE: ../../../flutter/impeller/entity/shaders/solid_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/solid_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/solid_stroke.frag
 FILE: ../../../flutter/impeller/entity/shaders/solid_stroke.vert
+FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_fill.frag
+FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/vertices.frag
