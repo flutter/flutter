@@ -64,14 +64,16 @@ class SliverGridGeometry {
   /// required size.
   ///
   /// If the [mainAxisExtent] is [double.infinity] the child will be allowed to
-  /// chose its own size in the main axis. An infinite [crossAxisExtent] will
-  /// result in the child having a max cross axis size of the provided
-  /// [SliverConstraints.crossAxisExtent].
+  /// chose its own size in the main axis. Similarly, an infinite
+  /// [crossAxisExtent] will result in the child sizing itself in the cross
+  /// axis. Otherwise, the provided cross axis size or the
+  /// [SliverConstraints.crossAxisExtent] will be used to create tight
+  /// constraints in the cross axis.
   BoxConstraints getBoxConstraints(SliverConstraints constraints) {
     return constraints.asBoxConstraints(
       minExtent: mainAxisExtent.isFinite ? mainAxisExtent : 0,
       maxExtent: mainAxisExtent,
-      crossAxisExtent: crossAxisExtent.isFinite ? crossAxisExtent : null,
+      crossAxisExtent: crossAxisExtent,
     );
   }
 
@@ -133,30 +135,32 @@ abstract class SliverGridLayout {
   /// offset.
   /// TODO(Piinks): Add more docs - only used for fixed layouts
   int getMinChildIndexForScrollOffset(double scrollOffset) {
-    assert(
-      layoutType == SliverGridLayoutType.fixed,
-      'This method is only used for fixed layouts that know all of the child '
-      'positioning ahead of time.',
-    );
-    throw UnimplementedError(
-      'A SliverGridLayoutType.fixed requires getMinChildIndexForScrollOffset to be '
-      'implemented, returning the child index for the given scrollOffset.',
-    );
+    return 0;
+    // assert(
+    //   layoutType == SliverGridLayoutType.fixed,
+    //   'This method is only used for fixed layouts that know all of the child '
+    //   'positioning ahead of time.',
+    // );
+    // throw UnimplementedError(
+    //   'A SliverGridLayoutType.fixed requires getMinChildIndexForScrollOffset to be '
+    //   'implemented, returning the child index for the given scrollOffset.',
+    // );
   }
 
   /// The maximum child index that intersects with (or is before) this scroll
   /// offset.
   /// TODO(Piinks): Add more docs - only used for fixed layouts
   int getMaxChildIndexForScrollOffset(double scrollOffset) {
-    assert(
-      layoutType == SliverGridLayoutType.fixed,
-      'This method is only used for fixed layouts that know all of the child '
-      'positioning ahead of time.',
-    );
-    throw UnimplementedError(
-      'A SliverGridLayoutType.fixed requires getMaxChildIndexForScrollOffset to be '
-      'implemented, returning the child index for the given scrollOffset.',
-    );
+    return 0;
+    // assert(
+    //   layoutType == SliverGridLayoutType.fixed,
+    //   'This method is only used for fixed layouts that know all of the child '
+    //   'positioning ahead of time.',
+    // );
+    // throw UnimplementedError(
+    //   'A SliverGridLayoutType.fixed requires getMaxChildIndexForScrollOffset to be '
+    //   'implemented, returning the child index for the given scrollOffset.',
+    // );
   }
 
   /// The  estimated size and position of the child with the given index.

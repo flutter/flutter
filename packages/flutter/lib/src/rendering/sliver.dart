@@ -369,12 +369,14 @@ class SliverConstraints extends Constraints {
         && remainingPaintExtent >= 0.0;
   }
 
-  /// Returns [BoxConstraints] that reflects the sliver constraints.
+  /// Returns [BoxConstraints] that reflect the sliver constraints.
   ///
   /// The `minExtent` and `maxExtent` are used as the constraints in the main
-  /// axis. If non-null, the given `crossAxisExtent` is used as a tight
-  /// constraint in the cross axis. Otherwise, the [crossAxisExtent] from this
-  /// object is used as a constraint in the cross axis.
+  /// axis. If non-null, and the given `crossAxisExtent` is finite, it is used
+  /// as a tight constraint in the cross axis. When [double.infinity], the
+  /// constraints will be loose in the cross axis. If the provided
+  /// `crossAxisExtent` is null, the [crossAxisExtent] from this object is used
+  /// as a tight constraint in the cross axis.
   ///
   /// Useful for slivers that have [RenderBox] children.
   BoxConstraints asBoxConstraints({
@@ -382,19 +384,27 @@ class SliverConstraints extends Constraints {
     double maxExtent = double.infinity,
     double? crossAxisExtent,
   }) {
-    crossAxisExtent ??= this.crossAxisExtent;
+    late double minCrossAxisExtent;
+    late double maxCrossAxisExtent;
+    if (crossAxisExtent == null) {
+      minCrossAxisExtent = this.crossAxisExtent;
+      maxCrossAxisExtent = this.crossAxisExtent;
+    } else {
+      minCrossAxisExtent = crossAxisExtent.isInfinite ? 0.0 : crossAxisExtent;
+      maxCrossAxisExtent = crossAxisExtent;
+    }
     switch (axis) {
       case Axis.horizontal:
         return BoxConstraints(
-          minHeight: crossAxisExtent,
-          maxHeight: crossAxisExtent,
+          minHeight: minCrossAxisExtent,
+          maxHeight: maxCrossAxisExtent,
           minWidth: minExtent,
           maxWidth: maxExtent,
         );
       case Axis.vertical:
         return BoxConstraints(
-          minWidth: crossAxisExtent,
-          maxWidth: crossAxisExtent,
+          minWidth: minCrossAxisExtent,
+          maxWidth: maxCrossAxisExtent,
           minHeight: minExtent,
           maxHeight: maxExtent,
         );
