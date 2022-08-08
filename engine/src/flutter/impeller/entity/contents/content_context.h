@@ -48,6 +48,8 @@
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/entity/solid_stroke.frag.h"
 #include "impeller/entity/solid_stroke.vert.h"
+#include "impeller/entity/sweep_gradient_fill.frag.h"
+#include "impeller/entity/sweep_gradient_fill.vert.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/vertices.frag.h"
@@ -62,6 +64,8 @@ using SolidFillPipeline =
     PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 using RadialGradientFillPipeline =
     PipelineT<RadialGradientFillVertexShader, RadialGradientFillFragmentShader>;
+using SweepGradientFillPipeline =
+    PipelineT<SweepGradientFillVertexShader, SweepGradientFillFragmentShader>;
 using BlendPipeline = PipelineT<BlendVertexShader, BlendFragmentShader>;
 using RRectBlurPipeline =
     PipelineT<RrectBlurVertexShader, RrectBlurFragmentShader>;
@@ -151,6 +155,7 @@ class ContentContext {
       ContentContextOptions opts) const {
     return GetPipeline(gradient_fill_pipelines_, opts);
   }
+
   std::shared_ptr<Pipeline> GetRadialGradientFillPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(radial_gradient_fill_pipelines_, opts);
@@ -158,6 +163,11 @@ class ContentContext {
   std::shared_ptr<Pipeline> GetRRectBlurPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(rrect_blur_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline> GetSweepGradientFillPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(sweep_gradient_fill_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline> GetSolidFillPipeline(
@@ -309,6 +319,7 @@ class ContentContext {
   mutable Variants<GradientFillPipeline> gradient_fill_pipelines_;
   mutable Variants<SolidFillPipeline> solid_fill_pipelines_;
   mutable Variants<RadialGradientFillPipeline> radial_gradient_fill_pipelines_;
+  mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
   mutable Variants<BlendPipeline> texture_blend_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;
