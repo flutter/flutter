@@ -694,7 +694,7 @@ void main() {
     );
     const String toolExitMessage = '''
 pub get failed
-command: "bin/cache/dart-sdk/bin/dart __deprecated_pub --verbosity=warning get --no-precompile"
+command: "bin/cache/dart-sdk/bin/dart __deprecated_pub --directory . get --example"
 pub env: {
   "FLUTTER_ROOT": "",
   "PUB_ENVIRONMENT": "flutter_cli:flutter_tests",
@@ -748,7 +748,7 @@ last line of pub output: "err3"
             'bin/cache/dart-sdk/bin/dart',
             <String>[
               '__deprecated_pub',
-                  '--directory',
+              '--directory',
               '.',
               'get',
               '--example',
@@ -871,9 +871,10 @@ last line of pub output: "err3"
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
-          '--verbosity=warning',
+          '--directory',
+          '.',
           'get',
-          '--no-precompile',
+          '--example',
         ],
         exitCode: 69,
         environment: <String, String>{

@@ -379,14 +379,16 @@ class _DefaultPub implements Pub {
     final Status? status = printProgress
       ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',)
       : null;
+    final pubCommand = _pubCommand(arguments);
+    final pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
     try {
       do {
         output = <_OutputLine>[];
         attempts += 1;
         final io.Process process = await _processUtils.start(
-          _pubCommand(arguments),
+          pubCommand,
           workingDirectory: _fileSystem.path.current,
-          environment: await _createPubEnvironment(context, flutterRootOverride),
+          environment: pubEnvironment,
         );
         final StreamSubscription<String> stdoutSubscription =
           recordLines(process.stdout, _OutputStream.stdout);
@@ -458,7 +460,15 @@ class _DefaultPub implements Pub {
     final String lastPubMessage = output.isEmpty ? 'no message' : output.last.line;
 
     if (code != 0) {
-      throwToolExit('$failureMessage ($code; $lastPubMessage)', exitCode: code);
+      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      buffer.writeln('command: "${pubCommand.join(' ')}"');
+      buffer.write(_stringifyPubEnv(pubEnvironment));
+      buffer.writeln('exit code: $code');
+      buffer.writeln('last line of pub output: "${lastPubMessage.trim()}"');
+      throwToolExit(
+        buffer.toString(),
+        exitCode: code,
+      );
     }
   }
 
