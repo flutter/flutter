@@ -2683,6 +2683,36 @@ FlutterEngineResult FlutterEngineScheduleFrame(FLUTTER_API_SYMBOL(FlutterEngine)
                                   "Could not schedule frame.");
 }
 
+FlutterEngineResult FlutterEngineSetNextFrameCallback(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    VoidCallback callback,
+    void* user_data) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  if (callback == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Next frame callback was null.");
+  }
+
+  flutter::EmbedderEngine* embedder_engine =
+      reinterpret_cast<flutter::EmbedderEngine*>(engine);
+
+  fml::WeakPtr<flutter::PlatformView> weak_platform_view =
+      embedder_engine->GetShell().GetPlatformView();
+
+  if (!weak_platform_view) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Platform view unavailable.");
+  }
+
+  weak_platform_view->SetNextFrameCallback(
+      [callback, user_data]() { callback(user_data); });
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -2734,6 +2764,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
            FlutterEnginePostCallbackOnAllNativeThreads);
   SET_PROC(NotifyDisplayUpdate, FlutterEngineNotifyDisplayUpdate);
   SET_PROC(ScheduleFrame, FlutterEngineScheduleFrame);
+  SET_PROC(SetNextFrameCallback, FlutterEngineSetNextFrameCallback);
 #undef SET_PROC
 
   return kSuccess;
