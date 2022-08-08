@@ -14,6 +14,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain_details_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -26,6 +27,10 @@ static std::set<std::string> kRequiredDeviceExtensions = {
     "VK_KHR_portability_subset",  // For Molten VK. No define present in header.
 #endif
 };
+
+#if FML_OS_MACOSX
+static const char* MVK_MACOS_SURFACE_EXT = "VK_MVK_macos_surface";
+#endif
 
 static bool HasRequiredQueues(const vk::PhysicalDevice& device) {
   auto present_flags = vk::QueueFlags{};
@@ -205,6 +210,14 @@ ContextVK::ContextVK(
   // is a requirement for opting into Molten VK on Mac.
   enabled_extensions.push_back(
       VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+
+  // Required for glfw macOS surfaces.
+  if (!capabilities->HasExtension(MVK_MACOS_SURFACE_EXT)) {
+    VALIDATION_LOG << "On Mac: Required extension " << MVK_MACOS_SURFACE_EXT
+                   << " absent.";
+    return;
+  }
+  enabled_extensions.push_back(MVK_MACOS_SURFACE_EXT);
 #endif  // FML_OS_MACOSX
 
   //----------------------------------------------------------------------------
@@ -307,6 +320,8 @@ ContextVK::ContextVK(
       PickQueue(physical_device.value(), vk::QueueFlagBits::eTransfer);
   auto compute_queue =
       PickQueue(physical_device.value(), vk::QueueFlagBits::eCompute);
+
+  physical_device_ = physical_device.value();
 
   if (!graphics_queue.has_value() || !transfer_queue.has_value() ||
       !compute_queue.has_value()) {
@@ -421,6 +436,20 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateRenderCommandBuffer() const {
 
 std::shared_ptr<CommandBuffer> ContextVK::CreateTransferCommandBuffer() const {
   FML_UNREACHABLE();
+}
+
+vk::Instance ContextVK::GetInstance() const {
+  return *instance_;
+}
+
+std::unique_ptr<impeller::SwapchainVK> ContextVK::CreateSwapchain(
+    vk::SurfaceKHR surface) const {
+  auto swapchain_details =
+      SwapchainDetailsVK::Create(physical_device_, surface);
+  if (!swapchain_details) {
+    return nullptr;
+  }
+  return SwapchainVK::Create(*device_, surface, *swapchain_details);
 }
 
 }  // namespace impeller
