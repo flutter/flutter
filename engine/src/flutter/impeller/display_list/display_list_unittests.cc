@@ -297,12 +297,14 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     }
 
     static float sigma[] = {10, 10};
+    static float ctm_scale = 1;
     static bool use_bounds = true;
     static bool draw_circle = true;
     static bool add_clip = true;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat2("Sigma", sigma, 0, 100);
+    ImGui::SliderFloat("Scale", &ctm_scale, 0, 10);
     ImGui::NewLine();
     ImGui::TextWrapped(
         "If everything is working correctly, none of the options below should "
@@ -314,7 +316,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
 
     flutter::DisplayListBuilder builder;
 
-    Vector2 scale = GetContentScale();
+    Vector2 scale = ctm_scale * GetContentScale();
     builder.scale(scale.x, scale.y);
 
     auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
