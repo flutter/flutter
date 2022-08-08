@@ -714,6 +714,17 @@ class Shell final : public PlatformView::Delegate,
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
 
+  // Service protocol handler
+  //
+  // Forces the FontCollection to reload the font manifest. Used to support hot
+  // reload for fonts.
+  bool OnServiceProtocolReloadAssetFonts(
+      const ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document* response);
+
+  // Send a system font change notification.
+  void SendFontChangeNotification();
+
   // |ResourceCacheLimitItem|
   size_t GetResourceCacheLimit() override { return resource_cache_limit_; };
 

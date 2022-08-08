@@ -454,6 +454,10 @@ Shell::Shell(DartVMRef vm,
           task_runners_.GetRasterTaskRunner(),
           std::bind(&Shell::OnServiceProtocolRenderFrameWithRasterStats, this,
                     std::placeholders::_1, std::placeholders::_2)};
+  service_protocol_handlers_[ServiceProtocol::kReloadAssetFonts] = {
+      task_runners_.GetPlatformTaskRunner(),
+      std::bind(&Shell::OnServiceProtocolReloadAssetFonts, this,
+                std::placeholders::_1, std::placeholders::_2)};
 }
 
 Shell::~Shell() {
@@ -1900,6 +1904,45 @@ bool Shell::OnServiceProtocolRenderFrameWithRasterStats(
   }
 }
 
+void Shell::SendFontChangeNotification() {
+  // After system fonts are reloaded, we send a system channel message
+  // to notify flutter framework.
+  rapidjson::Document document;
+  document.SetObject();
+  auto& allocator = document.GetAllocator();
+  rapidjson::Value message_value;
+  message_value.SetString(kFontChange, allocator);
+  document.AddMember(kTypeKey, message_value, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  document.Accept(writer);
+  std::string message = buffer.GetString();
+  std::unique_ptr<PlatformMessage> fontsChangeMessage =
+      std::make_unique<flutter::PlatformMessage>(
+          kSystemChannel,
+          fml::MallocMapping::Copy(message.c_str(), message.length()), nullptr);
+  OnPlatformViewDispatchPlatformMessage(std::move(fontsChangeMessage));
+}
+
+bool Shell::OnServiceProtocolReloadAssetFonts(
+    const ServiceProtocol::Handler::ServiceProtocolMap& params,
+    rapidjson::Document* response) {
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  if (!engine_) {
+    return false;
+  }
+  engine_->GetFontCollection().RegisterFonts(engine_->GetAssetManager());
+  engine_->GetFontCollection().GetFontCollection()->ClearFontFamilyCache();
+  SendFontChangeNotification();
+
+  auto& allocator = response->GetAllocator();
+  response->SetObject();
+  response->AddMember("type", "Success", allocator);
+
+  return true;
+}
+
 Rasterizer::Screenshot Shell::Screenshot(
     Rasterizer::ScreenshotType screenshot_type,
     bool base64_encode) {
@@ -1962,23 +2005,7 @@ bool Shell::ReloadSystemFonts() {
   engine_->GetFontCollection().GetFontCollection()->ClearFontFamilyCache();
   // After system fonts are reloaded, we send a system channel message
   // to notify flutter framework.
-  rapidjson::Document document;
-  document.SetObject();
-  auto& allocator = document.GetAllocator();
-  rapidjson::Value message_value;
-  message_value.SetString(kFontChange, allocator);
-  document.AddMember(kTypeKey, message_value, allocator);
-
-  rapidjson::StringBuffer buffer;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-  document.Accept(writer);
-  std::string message = buffer.GetString();
-  std::unique_ptr<PlatformMessage> fontsChangeMessage =
-      std::make_unique<flutter::PlatformMessage>(
-          kSystemChannel,
-          fml::MallocMapping::Copy(message.c_str(), message.length()), nullptr);
-
-  OnPlatformViewDispatchPlatformMessage(std::move(fontsChangeMessage));
+  SendFontChangeNotification();
   return true;
 }
 
