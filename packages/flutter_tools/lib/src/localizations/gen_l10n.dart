@@ -811,6 +811,10 @@ class LocalizationsGenerator {
     return _allBundles.bundles.map((AppResourceBundle bundle) => bundle.file.path).toList();
   }
 
+  List<String> get outputFileList {
+    return _outputFileList;
+  }
+
   /// The supported language codes as found in the arb files located in
   /// [inputDirectory].
   final Set<String> supportedLanguageCodes = <String>{};
@@ -1339,7 +1343,7 @@ class LocalizationsGenerator {
         || message.placeholdersRequireFormatting;
   });
 
-  void writeOutputFiles({ bool isFromYaml = false }) {
+  List<String> writeOutputFiles({ bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1422,6 +1426,8 @@ class LocalizationsGenerator {
         }),
       );
     }
+
+    return _outputFileList;
   }
 
   void _generateUntranslatedMessagesFile(Logger logger, File untranslatedMessagesFile) {
