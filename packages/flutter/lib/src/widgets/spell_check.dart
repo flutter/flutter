@@ -92,13 +92,13 @@ class SpellCheckConfiguration {
 /// replacement suggestions for misspelled words are displayed via menu.
 ///
 /// Any widget may use this handler to build a [TextSpan] tree with
-/// [SpellCheckResults] indicated in a style based on the platform by calling
-/// `buildTextSpanWithSpellCheckSuggestions(...)`.
+/// [SpellCheckResults] by calling
+/// `SpellCheckSuggestionsHandler.buildTextSpanWithSpellCheckSuggestions(...)`.
 ///
 /// See also:
 ///
 ///  * [EditableText], which uses this handler to display spell check results
-///     by if spell check is enabled.
+///    if spell check is enabled.
 class SpellCheckSuggestionsHandler {
   /// Creates a handler to use for spell checking text input based on the
   /// provided platform.

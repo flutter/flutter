@@ -1796,11 +1796,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Configuration that determines how spell check will be performed.
   ///
-  /// This configuration will attempt to provide a default for the
-  /// [SpellCheckService] if it is not specified.
+  /// If possible, this configuration will contain a default for the
+  /// [SpellCheckService] if it is not otherwise specified.
   ///
   /// See also:
-  ///  * [DefaultSpellCheckService], the default spell check service.
+  ///  * [DefaultSpellCheckService], the spell check service used by default.
   @visibleForTesting
   SpellCheckConfiguration get spellCheckConfiguration => _spellCheckConfiguration;
 
@@ -2004,21 +2004,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  // State lifecycle:
-
-  @override
-  void initState() {
-    super.initState();
-    _clipboardStatus?.addListener(_onChangedClipboardStatus);
-    widget.controller.addListener(_didChangeTextEditingValue);
-    widget.focusNode.addListener(_handleFocusChanged);
-    _scrollController.addListener(_updateSelectionOverlayForScroll);
-    _cursorVisibilityNotifier.value = widget.showCursor;
-    _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
-  }
-
+  /// Infers the [SpellCheckConfiguration] used to perform spell check.
+  ///
   /// If spell check is enabled, this will try to infer a value for
-  /// [SpellCheckService] if left unspecified.
+  /// the [SpellCheckService] if left unspecified.
   SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
       return const SpellCheckConfiguration.disabled();
@@ -2035,6 +2024,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     spellCheckService = spellCheckService ?? DefaultSpellCheckService();
 
     return configuration.copyWith(spellCheckService: spellCheckService);
+  }
+
+  // State lifecycle:
+
+  @override
+  void initState() {
+    super.initState();
+    _clipboardStatus?.addListener(_onChangedClipboardStatus);
+    widget.controller.addListener(_didChangeTextEditingValue);
+    widget.focusNode.addListener(_handleFocusChanged);
+    _scrollController.addListener(_updateSelectionOverlayForScroll);
+    _cursorVisibilityNotifier.value = widget.showCursor;
+    _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
