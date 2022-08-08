@@ -25,7 +25,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
     required FileSystem fileSystem,
     required Logger logger,
-    required Artifacts artifacts,
+    Artifacts? artifacts,
     required ProcessManager processManager,
   }) :
     _fileSystem = fileSystem,
@@ -196,7 +196,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   final FileSystem _fileSystem;
   final Logger _logger;
-  final Artifacts _artifacts;
+  final Artifacts? _artifacts;
   final ProcessManager _processManager;
 
   @override
@@ -278,7 +278,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
     // All other post processing.
     if (boolArg('format') ?? false) {
-      final String dartBinary = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path; 
+      if (_artifacts == null) {
+        throwToolExit('Could not find artifacts');
+      }
+      final String dartBinary = _artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path; 
       final List<String> command = <String>[dartBinary, 'format', ...outputFileList];
       final Process process = await _processManager.start(command);
       final int result = await process.exitCode;
