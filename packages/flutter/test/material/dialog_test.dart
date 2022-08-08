@@ -140,9 +140,13 @@ void main() {
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
+    const Color shadowColor = Color(0xFF000001);
+    const Color surfaceTintColor = Color(0xFF000002);
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
       elevation: customElevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -151,6 +155,8 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
+    expect(materialWidget.shadowColor, shadowColor);
+    expect(materialWidget.surfaceTintColor, surfaceTintColor);
   });
 
   testWidgets('Custom Title Text Style', (WidgetTester tester) async {
