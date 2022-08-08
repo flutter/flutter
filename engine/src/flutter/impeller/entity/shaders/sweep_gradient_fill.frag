@@ -28,6 +28,6 @@ void main() {
     return;
   }
 
-  t = IPTileTextureCoords(t, gradient_info.tile_mode);
+  t = IPFloatTile(t, gradient_info.tile_mode);
   frag_color = mix(gradient_info.start_color, gradient_info.end_color, t);
 }

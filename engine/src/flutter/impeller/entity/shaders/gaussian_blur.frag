@@ -7,8 +7,13 @@
 // Paths for future optimization:
 //   * Remove the uv bounds multiplier in SampleColor by adding optional
 //     support for SamplerAddressMode::ClampToBorder in the texture sampler.
-//   * Sample from higher mipmap levels when the blur radius is high enough.
+//   * Render both blur passes into a smaller texture than the source image
+//     (~1/radius size).
+//   * If doing the small texture render optimization, cache misses can be
+//     reduced in the first pass by sampling the source textures with a mip
+//     level of log2(min_radius).
 
+#include <impeller/constants.glsl>
 #include <impeller/texture.glsl>
 
 uniform sampler2D texture_sampler;
@@ -23,14 +28,13 @@ uniform FragInfo {
   float src_factor;
   float inner_blur_factor;
   float outer_blur_factor;
-} frag_info;
+}
+frag_info;
 
 in vec2 v_texture_coords;
 in vec2 v_src_texture_coords;
 
 out vec4 frag_color;
-
-const float kSqrtTwoPi = 2.50662827463;
 
 float Gaussian(float x) {
   float variance = frag_info.blur_sigma * frag_info.blur_sigma;
@@ -46,14 +50,15 @@ void main() {
     float gaussian = Gaussian(i);
     gaussian_integral += gaussian;
     total_color +=
-        gaussian * IPSampleClampToBorder(texture_sampler,
-                                         v_texture_coords + blur_uv_offset * i);
+        gaussian * IPSampleWithTileMode(texture_sampler,
+                                        v_texture_coords + blur_uv_offset * i,
+                                        kTileModeDecal);
   }
 
   vec4 blur_color = total_color / gaussian_integral;
 
-  vec4 src_color =
-      IPSampleClampToBorder(alpha_mask_sampler, v_src_texture_coords);
+  vec4 src_color = IPSampleWithTileMode(alpha_mask_sampler,
+                                        v_src_texture_coords, kTileModeDecal);
   float blur_factor = frag_info.inner_blur_factor * float(src_color.a > 0) +
                       frag_info.outer_blur_factor * float(src_color.a == 0);
 

@@ -19,16 +19,6 @@ vec4 IPSample(sampler2D texture_sampler, vec2 coords, float y_coord_scale) {
   return texture(texture_sampler, coords);
 }
 
-/// Sample a texture, emulating SamplerAddressMode::ClampToBorder.
-///
-/// This is useful for Impeller graphics backend that don't support
-/// ClampToBorder.
-vec4 IPSampleClampToBorder(sampler2D tex, vec2 uv) {
-  float within_bounds = float(uv.x > 0 && uv.y > 0 && uv.x < 1 && uv.y < 1);
-  return texture(tex, uv) * within_bounds;
-}
-
-
 // These values must correspond to the order of the items in the
 // 'Entity::TileMode' enum class.
 const float kTileModeClamp = 0;
@@ -36,10 +26,13 @@ const float kTileModeRepeat = 1;
 const float kTileModeMirror = 2;
 const float kTileModeDecal = 3;
 
-/// Compute an interpolant value "t".
+/// Remap a float using a tiling mode.
 ///
-/// The domain appears to be any value and the range is [0 to 1].
-float IPTileTextureCoords(float t, float tile_mode) {
+/// When `tile_mode` is `kTileModeDecal`, no tiling is applied and `t` is
+/// returned. In all other cases, a value between 0 and 1 is returned by tiling
+/// `t`.
+/// When `t` is between [0 to 1), the original unchanged `t` is always returned.
+float IPFloatTile(float t, float tile_mode) {
   if (tile_mode == kTileModeClamp) {
     t = clamp(t, 0.0, 1.0);
   } else if (tile_mode == kTileModeRepeat) {
@@ -50,6 +43,26 @@ float IPTileTextureCoords(float t, float tile_mode) {
     t = abs(t2);
   }
   return t;
+}
+
+/// Remap a vec2 using a tiling mode.
+///
+/// Runs each component of the vec2 through `IPFloatTile`.
+vec2 IPVec2Tile(vec2 uv, float tile_mode) {
+  return vec2(IPFloatTile(uv.x, tile_mode), IPFloatTile(uv.y, tile_mode));
+}
+
+/// Sample a texture, emulating a specific tile mode.
+///
+/// This is useful for Impeller graphics backend that don't have native support
+/// for Decal.
+vec4 IPSampleWithTileMode(sampler2D tex, vec2 uv, float tile_mode) {
+  if (tile_mode == kTileModeDecal &&
+      (uv.x < 0 || uv.y < 0 || uv.x >= 1 || uv.y >= 1)) {
+    return vec4(0);
+  }
+
+  return texture(tex, IPVec2Tile(uv, tile_mode));
 }
 
 #endif

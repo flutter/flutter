@@ -24,6 +24,6 @@ void main() {
     return;
   }
 
-  t = IPTileTextureCoords(t, gradient_info.tile_mode);
+  t = IPFloatTile(t, gradient_info.tile_mode);
   frag_color = mix(gradient_info.center_color, gradient_info.edge_color, t);
 }
