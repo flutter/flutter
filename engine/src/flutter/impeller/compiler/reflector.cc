@@ -354,9 +354,22 @@ std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
         uniform_description.rows = spir_type.vecsize;
         uniform_description.columns = spir_type.columns;
         uniform_description.bit_width = spir_type.width;
+        uniform_description.array_elements = GetArrayElements(spir_type);
         data->AddUniformDescription(std::move(uniform_description));
       });
   return data;
+}
+
+uint32_t Reflector::GetArrayElements(const spirv_cross::SPIRType& type) const {
+  if (type.array.empty()) {
+    return 0;
+  }
+  uint32_t elements = 1;
+  for (size_t i = 0; i < type.array.size(); i++) {
+    FML_CHECK(type.array_size_literal[i]);
+    elements *= type.array[i];
+  }
+  return elements;
 }
 
 static std::string ToString(CompilerBackend::Type type) {

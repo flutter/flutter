@@ -65,6 +65,9 @@ std::string FragmentProgram::initFromAsset(std::string asset_name) {
       size_t size = uniform_description.dimensions.rows *
                     uniform_description.dimensions.cols *
                     uniform_description.bit_width / 8u;
+      if (uniform_description.array_elements > 0) {
+        size *= uniform_description.array_elements;
+      }
       other_uniforms_bytes += size;
     }
   }

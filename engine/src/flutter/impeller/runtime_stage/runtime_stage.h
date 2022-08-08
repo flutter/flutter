@@ -41,6 +41,7 @@ struct RuntimeUniformDescription {
   RuntimeUniformType type = kFloat;
   RuntimeUniformDimensions dimensions;
   size_t bit_width;
+  size_t array_elements;
 };
 
 size_t SizeOfRuntimeUniformType(RuntimeUniformType type);
