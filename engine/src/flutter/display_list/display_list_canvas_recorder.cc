@@ -10,11 +10,21 @@
 
 namespace flutter {
 
+#define CHECK_DISPOSE(ret)                                                \
+  do {                                                                    \
+    if (!builder_) {                                                      \
+      FML_DCHECK(builder_)                                                \
+          << "Calling method on DisplayListCanvasRecorder after Build()"; \
+      return ret;                                                         \
+    }                                                                     \
+  } while (0)
+
 DisplayListCanvasRecorder::DisplayListCanvasRecorder(const SkRect& bounds)
     : SkCanvasVirtualEnforcer(bounds.width(), bounds.height()),
       builder_(sk_make_sp<DisplayListBuilder>(bounds)) {}
 
 sk_sp<DisplayList> DisplayListCanvasRecorder::Build() {
+  CHECK_DISPOSE(nullptr);
   sk_sp<DisplayList> display_list = builder_->Build();
   builder_.reset();
   return display_list;
@@ -22,44 +32,53 @@ sk_sp<DisplayList> DisplayListCanvasRecorder::Build() {
 
 // clang-format off
 void DisplayListCanvasRecorder::didConcat44(const SkM44& m44) {
+  CHECK_DISPOSE();
   builder_->transform(m44);
 }
 // clang-format on
 void DisplayListCanvasRecorder::didSetM44(const SkM44& matrix) {
+  CHECK_DISPOSE();
   builder_->transformReset();
   builder_->transform(matrix);
 }
 void DisplayListCanvasRecorder::didTranslate(SkScalar tx, SkScalar ty) {
+  CHECK_DISPOSE();
   builder_->translate(tx, ty);
 }
 void DisplayListCanvasRecorder::didScale(SkScalar sx, SkScalar sy) {
+  CHECK_DISPOSE();
   builder_->scale(sx, sy);
 }
 
 void DisplayListCanvasRecorder::onClipRect(const SkRect& rect,
                                            SkClipOp clip_op,
                                            ClipEdgeStyle edge_style) {
+  CHECK_DISPOSE();
   builder_->clipRect(rect, clip_op,
                      edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
 }
 void DisplayListCanvasRecorder::onClipRRect(const SkRRect& rrect,
                                             SkClipOp clip_op,
                                             ClipEdgeStyle edge_style) {
+  CHECK_DISPOSE();
   builder_->clipRRect(rrect, clip_op,
                       edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
 }
 void DisplayListCanvasRecorder::onClipPath(const SkPath& path,
                                            SkClipOp clip_op,
                                            ClipEdgeStyle edge_style) {
+  CHECK_DISPOSE();
   builder_->clipPath(path, clip_op,
                      edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
 }
 
 void DisplayListCanvasRecorder::willSave() {
+  CHECK_DISPOSE();
   builder_->save();
 }
 SkCanvas::SaveLayerStrategy DisplayListCanvasRecorder::getSaveLayerStrategy(
     const SaveLayerRec& rec) {
+  CHECK_DISPOSE(SaveLayerStrategy::kNoLayer_SaveLayerStrategy);
   std::shared_ptr<DlImageFilter> backdrop = DlImageFilter::From(rec.fBackdrop);
   if (rec.fPaint) {
     builder_->setAttributesFromPaint(*rec.fPaint, kSaveLayerWithPaintFlags);
@@ -72,31 +91,37 @@ SkCanvas::SaveLayerStrategy DisplayListCanvasRecorder::getSaveLayerStrategy(
   return SaveLayerStrategy::kNoLayer_SaveLayerStrategy;
 }
 void DisplayListCanvasRecorder::didRestore() {
+  CHECK_DISPOSE();
   builder_->restore();
 }
 
 void DisplayListCanvasRecorder::onDrawPaint(const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawPaintFlags);
   builder_->drawPaint();
 }
 void DisplayListCanvasRecorder::onDrawRect(const SkRect& rect,
                                            const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawRectFlags);
   builder_->drawRect(rect);
 }
 void DisplayListCanvasRecorder::onDrawRRect(const SkRRect& rrect,
                                             const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawRRectFlags);
   builder_->drawRRect(rrect);
 }
 void DisplayListCanvasRecorder::onDrawDRRect(const SkRRect& outer,
                                              const SkRRect& inner,
                                              const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawDRRectFlags);
   builder_->drawDRRect(outer, inner);
 }
 void DisplayListCanvasRecorder::onDrawOval(const SkRect& rect,
                                            const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawOvalFlags);
   builder_->drawOval(rect);
 }
@@ -105,6 +130,7 @@ void DisplayListCanvasRecorder::onDrawArc(const SkRect& rect,
                                           SkScalar sweepAngle,
                                           bool useCenter,
                                           const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint,
                                    useCenter  //
                                        ? kDrawArcWithCenterFlags
@@ -113,6 +139,7 @@ void DisplayListCanvasRecorder::onDrawArc(const SkRect& rect,
 }
 void DisplayListCanvasRecorder::onDrawPath(const SkPath& path,
                                            const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawPathFlags);
   builder_->drawPath(path);
 }
@@ -121,6 +148,7 @@ void DisplayListCanvasRecorder::onDrawPoints(SkCanvas::PointMode mode,
                                              size_t count,
                                              const SkPoint pts[],
                                              const SkPaint& paint) {
+  CHECK_DISPOSE();
   switch (mode) {
     case SkCanvas::kPoints_PointMode:
       builder_->setAttributesFromPaint(paint, kDrawPointsAsPointsFlags);
@@ -146,6 +174,7 @@ void DisplayListCanvasRecorder::onDrawPoints(SkCanvas::PointMode mode,
 void DisplayListCanvasRecorder::onDrawVerticesObject(const SkVertices* vertices,
                                                      SkBlendMode mode,
                                                      const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawVerticesFlags);
   builder_->drawSkVertices(sk_ref_sp(vertices), mode);
 }
@@ -155,6 +184,7 @@ void DisplayListCanvasRecorder::onDrawImage2(const SkImage* image,
                                              SkScalar dy,
                                              const SkSamplingOptions& sampling,
                                              const SkPaint* paint) {
+  CHECK_DISPOSE();
   if (paint != nullptr) {
     builder_->setAttributesFromPaint(*paint, kDrawImageWithPaintFlags);
   }
@@ -168,6 +198,7 @@ void DisplayListCanvasRecorder::onDrawImageRect2(
     const SkSamplingOptions& sampling,
     const SkPaint* paint,
     SrcRectConstraint constraint) {
+  CHECK_DISPOSE();
   if (paint != nullptr) {
     builder_->setAttributesFromPaint(*paint, kDrawImageRectWithPaintFlags);
   }
@@ -179,6 +210,7 @@ void DisplayListCanvasRecorder::onDrawImageLattice2(const SkImage* image,
                                                     const SkRect& dst,
                                                     SkFilterMode filter,
                                                     const SkPaint* paint) {
+  CHECK_DISPOSE();
   if (paint != nullptr) {
     // SkCanvas will always construct a paint,
     // though it is a default paint most of the time
@@ -201,6 +233,7 @@ void DisplayListCanvasRecorder::onDrawAtlas2(const SkImage* image,
                                              const SkSamplingOptions& sampling,
                                              const SkRect* cull,
                                              const SkPaint* paint) {
+  CHECK_DISPOSE();
   if (paint != nullptr) {
     builder_->setAttributesFromPaint(*paint, kDrawAtlasWithPaintFlags);
   }
@@ -213,6 +246,7 @@ void DisplayListCanvasRecorder::onDrawTextBlob(const SkTextBlob* blob,
                                                SkScalar x,
                                                SkScalar y,
                                                const SkPaint& paint) {
+  CHECK_DISPOSE();
   builder_->setAttributesFromPaint(paint, kDrawTextBlobFlags);
   builder_->drawTextBlob(sk_ref_sp(blob), x, y);
 }
@@ -220,6 +254,7 @@ void DisplayListCanvasRecorder::onDrawTextBlob(const SkTextBlob* blob,
 void DisplayListCanvasRecorder::onDrawPicture(const SkPicture* picture,
                                               const SkMatrix* matrix,
                                               const SkPaint* paint) {
+  CHECK_DISPOSE();
   if (paint != nullptr) {
     builder_->setAttributesFromPaint(*paint, kDrawPictureWithPaintFlags);
   }
@@ -228,6 +263,7 @@ void DisplayListCanvasRecorder::onDrawPicture(const SkPicture* picture,
 
 void DisplayListCanvasRecorder::onDrawShadowRec(const SkPath& path,
                                                 const SkDrawShadowRec& rec) {
+  CHECK_DISPOSE();
   // Skia does not expose the SkDrawShadowRec structure in a public
   // header file so we cannot record this operation.
   // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
@@ -236,12 +272,14 @@ void DisplayListCanvasRecorder::onDrawShadowRec(const SkPath& path,
 }
 
 void DisplayListCanvasRecorder::onDrawBehind(const SkPaint&) {
+  CHECK_DISPOSE();
   FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
                   << __FUNCTION__;
 }
 
 void DisplayListCanvasRecorder::onDrawRegion(const SkRegion& region,
                                              const SkPaint& paint) {
+  CHECK_DISPOSE();
   FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
                   << __FUNCTION__;
 }
@@ -251,6 +289,7 @@ void DisplayListCanvasRecorder::onDrawPatch(const SkPoint cubics[12],
                                             const SkPoint texCoords[4],
                                             SkBlendMode mode,
                                             const SkPaint& paint) {
+  CHECK_DISPOSE();
   FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
                   << __FUNCTION__;
 }
@@ -260,6 +299,7 @@ void DisplayListCanvasRecorder::onDrawEdgeAAQuad(const SkRect& rect,
                                                  SkCanvas::QuadAAFlags aaFlags,
                                                  const SkColor4f& color,
                                                  SkBlendMode mode) {
+  CHECK_DISPOSE();
   FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
                   << __FUNCTION__;
 }
@@ -267,12 +307,14 @@ void DisplayListCanvasRecorder::onDrawEdgeAAQuad(const SkRect& rect,
 void DisplayListCanvasRecorder::onDrawAnnotation(const SkRect& rect,
                                                  const char key[],
                                                  SkData* value) {
+  CHECK_DISPOSE();
   FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
                   << __FUNCTION__;
 }
 
 void DisplayListCanvasRecorder::onDrawDrawable(SkDrawable* drawable,
                                                const SkMatrix* matrix) {
+  CHECK_DISPOSE();
   FML_DLOG(ERROR) << "Unimplemented DisplayListCanvasRecorder::"
                   << __FUNCTION__;
 }
