@@ -278,11 +278,13 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
     // All other post processing.
     if (boolArg('format') ?? false) {
-      print(outputFileList);
       if (_artifacts == null) {
         throwToolExit('Could not find artifacts');
       }
-      final String dartBinary = _artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path; 
+      if (outputFileList.isEmpty) {
+        return FlutterCommandResult.success();
+      }
+      final String dartBinary = _artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
       final List<String> command = <String>[dartBinary, 'format', ...outputFileList];
       final Process process = await _processManager.start(command);
       final int result = await process.exitCode;

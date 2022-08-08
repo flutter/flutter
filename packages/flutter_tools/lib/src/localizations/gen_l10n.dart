@@ -1376,9 +1376,7 @@ class LocalizationsGenerator {
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
       file.writeAsStringSync(contents);
-      if (inputsAndOutputsListFile != null) {
-        _outputFileList.add(file.absolute.path);
-      }
+      _outputFileList.add(file.absolute.path);
     });
 
     baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
@@ -1411,9 +1409,8 @@ class LocalizationsGenerator {
       );
     }
     final File? inputsAndOutputsListFileLocal = inputsAndOutputsListFile;
+    _outputFileList.add(baseOutputFile.absolute.path);
     if (inputsAndOutputsListFileLocal != null) {
-      _outputFileList.add(baseOutputFile.absolute.path);
-
       // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
       if (!inputsAndOutputsListFileLocal.existsSync()) {
         inputsAndOutputsListFileLocal.createSync(recursive: true);
@@ -1433,9 +1430,7 @@ class LocalizationsGenerator {
   void _generateUntranslatedMessagesFile(Logger logger, File untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
       untranslatedMessagesFile.writeAsStringSync('{}');
-      if (inputsAndOutputsListFile != null) {
-        _outputFileList.add(untranslatedMessagesFile.absolute.path);
-      }
+      _outputFileList.add(untranslatedMessagesFile.absolute.path);
       return;
     }
 
@@ -1463,8 +1458,6 @@ class LocalizationsGenerator {
 
     resultingFile += '}\n';
     untranslatedMessagesFile.writeAsStringSync(resultingFile);
-    if (inputsAndOutputsListFile != null) {
-      _outputFileList.add(untranslatedMessagesFile.absolute.path);
-    }
+    _outputFileList.add(untranslatedMessagesFile.absolute.path);
   }
 }
