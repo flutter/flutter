@@ -83,6 +83,7 @@ def RunGN(variant_dir, flags):
 def BuildNinjaTargets(variant_dir, targets):
   assert os.path.exists(os.path.join(_out_dir, variant_dir))
 
+  print('Running autoninja for targets: %s', targets)
   RunExecutable(['autoninja', '-C',
                  os.path.join(_out_dir, variant_dir)] + targets)
 
@@ -310,15 +311,8 @@ def ProcessCIPDPackage(upload, engine_version):
 
 
 def BuildTarget(
-    runtime_mode,
-    arch,
-    optimized,
-    enable_lto,
-    enable_legacy,
-    asan,
-    dart_version_git_info,
-    prebuilt_dart_sdk,
-    additional_targets=[]
+    runtime_mode, arch, optimized, enable_lto, enable_legacy, asan,
+    dart_version_git_info, prebuilt_dart_sdk, build_targets
 ):
   unopt = "_unopt" if not optimized else ""
   out_dir = 'fuchsia_%s%s_%s' % (runtime_mode, unopt, arch)
@@ -344,7 +338,7 @@ def BuildTarget(
     flags.append('--no-prebuilt-dart-sdk')
 
   RunGN(out_dir, flags)
-  BuildNinjaTargets(out_dir, ['flutter'] + additional_targets)
+  BuildNinjaTargets(out_dir, build_targets)
 
   return
 
@@ -473,7 +467,7 @@ def main():
               runtime_mode, arch, optimized, enable_lto, enable_legacy,
               args.asan, not args.no_dart_version_git_info,
               not args.no_prebuilt_dart_sdk,
-              args.targets.split(",") if args.targets else []
+              args.targets.split(",") if args.targets else ['flutter']
           )
         CopyBuildToBucket(runtime_mode, arch, optimized, product)
 
