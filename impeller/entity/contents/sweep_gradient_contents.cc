@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "radial_gradient_contents.h"
+#include "sweep_gradient_contents.h"
 
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
@@ -12,20 +12,26 @@
 
 namespace impeller {
 
-RadialGradientContents::RadialGradientContents() = default;
+SweepGradientContents::SweepGradientContents() = default;
 
-RadialGradientContents::~RadialGradientContents() = default;
+SweepGradientContents::~SweepGradientContents() = default;
 
-void RadialGradientContents::SetPath(Path path) {
+void SweepGradientContents::SetPath(Path path) {
   path_ = std::move(path);
 }
 
-void RadialGradientContents::SetCenterAndRadius(Point center, Scalar radius) {
+void SweepGradientContents::SetCenterAndAngles(Point center,
+                                               Degrees start_angle,
+                                               Degrees end_angle) {
   center_ = center;
-  radius_ = radius;
+  Scalar t0 = start_angle.degrees / 360;
+  Scalar t1 = end_angle.degrees / 360;
+  FML_DCHECK(t0 < t1);
+  bias_ = -t0;
+  scale_ = 1 / (t1 - t0);
 }
 
-void RadialGradientContents::SetColors(std::vector<Color> colors) {
+void SweepGradientContents::SetColors(std::vector<Color> colors) {
   colors_ = std::move(colors);
   if (colors_.empty()) {
     colors_.push_back(Color::Black());
@@ -35,24 +41,24 @@ void RadialGradientContents::SetColors(std::vector<Color> colors) {
   }
 }
 
-void RadialGradientContents::SetTileMode(Entity::TileMode tile_mode) {
+void SweepGradientContents::SetTileMode(Entity::TileMode tile_mode) {
   tile_mode_ = tile_mode;
 }
 
-const std::vector<Color>& RadialGradientContents::GetColors() const {
+const std::vector<Color>& SweepGradientContents::GetColors() const {
   return colors_;
 }
 
-std::optional<Rect> RadialGradientContents::GetCoverage(
+std::optional<Rect> SweepGradientContents::GetCoverage(
     const Entity& entity) const {
   return path_.GetTransformedBoundingBox(entity.GetTransformation());
 };
 
-bool RadialGradientContents::Render(const ContentContext& renderer,
-                                    const Entity& entity,
-                                    RenderPass& pass) const {
-  using VS = RadialGradientFillPipeline::VertexShader;
-  using FS = RadialGradientFillPipeline::FragmentShader;
+bool SweepGradientContents::Render(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) const {
+  using VS = SweepGradientFillPipeline::VertexShader;
+  using FS = SweepGradientFillPipeline::FragmentShader;
 
   auto vertices_builder = VertexBufferBuilder<VS::PerVertexData>();
   {
@@ -78,14 +84,15 @@ bool RadialGradientContents::Render(const ContentContext& renderer,
 
   FS::GradientInfo gradient_info;
   gradient_info.center = center_;
-  gradient_info.radius = radius_;
-  gradient_info.center_color = colors_[0].Premultiply();
-  gradient_info.edge_color = colors_[1].Premultiply();
+  gradient_info.bias = bias_;
+  gradient_info.scale = scale_;
+  gradient_info.start_color = colors_[0].Premultiply();
+  gradient_info.end_color = colors_[1].Premultiply();
   gradient_info.tile_mode = static_cast<Scalar>(tile_mode_);
 
   Command cmd;
-  cmd.label = "RadialGradientFill";
-  cmd.pipeline = renderer.GetRadialGradientFillPipeline(
+  cmd.label = "SweepGradientFill";
+  cmd.pipeline = renderer.GetSweepGradientFillPipeline(
       OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
