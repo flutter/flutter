@@ -4,8 +4,11 @@
 
 // @dart = 2.8
 
+import 'dart:async';
 import 'dart:io' hide Directory, File;
 
+import 'package:dwds/dwds.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,6 +27,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -871,112 +875,68 @@ void main() {
   }));
 
   test('foo bar bar foo', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
-      ..createSync(recursive: true);
-    outputFile.parent.childFile('a.sources').writeAsStringSync('');
-    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+    await FakeAsync().run<Future<void>>((FakeAsync time) {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = FakeResidentCompiler()
-      ..output = const CompilerOutput('a', 0, <Uri>[]);
+      final ResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = WebDevFS(
-      hostname: 'localhost',
-      port: 0,
-      packagesFilePath: '.packages',
-      urlTunneller: null,
-      useSseForDebugProxy: true,
-      useSseForDebugBackend: true,
-      useSseForInjectedClient: true,
-      nullAssertions: true,
-      nativeNullAssertions: true,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-      ),
-      enableDwds: true,
-      enableDds: false,
-      entrypoint: Uri.base,
-      testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
-      nullSafetyMode: NullSafetyMode.sound,
-    );
-    webDevFS.requireJS.createSync(recursive: true);
-    webDevFS.stackTraceMapper.createSync(recursive: true);
+      final WebDevFS webDevFS = WebDevFS(
+        // if this is any other value, we will do a real ip lookup
+        hostname: 'any',
+        port: 0,
+        packagesFilePath: '.packages',
+        urlTunneller: null,
+        useSseForDebugProxy: true,
+        useSseForDebugBackend: true,
+        useSseForInjectedClient: true,
+        nullAssertions: true,
+        nativeNullAssertions: true,
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+        ),
+        enableDwds: true,
+        enableDds: false,
+        entrypoint: Uri.base,
+        testMode: true,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nullSafetyMode: NullSafetyMode.sound,
+      );
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
+      final FakeAppConnection firstConnection = FakeAppConnection();
+      final FakeAppConnection secondConnection = FakeAppConnection();
 
-    final Uri uri = await webDevFS.create();
-    final ConnectionResult foo = await webDevFS.connect(false);
-    //webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
-    //globals.fs.currentDirectory
-    //  .childDirectory('lib')
-    //  .childFile('web_entrypoint.dart')
-    //  ..createSync(recursive: true)
-    //  ..writeAsStringSync('GENERATED');
-    //final String webPrecompiledSdk = globals.artifacts
-    //  .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
-    //final String webPrecompiledSdkSourcemaps = globals.artifacts
-    //  .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
-    //final String webPrecompiledCanvaskitSdk = globals.artifacts
-    //  .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
-    //final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-    //  .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
-    //globals.fs.file(webPrecompiledSdk)
-    //  ..createSync(recursive: true)
-    //  ..writeAsStringSync('HELLO');
-    //globals.fs.file(webPrecompiledSdkSourcemaps)
-    //  ..createSync(recursive: true)
-    //  ..writeAsStringSync('THERE');
-    //globals.fs.file(webPrecompiledCanvaskitSdk)
-    //  ..createSync(recursive: true)
-    //  ..writeAsStringSync('OL');
-    //globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
-    //  ..createSync(recursive: true)
-    //  ..writeAsStringSync('CHUM');
+      final Future<void> done = webDevFS.create().then<void>((Uri _) {
+        print('done creating, got a Uri');
+        // In non-test mode, webDevFS.create() would have initialized DWDS
+        webDevFS.webAssetServer.dwds = FakeDwds(<AppConnection>[firstConnection, secondConnection]);
 
-    //await webDevFS.update(
-    //  mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
-    //  generator: residentCompiler,
-    //  trackWidgetCreation: true,
-    //  bundleFirstUpload: true,
-    //  invalidatedFiles: <Uri>[],
-    //  packageConfig: PackageConfig.empty,
-    //  pathToReload: '',
-    //  dillOutputPath: '',
-    //  shaderCompiler: const FakeShaderCompiler(),
-    //);
-
-    //expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
-    //expect(webDevFS.webAssetServer.getFile('stack_trace_mapper.js'), isNotNull);
-    //expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
-    //expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
-    //expect(webDevFS.webAssetServer.getFile('flutter.js'), isNotNull);
-    //expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
-    //expect(webDevFS.webAssetServer.getFile('version.json'), isNotNull);
-    //expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
-    //expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
-
-    //// Update to the SDK.
-    //globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
-
-    //// New SDK should be visible..
-    //expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
-
-    //// Toggle CanvasKit
-    //webDevFS.webAssetServer.webRenderer = WebRendererMode.canvaskit;
-    //expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
-    //expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
-
-    //// Generated entrypoint.
-    //expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
-    //  contains('GENERATED'));
-
-    //// served on localhost
-    //expect(uri.host, 'localhost');
-
-    await webDevFS.destroy();
+        int vmServiceFactoryInvocationCount = 0;
+        Future<vm_service.VmService> vmServiceFactory(Uri uri, {CompressionOptions compression, @required Logger logger}) {
+          if (vmServiceFactoryInvocationCount > 0) {
+            return Future<vm_service.VmService>.value(FakeVmService());
+          }
+          vmServiceFactoryInvocationCount += 1;
+          return Completer<vm_service.VmService>().future;
+        }
+        print('about to connect');
+        return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((ConnectionResult firstConnectionResult) {
+          webDevFS.destroy();
+        });
+      });
+      time.elapse(const Duration(seconds: 1));
+      return done;
+    });
+    print('outside fake async');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
   }));
@@ -1251,3 +1211,32 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
     throw UnimplementedError();
   }
 }
+
+class FakeDwds extends Fake implements Dwds {
+  FakeDwds(this.connectedAppsIterable) :
+    connectedApps = Stream<AppConnection>.fromIterable(connectedAppsIterable);
+
+  final Iterable<AppConnection> connectedAppsIterable;
+
+  @override
+  final Stream<AppConnection> connectedApps;
+
+  @override
+  Future<DebugConnection> debugConnection(AppConnection appConnection) => Future<DebugConnection>.value(FakeDebugConnection());
+}
+
+class FakeAppConnection extends Fake implements AppConnection {
+  @override
+  void runMain() {}
+}
+
+class FakeDebugConnection extends Fake implements DebugConnection {
+  FakeDebugConnection({
+    this.uri = 'http://foo',
+  });
+
+  @override
+  final String uri;
+}
+
+class FakeVmService extends Fake implements vm_service.VmService {}

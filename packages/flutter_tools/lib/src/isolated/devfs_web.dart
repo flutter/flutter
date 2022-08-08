@@ -206,9 +206,12 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
+        print('about to try binding');
         httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        print('succeeded binding');
         break;
       } on SocketException catch (e, s) {
+        print('whoops!');
         if (i >= kMaxRetries) {
           globals.printError('Failed to bind web development server:\n$e', stackTrace: s);
           throwToolExit('Failed to bind web development server:\n$e');
@@ -232,6 +235,7 @@ class WebAssetServer implements AssetReader {
       nullSafetyMode,
     );
     if (testMode) {
+      print('returning early because testmode');
       return server;
     }
 
@@ -625,6 +629,12 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
+typedef VmServiceFactory = Future<vm_service.VmService> Function(
+  Uri, {
+  CompressionOptions compression,
+  required Logger logger,
+});
+
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
   /// Create a new [WebDevFS] instance.
@@ -683,7 +693,12 @@ class WebDevFS implements DevFS {
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
-  Future<ConnectionResult?> connect(bool useDebugExtension) {
+  Future<ConnectionResult?> connect(
+    bool useDebugExtension, {
+    @visibleForTesting
+    VmServiceFactory vmServiceFactory = createVmServiceDelegate,
+  }) {
+    print('connect started');
     final Completer<ConnectionResult> firstConnection =
         Completer<ConnectionResult>();
     // Note there is an asynchronous gap between this being set to true and
@@ -698,22 +713,28 @@ class WebDevFS implements DevFS {
                 dwds.extensionDebugConnections.stream.first)
             : await dwds.debugConnection(appConnection);
         if (foundFirstConnection) {
+        //if (firstConnection.isCompleted) { // TODO delete
+          print('second foo');
           appConnection.runMain();
         } else {
+          print('about to call the factory');
           foundFirstConnection = true;
-          final vm_service.VmService vmService = await createVmServiceDelegate(
+          final vm_service.VmService vmService = await vmServiceFactory(
             Uri.parse(debugConnection.uri),
             logger: globals.logger,
           );
+          print('completing first connection...');
           firstConnection
               .complete(ConnectionResult(appConnection, debugConnection, vmService));
         }
       } on Exception catch (error, stackTrace) {
+        print('caught foo');
         if (!firstConnection.isCompleted) {
           firstConnection.completeError(error, stackTrace);
         }
       }
     }, onError: (Object error, StackTrace stackTrace) {
+      print('caught bar');
       globals.printError(
           'Unknown error while waiting for debug connection:$error\n$stackTrace');
       if (!firstConnection.isCompleted) {
@@ -758,6 +779,8 @@ class WebDevFS implements DevFS {
       nullSafetyMode,
       testMode: testMode,
     );
+    print('got a server!');
+
     final int selectedPort = webAssetServer.selectedPort;
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
       webAssetServer.webRenderer = WebRendererMode.autoDetect;
@@ -769,6 +792,7 @@ class WebDevFS implements DevFS {
     } else {
       _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath!);
     }
+    print('about to return $_baseUri');
     return _baseUri!;
   }
 
