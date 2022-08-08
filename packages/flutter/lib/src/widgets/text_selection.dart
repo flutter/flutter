@@ -35,19 +35,6 @@ export 'package:flutter/services.dart' show TextSelectionDelegate;
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
-/// Signature for when a pointer that's dragging to select text has moved again.
-///
-/// The first argument [startDetails] contains the details of the event that
-/// initiated the dragging.
-///
-/// The second argument [updateDetails] contains the details of the current
-/// pointer movement. It's the same as the one passed to [DragGestureRecognizer.onUpdate].
-///
-/// This signature is different from [GestureDragUpdateCallback] to make it
-/// easier for various text fields to use [TextSelectionGestureDetector] without
-/// having to store the start position.
-typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails, int tapCount);
-
 /// The type for a Function that builds a toolbar's container with the given
 /// child.
 ///
@@ -2493,7 +2480,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails, int tapCount) {
+  void onDragSelectionUpdate(DragUpdateDetails details, int tapCount) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2507,18 +2494,19 @@ class TextSelectionGestureDetectorBuilder {
         0.0,
         _scrollPosition - _dragStartScrollOffset,
       );
+      final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
       // Select word by word.
       if (tapCount == 2) {
         return renderEditable.selectWordsInRange(
-          from: startDetails.globalPosition - editableOffset,
-          to: updateDetails.globalPosition,
+          from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+          to: details.globalPosition,
           cause: SelectionChangedCause.drag,
         );
       }
       return renderEditable.selectPositionAt(
-        from: startDetails.globalPosition - editableOffset - scrollableOffset,
-        to: updateDetails.globalPosition,
+        from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+        to: details.globalPosition,
         cause: SelectionChangedCause.drag,
       );
     }
@@ -2526,13 +2514,13 @@ class TextSelectionGestureDetectorBuilder {
     if (_shiftTapDragSelection!.isCollapsed
         || (defaultTargetPlatform != TargetPlatform.iOS
             && defaultTargetPlatform != TargetPlatform.macOS)) {
-      return _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
+      return _extendSelection(details.globalPosition, SelectionChangedCause.drag);
     }
 
     // If the drag inverts the selection, Mac and iOS revert to the initial
     // selection.
     final TextSelection selection = editableText.textEditingValue.selection;
-    final TextPosition nextExtent = renderEditable.getPositionForPoint(updateDetails.globalPosition);
+    final TextPosition nextExtent = renderEditable.getPositionForPoint(details.globalPosition);
     final bool isShiftTapDragSelectionForward =
         _shiftTapDragSelection!.baseOffset < _shiftTapDragSelection!.extentOffset;
     final bool isInverted = isShiftTapDragSelectionForward
@@ -2561,7 +2549,7 @@ class TextSelectionGestureDetectorBuilder {
         SelectionChangedCause.drag,
       );
     } else {
-      _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
+      _extendSelection(details.globalPosition, SelectionChangedCause.drag);
     }
   }
 
@@ -2703,7 +2691,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// The frequency of calls is throttled to avoid excessive text layout
   /// operations in text fields. The throttling is controlled by the constant
   /// [_kDragSelectionUpdateThrottle].
-  final DragSelectionUpdateCallback? onDragSelectionUpdate;
+  final GestureTapAndDragUpdateCallback? onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
   final GestureDragEndCallback? onDragSelectionEnd;
@@ -2758,17 +2746,13 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onSingleTapCancel?.call();
   }
 
-  DragStartDetails? _lastDragStartDetails;
   DragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
   int? _dragTapCount;
 
   void _handleDragStart(DragStartDetails details, int tapCount) {
     print('drag start');
-    assert(_lastDragStartDetails == null);
-    print('passed assert');
     print('tap count $tapCount');
-    _lastDragStartDetails = details;
     if (tapCount != 2) {
       widget.onDragSelectionStart?.call(details);
     }
@@ -2790,15 +2774,13 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   /// Once the drag gesture ends, any pending drag update will be fired
   /// immediately. See [_handleDragEnd].
   void _handleDragUpdateThrottled() {
-    assert(_lastDragStartDetails != null);
     assert(_lastDragUpdateDetails != null);
-    widget.onDragSelectionUpdate?.call(_lastDragStartDetails!, _lastDragUpdateDetails!, _dragTapCount!);
+    widget.onDragSelectionUpdate?.call(_lastDragUpdateDetails!, _dragTapCount!);
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
 
   void _handleDragEnd(TapUpDetails upDetails, DragEndDetails endDetails, int tapCount) {
-    assert(_lastDragStartDetails != null);
     print('drag end');
     print('tap count $tapCount');
     _handleTapUp(upDetails, tapCount);
@@ -2811,7 +2793,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onDragSelectionEnd?.call(endDetails);
     _dragTapCount = null;
     _dragUpdateThrottleTimer = null;
-    _lastDragStartDetails = null;
     _lastDragUpdateDetails = null;
   }
 
