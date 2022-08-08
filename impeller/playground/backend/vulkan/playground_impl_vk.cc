@@ -6,6 +6,7 @@
 
 #include "impeller/renderer/backend/vulkan/vk.h"
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include "flutter/fml/logging.h"
@@ -34,13 +35,35 @@ ShaderLibraryMappingsForPlayground() {
   };
 }
 
+void PlaygroundImplVK::DestroyWindowHandle(WindowHandle handle) {
+  if (!handle) {
+    return;
+  }
+  ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
+}
+
 PlaygroundImplVK::PlaygroundImplVK()
-    : concurrent_loop_(fml::ConcurrentMessageLoop::Create()) {
+    : concurrent_loop_(fml::ConcurrentMessageLoop::Create()),
+      handle_(nullptr, &DestroyWindowHandle) {
   if (!::glfwVulkanSupported()) {
     VALIDATION_LOG << "Attempted to initialize a Vulkan playground on a system "
                       "that does not support Vulkan.";
     return;
   }
+
+  ::glfwDefaultWindowHints();
+  ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+  ::glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+  auto window =
+      ::glfwCreateWindow(800, 600, "Test Vulkan Window", nullptr, nullptr);
+  if (!window) {
+    VALIDATION_LOG << "Unable to create glfw window";
+    return;
+  }
+
+  handle_.reset(window);
+
   auto context = ContextVK::Create(reinterpret_cast<PFN_vkGetInstanceProcAddr>(
                                        &::glfwGetInstanceProcAddress),    //
                                    ShaderLibraryMappingsForPlayground(),  //
@@ -55,6 +78,18 @@ PlaygroundImplVK::PlaygroundImplVK()
   }
 
   context_ = std::move(context);
+
+  SetupSwapchain();
+}
+
+void PlaygroundImplVK::SetupSwapchain() {
+  ContextVK* context_vk = reinterpret_cast<ContextVK*>(context_.get());
+  auto window = reinterpret_cast<GLFWwindow*>(handle_.get());
+
+  ::glfwCreateWindowSurface(context_vk->GetInstance(), window, nullptr,
+                            &surface_);
+
+  swapchain_ = context_vk->CreateSwapchain(surface_);
 }
 
 PlaygroundImplVK::~PlaygroundImplVK() = default;
@@ -66,7 +101,7 @@ std::shared_ptr<Context> PlaygroundImplVK::GetContext() const {
 
 // |PlaygroundImpl|
 PlaygroundImpl::WindowHandle PlaygroundImplVK::GetWindowHandle() const {
-  FML_UNREACHABLE();
+  return handle_.get();
 }
 
 // |PlaygroundImpl|
