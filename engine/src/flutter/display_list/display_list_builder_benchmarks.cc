@@ -133,103 +133,103 @@ static void BM_DisplayListBuilderWithSaveLayerAndImageFilter(
 BENCHMARK_CAPTURE(BM_DisplayListBuilderDefault,
                   kDefault,
                   DisplayListBuilderBenchmarkType::kDefault)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderDefault,
                   kBounds,
                   DisplayListBuilderBenchmarkType::kBounds)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderDefault,
                   kRtree,
                   DisplayListBuilderBenchmarkType::kRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderDefault,
                   kBoundsAndRtree,
                   DisplayListBuilderBenchmarkType::kBoundsAndRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithScaleAndTranslate,
                   kDefault,
                   DisplayListBuilderBenchmarkType::kDefault)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithScaleAndTranslate,
                   kBounds,
                   DisplayListBuilderBenchmarkType::kBounds)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithScaleAndTranslate,
                   kRtree,
                   DisplayListBuilderBenchmarkType::kRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithScaleAndTranslate,
                   kBoundsAndRtree,
                   DisplayListBuilderBenchmarkType::kBoundsAndRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithPerspective,
                   kDefault,
                   DisplayListBuilderBenchmarkType::kDefault)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithPerspective,
                   kBounds,
                   DisplayListBuilderBenchmarkType::kBounds)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithPerspective,
                   kRtree,
                   DisplayListBuilderBenchmarkType::kRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithPerspective,
                   kBoundsAndRtree,
                   DisplayListBuilderBenchmarkType::kBoundsAndRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithClipRect,
                   kDefault,
                   DisplayListBuilderBenchmarkType::kDefault)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithClipRect,
                   kBounds,
                   DisplayListBuilderBenchmarkType::kBounds)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithClipRect,
                   kRtree,
                   DisplayListBuilderBenchmarkType::kRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithClipRect,
                   kBoundsAndRtree,
                   DisplayListBuilderBenchmarkType::kBoundsAndRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayer,
                   kDefault,
                   DisplayListBuilderBenchmarkType::kDefault)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayer,
                   kBounds,
                   DisplayListBuilderBenchmarkType::kBounds)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayer,
                   kRtree,
                   DisplayListBuilderBenchmarkType::kRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayer,
                   kBoundsAndRtree,
                   DisplayListBuilderBenchmarkType::kBoundsAndRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayerAndImageFilter,
                   kDefault,
                   DisplayListBuilderBenchmarkType::kDefault)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayerAndImageFilter,
                   kBounds,
                   DisplayListBuilderBenchmarkType::kBounds)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayerAndImageFilter,
                   kRtree,
                   DisplayListBuilderBenchmarkType::kRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithSaveLayerAndImageFilter,
                   kBoundsAndRtree,
                   DisplayListBuilderBenchmarkType::kBoundsAndRtree)
-    ->Unit(benchmark::kMillisecond);
+    ->Unit(benchmark::kMicrosecond);
 
 }  // namespace flutter
