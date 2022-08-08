@@ -869,7 +869,15 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     }
     if (!_platformViewCreated) {
       // Depending on the platform, the initial size can be used to size the platform view.
-      return _PlatformViewPlaceHolder(onLayout: (Size size) => _controller!.create(size: size));
+      return _PlatformViewPlaceHolder(onLayout: (Size size) {
+        if (!_platformViewCreated) {
+          // TODO(stuartmorgan): Replace this call with a new API that only
+          // calls 'create' when an earlier 'create' was deferred, or when
+          // using a legacy init*AndroidView method; see comment in
+          // AndroidViewController.create.
+          _controller!.create(size: size);
+        }
+      });
     }
     _surface ??= widget._surfaceFactory(context, _controller!);
     return Focus(
@@ -1051,10 +1059,79 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 ///
 ///  * [AndroidView] which embeds an Android platform view in the widget hierarchy.
 ///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
-class AndroidViewSurface extends PlatformViewSurface {
+class AndroidViewSurface extends StatefulWidget {
   /// Construct an `AndroidPlatformViewSurface`.
   const AndroidViewSurface({
     super.key,
+    required this.controller,
+    required this.hitTestBehavior,
+    required this.gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null);
+
+  /// The controller for the platform view integrated by this [AndroidViewSurface].
+  ///
+  /// See [PlatformViewSurface.controller] for details.
+  final AndroidViewController controller;
+
+  /// Which gestures should be forwarded to the PlatformView.
+  ///
+  /// See [PlatformViewSurface.gestureRecognizers] for details.
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  /// {@macro flutter.widgets.AndroidView.hitTestBehavior}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  @override
+  State<StatefulWidget> createState() {
+    return _AndroidViewSurfaceState();
+  }
+}
+
+class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.controller.isCreated) {
+      // Schedule a rebuild once creation is complete and the final dislay
+      // type is known.
+      widget.controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.controller.requiresViewComposition) {
+      return _PlatformLayerBasedAndroidViewSurface(
+        controller: widget.controller,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers,
+      );
+    } else {
+      return _TextureBasedAndroidViewSurface(
+        controller: widget.controller,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers,
+      );
+    }
+  }
+
+  void _onPlatformViewCreated(int _) {
+    // Trigger a re-build based on the current controller state.
+    setState(() {});
+  }
+}
+
+// Displays an Android platform view via GL texture.
+class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
+  const _TextureBasedAndroidViewSurface({
     required AndroidViewController super.controller,
     required super.hitTestBehavior,
     required super.gestureRecognizers,
@@ -1065,16 +1142,6 @@ class AndroidViewSurface extends PlatformViewSurface {
   @override
   RenderObject createRenderObject(BuildContext context) {
     final AndroidViewController viewController = controller as AndroidViewController;
-    // Compose using the Android view hierarchy.
-    // This is useful when embedding a SurfaceView into a Flutter app.
-    // SurfaceViews cannot be composed using GL textures.
-    if (viewController is ExpensiveAndroidViewController) {
-      final PlatformViewRenderBox renderBox =
-          super.createRenderObject(context) as PlatformViewRenderBox;
-      viewController.pointTransformer =
-          (Offset position) => renderBox.globalToLocal(position);
-      return renderBox;
-    }
     // Use GL texture based composition.
     // App should use GL texture unless they require to embed a SurfaceView.
     final RenderAndroidView renderBox = RenderAndroidView(
@@ -1082,6 +1149,26 @@ class AndroidViewSurface extends PlatformViewSurface {
       gestureRecognizers: gestureRecognizers,
       hitTestBehavior: hitTestBehavior,
     );
+    viewController.pointTransformer =
+        (Offset position) => renderBox.globalToLocal(position);
+    return renderBox;
+  }
+}
+
+class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
+  const _PlatformLayerBasedAndroidViewSurface({
+    required AndroidViewController super.controller,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    final AndroidViewController viewController = controller as AndroidViewController;
+    final PlatformViewRenderBox renderBox =
+        super.createRenderObject(context) as PlatformViewRenderBox;
     viewController.pointTransformer =
         (Offset position) => renderBox.globalToLocal(position);
     return renderBox;

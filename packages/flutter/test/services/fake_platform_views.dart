@@ -120,6 +120,9 @@ class FakeAndroidViewController implements AndroidViewController {
 
   @override
   List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];
+
+  @override
+  bool get requiresViewComposition => false;
 }
 
 class FakeAndroidPlatformViewsController {
