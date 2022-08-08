@@ -48,6 +48,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
   RestartableTimer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
   int _tapCount = 0;
+  int? _dragTapCount;
 
   bool _isWithinConsecutiveTapTolerance(Offset secondTapOffset) {
     assert(secondTapOffset != null);
@@ -109,6 +110,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
         }
       }
 
+      _dragTapCount = _tapCount;
+
       invokeCallback('onDown', () => onDown!(details, _tapCount));
     } else if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       print('handle PointerMoveEvent $event');
@@ -121,8 +124,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
           globalPosition: event.position,
           localPosition: event.localPosition,
         );
-        invokeCallback<void>('onUpdate', () => onUpdate!(details, _tapCount));
+        invokeCallback<void>('onUpdate', () => onUpdate!(details, _dragTapCount!));
       } else if (_state == _DragState.possible) {
+        print('is zoom start ${event is PointerPanZoomStartEvent}');
         _state = _DragState.accepted;
         DragStartDetails details = DragStartDetails(
           sourceTimeStamp: event.timeStamp,
@@ -131,7 +135,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
           kind: getKindForPointer(event.pointer),
         );
 
-        invokeCallback<void>('onStart', () => onStart!(details, _tapCount));
+        invokeCallback<void>('onStart', () => onStart!(details, _dragTapCount!));
       }
     } else if (event is PointerUpEvent) {
       print('handle PointerUpEvent $event');
@@ -143,6 +147,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
       );
       DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
       invokeCallback<void>('onUpAndEnd', () => onUpAndEnd!(upDetails, endDetails, _tapCount));
+      _dragTapCount = null;
       _consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, _consecutiveTapTimeout);
     } else {
       print('handle unknown pointer $event');
