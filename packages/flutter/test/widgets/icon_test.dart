@@ -221,10 +221,10 @@ void main() {
 
     RichText text = tester.widget(find.byType(RichText));
     expect(text.text.style!.fontVariations, <FontVariation>[
-      FontVariation('FILL', 0.0),
-      FontVariation('wght', 400.0),
-      FontVariation('GRAD', 0.0),
-      FontVariation('opsz', 48.0)
+      const FontVariation('FILL', 0.0),
+      const FontVariation('wght', 400.0),
+      const FontVariation('GRAD', 0.0),
+      const FontVariation('opsz', 48.0)
     ]);
 
     await tester.pumpWidget(
