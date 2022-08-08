@@ -457,7 +457,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   // Caret Painters:
-  // A single painter for both the regular caret and the floaring cursor.
+  // A single painter for both the regular caret and the floating cursor.
   late final _CaretPainter _caretPainter = _CaretPainter();
 
   // Text Highlight painters:
