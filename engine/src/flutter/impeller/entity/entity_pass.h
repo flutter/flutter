@@ -114,7 +114,7 @@ class EntityPass {
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
   Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;
-
+  bool cover_whole_screen = false;
   /// This flag is set to `true` whenever an entity is added to the pass that
   /// requires reading the pass texture during rendering. This can happen in the
   /// following scenarios:

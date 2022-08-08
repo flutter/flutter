@@ -121,6 +121,8 @@ class Entity {
 
   bool Render(const ContentContext& renderer, RenderPass& parent_pass) const;
 
+  static bool BlendModeShouldCoverWholeScreen(BlendMode blend_mode);
+
  private:
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;
