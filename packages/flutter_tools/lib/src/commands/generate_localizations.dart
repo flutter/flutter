@@ -278,6 +278,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
     // All other post processing.
     if (boolArg('format') ?? false) {
+      print(outputFileList);
       if (_artifacts == null) {
         throwToolExit('Could not find artifacts');
       }
