@@ -239,6 +239,57 @@ void main() {
     ]);
   });
 
+  testWidgets('Fill, weight, grade, and optical size can be set at the theme-level', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IconTheme(
+          data: IconThemeData(
+            fill: 0.2,
+            weight: 3.0,
+            grade: 4.0,
+            opticalSize: 5.0,
+          ),
+          child: Icon(Icons.abc),
+        ),
+      ),
+    );
+
+    final RichText text = tester.widget(find.byType(RichText));
+    expect(text.text.style!.fontVariations, <FontVariation>[
+      const FontVariation('FILL', 0.2),
+      const FontVariation('wght', 3.0),
+      const FontVariation('GRAD', 4.0),
+      const FontVariation('opsz', 5.0)
+    ]);
+  });
+
+  testWidgets('Theme-level fill, weight, grade, and optical size can be overriden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IconTheme(
+          data: IconThemeData(
+            fill: 0.2,
+            weight: 3.0,
+            grade: 4.0,
+            opticalSize: 5.0,
+          ),
+          child: Icon(Icons.abc, fill: 0.6, weight: 7.0, grade: 8.0, opticalSize: 9.0),
+        ),
+      ),
+    );
+
+    final RichText text = tester.widget(find.byType(RichText));
+    expect(text.text.style!.fontVariations, isNotNull);
+    expect(text.text.style!.fontVariations, <FontVariation>[
+      const FontVariation('FILL', 0.6),
+      const FontVariation('wght', 7.0),
+      const FontVariation('GRAD', 8.0),
+      const FontVariation('opsz', 9.0)
+    ]);
+  });
+
   test('Throws if given invalid values', () {
     expect(() => Icon(Icons.abc, fill: -0.1), throwsAssertionError);
     expect(() => Icon(Icons.abc, fill: 1.1), throwsAssertionError);
