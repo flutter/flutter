@@ -138,6 +138,7 @@ class WebDriverService extends DriverService {
     int? driverPort,
     List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
+    List<String>? extensions,
     String? profileMemory,
   }) async {
     late async_io.WebDriver webDriver;
@@ -150,6 +151,7 @@ class WebDriverService extends DriverService {
           headless,
           webBrowserFlags: webBrowserFlags,
           chromeBinary: chromeBinary,
+          extensions: extensions,
         ),
       );
     } on SocketException catch (error) {
@@ -248,9 +250,13 @@ Map<String, dynamic> getDesiredCapabilities(
   bool? headless, {
   List<String> webBrowserFlags = const <String>[],
   String? chromeBinary,
+  List<String>? extensions,
 }) {
   switch (browser) {
     case Browser.chrome:
+      final String chromeExtensionFlag = extensions == null
+        ? '--disable-extensions'
+        : '--load-extension=${extensions.join(',')}';
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
@@ -266,12 +272,12 @@ Map<String, dynamic> getDesiredCapabilities(
             '--bwsi',
             '--disable-background-timer-throttling',
             '--disable-default-apps',
-            '--disable-extensions',
             '--disable-popup-blocking',
             '--disable-translate',
             '--no-default-browser-check',
             '--no-sandbox',
             '--no-first-run',
+            chromeExtensionFlag,
             if (headless!) '--headless',
             ...webBrowserFlags,
           ],

@@ -28,7 +28,6 @@ const List<String> kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
   '--disable-default-apps',
-  '--disable-extensions',
   '--disable-popup-blocking',
   '--disable-translate',
   '--no-default-browser-check',
@@ -49,6 +48,7 @@ void main() {
         'w3c': false,
         'args': <String>[
           ...kChromeArgs,
+          '--disable-extensions',
           '--headless',
         ],
         'perfLoggingPrefs': <String, String>{
@@ -75,7 +75,10 @@ void main() {
       'chromeOptions': <String, dynamic>{
         'binary': chromeBinary,
         'w3c': false,
-        'args': kChromeArgs,
+        'args': [
+          ...kChromeArgs,
+          '--disable-extensions',
+        ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
           'devtools.timeline,'
@@ -106,6 +109,7 @@ void main() {
         'w3c': false,
         'args': <String>[
           ...kChromeArgs,
+          '--disable-extensions',
           '--autoplay-policy=no-user-gesture-required',
           '--incognito',
           '--auto-select-desktop-capture-source="Entire screen"',
@@ -120,6 +124,58 @@ void main() {
     };
 
     expect(getDesiredCapabilities(Browser.chrome, false, webBrowserFlags: webBrowserFlags), expected);
+  });
+
+  testWithoutContext('getDesiredCapabilities Chrome with one extension', () {
+    final Map<String, dynamic> expected = <String, dynamic>{
+      'acceptInsecureCerts': true,
+      'browserName': 'chrome',
+      'goog:loggingPrefs': <String, String>{
+        sync_io.LogType.browser: 'INFO',
+        sync_io.LogType.performance: 'ALL',
+      },
+      'chromeOptions': <String, dynamic>{
+        'w3c': false,
+        'args': <String>[
+          ...kChromeArgs,
+          '--load-extension=extension_folder1',
+        ],
+        'perfLoggingPrefs': <String, String>{
+          'traceCategories':
+          'devtools.timeline,'
+              'v8,blink.console,benchmark,blink,'
+              'blink.user_timing',
+        },
+      },
+    };
+
+    expect(getDesiredCapabilities(Browser.chrome, false, extensions: <String>['extension_folder1']), expected);
+  });
+
+  testWithoutContext('getDesiredCapabilities Chrome with one extension', () {
+    final Map<String, dynamic> expected = <String, dynamic>{
+      'acceptInsecureCerts': true,
+      'browserName': 'chrome',
+      'goog:loggingPrefs': <String, String>{
+        sync_io.LogType.browser: 'INFO',
+        sync_io.LogType.performance: 'ALL',
+      },
+      'chromeOptions': <String, dynamic>{
+        'w3c': false,
+        'args': <String>[
+          ...kChromeArgs,
+          '--load-extension=extension_folder1,extension_folder2',
+        ],
+        'perfLoggingPrefs': <String, String>{
+          'traceCategories':
+          'devtools.timeline,'
+              'v8,blink.console,benchmark,blink,'
+              'blink.user_timing',
+        },
+      },
+    };
+
+    expect(getDesiredCapabilities(Browser.chrome, false, extensions: <String>['extension_folder1', 'extension_folder2']), expected);
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with headless on', () {

@@ -141,6 +141,9 @@ class DriveCommand extends RunCommandBase {
       ..addOption('chrome-binary',
         help: 'Location of the Chrome binary. '
               'Works only if "browser-name" is set to "chrome".')
+      ..addOption('load-extension',
+        help: 'Paths to extensions to load at startup separated by comma. '
+              'Works only if "browser-name" is set to "chrome".')
       ..addOption('write-sksl-on-exit',
         help: 'Attempts to write an SkSL file when the drive process is finished '
               'to the provided file, overwriting it if necessary.')
@@ -282,6 +285,7 @@ class DriveCommand extends RunCommandBase {
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
         browserDimension: stringArgDeprecated('browser-dimension')!.split(','),
         browserName: stringArgDeprecated('browser-name'),
+        extensions: stringArgDeprecated('load-extension')?.split(','),
         driverPort: stringArgDeprecated('driver-port') != null
           ? int.tryParse(stringArgDeprecated('driver-port')!)
           : null,

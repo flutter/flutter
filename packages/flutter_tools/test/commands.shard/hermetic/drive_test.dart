@@ -355,6 +355,7 @@ class FailingFakeDriverService extends Fake implements DriverService {
       int driverPort,
       List<String> webBrowserFlags,
       List<String> browserDimension,
+      List<String> extensions,
       String profileMemory,
     }) async => 1;
 }
