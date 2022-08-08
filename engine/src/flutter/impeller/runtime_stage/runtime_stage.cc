@@ -85,6 +85,7 @@ RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
       desc.dimensions = RuntimeUniformDimensions{
           static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
       desc.bit_width = i->bit_width();
+      desc.array_elements = i->array_elements();
       uniforms_.emplace_back(std::move(desc));
     }
   }

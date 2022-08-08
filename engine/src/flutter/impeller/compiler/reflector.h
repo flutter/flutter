@@ -138,6 +138,8 @@ class Reflector {
   std::vector<StructMember> ReadStructMembers(
       const spirv_cross::TypeID& type_id) const;
 
+  uint32_t GetArrayElements(const spirv_cross::SPIRType& type) const;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Reflector);
 };
 

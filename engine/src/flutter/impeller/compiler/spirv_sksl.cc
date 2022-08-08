@@ -22,6 +22,7 @@ std::string CompilerSkSL::compile() {
   options.version = 100;
   options.vulkan_semantics = false;
   options.enable_420pack_extension = false;
+  options.flatten_multidimensional_arrays = true;
 
   backend.allow_precision_qualifiers = false;
   backend.basic_int16_type = "short";
