@@ -7,6 +7,8 @@
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
 #include "impeller/playground/playground_impl.h"
+#include "impeller/renderer/backend/vulkan/swapchain_vk.h"
+#include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
 
@@ -20,6 +22,15 @@ class PlaygroundImplVK final : public PlaygroundImpl {
   std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;
   std::shared_ptr<Context> context_;
 
+  // windows
+  static void DestroyWindowHandle(WindowHandle handle);
+  using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
+  UniqueHandle handle_;
+
+  // surface and swapchain
+  VkSurfaceKHR surface_;
+  std::unique_ptr<SwapchainVK> swapchain_;
+
   // |PlaygroundImpl|
   std::shared_ptr<Context> GetContext() const override;
 
@@ -29,6 +40,8 @@ class PlaygroundImplVK final : public PlaygroundImpl {
   // |PlaygroundImpl|
   std::unique_ptr<Surface> AcquireSurfaceFrame(
       std::shared_ptr<Context> context) override;
+
+  void SetupSwapchain();
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlaygroundImplVK);
 };
