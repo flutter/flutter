@@ -43,6 +43,7 @@ import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
+import 'windows/windows_version_validator.dart';
 
 abstract class DoctorValidatorsProvider {
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
@@ -118,6 +119,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
     _validators = <DoctorValidator>[
+      WindowsVersionValidator(
+        platform: platform,
+      ),
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
