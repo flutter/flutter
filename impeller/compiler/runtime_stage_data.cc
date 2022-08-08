@@ -157,6 +157,7 @@ std::shared_ptr<fml::Mapping> RuntimeStageData::CreateMapping() const {
     }
     desc->type = uniform_type.value();
     desc->bit_width = uniform.bit_width;
+    desc->array_elements = uniform.array_elements;
 
     runtime_stage.uniforms.emplace_back(std::move(desc));
   }

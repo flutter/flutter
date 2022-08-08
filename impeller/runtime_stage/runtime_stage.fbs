@@ -41,6 +41,7 @@ table UniformDescription {
   bit_width: uint64;
   rows: uint64;
   columns: uint64;
+  array_elements: uint64;
 }
 
 table RuntimeStage {

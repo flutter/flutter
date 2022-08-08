@@ -64,6 +64,22 @@ void main() async {
     expect(toFloat(renderedBytes.getUint8(3)), closeTo(1.0, epsilon));
   });
 
+  test('shader with array uniforms renders correctly', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'uniform_arrays.frag.iplr',
+    );
+
+    final List<double> floatArray = List<double>.generate(
+      24, (int i) => i.toDouble(),
+    );
+    final Shader shader = program.shader(
+      floatUniforms: Float32List.fromList(<double>[
+        ...floatArray,
+    ]));
+
+    await _expectShaderRendersGreen(shader);
+  });
+
   test('The ink_sparkle shader is accepted', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'ink_sparkle.frag.iplr',
