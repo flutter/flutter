@@ -2507,6 +2507,15 @@ class TextSelectionGestureDetectorBuilder {
         0.0,
         _scrollPosition - _dragStartScrollOffset,
       );
+
+      // Select word by word.
+      if (tapCount == 2) {
+        return renderEditable.selectWordsInRange(
+          from: startDetails.globalPosition - editableOffset,
+          to: updateDetails.globalPosition,
+          cause: SelectionChangedCause.drag,
+        );
+      }
       return renderEditable.selectPositionAt(
         from: startDetails.globalPosition - editableOffset - scrollableOffset,
         to: updateDetails.globalPosition,
@@ -2752,6 +2761,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   DragStartDetails? _lastDragStartDetails;
   DragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
+  int? _dragTapCount;
 
   void _handleDragStart(DragStartDetails details, int tapCount) {
     print('drag start');
@@ -2759,13 +2769,16 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     print('passed assert');
     print('tap count $tapCount');
     _lastDragStartDetails = details;
-    widget.onDragSelectionStart?.call(details);
+    if (tapCount != 2) {
+      widget.onDragSelectionStart?.call(details);
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details, int tapCount) {
     print('drag update');
     print('tap count $tapCount');
     _lastDragUpdateDetails = details;
+    _dragTapCount = tapCount;
     // Only schedule a new timer if there's no one pending.
     _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
   }
@@ -2779,7 +2792,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _handleDragUpdateThrottled() {
     assert(_lastDragStartDetails != null);
     assert(_lastDragUpdateDetails != null);
-    widget.onDragSelectionUpdate?.call(_lastDragStartDetails!, _lastDragUpdateDetails!, 0);
+    widget.onDragSelectionUpdate?.call(_lastDragStartDetails!, _lastDragUpdateDetails!, _dragTapCount!);
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
@@ -2796,6 +2809,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       _handleDragUpdateThrottled();
     }
     widget.onDragSelectionEnd?.call(endDetails);
+    _dragTapCount = null;
     _dragUpdateThrottleTimer = null;
     _lastDragStartDetails = null;
     _lastDragUpdateDetails = null;
