@@ -958,7 +958,7 @@ class SelectionOverlay {
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
   void showMagnifier(MagnifierOverlayInfoBearer initalInfoBearer) {
-    if (_toolbar != null) {
+    if (_toolbar != null || ContextMenuController.isShown) {
       hideToolbar();
     }
 
