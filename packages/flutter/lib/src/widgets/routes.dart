@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -886,45 +885,42 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
-                      child: FocusTrap(
-                        focusScopeNode: focusScopeNode,
-                        child: RepaintBoundary(
-                          child: AnimatedBuilder(
-                            animation: _listenable, // immutable
-                            builder: (BuildContext context, Widget? child) {
-                              return widget.route.buildTransitions(
-                                context,
-                                widget.route.animation!,
-                                widget.route.secondaryAnimation!,
-                                // This additional AnimatedBuilder is include because if the
-                                // value of the userGestureInProgressNotifier changes, it's
-                                // only necessary to rebuild the IgnorePointer widget and set
-                                // the focus node's ability to focus.
-                                AnimatedBuilder(
-                                  animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                                  builder: (BuildContext context, Widget? child) {
-                                    final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                                    focusScopeNode.canRequestFocus = !ignoreEvents;
-                                    return IgnorePointer(
-                                      ignoring: ignoreEvents,
-                                      child: child,
-                                    );
-                                  },
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: _page ??= RepaintBoundary(
-                              key: widget.route._subtreeKey, // immutable
-                              child: Builder(
-                                builder: (BuildContext context) {
-                                  return widget.route.buildPage(
-                                    context,
-                                    widget.route.animation!,
-                                    widget.route.secondaryAnimation!,
+                      child: RepaintBoundary(
+                        child: AnimatedBuilder(
+                          animation: _listenable, // immutable
+                          builder: (BuildContext context, Widget? child) {
+                            return widget.route.buildTransitions(
+                              context,
+                              widget.route.animation!,
+                              widget.route.secondaryAnimation!,
+                              // This additional AnimatedBuilder is include because if the
+                              // value of the userGestureInProgressNotifier changes, it's
+                              // only necessary to rebuild the IgnorePointer widget and set
+                              // the focus node's ability to focus.
+                              AnimatedBuilder(
+                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                                builder: (BuildContext context, Widget? child) {
+                                  final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                                  focusScopeNode.canRequestFocus = !ignoreEvents;
+                                  return IgnorePointer(
+                                    ignoring: ignoreEvents,
+                                    child: child,
                                   );
                                 },
+                                child: child,
                               ),
+                            );
+                          },
+                          child: _page ??= RepaintBoundary(
+                            key: widget.route._subtreeKey, // immutable
+                            child: Builder(
+                              builder: (BuildContext context) {
+                                return widget.route.buildPage(
+                                  context,
+                                  widget.route.animation!,
+                                  widget.route.secondaryAnimation!,
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -2147,184 +2143,3 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
-
-/// The [FocusTrap] widget removes focus when a mouse primary pointer makes contact with another
-/// region of the screen.
-///
-/// When a primary pointer makes contact with the screen, this widget determines if that pointer
-/// contacted an existing focused widget. If not, this asks the [FocusScopeNode] to reset the
-/// focus state. This allows [TextField]s and other focusable widgets to give up their focus
-/// state, without creating a gesture detector that competes with others on screen.
-///
-/// In cases where focus is conceptually larger than the focused render object, a [FocusTrapArea]
-/// can be used to expand the focus area to include all render objects below that. This is used by
-/// the [TextField] widgets to prevent a loss of focus when interacting with decorations on the
-/// text area.
-///
-/// See also:
-///
-///  * [FocusTrapArea], the widget that allows expanding the conceptual focus area.
-class FocusTrap extends SingleChildRenderObjectWidget {
-
-  /// Create a new [FocusTrap] widget scoped to the provided [focusScopeNode].
-  const FocusTrap({
-    required this.focusScopeNode,
-    required Widget super.child,
-    super.key,
-  });
-
-  /// The [focusScopeNode] that this focus trap widget operates on.
-  final FocusScopeNode focusScopeNode;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderFocusTrap(focusScopeNode);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    if (renderObject is _RenderFocusTrap) {
-      renderObject.focusScopeNode = focusScopeNode;
-    }
-  }
-}
-
-/// Declares a widget subtree which is part of the provided [focusNode]'s focus area
-/// without attaching focus to that region.
-///
-/// This is used by text field widgets which decorate a smaller editable text area.
-/// This area is conceptually part of the editable text, but not attached to the
-/// focus context. The [FocusTrapArea] is used to inform the framework of this
-/// relationship, so that primary pointer contact inside of this region but above
-/// the editable text focus will not trigger loss of focus.
-///
-/// See also:
-///
-///  * [FocusTrap], the widget which removes focus based on primary pointer interactions.
-class FocusTrapArea extends SingleChildRenderObjectWidget {
-
-  /// Create a new [FocusTrapArea] that expands the area of the provided [focusNode].
-  const FocusTrapArea({required this.focusNode, super.key, super.child});
-
-  /// The [FocusNode] that the focus trap area will expand to.
-  final FocusNode focusNode;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderFocusTrapArea(focusNode);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    if (renderObject is _RenderFocusTrapArea) {
-      renderObject.focusNode = focusNode;
-    }
-  }
-}
-
-class _RenderFocusTrapArea extends RenderProxyBox {
-  _RenderFocusTrapArea(this.focusNode);
-
-  FocusNode focusNode;
-}
-
-class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
-  _RenderFocusTrap(this._focusScopeNode);
-
-  Rect? currentFocusRect;
-  Expando<BoxHitTestResult> cachedResults = Expando<BoxHitTestResult>();
-
-  FocusScopeNode _focusScopeNode;
-  FocusNode? _previousFocus;
-  FocusScopeNode get focusScopeNode => _focusScopeNode;
-  set focusScopeNode(FocusScopeNode value) {
-    if (focusScopeNode == value) {
-      return;
-    }
-    _focusScopeNode = value;
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
-    bool hitTarget = false;
-    if (size.contains(position)) {
-      hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
-      if (hitTarget) {
-        final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
-        cachedResults[entry] = result;
-        result.add(entry);
-      }
-    }
-    return hitTarget;
-  }
-
-  /// The focus dropping behavior is only present on desktop platforms
-  /// and mobile browsers.
-  bool get _shouldIgnoreEvents {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return !kIsWeb;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-        return false;
-    }
-  }
-
-  void _checkForUnfocus() {
-    if (_previousFocus == null) {
-      return;
-    }
-    // Only continue to unfocus if the previous focus matches the current focus.
-    // If the focus has changed in the meantime, it was probably intentional.
-    if (FocusManager.instance.primaryFocus == _previousFocus) {
-      _previousFocus!.unfocus();
-    }
-    _previousFocus = null;
-  }
-
-  @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
-    if (event is! PointerDownEvent
-      || event.buttons != kPrimaryButton
-      || event.kind != PointerDeviceKind.mouse
-      || _shouldIgnoreEvents
-      || _focusScopeNode.focusedChild == null) {
-      return;
-    }
-    final BoxHitTestResult? result = cachedResults[entry];
-    final FocusNode? focusNode = _focusScopeNode.focusedChild;
-    if (focusNode == null || result == null) {
-      return;
-    }
-
-    final RenderObject? renderObject = focusNode.context?.findRenderObject();
-    if (renderObject == null) {
-      return;
-    }
-
-    bool hitCurrentFocus = false;
-    for (final HitTestEntry entry in result.path) {
-      final HitTestTarget target = entry.target;
-      if (target == renderObject) {
-        hitCurrentFocus = true;
-        break;
-      }
-      if (target is _RenderFocusTrapArea && target.focusNode == focusNode) {
-        hitCurrentFocus = true;
-        break;
-      }
-    }
-    if (!hitCurrentFocus) {
-      _previousFocus = focusNode;
-      // Check post-frame to see that the focus hasn't changed before
-      // unfocusing. This also allows a button tap to capture the previously
-      // active focus before FocusTrap tries to unfocus it, and avoids a bounce
-      // through the scope's focus node in between.
-      SchedulerBinding.instance.scheduleTask<void>(_checkForUnfocus, Priority.touch);
-    }
-  }
-}

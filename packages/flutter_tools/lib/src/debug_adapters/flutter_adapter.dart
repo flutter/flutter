@@ -400,6 +400,16 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     if (isAttach) {
       await preventBreakingAndResume();
     }
+
+    // Send a request to stop/detach to give Flutter chance to do some cleanup.
+    // It's possible the Flutter process will terminate before we process the
+    // response, so accept either a response or the process exiting.
+    final String method = isAttach ? 'app.detach' : 'app.stop';
+    await Future.any<void>(<Future<void>>[
+      sendFlutterRequest(method, <String, Object?>{'appId': _appId}),
+      _process?.exitCode ?? Future<void>.value(),
+    ]);
+
     terminatePids(ProcessSignal.sigterm);
     await _process?.exitCode;
   }

@@ -92,7 +92,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "none"}
         ]
@@ -104,7 +104,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "none"}
         ]
@@ -115,20 +115,20 @@ platform_properties:
   windows:
     properties:
       dependencies: >-
-          [
-            {"dependency": "certs", "version": "version:9563bb"}
-          ]
+        [
+          {"dependency": "certs", "version": "version:9563bb"}
+        ]
       os: Windows-10
       device_type: none
   windows_android:
     properties:
       dependencies: >-
-          [
-            {"dependency": "android_sdk", "version": "version:32v1"},
-            {"dependency": "certs", "version": "version:9563bb"},
-            {"dependency": "chrome_and_driver", "version": "version:96.2"},
-            {"dependency": "open_jdk", "version": "11"}
-          ]
+        [
+          {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "certs", "version": "version:9563bb"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "11"}
+        ]
       os: Windows-10
       device_type: "msm8952"
 
@@ -153,9 +153,9 @@ targets:
       tags: >
         ["framework","hostonly"]
       dependencies: >-
-          [
-            {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
-          ]
+        [
+          {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
+        ]
 
   - name: Linux android views
     recipe: flutter/android_views
@@ -306,6 +306,8 @@ targets:
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
+    enabled_branches:
+      - master
     timeout: 60
     properties:
       shard: flutter_plugins
@@ -1347,7 +1349,6 @@ targets:
       task_name: channels_integration_test
 
   - name: Linux_android clipper_cache_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1377,7 +1378,6 @@ targets:
   - name: Linux_android color_filter_with_unstable_child_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1996,7 +1996,6 @@ targets:
 
   - name: Linux_android new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2251,16 +2250,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
-  - name: Linux_android android_lifecycles_test
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: android_lifecycles_test
-
   - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
     bringup: true
     recipe: devicelab/devicelab_drone
@@ -2323,9 +2312,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2362,7 +2349,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2381,7 +2368,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2400,7 +2387,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2419,7 +2406,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2444,7 +2431,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2488,7 +2475,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "android_sdk", "version": "version:32v1"}
@@ -2612,9 +2599,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2648,7 +2633,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2666,9 +2651,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2724,9 +2707,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2745,7 +2726,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -2768,7 +2749,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2793,7 +2774,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2818,7 +2799,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2843,7 +2824,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:32v1"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2903,7 +2884,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13a233"}
+          {"dependency": "xcode", "version": "13f17a"}
         ]
       tags: >
         ["framework", "hostonly", "shard"]
@@ -3082,10 +3063,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_ios__compile
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3095,10 +3072,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_ios__start_up
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3108,10 +3081,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"}
-        ]
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3131,6 +3100,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: external_ui_integration_test_ios
+      ignore_flakiness: "true"
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
@@ -3364,11 +3334,22 @@ targets:
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
+
+  - name: Mac_ios native_platform_view_ui_tests_ios
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: native_platform_view_ui_tests_ios
 
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
@@ -3493,7 +3474,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3505,27 +3486,13 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac native_platform_view_ui_tests_ios
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "13a233"}
-        ]
-      tags: >
-        ["devicelab", "hostonly"]
-      task_name: native_platform_view_ui_tests_ios
-
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13a233"},
+          {"dependency": "xcode", "version": "13f17a"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3694,7 +3661,6 @@ targets:
       - .ci.yaml
 
   - name: Windows gradle_plugin_bundle_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/108020
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:

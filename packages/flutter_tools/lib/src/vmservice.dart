@@ -478,12 +478,13 @@ class FlutterVmService {
     required Uri assetsDirectory,
     required String? viewId,
     required String? uiIsolateId,
+    required bool windows,
   }) async {
     await callMethodWrapper(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
       args: <String, Object?>{
         'viewId': viewId,
-        'assetDirectory': assetsDirectory.toFilePath(windows: false),
+        'assetDirectory': assetsDirectory.toFilePath(windows: windows),
       });
   }
 
@@ -726,6 +727,19 @@ class FlutterVmService {
       },
     );
   }
+
+  Future<Map<String, Object?>?> flutterEvictShader(String assetPath, {
+   required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.window.reinitializeShader',
+      isolateId: isolateId,
+      args: <String, Object?>{
+        'assetKey': assetPath,
+      },
+    );
+  }
+
 
   /// Exit the application by calling [exit] from `dart:io`.
   ///

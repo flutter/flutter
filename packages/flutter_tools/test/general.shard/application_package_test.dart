@@ -25,6 +25,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -86,7 +87,7 @@ void main() {
       expect(applicationPackage.name, 'app.apk');
       expect(applicationPackage, isA<PrebuiltApplicationPackage>());
       expect((applicationPackage as PrebuiltApplicationPackage).applicationPackage.path, apkFile.path);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools not, apk exists', () async {
@@ -108,7 +109,7 @@ void main() {
         buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
@@ -119,7 +120,7 @@ void main() {
         TargetPlatform.android_arm,
         buildInfo: null,
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
 
     testWithoutContext('returns null when failed to extract manifest', () async {
@@ -136,7 +137,7 @@ void main() {
       );
 
       expect(androidApk, isNull);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
   });
 

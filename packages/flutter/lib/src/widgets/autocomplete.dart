@@ -432,7 +432,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           );
         },
       );
-      Overlay.of(context, rootOverlay: true)!.insert(newFloatingOptions);
+      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget)!.insert(newFloatingOptions);
       _floatingOptions = newFloatingOptions;
     } else {
       _floatingOptions = null;
