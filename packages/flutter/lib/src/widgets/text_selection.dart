@@ -1870,6 +1870,15 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
+  static bool _selectionContains(TextSelection selection, TextPosition position) {
+    if (selection.isCollapsed) {
+      return selection.baseOffset == position.offset;
+    }
+    final int first = math.min(selection.baseOffset, selection.extentOffset);
+    final int last = math.max(selection.baseOffset, selection.extentOffset);
+    return position.offset >= first && position.offset <= last;
+  }
+
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
   ///
   /// By default, it selects word edge if selection is enabled.
@@ -1880,65 +1889,78 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleTapUp(TapUpDetails details) {
-    if (delegate.selectionEnabled) {
-      // Handle shift + click selection if needed.
-      final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          // On desktop platforms the selection is set on tap down.
-          if (_isShiftTapping) {
-            _isShiftTapping = false;
-          }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          if (isShiftPressedValid) {
-            _isShiftTapping = true;
-            _extendSelection(details.globalPosition, SelectionChangedCause.tap);
-            return;
-          }
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
-        case TargetPlatform.iOS:
-          if (isShiftPressedValid) {
-            // On iOS, a shift-tapped unfocused field expands from 0, not from
-            // the previous selection.
-            _isShiftTapping = true;
-            final TextSelection? fromSelection = renderEditable.hasFocus
-                ? null
-                : const TextSelection.collapsed(offset: 0);
-            _expandSelection(
-              details.globalPosition,
-              SelectionChangedCause.tap,
-              fromSelection,
-            );
-            return;
-          }
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.trackpad:
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              break;
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-              // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
-              final TextSelection oldSelection =
-                  renderEditable.textSelectionDelegate.textEditingValue.selection;
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              final TextSelection nextSelection =
-                  renderEditable.textSelectionDelegate.textEditingValue.selection;
-              if (oldSelection.isValid && oldSelection == nextSelection) {
-                editableText.showToolbar();
-              }
-              break;
-          }
-          break;
-      }
+    // TODO(justinmc): You removed a call to editableText.hideToolbar() here
+    // (in the parent class). There must be places below that still need to call
+    // this but aren't right now.
+    if (!delegate.selectionEnabled) {
+      return;
+    }
+    // Handle shift + click selection if needed.
+    final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        // On desktop platforms the selection is set on tap down.
+        if (_isShiftTapping) {
+          _isShiftTapping = false;
+        }
+        editableText.hideToolbar();
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        if (isShiftPressedValid) {
+          _isShiftTapping = true;
+          _extendSelection(details.globalPosition, SelectionChangedCause.tap);
+          return;
+        }
+        renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+        break;
+      case TargetPlatform.iOS:
+        if (isShiftPressedValid) {
+          // On iOS, a shift-tapped unfocused field expands from 0, not from
+          // the previous selection.
+          _isShiftTapping = true;
+          final TextSelection? fromSelection = renderEditable.hasFocus
+              ? null
+              : const TextSelection.collapsed(offset: 0);
+          _expandSelection(
+            details.globalPosition,
+            SelectionChangedCause.tap,
+            fromSelection,
+          );
+          return;
+        }
+        switch (details.kind) {
+          case PointerDeviceKind.mouse:
+          case PointerDeviceKind.trackpad:
+          case PointerDeviceKind.stylus:
+          case PointerDeviceKind.invertedStylus:
+            // Precise devices should place the cursor at a precise position.
+            renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+            break;
+          case PointerDeviceKind.touch:
+          case PointerDeviceKind.unknown:
+            final TextSelection oldSelection =
+                renderEditable.textSelectionDelegate.textEditingValue.selection;
+            final TextPosition position = renderEditable.getPositionForPoint(details.globalPosition);
+            if (oldSelection.isValid && _selectionContains(oldSelection, position)) {
+              editableText.toggleToolbar(false);
+              return;
+            }
+
+            // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
+            renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+            final TextSelection nextSelection =
+                renderEditable.textSelectionDelegate.textEditingValue.selection;
+            if (oldSelection.isValid && oldSelection == nextSelection) {
+              editableText.toggleToolbar();
+            } else {
+              editableText.hideToolbar();
+            }
+            break;
+        }
+        break;
     }
   }
 

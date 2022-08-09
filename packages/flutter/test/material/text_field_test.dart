@@ -8084,9 +8084,9 @@ void main() {
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
 
       // Collapsed toolbar shows 2 buttons.
-      expect(find.byType(CupertinoButton), findsNothing);
+      expect(find.byType(CupertinoButton), findsNWidgets(2));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
   testWidgets(
