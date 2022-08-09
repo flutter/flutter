@@ -146,7 +146,6 @@ source_set("ui") {
   deps = [
     "//flutter/assets",
     "//flutter/common",
-    "//flutter/common/graphics",
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/impeller/runtime_stage",

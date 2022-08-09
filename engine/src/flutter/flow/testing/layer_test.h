@@ -44,8 +44,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
 
  public:
   LayerTestBase()
-      : texture_registry_(std::make_shared<TextureRegistry>()),
-        preroll_context_{
+      : preroll_context_{
             // clang-format off
             .raster_cache                  = nullptr,
             .gr_context                    = nullptr,
@@ -163,9 +162,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
 
   std::vector<RasterCacheItem*>& cacheable_items() { return cacheable_items_; }
 
-  std::shared_ptr<TextureRegistry> texture_registry() {
-    return texture_registry_;
-  }
+  TextureRegistry& texture_regitry() { return texture_registry_; }
   RasterCache* raster_cache() { return raster_cache_.get(); }
   PrerollContext* preroll_context() { return &preroll_context_; }
   PaintContext& paint_context() { return paint_context_; }
@@ -208,7 +205,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   FixedRefreshRateStopwatch raster_time_;
   FixedRefreshRateStopwatch ui_time_;
   MutatorsStack mutators_stack_;
-  std::shared_ptr<TextureRegistry> texture_registry_;
+  TextureRegistry texture_registry_;
 
   std::unique_ptr<RasterCache> raster_cache_;
   PrerollContext preroll_context_;

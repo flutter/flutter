@@ -2382,6 +2382,7 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
         FixedRefreshRateStopwatch raster_time;
         FixedRefreshRateStopwatch ui_time;
         MutatorsStack mutators_stack;
+        TextureRegistry texture_registry;
         PaintContext paint_context = {
             // clang-format off
             .internal_nodes_canvas         = nullptr,
@@ -2391,7 +2392,7 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time,
             .ui_time                       = ui_time,
-            .texture_registry              = nullptr,
+            .texture_registry              = texture_registry,
             .raster_cache                  = &raster_cache,
             .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
@@ -2410,7 +2411,7 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
             .surface_needs_readback        = false,
             .raster_time                   = raster_time,
             .ui_time                       = ui_time,
-            .texture_registry              = nullptr,
+            .texture_registry              = texture_registry,
             .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
             .has_platform_view             = false,
@@ -3764,7 +3765,7 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
 
 TEST_F(ShellTest, PictureToImageSync) {
 #if !SHELL_ENABLE_GL
-  // This test uses the GL backend.
+  // GL emulation does not exist on Fuchsia.
   GTEST_SKIP();
 #endif  // !SHELL_ENABLE_GL
   auto settings = CreateSettingsForFixture();
@@ -3777,12 +3778,9 @@ TEST_F(ShellTest, PictureToImageSync) {
                   ShellTestPlatformView::BackendType::kGLBackend  //
       );
 
-  fml::CountDownLatch latch(2);
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
-                      // Teardown and set up rasterizer again.
-                      PlatformViewNotifyDestroyed(shell.get());
-                      PlatformViewNotifyCreated(shell.get());
-                      latch.CountDown();
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&latch](auto args) {
+                      latch.Signal();
                     }));
 
   ASSERT_NE(shell, nullptr);

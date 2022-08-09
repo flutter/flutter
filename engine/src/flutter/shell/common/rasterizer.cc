@@ -141,8 +141,8 @@ void Rasterizer::NotifyLowMemoryWarning() const {
   context->performDeferredCleanup(std::chrono::milliseconds(0));
 }
 
-std::shared_ptr<flutter::TextureRegistry> Rasterizer::GetTextureRegistry() {
-  return compositor_context_->texture_registry();
+flutter::TextureRegistry* Rasterizer::GetTextureRegistry() {
+  return &compositor_context_->texture_registry();
 }
 
 flutter::LayerTree* Rasterizer::GetLastLayerTree() {
@@ -248,7 +248,7 @@ bool Rasterizer::ShouldResubmitFrame(const RasterStatus& raster_status) {
 }
 
 namespace {
-std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
+std::pair<sk_sp<SkImage>, std::string> MakeBitmapImage(
     sk_sp<DisplayList> display_list,
     const SkImageInfo& image_info) {
   FML_DCHECK(display_list);
@@ -258,10 +258,8 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
   // This limit is taken from the Metal specification. D3D, Vulkan, and GL
   // generally have lower limits.
   if (image_info.width() > 16384 || image_info.height() > 16384) {
-    return std::make_unique<SnapshotDelegate::GpuImageResult>(
-        GrBackendTexture(), nullptr, nullptr,
-        "unable to create render target at specified size");
-  };
+    return {nullptr, "unable to create render target at specified size"};
+  }
 
   sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
   SkCanvas* canvas = surface->getCanvas();
@@ -269,26 +267,18 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
   display_list->RenderTo(canvas);
 
   sk_sp<SkImage> image = surface->makeImageSnapshot();
-  return std::make_unique<SnapshotDelegate::GpuImageResult>(
-      GrBackendTexture(), nullptr, image,
-      image ? "" : "Unable to create image");
+  return {image, image ? "" : "Unable to create image"};
 }
 }  // namespace
 
-std::unique_ptr<SnapshotDelegate::GpuImageResult> Rasterizer::MakeGpuImage(
+std::pair<sk_sp<SkImage>, std::string> Rasterizer::MakeGpuImage(
     sk_sp<DisplayList> display_list,
-    const SkImageInfo& image_info) {
+    SkISize picture_size) {
   TRACE_EVENT0("flutter", "Rasterizer::MakeGpuImage");
   FML_DCHECK(display_list);
 
-// TODO(dnfield): the Linux embedding is in a rough state right now and
-// I can't seem to get the GPU path working on it.
-// https://github.com/flutter/flutter/issues/108835
-#if FML_OS_LINUX
-  return MakeBitmapImage(std::move(display_list), image_info);
-#endif
-
-  std::unique_ptr<SnapshotDelegate::GpuImageResult> result;
+  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(picture_size);
+  std::pair<sk_sp<SkImage>, std::string> result;
   delegate_.GetIsGpuDisabledSyncSwitch()->Execute(
       fml::SyncSwitch::Handlers()
           .SetIfTrue([&result, &image_info, &display_list] {
@@ -309,23 +299,11 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> Rasterizer::MakeGpuImage(
               return;
             }
 
-            GrBackendTexture texture = context->createBackendTexture(
-                image_info.width(), image_info.height(), image_info.colorType(),
-                GrMipmapped::kNo, GrRenderable::kYes);
-            if (!texture.isValid()) {
-              result = std::make_unique<SnapshotDelegate::GpuImageResult>(
-                  GrBackendTexture(), nullptr, nullptr,
-                  "unable to create render target at specified size");
-              return;
-            }
-
-            sk_sp<SkSurface> sk_surface = SkSurface::MakeFromBackendTexture(
-                context, texture, kTopLeft_GrSurfaceOrigin, /*sampleCnt=*/0,
-                image_info.colorType(), image_info.refColorSpace(), nullptr);
+            sk_sp<SkSurface> sk_surface = SkSurface::MakeRenderTarget(
+                context, SkBudgeted::kYes, image_info);
             if (!sk_surface) {
-              result = std::make_unique<SnapshotDelegate::GpuImageResult>(
-                  GrBackendTexture(), nullptr, nullptr,
-                  "unable to create rendering surface for image");
+              result = {nullptr,
+                        "unable to create render target at specified size"};
               return;
             }
 
@@ -333,8 +311,8 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> Rasterizer::MakeGpuImage(
             canvas->clear(SK_ColorTRANSPARENT);
             display_list->RenderTo(canvas);
 
-            result = std::make_unique<SnapshotDelegate::GpuImageResult>(
-                texture, sk_ref_sp(context), nullptr, "");
+            sk_sp<SkImage> image = sk_surface->makeImageSnapshot();
+            result = {image, image ? "" : "Unable to create image"};
           }));
   return result;
 }
