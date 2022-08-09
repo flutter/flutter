@@ -205,6 +205,9 @@ executable("flutter_windows_unittests") {
     "window_unittests.cc",
   ]
 
+  configs +=
+      [ "//flutter/shell/platform/common:desktop_library_implementation" ]
+
   public_configs = [ "//flutter:config" ]
 
   deps = [
