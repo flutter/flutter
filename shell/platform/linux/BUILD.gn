@@ -141,6 +141,7 @@ source_set("flutter_linux_sources") {
     "fl_task_runner.cc",
     "fl_task_runner.h",
     "fl_text_input_plugin.cc",
+    "fl_text_input_view_delegate.cc",
     "fl_texture.cc",
     "fl_texture_gl.cc",
     "fl_texture_registrar.cc",
@@ -234,6 +235,7 @@ executable("flutter_linux_unittests") {
     "testing/mock_settings.cc",
     "testing/mock_signal_handler.cc",
     "testing/mock_text_input_plugin.cc",
+    "testing/mock_text_input_view_delegate.cc",
     "testing/mock_texture_registrar.cc",
   ]
 
