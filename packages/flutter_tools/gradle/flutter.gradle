@@ -94,6 +94,8 @@ class FlutterPlugin implements Plugin<Project> {
     private static final String ARCH_X86        = "x86";
     private static final String ARCH_X86_64     = "x86_64";
 
+    private static final String INTERMEDIATE_DIR = "intermediate";
+
     /** Maps platforms to ABI architectures. */
     private static final Map PLATFORM_ARCH_MAP = [
         (PLATFORM_ARM32)    : ARCH_ARM32,
@@ -893,7 +895,7 @@ class FlutterPlugin implements Plugin<Project> {
                 trackWidgetCreation trackWidgetCreationValue
                 targetPlatformValues = targetPlatforms
                 sourceDir getFlutterSourceDirectory()
-                intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
+                intermediateDir project.file("${project.buildDir}/$INTERMEDIATE_DIR/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
@@ -915,7 +917,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            File libJar = project.file("${project.buildDir}/$INTERMEDIATE_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
