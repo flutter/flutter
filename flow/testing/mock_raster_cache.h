@@ -72,7 +72,7 @@ class MockRasterCache : public RasterCache {
   MutatorsStack mutators_stack_;
   FixedRefreshRateStopwatch raster_time_;
   FixedRefreshRateStopwatch ui_time_;
-  std::shared_ptr<TextureRegistry> texture_registry_;
+  TextureRegistry texture_registry_;
   PrerollContext preroll_context_ = {
       // clang-format off
       .raster_cache                  = this,
@@ -122,15 +122,10 @@ struct PaintContextHolder {
 };
 
 PrerollContextHolder GetSamplePrerollContextHolder(
-    RasterCache* raster_cache,
-    FixedRefreshRateStopwatch* raster_time,
-    FixedRefreshRateStopwatch* ui_time,
-    MutatorsStack* mutators_stack);
+    RasterCache* raster_cache = nullptr);
 
 PaintContextHolder GetSamplePaintContextHolder(
-    RasterCache* raster_cache,
-    FixedRefreshRateStopwatch* raster_time,
-    FixedRefreshRateStopwatch* ui_time);
+    RasterCache* raster_cache = nullptr);
 
 bool RasterCacheItemPrerollAndTryToRasterCache(
     DisplayListRasterCacheItem& display_list_item,
