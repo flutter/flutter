@@ -1376,7 +1376,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
+    expect(find.byType(BottomSheet), findsNothing);
 
     // Bring up bottom sheet.
     bool showBottomSheetThenCalled = false;
@@ -1393,7 +1393,7 @@ void main() {
       showBottomSheetThenCalled = true;
     });
     await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(find.byType(BottomSheet), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
   });
 
