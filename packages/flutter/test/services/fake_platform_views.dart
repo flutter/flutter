@@ -109,9 +109,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    throw UnimplementedError();
-  }
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {}
 
   @override
   Future<void> sendMotionEvent(AndroidMotionEvent event) {

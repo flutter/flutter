@@ -50,8 +50,9 @@ class CardCollectionState extends State<CardCollection> {
   bool _varyFontSizes = false;
 
   void _updateCardSizes() {
-    if (_fixedSizeCards)
+    if (_fixedSizeCards) {
       return;
+    }
     _cardModels = List<CardModel>.generate(
       _cardModels.length,
       (int i) {
@@ -77,10 +78,11 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   void _initCardModels() {
-    if (_fixedSizeCards)
+    if (_fixedSizeCards) {
       _initFixedSizedCardModels();
-    else
+    } else {
       _initVariableSizedCardModels();
+    }
   }
 
   @override
@@ -301,13 +303,15 @@ class CardCollectionState extends State<CardCollection> {
 
     // This icon is wrong in RTL.
     Widget leftArrowIcon = const Icon(Icons.arrow_back, size: 36.0);
-    if (_dismissDirection == DismissDirection.startToEnd)
+    if (_dismissDirection == DismissDirection.startToEnd) {
       leftArrowIcon = Opacity(opacity: 0.1, child: leftArrowIcon);
+    }
 
     // This icon is wrong in RTL.
     Widget rightArrowIcon = const Icon(Icons.arrow_forward, size: 36.0);
-    if (_dismissDirection == DismissDirection.endToStart)
+    if (_dismissDirection == DismissDirection.endToStart) {
       rightArrowIcon = Opacity(opacity: 0.1, child: rightArrowIcon);
+    }
 
     final ThemeData theme = Theme.of(context);
     final TextStyle? backgroundTextStyle = theme.primaryTextTheme.headline6;

@@ -115,8 +115,9 @@ Press play to produce texture frames.''';
           _state = FrameState.initial;
         });
       } else {
-        if ((tickCount % (calibrationTickCount ~/ 20)) == 0)
+        if ((tickCount % (calibrationTickCount ~/ 20)) == 0) {
           debugPrint('Calibrating... ${(100.0 * tickCount / calibrationTickCount).floor()}%');
+        }
       }
     });
     ticker.start();
