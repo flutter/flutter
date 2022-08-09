@@ -91,10 +91,12 @@ static bool AdvancedBlend(const FilterInput::Vector& inputs,
   cmd.BindVertices(vtx_buffer);
   cmd.pipeline = std::move(pipeline);
 
+  typename FS::BlendInfo blend_info;
+
   auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
   FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, sampler);
+  blend_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
 
-  typename FS::BlendInfo blend_info;
   if (foreground_color.has_value()) {
     blend_info.color_factor = 1;
     blend_info.color = foreground_color.value();
@@ -104,6 +106,7 @@ static bool AdvancedBlend(const FilterInput::Vector& inputs,
   } else {
     blend_info.color_factor = 0;
     FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, sampler);
+    blend_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
   }
   auto blend_uniform = host_buffer.EmplaceUniform(blend_info);
   FS::BindBlendInfo(cmd, blend_uniform);
