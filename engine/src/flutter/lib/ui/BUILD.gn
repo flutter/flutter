@@ -187,6 +187,7 @@ if (enable_unittests) {
     dart_main = "fixtures/ui_test.dart"
     fixtures = [
       "fixtures/DashInNooglerHat.jpg",
+      "fixtures/DashInNooglerHat%20WithSpace.jpg",
       "fixtures/Horizontal.jpg",
       "fixtures/Horizontal.png",
       "fixtures/hello_loop_2.gif",

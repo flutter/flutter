@@ -47,6 +47,7 @@ test_fixtures("file_fixtures") {
     "sample.tesc",
     "sample.tese",
     "sample.vert",
+    "sa%m#ple.vert",
     "struct_def_bug.vert",
     "table_mountain_nx.png",
     "table_mountain_ny.png",

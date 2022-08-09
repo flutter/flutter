@@ -464,13 +464,24 @@ const std::vector<std::string>& Compiler::GetIncludedFileNames() const {
   return included_file_names_;
 }
 
+// Escape `%` and `#` characters according to doc comment at
+// https://github.com/ninja-build/ninja/blob/master/src/depfile_parser.cc#L28
+static void EscapeString(std::string& str, std::stringstream& stream) {
+  for (auto it = str.begin(); it != str.end(); it++) {
+    if (*it == '%' || *it == '#') {
+      stream << '\\';
+    }
+    stream << *it;
+  }
+}
+
 static std::string JoinStrings(std::vector<std::string> items,
                                std::string separator) {
   std::stringstream stream;
   for (size_t i = 0, count = items.size(); i < count; i++) {
     const auto is_last = (i == count - 1);
 
-    stream << items[i];
+    EscapeString(items[i], stream);
     if (!is_last) {
       stream << separator;
     }
@@ -486,6 +497,7 @@ std::string Compiler::GetDependencyNames(std::string separator) const {
 
 std::unique_ptr<fml::Mapping> Compiler::CreateDepfileContents(
     std::initializer_list<std::string> targets_names) const {
+  // https://github.com/ninja-build/ninja/blob/master/src/depfile_parser.cc#L28
   const auto targets = JoinStrings(targets_names, " ");
   const auto dependencies = GetDependencyNames(" ");
 

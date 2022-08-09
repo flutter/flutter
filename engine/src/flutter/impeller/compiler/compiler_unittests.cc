@@ -65,6 +65,11 @@ TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
 
+TEST_P(CompilerTest, ShaderWithSpecialCharactersHasEscapedDepfile) {
+  ASSERT_TRUE(CanCompileAndReflect("sa\%m#ple.vert"));
+  ASSERT_TRUE(ValidateDepfileEscaped("sa\%m#ple.vert"));
+}
+
 #define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)              \
   INSTANTIATE_TEST_SUITE_P(                                               \
       suite_name, CompilerTest,                                           \

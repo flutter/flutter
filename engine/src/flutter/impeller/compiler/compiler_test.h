@@ -25,6 +25,8 @@ class CompilerTest : public ::testing::TestWithParam<TargetPlatform> {
       const char* fixture_name,
       SourceType source_type = SourceType::kUnknown) const;
 
+  bool ValidateDepfileEscaped(const char* fixture_name) const;
+
  private:
   fml::UniqueFD intermediates_directory_;
 
