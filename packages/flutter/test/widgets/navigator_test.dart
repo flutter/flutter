@@ -3867,7 +3867,7 @@ void main() {
       });
 
   testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
-    final NavigatorObserver observer = _MockNavigatorObserver();
+    final observer = _MockNavigatorObserver();
     Widget build([Key? key]) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -3887,11 +3887,16 @@ void main() {
     }
 
     await tester.pumpWidget(build());
+    observer._checkInvocations([#navigator, #didPush]);
     await tester.pumpWidget(Container(child: build()));
+    observer._checkInvocations([#navigator, #didPush, #navigator]);
     await tester.pumpWidget(Container());
+    observer._checkInvocations([#navigator]);
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(build(key));
+    observer._checkInvocations([#navigator, #didPush]);
     await tester.pumpWidget(Container(child: build(key)));
+    observer._checkInvocations([#navigator, #navigator]);
   });
 }
 
@@ -4145,8 +4150,16 @@ class ZeroDurationPageRoute extends PageRoute<void> {
 }
 
 class _MockNavigatorObserver implements NavigatorObserver {
+  List<Symbol> _invocations = [];
+
+  void _checkInvocations(List<Symbol> expected) {
+    expect(_invocations, expected);
+    _invocations.clear();
+  }
+
   @override
   Object? noSuchMethod(Invocation invocation) {
-    throw 'TODO(paulberry): $invocation';
+    _invocations.add(invocation.memberName);
+    return null;
   }
 }
