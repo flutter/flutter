@@ -158,6 +158,7 @@ shared_library("flutter_windows") {
 }
 
 test_fixtures("flutter_windows_fixtures") {
+  dart_main = "fixtures/main.dart"
   fixtures = []
 }
 
@@ -198,6 +199,12 @@ executable("flutter_windows_unittests") {
     "testing/test_keyboard.cc",
     "testing/test_keyboard.h",
     "testing/test_keyboard_unittests.cc",
+    "testing/windows_test.cc",
+    "testing/windows_test.h",
+    "testing/windows_test_config_builder.cc",
+    "testing/windows_test_config_builder.h",
+    "testing/windows_test_context.cc",
+    "testing/windows_test_context.h",
     "testing/wm_builders.cc",
     "testing/wm_builders.h",
     "text_input_plugin_unittest.cc",
