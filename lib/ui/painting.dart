@@ -4077,13 +4077,18 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   /// compiler. The constructed object should then be reused via the [shader]
   /// method to create [Shader] objects that can be used by [Shader.paint].
   static Future<FragmentProgram> fromAsset(String assetKey) {
-    final FragmentProgram? program = _shaderRegistry[assetKey]?.target;
+    // The flutter tool converts all asset keys with spaces into URI
+    // encoded paths (replacing ' ' with '%20', for example). We perform
+    // the same encoding here so that users can load assets with the same
+    // key they have written in the pubspec.
+    final String encodedKey = Uri(path: Uri.encodeFull(assetKey)).path;
+    final FragmentProgram? program = _shaderRegistry[encodedKey]?.target;
     if (program != null) {
       return Future<FragmentProgram>.value(program);
     }
     return Future<FragmentProgram>.microtask(() {
-      final FragmentProgram program = FragmentProgram._fromAsset(assetKey);
-      _shaderRegistry[assetKey] = WeakReference<FragmentProgram>(program);
+      final FragmentProgram program = FragmentProgram._fromAsset(encodedKey);
+      _shaderRegistry[encodedKey] = WeakReference<FragmentProgram>(program);
       return program;
     });
   }
@@ -5955,9 +5960,14 @@ class ImmutableBuffer extends NativeFieldWrapperClass1 {
   ///
   /// Throws an [Exception] if the asset does not exist.
   static Future<ImmutableBuffer> fromAsset(String assetKey) {
+    // The flutter tool converts all asset keys with spaces into URI
+    // encoded paths (replacing ' ' with '%20', for example). We perform
+    // the same encoding here so that users can load assets with the same
+    // key they have written in the pubspec.
+    final String encodedKey = Uri(path: Uri.encodeFull(assetKey)).path;
     final ImmutableBuffer instance = ImmutableBuffer._(0);
     return _futurize((_Callback<int> callback) {
-      return instance._initFromAsset(assetKey, callback);
+      return instance._initFromAsset(encodedKey, callback);
     }).then((int length) => instance.._length = length);
   }
 
