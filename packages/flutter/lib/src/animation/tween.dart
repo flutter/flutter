@@ -17,7 +17,8 @@ export 'curves.dart' show Curve;
 // late Animation<Offset> _animation;
 // late AnimationController _controller;
 
-/// A typedef used to create an [Animatable] from a callback.
+/// A typedef used by [Animatable.fromCallback] to create an [Animatable]
+/// from a callback.
 typedef AnimatableCallback<T> = T Function(double);
 
 /// An object that can produce a value of type `T` given an [Animation<double>]
