@@ -57,7 +57,7 @@ struct PrerollContext {
   // These allow us to paint in the end of subtree Preroll.
   const Stopwatch& raster_time;
   const Stopwatch& ui_time;
-  TextureRegistry& texture_registry;
+  std::shared_ptr<TextureRegistry> texture_registry;
   const bool checkerboard_offscreen_layers;
   const float frame_device_pixel_ratio = 1.0f;
 
@@ -132,7 +132,7 @@ struct PaintContext {
   ExternalViewEmbedder* view_embedder;
   const Stopwatch& raster_time;
   const Stopwatch& ui_time;
-  TextureRegistry& texture_registry;
+  std::shared_ptr<TextureRegistry> texture_registry;
   const RasterCache* raster_cache;
   const bool checkerboard_offscreen_layers;
   const float frame_device_pixel_ratio = 1.0f;

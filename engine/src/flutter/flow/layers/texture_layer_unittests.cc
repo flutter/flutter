@@ -43,7 +43,7 @@ TEST_F(TextureLayerTest, PaintingEmptyLayerDies) {
                                      false, DlImageSampling::kNearestNeighbor);
 
   // Ensure the texture is located by the Layer.
-  preroll_context()->texture_registry.RegisterTexture(mock_texture);
+  preroll_context()->texture_registry->RegisterTexture(mock_texture);
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
@@ -62,7 +62,7 @@ TEST_F(TextureLayerTest, PaintBeforePrerollDies) {
       layer_offset, layer_size, texture_id, false, DlImageSampling::kLinear);
 
   // Ensure the texture is located by the Layer.
-  preroll_context()->texture_registry.RegisterTexture(mock_texture);
+  preroll_context()->texture_registry->RegisterTexture(mock_texture);
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "needs_painting\\(context\\)");
@@ -78,7 +78,7 @@ TEST_F(TextureLayerTest, PaintingWithLinearSampling) {
       layer_offset, layer_size, texture_id, false, DlImageSampling::kLinear);
 
   // Ensure the texture is located by the Layer.
-  preroll_context()->texture_registry.RegisterTexture(mock_texture);
+  preroll_context()->texture_registry->RegisterTexture(mock_texture);
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(),
@@ -124,12 +124,12 @@ TEST_F(TextureLayerTest, OpacityInheritance) {
       layer_offset, layer_size, texture_id, false, DlImageSampling::kLinear);
 
   // Ensure the texture is located by the Layer.
-  preroll_context()->texture_registry.RegisterTexture(mock_texture);
+  preroll_context()->texture_registry->RegisterTexture(mock_texture);
 
   // The texture layer always reports opacity compatibility.
   PrerollContext* context = preroll_context();
   context->subtree_can_inherit_opacity = false;
-  context->texture_registry.RegisterTexture(mock_texture);
+  context->texture_registry->RegisterTexture(mock_texture);
   layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(context->subtree_can_inherit_opacity);
 
