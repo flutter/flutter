@@ -204,7 +204,7 @@ TEST_F(LayerTreeTest, PrerollContextInitialization) {
   MutatorsStack mock_mutators;
   FixedRefreshRateStopwatch mock_raster_time;
   FixedRefreshRateStopwatch mock_ui_time;
-  TextureRegistry mock_registry;
+  std::shared_ptr<TextureRegistry> mock_registry;
 
   auto expect_defaults = [&mock_mutators, &mock_raster_time, &mock_ui_time,
                           &mock_registry](const PrerollContext& context) {
@@ -218,7 +218,7 @@ TEST_F(LayerTreeTest, PrerollContextInitialization) {
 
     EXPECT_EQ(&context.raster_time, &mock_raster_time);
     EXPECT_EQ(&context.ui_time, &mock_ui_time);
-    EXPECT_EQ(&context.texture_registry, &mock_registry);
+    EXPECT_EQ(context.texture_registry.get(), mock_registry.get());
     EXPECT_EQ(context.checkerboard_offscreen_layers, false);
     EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);
 
@@ -244,11 +244,11 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
   // PaintContext that this test must be revisited and updated.
   // If any fields get removed or replaced, then the expect_defaults closure
   // will fail to compile, again bringing attention to updating this test.
-  EXPECT_EQ(sizeof(PaintContext), size_t(104));
+  EXPECT_EQ(sizeof(PaintContext), size_t(112));
 
   FixedRefreshRateStopwatch mock_raster_time;
   FixedRefreshRateStopwatch mock_ui_time;
-  TextureRegistry mock_registry;
+  std::shared_ptr<TextureRegistry> mock_registry;
 
   auto expect_defaults = [&mock_raster_time, &mock_ui_time,
                           &mock_registry](const PaintContext& context) {
@@ -258,7 +258,7 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
     EXPECT_EQ(context.view_embedder, nullptr);
     EXPECT_EQ(&context.raster_time, &mock_raster_time);
     EXPECT_EQ(&context.ui_time, &mock_ui_time);
-    EXPECT_EQ(&context.texture_registry, &mock_registry);
+    EXPECT_EQ(context.texture_registry.get(), mock_registry.get());
     EXPECT_EQ(context.raster_cache, nullptr);
     EXPECT_EQ(context.checkerboard_offscreen_layers, false);
     EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);

@@ -339,8 +339,28 @@ Future<void> toImageSync() async {
   expect(image.width, 20);
   expect(image.height, 25);
 
-  final ByteData data = (await image.toByteData())!;
-  expect(data.lengthInBytes, 20 * 25 * 4);
-  expect(data.buffer.asUint32List().every((int byte) => byte == 0xFFAAAAAA), true);
+  final ByteData dataBefore = (await image.toByteData())!;
+  expect(dataBefore.lengthInBytes, 20 * 25 * 4);
+  for (final int byte in dataBefore.buffer.asUint32List()) {
+    expect(byte, 0xFFAAAAAA);
+  }
+
+  // Cause the rasterizer to get torn down.
+  notifyNative();
+
+  final ByteData dataAfter = (await image.toByteData())!;
+  expect(dataAfter.lengthInBytes, 20 * 25 * 4);
+  for (final int byte in dataAfter.buffer.asUint32List()) {
+    expect(byte, 0xFFAAAAAA);
+  }
+
+  // Verify that the image can be drawn successfully.
+  final PictureRecorder recorder2 = PictureRecorder();
+  final Canvas canvas2 = Canvas(recorder2);
+  canvas2.drawImage(image, Offset.zero, Paint());
+  final Picture picture2 = recorder2.endRecording();
+
+  picture.dispose();
+  picture2.dispose();
   notifyNative();
 }
