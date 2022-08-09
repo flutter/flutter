@@ -35,14 +35,13 @@ void main() {
       const TextSpan(text: '! Hey')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
-      );
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
+    );
 
       expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -67,13 +66,12 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
@@ -102,14 +100,13 @@ void main() {
       const TextSpan(text: ' right'),
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
-      );
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
+    );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   });
@@ -136,13 +133,12 @@ void main() {
       const TextSpan(text: ' right'),
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
@@ -169,13 +165,12 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
@@ -204,13 +199,12 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
@@ -234,13 +228,12 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
@@ -267,13 +260,12 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
@@ -300,13 +292,12 @@ void main() {
       TextSpan(style: composingStyle, text: 'Hey')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
@@ -337,13 +328,12 @@ void main() {
       const TextSpan(text: '!')
     ]);
     final TextSpan textSpanTree =
-      SpellCheckSuggestionsHandler
-        .buildTextSpanWithSpellCheckSuggestions(
-          value,
-          composingRegionOutOfRange,
-          null,
-          misspelledTextStyle,
-          spellCheckResults
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));

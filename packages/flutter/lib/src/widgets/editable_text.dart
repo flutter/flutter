@@ -1570,7 +1570,7 @@ class EditableText extends StatefulWidget {
   /// default unless the [DefaultSpellCheckService] is supported, in which case
   /// it is used. It is currently supported only on Android.
   ///
-  /// If this configuration is left null, then spell check is diabled by default.
+  /// If this configuration is left null, then spell check is disabled by default.
   /// {@endtemplate}
   final SpellCheckConfiguration? spellCheckConfiguration;
   /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
@@ -1809,7 +1809,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// Spell check is enabled when a [SpellCheckConfiguration] has been specified
   /// for the widget.
-  @visibleForTesting
   bool get spellCheckEnabled => _spellCheckConfiguration.spellCheckEnabled;
 
   /// The most up-to-date spell check results for text input.
@@ -2009,7 +2008,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
-  SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
+  static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
       return const SpellCheckConfiguration.disabled();
     }
@@ -3831,13 +3830,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final bool composingRegionOutOfRange = !_value.isComposingRangeValid || !withComposing;
 
-      return SpellCheckSuggestionsHandler
-                .buildTextSpanWithSpellCheckSuggestions(
-                  _value,
-                  composingRegionOutOfRange,
-                  widget.style,
-                  _spellCheckConfiguration.misspelledTextStyle!,
-                  _spellCheckResults!,
+      return buildTextSpanWithSpellCheckSuggestions(
+        _value,
+        composingRegionOutOfRange,
+        widget.style,
+        _spellCheckConfiguration.misspelledTextStyle!,
+        _spellCheckResults!,
       );
     }
 

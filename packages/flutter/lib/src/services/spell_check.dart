@@ -89,7 +89,7 @@ abstract class SpellCheckService {
   /// Facilitates a spell check request.
   ///
   /// Returns a [Future] that resolves with a [List] of [SuggestionSpan]s for
-  /// all misspelled words in [text] for the given [locale].
+  /// all misspelled words in the given [String] for the given [Locale].
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
     Locale locale, String text
   );
@@ -103,7 +103,7 @@ abstract class SpellCheckService {
 ///
 /// See also:
 ///
-///  * [SpellCheckService], the service that this implements and may be
+///  * [SpellCheckService], the service that this implements that may be
 ///    overriden for use by [EditableText].
 ///  * [EditableText], which may use this service to fetch results.
 class DefaultSpellCheckService implements SpellCheckService {
@@ -113,11 +113,8 @@ class DefaultSpellCheckService implements SpellCheckService {
     spellCheckChannel = SystemChannels.spellCheck;
   }
 
-  /// The last recieved [SuggestionSpan]s from the shell side.
-  List<SuggestionSpan>? lastSavedSpans;
-
-  /// The text corresponding to the [lastSavedSpans].
-  String? lastSavedText;
+  /// The last received results from the shell side.
+  SpellCheckResults? lastSavedResults;
 
   /// The channel used to communicate with the shell side to complete spell
   /// check requests.
@@ -200,18 +197,19 @@ class DefaultSpellCheckService implements SpellCheckService {
       );
     }
 
-    // Merge current and previous spell check results if between requests,
-    // the text has not changed but the spell check results have.
-    final bool textHasNotChanged = lastSavedText != null && lastSavedText == text;
-    final bool spansHaveChanged =
-        lastSavedSpans != null && !listEquals(lastSavedSpans, suggestionSpans);
+    if (lastSavedResults != null) {
+      // Merge current and previous spell check results if between requests,
+      // the text has not changed but the spell check results have.
+      final bool textHasNotChanged = lastSavedResults!.spellCheckedText == text;
+      final bool spansHaveChanged =
+          listEquals(lastSavedResults!.suggestionSpans, suggestionSpans);
 
-    if (textHasNotChanged && spansHaveChanged) {
-      suggestionSpans = mergeResults(lastSavedSpans!, suggestionSpans);
+      if (textHasNotChanged && spansHaveChanged) {
+        suggestionSpans = mergeResults(lastSavedResults!.suggestionSpans, suggestionSpans);
+      }
+
+      lastSavedResults = SpellCheckResults(text, suggestionSpans);
     }
-
-    lastSavedSpans = suggestionSpans;
-    lastSavedText = text;
 
     return suggestionSpans;
   }

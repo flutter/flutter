@@ -818,8 +818,8 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   ///
-  /// If the misspelled [TextStyle] is not specified in this configuration,
-  /// then [cupertinoMisspelledTextStyle] is used by default.
+  /// If [SpellCheckConfiguration.misspelledTextStyle] is not specified in this
+  /// configuration, then [cupertinoMisspelledTextStyle] is used by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
 
   /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
