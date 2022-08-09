@@ -198,7 +198,7 @@ void main() {
             'git',
             'commit',
             '--message',
-            'Update Dart SDK to $nextDartRevision'
+            'Update Dart SDK to $nextDartRevision',
           ],
         ),
         const FakeCommand(
@@ -268,7 +268,7 @@ void main() {
             'git',
             'merge-base',
             'upstream/$candidateBranch',
-            'upstream/master'
+            'upstream/master',
           ],
           stdout: branchPointRevision,
         ),
@@ -279,7 +279,7 @@ void main() {
             'describe',
             '--exact-match',
             '--tags',
-            branchPointRevision
+            branchPointRevision,
           ],
         ),
       ];
