@@ -41,6 +41,7 @@ class TestResourceContext : public TestSkObject {
       : TestSkObject(latch, dtor_task_queue_id) {}
   ~TestResourceContext() = default;
   void performDeferredCleanup(std::chrono::milliseconds msNotUsed) {}
+  void deleteBackendTexture(GrBackendTexture texture) {}
 };
 
 class SkiaGpuObjectTest : public ThreadTest {

@@ -167,7 +167,6 @@ sk_sp<DisplayList> LayerTree::Flatten(const SkRect& bounds) {
 
   MutatorsStack unused_stack;
   const FixedRefreshRateStopwatch unused_stopwatch;
-  TextureRegistry unused_texture_registry;
   SkMatrix root_surface_transformation;
   // No root surface transformation. So assume identity.
   root_surface_transformation.reset();
@@ -183,7 +182,7 @@ sk_sp<DisplayList> LayerTree::Flatten(const SkRect& bounds) {
       .surface_needs_readback        = false,
       .raster_time                   = unused_stopwatch,
       .ui_time                       = unused_stopwatch,
-      .texture_registry              = unused_texture_registry,
+      .texture_registry              = nullptr,
       .checkerboard_offscreen_layers = false,
       .frame_device_pixel_ratio      = device_pixel_ratio_
       // clang-format on
@@ -202,7 +201,7 @@ sk_sp<DisplayList> LayerTree::Flatten(const SkRect& bounds) {
       .view_embedder                 = nullptr,
       .raster_time                   = unused_stopwatch,
       .ui_time                       = unused_stopwatch,
-      .texture_registry              = unused_texture_registry,
+      .texture_registry              = nullptr,
       .raster_cache                  = nullptr,
       .checkerboard_offscreen_layers = false,
       .frame_device_pixel_ratio      = device_pixel_ratio_,

@@ -16,7 +16,22 @@ class GrDirectContext;
 
 namespace flutter {
 
-class Texture {
+class ContextListener {
+ public:
+  ContextListener();
+  ~ContextListener();
+
+  // Called from raster thread.
+  virtual void OnGrContextCreated() = 0;
+
+  // Called from raster thread.
+  virtual void OnGrContextDestroyed() = 0;
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(ContextListener);
+};
+
+class Texture : public ContextListener {
  public:
   explicit Texture(int64_t id);  // Called from UI or raster thread.
   virtual ~Texture();            // Called from raster thread.
@@ -29,12 +44,6 @@ class Texture {
                      const SkSamplingOptions& sampling,
                      const SkPaint* paint = nullptr) = 0;
 
-  // Called from raster thread.
-  virtual void OnGrContextCreated() = 0;
-
-  // Called from raster thread.
-  virtual void OnGrContextDestroyed() = 0;
-
   // Called on raster thread.
   virtual void MarkNewFrameAvailable() = 0;
 
@@ -45,7 +54,6 @@ class Texture {
 
  private:
   int64_t id_;
-
   FML_DISALLOW_COPY_AND_ASSIGN(Texture);
 };
 
@@ -57,7 +65,14 @@ class TextureRegistry {
   void RegisterTexture(std::shared_ptr<Texture> texture);
 
   // Called from raster thread.
+  void RegisterContextListener(uintptr_t id,
+                               std::weak_ptr<ContextListener> image);
+
+  // Called from raster thread.
   void UnregisterTexture(int64_t id);
+
+  // Called from the raster thread.
+  void UnregisterContextListener(uintptr_t id);
 
   // Called from raster thread.
   std::shared_ptr<Texture> GetTexture(int64_t id);
@@ -70,6 +85,7 @@ class TextureRegistry {
 
  private:
   std::map<int64_t, std::shared_ptr<Texture>> mapping_;
+  std::map<uintptr_t, std::weak_ptr<ContextListener>> images_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureRegistry);
 };
