@@ -11,6 +11,7 @@
 ## Linux Android DeviceLab tests
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @blasten @flutter/engine
+/dev/devicelab/bin/tasks/android_assets_test.dart @jonahwilliams @flutter/tool
 /dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_lifecycles_test.dart @blasten @flutter/engine
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool

@@ -79,5 +79,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/test space.png
 
 # PUBSPEC CHECKSUM: 77df

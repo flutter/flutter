@@ -1239,7 +1239,17 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
-
+  
+  - name: Linux_android android_assets_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab" ,"android", "linux"]
+      task_name: android_assets_test
+  
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: false

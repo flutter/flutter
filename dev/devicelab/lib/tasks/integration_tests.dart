@@ -135,6 +135,14 @@ TaskFunction dartDefinesTask() {
   );
 }
 
+TaskFunction assetTestTask() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/assets.dart', 
+    extraOptions: <String>[],
+  );
+}
+
 TaskFunction createEndToEndIntegrationTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
