@@ -40,7 +40,8 @@ class FlutterExtension {
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
-     * Chosen as default version of the AGP version below.
+     * Chosen as default version of the AGP version below as found in
+     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
      */
     static String ndkVersion = "21.4.7075529"
 
@@ -94,7 +95,7 @@ class FlutterPlugin implements Plugin<Project> {
     private static final String ARCH_X86        = "x86";
     private static final String ARCH_X86_64     = "x86_64";
 
-    private static final String INTERMEDIATE_DIR = "intermediate";
+    private static final String INTERMEDIATES_DIR = "intermediates";
 
     /** Maps platforms to ABI architectures. */
     private static final Map PLATFORM_ARCH_MAP = [
@@ -895,7 +896,7 @@ class FlutterPlugin implements Plugin<Project> {
                 trackWidgetCreation trackWidgetCreationValue
                 targetPlatformValues = targetPlatforms
                 sourceDir getFlutterSourceDirectory()
-                intermediateDir project.file("${project.buildDir}/$INTERMEDIATE_DIR/flutter/${variant.name}/")
+                intermediateDir project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
@@ -917,7 +918,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            File libJar = project.file("${project.buildDir}/$INTERMEDIATE_DIR/flutter/${variant.name}/libs.jar")
+            File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
