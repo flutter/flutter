@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'dart:io' hide Directory, File;
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -70,10 +68,10 @@ void main() {
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
-        fileSystem: null,
-        flutterRoot: null,
-        platform: null,
-        webBuildDirectory: null,
+        fileSystem: null, // ignore: avoid_redundant_argument_values
+        flutterRoot: null, // ignore: avoid_redundant_argument_values
+        platform: null, // ignore: avoid_redundant_argument_values
+        webBuildDirectory: null, // ignore: avoid_redundant_argument_values
         basePath: null,
       );
     }, overrides: <Type, Generator>{
@@ -664,7 +662,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -680,8 +678,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -777,7 +775,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -792,8 +790,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -883,7 +881,7 @@ void main() {
       hostname: 'any',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -892,8 +890,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
@@ -918,7 +916,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -936,8 +934,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -961,7 +959,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -979,8 +977,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1071,7 +1069,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1082,8 +1080,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
