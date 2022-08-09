@@ -66,7 +66,7 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
       {{100, 800, 0.0}, {0.0, 1.0}},  // 4
   });
   auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
+      vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
@@ -145,9 +145,8 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
 
   VertexBuffer vertex_buffer;
   {
-    auto device_buffer =
-        context->GetPermanentsAllocator()->CreateBufferWithCopy(
-            reinterpret_cast<uint8_t*>(&cube), sizeof(cube));
+    auto device_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+        reinterpret_cast<uint8_t*>(&cube), sizeof(cube));
     vertex_buffer.vertex_buffer = {
         .buffer = device_buffer,
         .range = Range(offsetof(Cube, vertices), sizeof(Cube::vertices))};
@@ -231,7 +230,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
       {{100, 800, 0.0}, {0.0, 1.0}},  // 4
   });
   auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
+      vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
@@ -303,7 +302,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
       {{100, 800, 0.0}, {0.0, 1.0}},  // 4
   });
   auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
+      vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
@@ -328,7 +327,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
     texture_descriptor.usage =
         static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
 
-    color0.texture = context->GetPermanentsAllocator()->CreateTexture(
+    color0.texture = context->GetResourceAllocator()->CreateTexture(
         StorageMode::kHostVisible, texture_descriptor);
 
     ASSERT_TRUE(color0);
@@ -343,13 +342,13 @@ TEST_P(RendererTest, CanRenderToTexture) {
     stencil_texture_desc.format = PixelFormat::kS8UInt;
     stencil_texture_desc.usage =
         static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-    stencil0.texture = context->GetPermanentsAllocator()->CreateTexture(
+    stencil0.texture = context->GetResourceAllocator()->CreateTexture(
         StorageMode::kDeviceTransient, stencil_texture_desc);
 
     RenderTarget r2t_desc;
     r2t_desc.SetColorAttachment(color0, 0u);
     r2t_desc.SetStencilAttachment(stencil0);
-    auto cmd_buffer = context->CreateRenderCommandBuffer();
+    auto cmd_buffer = context->CreateCommandBuffer();
     r2t_pass = cmd_buffer->CreateRenderPass(r2t_desc);
     ASSERT_TRUE(r2t_pass && r2t_pass->IsValid());
   }
@@ -379,7 +378,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
   VS::BindUniformBuffer(
       cmd, r2t_pass->GetTransientsBuffer().EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->AddCommand(std::move(cmd)));
-  ASSERT_TRUE(r2t_pass->EncodeCommands(context->GetTransientsAllocator()));
+  ASSERT_TRUE(r2t_pass->EncodeCommands(context->GetResourceAllocator()));
 }
 
 #if IMPELLER_ENABLE_METAL
@@ -465,7 +464,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
   texture_desc.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget) |
       static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
-  auto texture = context->GetPermanentsAllocator()->CreateTexture(
+  auto texture = context->GetResourceAllocator()->CreateTexture(
       StorageMode::kHostVisible, texture_desc);
   ASSERT_TRUE(texture);
 
@@ -488,11 +487,11 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       {{0, size.y}, {0.0, 1.0}},       // 4
   });
   auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(*context->GetTransientsAllocator());
+      vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
-    auto buffer = context->CreateRenderCommandBuffer();
+    auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;
     }
@@ -512,7 +511,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       // Blit `bridge` to the top left corner of the texture.
       pass->AddCopy(bridge, texture);
 
-      pass->EncodeCommands(context->GetTransientsAllocator());
+      pass->EncodeCommands(context->GetResourceAllocator());
     }
 
     {
@@ -544,7 +543,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
 
         pass->AddCommand(std::move(cmd));
       }
-      pass->EncodeCommands(context->GetTransientsAllocator());
+      pass->EncodeCommands(context->GetResourceAllocator());
     }
 
     if (!buffer->SubmitCommands()) {
@@ -584,7 +583,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
       {{0, size.y}, {0.0, 1.0}},       // 4
   });
   auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
+      vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
   ASSERT_TRUE(vertex_buffer);
 
   bool first_frame = true;
@@ -613,7 +612,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
     ImGui::SliderFloat("LOD", &lod, 0, boston->GetMipCount() - 1);
     ImGui::End();
 
-    auto buffer = context->CreateRenderCommandBuffer();
+    auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;
     }
@@ -628,7 +627,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 
       pass->GenerateMipmap(boston, "Boston Mipmap");
 
-      pass->EncodeCommands(context->GetTransientsAllocator());
+      pass->EncodeCommands(context->GetResourceAllocator());
     }
 
     first_frame = false;
@@ -665,7 +664,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 
         pass->AddCommand(std::move(cmd));
       }
-      pass->EncodeCommands(context->GetTransientsAllocator());
+      pass->EncodeCommands(context->GetResourceAllocator());
     }
 
     if (!buffer->SubmitCommands()) {

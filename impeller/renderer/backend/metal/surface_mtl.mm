@@ -52,7 +52,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
       static_cast<ISize::Type>(current_drawable.texture.height)};
   color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
-  auto msaa_tex = context->GetPermanentsAllocator()->CreateTexture(
+  auto msaa_tex = context->GetResourceAllocator()->CreateTexture(
       StorageMode::kDeviceTransient, color0_tex_desc);
   if (!msaa_tex) {
     VALIDATION_LOG << "Could not allocate MSAA resolve texture.";
@@ -82,7 +82,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   stencil0_tex.size = color0_tex_desc.size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  auto stencil_texture = context->GetPermanentsAllocator()->CreateTexture(
+  auto stencil_texture = context->GetResourceAllocator()->CreateTexture(
       StorageMode::kDeviceTransient, stencil0_tex);
 
   if (!stencil_texture) {

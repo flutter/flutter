@@ -74,7 +74,7 @@ bool ImGui_ImplImpeller_Init(std::shared_ptr<impeller::Context> context) {
     texture_descriptor.size = {width, height};
     texture_descriptor.mip_count = 1u;
 
-    bd->font_texture = context->GetPermanentsAllocator()->CreateTexture(
+    bd->font_texture = context->GetResourceAllocator()->CreateTexture(
         impeller::StorageMode::kHostVisible, texture_descriptor);
     IM_ASSERT(bd->font_texture != nullptr &&
               "Could not allocate ImGui font texture.");
@@ -136,7 +136,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
   }
 
   // Allocate buffer for vertices + indices.
-  auto buffer = bd->context->GetTransientsAllocator()->CreateBuffer(
+  auto buffer = bd->context->GetResourceAllocator()->CreateBuffer(
       impeller::StorageMode::kHostVisible, total_vtx_bytes + total_idx_bytes);
   buffer->SetLabel(impeller::SPrintF("ImGui vertex+index buffer"));
 

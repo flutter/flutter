@@ -154,7 +154,7 @@ bool EntityPass::Render(ContentContext& renderer,
       return false;
     }
 
-    auto command_buffer = renderer.GetContext()->CreateRenderCommandBuffer();
+    auto command_buffer = renderer.GetContext()->CreateCommandBuffer();
     command_buffer->SetLabel("EntityPass Root Command Buffer");
     auto render_pass = command_buffer->CreateRenderPass(render_target);
     render_pass->SetLabel("EntityPass Root Render Pass");
@@ -174,7 +174,7 @@ bool EntityPass::Render(ContentContext& renderer,
     }
 
     if (!render_pass->EncodeCommands(
-            renderer.GetContext()->GetTransientsAllocator())) {
+            renderer.GetContext()->GetResourceAllocator())) {
       return false;
     }
     if (!command_buffer->SubmitCommands()) {

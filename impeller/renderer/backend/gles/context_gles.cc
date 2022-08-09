@@ -42,19 +42,12 @@ ContextGLES::ContextGLES(
         std::shared_ptr<PipelineLibraryGLES>(new PipelineLibraryGLES(reactor_));
   }
 
-  // Create all allocators.
+  // Create allocators.
   {
-    permanents_allocator_ =
+    resource_allocator_ =
         std::shared_ptr<AllocatorGLES>(new AllocatorGLES(reactor_));
-    if (!permanents_allocator_->IsValid()) {
-      VALIDATION_LOG << "Could not create permanents allocator.";
-      return;
-    }
-
-    transients_allocator_ =
-        std::shared_ptr<AllocatorGLES>(new AllocatorGLES(reactor_));
-    if (!transients_allocator_->IsValid()) {
-      VALIDATION_LOG << "Could not create transients allocator.";
+    if (!resource_allocator_->IsValid()) {
+      VALIDATION_LOG << "Could not create a resource allocator.";
       return;
     }
   }
@@ -93,12 +86,8 @@ bool ContextGLES::IsValid() const {
   return is_valid_;
 }
 
-std::shared_ptr<Allocator> ContextGLES::GetPermanentsAllocator() const {
-  return permanents_allocator_;
-}
-
-std::shared_ptr<Allocator> ContextGLES::GetTransientsAllocator() const {
-  return transients_allocator_;
+std::shared_ptr<Allocator> ContextGLES::GetResourceAllocator() const {
+  return resource_allocator_;
 }
 
 std::shared_ptr<ShaderLibrary> ContextGLES::GetShaderLibrary() const {
@@ -113,14 +102,8 @@ std::shared_ptr<PipelineLibrary> ContextGLES::GetPipelineLibrary() const {
   return pipeline_library_;
 }
 
-std::shared_ptr<CommandBuffer> ContextGLES::CreateRenderCommandBuffer() const {
+std::shared_ptr<CommandBuffer> ContextGLES::CreateCommandBuffer() const {
   return std::shared_ptr<CommandBufferGLES>(new CommandBufferGLES(reactor_));
-}
-
-std::shared_ptr<CommandBuffer> ContextGLES::CreateTransferCommandBuffer()
-    const {
-  // There is no such concept. Just use a render command buffer.
-  return CreateRenderCommandBuffer();
 }
 
 // |Context|
