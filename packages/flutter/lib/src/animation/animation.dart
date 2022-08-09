@@ -241,7 +241,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///  * [CurvedAnimation], an alternative to [CurveTween] for applying easing
   ///    curves, which supports distinct curves in the forward direction and the
   ///    reverse direction.
-  ///  * [Animatable.fromCallback], which allows creating an animatable from an
+  ///  * [Animatable.fromCallback], which allows creating an [Animatable] from an
   ///    arbitrary transformation.
   @optionalTypeArgs
   Animation<U> drive<U>(Animatable<U> child) {
