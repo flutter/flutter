@@ -504,7 +504,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   late Offset _selectionStartHandleDragPosition;
   late Offset _selectionEndHandleDragPosition;
 
-  late List<TextSelectionPoint> points;
+  late List<TextSelectionPoint> _points;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     assert(_selectionDelegate.value.startSelectionPoint != null);
@@ -586,12 +586,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
     final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
     if (startLocalPosition.dy > endLocalPosition.dy) {
-      points = <TextSelectionPoint>[
+      _points = <TextSelectionPoint>[
         TextSelectionPoint(endLocalPosition, TextDirection.ltr),
         TextSelectionPoint(startLocalPosition, TextDirection.ltr),
       ];
     } else {
-      points = <TextSelectionPoint>[
+      _points = <TextSelectionPoint>[
         TextSelectionPoint(startLocalPosition, TextDirection.ltr),
         TextSelectionPoint(endLocalPosition, TextDirection.ltr),
       ];
@@ -609,7 +609,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       onEndHandleDragEnd: _onAnyDragEnd,
-      selectionEndpoints: points,
+      selectionEndpoints: _points,
       selectionControls: widget.selectionControls,
       selectionDelegate: this,
       clipboardStatus: null,
