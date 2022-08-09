@@ -874,7 +874,7 @@ void main() {
     Artifacts: () => Artifacts.test(),
   }));
 
-  test('foo bar bar foo', () => testbed.run(() async {
+  test('.connect() will never call vmServiceFactory twice', () => testbed.run(() async {
     await FakeAsync().run<Future<void>>((FakeAsync time) {
       final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
         ..createSync(recursive: true);
@@ -882,9 +882,6 @@ void main() {
       outputFile.parent.childFile('a.json').writeAsStringSync('{}');
       outputFile.parent.childFile('a.map').writeAsStringSync('{}');
       outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-
-      final ResidentCompiler residentCompiler = FakeResidentCompiler()
-        ..output = const CompilerOutput('a', 0, <Uri>[]);
 
       final WebDevFS webDevFS = WebDevFS(
         // if this is any other value, we will do a real ip lookup
@@ -916,27 +913,28 @@ void main() {
       final FakeAppConnection secondConnection = FakeAppConnection();
 
       final Future<void> done = webDevFS.create().then<void>((Uri _) {
-        print('done creating, got a Uri');
         // In non-test mode, webDevFS.create() would have initialized DWDS
         webDevFS.webAssetServer.dwds = FakeDwds(<AppConnection>[firstConnection, secondConnection]);
 
         int vmServiceFactoryInvocationCount = 0;
         Future<vm_service.VmService> vmServiceFactory(Uri uri, {CompressionOptions compression, @required Logger logger}) {
           if (vmServiceFactoryInvocationCount > 0) {
-            return Future<vm_service.VmService>.value(FakeVmService());
+            fail('Called vmServiceFactory twice!');
           }
           vmServiceFactoryInvocationCount += 1;
-          return Completer<vm_service.VmService>().future;
+          return Future<vm_service.VmService>.delayed(
+            const Duration(seconds: 2),
+            () => FakeVmService(),
+          );
         }
-        print('about to connect');
         return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((ConnectionResult firstConnectionResult) {
-          webDevFS.destroy();
+          return webDevFS.destroy();
         });
       });
       time.elapse(const Duration(seconds: 1));
+      time.elapse(const Duration(seconds: 2));
       return done;
     });
-    print('outside fake async');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
   }));
