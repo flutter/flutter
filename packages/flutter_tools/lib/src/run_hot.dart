@@ -1032,7 +1032,7 @@ class HotRunner extends ResidentRunner {
 
   @visibleForTesting
   Future<void> evictDirtyAssets() async {
-    final List<Future<Map<String, dynamic>?>> futures = <Future<Map<String, dynamic>>>[];
+    final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
         continue;
@@ -1060,6 +1060,14 @@ class HotRunner extends ResidentRunner {
         globals.printError('Application isolate not found for $device');
         continue;
       }
+
+      if (device.devFS!.didUpdateFontManifest) {
+        futures.add(device.vmService!.reloadAssetFonts(
+            isolateId: views.first.uiIsolate!.id!,
+            viewId: views.first.id,
+        ));
+      }
+
       for (final String assetPath in device.devFS!.assetPathsToEvict) {
         futures.add(
           device.vmService!
@@ -1081,7 +1089,7 @@ class HotRunner extends ResidentRunner {
       device.devFS!.assetPathsToEvict.clear();
       device.devFS!.shaderPathsToEvict.clear();
     }
-    await Future.wait<Map<String, Object?>?>(futures);
+    await Future.wait<void>(futures);
   }
 
   @override
