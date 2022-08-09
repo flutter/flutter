@@ -1340,7 +1340,7 @@ class CompileTest {
       await flutter('packages', options: <String>['get']);
 
       // "initial" compile required downloading and creating the `android/.gradle` directory while "full"
-      // compiles only run `flutter clean` between runs.gi
+      // compiles only run `flutter clean` between runs.
       final Map<String, dynamic> compileInitialRelease = await _compileApp(deleteGradleCache: true);
       final Map<String, dynamic> compileFullRelease = await _compileApp(deleteGradleCache: false);
       final Map<String, dynamic> compileInitialDebug = await _compileDebug(
