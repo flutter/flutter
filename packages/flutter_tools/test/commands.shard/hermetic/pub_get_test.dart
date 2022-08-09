@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
@@ -107,6 +108,52 @@ void main() {
       commandPackagesProjectModule: false,
       commandPackagesAndroidEmbeddingVersion: 'v1',
     ));
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
+  testUsingContext('pub get triggers localizations generation when generate: true', () async {
+    final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')
+      ..createSync();
+    pubspecFile.writeAsStringSync(
+      '''
+      flutter:
+        generate: true
+      '''
+    );
+    fileSystem.currentDirectory.childFile('l10n.yaml')
+      ..createSync()
+      ..writeAsStringSync(
+        '''
+        arb-dir: lib/l10n
+        '''
+      );
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync(
+      '''
+      {
+        "helloWorld": "Hello, World!",
+        "@helloWorld": {
+          "description": "Sample description"
+        }
+      }
+      '''
+    );
+
+    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>['get']);
+    final FlutterCommandResult result = await command.runCommand();
+
+    expect(result.exitStatus, ExitStatus.success);
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    expect(outputDirectory.existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
