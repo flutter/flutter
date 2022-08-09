@@ -46,14 +46,11 @@ std::optional<SkRect> FrameDamage::ComputeClipRect(
 }
 
 CompositorContext::CompositorContext()
-    : texture_registry_(std::make_shared<TextureRegistry>()),
-      raster_time_(fixed_refresh_rate_updater_),
+    : raster_time_(fixed_refresh_rate_updater_),
       ui_time_(fixed_refresh_rate_updater_) {}
 
 CompositorContext::CompositorContext(Stopwatch::RefreshRateUpdater& updater)
-    : texture_registry_(std::make_shared<TextureRegistry>()),
-      raster_time_(updater),
-      ui_time_(updater) {}
+    : raster_time_(updater), ui_time_(updater) {}
 
 CompositorContext::~CompositorContext() = default;
 
@@ -163,12 +160,12 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
 }
 
 void CompositorContext::OnGrContextCreated() {
-  texture_registry_->OnGrContextCreated();
+  texture_registry_.OnGrContextCreated();
   raster_cache_.Clear();
 }
 
 void CompositorContext::OnGrContextDestroyed() {
-  texture_registry_->OnGrContextDestroyed();
+  texture_registry_.OnGrContextDestroyed();
   raster_cache_.Clear();
 }
 

@@ -34,16 +34,6 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
     }
   }
 
-  void DeleteTexture(GrBackendTexture texture) {
-    std::scoped_lock lock(mutex_);
-    textures_.push_back(texture);
-    if (!drain_pending_) {
-      drain_pending_ = true;
-      task_runner_->PostDelayedTask(
-          [strong = fml::Ref(this)]() { strong->Drain(); }, drain_delay_);
-    }
-  }
-
   // Usually, the drain is called automatically. However, during IO manager
   // shutdown (when the platform side reference to the OpenGL context is about
   // to go away), we may need to pre-emptively drain the unref queue. It is the
@@ -52,14 +42,12 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   void Drain() {
     TRACE_EVENT0("flutter", "SkiaUnrefQueue::Drain");
     std::deque<SkRefCnt*> skia_objects;
-    std::deque<GrBackendTexture> textures;
     {
       std::scoped_lock lock(mutex_);
       objects_.swap(skia_objects);
-      textures_.swap(textures);
       drain_pending_ = false;
     }
-    DoDrain(skia_objects, textures, context_);
+    DoDrain(skia_objects, context_);
   }
 
   void UpdateResourceContext(sk_sp<ResourceContext> context) {
@@ -71,7 +59,6 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   const fml::TimeDelta drain_delay_;
   std::mutex mutex_;
   std::deque<SkRefCnt*> objects_;
-  std::deque<GrBackendTexture> textures_;
   bool drain_pending_;
   sk_sp<ResourceContext> context_;
 
@@ -92,30 +79,22 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
     // into a task queued to that thread.
     ResourceContext* raw_context = context_.release();
     fml::TaskRunner::RunNowOrPostTask(
-        task_runner_, [objects = std::move(objects_),
-                       textures = std::move(textures_), raw_context]() mutable {
+        task_runner_, [objects = std::move(objects_), raw_context]() mutable {
           sk_sp<ResourceContext> context(raw_context);
-          DoDrain(objects, textures, context);
+          DoDrain(objects, context);
           context.reset();
         });
   }
 
   // static
   static void DoDrain(const std::deque<SkRefCnt*>& skia_objects,
-                      const std::deque<GrBackendTexture>& textures,
                       sk_sp<ResourceContext> context) {
     for (SkRefCnt* skia_object : skia_objects) {
       skia_object->unref();
     }
 
-    if (context) {
-      for (GrBackendTexture texture : textures) {
-        context->deleteBackendTexture(texture);
-      }
-
-      if (!skia_objects.empty()) {
-        context->performDeferredCleanup(std::chrono::milliseconds(0));
-      }
+    if (context && !skia_objects.empty()) {
+      context->performDeferredCleanup(std::chrono::milliseconds(0));
     }
   }
 

@@ -212,8 +212,16 @@ class Rasterizer final : public SnapshotDelegate,
   void DrawLastLayerTree(
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder);
 
-  // |SnapshotDelegate|
-  std::shared_ptr<flutter::TextureRegistry> GetTextureRegistry() override;
+  //----------------------------------------------------------------------------
+  /// @brief      Gets the registry of external textures currently in use by the
+  ///             rasterizer. These textures may be updated at a cadence
+  ///             different from that of the Flutter application. When an
+  ///             external texture is referenced in the Flutter layer tree, that
+  ///             texture is composited within the Flutter layer tree.
+  ///
+  /// @return     A pointer to the external texture registry.
+  ///
+  flutter::TextureRegistry* GetTextureRegistry();
 
   using LayerTreeDiscardCallback = std::function<bool(flutter::LayerTree&)>;
 
@@ -462,9 +470,9 @@ class Rasterizer final : public SnapshotDelegate,
 
  private:
   // |SnapshotDelegate|
-  std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeGpuImage(
+  std::pair<sk_sp<SkImage>, std::string> MakeGpuImage(
       sk_sp<DisplayList> display_list,
-      const SkImageInfo& image_info) override;
+      SkISize picture_size) override;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(
