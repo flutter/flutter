@@ -117,24 +117,31 @@ void main() {
   testUsingContext('pub get triggers localizations generation when generate: true', () async {
     final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')
       ..createSync();
-    pubspecFile.writeAsStringSync('''
-flutter:
-  generate: true
-''');
+    pubspecFile.writeAsStringSync(
+      '''
+      flutter:
+        generate: true
+      '''
+    );
     fileSystem.currentDirectory.childFile('l10n.yaml')
       ..createSync()
-      ..writeAsStringSync('''
-arb-dir: lib/l10n
-''');
+      ..writeAsStringSync(
+        '''
+        arb-dir: lib/l10n
+        '''
+      );
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''
-{
-  "helloWorld": "Hello, World!",
-  "@helloWorld": {
-    "description": "Sample description"
-  }
-}''');
+    arbFile.writeAsStringSync(
+      '''
+      {
+        "helloWorld": "Hello, World!",
+        "@helloWorld": {
+          "description": "Sample description"
+        }
+      }
+      '''
+    );
 
     final PackagesGetCommand command = PackagesGetCommand('get', false);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
