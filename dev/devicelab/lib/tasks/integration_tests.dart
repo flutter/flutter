@@ -138,7 +138,7 @@ TaskFunction dartDefinesTask() {
 TaskFunction assetTestTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/assets.dart', 
+    'lib/assets.dart',
     extraOptions: <String>[],
   );
 }

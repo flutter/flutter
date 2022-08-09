@@ -9,7 +9,7 @@ import 'package:flutter_driver/driver_extension.dart';
 void main() {
   enableFlutterDriverExtension(handler: (String? message) async {
     assert(message == 'test');
-    const AssetImage provider = AssetImage('test space.png');
+    const AssetImage provider = AssetImage('assets/test space.png');
     final ImageStream stream = provider.resolve(ImageConfiguration.empty);
     final Completer<bool> completer = Completer<bool>();
     stream.addListener(ImageStreamListener((ImageInfo imageInfo, bool synchronousCall) {
