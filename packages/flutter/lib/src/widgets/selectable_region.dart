@@ -433,7 +433,28 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
  }
 
  void _onAnyDragEnd(DragEndDetails details) {
-  _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
+   if (widget.selectionControls is! TextSelectionHandleControls) {
+    _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
+   } else {
+    _selectionOverlay!.hideMagnifier(
+      contextMenuBuilder: (BuildContext context) {
+        final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
+        final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
+        final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
+        final Rect anchorRect = _selectionOverlay!.getAnchors(
+          renderBox,
+          lineHeightAtStart,
+          endGlyphHeight,
+        );
+        return widget.contextMenuBuilder!(
+          context,
+          this,
+          anchorRect.topLeft,
+          anchorRect.bottomRight,
+        );
+      },
+    );
+   }
   _stopSelectionEndEdgeUpdate();
  }
 
@@ -682,30 +703,36 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
     // If given a location, just display the context menu there.
     if (location != null) {
-      _selectionOverlay!.showToolbar((BuildContext context) {
-        return widget.contextMenuBuilder!(context, this, location);
-      }, context);
+      _selectionOverlay!.showToolbar(
+        context: context,
+        contextMenuBuilder: (BuildContext context) {
+          return widget.contextMenuBuilder!(context, this, location);
+        },
+      );
       return true;
     }
 
     // Otherwise, calculate the anchors as the upper and lower horizontal center
     // of the selection.
-    _selectionOverlay!.showToolbar((BuildContext context) {
-      final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
-      final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
-      final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
-      final Rect anchorRect = _selectionOverlay!.getAnchors(
-        renderBox,
-        lineHeightAtStart,
-        endGlyphHeight,
-      );
-      return widget.contextMenuBuilder!(
-        context,
-        this,
-        anchorRect.topLeft,
-        anchorRect.bottomRight,
-      );
-    }, context);
+    _selectionOverlay!.showToolbar(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
+        final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
+        final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
+        final Rect anchorRect = _selectionOverlay!.getAnchors(
+          renderBox,
+          lineHeightAtStart,
+          endGlyphHeight,
+        );
+        return widget.contextMenuBuilder!(
+          context,
+          this,
+          anchorRect.topLeft,
+          anchorRect.bottomRight,
+        );
+      },
+    );
 
     return true;
   }
@@ -923,7 +950,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectionDelegate.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier
     // so it doesn't remain stuck in the overlay forever.
-    _selectionOverlay?.hideMagnifier(shouldShowToolbar: false);
+    _selectionOverlay?.hideMagnifier();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     super.dispose();

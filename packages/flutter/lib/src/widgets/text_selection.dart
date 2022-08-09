@@ -468,8 +468,8 @@ class TextSelectionOverlay {
     );
   }
 
-  /// {@template flutter.widgets.SelectionOverlay.selectionControls}
-  /// The context in which the selection handles should appear.
+  /// {@template flutter.widgets.SelectionOverlay.context}
+  /// The context in which the selection UI should appear.
   ///
   /// This context must have an [Overlay] as an ancestor because this object
   /// will display the text selection handles in that [Overlay].
@@ -570,29 +570,38 @@ class TextSelectionOverlay {
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          _selectionOverlay.showToolbar((BuildContext context) {
-            return contextMenuBuilder!(context, renderObject.lastSecondaryTapDownPosition!);
-          }, context);
+          _selectionOverlay.showToolbar(
+            context: context,
+            contextMenuBuilder: (BuildContext context) {
+              return contextMenuBuilder!(
+                context,
+                renderObject.lastSecondaryTapDownPosition!,
+              );
+            },
+          );
           return;
       }
     }
 
     // Otherwise, calculate the anchors as the upper and lower horizontal center
     // of the selection.
-    _selectionOverlay.showToolbar((BuildContext context) {
-      final double startGlyphHeight = _getStartGlyphHeight();
-      final double endGlyphHeight = _getEndGlyphHeight();
-      final Rect anchorRect = _selectionOverlay.getAnchors(
-        renderBox,
-        startGlyphHeight,
-        endGlyphHeight,
-      );
-      return contextMenuBuilder!(
-        context,
-        anchorRect.topLeft,
-        anchorRect.bottomRight,
-      );
-    }, context);
+    _selectionOverlay.showToolbar(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        final double startGlyphHeight = _getStartGlyphHeight();
+        final double endGlyphHeight = _getEndGlyphHeight();
+        final Rect anchorRect = _selectionOverlay.getAnchors(
+          renderBox,
+          startGlyphHeight,
+          endGlyphHeight,
+        );
+        return contextMenuBuilder!(
+          context,
+          anchorRect.topLeft,
+          anchorRect.bottomRight,
+        );
+      },
+    );
   }
 
   /// Updates the overlay after the selection has changed.
@@ -850,7 +859,33 @@ class TextSelectionOverlay {
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
 
-  void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideMagnifier(shouldShowToolbar: !_selection.isCollapsed);
+  void _handleAnyDragEnd(DragEndDetails details) {
+    if (selectionControls is! TextSelectionHandleControls) {
+      _selectionOverlay.hideMagnifier(
+        shouldShowToolbar: !_selection.isCollapsed,
+      );
+      return;
+    }
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    _selectionOverlay.hideMagnifier(
+      contextMenuBuilder: _selection.isCollapsed
+        ? null
+        : (BuildContext context) {
+          final double startGlyphHeight = _getStartGlyphHeight();
+          final double endGlyphHeight = _getEndGlyphHeight();
+          final Rect anchorRect = _selectionOverlay.getAnchors(
+            renderBox,
+            startGlyphHeight,
+            endGlyphHeight,
+          );
+          return contextMenuBuilder!(
+            context,
+            anchorRect.topLeft,
+            anchorRect.bottomRight,
+          );
+        },
+    );
+  }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
@@ -927,9 +962,8 @@ class SelectionOverlay {
        _toolbarLocation = toolbarLocation,
        assert(debugCheckHasOverlay(context));
 
-  /// {@macro flutter.widgets.SelectionOverlay.selectionControls}
+  /// {@macro flutter.widgets.SelectionOverlay.context}
   final BuildContext context;
-
 
   final ValueNotifier<MagnifierOverlayInfoBearer> _magnifierOverlayInfoBearer =
           ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty());
@@ -987,10 +1021,17 @@ class SelectionOverlay {
   }
 
   /// Hide the current magnifier, optionally immediately showing
-  /// the toolbar.
+  /// the toolbar provided by `contextMenuBuilder`.
   ///
   /// This does nothing if there is no magnifier.
-  void hideMagnifier({required bool shouldShowToolbar}) {
+  void hideMagnifier({
+    WidgetBuilder? contextMenuBuilder,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
+    bool shouldShowToolbar = false,
+  }) {
     // This cannot be a check on `MagnifierController.shown`, since
     // it's possible that the magnifier is still in the overlay, but
     // not shown in cases where the magnifier hides itself.
@@ -1002,6 +1043,8 @@ class SelectionOverlay {
 
     if (shouldShowToolbar) {
       showToolbar();
+    } else if (contextMenuBuilder != null) {
+      showToolbar(context: context, contextMenuBuilder: contextMenuBuilder);
     }
   }
 
@@ -1278,7 +1321,10 @@ class SelectionOverlay {
   /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
-  void showToolbar([WidgetBuilder? contextMenuBuilder, BuildContext? context]) {
+  void showToolbar({
+    WidgetBuilder? contextMenuBuilder,
+    BuildContext? context,
+  }) {
     if (contextMenuBuilder == null) {
       if (_toolbar != null) {
         return;
@@ -1293,7 +1339,6 @@ class SelectionOverlay {
     }
 
     ContextMenuController.hide();
-
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     ContextMenuController.show(
       context: context,
@@ -1427,6 +1472,7 @@ class SelectionOverlay {
     );
   }
 
+  // Build the toolbar via TextSelectionControls.
   Widget _buildToolbar(BuildContext context) {
     if (selectionControls == null) {
       return Container();
