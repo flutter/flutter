@@ -458,7 +458,6 @@ void main() {
       highlightColor: Colors.black,
       splashColor: Colors.black,
       splashFactory: InkRipple.splashFactory,
-      selectedRowColor: Colors.black,
       unselectedWidgetColor: Colors.black,
       disabledColor: Colors.black,
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
