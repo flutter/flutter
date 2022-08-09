@@ -41,13 +41,15 @@ class FilterContents : public Contents {
       Sigma sigma,
       Vector2 direction,
       BlurStyle blur_style = BlurStyle::kNormal,
+      Entity::TileMode tile_mode = Entity::TileMode::kDecal,
       FilterInput::Ref alpha_mask = nullptr);
 
   static std::shared_ptr<FilterContents> MakeGaussianBlur(
       FilterInput::Ref input,
       Sigma sigma_x,
       Sigma sigma_y,
-      BlurStyle blur_style = BlurStyle::kNormal);
+      BlurStyle blur_style = BlurStyle::kNormal,
+      Entity::TileMode tile_mode = Entity::TileMode::kDecal);
 
   static std::shared_ptr<FilterContents> MakeBorderMaskBlur(
       FilterInput::Ref input,

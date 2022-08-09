@@ -103,6 +103,19 @@ static Entity::BlendMode ToBlendMode(flutter::DlBlendMode mode) {
   FML_UNREACHABLE();
 }
 
+static Entity::TileMode ToTileMode(flutter::DlTileMode tile_mode) {
+  switch (tile_mode) {
+    case flutter::DlTileMode::kClamp:
+      return Entity::TileMode::kClamp;
+    case flutter::DlTileMode::kRepeat:
+      return Entity::TileMode::kRepeat;
+    case flutter::DlTileMode::kMirror:
+      return Entity::TileMode::kMirror;
+    case flutter::DlTileMode::kDecal:
+      return Entity::TileMode::kDecal;
+  }
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setAntiAlias(bool aa) {
   // Nothing to do because AA is implicit.
@@ -248,7 +261,7 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(linear->colors()[i]));
       }
       contents->SetColors(std::move(colors));
-      contents->SetTileMode(static_cast<Entity::TileMode>(linear->tile_mode()));
+      contents->SetTileMode(ToTileMode(linear->tile_mode()));
       paint_.contents = std::move(contents);
       return;
     }
@@ -264,8 +277,7 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(radialGradient->colors()[i]));
       }
       contents->SetColors(std::move(colors));
-      contents->SetTileMode(
-          static_cast<Entity::TileMode>(radialGradient->tile_mode()));
+      contents->SetTileMode(ToTileMode(radialGradient->tile_mode()));
       paint_.contents = std::move(contents);
       return;
     }
@@ -282,8 +294,7 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(sweepGradient->colors()[i]));
       }
       contents->SetColors(std::move(colors));
-      contents->SetTileMode(
-          static_cast<Entity::TileMode>(sweepGradient->tile_mode()));
+      contents->SetTileMode(ToTileMode(sweepGradient->tile_mode()));
       paint_.contents = std::move(contents);
       return;
     }
@@ -400,14 +411,12 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
           Vector2(blur->sigma_x(), blur->sigma_y()) * effect_scale;
       auto sigma_x = Sigma(scaled_blur.x);
       auto sigma_y = Sigma(scaled_blur.y);
+      auto tile_mode = ToTileMode(blur->tile_mode());
 
-      if (blur->tile_mode() != flutter::DlTileMode::kClamp) {
-        // TODO(105072): Implement tile mode for blur filter.
-        UNIMPLEMENTED;
-      }
-
-      return [sigma_x, sigma_y](FilterInput::Ref input) {
-        return FilterContents::MakeGaussianBlur(input, sigma_x, sigma_y);
+      return [sigma_x, sigma_y, tile_mode](FilterInput::Ref input) {
+        return FilterContents::MakeGaussianBlur(
+            input, sigma_x, sigma_y, FilterContents::BlurStyle::kNormal,
+            tile_mode);
       };
 
       break;
