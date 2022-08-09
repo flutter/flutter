@@ -37,13 +37,11 @@ class ContextMTL final : public Context,
 
  private:
   id<MTLDevice> device_ = nullptr;
-  id<MTLCommandQueue> render_queue_ = nullptr;
-  id<MTLCommandQueue> transfer_queue_ = nullptr;
+  id<MTLCommandQueue> command_queue_ = nullptr;
   std::shared_ptr<ShaderLibraryMTL> shader_library_;
   std::shared_ptr<PipelineLibraryMTL> pipeline_library_;
   std::shared_ptr<SamplerLibrary> sampler_library_;
-  std::shared_ptr<AllocatorMTL> permanents_allocator_;
-  std::shared_ptr<AllocatorMTL> transients_allocator_;
+  std::shared_ptr<AllocatorMTL> resource_allocator_;
   bool is_valid_ = false;
 
   ContextMTL(id<MTLDevice> device, NSArray<id<MTLLibrary>>* shader_libraries);
@@ -52,10 +50,7 @@ class ContextMTL final : public Context,
   bool IsValid() const override;
 
   // |Context|
-  std::shared_ptr<Allocator> GetPermanentsAllocator() const override;
-
-  // |Context|
-  std::shared_ptr<Allocator> GetTransientsAllocator() const override;
+  std::shared_ptr<Allocator> GetResourceAllocator() const override;
 
   // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;
@@ -67,10 +62,7 @@ class ContextMTL final : public Context,
   std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const override;
 
   // |Context|
-  std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const override;
-
-  // |Context|
-  std::shared_ptr<CommandBuffer> CreateTransferCommandBuffer() const override;
+  std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;

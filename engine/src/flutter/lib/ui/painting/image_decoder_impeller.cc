@@ -149,7 +149,7 @@ static sk_sp<DlImage> UploadTexture(std::shared_ptr<impeller::Context> context,
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
 
-  auto texture = context->GetPermanentsAllocator()->CreateTexture(
+  auto texture = context->GetResourceAllocator()->CreateTexture(
       impeller::StorageMode::kHostVisible, texture_descriptor);
   if (!texture) {
     FML_DLOG(ERROR) << "Could not create Impeller texture.";

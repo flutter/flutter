@@ -204,7 +204,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
   color0.clear_color = Color::BlackTransparent();
   color0.load_action = color_load_action;
   color0.store_action = color_store_action;
-  color0.texture = context.GetPermanentsAllocator()->CreateTexture(
+  color0.texture = context.GetResourceAllocator()->CreateTexture(
       color_storage_mode, color_tex0);
 
   if (!color0.texture) {
@@ -217,7 +217,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
   stencil0.load_action = stencil_load_action;
   stencil0.store_action = stencil_store_action;
   stencil0.clear_stencil = 0u;
-  stencil0.texture = context.GetPermanentsAllocator()->CreateTexture(
+  stencil0.texture = context.GetResourceAllocator()->CreateTexture(
       stencil_storage_mode, stencil_tex0);
 
   if (!stencil0.texture) {

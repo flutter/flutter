@@ -410,11 +410,7 @@ bool ContextVK::IsValid() const {
   return is_valid_;
 }
 
-std::shared_ptr<Allocator> ContextVK::GetPermanentsAllocator() const {
-  return allocator_;
-}
-
-std::shared_ptr<Allocator> ContextVK::GetTransientsAllocator() const {
+std::shared_ptr<Allocator> ContextVK::GetResourceAllocator() const {
   return allocator_;
 }
 
@@ -430,11 +426,7 @@ std::shared_ptr<PipelineLibrary> ContextVK::GetPipelineLibrary() const {
   return pipeline_library_;
 }
 
-std::shared_ptr<CommandBuffer> ContextVK::CreateRenderCommandBuffer() const {
-  FML_UNREACHABLE();
-}
-
-std::shared_ptr<CommandBuffer> ContextVK::CreateTransferCommandBuffer() const {
+std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
   FML_UNREACHABLE();
 }
 

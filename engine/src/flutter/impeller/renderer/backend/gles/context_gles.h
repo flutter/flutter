@@ -38,8 +38,7 @@ class ContextGLES final : public Context,
   std::shared_ptr<ShaderLibraryGLES> shader_library_;
   std::shared_ptr<PipelineLibraryGLES> pipeline_library_;
   std::shared_ptr<SamplerLibraryGLES> sampler_library_;
-  std::shared_ptr<AllocatorGLES> permanents_allocator_;
-  std::shared_ptr<AllocatorGLES> transients_allocator_;
+  std::shared_ptr<AllocatorGLES> resource_allocator_;
   bool is_valid_ = false;
 
   ContextGLES(std::unique_ptr<ProcTableGLES> gl,
@@ -49,10 +48,7 @@ class ContextGLES final : public Context,
   bool IsValid() const override;
 
   // |Context|
-  std::shared_ptr<Allocator> GetPermanentsAllocator() const override;
-
-  // |Context|
-  std::shared_ptr<Allocator> GetTransientsAllocator() const override;
+  std::shared_ptr<Allocator> GetResourceAllocator() const override;
 
   // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;
@@ -64,10 +60,7 @@ class ContextGLES final : public Context,
   std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const override;
 
   // |Context|
-  std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const override;
-
-  // |Context|
-  std::shared_ptr<CommandBuffer> CreateTransferCommandBuffer() const override;
+  std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
 
   // |Context|
   bool HasThreadingRestrictions() const override;

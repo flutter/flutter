@@ -41,15 +41,13 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
   }
 
   // Setup command queues.
-  render_queue_ = device_.newCommandQueue;
-  transfer_queue_ = device_.newCommandQueue;
+  command_queue_ = device_.newCommandQueue;
 
-  if (!render_queue_ || !transfer_queue_) {
+  if (!command_queue_) {
     return;
   }
 
-  render_queue_.label = @"Impeller Render Queue";
-  transfer_queue_.label = @"Impeller Transfer Queue";
+  command_queue_.label = @"Impeller Command Queue";
 
   // Setup the pipeline library.
   {  //
@@ -64,15 +62,9 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
   }
 
   {
-    transients_allocator_ = std::shared_ptr<AllocatorMTL>(
-        new AllocatorMTL(device_, "Impeller Transients Allocator"));
-    if (!transients_allocator_) {
-      return;
-    }
-
-    permanents_allocator_ = std::shared_ptr<AllocatorMTL>(
+    resource_allocator_ = std::shared_ptr<AllocatorMTL>(
         new AllocatorMTL(device_, "Impeller Permanents Allocator"));
-    if (!permanents_allocator_) {
+    if (!resource_allocator_) {
       return;
     }
   }
@@ -191,12 +183,8 @@ std::shared_ptr<SamplerLibrary> ContextMTL::GetSamplerLibrary() const {
   return sampler_library_;
 }
 
-std::shared_ptr<CommandBuffer> ContextMTL::CreateRenderCommandBuffer() const {
-  return CreateCommandBufferInQueue(render_queue_);
-}
-
-std::shared_ptr<CommandBuffer> ContextMTL::CreateTransferCommandBuffer() const {
-  return CreateCommandBufferInQueue(transfer_queue_);
+std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBuffer() const {
+  return CreateCommandBufferInQueue(command_queue_);
 }
 
 std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBufferInQueue(
@@ -212,12 +200,8 @@ std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBufferInQueue(
   return buffer;
 }
 
-std::shared_ptr<Allocator> ContextMTL::GetPermanentsAllocator() const {
-  return permanents_allocator_;
-}
-
-std::shared_ptr<Allocator> ContextMTL::GetTransientsAllocator() const {
-  return transients_allocator_;
+std::shared_ptr<Allocator> ContextMTL::GetResourceAllocator() const {
+  return resource_allocator_;
 }
 
 id<MTLDevice> ContextMTL::GetMTLDevice() const {
