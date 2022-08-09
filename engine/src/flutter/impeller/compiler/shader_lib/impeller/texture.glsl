@@ -48,21 +48,25 @@ float IPFloatTile(float t, float tile_mode) {
 /// Remap a vec2 using a tiling mode.
 ///
 /// Runs each component of the vec2 through `IPFloatTile`.
-vec2 IPVec2Tile(vec2 uv, float tile_mode) {
-  return vec2(IPFloatTile(uv.x, tile_mode), IPFloatTile(uv.y, tile_mode));
+vec2 IPVec2Tile(vec2 coords, float tile_mode) {
+  return vec2(IPFloatTile(coords.x, tile_mode),
+              IPFloatTile(coords.y, tile_mode));
 }
 
 /// Sample a texture, emulating a specific tile mode.
 ///
 /// This is useful for Impeller graphics backend that don't have native support
 /// for Decal.
-vec4 IPSampleWithTileMode(sampler2D tex, vec2 uv, float tile_mode) {
+vec4 IPSampleWithTileMode(sampler2D tex,
+                          vec2 coords,
+                          float y_coord_scale,
+                          float tile_mode) {
   if (tile_mode == kTileModeDecal &&
-      (uv.x < 0 || uv.y < 0 || uv.x >= 1 || uv.y >= 1)) {
+      (coords.x < 0 || coords.y < 0 || coords.x >= 1 || coords.y >= 1)) {
     return vec4(0);
   }
 
-  return texture(tex, IPVec2Tile(uv, tile_mode));
+  return IPSample(tex, IPVec2Tile(coords, tile_mode), y_coord_scale);
 }
 
 #endif

@@ -57,15 +57,23 @@ void main() {
     float gaussian = Gaussian(i);
     gaussian_integral += gaussian;
     total_color +=
-        gaussian * IPSampleWithTileMode(texture_sampler,
-                                        v_texture_coords + blur_uv_offset * i,
-                                        frag_info.tile_mode);
+        gaussian *
+        IPSampleWithTileMode(
+            texture_sampler,                        // sampler
+            v_texture_coords + blur_uv_offset * i,  // texture coordinates
+            1.0,                                    // y coordinate scale
+            frag_info.tile_mode                     // tile mode
+        );
   }
 
   vec4 blur_color = total_color / gaussian_integral;
 
-  vec4 src_color = IPSampleWithTileMode(
-      alpha_mask_sampler, v_src_texture_coords, frag_info.tile_mode);
+  vec4 src_color =
+      IPSampleWithTileMode(alpha_mask_sampler,    // sampler
+                           v_src_texture_coords,  // texture coordinates
+                           1.0,                   // y coordinate scale
+                           frag_info.tile_mode    // tile mode
+      );
   float blur_factor = frag_info.inner_blur_factor * float(src_color.a > 0) +
                       frag_info.outer_blur_factor * float(src_color.a == 0);
 
