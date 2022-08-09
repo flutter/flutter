@@ -20,6 +20,9 @@ uniform sampler2D texture_sampler;
 uniform sampler2D alpha_mask_sampler;
 
 uniform FragInfo {
+  float texture_sampler_y_coord_scale;
+  float alpha_mask_sampler_y_coord_scale;
+
   vec2 texture_size;
   vec2 blur_direction;
 
@@ -59,21 +62,21 @@ void main() {
     total_color +=
         gaussian *
         IPSampleWithTileMode(
-            texture_sampler,                        // sampler
-            v_texture_coords + blur_uv_offset * i,  // texture coordinates
-            1.0,                                    // y coordinate scale
-            frag_info.tile_mode                     // tile mode
+            texture_sampler,                          // sampler
+            v_texture_coords + blur_uv_offset * i,    // texture coordinates
+            frag_info.texture_sampler_y_coord_scale,  // y coordinate scale
+            frag_info.tile_mode                       // tile mode
         );
   }
 
   vec4 blur_color = total_color / gaussian_integral;
 
-  vec4 src_color =
-      IPSampleWithTileMode(alpha_mask_sampler,    // sampler
-                           v_src_texture_coords,  // texture coordinates
-                           1.0,                   // y coordinate scale
-                           frag_info.tile_mode    // tile mode
-      );
+  vec4 src_color = IPSampleWithTileMode(
+      alpha_mask_sampler,                          // sampler
+      v_src_texture_coords,                        // texture coordinates
+      frag_info.alpha_mask_sampler_y_coord_scale,  // y coordinate scale
+      frag_info.tile_mode                          // tile mode
+  );
   float blur_factor = frag_info.inner_blur_factor * float(src_color.a > 0) +
                       frag_info.outer_blur_factor * float(src_color.a == 0);
 
