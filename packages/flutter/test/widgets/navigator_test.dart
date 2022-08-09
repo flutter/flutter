@@ -3865,6 +3865,34 @@ void main() {
         await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
       });
+
+  testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
+    final NavigatorObserver observer = _MockNavigatorObserver();
+    Widget build([Key? key]) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: key,
+          observers: <NavigatorObserver>[observer],
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
+                return Container();
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+    await tester.pumpWidget(Container(child: build()));
+    await tester.pumpWidget(Container());
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(build(key));
+    await tester.pumpWidget(Container(child: build(key)));
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
@@ -4114,4 +4142,11 @@ class ZeroDurationPageRoute extends PageRoute<void> {
 
   @override
   String? get barrierLabel => null;
+}
+
+class _MockNavigatorObserver implements NavigatorObserver {
+  @override
+  Object? noSuchMethod(Invocation invocation) {
+    throw 'TODO(paulberry): $invocation';
+  }
 }
