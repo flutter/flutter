@@ -7,27 +7,29 @@
 
 set -e
 
+if [[ $# -eq 0 ]]; then
+   echo "Error: Argument specifying output directory required."
+   exit 1
+fi
+
+# Move to the flutter checkout
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd "$SCRIPT_DIR/../../flutter"
+
 FLUTTER_UMBRELLA_HEADER=$(find ../out -maxdepth 4 -type f -name Flutter.h | grep 'ios_' | head -n 1)
 if [[ ! -f "$FLUTTER_UMBRELLA_HEADER" ]]
   then
       echo "Error: This script must be run at the root of the Flutter source tree with at least one built Flutter.framework in ../out/ios*/Flutter.framework."
+      echo "Running from: $(pwd)"
       exit 1
 fi
 
-
-# If the script is running from within LUCI we use the LUCI_WORKDIR, if not we force the caller of the script
-# to pass an output directory as the first parameter.
-OUTPUT_DIR=""
-
-if [[ -z "$LUCI_CI" ]]; then
-  if [[ $# -eq 0 ]]; then
-    echo "Error: Argument specifying output directory required."
-    exit 1
-  else
-    OUTPUT_DIR="$1"
-  fi
-else
-  OUTPUT_DIR="$LUCI_WORKDIR/objectc_docs"
+OUTPUT_DIR="$1/objectc_docs"
+ZIP_DESTINATION="$1"
+if [ "${OUTPUT_DIR:0:1}" != "/" ]
+then
+  ZIP_DESTINATION="$SCRIPT_DIR/../../$1"
+  OUTPUT_DIR="$ZIP_DESTINATION/objectc_docs"
 fi
 
 # If GEM_HOME is set, prefer using its copy of jazzy.
@@ -83,3 +85,8 @@ if [[ $EXPECTED_CLASSES != $ACTUAL_CLASSES ]]; then
   diff <(echo "$EXPECTED_CLASSES") <(echo "$ACTUAL_CLASSES")
   exit -1
 fi
+
+# Create the final zip file.
+pushd $OUTPUT_DIR
+zip -r "$ZIP_DESTINATION/ios-objcdoc.zip" .
+popd
