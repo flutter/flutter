@@ -80,6 +80,8 @@ struct FlTextInputPluginPrivate {
   // Input method.
   GtkIMContext* im_context;
 
+  FlTextInputViewDelegate* view_delegate;
+
   flutter::TextInputModel* text_model;
 
   // A 4x4 matrix that maps from `EditableText` local coordinates to the
@@ -487,9 +489,13 @@ static void update_im_cursor_position(FlTextInputPlugin* self) {
            priv->composing_rect.y * priv->editabletext_transform[1][1] +
            priv->editabletext_transform[3][1] + priv->composing_rect.height;
 
+  // Transform from Flutter view coordinates to GTK window coordinates.
+  GdkRectangle preedit_rect = {};
+  fl_text_input_view_delegate_translate_coordinates(
+      priv->view_delegate, x, y, &preedit_rect.x, &preedit_rect.y);
+
   // Set the cursor location in window coordinates so that GTK can position any
   // system input method windows.
-  GdkRectangle preedit_rect = {x, y, 0, 0};
   gtk_im_context_set_cursor_location(priv->im_context, &preedit_rect);
 }
 
@@ -586,6 +592,12 @@ static void fl_text_input_plugin_dispose(GObject* object) {
   if (priv->text_model != nullptr) {
     delete priv->text_model;
     priv->text_model = nullptr;
+  }
+  if (priv->view_delegate != nullptr) {
+    g_object_remove_weak_pointer(
+        G_OBJECT(priv->view_delegate),
+        reinterpret_cast<gpointer*>(&(priv->view_delegate)));
+    priv->view_delegate = nullptr;
   }
 
   G_OBJECT_CLASS(fl_text_input_plugin_parent_class)->dispose(object);
@@ -719,10 +731,13 @@ static void init_im_context(FlTextInputPlugin* self, GtkIMContext* im_context) {
                           G_CONNECT_SWAPPED);
 }
 
-FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger,
-                                            GtkIMContext* im_context) {
+FlTextInputPlugin* fl_text_input_plugin_new(
+    FlBinaryMessenger* messenger,
+    GtkIMContext* im_context,
+    FlTextInputViewDelegate* view_delegate) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
   g_return_val_if_fail(GTK_IS_IM_CONTEXT(im_context), nullptr);
+  g_return_val_if_fail(FL_IS_TEXT_INPUT_VIEW_DELEGATE(view_delegate), nullptr);
 
   FlTextInputPlugin* self = FL_TEXT_INPUT_PLUGIN(
       g_object_new(fl_text_input_plugin_get_type(), nullptr));
@@ -736,6 +751,11 @@ FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger,
                                             nullptr);
 
   init_im_context(self, im_context);
+
+  priv->view_delegate = view_delegate;
+  g_object_add_weak_pointer(
+      G_OBJECT(view_delegate),
+      reinterpret_cast<gpointer*>(&(priv->view_delegate)));
 
   return self;
 }

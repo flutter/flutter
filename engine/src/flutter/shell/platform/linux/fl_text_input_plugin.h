@@ -8,6 +8,7 @@
 #include <gtk/gtk.h>
 
 #include "flutter/shell/platform/linux/fl_key_event.h"
+#include "flutter/shell/platform/linux/fl_text_input_view_delegate.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 
 G_BEGIN_DECLS
@@ -38,14 +39,17 @@ struct _FlTextInputPluginClass {
  * fl_text_input_plugin_new:
  * @messenger: an #FlBinaryMessenger.
  * @im_context: (allow-none): a #GtkIMContext.
+ * @view_delegate: an #FlTextInputViewDelegate.
  *
  * Creates a new plugin that implements SystemChannels.textInput from the
  * Flutter services library.
  *
  * Returns: a new #FlTextInputPlugin.
  */
-FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger,
-                                            GtkIMContext* im_context);
+FlTextInputPlugin* fl_text_input_plugin_new(
+    FlBinaryMessenger* messenger,
+    GtkIMContext* im_context,
+    FlTextInputViewDelegate* view_delegate);
 
 /**
  * fl_text_input_plugin_filter_keypress

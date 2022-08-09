@@ -20,6 +20,7 @@
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_view_delegate.h"
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
+#include "flutter/shell/platform/linux/fl_text_input_view_delegate.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -82,6 +83,9 @@ static void fl_view_keyboard_delegate_iface_init(
 static void fl_view_scrolling_delegate_iface_init(
     FlScrollingViewDelegateInterface* iface);
 
+static void fl_view_text_input_delegate_iface_init(
+    FlTextInputViewDelegateInterface* iface);
+
 G_DEFINE_TYPE_WITH_CODE(
     FlView,
     fl_view,
@@ -91,18 +95,22 @@ G_DEFINE_TYPE_WITH_CODE(
         G_IMPLEMENT_INTERFACE(fl_keyboard_view_delegate_get_type(),
                               fl_view_keyboard_delegate_iface_init)
             G_IMPLEMENT_INTERFACE(fl_scrolling_view_delegate_get_type(),
-                                  fl_view_scrolling_delegate_iface_init))
+                                  fl_view_scrolling_delegate_iface_init)
+                G_IMPLEMENT_INTERFACE(fl_text_input_view_delegate_get_type(),
+                                      fl_view_text_input_delegate_iface_init))
 
 // Initialize keyboard manager.
 static void init_keyboard(FlView* self) {
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
 
-  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(self));
+  GdkWindow* window =
+      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self)));
   g_return_if_fail(GDK_IS_WINDOW(window));
   g_autoptr(GtkIMContext) im_context = gtk_im_multicontext_new();
   gtk_im_context_set_client_window(im_context, window);
 
-  self->text_input_plugin = fl_text_input_plugin_new(messenger, im_context);
+  self->text_input_plugin = fl_text_input_plugin_new(
+      messenger, im_context, FL_TEXT_INPUT_VIEW_DELEGATE(self));
   self->keyboard_manager =
       fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
 }
@@ -331,6 +339,18 @@ static void fl_view_scrolling_delegate_iface_init(
                                                 rotation);
         };
       };
+}
+
+static void fl_view_text_input_delegate_iface_init(
+    FlTextInputViewDelegateInterface* iface) {
+  iface->translate_coordinates = [](FlTextInputViewDelegate* delegate,
+                                    gint view_x, gint view_y, gint* window_x,
+                                    gint* window_y) {
+    FlView* self = FL_VIEW(delegate);
+    gtk_widget_translate_coordinates(GTK_WIDGET(self),
+                                     gtk_widget_get_toplevel(GTK_WIDGET(self)),
+                                     view_x, view_y, window_x, window_y);
+  };
 }
 
 // Signal handler for GtkWidget::button-press-event
