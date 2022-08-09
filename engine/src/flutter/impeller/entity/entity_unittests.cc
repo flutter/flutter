@@ -847,6 +847,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
     const char* input_type_names[] = {"Texture", "Solid Color"};
     const char* blur_type_names[] = {"Image blur", "Mask blur"};
+    const char* pass_variation_names[] = {"Two pass", "Directional"};
     const char* blur_style_names[] = {"Normal", "Solid", "Outer", "Inner"};
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const FilterContents::BlurStyle blur_styles[] = {
@@ -860,6 +861,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     static int selected_input_type = 0;
     static Color input_color = Color::Black();
     static int selected_blur_type = 0;
+    static int selected_pass_variation = 0;
     static float blur_amount[2] = {20, 20};
     static int selected_blur_style = 0;
     static int selected_tile_mode = 3;
@@ -882,6 +884,11 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       }
       ImGui::Combo("Blur type", &selected_blur_type, blur_type_names,
                    sizeof(blur_type_names) / sizeof(char*));
+      if (selected_blur_type == 0) {
+        ImGui::Combo("Pass variation", &selected_pass_variation,
+                     pass_variation_names,
+                     sizeof(pass_variation_names) / sizeof(char*));
+      }
       ImGui::SliderFloat2("Sigma", &blur_amount[0], 0, 200);
       ImGui::Combo("Blur style", &selected_blur_style, blur_style_names,
                    sizeof(blur_style_names) / sizeof(char*));
@@ -921,9 +928,18 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       input_size = input_rect.size;
     }
 
-    auto blur = FilterContents::MakeGaussianBlur(
-        FilterInput::Make(input), Sigma{blur_amount[0]}, Sigma{blur_amount[1]},
-        blur_styles[selected_blur_style], tile_modes[selected_tile_mode]);
+    std::shared_ptr<FilterContents> blur;
+    if (selected_pass_variation == 0) {
+      blur = FilterContents::MakeGaussianBlur(
+          FilterInput::Make(input), Sigma{blur_amount[0]},
+          Sigma{blur_amount[1]}, blur_styles[selected_blur_style],
+          tile_modes[selected_tile_mode]);
+    } else {
+      Vector2 blur_vector(blur_amount[0], blur_amount[1]);
+      blur = FilterContents::MakeDirectionalGaussianBlur(
+          FilterInput::Make(input), Sigma{blur_vector.GetLength()},
+          blur_vector.Normalize());
+    }
 
     auto mask_blur = FilterContents::MakeBorderMaskBlur(
         FilterInput::Make(input), Sigma{blur_amount[0]}, Sigma{blur_amount[1]},
