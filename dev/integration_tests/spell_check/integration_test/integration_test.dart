@@ -47,9 +47,12 @@ Future<void> main() async {
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans!.length, equals(0));
-    expect(defaultSpellCheckService.lastSavedText, equals(text));
     expect(
-      defaultSpellCheckService.lastSavedSpans,
+      defaultSpellCheckService.lastSavedResults!.spellCheckedText,
+      equals(text)
+    );
+    expect(
+      defaultSpellCheckService.lastSavedResults!.suggestionSpans,
       equals(spellCheckSuggestionSpans)
     );
   });
@@ -80,9 +83,12 @@ Future<void> main() async {
         );
     }
 
-    expect(defaultSpellCheckService.lastSavedText, equals(text));
     expect(
-      defaultSpellCheckService.lastSavedSpans,
+      defaultSpellCheckService.lastSavedResults!.spellCheckedText,
+      equals(text)
+    );
+    expect(
+      defaultSpellCheckService.lastSavedResults!.suggestionSpans,
       equals(spellCheckSuggestionSpans)
     );
   });
@@ -122,8 +128,8 @@ Future<void> main() async {
     // Remove one span to simulate Gboard attempting to un-ignore the composing region, after tapping away from "Yuou".
     modifiedSpellCheckSuggestionSpans.removeAt(1);
 
-    defaultSpellCheckService.lastSavedSpans = modifiedSpellCheckSuggestionSpans;
-    defaultSpellCheckService.lastSavedText = text;
+    defaultSpellCheckService.lastSavedResults!.suggestionSpans = modifiedSpellCheckSuggestionSpans;
+    defaultSpellCheckService.lastSavedResults!.spellCheckedText = text;
 
     final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
@@ -177,6 +183,6 @@ Future<void> main() async {
 
     // We expect it to be rare for the first request to complete before the
     // second, so no text should be saved as of now.
-    expect(defaultSpellCheckService.lastSavedText, null);
+    expect(defaultSpellCheckService.lastSavedResults, null);
   });
 }
