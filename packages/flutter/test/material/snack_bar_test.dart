@@ -1652,6 +1652,93 @@ void main() {
       },
     );
 
+    Future<void> openFloatingSnackBar(WidgetTester tester) async {
+      final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+      scaffoldMessengerState.showSnackBar(
+        const SnackBar(
+          content: Text('SnackBar text'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+    }
+
+    void expectSnackBarNotVisibleError(WidgetTester tester) {
+      final AssertionError exception = tester.takeException() as AssertionError;
+      const String message = 'Floating SnackBar presented off screen.\n'
+        'A SnackBar with behavior property set to SnackBarBehavior.floating is fully '
+        'or partially off screen because some or all the widgets provided to '
+        'Scaffold.floatingActionButton, Scaffold.persistentFooterButtons and '
+        'Scaffold.bottomNavigationBar take up too much vertical space.\n'
+        'Consider constraining the size of these widgets to allow room for the SnackBar to be visible.';
+      expect(exception.message, message);
+    }
+
+    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offsetted too high by a large Scaffold.floatingActionButton', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/84263
+      Future<void> boilerplate({required double? fabHeight}) {
+        return tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              floatingActionButton: Container(height: fabHeight),
+            ),
+          ),
+        );
+      }
+
+      // Run once with a visible SnackBar to compute the empty space above SnackBar.
+      const double mediumFabHeight = 100;
+      await boilerplate(fabHeight: mediumFabHeight);
+      await openFloatingSnackBar(tester);
+      expect(tester.takeException(), isNull);
+      final double spaceAboveSnackBar = tester.getTopLeft(find.byType(SnackBar)).dy;
+
+      // Run with the Snackbar fully off screen.
+      await boilerplate(fabHeight: spaceAboveSnackBar + mediumFabHeight * 2);
+      await openFloatingSnackBar(tester);
+      expectSnackBarNotVisibleError(tester);
+
+      // Run with the Snackbar partially off screen.
+      await boilerplate(fabHeight: spaceAboveSnackBar + mediumFabHeight + 10);
+      await openFloatingSnackBar(tester);
+      expectSnackBarNotVisibleError(tester);
+
+      // Run with the Snackbar fully visible right on the top of the screen.
+      await boilerplate(fabHeight: spaceAboveSnackBar + mediumFabHeight);
+      await openFloatingSnackBar(tester);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offsetted too high by a large Scaffold.persistentFooterButtons', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/84263
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            persistentFooterButtons: <Widget>[SizedBox(height: 1000)],
+          ),
+        ),
+      );
+
+      await openFloatingSnackBar(tester);
+      await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+      expectSnackBarNotVisibleError(tester);
+    });
+
+    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offsetted too high by a large Scaffold.bottomNavigationBar', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/84263
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: SizedBox(height: 1000),
+          ),
+        ),
+      );
+
+      await openFloatingSnackBar(tester);
+      await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+      expectSnackBarNotVisibleError(tester);
+    });
+
     testWidgets(
       'SnackBar has correct end padding when it contains an action with fixed behavior',
       (WidgetTester tester) async {
