@@ -37,7 +37,7 @@ bool InlinePassContext::EndPass() {
     return true;
   }
 
-  if (!pass_->EncodeCommands(context_->GetTransientsAllocator())) {
+  if (!pass_->EncodeCommands(context_->GetResourceAllocator())) {
     return false;
   }
 
@@ -59,7 +59,7 @@ std::shared_ptr<RenderPass> InlinePassContext::GetRenderPass(
     uint32_t pass_depth) {
   // Create a new render pass if one isn't active.
   if (!IsActive()) {
-    command_buffer_ = context_->CreateRenderCommandBuffer();
+    command_buffer_ = context_->CreateCommandBuffer();
     if (!command_buffer_) {
       return nullptr;
     }

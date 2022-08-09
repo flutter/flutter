@@ -243,7 +243,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     return nullptr;
   }
 
-  auto sub_command_buffer = context->CreateRenderCommandBuffer();
+  auto sub_command_buffer = context->CreateCommandBuffer();
   sub_command_buffer->SetLabel("Offscreen Contents Command Buffer");
   if (!sub_command_buffer) {
     return nullptr;
@@ -259,7 +259,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     return nullptr;
   }
 
-  if (!sub_renderpass->EncodeCommands(context->GetTransientsAllocator())) {
+  if (!sub_renderpass->EncodeCommands(context->GetResourceAllocator())) {
     return nullptr;
   }
 

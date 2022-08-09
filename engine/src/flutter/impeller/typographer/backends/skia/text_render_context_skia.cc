@@ -248,7 +248,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   // ---------------------------------------------------------------------------
   // Step 6: Upload the atlas as a texture.
   // ---------------------------------------------------------------------------
-  auto texture = UploadGlyphTextureAtlas(GetContext()->GetTransientsAllocator(),
+  auto texture = UploadGlyphTextureAtlas(GetContext()->GetResourceAllocator(),
                                          bitmap, atlas_size);
   if (!texture) {
     return nullptr;
