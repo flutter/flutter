@@ -1759,7 +1759,7 @@ class GridView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     required this.gridDelegate,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,

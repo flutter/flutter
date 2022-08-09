@@ -143,6 +143,26 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
+  testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 42,
+        ),
+        itemCount: 42,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 5) {
+            return null;
+          }
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(5));
+  });
+
   testWidgets('ListView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
@@ -164,7 +184,9 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
         itemCount: 42,
-        separatorBuilder: (BuildContext context, int index) => const Text('separator'),
+        separatorBuilder: (BuildContext context, int index) {
+          return const Text('separator');
+        },
         itemBuilder: (BuildContext context, int index) {
           if (index == 5) {
             return null;
@@ -176,7 +198,7 @@ void main() {
     ));
 
     expect(find.text('item'), findsNWidgets(5));
-    expect(find.text('separator'), findsNWidgets(4));
+    expect(find.text('separator'), findsNWidgets(5));
   });
 
   testWidgets('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
