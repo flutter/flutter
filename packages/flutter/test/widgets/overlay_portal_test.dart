@@ -1204,6 +1204,114 @@ void main() {
       verifyTreeIsClean();
     });
 
+    testWidgets('Paint order of nested OverlayWidget: swap inner and outer', (WidgetTester tester) async {
+      final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
+      final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
+
+
+      late StateSetter setState;
+
+      const Key key1 = Key('key1');
+      const Key key2 = Key('key2');
+      const Key key3 = Key('key3');
+      const Key key4 = Key('key4');
+      const Key key5 = Key('key5');
+      // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
+      const Widget child1 = SizedBox(key: key1);
+      const Widget child2 = SizedBox(key: key2);
+      const Widget child3 = SizedBox(key: key3);
+      const Widget child4 = SizedBox(key: key4);
+      const Widget child5 = SizedBox(key: key5);
+
+      Widget widget = Column(
+        children: <Widget>[
+          const OverlayPortal(
+            overlayChild: child1,
+            child: null,
+          ),
+          OverlayPortal(
+            key: outerKey,
+            overlayChild: OverlayPortal(
+              key: innerKey,
+              overlayChild: child4,
+              child: child3,
+            ),
+            child: child2,
+          ),
+          const OverlayPortal(
+            overlayChild: null,
+            child: null,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(builder: (BuildContext context) {
+                return StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
+                  setState = stateSetter;
+                  return widget;
+                });
+              }),
+            ],
+          ),
+        ),
+      );
+
+      final RenderObject theatre = tester.renderObject<RenderObject>(find.byType(Overlay));
+
+      final List<RenderObject> childrenVisited = <RenderObject>[];
+      theatre.visitChildren(childrenVisited.add);
+      expect(childrenVisited.length, 4);
+      expect(childrenVisited, containsAllInOrder(
+        <AbstractNode>[
+          tester.renderObject(find.byKey(key1)).parent!,
+          tester.renderObject(find.byKey(innerKey)).parent!,
+          tester.renderObject(find.byKey(key4)).parent!,
+        ],
+      ));
+      childrenVisited.clear();
+
+      setState(() {
+        widget = Column(
+          children: <Widget>[
+            const OverlayPortal(
+              overlayChild: child1,
+              child: null,
+            ),
+            OverlayPortal(
+              key: outerKey,
+              overlayChild: OverlayPortal(
+                key: innerKey,
+                overlayChild: child4,
+                child: child3,
+              ),
+              child: child2,
+            ),
+            const OverlayPortal(
+              overlayChild: child5,
+              child: null,
+            ),
+          ],
+        );
+      });
+
+      await tester.pump();
+      theatre.visitChildren(childrenVisited.add);
+      expect(childrenVisited.length, 5);
+      expect(childrenVisited, containsAllInOrder(
+        <AbstractNode>[
+          tester.renderObject(find.byKey(key1)).parent!,
+          tester.renderObject(find.byKey(innerKey)).parent!,
+          tester.renderObject(find.byKey(key4)).parent!,
+          tester.renderObject(find.byKey(key5)).parent!,
+        ],
+      ));
+    });
+
     group('Swapping', () {
       StateSetter? setState1, setState2;
       bool swapped = false;
@@ -1483,6 +1591,65 @@ void main() {
         expect(counter1.layoutCount, 3);
         expect(counter2.layoutCount, 3);
       });
+    });
+  });
+
+  group('Paint order', () {
+    testWidgets('Paint order does not change after global key reparenting', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+
+      final RenderBox child1Box = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+      final RenderBox child2Box = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+
+      late StateSetter setState;
+      bool reparented = false;
+
+      // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
+      final Widget child1 = WidgetToRenderBoxAdapter(renderBox: child1Box);
+      final Widget child2 = WidgetToRenderBoxAdapter(renderBox: child2Box);
+
+      final Widget overlayPortal1 = OverlayPortal(
+        key: key,
+        overlayChild: child1,
+        child: const SizedBox(),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
+                      setState = stateSetter;
+                      return reparented ? SizedBox(child: overlayPortal1) : overlayPortal1;
+                    }),
+                    OverlayPortal(
+                      overlayChild: child2,
+                      child: const SizedBox(),
+                    ),
+                  ],
+                );
+              }),
+            ],
+          ),
+        ),
+      );
+
+      final RenderObject theatre = tester.renderObject<RenderObject>(find.byType(Overlay));
+      final List<RenderObject> childrenVisited = <RenderObject>[];
+      theatre.visitChildren(childrenVisited.add);
+      expect(childrenVisited.length, 3);
+      expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
+      childrenVisited.clear();
+
+      setState(() { reparented = true; });
+      await tester.pump();
+      theatre.visitChildren(childrenVisited.add);
+      // The child list stays the same.
+      expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
     });
   });
 }

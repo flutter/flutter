@@ -15,12 +15,9 @@ import 'ticker_provider.dart';
 
 typedef _ChildIterator = RenderBox? Function();
 
-RenderBox? _emptyChildIterator() => null;
-
 BoxHitTest _toBoxHitTest(bool Function(BoxHitTestResult result, { required Offset position }) hitTest) {
   return (BoxHitTestResult result, Offset transform) => hitTest(result, position: transform);
 }
-
 
 /// A place in an [Overlay] that can contain a widget.
 ///
@@ -229,7 +226,7 @@ class OverlayEntry implements Listenable {
   String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
 }
 
-// Indicates the location of this Overlay child.
+// Lazy OverlayLocation provider.
 class _OverlayLocationWidget extends StatefulWidget {
   const _OverlayLocationWidget({
     required this.referenceLocation,
@@ -244,33 +241,27 @@ class _OverlayLocationWidget extends StatefulWidget {
 }
 
 class _OverlayLocationState extends State<_OverlayLocationWidget> {
-  _DoublyLinkedOverlayLocation? _location;
-  _DoublyLinkedOverlayLocation get location {
-    final _DoublyLinkedOverlayLocation? location = _location;
-    if (location != null) {
-      return location;
-    }
+  _DoublyLinkedOverlayLocation get location => widget.referenceLocation.createNextIfAbsent(_OverlayLocation.new);
 
-    final _OverlayLocation newLocation = _OverlayLocation(referenceLocation: widget.referenceLocation);
-    widget.referenceLocation.next = newLocation;
-    widget.referenceLocation.root.last = newLocation;
-    return newLocation;
+  @override
+  void initState() {
+    super.initState();
+    widget.referenceLocation.attach();
   }
 
   @override
   void didUpdateWidget(_OverlayLocationWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.referenceLocation != oldWidget.referenceLocation) {
-      _location?._dispose();
-      _location = null;
+      oldWidget.referenceLocation.detach();
+      widget.referenceLocation.attach();
     }
   }
 
   @override
   void dispose() {
+    widget.referenceLocation.detach();
     super.dispose();
-    _location?._dispose();
-    _location = null;
   }
 
   @override
@@ -294,7 +285,11 @@ class _OverlayLocationInheritedWidget extends InheritedWidget {
   final _OverlayLocationState? state;
   final _RootOverlayLocation? rootLocation;
 
-  OverlayLocation get locatoin => rootLocation ?? state!.location;
+  OverlayLocation get location {
+    final _DoublyLinkedOverlayLocation location = rootLocation ?? state!.location;
+    assert(!location._debugDisposed);
+    return location;
+  }
 
   @override
   bool updateShouldNotify(_OverlayLocationInheritedWidget oldWidget) {
@@ -311,39 +306,14 @@ class _OverlayLocationInheritedWidget extends InheritedWidget {
 class _LocationOccupants extends LinkedList<_RenderDeferredLayoutBox> {
   _LocationOccupants();
 
-  //late final Set<RenderBox> _debugMembers = <RenderBox>{ };
-  //_RenderDeferredLayoutBox? _firstChild;
-  //_RenderDeferredLayoutBox? _lastChild;
-  //void add(_RenderDeferredLayoutBox child) {
-  //  assert(_debugMembers.add(child), '$child was already in $_debugMembers');
-  //  final StackParentData childParentData = child.parentData! as StackParentData;
-  //  assert(childParentData.previousSibling == null);
-  //  assert(childParentData.nextSibling == null);
-  //  final StackParentData? prevParentData = _lastChild?.parentData! as StackParentData?;
-  //  prevParentData?.nextSibling = child;
-  //  childParentData.previousSibling = _lastChild;
-  //  _firstChild ??= child;
-  //  _lastChild = child;
-  //}
+  @override
+  void add(_RenderDeferredLayoutBox entry) {
+    if (contains(entry)) {
+      return;
+    }
+    super.add(entry);
+  }
 
-  //void remove(_RenderDeferredLayoutBox child) {
-  //  assert(_debugMembers.remove(child), 'Attempt to remove a non-existent member $child from $_debugMembers');
-  //  final StackParentData childParentData = child.parentData! as StackParentData;
-  //  final StackParentData? prevParentData = childParentData.previousSibling?.parentData as StackParentData?;
-  //  final StackParentData? nextParentData = childParentData.nextSibling?.parentData as StackParentData?;
-  //  if (prevParentData != null) {
-  //    prevParentData.nextSibling = childParentData.nextSibling;
-  //  } else {
-  //    _firstChild = childParentData.nextSibling! as _RenderDeferredLayoutBox;
-  //  }
-  //  if (nextParentData != null) {
-  //    nextParentData.previousSibling = childParentData.previousSibling;
-  //  } else {
-  //    _lastChild = childParentData.previousSibling! as _RenderDeferredLayoutBox;
-  //  }
-  //  childParentData.previousSibling = null;
-  //  childParentData.nextSibling = null;
-  //}
   _RenderDeferredLayoutBox? childAfter(_RenderDeferredLayoutBox? child) {
     if (isEmpty) {
       return null;
@@ -359,7 +329,6 @@ class _LocationOccupants extends LinkedList<_RenderDeferredLayoutBox> {
     final _RenderDeferredLayoutBox? prev = child == null ? last : child.previous;
     return prev != null && prev.parent == null ? childBefore(prev) : prev;
   }
-
 
   _ChildIterator? paintOrderIterator() {
     _RenderDeferredLayoutBox? child = childAfter(null);
@@ -411,28 +380,34 @@ class _RootOverlayLocation extends _DoublyLinkedOverlayLocation {
   @override
   _RootOverlayLocation get root => this;
 
-  static T reduce<T>(T initialValue, T Function(T, RenderBox) combine, _ChildIterator iter) {
-    final RenderBox? box = iter();
-    return box == null
-      ? initialValue
-      : reduce(combine(initialValue, box), combine, iter);
+  @override
+  String toString() {
+    final String base = '${describeIdentity(this)}[$_children](root)';
+    final _DoublyLinkedOverlayLocation? next = this.next;
+    if (next == null) {
+      return base;
+    }
+    return '$base -> ${describeIdentity(next)}';
   }
 }
 
 class _OverlayLocation extends _DoublyLinkedOverlayLocation {
-  _OverlayLocation({ required _DoublyLinkedOverlayLocation referenceLocation })
+  _OverlayLocation(_DoublyLinkedOverlayLocation referenceLocation)
     : root = referenceLocation.root,
+      assert(referenceLocation._debugNotDisposed()),
       super(referenceLocation, referenceLocation._overlayRenderObject);
 
   @override
   final _RootOverlayLocation root;
 
-  void unlink() {
+  @override
+  void _dispose() {
     final _DoublyLinkedOverlayLocation? next = this.next;
     final _DoublyLinkedOverlayLocation? prev = this.prev;
-    prev?.next = next;
+    prev?.next = null;
 
     assert(linked);
+    assert(next == null || next._debugNotDisposed());
 
     if (prev == null) {
       root.first = next!;
@@ -440,11 +415,19 @@ class _OverlayLocation extends _DoublyLinkedOverlayLocation {
       root.last = prev;
     }
     this.next = null;
+    super._dispose();
+    next?._dispose();
+    assert(prev?.next == null);
   }
 
   @override
   String toString() {
-    return '${describeIdentity(this)}[$_children] -> ${describeIdentity(next)}';
+    final String base = '${describeIdentity(this)}[$_children](depth: $_relativeZIndex)(disposed: $_debugDisposed)';
+    final _DoublyLinkedOverlayLocation? next = this.next;
+    if (next == null) {
+      return base;
+    }
+    return '$base -> ${describeIdentity(next)}';
   }
 }
 
@@ -454,10 +437,44 @@ abstract class _DoublyLinkedOverlayLocation extends OverlayLocation {
 
   final _DoublyLinkedOverlayLocation? prev;
   _DoublyLinkedOverlayLocation? next;
-
   _RootOverlayLocation get root;
 
+  _DoublyLinkedOverlayLocation createNextIfAbsent(_DoublyLinkedOverlayLocation Function(_DoublyLinkedOverlayLocation) f) {
+    assert(_debugNotDisposed());
+    final _DoublyLinkedOverlayLocation? next = this.next;
+    if (next != null) {
+      assert(next._debugNotDisposed());
+      return next;
+    }
+    final _DoublyLinkedOverlayLocation value = this.next = f(this);
+    root.last = value;
+    return value;
+  }
+
   bool get linked => prev != null || next != null;
+
+  int refCount = 0;
+  void attach() {
+    assert(_debugNotDisposed());
+    refCount += 1;
+  }
+
+  void detach() {
+    assert(_debugNotDisposed());
+    refCount -= 1;
+    assert(refCount >= 0);
+    if (refCount > 0) {
+      return;
+    }
+
+    // Clean up if the node is unused.
+    _DoublyLinkedOverlayLocation? location = this;
+    while (location != null && location.refCount <= 0 && location.next == null) {
+      print('>>> $location(already disposed? ${location._debugDisposed}) refCount reaches 0, disposing.');
+      location._dispose();
+      location = location.prev;
+    }
+  }
 
   _ChildIterator? _paintOrderIterator() {
     _ChildIterator? currentIterator = _children.paintOrderIterator();
@@ -465,39 +482,17 @@ abstract class _DoublyLinkedOverlayLocation extends OverlayLocation {
     if (currentIterator == null) {
       return next?._paintOrderIterator();
     }
-    bool debugReentry = false;
     return () {
-      assert(!debugReentry);
-      assert(() {
-        debugReentry = true;
-        return true;
-      }());
       final _ChildIterator? iter = currentIterator;
       if (iter == null) {
-        assert(() {
-          debugReentry = false;
-          return true;
-        }());
         return null;
       }
       final RenderBox? child = iter();
       if (child != null) {
-        assert(() {
-          debugReentry = false;
-          return true;
-        }());
         return child;
       }
-      if (lastIterator) {
-        currentIterator = null;
-        return null;
-      }
+      currentIterator = lastIterator ? null : next?._paintOrderIterator();
       lastIterator = true;
-      currentIterator = next?._paintOrderIterator();
-      assert(() {
-        debugReentry = false;
-        return true;
-      }());
       return currentIterator?.call();
     };
   }
@@ -517,12 +512,8 @@ abstract class _DoublyLinkedOverlayLocation extends OverlayLocation {
       if (child != null) {
         return child;
       }
-      if (lastIterator) {
-        currentIterator = null;
-        return null;
-      }
+      currentIterator = lastIterator ? null : prev?._hitTestOrderIterator();
       lastIterator = true;
-      currentIterator = prev?._hitTestOrderIterator();
       return currentIterator?.call();
     };
   }
@@ -577,7 +568,7 @@ abstract class OverlayLocation {
   /// This method returns null when no enclosing [Overlay] can be found in the
   /// given [context].
   static OverlayLocation? above(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.locatoin;
+    return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.location;
   }
 
   final _LocationOccupants _children = _LocationOccupants();
@@ -591,8 +582,8 @@ abstract class OverlayLocation {
   }
 
   void _move(_RenderDeferredLayoutBox child, OverlayLocation oldLocation) {
-    print('$child moved to $this from $oldLocation');
-    assert(!_debugDisposed);
+    print('MOVED: $child to $this from $oldLocation');
+    assert(!_debugDisposed, 'moving $child to a disposed location $this');
     if (oldLocation._overlayRenderObject != _overlayRenderObject) {
       // Moving to a different Overlay.
       oldLocation._remove(child);
@@ -603,11 +594,11 @@ abstract class OverlayLocation {
     assert(oldLocation._children != null);
     oldLocation._children.remove(child);
     _children.add(child);
+    _overlayRenderObject.moveDeferredChild(child, oldLocation, this);
   }
 
   void _remove(_RenderDeferredLayoutBox child) {
     print('REMOVED: $child from $this');
-    assert(!_debugDisposed);
     assert(_children != null);
     _children.remove(child);
     _overlayRenderObject.removeDeferredChild(child, this);
@@ -619,11 +610,18 @@ abstract class OverlayLocation {
   }
 
   void _deactivate(_RenderDeferredLayoutBox child) {
-    assert(!_debugDisposed);
+    // This method can be called while the location is already disposed.
     _overlayRenderObject.dropChild(child);
   }
 
+  bool _debugNotDisposed() {
+    if (!_debugDisposed) {
+      return true;
+    }
+    throw FlutterError('$this is already disposed');
+  }
   bool _debugDisposed = false;
+  @mustCallSuper
   void _dispose() {
     assert(!_debugDisposed);
     assert(() {
@@ -631,13 +629,6 @@ abstract class OverlayLocation {
       return true;
     }());
   }
-
-  //static int _compare(OverlayLocation location, OverlayLocation other) {
-  //  assert(other._overlayRenderObject == location._overlayRenderObject);
-  //  return location._reversedPaintOrderIndex == other._reversedPaintOrderIndex
-  //    ? location._relativeZIndex.compareTo(other._relativeZIndex)
-  //    : other._reversedPaintOrderIndex.compareTo(location._reversedPaintOrderIndex);
-  //}
 }
 
 class _OverlayEntryWidget extends StatefulWidget {
@@ -668,7 +659,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   void initState() {
     super.initState();
     widget.entry._overlayStateMounted.value = true;
-    widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!);
+    widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!)..attach();
   }
 
   @override
@@ -680,7 +671,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       assert(oldWidget.entry == widget.entry);
       oldWidget.entry._overlayLocation?._dispose();
       oldWidget.entry._overlayLocation = null;
-      widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!);
+      widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!)..attach();
     }
   }
 
@@ -1199,10 +1190,6 @@ mixin _RenderTheatreMixin on RenderBox {
 class _TheatreParentData extends StackParentData {
   // Only RenderObjects created by OverlayEntries make use of this.
   _RootOverlayLocation? location;
-
-  @override
-  void detach() {
-  }
 }
 
 class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox, _TheatreParentData>, _RenderTheatreMixin {
@@ -1282,8 +1269,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       final _ChildIterator? forwardIterator = childParentData.location!._paintOrderIterator();
       RenderBox? deferredChild = forwardIterator?.call();
       while (deferredChild != null) {
+        print('> attaching $deferredChild');
         deferredChild.attach(owner);
-        deferredChild = forwardIterator?.call();
+        deferredChild = forwardIterator!();
       }
       // The super implementation already attaches `child`.
       child = childParentData.nextSibling;
@@ -1299,8 +1287,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       final _ChildIterator? forwardIterator = childParentData.location!._paintOrderIterator();
       RenderBox? deferredChild = forwardIterator?.call();
       while (deferredChild != null) {
+        print('< detaching $deferredChild');
         deferredChild.detach();
-        deferredChild = forwardIterator?.call();
+        deferredChild = forwardIterator!();
       }
       // The super implementation already detaches `child`.
       child = childParentData.nextSibling;
@@ -1334,7 +1323,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     markNeedsPaint();
     markNeedsCompositingBitsUpdate();
     markNeedsSemanticsUpdate();
-    throw UnimplementedError();
+    //throw UnimplementedError();
   }
 
   void removeDeferredChild(_RenderDeferredLayoutBox child, OverlayLocation location) {
@@ -1438,7 +1427,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       RenderBox? deferredChild = forwardIterator?.call();
       //print('Deferred child > $deferredChild');
       while (deferredChild != null) {
-        print('Deferred child > $deferredChild');
+        print('laying out deferred child > $deferredChild');
         layoutChild(deferredChild, nonPositionedChildConstraints);
         deferredChild = forwardIterator!();
       }
@@ -1455,7 +1444,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     while (child != null) {
       final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
       context.paintChild(child, childParentData.offset + offset);
-      print('painting: $child ${childParentData.location!}, ${childParentData.location!._children}');
+      //print('painting: $child ${childParentData.location!}, ${childParentData.location!._children}');
       final _ChildIterator? forwardIterator = childParentData.location!.first._paintOrderIterator();
       RenderBox? deferredLayoutBox = forwardIterator?.call();
       while(deferredLayoutBox != null) {
@@ -1532,13 +1521,13 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       visitor(child);
-      print('visiting child (entry): $child');
+      //print('-- visiting child (entry): $child');
       final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
       final _ChildIterator? forwardIterator = childParentData.location!.first._paintOrderIterator();
       RenderBox? renderChild = forwardIterator?.call();
       while (renderChild != null) {
         visitor(renderChild);
-        print('visiting child: $child');
+        //print('   visiting child: $renderChild');
         renderChild = forwardIterator!();
       }
       child = childParentData.nextSibling;
@@ -1666,14 +1655,15 @@ class OverlayPortal extends RenderObjectWidget {
   ///
   /// The `overlayLocation` parameter must not be null when [overlayChild] is not
   /// null.
-  const OverlayPortal.forOverlay({
+  OverlayPortal.forOverlay({
     super.key,
     required OverlayLocation? overlayLocation,
     required this.overlayChild,
     required this.child,
   }) : _overlayLocation = overlayLocation,
        _overlayLocationGetter = _neverGetter,
-       assert(overlayChild == null || overlayLocation != null);
+       assert(overlayChild == null || overlayLocation != null),
+       assert(overlayLocation == null || overlayLocation._debugNotDisposed());
 
   static Never _neverGetter(BuildContext context) => throw FlutterError('Unreachable!');
 
@@ -1839,7 +1829,6 @@ class _OverlayPortalElement extends RenderObjectElement {
     if (slot != null) {
       renderObject._deferredLayoutChild = child as _RenderDeferredLayoutBox;
       slot._add(child);
-      //slot._overlayRenderObject.addDeferredChild(child, slot);
     } else {
       renderObject.child = child;
     }
@@ -1850,12 +1839,6 @@ class _OverlayPortalElement extends RenderObjectElement {
   @override
   void moveRenderObjectChild(RenderBox child, OverlayLocation oldSlot, OverlayLocation newSlot) {
     newSlot._move(child as _RenderDeferredLayoutBox, oldSlot);
-    //if (oldSlot._overlayRenderObject != newSlot._overlayRenderObject) {
-    //  oldSlot._overlayRenderObject.removeDeferredChild(child as _RenderDeferredLayoutBox, oldSlot);
-    //  insertRenderObjectChild(child, newSlot);
-    //} else {
-    //  newSlot._overlayRenderObject.moveDeferredChild(child as _RenderDeferredLayoutBox, oldSlot, newSlot);
-    //}
   }
 
   @override
@@ -1923,7 +1906,6 @@ class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheatreMixin, 
 
   StackParentData get stackParentData => parentData! as StackParentData;
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
-  OverlayLocation? _location;
 
   @override
   RenderBox? get _firstOnstageChild => child;
