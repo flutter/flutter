@@ -65,7 +65,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     FilterInput::Ref input,
     bool is_solid_color) const {
   if (is_solid_color) {
-    return FilterContents::MakeGaussianBlur(input, sigma, sigma, style);
+    return FilterContents::MakeGaussianBlur(input, sigma, sigma, style,
+                                            Entity::TileMode::kDecal);
   }
   return FilterContents::MakeBorderMaskBlur(input, sigma, sigma, style);
 }

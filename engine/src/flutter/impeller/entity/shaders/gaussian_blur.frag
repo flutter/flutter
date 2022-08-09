@@ -23,8 +23,15 @@ uniform FragInfo {
   vec2 texture_size;
   vec2 blur_direction;
 
+  float tile_mode;
+
+  // The blur sigma and radius have a linear relationship which is defined
+  // host-side, but both are useful controls here. Sigma (pixels per standard
+  // deviation) is used to define the gaussian function itself, whereas the
+  // radius is used to limit how much of the function is integrated.
   float blur_sigma;
   float blur_radius;
+
   float src_factor;
   float inner_blur_factor;
   float outer_blur_factor;
@@ -52,13 +59,13 @@ void main() {
     total_color +=
         gaussian * IPSampleWithTileMode(texture_sampler,
                                         v_texture_coords + blur_uv_offset * i,
-                                        kTileModeDecal);
+                                        frag_info.tile_mode);
   }
 
   vec4 blur_color = total_color / gaussian_integral;
 
-  vec4 src_color = IPSampleWithTileMode(alpha_mask_sampler,
-                                        v_src_texture_coords, kTileModeDecal);
+  vec4 src_color = IPSampleWithTileMode(
+      alpha_mask_sampler, v_src_texture_coords, frag_info.tile_mode);
   float blur_factor = frag_info.inner_blur_factor * float(src_color.a > 0) +
                       frag_info.outer_blur_factor * float(src_color.a == 0);
 
