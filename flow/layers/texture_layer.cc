@@ -54,7 +54,9 @@ void TextureLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   std::shared_ptr<Texture> texture =
-      context.texture_registry.GetTexture(texture_id_);
+      context.texture_registry
+          ? context.texture_registry->GetTexture(texture_id_)
+          : nullptr;
   if (!texture) {
     TRACE_EVENT_INSTANT0("flutter", "null texture");
     return;
