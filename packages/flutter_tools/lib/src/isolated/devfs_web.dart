@@ -677,6 +677,9 @@ class WebDevFS implements DevFS {
   @override
   bool hasSetAssetDirectory = false;
 
+  @override
+  bool didUpdateFontManifest = false;
+
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
 
