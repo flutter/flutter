@@ -138,6 +138,10 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
 
   FS::FragInfo frag_info;
+  frag_info.texture_sampler_y_coord_scale =
+      input_snapshot->texture->GetYCoordScale();
+  frag_info.alpha_mask_sampler_y_coord_scale =
+      source_snapshot->texture->GetYCoordScale();
   frag_info.blur_sigma = transformed_blur.GetLength();
   frag_info.blur_radius = Radius{Sigma{frag_info.blur_sigma}}.radius;
   frag_info.blur_direction = input_snapshot->transform.Invert()
