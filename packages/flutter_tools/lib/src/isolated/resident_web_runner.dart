@@ -532,10 +532,6 @@ class ResidentWebRunner extends ResidentRunner {
       final WebDevFS webDevFS = device!.devFS! as WebDevFS;
       final bool useDebugExtension = device!.device is WebServerDevice && debuggingOptions.startPaused;
       _connectionResult = await webDevFS.connect(useDebugExtension);
-      print('Received connection result!');
-      print('waiting for 5 seconds...');
-      await Future<void>.delayed(const Duration(seconds: 5));
-      print('done waiting!');
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
       void onLogEvent(vmservice.Event event)  {

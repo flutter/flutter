@@ -232,7 +232,6 @@ class WebAssetServer implements AssetReader {
       nullSafetyMode,
     );
     if (testMode) {
-      print('returning early because testmode');
       return server;
     }
 
