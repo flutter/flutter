@@ -170,11 +170,10 @@ class ChangeNotifier implements Listenable {
   /// [notifyListeners]; and similarly, by overriding [removeListener], checking
   /// if [hasListeners] is false after calling `super.removeListener()`, and if
   /// so, stopping that same work.
+  ///
+  /// This method returns false if [dispose] has been called.
   @protected
-  bool get hasListeners {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
-    return _count > 0;
-  }
+  bool get hasListeners => _count > 0;
 
   /// Register a closure to be called when the object changes.
   ///

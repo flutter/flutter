@@ -135,7 +135,7 @@ void main() {
     );
   });
 
-  test('normalizeHashCodesEquals', () {
+  test('equalsIgnoringHashCodes', () {
     expect('Foo#34219', equalsIgnoringHashCodes('Foo#00000'));
     expect('Foo#34219', equalsIgnoringHashCodes('Foo#12345'));
     expect('Foo#34219', equalsIgnoringHashCodes('Foo#abcdf'));
@@ -173,6 +173,24 @@ void main() {
     expect('Foo#', isNot(equalsIgnoringHashCodes('Foo#00000')));
     expect('Foo#3421', isNot(equalsIgnoringHashCodes('Foo#00000')));
     expect('Foo#342193', isNot(equalsIgnoringHashCodes('Foo#00000')));
+    expect(<String>['Foo#a3b4d'], equalsIgnoringHashCodes(<String>['Foo#12345']));
+    expect(
+      <String>['Foo#a3b4d', 'Foo#12345'],
+      equalsIgnoringHashCodes(<String>['Foo#00000', 'Foo#00000']),
+    );
+    expect(
+      <String>['Foo#a3b4d', 'Bar#12345'],
+      equalsIgnoringHashCodes(<String>['Foo#00000', 'Bar#00000']),
+    );
+    expect(
+      <String>['Foo#a3b4d', 'Bar#12345'],
+      isNot(equalsIgnoringHashCodes(<String>['Bar#00000', 'Foo#00000'])),
+    );
+    expect(<String>['Foo#a3b4d'], isNot(equalsIgnoringHashCodes(<String>['Foo'])));
+    expect(
+      <String>['Foo#a3b4d'],
+      isNot(equalsIgnoringHashCodes(<String>['Foo#00000', 'Bar#00000'])),
+    );
   });
 
   test('moreOrLessEquals', () {

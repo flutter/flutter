@@ -91,8 +91,9 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({ required Widget child }) {
+Widget boilerplate({ required Widget child, ThemeData? theme }) {
   return MaterialApp(
+    theme: theme,
     home: Localizations(
       locale: const Locale('en', 'US'),
       delegates: <LocalizationsDelegate<dynamic>>[
@@ -4653,6 +4654,38 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
+  testWidgets('maxLength shows warning in Material 3', (WidgetTester tester) async {
+    final TextEditingController textController = TextEditingController();
+    final ThemeData theme = ThemeData.from(
+      colorScheme: const ColorScheme.light().copyWith(error: Colors.deepPurpleAccent),
+      useMaterial3: true,
+    );
+    await tester.pumpWidget(boilerplate(
+      theme: theme,
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforcement: MaxLengthEnforcement.none,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pump();
+
+    expect(textController.text, '0123456789101112');
+    expect(find.text('16/10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16/10'));
+    expect(counterTextWidget.style!.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '0123456789');
+    await tester.pump();
+
+    expect(textController.text, '0123456789');
+    expect(find.text('10/10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10/10'));
+    expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
+  });
+
   testWidgets('maxLength shows warning when maxLengthEnforcement.none with surrogate pairs.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
@@ -6080,6 +6113,60 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  // Regressing test for https://github.com/flutter/flutter/issues/99763
+  testWidgets('Update textField semantics when obscureText changes', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(_ObscureTextTestWidget(controller: controller));
+
+    controller.text = 'Hello';
+    await tester.pump();
+
+    expect(
+        semantics,
+        includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          value: 'Hello',
+        )
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.tap],
+        textDirection: TextDirection.ltr,
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isObscured,
+        ],
+      )
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(
+        semantics,
+        includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          value: 'Hello',
+        )
+    );
 
     semantics.dispose();
   });
@@ -12266,4 +12353,41 @@ void main() {
       }, variant: TargetPlatformVariant.all());
     }
   });
+}
+
+/// A Simple widget for testing the obscure text.
+class _ObscureTextTestWidget extends StatefulWidget {
+   const _ObscureTextTestWidget({ required this.controller });
+
+  final TextEditingController controller;
+  @override
+  _ObscureTextTestWidgetState createState() => _ObscureTextTestWidgetState();
+}
+
+class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
+
+  bool _obscureText = false;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (_) {
+            return Column(
+              children: <Widget>[
+                TextField(
+                    obscureText: _obscureText,
+                    controller: widget.controller,
+                ),
+                ElevatedButton(
+                  onPressed: () => setState(() {_obscureText = !_obscureText;}),
+                  child: const SizedBox.shrink(),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 }

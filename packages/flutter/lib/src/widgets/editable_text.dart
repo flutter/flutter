@@ -22,6 +22,7 @@ import 'constants.dart';
 import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
+import 'default_text_editing_shortcuts.dart';
 import 'editable_text_context_menu_button_items_builder.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -3316,6 +3317,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
+  void performSelector(String selectorName) {
+    final Intent? intent = intentForMacOSSelector(selectorName);
+
+    if (intent != null) {
+      final BuildContext? primaryContext = primaryFocus?.context;
+      if (primaryContext != null) {
+        Actions.invoke(primaryContext, intent);
+      }
+    }
+  }
+
+  @override
   String get autofillId => 'EditableText-$hashCode';
 
   @override
@@ -4521,7 +4534,16 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     }
 
     final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+
+    // "textBoundary's selection is only updated after rebuild; if the text
+    // is the same, use the selection from state, which is more recent.
+    // This is necessary on macOS where alt+up sends the moveBackward:
+    // and moveToBeginningOfParagraph: selectors at the same time.
+    final TextSelection textBoundarySelection =
+        textBoundary.textEditingValue.text == state._value.text
+            ? state._value.selection
+            : textBoundary.textEditingValue.selection;
+
     if (!textBoundarySelection.isValid) {
       return null;
     }

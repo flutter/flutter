@@ -19,6 +19,7 @@ import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
@@ -26,6 +27,7 @@ import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'icon_button_theme.dart';
 import 'ink_ripple.dart';
 import 'ink_sparkle.dart';
 import 'ink_splash.dart';
@@ -114,6 +116,7 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [OutlinedButton]
 ///   * [TextButton]
 ///   * [ElevatedButton]
+///   * [IconButton]
 ///   * The time picker widget ([showTimePicker])
 ///   * [SnackBar]
 ///   * [Chip]
@@ -339,6 +342,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
@@ -535,7 +539,7 @@ class ThemeData with Diagnosticable {
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
+    iconTheme ??= isDark ? const IconThemeData(color: kDefaultIconLightColor) : const IconThemeData(color: kDefaultIconDarkColor);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
@@ -554,6 +558,7 @@ class ThemeData with Diagnosticable {
     drawerTheme ??= const DrawerThemeData();
     elevatedButtonTheme ??= const ElevatedButtonThemeData();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    iconButtonTheme ??= const IconButtonThemeData();
     listTileTheme ??= const ListTileThemeData();
     navigationBarTheme ??= const NavigationBarThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
@@ -645,6 +650,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
+      iconButtonTheme: iconButtonTheme,
       listTileTheme: listTileTheme,
       navigationBarTheme: navigationBarTheme,
       navigationRailTheme: navigationRailTheme,
@@ -750,6 +756,7 @@ class ThemeData with Diagnosticable {
     required this.elevatedButtonTheme,
     required this.expansionTileTheme,
     required this.floatingActionButtonTheme,
+    required this.iconButtonTheme,
     required this.listTileTheme,
     required this.navigationBarTheme,
     required this.navigationRailTheme,
@@ -892,6 +899,7 @@ class ThemeData with Diagnosticable {
        assert(elevatedButtonTheme != null),
        assert(expansionTileTheme != null),
        assert(floatingActionButtonTheme != null),
+       assert(iconButtonTheme != null),
        assert(listTileTheme != null),
        assert(navigationBarTheme != null),
        assert(navigationRailTheme != null),
@@ -1444,6 +1452,10 @@ class ThemeData with Diagnosticable {
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
 
+  /// A theme for customizing the appearance and internal layout of
+  /// [IconButton]s.
+  final IconButtonThemeData iconButtonTheme;
+
   /// A theme for customizing the appearance of [ListTile] widgets.
   final ListTileThemeData listTileTheme;
 
@@ -1712,6 +1724,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
@@ -1852,6 +1865,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme ?? this.expansionTileTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
+      iconButtonTheme: iconButtonTheme ?? this.iconButtonTheme,
       listTileTheme: listTileTheme ?? this.listTileTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
@@ -2050,6 +2064,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t)!,
       expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t)!,
+      iconButtonTheme: IconButtonThemeData.lerp(a.iconButtonTheme, b.iconButtonTheme, t)!,
       listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
       navigationBarTheme: NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
@@ -2150,6 +2165,7 @@ class ThemeData with Diagnosticable {
         other.elevatedButtonTheme == elevatedButtonTheme &&
         other.expansionTileTheme == expansionTileTheme &&
         other.floatingActionButtonTheme == floatingActionButtonTheme &&
+        other.iconButtonTheme == iconButtonTheme &&
         other.listTileTheme == listTileTheme &&
         other.navigationBarTheme == navigationBarTheme &&
         other.navigationRailTheme == navigationRailTheme &&
@@ -2247,6 +2263,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme,
       expansionTileTheme,
       floatingActionButtonTheme,
+      iconButtonTheme,
       listTileTheme,
       navigationBarTheme,
       navigationRailTheme,
@@ -2346,6 +2363,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ExpansionTileThemeData>('expansionTileTheme', expansionTileTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonTheme', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<IconButtonThemeData>('iconButtonTheme', iconButtonTheme, defaultValue: defaultData.iconButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ListTileThemeData>('listTileTheme', listTileTheme, defaultValue: defaultData.listTileTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailTheme', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
