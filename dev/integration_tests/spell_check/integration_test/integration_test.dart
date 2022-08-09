@@ -128,8 +128,8 @@ Future<void> main() async {
     // Remove one span to simulate Gboard attempting to un-ignore the composing region, after tapping away from "Yuou".
     modifiedSpellCheckSuggestionSpans.removeAt(1);
 
-    defaultSpellCheckService.lastSavedResults!.suggestionSpans = modifiedSpellCheckSuggestionSpans;
-    defaultSpellCheckService.lastSavedResults!.spellCheckedText = text;
+    defaultSpellCheckService.lastSavedResults =
+      SpellCheckResults(text, modifiedSpellCheckSuggestionSpans);
 
     final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
