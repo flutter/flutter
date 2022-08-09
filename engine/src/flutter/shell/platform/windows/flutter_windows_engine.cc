@@ -254,6 +254,7 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
+  args.shutdown_dart_vm_when_done = true;
   args.assets_path = assets_path_string.c_str();
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
