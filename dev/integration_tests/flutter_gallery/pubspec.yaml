@@ -276,8 +276,4 @@ flutter:
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
-<<<<<<< HEAD
-# PUBSPEC CHECKSUM: 21e9
-=======
 # PUBSPEC CHECKSUM: 38e8
->>>>>>> upstream/master

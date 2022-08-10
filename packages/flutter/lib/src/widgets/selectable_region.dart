@@ -874,8 +874,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-<<<<<<< HEAD
-=======
     Widget result = SelectionContainer(
       registrar: this,
       delegate: _selectionDelegate,
@@ -886,7 +884,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         child: result,
       );
     }
->>>>>>> upstream/master
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
       child: RawGestureDetector(
@@ -898,15 +895,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
           child: Focus(
             includeSemantics: false,
             focusNode: widget.focusNode,
-<<<<<<< HEAD
-            child: SelectionContainer(
-              registrar: this,
-              delegate: _selectionDelegate,
-              child: widget.child,
-            ),
-=======
             child: result,
->>>>>>> upstream/master
           ),
         ),
       ),

@@ -274,10 +274,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-<<<<<<< HEAD
     this.spellCheckConfiguration,
-=======
->>>>>>> upstream/master
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -440,10 +437,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-<<<<<<< HEAD
     this.spellCheckConfiguration,
-=======
->>>>>>> upstream/master
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),

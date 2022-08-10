@@ -219,8 +219,4 @@ flutter:
       fonts:
         - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
 
-<<<<<<< HEAD
-# PUBSPEC CHECKSUM: 186b
-=======
 # PUBSPEC CHECKSUM: d36a
->>>>>>> upstream/master
