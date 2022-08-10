@@ -69,8 +69,6 @@ class Allocator {
   std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
       const fml::Mapping& mapping);
 
-  static bool RequiresExplicitHostSynchronization(StorageMode mode);
-
  protected:
   Allocator();
 
