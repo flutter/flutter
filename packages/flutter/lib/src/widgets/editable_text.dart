@@ -4490,7 +4490,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     return Actions.invoke(
       context!,
       ReplaceTextIntent(
-        textBoundary.textEditingValue,
+        textBoundary.textEditingValue, 
         '',
         textBoundary.getTextBoundaryAt(textBoundary.textEditingValue.selection.base),
         SelectionChangedCause.keyboard,
@@ -4570,7 +4570,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
             ? state._value.selection
             : textBoundary.textEditingValue.selection;
 
-    if (!textBoundarySelection.isValid) {
+ d    if (!textBoundarySelection.isValid) {
       return null;
     }
     if (!textBoundarySelection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
