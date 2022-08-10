@@ -681,6 +681,72 @@ TEST_P(PointerInjectorDelegateTest, ViewsGetPointerEventsInFIFO) {
   }
 }
 
+TEST_P(PointerInjectorDelegateTest, DeviceRetriesRegisterWhenClosed) {
+  const uint64_t view_id = 1;
+  const int pointer_id = 1;
+  auto view_ref_pair = scenic::ViewRefPair::New();
+
+  auto response = FakePlatformMessageResponse::Create();
+  auto response_2 = FakePlatformMessageResponse::Create();
+
+  std::optional<fuv_ViewRef> view_ref_clone;
+  std::optional<fuv_ViewRef> view_ref_clone_2;
+
+  // Create the view.
+  if (!is_flatland_) {
+    CreateView(view_id);
+    fuv_ViewRef temp_ref;
+    fuv_ViewRef temp_ref_2;
+    fidl::Clone(view_ref_pair.view_ref, &temp_ref);
+    fidl::Clone(view_ref_pair.view_ref, &temp_ref_2);
+    view_ref_clone = std::move(temp_ref);
+    view_ref_clone_2 = std::move(temp_ref_2);
+  } else {
+    fuv_ViewRef view_ref;
+    fidl::Clone(view_ref_pair.view_ref, &view_ref);
+    CreateView(view_id, std::move(view_ref));
+  }
+
+  EXPECT_TRUE(pointer_injector_delegate_->HandlePlatformMessage(
+      PlatformMessageBuilder()
+          .SetViewId(view_id)
+          .SetPointerId(pointer_id)
+          .SetViewRefMaybe(std::move(view_ref_clone))
+          .Build(),
+      response));
+
+  response->ExpectCompleted("[0]");
+
+  // The mock Pointerinjector registry server receives a pointer event from
+  // |f.u.p.Device.Inject| call for the view.
+  RunLoopUntil([this] { return registry_->num_events_received() == 1; });
+
+  // The mock Pointerinjector registry server receives a
+  // |f.u.p.Registry.Register| call for the view.
+  ASSERT_TRUE(registry_->num_register_calls() == 1);
+
+  // Close the device channel.
+  registry_->ClearBindings();
+  RunLoopUntilIdle();
+
+  EXPECT_TRUE(pointer_injector_delegate_->HandlePlatformMessage(
+      PlatformMessageBuilder()
+          .SetViewId(view_id)
+          .SetPointerId(pointer_id)
+          .SetViewRefMaybe(std::move(view_ref_clone_2))
+          .Build(),
+      response_2));
+
+  response_2->ExpectCompleted("[0]");
+
+  // The mock Pointerinjector registry server receives a pointer event from
+  // |f.u.p.Device.Inject| call for the view.
+  RunLoopUntil([this] { return registry_->num_events_received() == 2; });
+
+  // The device tries to register again as the channel got closed.
+  ASSERT_TRUE(registry_->num_register_calls() == 2);
+}
+
 INSTANTIATE_TEST_SUITE_P(PointerInjectorDelegateParameterizedTest,
                          PointerInjectorDelegateTest,
                          ::testing::Bool());

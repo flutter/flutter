@@ -51,6 +51,8 @@ class MockInjectorRegistry : public fuchsia::ui::pointerinjector::Registry,
     callback();
   }
 
+  void ClearBindings() { bindings_.clear(); }
+
   // Returns the |fuchsia::ui::pointerinjector::Config| received in the last
   // |Register(...)| call.
   const fuchsia::ui::pointerinjector::Config& config() const { return config_; }
