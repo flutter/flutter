@@ -619,8 +619,18 @@ abstract class Page<T> extends RouteSettings {
 /// An interface for observing the behavior of a [Navigator].
 class NavigatorObserver {
   /// The navigator that the observer is observing, if any.
-  NavigatorState? get navigator => _navigator;
-  NavigatorState? _navigator;
+  NavigatorState? get navigator => _navigators[this];
+
+  /// Expando mapping instances of NavigatorObserver to their associated
+  /// NavigatorState (or `null`, if there is no associated NavigatorState).  The
+  /// reason we don't simply use a private instance field of type
+  /// `NavigatorState?` is because as part of implementing
+  /// https://github.com/dart-lang/language/issues/2020, it will soon become a
+  /// runtime error to invoke a private member that is mocked in another
+  /// library.  By using an expando rather than an instance field, we ensure
+  /// that a mocked NavigatorObserver can still properly keep track of its
+  /// associated NavigatorState.
+  static final Expando<NavigatorState> _navigators = Expando<NavigatorState>();
 
   /// The [Navigator] pushed `route`.
   ///
@@ -3236,7 +3246,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     for (final NavigatorObserver observer in widget.observers) {
       assert(observer.navigator == null);
-      observer._navigator = this;
+      NavigatorObserver._navigators[observer] = this;
     }
     _effectiveObservers = widget.observers;
 
@@ -3359,12 +3369,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
               // We only check if this navigator still owns the hero controller.
               if (_heroControllerFromScope == newHeroController) {
-                final bool hasHeroControllerOwnerShip = _heroControllerFromScope!._navigator == this;
+                final bool hasHeroControllerOwnerShip = _heroControllerFromScope!.navigator == this;
                 if (!hasHeroControllerOwnerShip ||
                     previousOwner._heroControllerFromScope == newHeroController) {
                   final NavigatorState otherOwner = hasHeroControllerOwnerShip
                     ? previousOwner
-                    : _heroControllerFromScope!._navigator!;
+                    : _heroControllerFromScope!.navigator!;
                   FlutterError.reportError(
                     FlutterErrorDetails(
                       exception: FlutterError(
@@ -3386,12 +3396,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           }
           return true;
         }());
-        newHeroController._navigator = this;
+        NavigatorObserver._navigators[newHeroController] = this;
       }
       // Only unsubscribe the hero controller when it is currently subscribe to
       // this navigator.
-      if (_heroControllerFromScope?._navigator == this) {
-        _heroControllerFromScope?._navigator = null;
+      if (_heroControllerFromScope?.navigator == this) {
+        NavigatorObserver._navigators[_heroControllerFromScope!] = null;
       }
       _heroControllerFromScope = newHeroController;
       _updateEffectiveObservers();
@@ -3440,11 +3450,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     if (oldWidget.observers != widget.observers) {
       for (final NavigatorObserver observer in oldWidget.observers) {
-        observer._navigator = null;
+        NavigatorObserver._navigators[observer] = null;
       }
       for (final NavigatorObserver observer in widget.observers) {
         assert(observer.navigator == null);
-        observer._navigator = this;
+        NavigatorObserver._navigators[observer] = this;
       }
       _updateEffectiveObservers();
     }
@@ -3489,7 +3499,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void deactivate() {
     for (final NavigatorObserver observer in _effectiveObservers) {
-      observer._navigator = null;
+      NavigatorObserver._navigators[observer] = null;
     }
     super.deactivate();
   }
@@ -3499,7 +3509,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     super.activate();
     for (final NavigatorObserver observer in _effectiveObservers) {
       assert(observer.navigator == null);
-      observer._navigator = this;
+      NavigatorObserver._navigators[observer] = this;
     }
   }
 
@@ -3512,7 +3522,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     assert(() {
       for (final NavigatorObserver observer in _effectiveObservers) {
-        assert(observer._navigator != this);
+        assert(observer.navigator != this);
       }
       return true;
     }());
