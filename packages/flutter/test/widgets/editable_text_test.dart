@@ -5929,7 +5929,6 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.pageDown,
       ],
-      wordModifier: isCupertino,
       targetPlatform: defaultTargetPlatform,
     );
 
@@ -5951,7 +5950,6 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.pageUp,
       ],
-      wordModifier: isCupertino,
       targetPlatform: defaultTargetPlatform,
     );
 
