@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
 
 class SelectedBorder extends RoundedRectangleBorder
     implements MaterialStateOutlinedBorder {
+  const SelectedBorder();
+
   @override
   OutlinedBorder? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
@@ -54,7 +56,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             isSelected = value;
           });
         },
-        shape: SelectedBorder(),
+        shape: const SelectedBorder(),
       ),
     );
   }

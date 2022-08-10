@@ -212,7 +212,7 @@ void main() {
           command: <String>['git', 'add', '--all'],
         ),
         const FakeCommand(
-          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+          command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -400,7 +400,7 @@ void main() {
           command: <String>['git', 'add', '--all'],
         ),
         const FakeCommand(
-          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+          command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -574,7 +574,7 @@ void main() {
           command: <String>['git', 'add', '--all'],
         ),
         const FakeCommand(
-          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+          command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -761,7 +761,7 @@ void main() {
           command: <String>['git', 'add', '--all'],
         ),
         const FakeCommand(
-          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+          command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -952,7 +952,7 @@ void main() {
           command: <String>['git', 'add', '--all'],
         ),
         const FakeCommand(
-          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+          command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],

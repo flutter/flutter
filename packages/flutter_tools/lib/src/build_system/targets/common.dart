@@ -74,6 +74,7 @@ class CopyFlutterBundle extends Target {
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -226,6 +227,8 @@ class KernelSnapshot extends Target {
       trackWidgetCreation: trackWidgetCreation && buildMode != BuildMode.release,
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
+      initializeFromDill: buildMode.isPrecompiled ? null :
+          environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesFile.path,
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,

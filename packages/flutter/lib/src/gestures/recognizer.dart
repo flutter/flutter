@@ -7,18 +7,24 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'events.dart';
-import 'gesture_settings.dart';
 import 'pointer_router.dart';
 import 'team.dart';
 
-export 'pointer_router.dart' show PointerRouter;
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'arena.dart' show GestureDisposition;
+export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEvent;
+export 'gesture_settings.dart' show DeviceGestureSettings;
+export 'team.dart' show GestureArenaTeam;
 
 /// Generic signature for callbacks passed to
 /// [GestureRecognizer.invokeCallback]. This allows the
@@ -347,8 +353,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void resolve(GestureDisposition disposition) {
     final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.of(_entries.values);
     _entries.clear();
-    for (final GestureArenaEntry entry in localEntries)
+    for (final GestureArenaEntry entry in localEntries) {
       entry.resolve(disposition);
+    }
   }
 
   /// Resolves this recognizer's participation in the given gesture arena with
@@ -366,8 +373,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     resolve(GestureDisposition.rejected);
-    for (final int pointer in _trackedPointers)
+    for (final int pointer in _trackedPointers) {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
+    }
     _trackedPointers.clear();
     assert(_entries.isEmpty);
     super.dispose();
@@ -395,8 +403,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   }
 
   GestureArenaEntry _addPointerToArena(int pointer) {
-    if (_team != null)
+    if (_team != null) {
       return _team!.add(pointer, this);
+    }
     return GestureBinding.instance.gestureArena.add(pointer, this);
   }
 
@@ -433,8 +442,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     if (_trackedPointers.contains(pointer)) {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
       _trackedPointers.remove(pointer);
-      if (_trackedPointers.isEmpty)
+      if (_trackedPointers.isEmpty) {
         didStopTrackingLastPointer(pointer);
+      }
     }
   }
 
@@ -442,8 +452,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// a [PointerUpEvent] or a [PointerCancelEvent] event.
   @protected
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
-    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent)
+    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       stopTrackingPointer(event.pointer);
+    }
   }
 }
 
@@ -571,8 +582,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       _state = GestureRecognizerState.possible;
       _primaryPointer = event.pointer;
       _initialPosition = OffsetPair(local: event.localPosition, global: event.position);
-      if (deadline != null)
+      if (deadline != null) {
         _timer = Timer(deadline!, () => didExceedDeadlineWithEvent(event));
+      }
     }
   }
 

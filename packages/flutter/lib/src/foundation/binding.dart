@@ -5,7 +5,7 @@
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
+import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -14,10 +14,13 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'diagnostics.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
+
+export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
 // Examples can assume:
 // mixin BarBinding on BindingBase { }
@@ -827,8 +830,9 @@ abstract class BindingBase {
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
-        if (debugInstrumentationEnabled)
+        if (debugInstrumentationEnabled) {
           debugPrint('service extension method received: $method($parameters)');
+        }
         return true;
       }());
 

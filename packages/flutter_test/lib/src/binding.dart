@@ -179,8 +179,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
-    if (registerTestTextInput)
+    if (registerTestTextInput) {
       _testTextInput.register();
+    }
   }
 
   @override
@@ -306,8 +307,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This is called automatically by [testWidgets].
   static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-    if (_instance != null)
+    if (_instance != null) {
       return _instance!;
+    }
     return binding.ensureInitialized(environment);
   }
 
@@ -323,7 +325,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  // ignore: MUST_CALL_SUPER
+  // ignore: must_call_super
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
@@ -435,8 +437,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      if (_surfaceSize == size)
+      if (_surfaceSize == size) {
         return;
+      }
       _surfaceSize = size;
       handleMetricsChanged();
     });
@@ -491,8 +494,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// When [handlePointerEvent] is called directly, [pointerEventSource]
   /// is [TestBindingEventSource.device].
+  ///
+  /// This means that pointer events triggered by the [WidgetController] (e.g.
+  /// via [WidgetController.tap]) will result in actual interactions with the
+  /// UI, but other pointer events such as those from physical taps will be
+  /// dropped. See also [shouldPropagateDevicePointerEvents] if this is
+  /// undesired.
   TestBindingEventSource get pointerEventSource => _pointerEventSource;
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
+
+  /// Whether pointer events from [TestBindingEventSource.device] will be
+  /// propagated to the framework, or dropped.
+  ///
+  /// Setting this can be useful to interact with the app in some other way
+  /// besides through the [WidgetController], such as with `adb shell input tap`
+  /// on Android.
+  ///
+  /// See also [pointerEventSource].
+  bool shouldPropagateDevicePointerEvents = false;
 
   /// Dispatch an event to the targets found by a hit test on its position,
   /// and remember its source as [pointerEventSource].
@@ -663,8 +682,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
-      if (!completer.isCompleted)
+      if (!completer.isCompleted) {
         completer.complete();
+      }
     };
   }
 
@@ -714,10 +734,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // information to stack traces, in this case the Trace and Chain classes
       // can be present. Because these StackTrace implementations do not follow
       // the format the framework expects, we covert them to a vm trace here.
-      if (stack is stack_trace.Trace)
+      if (stack is stack_trace.Trace) {
         return stack.vmTrace;
-      if (stack is stack_trace.Chain)
+      }
+      if (stack is stack_trace.Chain) {
         return stack.toTrace().vmTrace;
+      }
       return stack;
     };
     final Completer<void> testCompleter = Completer<void>();
@@ -789,13 +811,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
         informationCollector: () sync* {
-          if (stackLinesToOmit > 0)
+          if (stackLinesToOmit > 0) {
             yield* omittedFrames;
+          }
           if (showAppDumpInErrors) {
             yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
           }
-          if (description.isNotEmpty)
+          if (description.isNotEmpty) {
             yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.errorProperty);
+          }
         },
       ));
       assert(_parentZone != null);
@@ -828,6 +852,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
     final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
+    final bool shouldPropagateDevicePointerEventsBeforeTest = shouldPropagateDevicePointerEvents;
 
     // run the test
     await testBody();
@@ -839,12 +864,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // alone so that we don't cause more spurious errors.
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
-      if (registerTestTextInput)
+      if (registerTestTextInput) {
         _testTextInput.unregister();
+      }
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
+      _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
       _verifyInvariants();
     }
 
@@ -934,6 +961,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }());
   }
 
+  void _verifyShouldPropagateDevicePointerEventsUnset(bool valueBeforeTest) {
+    assert(() {
+      if (shouldPropagateDevicePointerEvents != valueBeforeTest) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: FlutterError(
+              'The value of shouldPropagateDevicePointerEvents was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
+  }
+
   /// Called by the [testWidgets] function after a test is executed.
   void postTest() {
     assert(inTest);
@@ -942,7 +984,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner!.focusManager.dispose();
+
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
@@ -952,10 +997,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     keyEventManager.clearState();
-    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
-        'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
-        'test has not removed the mouse pointer which it added. Call removePointer on the '
-        'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
   }
@@ -999,8 +1040,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// will select the correct test binding implementation
   /// automatically.
   static AutomatedTestWidgetsFlutterBinding ensureInitialized() {
-    if (AutomatedTestWidgetsFlutterBinding._instance == null)
+    if (AutomatedTestWidgetsFlutterBinding._instance == null) {
       AutomatedTestWidgetsFlutterBinding();
+    }
     return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
@@ -1037,8 +1079,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return TestAsyncUtils.guard<void>(() {
       assert(inTest);
       assert(_clock != null);
-      if (duration != null)
+      if (duration != null) {
         _currentFakeAsync!.elapse(duration);
+      }
       _phase = newPhase;
       if (hasScheduledFrame) {
         addTime(const Duration(milliseconds: 500));
@@ -1061,8 +1104,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     assert(additionalTime != null);
     assert(() {
-      if (_pendingAsyncTasks == null)
+      if (_pendingAsyncTasks == null) {
         return true;
+      }
       fail(
         'Reentrant call to runAsync() denied.\n'
         'runAsync() was called, then before its future completed, it '
@@ -1163,7 +1207,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void allowFirstFrame() {
     assert(_firstFrameDeferredCount > 0);
     _firstFrameDeferredCount -= 1;
-    // Unlike in RendererBinding.allowFirstFrame we do not force a frame her
+    // Unlike in RendererBinding.allowFirstFrame we do not force a frame here
     // to give the test full control over frame scheduling.
   }
 
@@ -1455,8 +1499,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// will select the correct test binding implementation
   /// automatically.
   static LiveTestWidgetsFlutterBinding ensureInitialized() {
-    if (LiveTestWidgetsFlutterBinding._instance == null)
+    if (LiveTestWidgetsFlutterBinding._instance == null) {
       LiveTestWidgetsFlutterBinding();
+    }
     return LiveTestWidgetsFlutterBinding.instance;
   }
 
@@ -1503,15 +1548,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void scheduleFrame() {
-    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
-      return; // In benchmark mode, don't actually schedule any engine frames.
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      // In benchmark mode, don't actually schedule any engine frames.
+      return;
+    }
     super.scheduleFrame();
   }
 
   @override
   void scheduleForcedFrame() {
-    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
-      return; // In benchmark mode, don't actually schedule any engine frames.
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+      // In benchmark mode, don't actually schedule any engine frames.
+      return;
+    }
     super.scheduleForcedFrame();
   }
 
@@ -1542,8 +1591,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void handleDrawFrame() {
     assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame!)
+    if (_doDrawThisFrame!) {
       super.handleDrawFrame();
+    }
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
     _expectingFrameToReassemble = false;
@@ -1578,7 +1628,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// Normally, device events are silently dropped. However, if this property is
   /// set to a non-null value, then the events will be routed to its
-  /// [HitTestDispatcher.dispatchEvent] method instead.
+  /// [HitTestDispatcher.dispatchEvent] method instead, unless
+  /// [shouldPropagateDevicePointerEvents] is true.
   ///
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
@@ -1599,8 +1650,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         final _LiveTestPointerRecord? record = _liveTestRenderView._pointers[event.pointer];
         if (record != null) {
           record.position = event.position;
-          if (!event.down)
+          if (!event.down) {
             record.decay = _kPointerDecay;
+          }
           _handleViewNeedsPaint();
         } else if (event.down) {
           _liveTestRenderView._pointers[event.pointer] = _LiveTestPointerRecord(
@@ -1612,6 +1664,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         super.handlePointerEvent(event);
         break;
       case TestBindingEventSource.device:
+        if (shouldPropagateDevicePointerEvents) {
+          super.handlePointerEvent(event);
+          break;
+        }
         if (deviceEventDispatcher != null) {
           // The pointer events received with this source has a global position
           // (see [handlePointerEventForSource]). Transform it to the local
@@ -1633,9 +1689,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         break;
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
+        if (shouldPropagateDevicePointerEvents) {
+          super.dispatchEvent(event, hitTestResult);
+          break;
+        }
         assert(deviceEventDispatcher != null);
-        if (hitTestResult != null)
+        if (hitTestResult != null) {
           deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
+        }
         break;
     }
   }
@@ -1671,8 +1732,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
-      if (!_runningAsyncTasks)
+      if (!_runningAsyncTasks) {
         return true;
+      }
       fail(
         'Reentrant call to runAsync() denied.\n'
         'runAsync() was called, then before its future completed, it '
@@ -1894,8 +1956,9 @@ class _LiveTestRenderView extends RenderView {
         final _LiveTestPointerRecord record = _pointers[pointer]!;
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);
-        if (record.decay < 0)
+        if (record.decay < 0) {
           dirty = true;
+        }
         record.decay += 1;
       }
       _pointers
@@ -1903,8 +1966,9 @@ class _LiveTestRenderView extends RenderView {
         .where((int pointer) => _pointers[pointer]!.decay == 0)
         .toList()
         .forEach(_pointers.remove);
-      if (dirty && onNeedPaint != null)
+      if (dirty && onNeedPaint != null) {
         scheduleMicrotask(onNeedPaint);
+      }
     }
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }

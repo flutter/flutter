@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -26,12 +24,12 @@ const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
 
 final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 void main() {
-  FakeProcessManager processManager;
-  Environment androidEnvironment;
-  Environment iosEnvironment;
-  Artifacts artifacts;
-  FileSystem fileSystem;
-  Logger logger;
+  late FakeProcessManager processManager;
+  late Environment androidEnvironment;
+  late Environment iosEnvironment;
+  late Artifacts artifacts;
+  late FileSystem fileSystem;
+  late Logger logger;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -102,6 +100,7 @@ void main() {
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--verbosity=error',
         'file:///lib/main.dart',
       ], exitCode: 1),
     ]);
@@ -139,6 +138,7 @@ void main() {
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
     ]);
@@ -177,6 +177,7 @@ void main() {
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
     ]);
@@ -216,6 +217,7 @@ void main() {
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--verbosity=error',
         'foo',
         'bar',
         'file:///lib/main.dart',
@@ -255,6 +257,10 @@ void main() {
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--incremental',
+        '--initialize-from-dill',
+        '$build/app.dill',
+        '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
     ]);
@@ -292,6 +298,10 @@ void main() {
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--incremental',
+        '--initialize-from-dill',
+        '$build/app.dill',
+        '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
     ]);
@@ -344,6 +354,10 @@ void main() {
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--incremental',
+        '--initialize-from-dill',
+        '$build/app.dill',
+        '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey /build/653e11a8e6908714056a57cd6b4f602a/app.dill 0\n'),
     ]);

@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -113,6 +114,37 @@ void main() {
     expect(Uuid.isValidUUID(fromString: identifier), isTrue);
   });
 
+  testUsingContext('tool exits on Windows if given a drive letter without a path', () async {
+    // Must use LocalFileSystem as it is dependent on dart:io handling of
+    // Windows paths, which the MemoryFileSystem does not implement
+    final Directory workingDir = globals.fs.directory(r'X:\path\to\working\dir');
+    // Must use [io.IOOverrides] as directory.absolute depends on Directory.current
+    // from dart:io.
+    await io.IOOverrides.runZoned<Future<void>>(
+      () async {
+        // Verify IOOverrides is working
+        expect(io.Directory.current, workingDir);
+        final CreateCommand command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        const String driveName = 'X:';
+        await expectToolExitLater(
+          runner.run(<String>[
+            'create',
+            '--project-name',
+            'test_app',
+            '--offline',
+            driveName,
+          ]),
+          contains('You attempted to create a flutter project at the path "$driveName"'),
+        );
+      },
+      getCurrentDirectory: () => workingDir,
+    );
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test(),
+  }, skip: !io.Platform.isWindows // [intended] relies on Windows file system
+  );
+
   // Verify that we create a default project ('app') that is
   // well-formed.
   testUsingContext('can create a default project', () async {
@@ -127,6 +159,8 @@ void main() {
         'ios/Flutter/AppFrameworkInfo.plist',
         'ios/Runner/AppDelegate.m',
         'ios/Runner/GeneratedPluginRegistrant.h',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
         'lib/main.dart',
       ],
     );
@@ -754,7 +788,7 @@ void main() {
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-    expect(logger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+    expect(logger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
   }, overrides: <Type, Generator>{
     Logger: () => logger,
   });
@@ -2701,6 +2735,22 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
     expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
+    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: ()=> logger,
+  });
+
+  testUsingContext('created FFI plugin supports no platforms should print `no platforms` message', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+    expect(logger.errorText, contains(_kNoPlatformsMessage));
+    expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
     expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
 
   }, overrides: <Type, Generator>{

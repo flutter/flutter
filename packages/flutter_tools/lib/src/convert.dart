@@ -5,12 +5,12 @@
 // Hide the original utf8 [Codec] so that we can export our own implementation
 // which adds additional error handling.
 import 'dart:convert' hide utf8;
-import 'dart:convert' as cnv show utf8, Utf8Decoder;
+import 'dart:convert' as cnv show Utf8Decoder, utf8;
 
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
-export 'dart:convert' hide utf8, Utf8Codec, Utf8Decoder;
+export 'dart:convert' hide Utf8Codec, Utf8Decoder, utf8;
 
 /// The original utf8 encoding for testing overrides only.
 ///
@@ -26,10 +26,14 @@ const Encoding utf8ForTesting = cnv.utf8;
 /// that aren't UTF-8 and we're not quite sure how this is happening.
 /// This tells people to report a bug when they see this.
 class Utf8Codec extends Encoding {
-  const Utf8Codec();
+  const Utf8Codec({this.reportErrors = true});
+
+  final bool reportErrors;
 
   @override
-  Converter<List<int>, String> get decoder => const Utf8Decoder();
+  Converter<List<int>, String> get decoder => reportErrors
+    ? const Utf8Decoder()
+    : const Utf8Decoder(reportErrors: false);
 
   @override
   Converter<String, List<int>> get encoder => cnv.utf8.encoder;

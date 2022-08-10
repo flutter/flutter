@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -630,8 +631,9 @@ class DataTable extends StatelessWidget {
     for (int index = 0; index < columns.length; index += 1) {
       final DataColumn column = columns[index];
       if (!column.numeric) {
-        if (result != null)
+        if (result != null) {
           return null;
+        }
         result = index;
       }
     }
@@ -653,8 +655,9 @@ class DataTable extends StatelessWidget {
       onSelectAll!(effectiveChecked);
     } else {
       for (final DataRow row in rows) {
-        if (row.onSelectChanged != null && row.selected != effectiveChecked)
+        if (row.onSelectChanged != null && row.selected != effectiveChecked) {
           row.onSelectChanged!(effectiveChecked);
+        }
       }
     }
   }
@@ -874,8 +877,9 @@ class DataTable extends StatelessWidget {
       ?? theme.dataTableTheme.dataRowColor;
     final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected))
+        if (states.contains(MaterialState.selected)) {
           return theme.colorScheme.primary.withOpacity(0.08);
+        }
         return null;
       },
     );
@@ -1085,9 +1089,9 @@ class TableRowInkWell extends InkResponse {
   RectCallback getRectCallback(RenderBox referenceBox) {
     return () {
       RenderObject cell = referenceBox;
-      RenderObject? table = cell.parent;
+      AbstractNode? table = cell.parent;
       final Matrix4 transform = Matrix4.identity();
-      while (table != null && table is! RenderTable) {
+      while (table is RenderObject && table is! RenderTable) {
         table.applyPaintTransform(cell, transform);
         assert(table == cell.parent);
         cell = table;
@@ -1101,8 +1105,9 @@ class TableRowInkWell extends InkResponse {
         // TableRowInkWell's coordinate space.
         table.applyPaintTransform(cell, transform);
         final Offset? offset = MatrixUtils.getAsTranslation(transform);
-        if (offset != null)
+        if (offset != null) {
           return rect.shift(-offset);
+        }
       }
       return Rect.zero;
     };
@@ -1165,8 +1170,9 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     _orientationAnimation = _orientationController.drive(_turnTween)
       ..addListener(_rebuild)
       ..addStatusListener(_resetOrientationAnimation);
-    if (widget.visible)
+    if (widget.visible) {
       _orientationOffset = widget.up! ? 0.0 : math.pi;
+    }
   }
 
   void _rebuild() {

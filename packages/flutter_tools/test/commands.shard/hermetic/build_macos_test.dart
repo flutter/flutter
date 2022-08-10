@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -366,7 +367,7 @@ STDERR STUFF
         const <String>['build', 'macos', '--debug', '--no-pub']
     );
 
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,

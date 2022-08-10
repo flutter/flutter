@@ -6,12 +6,15 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
+import 'material_state.dart';
 import 'radio.dart';
+import 'radio_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
+// enum Meridiem { am, pm }
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
@@ -39,6 +42,35 @@ import 'theme_data.dart';
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The
 /// [secondary] widget is placed on the opposite side. This maps to the
 /// [ListTile.leading] and [ListTile.trailing] properties of [ListTile].
+///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [RadioListTile] itself but by the [Material] widget ancestor. In this
+/// case, one can wrap a [Material] widget around the [RadioListTile], e.g.:
+///
+/// {@tool snippet}
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: RadioListTile<Meridiem>(
+///       tileColor: Colors.red,
+///       title: const Text('AM'),
+///       groupValue: Meridiem.am,
+///       value: Meridiem.am,
+///       onChanged:(Meridiem? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ## Performance considerations when wrapping [RadioListTile] with [Material]
+///
+/// Wrapping a large number of [RadioListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [RadioListTile]s that require it
+/// or include a common [Material] ancestor where possible.
 ///
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
@@ -316,36 +348,42 @@ class RadioListTile<T> extends StatelessWidget {
         trailing = control;
         break;
     }
+    final ThemeData theme = Theme.of(context);
+    final RadioThemeData radioThemeData = RadioTheme.of(context);
+    final Set<MaterialState> states = <MaterialState>{
+      if (selected) MaterialState.selected,
+    };
+    final Color effectiveActiveColor = activeColor
+      ?? radioThemeData.fillColor?.resolve(states)
+      ?? theme.colorScheme.secondary;
     return MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          shape: shape,
-          tileColor: tileColor,
-          selectedTileColor: selectedTileColor,
-          onTap: onChanged != null ? () {
-            if (toggleable && checked) {
-              onChanged!(null);
-              return;
-            }
-            if (!checked) {
-              onChanged!(value);
-            }
-          } : null,
-          selected: selected,
-          autofocus: autofocus,
-          contentPadding: contentPadding,
-          visualDensity: visualDensity,
-          focusNode: focusNode,
-          enableFeedback: enableFeedback,
-        ),
+      child: ListTile(
+        selectedColor: effectiveActiveColor,
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        enabled: onChanged != null,
+        shape: shape,
+        tileColor: tileColor,
+        selectedTileColor: selectedTileColor,
+        onTap: onChanged != null ? () {
+          if (toggleable && checked) {
+            onChanged!(null);
+            return;
+          }
+          if (!checked) {
+            onChanged!(value);
+          }
+        } : null,
+        selected: selected,
+        autofocus: autofocus,
+        contentPadding: contentPadding,
+        visualDensity: visualDensity,
+        focusNode: focusNode,
+        enableFeedback: enableFeedback,
       ),
     );
   }

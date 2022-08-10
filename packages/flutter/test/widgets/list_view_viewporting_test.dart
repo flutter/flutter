@@ -192,8 +192,9 @@ void main() {
     }
 
     void collectText(Widget widget) {
-      if (widget is Text)
+      if (widget is Text) {
         text.add(widget.data);
+      }
     }
 
     Widget builder() {

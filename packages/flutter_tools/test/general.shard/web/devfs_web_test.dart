@@ -4,23 +4,30 @@
 
 // @dart = 2.8
 
+import 'dart:async';
 import 'dart:io' hide Directory, File;
 
+import 'package:dwds/dwds.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:logging/logging.dart' as logging;
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -65,10 +72,10 @@ void main() {
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
-        fileSystem: null,
-        flutterRoot: null,
-        platform: null,
-        webBuildDirectory: null,
+        fileSystem: null, // ignore: avoid_redundant_argument_values
+        flutterRoot: null, // ignore: avoid_redundant_argument_values
+        platform: null, // ignore: avoid_redundant_argument_values
+        webBuildDirectory: null, // ignore: avoid_redundant_argument_values
         basePath: null,
       );
     }, overrides: <Type, Generator>{
@@ -659,7 +666,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -675,8 +682,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -719,6 +726,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: 'out.dill',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -771,7 +779,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -786,8 +794,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -830,6 +838,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: '',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -865,6 +874,71 @@ void main() {
     Artifacts: () => Artifacts.test(),
   }));
 
+  test('.connect() will never call vmServiceFactory twice', () => testbed.run(() async {
+    await FakeAsync().run<Future<void>>((FakeAsync time) {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+      final WebDevFS webDevFS = WebDevFS(
+        // if this is any other value, we will do a real ip lookup
+        hostname: 'any',
+        port: 0,
+        packagesFilePath: '.packages',
+        urlTunneller: null,
+        useSseForDebugProxy: true,
+        useSseForDebugBackend: true,
+        useSseForInjectedClient: true,
+        nullAssertions: true,
+        nativeNullAssertions: true,
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+        ),
+        enableDwds: true,
+        enableDds: false,
+        entrypoint: Uri.base,
+        testMode: true,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nullSafetyMode: NullSafetyMode.sound,
+      );
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
+      final FakeAppConnection firstConnection = FakeAppConnection();
+      final FakeAppConnection secondConnection = FakeAppConnection();
+
+      final Future<void> done = webDevFS.create().then<void>((Uri _) {
+        // In non-test mode, webDevFS.create() would have initialized DWDS
+        webDevFS.webAssetServer.dwds = FakeDwds(<AppConnection>[firstConnection, secondConnection]);
+
+        int vmServiceFactoryInvocationCount = 0;
+        Future<vm_service.VmService> vmServiceFactory(Uri uri, {CompressionOptions compression, @required Logger logger}) {
+          if (vmServiceFactoryInvocationCount > 0) {
+            fail('Called vmServiceFactory twice!');
+          }
+          vmServiceFactoryInvocationCount += 1;
+          return Future<vm_service.VmService>.delayed(
+            const Duration(seconds: 2),
+            () => FakeVmService(),
+          );
+        }
+        return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((ConnectionResult firstConnectionResult) {
+          return webDevFS.destroy();
+        });
+      });
+      time.elapse(const Duration(seconds: 1));
+      time.elapse(const Duration(seconds: 2));
+      return done;
+    });
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+  }));
+
   test('Can start web server with hostname any', () => testbed.run(() async {
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
@@ -876,7 +950,7 @@ void main() {
       hostname: 'any',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -885,8 +959,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
@@ -911,7 +985,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -929,8 +1003,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -954,7 +1028,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -972,8 +1046,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1064,7 +1138,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1075,8 +1149,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1118,7 +1192,49 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     FileSystem fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File dartPluginRegistrant,
   }) async {
     return output;
   }
 }
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
+}
+
+class FakeDwds extends Fake implements Dwds {
+  FakeDwds(this.connectedAppsIterable) :
+    connectedApps = Stream<AppConnection>.fromIterable(connectedAppsIterable);
+
+  final Iterable<AppConnection> connectedAppsIterable;
+
+  @override
+  final Stream<AppConnection> connectedApps;
+
+  @override
+  Future<DebugConnection> debugConnection(AppConnection appConnection) => Future<DebugConnection>.value(FakeDebugConnection());
+}
+
+class FakeAppConnection extends Fake implements AppConnection {
+  @override
+  void runMain() {}
+}
+
+class FakeDebugConnection extends Fake implements DebugConnection {
+  FakeDebugConnection({
+    this.uri = 'http://foo',
+  });
+
+  @override
+  final String uri;
+}
+
+class FakeVmService extends Fake implements vm_service.VmService {}

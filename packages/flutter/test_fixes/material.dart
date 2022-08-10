@@ -554,4 +554,42 @@ void main() {
 
   // Change made in https://github.com/flutter/flutter/pull/100381
   TextSelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/105291
+  ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
+    primary: Colors.blue,
+    onPrimary: Colors.white,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle textButtonStyle = TextButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/97972
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(toggleableActiveColor: Colors.black);
+  themeData = ThemeData(
+    toggleableActiveColor: Colors.black,
+  );
+  themeData = ThemeData.raw(toggleableActiveColor: Colors.black);
+  themeData = ThemeData.raw(
+    toggleableActiveColor: Colors.black,
+  );
+  themeData = themeData.copyWith(toggleableActiveColor: Colors.black);
+  themeData = themeData.copyWith(
+    toggleableActiveColor: Colors.black,
+  );
+  themeData.toggleableActiveColor; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/109070
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(selectedRowColor: Brightness.dark);
+  themeData = ThemeData.raw(selectedRowColor: Brightness.dark);
+  themeData = themeData.copyWith(selectedRowColor: Brightness.dark);
+  themeData.selectedRowColor; // Removing field reference not supported.
 }

@@ -353,7 +353,7 @@ void main() {
   });
 
   testWidgets('CheckBox color rendering', (WidgetTester tester) async {
-    const Color borderColor = Color(0xff1e88e5);
+    const Color borderColor = Color(0xff2196f3);
     Color checkColor = const Color(0xffFFFFFF);
     Color activeColor;
 
@@ -391,7 +391,11 @@ void main() {
 
     activeColor = const Color(0xFF00FF00);
 
-    await tester.pumpWidget(buildFrame(themeData: ThemeData(toggleableActiveColor: activeColor)));
+    await tester.pumpWidget(buildFrame(
+      themeData: ThemeData(
+        colorScheme: const ColorScheme.light()
+        .copyWith(secondary: activeColor))),
+      );
     await tester.pumpAndSettle();
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // paints's color is 0xFF00FF00 (theme)
 
@@ -435,7 +439,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..path(color: const Color(0xff1e88e5))
+        ..path(color: const Color(0xff2196f3))
         ..path(color: Colors.white),
     );
 
@@ -526,13 +530,12 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: const Color(0xff1e88e5))
+        ..path(color: const Color(0xff2196f3))
         ..path(color: const Color(0xffffffff),style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
 
     await tester.pumpWidget(buildApp());
@@ -540,7 +543,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: const Color(0xff1e88e5))
+        ..path(color: const Color(0xff2196f3))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -710,7 +713,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -882,7 +884,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1051,7 +1052,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 

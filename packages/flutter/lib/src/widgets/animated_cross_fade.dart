@@ -269,8 +269,9 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       reverseDuration: widget.reverseDuration,
       vsync: this,
     );
-    if (widget.crossFadeState == CrossFadeState.showSecond)
+    if (widget.crossFadeState == CrossFadeState.showSecond) {
       _controller.value = 1.0;
+    }
     _firstAnimation = _initAnimation(widget.firstCurve, true);
     _secondAnimation = _initAnimation(widget.secondCurve, false);
     _controller.addStatusListener((AnimationStatus status) {
@@ -283,8 +284,9 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
 
   Animation<double> _initAnimation(Curve curve, bool inverted) {
     Animation<double> result = _controller.drive(CurveTween(curve: curve));
-    if (inverted)
+    if (inverted) {
       result = result.drive(Tween<double>(begin: 1.0, end: 0.0));
+    }
     return result;
   }
 
@@ -297,14 +299,18 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   @override
   void didUpdateWidget(AnimatedCrossFade oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.duration != oldWidget.duration)
+    if (widget.duration != oldWidget.duration) {
       _controller.duration = widget.duration;
-    if (widget.reverseDuration != oldWidget.reverseDuration)
+    }
+    if (widget.reverseDuration != oldWidget.reverseDuration) {
       _controller.reverseDuration = widget.reverseDuration;
-    if (widget.firstCurve != oldWidget.firstCurve)
+    }
+    if (widget.firstCurve != oldWidget.firstCurve) {
       _firstAnimation = _initAnimation(widget.firstCurve, true);
-    if (widget.secondCurve != oldWidget.secondCurve)
+    }
+    if (widget.secondCurve != oldWidget.secondCurve) {
       _secondAnimation = _initAnimation(widget.secondCurve, false);
+    }
     if (widget.crossFadeState != oldWidget.crossFadeState) {
       switch (widget.crossFadeState) {
         case CrossFadeState.showFirst:

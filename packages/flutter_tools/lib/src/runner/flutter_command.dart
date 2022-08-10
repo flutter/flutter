@@ -12,6 +12,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -68,7 +69,7 @@ class FlutterCommandResult {
   /// Optional data that can be appended to the timing event.
   /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
   /// Do not add PII.
-  final List<String>? timingLabelParts;
+  final List<String?>? timingLabelParts;
 
   /// Optional epoch time when the command's non-interactive wait time is
   /// complete during the command's execution. Use to measure user perceivable
@@ -118,6 +119,7 @@ class FlutterOptions {
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
+  static const String kWebBrowserFlag = 'web-browser-flag';
 }
 
 /// flutter command categories for usage.
@@ -268,6 +270,15 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('web-launch-url',
       help: 'The URL to provide to the browser. Defaults to an HTTP URL with the host '
           'name of "--web-hostname", the port of "--web-port", and the path set to "/".',
+    );
+    argParser.addMultiOption(
+      FlutterOptions.kWebBrowserFlag,
+      help: 'Additional flag to pass to a browser instance at startup.\n'
+          'Chrome: https://www.chromium.org/developers/how-tos/run-chromium-with-flags/\n'
+          'Firefox: https://wiki.mozilla.org/Firefox/CommandLineOptions\n'
+          'Multiple flags can be passed by repeating "--${FlutterOptions.kWebBrowserFlag}" multiple times.',
+      valueHelp: '--foo=bar',
+      hide: !verboseHelp,
     );
   }
 
@@ -554,7 +565,8 @@ abstract class FlutterCommand extends Command<void> {
               'Each build must have a unique identifier to differentiate it from previous builds.\n'
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
               'On Android it is used as "versionCode".\n'
-              'On Xcode builds it is used as "CFBundleVersion".',
+              'On Xcode builds it is used as "CFBundleVersion".\n'
+              'On Windows it is used as the build suffix for the product and file versions.',
     );
   }
 
@@ -563,7 +575,8 @@ abstract class FlutterCommand extends Command<void> {
         help: 'A "x.y.z" string used as the version number shown to users.\n'
               'For each new version of your app, you will provide a version number to differentiate it from previous versions.\n'
               'On Android it is used as "versionName".\n'
-              'On Xcode builds it is used as "CFBundleShortVersionString".',
+              'On Xcode builds it is used as "CFBundleShortVersionString".\n'
+              'On Windows it is used as the major, minor, and patch parts of the product and file versions.',
         valueHelp: 'x.y.z');
   }
 
@@ -882,6 +895,8 @@ abstract class FlutterCommand extends Command<void> {
     usesPubOption();
     usesTargetOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    usesBuildNumberOption();
+    usesBuildNameOption();
   }
 
   /// The build mode that this command will use if no build mode is
@@ -1264,7 +1279,7 @@ abstract class FlutterCommand extends Command<void> {
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
-    final List<String> labels = <String>[
+    final List<String?> labels = <String?>[
       if (commandResult.exitStatus != null)
         getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
@@ -1272,7 +1287,7 @@ abstract class FlutterCommand extends Command<void> {
     ];
 
     final String label = labels
-        .where((String label) => !_isBlank(label))
+        .where((String? label) => label != null && !_isBlank(label))
         .join('-');
     globals.flutterUsage.sendTiming(
       'flutter',
@@ -1328,6 +1343,7 @@ abstract class FlutterCommand extends Command<void> {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );
@@ -1475,16 +1491,12 @@ abstract class FlutterCommand extends Command<void> {
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.
-      bool changedDirectory = false;
-      while (!globals.fs.isFileSync('pubspec.yaml')) {
-        final Directory nextCurrent = globals.fs.currentDirectory.parent;
-        if (nextCurrent == null || nextCurrent.path == globals.fs.currentDirectory.path) {
-          throw ToolExit(userMessages.flutterNoPubspec);
-        }
-        globals.fs.currentDirectory = nextCurrent;
-        changedDirectory = true;
+      final String? path = findProjectRoot(globals.fs, globals.fs.currentDirectory.path);
+      if (path == null) {
+        throwToolExit(userMessages.flutterNoPubspec);
       }
-      if (changedDirectory) {
+      if (path != globals.fs.currentDirectory.path) {
+        globals.fs.currentDirectory = path;
         globals.printStatus('Changing current working directory to: ${globals.fs.currentDirectory.path}');
       }
     }
@@ -1537,14 +1549,16 @@ abstract class FlutterCommand extends Command<void> {
     if (!argParser.options.containsKey(name)) {
       return null;
     }
-    return argResults![name] as String;
+    return argResults![name] as String?;
   }
 
   /// Gets the parsed command-line option named [name] as an `int`.
   int? intArg(String name) => argResults?[name] as int?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
-  List<String> stringsArg(String name) => argResults?[name] as List<String>? ?? <String>[];
+  List<String> stringsArg(String name) {
+    return argResults![name]! as List<String>? ?? <String>[];
+  }
 }
 
 /// A mixin which applies an implementation of [requiredArtifacts] that only
