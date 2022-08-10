@@ -17,8 +17,8 @@ std::shared_ptr<DlColorSource> DlColorSource::From(SkShader* sk_shader) {
     SkImage* image = sk_shader->isAImage(&local_matrix, xy);
     if (image) {
       return std::make_shared<DlImageColorSource>(
-          sk_ref_sp(image), ToDl(xy[0]), ToDl(xy[1]), DlImageSampling::kLinear,
-          &local_matrix);
+          DlImage::Make(image), ToDl(xy[0]), ToDl(xy[1]),
+          DlImageSampling::kLinear, &local_matrix);
     }
   }
   // Skia provides |SkShader->asAGradient(&info)| method to access the

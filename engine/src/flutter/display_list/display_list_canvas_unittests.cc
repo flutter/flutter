@@ -2200,7 +2200,7 @@ BoundsTolerance CanvasCompareTester::DefaultTolerance =
 
 const sk_sp<SkImage> CanvasCompareTester::kTestImage = makeTestImage();
 const DlImageColorSource CanvasCompareTester::kTestImageColorSource(
-    kTestImage,
+    DlImage::Make(kTestImage),
     DlTileMode::kRepeat,
     DlTileMode::kRepeat,
     DlImageSampling::kLinear);
