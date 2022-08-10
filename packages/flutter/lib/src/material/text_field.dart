@@ -1212,7 +1212,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     // unless a custom style is specified.
     final SpellCheckConfiguration spellCheckConfiguration =
       widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != SpellCheckConfiguration.disabled()
+      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? TextField.materialMisspelledTextStyle)
