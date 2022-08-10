@@ -305,4 +305,10 @@ void PointerInjectorDelegate::PointerInjectorEndpoint::RegisterInjector(
   registered_ = true;
 }
 
+void PointerInjectorDelegate::PointerInjectorEndpoint::Reset() {
+  injection_in_flight_ = false;
+  registered_ = false;
+  injector_events_ = {};
+}
+
 }  // namespace flutter_runner
