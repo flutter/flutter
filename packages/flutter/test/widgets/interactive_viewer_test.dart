@@ -295,7 +295,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                alignPanAxis: true,
+                alignPanAxis: PanAxis.aligned,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
@@ -334,7 +334,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                alignPanAxis: true,
+                alignPanAxis: PanAxis.aligned,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
@@ -373,7 +373,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                panningDirection: Axis.horizontal,
+                alignPanAxis: PanAxis.horizontal,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
@@ -398,7 +398,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      // Translation has only happened along the y axis (the default axis when
+      // Translation has only happened along the x axis (the default axis when
       // a gesture is perfectly at 45 degrees to the axes).
       final Vector3 translation = transformationController.value.getTranslation();
       expect(translation.x, childOffset.dx - childInterior.dx);
@@ -412,7 +412,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                panningDirection: Axis.horizontal,
+                alignPanAxis: PanAxis.horizontal,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
@@ -444,14 +444,14 @@ void main() {
       expect(translation.y, 0.0);
     });
 
-     testWidgets('panningDirection do not allow panning in vertical direction on vertical gesture', (WidgetTester tester) async {
+     testWidgets('panningDirection does not allow panning in vertical direction on vertical gesture', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                panningDirection: Axis.horizontal,
+                alignPanAxis: PanAxis.horizontal,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
@@ -476,8 +476,8 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      // Translation happened didn't happened, because the only axis allowed to
-      //do panning is the horizontal.
+      // Translation didn't happen because the only axis allowed to do panning 
+      // is the horizontal.
       final Vector3 translation = transformationController.value.getTranslation();
       expect(translation.x, 0.0);
       expect(translation.y, 0.0);
@@ -636,7 +636,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                alignPanAxis: true,
+                alignPanAxis: PanAxis.aligned,
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
                 transformationController: transformationController,

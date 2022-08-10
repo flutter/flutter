@@ -61,8 +61,7 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    this.panningDirection,
-    this.alignPanAxis = false,
+    this.alignPanAxis = PanAxis.both,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
@@ -109,8 +108,7 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    this.panningDirection,
-    this.alignPanAxis = false,
+    this.alignPanAxis = PanAxis.both,
     this.boundaryMargin = EdgeInsets.zero,
     // These default scale values were eyeballed as reasonable limits for common
     // use cases.
@@ -154,25 +152,17 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// The axis in which the pan gesture should be aligned.
+  /// When set to [PanAxis.aligned] panning is only allowed in the horizontal 
+  /// axis or the vertical axis, diagonal panning not allowed.
   ///
-  /// If different to null it will lock the pan gesture to that axis. For example
-  /// if set to [Axis.vertical] the pan gesture will only be allowed to pan in the
-  /// vertical direction.
-  final Axis? panningDirection;
-
-  /// If true, panning is only allowed in the direction of the horizontal axis
-  /// or the vertical axis.
+  /// When set to [PanAxis.vertical] or [PanAxis.horizontal] panning is only 
+  /// allowed in the specified axis. For example, if set to [PanAxis.vertical]
+  /// if you try to pan in the horizontal axis the InteractiveViewer will not
+  /// pan. And if you try to pan in diagonal directions the InteractiveViewer will
+  /// only pan in the vertical direction.
   ///
-  /// In other words, when this is true, diagonal panning is not allowed. A
-  /// single gesture begun along one axis cannot also cause panning along the
-  /// other axis without stopping and beginning a new gesture. This is a common
-  /// pattern in tables where data is displayed in columns and rows.
-  ///
-  /// See also:
-  ///  * [constrained], which has an example of creating a table that uses
-  ///    alignPanAxis.
-  final bool alignPanAxis;
+  /// Defaults to [PanAxis.both].
+  final PanAxis alignPanAxis;
 
   /// A margin for the visible boundaries of the child.
   ///
@@ -572,12 +562,19 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     late final Offset alignedTranslation;
 
     if (_panAxis != null) {
-      if (widget.panningDirection != null) {
-        alignedTranslation = _alignAxis(translation, widget.panningDirection!);
-      } else if (widget.alignPanAxis) {
-        alignedTranslation = _alignAxis(translation, _panAxis!);
-      } else {
-        alignedTranslation = translation;
+      switch(widget.alignPanAxis){
+        case PanAxis.horizontal:
+          alignedTranslation = _alignAxis(translation, Axis.horizontal);
+          break;
+        case PanAxis.vertical:
+          alignedTranslation = _alignAxis(translation, Axis.vertical);
+          break;
+        case PanAxis.aligned:
+          alignedTranslation = _alignAxis(translation, _panAxis!);
+          break;
+        case PanAxis.both:
+          alignedTranslation = translation;
+          break;
       }
     } else {
       alignedTranslation = translation;
@@ -1308,4 +1305,21 @@ Axis? _getPanAxis(Offset point1, Offset point2) {
   final double x = point2.dx - point1.dx;
   final double y = point2.dy - point1.dy;
   return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
+}
+
+/// This enum is used to specify the behavior of the [InteractiveViewer] when
+/// the user drags the viewport.
+enum PanAxis{
+  /// The user can pan the viewport along the horizontal axis.
+  horizontal,
+
+  /// The user can pan the viewport along the vertical axis.
+  vertical,
+
+  /// The user can pan the viewport along the horizontal and vertical axes but 
+  /// not diagonally.
+  aligned,
+
+  /// The user can pan the viewport along both the horizontal and vertical axes.
+  both,
 }
