@@ -99,7 +99,7 @@ static const sk_sp<SkBlender> kTestBlender2 =
     SkBlenders::Arithmetic(0.2, 0.2, 0.2, 0.2, true);
 static const sk_sp<SkBlender> kTestBlender3 =
     SkBlenders::Arithmetic(0.3, 0.3, 0.3, 0.3, true);
-static const DlImageColorSource kTestSource1(TestImage1->skia_image(),
+static const DlImageColorSource kTestSource1(TestImage1,
                                              DlTileMode::kClamp,
                                              DlTileMode::kMirror,
                                              kLinearSampling);

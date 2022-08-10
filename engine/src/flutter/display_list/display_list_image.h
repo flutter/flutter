@@ -97,6 +97,21 @@ class DlImage : public SkRefCnt {
   ///             image.
   virtual std::optional<std::string> get_error() const;
 
+  bool Equals(const DlImage* other) const {
+    if (!other) {
+      return false;
+    }
+    if (this == other) {
+      return true;
+    }
+    return skia_image() == other->skia_image() &&
+           impeller_texture() == other->impeller_texture();
+  }
+
+  bool Equals(const DlImage& other) const { return Equals(&other); }
+
+  bool Equals(sk_sp<const DlImage> other) const { return Equals(other.get()); }
+
  protected:
   DlImage();
 };
