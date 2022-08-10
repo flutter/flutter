@@ -223,6 +223,17 @@ TaskFunction createPictureCacheComplexityScoringPerfTest() {
   ).run;
 }
 
+TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
+  return PerfTest(
+    openpayDirectory.path,
+    'test_driver/scroll_perf.dart',
+    'openpay_scroll_perf',
+    measureCpuGpu: measureCpuGpu,
+    testDriver: 'test_driver/scroll_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart'}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
