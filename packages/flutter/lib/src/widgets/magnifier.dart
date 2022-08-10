@@ -502,29 +502,23 @@ class _DonutClip extends CustomClipper<Path> {
 }
 
 class _Magnifier extends SingleChildRenderObjectWidget {
-  /// Construct a [_Magnifier].
   const _Magnifier({
-      super.child,
-      required this.shape,
-      this.magnificationScale = 1,
-      this.focalPointOffset = Offset.zero,
+    super.child,
+    required this.shape,
+    this.magnificationScale = 1,
+    this.focalPointOffset = Offset.zero,
   });
 
-  /// [focalPointOffset] is the area the center of the
-  /// [_Magnifier] points to, relative to the center of the magnifier.
-  ///
-  /// {@macro flutter.widgets.magnifier.offset}
+  // Area the center of the _Magnifier points to, relative to the center of the magnifier.
   final Offset focalPointOffset;
 
-  /// The scale of the magnification.
-  ///
-  /// A [magnificationScale] of 1 means that the content in the magnifier
-  /// is true to it's real size. Anything greater than one will appear bigger
-  /// in the magnifier, and anything less than one will appear smaller in
-  /// the magnifier.
+  // Scale of the magnification.
+  //
+  // If equal to 1.0, the content in the magnifier is true to its real size.
+  // If greater than 1.0, the content appears bigger in the magnifier.
   final double magnificationScale;
 
-  /// The shape of the magnifier is dictated by [shape.getOuterPath].
+  // Shape of the magnifier.
   final ShapeBorder shape;
 
   @override
