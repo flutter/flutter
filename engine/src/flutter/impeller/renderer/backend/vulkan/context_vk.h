@@ -10,6 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_library_vk.h"
@@ -73,6 +74,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   vk::Queue graphics_queue_;
   vk::Queue compute_queue_;
   vk::Queue transfer_queue_;
+  std::unique_ptr<CommandPoolVK> graphics_command_pool_;
   bool is_valid_ = false;
 
   ContextVK(
