@@ -21,11 +21,10 @@ class AllocatorMTL final : public Allocator {
  private:
   friend class ContextMTL;
 
-  // In the prototype, we are going to be allocating resources directly with the
-  // MTLDevice APIs. But, in the future, this could be backed by named heaps
-  // with specific limits.
   id<MTLDevice> device_;
   std::string allocator_label_;
+  bool supports_memoryless_targets_ = false;
+  bool supports_uma_ = false;
   bool is_valid_ = false;
 
   AllocatorMTL(id<MTLDevice> device, std::string label);

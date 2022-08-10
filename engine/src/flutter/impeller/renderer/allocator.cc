@@ -13,20 +13,6 @@ Allocator::Allocator() = default;
 
 Allocator::~Allocator() = default;
 
-bool Allocator::RequiresExplicitHostSynchronization(StorageMode mode) {
-  if (mode != StorageMode::kHostVisible) {
-    return false;
-  }
-
-#if FML_OS_IOS
-  // StorageMode::kHostVisible is MTLStorageModeShared already.
-  return false;
-#else   // FML_OS_IOS
-  // StorageMode::kHostVisible is MTLResourceStorageModeManaged.
-  return true;
-#endif  // FML_OS_IOS
-}
-
 std::shared_ptr<DeviceBuffer> Allocator::CreateBufferWithCopy(
     const uint8_t* buffer,
     size_t length) {
