@@ -499,8 +499,10 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// to a single child can be replaced with an [ImageFiltered] widget. This code
 /// is generally simpler and the performance will be improved dramatically.
 ///
+/// The implementation below is unnecessarily expensive.
+///
 /// ```dart
-///  return Stack(
+///  Stack(
 ///    children: [
 ///      Positioned.fill(child: Image.asset('image.png')),
 ///        Positioned.fill(
@@ -518,7 +520,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// to the child widget.
 ///
 /// ```dart
-///  return ImageFiltered(
+///  ImageFiltered(
 ///    filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
 ///    child: Image.asset('image.png')),
 ///  );
