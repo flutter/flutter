@@ -6,8 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_COMMON_PUBLIC_FLUTTER_EXPORT_H_
 
 #ifdef FLUTTER_DESKTOP_LIBRARY
-// Add visibility/export annotations when building the library.
 
+// Add visibility/export annotations when building the library.
 #ifdef _WIN32
 #define FLUTTER_EXPORT __declspec(dllexport)
 #else
