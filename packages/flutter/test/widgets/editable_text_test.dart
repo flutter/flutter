@@ -5923,10 +5923,6 @@ void main() {
       reason: 'on $platform',
     );
 
-    // On Cupertino platforms, caret moves by page with Alt + PageDown/Up.
-    final bool isCupertino = defaultTargetPlatform == TargetPlatform.macOS
-        || defaultTargetPlatform == TargetPlatform.iOS;
-
     // Move down by page.
     await sendKeys(
       tester,
@@ -5937,12 +5933,14 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
+    // On macOS platforms, there's no NSStandardKeyBindingResponding
+    // for move selection by page + collapse.
     expect(
       selection,
       equals(
-        const TextSelection.collapsed(
-          offset: 55,
-        ),
+        defaultTargetPlatform == TargetPlatform.macOS
+          ? const TextSelection.collapsed(offset: 55)
+          : const TextSelection.collapsed(offset: 0),
       ),
       reason: 'on $platform',
     );
@@ -5974,7 +5972,6 @@ void main() {
         LogicalKeyboardKey.pageDown,
       ],
       shift: true,
-      wordModifier: isCupertino,
       targetPlatform: defaultTargetPlatform,
     );
 
@@ -5997,7 +5994,6 @@ void main() {
         LogicalKeyboardKey.pageUp,
       ],
       shift: true,
-      wordModifier: isCupertino,
       targetPlatform: defaultTargetPlatform,
     );
 
