@@ -26,11 +26,12 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// late RouteObserver<Route<void>> routeObserver;
 // late NavigatorState navigator;
 // late BuildContext context;
 // Future<bool> askTheUserIfTheyAreSure() async { return true; }
 // abstract class MyWidget extends StatefulWidget { const MyWidget({super.key}); }
+// late dynamic _myState, newValue;
+// late StateSetter setState;
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -987,7 +988,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// the change in a function that you pass to [setState], as in:
   ///
   /// ```dart
-  /// setState(() { myState = newValue });
+  /// setState(() { _myState = newValue; });
   /// ```
   ///
   /// If you just change the state directly without calling [setState], then the
@@ -1766,6 +1767,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
 /// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+///
 /// void main() {
 ///   runApp(MaterialApp(
 ///     home: Container(),

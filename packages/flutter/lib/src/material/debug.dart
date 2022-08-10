@@ -8,6 +8,9 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Asserts that the given context has a [Material] ancestor.
 ///
 /// Used by many Material Design widgets to make sure that they are

@@ -14,6 +14,11 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'table.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// List<Widget> children = <Widget>[];
+// List<Widget> items = <Widget>[];
+
 // Any changes to this file should be reflected in the debugAssertAllWidgetVarsUnset()
 // function below.
 
@@ -177,26 +182,35 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
 
 /// Asserts if the given child list contains any duplicate non-null keys.
 ///
-/// To invoke this function, use the following pattern, typically in the
-/// relevant Widget's constructor:
+/// To invoke this function, use the following pattern:
 ///
 /// ```dart
-/// assert(!debugChildrenHaveDuplicateKeys(this, children));
+/// class MyWidget extends StatelessWidget {
+///   MyWidget({ super.key, required this.children }) {
+///     assert(!debugChildrenHaveDuplicateKeys(this, children));
+///   }
+///
+///   final List<Widget> children;
+///
+///   // ...
+/// }
 /// ```
+///
+/// If specified, the `message` overrides the default message.
 ///
 /// For a version of this function that can be used in contexts where
 /// the list of items does not have a particular parent, see
 /// [debugItemsHaveDuplicateKeys].
 ///
-/// Does nothing if asserts are disabled. Always returns true.
-bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
+/// Does nothing if asserts are disabled. Always returns false.
+bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children, { String? message }) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
       throw FlutterError(
-        'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        '$parent has multiple children with key $nonUniqueKey.',
+        "${message ?? 'Duplicate keys found.\n'
+                      'If multiple keyed widgets exist as children of another widget, they must have unique keys.'}"
+        '\n$parent has multiple children with key $nonUniqueKey.',
       );
     }
     return true;
@@ -215,7 +229,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
 /// For a version of this function specifically intended for parents
 /// checking their children lists, see [debugChildrenHaveDuplicateKeys].
 ///
-/// Does nothing if asserts are disabled. Always returns true.
+/// Does nothing if asserts are disabled. Always returns false.
 bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(items);

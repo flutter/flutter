@@ -33,6 +33,9 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
+// Examples can assume:
+// late Widget myWidget;
+
 /// The signature of [WidgetsApp.localeListResolutionCallback].
 ///
 /// A [LocaleListResolutionCallback] is responsible for computing the locale of the app's
@@ -947,7 +950,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// ```dart
   /// // Full Chinese support for CN, TW, and HK
-  /// supportedLocales: [
+  /// supportedLocales: <Locale>[
   ///   const Locale.fromSubtags(languageCode: 'zh'), // generic Chinese 'zh'
   ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'), // generic simplified Chinese 'zh_Hans'
   ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'), // generic traditional Chinese 'zh_Hant'

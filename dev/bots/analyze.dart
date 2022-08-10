@@ -177,7 +177,7 @@ Future<void> run(List<String> arguments) async {
   // Analyze the code in `{@tool snippet}` sections in the repo.
   print('$clock Snippet code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
+    <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 

@@ -57,6 +57,9 @@ import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
 /// Typically used for custom colors. To use, subclass [ThemeExtension],
@@ -1576,9 +1579,10 @@ class ThemeData with Diagnosticable {
   ///
   /// ```dart
   /// final ThemeData theme = Theme.of(context);
-  /// theme.textTheme.headline1.copyWith(
+  /// final TextStyle style = theme.textTheme.headline1!.copyWith(
   ///   color: theme.colorScheme.onSecondary,
-  /// )
+  /// );
+  /// // ...use style...
   /// ```
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
