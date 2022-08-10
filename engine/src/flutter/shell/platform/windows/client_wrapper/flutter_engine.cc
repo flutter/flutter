@@ -16,6 +16,7 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
   c_engine_properties.assets_path = project.assets_path().c_str();
   c_engine_properties.icu_data_path = project.icu_data_path().c_str();
   c_engine_properties.aot_library_path = project.aot_library_path().c_str();
+  c_engine_properties.dart_entrypoint = project.dart_entrypoint().c_str();
 
   const std::vector<std::string>& entrypoint_args =
       project.dart_entrypoint_arguments();
@@ -38,6 +39,10 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
 
 FlutterEngine::~FlutterEngine() {
   ShutDown();
+}
+
+bool FlutterEngine::Run() {
+  return Run(nullptr);
 }
 
 bool FlutterEngine::Run(const char* entry_point) {

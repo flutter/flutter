@@ -86,7 +86,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   MockEmbedderApiForKeyboard(modifier,
                              std::make_shared<MockKeyResponseController>());
 
-  engine->RunWithEntrypoint(nullptr);
+  engine->Run();
   return engine;
 }
 

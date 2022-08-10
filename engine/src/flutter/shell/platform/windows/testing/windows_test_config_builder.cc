@@ -22,6 +22,13 @@ WindowsConfigBuilder::WindowsConfigBuilder(WindowsTestContext& context)
 
 WindowsConfigBuilder::~WindowsConfigBuilder() = default;
 
+void WindowsConfigBuilder::SetDartEntrypoint(std::string_view entrypoint) {
+  if (entrypoint.empty()) {
+    return;
+  }
+  dart_entrypoint_ = entrypoint;
+}
+
 void WindowsConfigBuilder::AddDartEntrypointArgument(std::string_view arg) {
   if (arg.empty()) {
     return;
@@ -35,6 +42,9 @@ FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
   FlutterDesktopEngineProperties engine_properties = {};
   engine_properties.assets_path = context_.GetAssetsPath().c_str();
   engine_properties.icu_data_path = context_.GetIcuDataPath().c_str();
+
+  // Set Dart entrypoint.
+  engine_properties.dart_entrypoint = dart_entrypoint_.c_str();
 
   // Set Dart entrypoint argc, argv.
   std::vector<const char*> dart_args;
@@ -55,7 +65,12 @@ FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
   return engine_properties;
 }
 
-ViewControllerPtr WindowsConfigBuilder::LaunchEngine() const {
+EnginePtr WindowsConfigBuilder::InitializeEngine() const {
+  FlutterDesktopEngineProperties engine_properties = GetEngineProperties();
+  return EnginePtr(FlutterDesktopEngineCreate(&engine_properties));
+}
+
+ViewControllerPtr WindowsConfigBuilder::Run() const {
   InitializeCOM();
 
   EnginePtr engine = InitializeEngine();
@@ -76,11 +91,6 @@ ViewControllerPtr WindowsConfigBuilder::LaunchEngine() const {
 
 void WindowsConfigBuilder::InitializeCOM() const {
   FML_CHECK(SUCCEEDED(::CoInitializeEx(nullptr, COINIT_MULTITHREADED)));
-}
-
-EnginePtr WindowsConfigBuilder::InitializeEngine() const {
-  FlutterDesktopEngineProperties engine_properties = GetEngineProperties();
-  return EnginePtr(FlutterDesktopEngineCreate(&engine_properties));
 }
 
 }  // namespace testing

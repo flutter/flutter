@@ -9,6 +9,8 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include "flutter/shell/platform/common/accessibility_bridge.h"
@@ -72,11 +74,22 @@ class FlutterWindowsEngine {
   FlutterWindowsEngine(FlutterWindowsEngine const&) = delete;
   FlutterWindowsEngine& operator=(FlutterWindowsEngine const&) = delete;
 
-  // Starts running the engine with the given entrypoint. If null, defaults to
-  // main().
+  // Starts running the entrypoint function specifed in the project bundle. If
+  // unspecified, defaults to main().
   //
   // Returns false if the engine couldn't be started.
-  bool RunWithEntrypoint(const char* entrypoint);
+  bool Run();
+
+  // Starts running the engine with the given entrypoint. If the empty string
+  // is specified, defaults to the entrypoint function specified in the project
+  // bundle, or main() if both are unspecified.
+  //
+  // Returns false if the engine couldn't be started or if conflicting,
+  // non-default values are passed here and in the project bundle..
+  //
+  // DEPRECATED: Prefer setting the entrypoint in the FlutterProjectBundle
+  // passed to the constructor and calling the no-parameter overload.
+  bool Run(std::string_view entrypoint);
 
   // Returns true if the engine is currently running.
   bool running() { return engine_ != nullptr; }

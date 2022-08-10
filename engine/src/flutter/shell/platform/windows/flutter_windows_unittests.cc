@@ -30,7 +30,7 @@ TEST(WindowsNoFixtureTest, GetTextureRegistrar) {
 TEST_F(WindowsTest, LaunchMain) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
-  ViewControllerPtr controller{builder.LaunchEngine()};
+  ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
   // Run for 1 second, then shut down.
@@ -39,6 +39,57 @@ TEST_F(WindowsTest, LaunchMain) {
   // determine that execution has made it to a specific point in the Dart
   // code. https://github.com/flutter/flutter/issues/109242
   std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+TEST_F(WindowsTest, LaunchCustomEntrypoint) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("customEntrypoint");
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  // Run for 1 second, then shut down.
+  //
+  // TODO(cbracken): Support registring a native function we can use to
+  // determine that execution has made it to a specific point in the Dart
+  // code. https://github.com/flutter/flutter/issues/109242
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+// Verify that engine launches with the custom entrypoint specified in the
+// FlutterDesktopEngineRun parameter when no entrypoint is specified in
+// FlutterDesktopEngineProperties.dart_entrypoint.
+//
+// TODO(cbracken): https://github.com/flutter/flutter/issues/109285
+TEST_F(WindowsTest, LaunchCustomEntrypointInEngineRunInvocation) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.InitializeEngine()};
+  ASSERT_NE(engine, nullptr);
+
+  ASSERT_TRUE(FlutterDesktopEngineRun(engine.get(), "customEntrypoint"));
+
+  // Run for 1 second, then shut down.
+  //
+  // TODO(cbracken): Support registring a native function we can use to
+  // determine that execution has made it to a specific point in the Dart
+  // code. https://github.com/flutter/flutter/issues/109242
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+// Verify that engine fails to launch when a conflicting entrypoint in
+// FlutterDesktopEngineProperties.dart_entrypoint and the
+// FlutterDesktopEngineRun parameter.
+//
+// TODO(cbracken): https://github.com/flutter/flutter/issues/109285
+TEST_F(WindowsTest, LaunchConflictingCustomEntrypoints) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("customEntrypoint");
+  EnginePtr engine{builder.InitializeEngine()};
+  ASSERT_NE(engine, nullptr);
+
+  ASSERT_FALSE(FlutterDesktopEngineRun(engine.get(), "conflictingEntrypoint"));
 }
 
 }  // namespace testing

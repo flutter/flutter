@@ -129,7 +129,7 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
   // Set the AngleSurfaceManager to !nullptr to test ANGLE rendering.
   modifier.SetSurfaceManager(reinterpret_cast<AngleSurfaceManager*>(1));
 
-  engine->RunWithEntrypoint(nullptr);
+  engine->Run();
 
   EXPECT_TRUE(run_called);
   EXPECT_TRUE(update_locales_called);
@@ -206,7 +206,7 @@ TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
   // Set the AngleSurfaceManager to nullptr to test software fallback path.
   modifier.SetSurfaceManager(nullptr);
 
-  engine->RunWithEntrypoint(nullptr);
+  engine->Run();
 
   EXPECT_TRUE(run_called);
 
@@ -351,7 +351,7 @@ TEST(FlutterWindowsEngine, AddPluginRegistrarDestructionCallback) {
   MockEmbedderApiForKeyboard(modifier,
                              std::make_shared<MockKeyResponseController>());
 
-  engine->RunWithEntrypoint(nullptr);
+  engine->Run();
 
   // Verify that destruction handlers don't overwrite each other.
   int result1 = 0;

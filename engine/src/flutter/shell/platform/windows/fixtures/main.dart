@@ -3,5 +3,10 @@
 // found in the LICENSE file.
 
 void main() {
-  print('Hello windows engine test!');
+  print('Hello windows engine test main!');
+}
+
+@pragma('vm:entry-point')
+void customEntrypoint() {
+  print('Hello windows engine test customEntrypoint!');
 }
