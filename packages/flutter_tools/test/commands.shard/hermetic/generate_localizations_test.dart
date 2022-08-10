@@ -5,11 +5,13 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:process/process.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
@@ -18,6 +20,9 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FileSystem fileSystem;
+  BufferLogger logger;
+  Artifacts artifacts;
+  ProcessManager processManager;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -25,10 +30,12 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
+    artifacts = Artifacts.test();
+    processManager = const LocalProcessManager();
   });
 
   testUsingContext('default l10n settings', () async {
-    final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -41,6 +48,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
@@ -56,7 +65,6 @@ void main() {
   });
 
   testUsingContext('not using synthetic packages', () async {
-    final BufferLogger logger = BufferLogger.test();
     final Directory l10nDirectory = fileSystem.directory(
       fileSystem.path.join('lib', 'l10n'),
     );
@@ -75,6 +83,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>[
       'gen-l10n',
@@ -92,7 +102,6 @@ void main() {
   });
 
   testUsingContext('throws error when arguments are invalid', () async {
-    final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -107,6 +116,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
     expect(
       () => createTestCommandRunner(command).run(<String>[
@@ -122,7 +133,6 @@ void main() {
   });
 
   testUsingContext('l10n yaml file takes precedence over command line arguments', () async {
-    final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -138,6 +148,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
@@ -154,7 +166,6 @@ void main() {
   });
 
   testUsingContext('nullable-getter help message is expected string', () async {
-    final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -170,6 +181,8 @@ void main() {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
     expect(command.usage, contains(' If this value is set to false, then '));
