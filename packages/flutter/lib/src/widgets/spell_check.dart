@@ -93,7 +93,7 @@ class SpellCheckConfiguration {
 ///
 /// Used in the case where the request for the spell check results of the
 /// [newText] is lagging in order to avoid display of incorrect results.
-List<SuggestionSpan> correctSpellCheckResults(
+List<SuggestionSpan> _correctSpellCheckResults(
     String newText, String resultsText, List<SuggestionSpan> results) {
   final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
 
@@ -202,7 +202,7 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
 }
 
 /// Builds [TextSpan] subtree for text with misspelled words.
-List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(
+List<TextSpan> _buildSubtreesWithMisspelledWordsIndicated(
     List<SuggestionSpan>? spellCheckSuggestions,
     TextEditingValue value,
     TextStyle? style,
