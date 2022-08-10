@@ -86,6 +86,23 @@ TEST(FlutterEngineTest, CreateDestroy) {
   EXPECT_EQ(test_api->destroy_called(), true);
 }
 
+TEST(FlutterEngineTest, CreateDestroyWithCustomEntrypoint) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+  {
+    DartProject project(L"fake/project/path");
+    project.set_dart_entrypoint("customEntrypoint");
+    FlutterEngine engine(project);
+    engine.Run();
+    EXPECT_EQ(test_api->create_called(), true);
+    EXPECT_EQ(test_api->run_called(), true);
+    EXPECT_EQ(test_api->destroy_called(), false);
+  }
+  // Destroying should implicitly shut down if it hasn't been done manually.
+  EXPECT_EQ(test_api->destroy_called(), true);
+}
+
 TEST(FlutterEngineTest, ExplicitShutDown) {
   testing::ScopedStubFlutterWindowsApi scoped_api_stub(
       std::make_unique<TestFlutterWindowsApi>());
