@@ -3867,7 +3867,7 @@ void main() {
       });
 
   testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
-    final observer = _MockNavigatorObserver();
+    final _MockNavigatorObserver observer = _MockNavigatorObserver();
     Widget build([Key? key]) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -3887,16 +3887,16 @@ void main() {
     }
 
     await tester.pumpWidget(build());
-    observer._checkInvocations([#navigator, #didPush]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
     await tester.pumpWidget(Container(child: build()));
-    observer._checkInvocations([#navigator, #didPush, #navigator]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #navigator]);
     await tester.pumpWidget(Container());
-    observer._checkInvocations([#navigator]);
+    observer._checkInvocations(<Symbol>[#navigator]);
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(build(key));
-    observer._checkInvocations([#navigator, #didPush]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
     await tester.pumpWidget(Container(child: build(key)));
-    observer._checkInvocations([#navigator, #navigator]);
+    observer._checkInvocations(<Symbol>[#navigator, #navigator]);
   });
 }
 
@@ -4150,7 +4150,7 @@ class ZeroDurationPageRoute extends PageRoute<void> {
 }
 
 class _MockNavigatorObserver implements NavigatorObserver {
-  List<Symbol> _invocations = [];
+  final List<Symbol> _invocations = <Symbol>[];
 
   void _checkInvocations(List<Symbol> expected) {
     expect(_invocations, expected);
