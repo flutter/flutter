@@ -459,7 +459,7 @@ void main() {
     );
 
     final RenderBox iconBox = tester.renderObject(find.byType(IconButton));
-    expect(iconBox.size.height, kMinInteractiveDimension);
+    expect(iconBox.size.height, 48.0);
     expect(tester.getCenter(find.byType(IconButton)).dy, 28);
   });
 

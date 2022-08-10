@@ -712,11 +712,9 @@ void main() {
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android);
-
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
