@@ -265,7 +265,7 @@ void main() {
     await tester.pump();
 
     expect(state.selectionOverlay!.toolbarIsVisible, isFalse);
-  }, skip: isContextMenuProvidedByPlatform);
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Composing change does not hide selection handle caret', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/108673
