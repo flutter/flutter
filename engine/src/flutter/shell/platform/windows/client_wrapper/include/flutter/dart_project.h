@@ -45,6 +45,20 @@ class DartProject {
 
   ~DartProject() = default;
 
+  // Sets the Dart entrypoint to the specified value.
+  //
+  // If not set, the default entrypoint (main) is used. Custom Dart entrypoints
+  // must be decorated with `@pragma('vm:entry-point')`.
+  void set_dart_entrypoint(const std::string& entrypoint) {
+    if (entrypoint.empty()) {
+      return;
+    }
+    dart_entrypoint_ = entrypoint;
+  }
+
+  // Returns the Dart entrypoint.
+  const std::string& dart_entrypoint() const { return dart_entrypoint_; }
+
   // Sets the command line arguments that should be passed to the Dart
   // entrypoint.
   void set_dart_entrypoint_arguments(std::vector<std::string> arguments) {
@@ -77,6 +91,8 @@ class DartProject {
   // The path to the AOT library. This will always return a path, but non-AOT
   // builds will not be expected to actually have a library at that path.
   std::wstring aot_library_path_;
+  // The Dart entrypoint to launch.
+  std::string dart_entrypoint_;
   // The list of arguments to pass through to the Dart entrypoint.
   std::vector<std::string> dart_entrypoint_arguments_;
 };

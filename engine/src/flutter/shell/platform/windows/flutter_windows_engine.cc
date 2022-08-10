@@ -200,7 +200,11 @@ void FlutterWindowsEngine::SetSwitches(
   project_->SetSwitches(switches);
 }
 
-bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
+bool FlutterWindowsEngine::Run() {
+  return Run("");
+}
+
+bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   if (!project_->HasValidPaths()) {
     std::cerr << "Missing or unresolvable paths to assets." << std::endl;
     return false;
@@ -259,6 +263,26 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = argv.empty() ? nullptr : argv.data();
+
+  // Fail if conflicting non-default entrypoints are specified in the method
+  // argument and the project.
+  //
+  // TODO(cbracken): https://github.com/flutter/flutter/issues/109285
+  // The entrypoint method parameter should eventually be removed from this
+  // method and only the entrypoint specified in project_ should be used.
+  if (!project_->dart_entrypoint().empty() && !entrypoint.empty() &&
+      project_->dart_entrypoint() != entrypoint) {
+    std::cerr << "Conflicting entrypoints were specified in "
+                 "FlutterDesktopEngineProperties.dart_entrypoint and "
+                 "FlutterDesktopEngineRun(engine, entry_point). "
+              << std::endl;
+    return false;
+  }
+  if (!entrypoint.empty()) {
+    args.custom_dart_entrypoint = entrypoint.data();
+  } else if (!project_->dart_entrypoint().empty()) {
+    args.custom_dart_entrypoint = project_->dart_entrypoint().c_str();
+  }
   args.dart_entrypoint_argc = static_cast<int>(entrypoint_argv.size());
   args.dart_entrypoint_argv =
       entrypoint_argv.empty() ? nullptr : entrypoint_argv.data();
@@ -300,9 +324,6 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
 
   if (aot_data_) {
     args.aot_data = aot_data_.get();
-  }
-  if (entrypoint) {
-    args.custom_dart_entrypoint = entrypoint;
   }
 
   FlutterRendererConfig renderer_config = surface_manager_

@@ -52,22 +52,29 @@ class WindowsConfigBuilder {
   // Returns the desktop engine properties configured for this test.
   FlutterDesktopEngineProperties GetEngineProperties() const;
 
+  // Sets the Dart entrypoint to the specified value.
+  //
+  // If not set, the default entrypoint (main) is used. Custom Dart entrypoints
+  // must be decorated with `@pragma('vm:entry-point')`.
+  void SetDartEntrypoint(std::string_view entrypoint);
+
   // Adds an argument to the Dart entrypoint arguments List<String>.
   void AddDartEntrypointArgument(std::string_view arg);
 
+  // Returns a configured and initialized engine.
+  EnginePtr InitializeEngine() const;
+
   // Returns a configured and initialized view controller running the default
   // Dart entrypoint.
-  ViewControllerPtr LaunchEngine() const;
+  ViewControllerPtr Run() const;
 
  private:
   // Initialize COM, so that it is available for use in the library and/or
   // plugins.
   void InitializeCOM() const;
 
-  // Returns a configured and initialized engine.
-  EnginePtr InitializeEngine() const;
-
   WindowsTestContext& context_;
+  std::string dart_entrypoint_;
   std::vector<std::string> dart_entrypoint_arguments_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowsConfigBuilder);

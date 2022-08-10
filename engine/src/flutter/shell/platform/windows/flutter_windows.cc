@@ -78,7 +78,7 @@ FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
       std::unique_ptr<flutter::FlutterWindowsEngine>(EngineFromHandle(engine)));
   state->view->CreateRenderSurface();
   if (!state->view->GetEngine()->running()) {
-    if (!state->view->GetEngine()->RunWithEntrypoint(nullptr)) {
+    if (!state->view->GetEngine()->Run()) {
       return nullptr;
     }
   }
@@ -144,7 +144,7 @@ bool FlutterDesktopEngineDestroy(FlutterDesktopEngineRef engine_ref) {
 
 bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
                              const char* entry_point) {
-  return EngineFromHandle(engine)->RunWithEntrypoint(entry_point);
+  return EngineFromHandle(engine)->Run(entry_point);
 }
 
 uint64_t FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine) {
