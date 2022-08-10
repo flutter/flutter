@@ -11,6 +11,7 @@ config("desktop_library_implementation") {
 
 _public_headers = [
   "public/flutter_export.h",
+  "public/flutter_macros.h",
   "public/flutter_messenger.h",
   "public/flutter_plugin_registrar.h",
   "public/flutter_texture_registrar.h",
