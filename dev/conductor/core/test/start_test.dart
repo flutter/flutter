@@ -934,17 +934,6 @@ void main() {
       expect(state.conductorVersion, conductorVersion);
       expect(state.releaseType, ReleaseType.STABLE_INITIAL);
     });
-
-    test('mirrors are interpreted from github username', () async {
-      const String githubUsername = 'user';
-      const String interpolatedFrameworkMirror =
-          'https://github.com/$githubUsername/flutter.git';
-      const String interpolatedEngineMirror =
-          'https://github.com/$githubUsername/engine.git';
-
-      expect(interpolatedFrameworkMirror, frameworkMirror);
-      expect(interpolatedEngineMirror, engineMirror);
-    });
     test(
         'StartContext gets engine and framework checkout directories after run',
         () async {
