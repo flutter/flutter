@@ -1204,10 +1204,9 @@ void main() {
       verifyTreeIsClean();
     });
 
-    testWidgets('Paint order of nested OverlayWidget: swap inner and outer', (WidgetTester tester) async {
+    testWidgets('Paint order', (WidgetTester tester) async {
       final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
       final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
-
 
       late StateSetter setState;
 
@@ -1216,13 +1215,13 @@ void main() {
       const Key key3 = Key('key3');
       const Key key4 = Key('key4');
       const Key key5 = Key('key5');
-      // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
       const Widget child1 = SizedBox(key: key1);
       const Widget child2 = SizedBox(key: key2);
       const Widget child3 = SizedBox(key: key3);
       const Widget child4 = SizedBox(key: key4);
       const Widget child5 = SizedBox(key: key5);
 
+      // Expected Order child1 -> innerKey -> child4.
       Widget widget = Column(
         children: <Widget>[
           const OverlayPortal(
@@ -1275,6 +1274,7 @@ void main() {
       ));
       childrenVisited.clear();
 
+      // Expected Order child1 -> innerKey -> child5 -> child4.
       setState(() {
         widget = Column(
           children: <Widget>[
@@ -1306,8 +1306,88 @@ void main() {
         <AbstractNode>[
           tester.renderObject(find.byKey(key1)).parent!,
           tester.renderObject(find.byKey(innerKey)).parent!,
-          tester.renderObject(find.byKey(key4)).parent!,
           tester.renderObject(find.byKey(key5)).parent!,
+          tester.renderObject(find.byKey(key4)).parent!,
+        ],
+      ));
+      childrenVisited.clear();
+
+      // Reparent one of the subtrees. The paint order shouldn't change.
+      setState(() {
+        widget = Column(
+          children: <Widget>[
+            const OverlayPortal(
+              overlayChild: child1,
+              child: null,
+            ),
+            Center(
+              child: OverlayPortal(
+                key: outerKey,
+                overlayChild: OverlayPortal(
+                  key: innerKey,
+                  overlayChild: child4,
+                  child: child3,
+                ),
+                child: child2,
+              ),
+            ),
+            const OverlayPortal(
+              overlayChild: child5,
+              child: null,
+            ),
+          ],
+        );
+      });
+
+      await tester.pump();
+      theatre.visitChildren(childrenVisited.add);
+      expect(childrenVisited.length, 5);
+      expect(childrenVisited, containsAllInOrder(
+        <AbstractNode>[
+          tester.renderObject(find.byKey(key1)).parent!,
+          tester.renderObject(find.byKey(innerKey)).parent!,
+          tester.renderObject(find.byKey(key5)).parent!,
+          tester.renderObject(find.byKey(key4)).parent!,
+        ],
+      ));
+      childrenVisited.clear();
+
+      // Swap inner with outer. child4 should still paint last.
+      setState(() {
+        widget = Column(
+          children: <Widget>[
+            const OverlayPortal(
+              overlayChild: child1,
+              child: null,
+            ),
+            Center(
+              child: OverlayPortal(
+                key: innerKey,
+                overlayChild: OverlayPortal(
+                  key: outerKey,
+                  overlayChild: child4,
+                  child: child2,
+                ),
+                child: child3,
+              ),
+            ),
+            const OverlayPortal(
+              overlayChild: child5,
+              child: null,
+            ),
+          ],
+        );
+      });
+
+      await tester.pump();
+      theatre.visitChildren(childrenVisited.add);
+      expect(childrenVisited.length, 5);
+      expect(childrenVisited, containsAllInOrder(
+        <AbstractNode>[
+          tester.renderObject(find.byKey(key1)).parent!,
+          tester.renderObject(find.byKey(key5)).parent!,
+          tester.renderObject(find.byKey(outerKey)).parent!,
+          tester.renderObject(find.byKey(key4)).parent!,
         ],
       ));
     });

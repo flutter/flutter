@@ -226,13 +226,17 @@ class OverlayEntry implements Listenable {
   String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
 }
 
-// Lazy OverlayLocation provider.
 class _OverlayLocationWidget extends StatefulWidget {
   const _OverlayLocationWidget({
     required this.referenceLocation,
     required this.child,
   });
 
+  // This widget ensures that the `referenceLocation` it uses will never be
+  // disposed when still being used by OverlayPortals. Once all OverlayPortals
+  // stop using referenceLocation, unlink and dispose the location.
+  //
+  // For root locations owned by OverlayEntries no ref counting is needed.
   final _DoublyLinkedOverlayLocation referenceLocation;
   final Widget child;
 
@@ -342,10 +346,7 @@ class _LocationOccupants extends LinkedList<_RenderDeferredLayoutBox> {
         isInitial = false;
         return child;
       }
-      if (child == null) {
-        return null;
-      }
-      return child = childAfter(child);
+      return child == null ? null : child = childAfter(child);
     };
   }
 
@@ -361,10 +362,7 @@ class _LocationOccupants extends LinkedList<_RenderDeferredLayoutBox> {
         isInitial = false;
         return child;
       }
-      if (child == null) {
-        return null;
-      }
-      return child = childBefore(child);
+      return child == null ? null : child = childBefore(child);
     };
   }
 }
@@ -422,22 +420,22 @@ class _OverlayLocation extends _DoublyLinkedOverlayLocation {
 
   @override
   String toString() {
-    final String base = '${describeIdentity(this)}[$_children](depth: $_relativeZIndex)(disposed: $_debugDisposed)';
-    final _DoublyLinkedOverlayLocation? next = this.next;
-    if (next == null) {
-      return base;
-    }
-    return '$base -> ${describeIdentity(next)}';
+    return _debugDisposed
+      ? describeIdentity(this)
+      : '${describeIdentity(this)}(disposed: $_debugDisposed)';
   }
 }
 
 abstract class _DoublyLinkedOverlayLocation extends OverlayLocation {
-  _DoublyLinkedOverlayLocation(this.prev, _RenderTheatre overlayRenderObject)
-    : super._(overlayRenderObject, prev == null ? 0 : prev._relativeZIndex + 1);
+  _DoublyLinkedOverlayLocation(this.prev, this._overlayRenderObject)
+    : super._(prev == null ? 0 : prev._relativeZIndex + 1);
 
   final _DoublyLinkedOverlayLocation? prev;
   _DoublyLinkedOverlayLocation? next;
   _RootOverlayLocation get root;
+
+  @override
+  final _RenderTheatre _overlayRenderObject;
 
   _DoublyLinkedOverlayLocation createNextIfAbsent(_DoublyLinkedOverlayLocation Function(_DoublyLinkedOverlayLocation) f) {
     assert(_debugNotDisposed());
@@ -517,6 +515,99 @@ abstract class _DoublyLinkedOverlayLocation extends OverlayLocation {
       return currentIterator?.call();
     };
   }
+
+  final _LocationOccupants _children = _LocationOccupants();
+
+  @override
+  void _addToChildModel(_RenderDeferredLayoutBox child) {
+    _children.add(child);
+    super._addToChildModel(child);
+  }
+
+  @override
+  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
+    _children.remove(child);
+    super._addToChildModel(child);
+  }
+}
+
+class TopmostOverlayLocation extends OverlayLocation {
+  TopmostOverlayLocation({
+    required this.context,
+    this.targetsRootOverlay = false,
+    this.debugRequiredFor,
+  }) : super._(0);
+
+  final BuildContext context;
+  final Widget? debugRequiredFor;
+
+  final bool targetsRootOverlay;
+  bool get shouldShow => _shouldShow;
+  // The first call must be `show`.
+  bool _shouldShow = false;
+
+  // timestamp
+  @override
+  _RenderTheatre? get _overlayRenderObject => _currentTheatre;
+  _RenderTheatre? _currentTheatre;
+  _RootOverlayLocation? _topLocation;
+  _RenderDeferredLayoutBox? child;
+
+  _RenderTheatre? _findRenderTheatre() {
+    return Overlay.of(context, rootOverlay: targetsRootOverlay, debugRequiredFor: debugRequiredFor)?.context
+      .findAncestorRenderObjectOfType<_RenderTheatre>();
+  }
+
+  void show() {
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(!shouldShow);
+    assert(
+      _currentTheatre == null,
+      'Already showing on Overlay $_currentTheatre. Consider calling hide() first.',
+    );
+    final _RenderTheatre? theatre = _findRenderTheatre();
+    if (theatre == null) {
+      assert(false, 'No overlay in $context');
+      return;
+    }
+    _targetTheatre = theatre;
+  }
+
+  void hide() {
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    _shouldShow = false;
+  }
+
+  @override
+  void _add(_RenderDeferredLayoutBox child) {
+    assert(_shouldShow);
+    super._add(child);
+  }
+
+  @override
+  void _addToChildModel(_RenderDeferredLayoutBox child) {
+    this.child = child;
+  }
+
+  @override
+  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
+    assert(child == this.child);
+    this.child = null;
+  }
+
+  @override
+  void _remove(_RenderDeferredLayoutBox child) {
+    _currentTheatre = null;
+  }
+
+  @override
+  void _activate(_RenderDeferredLayoutBox child) {
+    assert(_shouldShow);
+  }
+
+  @override
+  void _deactivate(_RenderDeferredLayoutBox child) {
+  }
 }
 
 /// A location in a particular [Overlay].
@@ -531,20 +622,14 @@ abstract class _DoublyLinkedOverlayLocation extends OverlayLocation {
 abstract class OverlayLocation {
   OverlayLocation._(
     //this._overlayEntryIdentifier,
-    this._overlayRenderObject,
     this._relativeZIndex,
   );
 
-  /// The distance from the [OverlayEntry] that this [OverlayLocation] uses as
-  /// the reference, to the current topmost [OverlayEntry] in the [Overlay].
+  /// The underlying [RenderObject] of the [Overlay] this [OverlayLocation]
+  /// targets.
   ///
-  /// Must be greater than or equal to 0. A value of 0 means this
-  /// [OverlayLocation] will be painted above the current topmost [OverlayEntry].
-  // int get _reversedPaintOrderIndex => _overlayEntryState.widget.reversedIndex;
-
-  //final Key _overlayEntryIdentifier;
-  /// The underlying [RenderObject] of the [Overlay].
-  final _RenderTheatre _overlayRenderObject;
+  /// Must be non-null after _add.
+  _RenderTheatre? get _overlayRenderObject;
 
   /// The z-index relative to the render object of an [OverlayEntry] in the
   /// [Overlay].
@@ -552,8 +637,6 @@ abstract class OverlayLocation {
   /// Must be greater than or equal to 0. The larger the number is, the later in
   /// paint order (and the earlier in hit-test order) the [OverlayLocation] is.
   final int _relativeZIndex;
-
-  //OverlayLocation get _next; //=> _links.next ??= _OverlayLocation(referenceLocation: this);
 
   /// Returns an [OverlayLocation] that represents a location in the same
   /// [Overlay] as the enclosing [OverlayEntry] or [OverlayPortal], but later in
@@ -571,47 +654,43 @@ abstract class OverlayLocation {
     return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.location;
   }
 
-  final _LocationOccupants _children = _LocationOccupants();
-
-  // Allowing _OverlayPortalElement to insert/move/remove RenderBoxes.
-  void _add(_RenderDeferredLayoutBox child) {
-    assert(!_debugDisposed);
-    _overlayRenderObject.addDeferredChild(child, this);
-    print('$this adding $child');
-    _children.add(child);
+  @mustCallSuper
+  void _addToChildModel(_RenderDeferredLayoutBox child) {
+    final _RenderTheatre theatre = _overlayRenderObject!;
+    theatre.markNeedsPaint();
+    theatre.markNeedsCompositingBitsUpdate();
+    theatre.markNeedsSemanticsUpdate();
   }
 
-  void _move(_RenderDeferredLayoutBox child, OverlayLocation oldLocation) {
-    print('MOVED: $child to $this from $oldLocation');
-    assert(!_debugDisposed, 'moving $child to a disposed location $this');
-    if (oldLocation._overlayRenderObject != _overlayRenderObject) {
-      // Moving to a different Overlay.
-      oldLocation._remove(child);
-      _add(child);
-      return;
-    }
+  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
+    final _RenderTheatre theatre = _overlayRenderObject!;
+    theatre.markNeedsPaint();
+    theatre.markNeedsCompositingBitsUpdate();
+    theatre.markNeedsSemanticsUpdate();
+  }
 
-    assert(oldLocation._children != null);
-    oldLocation._children.remove(child);
-    _children.add(child);
-    _overlayRenderObject.moveDeferredChild(child, oldLocation, this);
+  void _add(_RenderDeferredLayoutBox child) {
+    assert(!_debugDisposed);
+    assert(_overlayRenderObject != null, 'override _add');
+    _overlayRenderObject!.addDeferredChild(child, this);
+    print('$this adding $child');
+    _addToChildModel(child);
   }
 
   void _remove(_RenderDeferredLayoutBox child) {
     print('REMOVED: $child from $this');
-    assert(_children != null);
-    _children.remove(child);
-    _overlayRenderObject.removeDeferredChild(child, this);
+    _removeFromChildModel(child);
+    _overlayRenderObject!.removeDeferredChild(child, this);
   }
 
   void _activate(_RenderDeferredLayoutBox child) {
     assert(!_debugDisposed);
-    _overlayRenderObject.adoptChild(child);
+    _overlayRenderObject!.adoptChild(child);
   }
 
   void _deactivate(_RenderDeferredLayoutBox child) {
     // This method can be called while the location is already disposed.
-    _overlayRenderObject.dropChild(child);
+    _overlayRenderObject!.dropChild(child);
   }
 
   bool _debugNotDisposed() {
@@ -1299,6 +1378,8 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void redepthChildren() => visitChildren(redepthChild);
 
+  late final _RootOverlayLocation _topOverlayLocation = _RootOverlayLocation(this)..attach();
+
   // Adding/removing deferred child does not affect the layout of other children,
   // or that of the Overlay, so there's no need to invalidate the layout of the
   // Overlay.
@@ -1320,9 +1401,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 
   void moveDeferredChild(_RenderDeferredLayoutBox child, OverlayLocation oldLocation, OverlayLocation newLocation) {
-    markNeedsPaint();
-    markNeedsCompositingBitsUpdate();
-    markNeedsSemanticsUpdate();
     //throw UnimplementedError();
   }
 
@@ -1838,7 +1916,16 @@ class _OverlayPortalElement extends RenderObjectElement {
   // reparenting between _overlayChild and _child, thus the non-null-typed slots.
   @override
   void moveRenderObjectChild(RenderBox child, OverlayLocation oldSlot, OverlayLocation newSlot) {
-    newSlot._move(child as _RenderDeferredLayoutBox, oldSlot);
+    assert(newSlot._debugNotDisposed());
+    final _RenderTheatre? oldTheatre = oldSlot._overlayRenderObject;
+    if (oldTheatre != null && oldTheatre != newSlot._overlayRenderObject) {
+      // Moving to a different Overlay.
+      oldSlot._remove(child as _RenderDeferredLayoutBox);
+      newSlot._add(child);
+      return;
+    }
+    oldSlot._removeFromChildModel(child as _RenderDeferredLayoutBox);
+    newSlot._addToChildModel(child);
   }
 
   @override
