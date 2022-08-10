@@ -5939,8 +5939,8 @@ void main() {
       selection,
       equals(
         defaultTargetPlatform == TargetPlatform.macOS
-          ? const TextSelection.collapsed(offset: 55)
-          : const TextSelection.collapsed(offset: 0),
+          ? const TextSelection.collapsed(offset: 0)
+          : const TextSelection.collapsed(offset: 55),
       ),
       reason: 'on $platform',
     );
