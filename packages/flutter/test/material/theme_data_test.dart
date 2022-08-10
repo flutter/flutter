@@ -669,7 +669,6 @@ void main() {
       primaryColorLight: Colors.black,
       scaffoldBackgroundColor: Colors.black,
       secondaryHeaderColor: Colors.black,
-      selectedRowColor: Colors.black,
       shadowColor: Colors.black,
       splashColor: Colors.black,
       unselectedWidgetColor: Colors.black,
@@ -724,6 +723,7 @@ void main() {
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
       toggleableActiveColor: Colors.black,
+      selectedRowColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -780,7 +780,6 @@ void main() {
       primaryColorLight: Colors.white,
       scaffoldBackgroundColor: Colors.white,
       secondaryHeaderColor: Colors.white,
-      selectedRowColor: Colors.white,
       shadowColor: Colors.white,
       splashColor: Colors.white,
       unselectedWidgetColor: Colors.white,
@@ -838,6 +837,7 @@ void main() {
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
       toggleableActiveColor: Colors.white,
+      selectedRowColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -879,7 +879,6 @@ void main() {
       primaryColorLight: otherTheme.primaryColorLight,
       scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
       secondaryHeaderColor: otherTheme.secondaryHeaderColor,
-      selectedRowColor: otherTheme.selectedRowColor,
       shadowColor: otherTheme.shadowColor,
       splashColor: otherTheme.splashColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
@@ -937,6 +936,7 @@ void main() {
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
       toggleableActiveColor: otherTheme.toggleableActiveColor,
+      selectedRowColor: otherTheme.selectedRowColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -977,7 +977,6 @@ void main() {
     expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
     expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
     expect(themeDataCopy.secondaryHeaderColor, equals(otherTheme.secondaryHeaderColor));
-    expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
@@ -1040,6 +1039,7 @@ void main() {
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
     expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
+    expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1110,7 +1110,6 @@ void main() {
       'dividerColor',
       'highlightColor',
       'splashColor',
-      'selectedRowColor',
       'unselectedWidgetColor',
       'disabledColor',
       'secondaryHeaderColor',
@@ -1170,6 +1169,7 @@ void main() {
       'primaryColorBrightness',
       'androidOverscrollIndicator',
       'toggleableActiveColor',
+      'selectedRowColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();

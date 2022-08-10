@@ -2633,6 +2633,9 @@ class FakeDevFS extends Fake implements DevFS {
   @override
   Set<String> shaderPathsToEvict = <String>{};
 
+  @override
+  bool didUpdateFontManifest = false;
+
   UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
 
   @override

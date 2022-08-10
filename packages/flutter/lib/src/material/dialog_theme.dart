@@ -30,8 +30,6 @@ class DialogTheme with Diagnosticable {
   const DialogTheme({
     this.backgroundColor,
     this.elevation,
-    this.shadowColor,
-    this.surfaceTintColor,
     this.shape,
     this.alignment,
     this.iconColor,
@@ -45,12 +43,6 @@ class DialogTheme with Diagnosticable {
 
   /// Overrides the default value for [Dialog.elevation].
   final double? elevation;
-
-  /// Overrides the default value for [Dialog.shadowColor].
-  final Color? shadowColor;
-
-  /// Overrides the default value for [Dialog.surfaceTintColor].
-  final Color? surfaceTintColor;
 
   /// Overrides the default value for [Dialog.shape].
   final ShapeBorder? shape;
@@ -77,8 +69,6 @@ class DialogTheme with Diagnosticable {
   DialogTheme copyWith({
     Color? backgroundColor,
     double? elevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
     ShapeBorder? shape,
     AlignmentGeometry? alignment,
     Color? iconColor,
@@ -89,8 +79,6 @@ class DialogTheme with Diagnosticable {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
-      shadowColor: shadowColor ?? this.shadowColor,
-      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       shape: shape ?? this.shape,
       alignment: alignment ?? this.alignment,
       iconColor: iconColor ?? this.iconColor,
@@ -115,8 +103,6 @@ class DialogTheme with Diagnosticable {
     return DialogTheme(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
-      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
       iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
@@ -140,8 +126,6 @@ class DialogTheme with Diagnosticable {
     return other is DialogTheme
         && other.backgroundColor == backgroundColor
         && other.elevation == elevation
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
         && other.shape == shape
         && other.alignment == alignment
         && other.iconColor == iconColor
@@ -155,8 +139,6 @@ class DialogTheme with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(ColorProperty('shadowColor', shadowColor));
-    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     properties.add(ColorProperty('iconColor', iconColor));
