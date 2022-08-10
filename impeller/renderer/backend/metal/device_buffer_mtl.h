@@ -27,8 +27,12 @@ class DeviceBufferMTL final
   friend class AllocatorMTL;
 
   const id<MTLBuffer> buffer_;
+  const MTLStorageMode storage_mode_;
 
-  DeviceBufferMTL(id<MTLBuffer> buffer, size_t size, StorageMode mode);
+  DeviceBufferMTL(id<MTLBuffer> buffer,
+                  size_t size,
+                  StorageMode mode,
+                  MTLStorageMode storage_mode);
 
   // |DeviceBuffer|
   bool CopyHostBuffer(const uint8_t* source,

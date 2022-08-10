@@ -13,8 +13,9 @@ namespace impeller {
 
 DeviceBufferMTL::DeviceBufferMTL(id<MTLBuffer> buffer,
                                  size_t size,
-                                 StorageMode mode)
-    : DeviceBuffer(size, mode), buffer_(buffer) {}
+                                 StorageMode mode,
+                                 MTLStorageMode storage_mode)
+    : DeviceBuffer(size, mode), buffer_(buffer), storage_mode_(storage_mode) {}
 
 DeviceBufferMTL::~DeviceBufferMTL() = default;
 
@@ -45,15 +46,11 @@ id<MTLBuffer> DeviceBufferMTL::GetMTLBuffer() const {
     ::memmove(dest + offset, source + source_range.offset, source_range.length);
   }
 
-// |RequiresExplicitHostSynchronization| always returns false on iOS. But the
-// compiler is mad that `didModifyRange:` appears in a TU meant for iOS. So,
+// MTLStorageModeManaged is never present on always returns false on iOS. But
+// the compiler is mad that `didModifyRange:` appears in a TU meant for iOS. So,
 // just compile it away.
-//
-// Making this call is never necessary on iOS because there is no
-// MTLResourceStorageModeManaged mode. Only the MTLStorageModeShared mode is
-// available.
 #if !FML_OS_IOS
-  if (Allocator::RequiresExplicitHostSynchronization(mode_)) {
+  if (storage_mode_ == MTLStorageModeManaged) {
     [buffer_ didModifyRange:NSMakeRange(offset, source_range.length)];
   }
 #endif
@@ -76,7 +73,6 @@ bool DeviceBufferMTL::SetLabel(const std::string& label, Range range) {
   [buffer_ addDebugMarker:@(label.c_str())
                     range:NSMakeRange(range.offset, range.length)];
   return true;
-  FML_UNREACHABLE();
 }
 
 }  // namespace impeller
