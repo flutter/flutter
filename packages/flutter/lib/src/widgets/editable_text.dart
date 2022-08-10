@@ -4490,7 +4490,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     return Actions.invoke(
       context!,
       ReplaceTextIntent(
-        textBoundary.textEditingValue, 
+        textBoundary.textEditingValue,
         '',
         textBoundary.getTextBoundaryAt(textBoundary.textEditingValue.selection.base),
         SelectionChangedCause.keyboard,
