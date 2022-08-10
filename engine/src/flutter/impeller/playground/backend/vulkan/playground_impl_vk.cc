@@ -85,11 +85,9 @@ PlaygroundImplVK::PlaygroundImplVK()
 void PlaygroundImplVK::SetupSwapchain() {
   ContextVK* context_vk = reinterpret_cast<ContextVK*>(context_.get());
   auto window = reinterpret_cast<GLFWwindow*>(handle_.get());
-
   ::glfwCreateWindowSurface(context_vk->GetInstance(), window, nullptr,
                             &surface_);
-
-  swapchain_ = context_vk->CreateSwapchain(surface_);
+  context_vk->SetupSwapchain(surface_);
 }
 
 PlaygroundImplVK::~PlaygroundImplVK() = default;
