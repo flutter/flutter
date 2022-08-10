@@ -180,6 +180,24 @@ void main() {
     expect(find.text('item'), findsNWidgets(5));
   });
 
+  testWidgets('PageView supports null items in itemBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: PageView.builder(
+        itemCount: 5,
+        controller: PageController(viewportFraction: 1/5),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 2) {
+            return null;
+          }
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(2));
+  });
+
   testWidgets('ListView.separated supports null items in itemBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
