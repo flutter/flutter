@@ -55,16 +55,12 @@ void main() {
         home: Placeholder(),
       ));
 
-      final BuildContext context =
-          tester.firstElement(find.byType(Placeholder));
+      final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-      final Widget? builtWidget =
-          TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+      final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
         MagnifierController(),
-        ValueNotifier<MagnifierOverlayInfoBearer>(
-          const MagnifierOverlayInfoBearer.empty(),
-        ),
+        ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
       );
 
       expect(builtWidget, isA<TextMagnifier>());
@@ -76,15 +72,13 @@ void main() {
         home: Placeholder(),
       ));
 
-      final BuildContext context =
-          tester.firstElement(find.byType(Placeholder));
+      final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-      final Widget? builtWidget =
-          TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
-              context,
-              MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty()));
+      final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+        context,
+        MagnifierController(),
+        ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+      );
 
       expect(builtWidget, isA<CupertinoTextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
@@ -95,17 +89,13 @@ void main() {
         home: Placeholder(),
       ));
 
-      final BuildContext context =
-          tester.firstElement(find.byType(Placeholder));
+      final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final Widget? builtWidget =
-            TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
-          context,
-          MagnifierController(),
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            const MagnifierOverlayInfoBearer.empty(),
-          ),
-        );
+      final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+        context,
+        MagnifierController(),
+        ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+      );
 
       expect(builtWidget, isNull);
     },

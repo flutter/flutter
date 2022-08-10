@@ -84,7 +84,7 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// the magnifier's behavior through the [SelectionOverlay].
 /// {@endtemplate}
 class TextMagnifierConfiguration {
-  /// Construct a [TextMagnifierConfiguration] from parts.
+  /// Constructs a [TextMagnifierConfiguration] from parts.
   ///
   /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
   /// that never builds a magnifier.
@@ -758,7 +758,7 @@ class SelectionOverlay {
 
 
   final ValueNotifier<MagnifierOverlayInfoBearer> _magnifierOverlayInfoBearer =
-          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty());
+      ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty);
 
   /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
   /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,

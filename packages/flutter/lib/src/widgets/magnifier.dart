@@ -46,12 +46,13 @@ class MagnifierOverlayInfoBearer {
     required this.currentLineBoundaries,
   });
 
-  /// Constructs an empty [MagnifierOverlayInfoBearer] with all values set to 0.
-  const MagnifierOverlayInfoBearer.empty()
-    : globalGesturePosition = Offset.zero,
-      caretRect = Rect.zero,
-      currentLineBoundaries = Rect.zero,
-      fieldBounds = Rect.zero;
+  /// Const [MagnifierOverlayInfoBearer] with all values set to 0.
+  const MagnifierOverlayInfoBearer empty = MagnifierOverlayInfoBearer({
+    globalGesturePosition: Offset.zero,
+    caretRect: Rect.zero,
+    currentLineBoundaries: Rect.zero,
+    fieldBounds: Rect.zero,
+  });
 
   /// The offset of the gesture position that the magnifier should be shown at.
   final Offset globalGesturePosition;
