@@ -4017,6 +4017,7 @@ targets:
       task_name: windows_home_scroll_perf__timeline_summary
 
   - name: Windows_android basic_material_app_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/109324
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
