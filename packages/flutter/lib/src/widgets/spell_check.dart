@@ -24,7 +24,6 @@ class SpellCheckConfiguration {
   /// Creates a configuration that disables spell check.
   const SpellCheckConfiguration.disabled({
     SpellCheckService? spellCheckService,
-    SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler,
     TextStyle? misspelledTextStyle,
   }) : _spellCheckEnabled = false,
        spellCheckService = null,

@@ -788,19 +788,6 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
-  ///
-  /// If the misspelled [TextStyle] is not specified in this configuration,
-  /// then [cupertinoMisspelledTextStyle] is used by default.
-  final SpellCheckConfiguration? spellCheckConfiguration;
-
-  /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
-  static const TextStyle cupertinoMisspelledTextStyle =
-    TextStyle(
-      decoration: TextDecoration.underline,
-      decorationColor: CupertinoColors.systemRed,
-      decorationStyle: TextDecorationStyle.dotted
-  );
   /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
