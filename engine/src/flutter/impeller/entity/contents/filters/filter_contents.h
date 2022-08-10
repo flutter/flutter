@@ -31,6 +31,11 @@ class FilterContents : public Contents {
     kInner,
   };
 
+  // Domain is kRGBA, we may decide to support more color modes later.
+  struct ColorMatrix {
+    float array[20];
+  };
+
   static std::shared_ptr<FilterContents> MakeBlend(
       Entity::BlendMode blend_mode,
       FilterInput::Vector inputs,
@@ -56,6 +61,10 @@ class FilterContents : public Contents {
       Sigma sigma_x,
       Sigma sigma_y,
       BlurStyle blur_style = BlurStyle::kNormal);
+
+  static std::shared_ptr<FilterContents> MakeColorMatrix(
+      FilterInput::Ref input,
+      const ColorMatrix& matrix);
 
   FilterContents();
 

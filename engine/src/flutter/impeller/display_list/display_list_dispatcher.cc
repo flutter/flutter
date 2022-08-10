@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 #include "display_list/display_list_blend_mode.h"
+#include "display_list/display_list_color_filter.h"
 #include "display_list/display_list_path_effect.h"
 #include "display_list/display_list_tile_mode.h"
 #include "flutter/fml/logging.h"
@@ -15,6 +16,7 @@
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
@@ -330,10 +332,25 @@ void DisplayListDispatcher::setColorFilter(
       };
       return;
     }
-    case flutter::DlColorFilterType::kMatrix:
+    case flutter::DlColorFilterType::kMatrix: {
+      const flutter::DlMatrixColorFilter* dl_matrix = filter->asMatrix();
+      impeller::FilterContents::ColorMatrix color_matrix;
+      dl_matrix->get_matrix(color_matrix.array);
+      paint_.color_filter = [color_matrix](FilterInput::Ref input) {
+        return FilterContents::MakeColorMatrix({input}, color_matrix);
+      };
+      return;
+    }
     case flutter::DlColorFilterType::kSrgbToLinearGamma:
+      FML_LOG(ERROR) << "requested DlColorFilterType::kSrgbToLinearGamma";
+      UNIMPLEMENTED;
+      break;
     case flutter::DlColorFilterType::kLinearToSrgbGamma:
+      FML_LOG(ERROR) << "requested DlColorFilterType::kLinearToSrgbGamma";
+      UNIMPLEMENTED;
+      break;
     case flutter::DlColorFilterType::kUnknown:
+      FML_LOG(ERROR) << "requested DlColorFilterType::kUnknown";
       UNIMPLEMENTED;
       break;
   }
