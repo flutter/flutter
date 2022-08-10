@@ -1458,10 +1458,9 @@ class LocalizationsGenerator {
     }
     final String dartBinary = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[dartBinary, 'format', ..._formatFileList];
-    final Process process = await _processManager.start(command);
-    final int result = await process.exitCode;
-    if (result != 0) {
-      throwToolExit('Formatting failed: $result', exitCode: result);
+    final ProcessResult result = await _processManager.run(command);
+    if (result.exitCode != 0) {
+      throwToolExit('Formatting failed: $result', exitCode: result.exitCode);
     }
   }
 
