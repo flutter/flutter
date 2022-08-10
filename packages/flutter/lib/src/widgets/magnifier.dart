@@ -16,7 +16,7 @@ import 'navigator.dart';
 import 'overlay.dart';
 
 /// {@template flutter.widgets.magnifier.MagnifierBuilder}
-/// Signature for a builder that builds a Widget with a [MagnifierController].
+/// Signature for a builder that builds a [Widget] with a [MagnifierController].
 ///
 /// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
 /// required, although if a Widget intends to have entry or exit animations, it should take
@@ -26,7 +26,7 @@ import 'overlay.dart';
 ///
 /// See also:
 ///
-/// - [MagnifierOverlayInfoBearer], the dataclass that updates the
+/// - [MagnifierOverlayInfoBearer], the data class that updates the
 ///   magnifier.
 typedef MagnifierBuilder = Widget? Function(
     BuildContext context,
@@ -34,12 +34,11 @@ typedef MagnifierBuilder = Widget? Function(
     ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
 );
 
-/// A data class that allows the [SelectionOverlay] to delegate
-/// the magnifier's positioning to the magnifier itself, based on the
-/// info in [MagnifierOverlayInfoBearer].
+/// A data class that contains the geometry information of text layouts
+/// and selection gestures, used to position magnifiers.
 @immutable
 class MagnifierOverlayInfoBearer {
-  /// Construct a [MagnifierOverlayInfoBearer] from raw values.
+  /// Constructs a [MagnifierOverlayInfoBearer] from provided geometry values.
   const MagnifierOverlayInfoBearer({
     required this.globalGesturePosition,
     required this.caretRect,
@@ -47,20 +46,19 @@ class MagnifierOverlayInfoBearer {
     required this.currentLineBoundaries,
   });
 
-  /// Construct an empty [MagnifierOverlayInfoBearer], with all
-  /// values set to 0.
-  const MagnifierOverlayInfoBearer.empty() :
-    globalGesturePosition = Offset.zero,
-    caretRect = Rect.zero,
-    currentLineBoundaries = Rect.zero,
-    fieldBounds = Rect.zero;
+  /// Constructs an empty [MagnifierOverlayInfoBearer] with all values set to 0.
+  const MagnifierOverlayInfoBearer.empty()
+    : globalGesturePosition = Offset.zero,
+      caretRect = Rect.zero,
+      currentLineBoundaries = Rect.zero,
+      fieldBounds = Rect.zero;
 
   /// The offset of the gesture position that the magnifier should be shown at.
   final Offset globalGesturePosition;
 
-  /// The rect of the current line the magnifier should be shown at. Do not take
-  /// into account any padding of the field; only the position of the first
-  /// and last character.
+  /// The rect of the current line the magnifier should be shown at,
+  /// without taking into account any padding of the field; only the position
+  /// of the first and last character.
   final Rect currentLineBoundaries;
 
   /// The rect of the handle that the magnifier should follow.
