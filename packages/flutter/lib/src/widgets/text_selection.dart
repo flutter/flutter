@@ -72,48 +72,6 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
 }
 
-/// {@template flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
-/// A configuration object for a magnifier.
-/// {@endtemplate}
-///
-/// {@macro flutter.widgets.magnifier.intro}
-///
-/// {@template flutter.widgets.text_selection.TextMagnifierConfiguration.details}
-/// In general, most features of the magnifier can be configured through
-/// [MagnifierBuilder]. [TextMagnifierConfiguration] is used to configure
-/// the magnifier's behavior through the [SelectionOverlay].
-/// {@endtemplate}
-class TextMagnifierConfiguration {
-  /// Constructs a [TextMagnifierConfiguration] from parts.
-  ///
-  /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
-  /// that never builds a magnifier.
-  const TextMagnifierConfiguration({
-    MagnifierBuilder? magnifierBuilder,
-    this.shouldDisplayHandlesInMagnifier = true
-  }) : _magnifierBuilder = magnifierBuilder;
-
-  /// The passed in [MagnifierBuilder].
-  ///
-  /// This is nullable because [disabled] needs to be static const,
-  /// so that it can be used as a default parameter. If left null,
-  /// the [magnifierBuilder] getter will be a function that always returns
-  /// null.
-  final MagnifierBuilder? _magnifierBuilder;
-
-  /// {@macro flutter.widgets.magnifier.MagnifierBuilder}
-  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
-
-  /// Determines whether a magnifier should show the text editing handles or not.
-  final bool shouldDisplayHandlesInMagnifier;
-
-  /// A constant for a [TextMagnifierConfiguration] that is disabled.
-  ///
-  /// In particular, this [TextMagnifierConfiguration] is considered disabled
-  /// because it never builds anything, regardless of platform.
-  static const TextMagnifierConfiguration disabled = TextMagnifierConfiguration();
-}
-
 /// An interface for building the selection UI, to be provided by the
 /// implementer of the toolbar widget.
 ///
@@ -766,13 +724,13 @@ class SelectionOverlay {
   /// with other properties in [SelectionOverlay].
   final MagnifierController _magnifierController = MagnifierController();
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
   /// By default, [SelectionOverlay]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]

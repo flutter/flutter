@@ -47,12 +47,12 @@ class MagnifierOverlayInfoBearer {
   });
 
   /// Const [MagnifierOverlayInfoBearer] with all values set to 0.
-  const MagnifierOverlayInfoBearer empty = MagnifierOverlayInfoBearer({
+  static const MagnifierOverlayInfoBearer empty = MagnifierOverlayInfoBearer(
     globalGesturePosition: Offset.zero,
     caretRect: Rect.zero,
     currentLineBoundaries: Rect.zero,
     fieldBounds: Rect.zero,
-  });
+  );
 
   /// The offset of the gesture position that the magnifier should be shown at.
   final Offset globalGesturePosition;
@@ -87,6 +87,48 @@ class MagnifierOverlayInfoBearer {
     fieldBounds,
     currentLineBoundaries,
   );
+}
+
+/// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+/// A configuration object for a magnifier.
+/// {@endtemplate}
+///
+/// {@macro flutter.widgets.magnifier.intro}
+///
+/// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+/// In general, most features of the magnifier can be configured through
+/// [MagnifierBuilder]. [TextMagnifierConfiguration] is used to configure
+/// the magnifier's behavior through the [SelectionOverlay].
+/// {@endtemplate}
+class TextMagnifierConfiguration {
+  /// Constructs a [TextMagnifierConfiguration] from parts.
+  ///
+  /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
+  /// that never builds a magnifier.
+  const TextMagnifierConfiguration({
+    MagnifierBuilder? magnifierBuilder,
+    this.shouldDisplayHandlesInMagnifier = true
+  }) : _magnifierBuilder = magnifierBuilder;
+
+  /// The passed in [MagnifierBuilder].
+  ///
+  /// This is nullable because [disabled] needs to be static const,
+  /// so that it can be used as a default parameter. If left null,
+  /// the [magnifierBuilder] getter will be a function that always returns
+  /// null.
+  final MagnifierBuilder? _magnifierBuilder;
+
+  /// {@macro flutter.widgets.magnifier.MagnifierBuilder}
+  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
+
+  /// Determines whether a magnifier should show the text editing handles or not.
+  final bool shouldDisplayHandlesInMagnifier;
+
+  /// A constant for a [TextMagnifierConfiguration] that is disabled.
+  ///
+  /// In particular, this [TextMagnifierConfiguration] is considered disabled
+  /// because it never builds anything, regardless of platform.
+  static const TextMagnifierConfiguration disabled = TextMagnifierConfiguration();
 }
 
 /// [MagnifierController]'s main benefit over holding a raw [OverlayEntry] is that
