@@ -2723,13 +2723,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _showCaretOnScreenScheduled = false;
       final RenderEditable? renderEditable =
           _editableKey.currentContext?.findRenderObject() as RenderEditable?;
-      if (renderEditable == null
-          || !(renderEditable.selection?.isValid ?? false)
-          || !_scrollController.hasClients) {
+      if (!(renderEditable?.selection?.isValid ?? false) || !_scrollController.hasClients) {
         return;
       }
 
-      final double lineHeight = renderEditable.preferredLineHeight;
+      final double lineHeight = renderEditable!.preferredLineHeight;
 
       // Enlarge the target rect by scrollPadding to ensure that caret is not
       // positioned directly at the edge after scrolling.
