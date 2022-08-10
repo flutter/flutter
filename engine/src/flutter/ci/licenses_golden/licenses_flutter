@@ -556,6 +556,8 @@ FILE: ../../../flutter/impeller/entity/contents/filters/blend_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/blend_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/border_mask_blur_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/border_mask_blur_filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/color_matrix_filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/color_matrix_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.cc
@@ -623,6 +625,8 @@ FILE: ../../../flutter/impeller/entity/shaders/blending/blend.frag
 FILE: ../../../flutter/impeller/entity/shaders/blending/blend.vert
 FILE: ../../../flutter/impeller/entity/shaders/border_mask_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/border_mask_blur.vert
+FILE: ../../../flutter/impeller/entity/shaders/color_matrix_color_filter.frag
+FILE: ../../../flutter/impeller/entity/shaders/color_matrix_color_filter.vert
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.vert
 FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas.frag

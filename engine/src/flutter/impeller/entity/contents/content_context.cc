@@ -195,6 +195,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<GaussianBlurPipeline>(*context_);
   border_mask_blur_pipelines_[{}] =
       CreateDefaultPipeline<BorderMaskBlurPipeline>(*context_);
+  color_matrix_color_filter_pipelines_[{}] =
+      CreateDefaultPipeline<ColorMatrixColorFilterPipeline>(*context_);
   solid_stroke_pipelines_[{}] =
       CreateDefaultPipeline<SolidStrokePipeline>(*context_);
   glyph_atlas_pipelines_[{}] =
