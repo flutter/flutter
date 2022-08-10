@@ -2721,7 +2721,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-      if (!mounted || !_cursorActive || !_scrollController.hasClients) {
+      if (!mounted || !(renderEditable.selection?.isValid ?? false) || !_scrollController.hasClients) {
         return;
       }
 
