@@ -552,10 +552,11 @@ class _Magnifier extends SingleChildRenderObjectWidget {
     this.focalPointOffset = Offset.zero,
   });
 
-  // Area the center of the _Magnifier points to, relative to the center of the magnifier.
+  // The Offset that the center of the _Magnifier points to, relative
+  // to the center of the magnifier.
   final Offset focalPointOffset;
 
-  // Scale of the magnification.
+  // The enlarge multiplier of the magnification.
   //
   // If equal to 1.0, the content in the magnifier is true to its real size.
   // If greater than 1.0, the content appears bigger in the magnifier.
