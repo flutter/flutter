@@ -496,8 +496,9 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// {@tool snippet}
 ///
 /// This example shows how the common case of applying a [BackdropFilter] blur
-/// to a single child can be replaced with an [ImageFiltered] widget. This code
-/// is generally simpler and the performance will be improved dramatically.
+/// to a single sibling can be replaced with an [ImageFiltered] widget. This code
+/// is generally simpler and the performance will be improved dramatically for
+/// complex filter like blurs.
 ///
 /// The implementation below is unnecessarily expensive.
 ///
@@ -506,12 +507,12 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///    children: <Widget>[
 ///      Positioned.fill(child: Image.asset('image.png')),
 ///        Positioned.fill(
-///          child: BackdropFilter(
-///            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-///          ),
+///        child: BackdropFilter(
+///          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
 ///        ),
-///      ],
-///   )
+///      ),
+///    ],
+///  )
 ///
 /// ```
 /// {@end-tool}
