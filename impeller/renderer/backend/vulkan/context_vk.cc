@@ -401,6 +401,8 @@ ContextVK::ContextVK(
       device_->getQueue(compute_queue->family, compute_queue->index);
   transfer_queue_ =
       device_->getQueue(transfer_queue->family, transfer_queue->index);
+  graphics_command_pool_ =
+      CommandPoolVK::Create(*device_, graphics_queue->index);
   is_valid_ = true;
 }
 

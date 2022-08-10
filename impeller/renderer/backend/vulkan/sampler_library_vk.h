@@ -26,7 +26,7 @@ class SamplerLibraryVK final
   vk::Device device_;
   SamplerMap samplers_;
 
-  SamplerLibraryVK(vk::Device device);
+  explicit SamplerLibraryVK(vk::Device device);
 
   // |SamplerLibrary|
   std::shared_ptr<const Sampler> GetSampler(

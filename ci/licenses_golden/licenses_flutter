@@ -773,6 +773,8 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.cc
