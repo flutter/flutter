@@ -106,7 +106,11 @@ class PointerInjectorDelegate {
             if (!weak) {
               return;
             }
-            weak->registered_ = false;
+
+            // Clear all the stale pointer events in |injector_events_| and
+            // reset the state of |weak| so that any future calls do not inject
+            // any stale pointer events.
+            weak->Reset();
           });
     }
 
@@ -128,6 +132,12 @@ class PointerInjectorDelegate {
     void DispatchPendingEvents();
 
     void EnqueueEvent(fuchsia::ui::pointerinjector::Event event);
+
+    // Resets |registered_|, |injection_in_flight_| and |injector_events_| so
+    // that |device_| can be re-registered and future calls to
+    // |fuchsia.ui.pointerinjector.Device.Inject| do not include any stale
+    // pointer events.
+    void Reset();
 
     // Set to true if there is a |fuchsia.ui.pointerinjector.Device.Inject| call
     // in progress. If true, the |fuchsia.ui.pointerinjector.Event| is buffered
