@@ -393,11 +393,11 @@ class TextField extends StatefulWidget {
                        paste: true,
                      )));
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
