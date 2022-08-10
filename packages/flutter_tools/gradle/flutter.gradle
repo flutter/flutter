@@ -746,6 +746,58 @@ class FlutterPlugin implements Plugin<Project> {
         return target
     }
 
+    /**
+     * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
+     * When building APKs, this causes an issue where building release requires the debug JAR,
+     * but Gradle won't build debug.
+     *
+     * To workaround this issue, only configure the JAR task that is required given the task
+     * from the command line.
+     *
+     * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
+     * time of adding this code. Once released, this can be removed. However, after updating to
+     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Futher
+     * investigation necessary to remote this.
+     *
+     * Tested cases:
+     * * `./gradlew assembleRelease`
+     * * `./gradlew app:assembleRelease.`
+     * * `./gradlew assemble{flavorName}Release`
+     * * `./gradlew app:assemble{flavorName}Release`
+     * * `./gradlew assemble.`
+     * * `./gradlew app:assemble.`
+     * * `./gradlew bundle.`
+     * * `./gradlew bundleRelease.`
+     * * `./gradlew app:bundleRelease.`
+     *
+     * Related issues:
+     * https://issuetracker.google.com/issues/158060799
+     * https://issuetracker.google.com/issues/158753935
+     */
+    private boolean shouldConfigureFlutterTask(Task assembleTask) {
+        def cliTasksNames = project.gradle.startParameter.taskNames
+        if (cliTasksNames.size() != 1 || !cliTasksNames.first().contains("assemble")) {
+            return true
+        }
+        def taskName = cliTasksNames.first().split(":").last()
+        if (taskName == "assemble") {
+            return true
+        }
+        if (taskName == assembleTask.name) {
+            return true
+        }
+        if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
+            return true
+        }
+        if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
+            return true
+        }
+        if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
+            return true
+        }
+        return false
+    }
+
     private Task getAssembleTask(variant) {
         // `assemble` became `assembleProvider` in AGP 3.3.0.
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
@@ -926,6 +978,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
+                if (!shouldConfigureFlutterTask(assembleTask)) {
+                  return
+                }
                 Task copyFlutterAssetsTask = addFlutterDeps(variant)
                 def variantOutput = variant.outputs.first()
                 def processResources = variantOutput.hasProperty("processResourcesProvider") ?
@@ -984,6 +1039,9 @@ class FlutterPlugin implements Plugin<Project> {
                 Task copyFlutterAssetsTask
                 appProject.android.applicationVariants.all { appProjectVariant ->
                     Task appAssembleTask = getAssembleTask(appProjectVariant)
+                    if (!shouldConfigureFlutterTask(appAssembleTask)) {
+                        return
+                    }
                     // Find a compatible application variant in the host app.
                     //
                     // For example, consider a host app that defines the following variants:
