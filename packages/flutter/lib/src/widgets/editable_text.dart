@@ -27,6 +27,7 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
@@ -1573,11 +1574,12 @@ class EditableText extends StatefulWidget {
   /// If this configuration is left null, then spell check is disabled by default.
   /// {@endtemplate}
   final SpellCheckConfiguration? spellCheckConfiguration;
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
