@@ -1675,6 +1675,7 @@ FILE: ../../../flutter/shell/platform/common/path_utils.h
 FILE: ../../../flutter/shell/platform/common/path_utils_unittests.cc
 FILE: ../../../flutter/shell/platform/common/platform_provided_menu.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_export.h
+FILE: ../../../flutter/shell/platform/common/public/flutter_macros.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_messenger.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_plugin_registrar.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_texture_registrar.h
