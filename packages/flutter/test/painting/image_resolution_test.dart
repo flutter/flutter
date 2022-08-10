@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -23,14 +23,22 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.json')
+    if (key == 'AssetManifest.json') {
       return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(_assetBundleContents)).buffer);
+    }
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
-    if (key == 'one')
+    if (key == 'one') {
       return ByteData(1)
         ..setInt8(0, 49);
+    }
     throw FlutterError('key not found');
+  }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
   }
 }
 

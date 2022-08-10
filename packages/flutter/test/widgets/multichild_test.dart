@@ -31,16 +31,6 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   }
 }
 
-class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
-  MockMultiChildRenderObjectWidget({ super.key, required super.children });
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    assert(false);
-    return FakeRenderObject();
-  }
-}
-
 void main() {
   testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
 
@@ -355,13 +345,6 @@ void main() {
 
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
   });
-}
-
-class FakeRenderObject extends RenderBox {
-  @override
-  void performLayout() {
-    size = constraints.biggest;
-  }
 }
 
 class DummyWidget extends StatelessWidget {

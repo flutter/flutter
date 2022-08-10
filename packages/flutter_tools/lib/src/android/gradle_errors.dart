@@ -80,6 +80,8 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minCompileSdkVersionHandler,
   jvm11RequiredHandler,
   outdatedGradleHandler,
+  sslExceptionHandler,
+  zipExceptionHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -101,6 +103,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     if (multidexEnabled) {
       globals.printStatus(
         'Multidex support is required for your android app to build since the number of methods has exceeded 64k. '
+        'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information. '
         "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.\n",
         indent: 4,
       );
@@ -204,12 +207,6 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
 
 /// Gradle crashes for several known reasons when downloading that are not
 /// actionable by Flutter.
-///
-/// The Gradle cache directory must be deleted, otherwise it may attempt to
-/// re-use the bad zip file.
-///
-/// See also:
-///  * https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
 @visibleForTesting
 final GradleHandledError networkErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
@@ -232,18 +229,71 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
       '${globals.logger.terminal.warningMark} '
       'Gradle threw an error while downloading artifacts from the network.'
     );
-    try {
-      final String? homeDir = globals.platform.environment['HOME'];
-      if (homeDir != null) {
-        final Directory directory = globals.fs.directory(globals.fs.path.join(homeDir, '.gradle'));
-        ErrorHandlingFileSystem.deleteIfExists(directory, recursive: true);
-      }
-    } on FileSystemException catch (err) {
-      globals.printTrace('Failed to delete Gradle cache: $err');
-    }
     return GradleBuildStatus.retry;
   },
   eventLabel: 'network',
+);
+
+/// Handles corrupted jar or other types of zip files.
+///
+/// If a terminal is attached, this handler prompts the user if they would like to
+/// delete the $HOME/.gradle directory prior to retrying the build.
+///
+/// If this handler runs on a bot (e.g. a CI bot), the $HOME/.gradle is automatically deleted.
+///
+/// See also:
+///  * https://github.com/flutter/flutter/issues/51195
+///  * https://github.com/flutter/flutter/issues/89959
+///  * https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
+@visibleForTesting
+final GradleHandledError zipExceptionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'java.util.zip.ZipException: error in opening zip file',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Your .gradle directory under the home directory might be corrupted.'
+    );
+    bool shouldDeleteUserGradle = await globals.botDetector.isRunningOnBot;
+    if (!shouldDeleteUserGradle && globals.terminal.stdinHasTerminal) {
+      try {
+        final String selection = await globals.terminal.promptForCharInput(
+          <String>['y', 'n'],
+          logger: globals.logger,
+          prompt: 'Do you want to delete the .gradle directory under the home directory?',
+          defaultChoiceIndex: 0,
+        );
+        shouldDeleteUserGradle = selection == 'y';
+      } on StateError catch(e) {
+        globals.printError(
+          e.message,
+          indent: 0,
+        );
+      }
+    }
+    if (shouldDeleteUserGradle) {
+      final String? homeDir = globals.platform.environment['HOME'];
+      if (homeDir == null) {
+        globals.logger.printStatus("Could not delete .gradle directory because there isn't a HOME env variable");
+        return GradleBuildStatus.retry;
+      }
+      final Directory userGradle = globals.fs.directory(globals.fs.path.join(homeDir, '.gradle'));
+      globals.logger.printStatus('Deleting ${userGradle.path}');
+      try {
+        ErrorHandlingFileSystem.deleteIfExists(userGradle, recursive: true);
+      } on FileSystemException catch (err) {
+        globals.printTrace('Failed to delete Gradle cache: $err');
+      }
+    }
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'zip-exception',
 );
 
 // R8 failure.
@@ -597,4 +647,26 @@ final GradleHandledError jvm11RequiredHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'java11-required',
+);
+
+/// Handles SSL exceptions: https://github.com/flutter/flutter/issues/104628
+@visibleForTesting
+final GradleHandledError sslExceptionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'javax.net.ssl.SSLException: Tag mismatch!',
+    'javax.crypto.AEADBadTagException: Tag mismatch!',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'ssl-exception-tag-mismatch',
 );

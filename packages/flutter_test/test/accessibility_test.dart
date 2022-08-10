@@ -765,7 +765,7 @@ void main() {
         backgroundColor: Colors.white,
         body: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: const Color(0xFFFBBC04),
+            backgroundColor: const Color(0xFFFBBC04),
             elevation: 0,
           ),
           onPressed: () {},

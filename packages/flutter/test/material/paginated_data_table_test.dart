@@ -25,8 +25,9 @@ class TestDataSource extends DataTableSource {
   int get generation => _generation;
   int _generation = 0;
   set generation(int value) {
-    if (_generation == value)
+    if (_generation == value) {
       return;
+    }
     _generation = value;
     notifyListeners();
   }

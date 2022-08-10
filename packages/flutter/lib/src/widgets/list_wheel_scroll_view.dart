@@ -91,8 +91,9 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (index < 0 || index >= children.length)
+    if (index < 0 || index >= children.length) {
       return null;
+    }
     return IndexedSemantics(index: index, child: children[index]);
   }
 
@@ -137,8 +138,9 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (children.isEmpty)
+    if (children.isEmpty) {
       return null;
+    }
     return IndexedSemantics(index: index, child: children[index % children.length]);
   }
 
@@ -184,8 +186,9 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
       final Widget? child = builder(context, index);
       return child == null ? null : IndexedSemantics(index: index, child: child);
     }
-    if (index < 0 || index >= childCount!)
+    if (index < 0 || index >= childCount!) {
       return null;
+    }
     return IndexedSemantics(index: index, child: builder(context, index));
   }
 
@@ -830,8 +833,9 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   void performRebuild() {
     _childWidgets.clear();
     super.performRebuild();
-    if (_childElements.isEmpty)
+    if (_childElements.isEmpty) {
       return;
+    }
 
     final int firstIndex = _childElements.firstKey()!;
     final int lastIndex = _childElements.lastKey()!;
@@ -892,8 +896,9 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     final ListWheelParentData? newParentData = newChild?.renderObject?.parentData as ListWheelParentData?;
     if (newParentData != null) {
       newParentData.index = newSlot! as int;
-      if (oldParentData != null)
+      if (oldParentData != null) {
         newParentData.offset = oldParentData.offset;
+      }
     }
 
     return newChild;

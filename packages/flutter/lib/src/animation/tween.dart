@@ -2,17 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Size, Rect;
+import 'dart:ui' show Color, Rect, Size;
 
 import 'package:flutter/foundation.dart';
 
-import 'animation.dart';
 import 'animations.dart';
-import 'curves.dart';
+
+export 'dart:ui' show Color, Rect, Size;
+
+export 'animation.dart' show Animation;
+export 'curves.dart' show Curve;
 
 // Examples can assume:
 // late Animation<Offset> _animation;
 // late AnimationController _controller;
+
+/// A typedef used by [Animatable.fromCallback] to create an [Animatable]
+/// from a callback.
+typedef AnimatableCallback<T> = T Function(double);
 
 /// An object that can produce a value of type `T` given an [Animation<double>]
 /// as input.
@@ -25,6 +32,14 @@ abstract class Animatable<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Animatable();
+
+  /// Create a new [Animatable] from the provided [callback].
+  ///
+  /// See also:
+  ///
+  ///  * [Animation.drive], which provides an example for how this can be
+  ///    used.
+  const factory Animatable.fromCallback(AnimatableCallback<T> callback) = _CallbackAnimatable<T>;
 
   /// Returns the value of the object at point `t`.
   ///
@@ -72,6 +87,18 @@ abstract class Animatable<T> {
   /// This allows [Tween]s to be chained before obtaining an [Animation].
   Animatable<T> chain(Animatable<double> parent) {
     return _ChainedEvaluation<T>(parent, this);
+  }
+}
+
+// A concrete subclass of `Animatable` used by `Animatable.fromCallback`.
+class _CallbackAnimatable<T> extends Animatable<T> {
+  const _CallbackAnimatable(this._callback);
+
+  final AnimatableCallback<T> _callback;
+
+  @override
+  T transform(double t) {
+    return _callback(t);
   }
 }
 
@@ -320,10 +347,12 @@ class Tween<T extends Object?> extends Animatable<T> {
   /// subclass.
   @override
   T transform(double t) {
-    if (t == 0.0)
+    if (t == 0.0) {
       return begin as T;
-    if (t == 1.0)
+    }
+    if (t == 1.0) {
       return end as T;
+    }
     return lerp(t);
   }
 

@@ -152,10 +152,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       // widgets, then align its left or right edge with the adjacent boundary.
       if (centerMiddle) {
         middleStart = (size.width - middleSize.width) / 2.0;
-        if (middleStart + middleSize.width > size.width - trailingWidth)
+        if (middleStart + middleSize.width > size.width - trailingWidth) {
           middleStart = size.width - trailingWidth - middleSize.width;
-        else if (middleStart < middleStartMargin)
+        } else if (middleStart < middleStartMargin) {
           middleStart = middleStartMargin;
+        }
       }
 
       final double middleX;

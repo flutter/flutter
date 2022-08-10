@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -116,9 +114,7 @@ void main() {
   final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(enabled: false);
   final CustomDeviceConfig testConfigNonForwarding = testConfig.copyWith(
     explicitForwardPortCommand: true,
-    forwardPortCommand: null,
     explicitForwardPortSuccessRegex: true,
-    forwardPortSuccessRegex: null,
   );
 
   testUsingContext('CustomDevice defaults',
@@ -339,12 +335,12 @@ void main() {
 
     final CustomDevicePortForwarder forwarder = CustomDevicePortForwarder(
       deviceName: 'testdevicename',
-      forwardPortCommand: testConfig.forwardPortCommand,
-      forwardPortSuccessRegex: testConfig.forwardPortSuccessRegex,
+      forwardPortCommand: testConfig.forwardPortCommand!,
+      forwardPortSuccessRegex: testConfig.forwardPortSuccessRegex!,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: testConfig.forwardPortCommand,
+          command: testConfig.forwardPortCommand!,
           stdout: testConfigForwardPortSuccessOutput,
           completer: forwardPortCommandCompleter,
         ),
@@ -373,7 +369,7 @@ void main() {
         stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
       ),
       FakeCommand(
-        command: testConfig.forwardPortCommand,
+        command: testConfig.forwardPortCommand!,
         completer: forwardPortCompleter,
         stdout: testConfigForwardPortSuccessOutput,
       ),
@@ -450,7 +446,7 @@ void main() {
             command: testConfig.pingCommand,
             stdout: testConfigPingSuccessOutput
           ),
-          FakeCommand(command: testConfig.postBuildCommand),
+          FakeCommand(command: testConfig.postBuildCommand!),
           FakeCommand(command: testConfig.uninstallCommand),
           FakeCommand(command: testConfig.installCommand),
           FakeCommand(
@@ -459,7 +455,7 @@ void main() {
             stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
           ),
           FakeCommand(
-            command: testConfig.forwardPortCommand,
+            command: testConfig.forwardPortCommand!,
             completer: forwardPortCompleter,
             stdout: testConfigForwardPortSuccessOutput,
           ),
@@ -524,7 +520,7 @@ void main() {
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-        command: testConfig.screenshotCommand,
+        command: testConfig.screenshotCommand!,
         onRun: () => screenshotCommandWasExecuted = true,
       ),
     ]);
@@ -550,7 +546,7 @@ void main() {
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-        command: testConfig.screenshotCommand,
+        command: testConfig.screenshotCommand!,
         onRun: () => screenshotCommandWasExecuted = true,
       ),
     ]);
@@ -560,8 +556,7 @@ void main() {
 
     final CustomDevice device = CustomDevice(
         config: testConfig.copyWith(
-          explicitScreenshotCommand: true,
-          screenshotCommand: null
+          explicitScreenshotCommand: true
         ),
         logger: BufferLogger.test(),
         processManager: processManager
@@ -640,14 +635,14 @@ class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> 
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   @override
   Future<void> build({
-    TargetPlatform platform,
-    BuildInfo buildInfo,
-    FlutterProject project,
-    String mainPath,
+    TargetPlatform? platform,
+    BuildInfo? buildInfo,
+    FlutterProject? project,
+    String? mainPath,
     String manifestPath = defaultManifestPath,
-    String applicationKernelFilePath,
-    String depfilePath,
-    String assetDirPath,
-    @visibleForTesting BuildSystem buildSystem
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    @visibleForTesting BuildSystem? buildSystem
   }) async {}
 }

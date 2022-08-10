@@ -930,13 +930,80 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Tooltip is dismissed after a long press and showDuration expired', (WidgetTester tester) async {
+    const Duration showDuration = Duration(seconds: 3);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+
+    // Long press reveals tooltip
+    await tester.pump(kLongPressTimeout);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsOneWidget);
+    await gesture.up();
+
+    // Tooltip is dismissed after showDuration expired
+    await tester.pump(showDuration);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip is dismissed after a tap and showDuration expired', (WidgetTester tester) async {
+    const Duration showDuration = Duration(seconds: 3);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, showDuration: showDuration);
+
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
+
+    await testGestureTap(tester, tooltip);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Tooltip is dismissed after showDuration expired
+    await tester.pump(showDuration);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip is dismissed after a tap and showDuration expired when competing with a GestureDetector', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/98854
+    const Duration showDuration = Duration(seconds: 3);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GestureDetector(
+          onVerticalDragStart: (_) { /* Do nothing */ },
+          child: const Tooltip(
+            message: tooltipText,
+            triggerMode: TooltipTriggerMode.tap,
+            showDuration: showDuration,
+            child: SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
+
+    await tester.tap(tooltip);
+    // Wait for GestureArena disambiguation, delay is kPressTimeout to disambiguate
+    // between onTap and onVerticalDragStart
+    await tester.pump(kPressTimeout);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Tooltip is dismissed after showDuration expired
+    await tester.pump(showDuration);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsNothing);
+  });
+
   testWidgets('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96890
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -986,12 +1053,44 @@ void main() {
     gesture = null;
   });
 
+  testWidgets('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/95851
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
+    expect(tooltipState.ensureTooltipVisible(), true);
+
+    // Remove the tooltip.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    expect(tooltipState.ensureTooltipVisible(), false);
+  });
+
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1160,8 +1259,9 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1204,8 +1304,9 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1271,8 +1372,9 @@ void main() {
     const Duration waitDuration = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
+      if (gesture != null) {
         return gesture.removePointer();
+      }
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1764,6 +1866,55 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  testWidgets('Tooltip onTriggered is called when Tooltip triggers', (WidgetTester tester) async {
+    bool onTriggeredCalled = false;
+    void onTriggered() => onTriggeredCalled = true;
+
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, onTriggered: onTriggered);
+    Finder tooltip = find.byType(Tooltip);
+    await testGestureLongPress(tester, tooltip);
+    expect(onTriggeredCalled, true);
+
+    onTriggeredCalled = false;
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, onTriggered: onTriggered);
+    tooltip = find.byType(Tooltip);
+    await testGestureTap(tester, tooltip);
+    expect(onTriggeredCalled, true);
+  });
+
+  testWidgets('Tooltip onTriggered is not called when Tooltip is hovered', (WidgetTester tester) async {
+    bool onTriggeredCalled = false;
+    void onTriggered() => onTriggeredCalled = true;
+
+    const Duration waitDuration = Duration.zero;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            onTriggered: onTriggered,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(onTriggeredCalled, false);
+  });
+
   testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -1791,12 +1942,19 @@ void main() {
   });
 }
 
-Future<void> setWidgetForTooltipMode(WidgetTester tester, TooltipTriggerMode triggerMode) async {
+Future<void> setWidgetForTooltipMode(
+  WidgetTester tester,
+  TooltipTriggerMode triggerMode, {
+  Duration? showDuration,
+  TooltipTriggeredCallback? onTriggered,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Tooltip(
         message: tooltipText,
         triggerMode: triggerMode,
+        onTriggered: onTriggered,
+        showDuration: showDuration,
         child: const SizedBox(width: 100.0, height: 100.0),
       ),
     ),
@@ -1817,7 +1975,8 @@ Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null)
+  if (object.debugSemantics != null) {
     return object.debugSemantics!;
-  return findDebugSemantics(object.parent!);
+  }
+  return findDebugSemantics(object.parent! as RenderObject);
 }

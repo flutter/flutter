@@ -120,7 +120,7 @@ void main() {
       await tester.pump();
       final Object? result = Actions.maybeInvoke(
         containerKey.currentContext!,
-        DoNothingIntent(),
+        const DoNothingIntent(),
       );
       expect(result, isNull);
       expect(invoked, isFalse);
@@ -146,7 +146,7 @@ void main() {
       await tester.pump();
       final Object? result = Actions.maybeInvoke(
         containerKey.currentContext!,
-        DoNothingIntent(),
+        const DoNothingIntent(),
       );
       expect(result, isNull);
       expect(invoked, isFalse);
@@ -358,7 +358,6 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -398,7 +397,6 @@ void main() {
       );
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
       await gesture.addPointer(location: const Offset(1, 1));
-      addTearDown(gesture.removePointer);
       await tester.pump();
 
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
@@ -752,7 +750,6 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -816,7 +813,6 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -1013,8 +1009,13 @@ void main() {
         .toList();
 
       expect(description.length, equals(2));
-      expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
-      expect(description[1], equals('actions: {}'));
+      expect(
+        description,
+        equalsIgnoringHashCodes(<String>[
+          'dispatcher: ActionDispatcher#00000',
+          'actions: {}',
+        ]),
+      );
     });
     testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1036,8 +1037,13 @@ void main() {
           .toList();
 
       expect(description.length, equals(2));
-      expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
-      expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
+      expect(
+        description,
+        equalsIgnoringHashCodes(<String>[
+          'dispatcher: ActionDispatcher#00000',
+          'actions: {TestIntent: TestAction#00000}',
+        ]),
+      );
     });
   });
 

@@ -25,17 +25,17 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
     addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies')); // path to package can be specified with --directory argument
-    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
-    addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
-    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies.')); // path to package can be specified with --directory argument
+    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache.'));
+    addSubcommand(PackagesForwardCommand('version', 'Print Pub version.'));
+    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev.'));
     addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.'));
     addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev.'));
-    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
-    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages.'));
+    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded.', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('token', 'Manage authentication tokens for hosted pub repositories.'));
     addSubcommand(PackagesPassthroughCommand());
   }
@@ -58,7 +58,6 @@ class PackagesCommand extends FlutterCommand {
 
 class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this.name, this.upgrade) {
-    requiresPubspecYaml();
     argParser.addFlag('offline',
       negatable: false,
       help: 'Use cached packages instead of accessing the network.',
@@ -125,6 +124,7 @@ class PackagesGetCommand extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         projectDir: flutterProject.directory,
         generateDartPluginRegistry: true,
       );
@@ -234,7 +234,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   String get description {
-    return '$_description.\n'
+    return '$_description\n'
            'This runs the "pub" tool in a Flutter context.';
   }
 
@@ -291,7 +291,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
 
   @override
   String get description {
-    return '$_description.\n'
+    return '$_description\n'
            'This runs the "pub" tool in a Flutter context.';
   }
 
@@ -333,6 +333,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
           outputDir: globals.fs.directory(getBuildDirectory()),
           processManager: globals.processManager,
           platform: globals.platform,
+          usage: globals.flutterUsage,
           projectDir: flutterProject.directory,
           generateDartPluginRegistry: true,
         );

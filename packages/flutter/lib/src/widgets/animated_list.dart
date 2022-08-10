@@ -488,10 +488,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   int _indexToItemIndex(int index) {
     int itemIndex = index;
     for (final _ActiveItem item in _outgoingItems) {
-      if (item.itemIndex <= itemIndex)
+      if (item.itemIndex <= itemIndex) {
         itemIndex += 1;
-      else
+      } else {
         break;
+      }
     }
     return itemIndex;
   }
@@ -500,10 +501,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     int index = itemIndex;
     for (final _ActiveItem item in _outgoingItems) {
       assert(item.itemIndex != itemIndex);
-      if (item.itemIndex < itemIndex)
+      if (item.itemIndex < itemIndex) {
         index -= 1;
-      else
+      } else {
         break;
+      }
     }
     return index;
   }
@@ -512,7 +514,12 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     return SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: _itemsCount,
-      findChildIndexCallback: widget.findChildIndexCallback,
+      findChildIndexCallback: widget.findChildIndexCallback == null
+          ? null
+          : (Key key) {
+              final int? index = widget.findChildIndexCallback!(key);
+              return index != null ? _indexToItemIndex(index) : null;
+            },
     );
   }
 
@@ -532,12 +539,14 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     // Increment the incoming and outgoing item indices to account
     // for the insertion.
     for (final _ActiveItem item in _incomingItems) {
-      if (item.itemIndex >= itemIndex)
+      if (item.itemIndex >= itemIndex) {
         item.itemIndex += 1;
+      }
     }
     for (final _ActiveItem item in _outgoingItems) {
-      if (item.itemIndex >= itemIndex)
+      if (item.itemIndex >= itemIndex) {
         item.itemIndex += 1;
+      }
     }
 
     final AnimationController controller = AnimationController(
@@ -596,12 +605,14 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
       // Decrement the incoming and outgoing item indices to account
       // for the removal.
       for (final _ActiveItem item in _incomingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex)
+        if (item.itemIndex > outgoingItem.itemIndex) {
           item.itemIndex -= 1;
+        }
       }
       for (final _ActiveItem item in _outgoingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex)
+        if (item.itemIndex > outgoingItem.itemIndex) {
           item.itemIndex -= 1;
+        }
       }
 
       setState(() => _itemsCount -= 1);

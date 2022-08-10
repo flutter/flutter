@@ -527,4 +527,272 @@ void main() {
 
   // Change made in https://github.com/flutter/flutter/pull/100381
   SelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/105291
+  ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
+    foregroundColor: Colors.white, backgroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38), disabledBackgroundColor: Colors.grey.withOpacity(0.12),
+  );
+  ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+  );
+  ButtonStyle textButtonStyle = TextButton.styleFrom(
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/97972
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(checkboxTheme: CheckboxThemeData(
+ 	  fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return Colors.black;
+      }
+ 	    return null;
+ 	  }),
+ 	  ), radioTheme: RadioThemeData(
+ 	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	  ), switchTheme: SwitchThemeData(
+ 	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	   trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	));
+  themeData = ThemeData(
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+      }),
+    ), radioTheme: RadioThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+      }),
+    ), switchTheme: SwitchThemeData(
+      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ),
+  );
+  themeData = ThemeData.raw(checkboxTheme: CheckboxThemeData(
+ 	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	  ), radioTheme: RadioThemeData(
+ 	   fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	  ), switchTheme: SwitchThemeData(
+ 	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	   trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	));
+ themeData = ThemeData.raw(
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ), radioTheme: RadioThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ), switchTheme: SwitchThemeData(
+      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ),
+  );
+  themeData = themeData.copyWith(checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ), radioTheme: RadioThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+ 	  ), switchTheme: SwitchThemeData(
+ 	   thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	   trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+       if (states.contains(MaterialState.disabled)) {
+         return null;
+       }
+       if (states.contains(MaterialState.selected)) {
+         return Colors.black;
+       }
+ 	     return null;
+ 	   }),
+ 	));
+  themeData = themeData.copyWith(
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ), radioTheme: RadioThemeData(
+      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ), switchTheme: SwitchThemeData(
+      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return null;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return Colors.black;
+        }
+ 	      return null;
+      }),
+    ),
+  );
+  themeData.toggleableActiveColor; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/109070
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.selectedRowColor; // Removing field reference not supported.
 }

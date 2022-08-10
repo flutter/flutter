@@ -6,8 +6,6 @@ import 'dart:collection';
 
 // COMMON SIGNATURES
 
-export 'dart:ui' show VoidCallback;
-
 /// Signature for callbacks that report that an underlying value has changed.
 ///
 /// See also:
@@ -191,8 +189,9 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   bool _fillNext() {
-    if (!_prefillIterator.moveNext())
+    if (!_prefillIterator.moveNext()) {
       return false;
+    }
     _results.add(_prefillIterator.current);
     return true;
   }
@@ -207,18 +206,21 @@ class _LazyListIterator<E> implements Iterator<E> {
   @override
   E get current {
     assert(_index >= 0); // called "current" before "moveNext()"
-    if (_index < 0 || _index == _owner._results.length)
+    if (_index < 0 || _index == _owner._results.length) {
       throw StateError('current can not be call after moveNext has returned false');
+    }
     return _owner._results[_index];
   }
 
   @override
   bool moveNext() {
-    if (_index >= _owner._results.length)
+    if (_index >= _owner._results.length) {
       return false;
+    }
     _index += 1;
-    if (_index == _owner._results.length)
+    if (_index == _owner._results.length) {
       return _owner._fillNext();
+    }
     return true;
   }
 }

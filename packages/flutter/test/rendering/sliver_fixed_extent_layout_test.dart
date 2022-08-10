@@ -175,8 +175,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length)
+    if (index < 0 || index >= children.length) {
       return;
+    }
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject!.insert(children[index], after: after);
@@ -221,7 +222,6 @@ class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAd
     :super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
 
   @override
-  // ignore: unnecessary_overrides
   int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
     return super.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
   }

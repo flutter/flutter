@@ -16,7 +16,6 @@ import 'dartdoc_checker.dart';
 
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
-const String kSnippetsRoot = 'dev/snippets';
 
 const String kDummyPackageName = 'Flutter';
 const String kPlatformIntegrationPackageName = 'platform_integration';
@@ -43,13 +42,15 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
   // If we're run from the `tools` dir, set the cwd to the repo root.
-  if (path.basename(Directory.current.path) == 'tools')
+  if (path.basename(Directory.current.path) == 'tools') {
     Directory.current = Directory.current.parent.parent;
+  }
 
   final ProcessResult flutter = Process.runSync('flutter', <String>[]);
   final File versionFile = File('version');
-  if (flutter.exitCode != 0 || !versionFile.existsSync())
+  if (flutter.exitCode != 0 || !versionFile.existsSync()) {
     throw Exception('Failed to determine Flutter version.');
+  }
   final String version = versionFile.readAsStringSync();
 
   // Create the pubspec.yaml file.
@@ -103,8 +104,9 @@ Future<void> main(List<String> arguments) async {
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
   final int code = await process.done;
-  if (code != 0)
+  if (code != 0) {
     exit(code);
+  }
 
   createFooter('$kDocsRoot/lib/', version);
   copyAssets();
@@ -237,8 +239,9 @@ Future<void> main(List<String> arguments) async {
   );
   final int exitCode = await process.done;
 
-  if (exitCode != 0)
+  if (exitCode != 0) {
     exit(exitCode);
+  }
 
   sanityCheckDocs();
   checkForUnresolvedDirectives('$kPublishRoot/api');
@@ -280,8 +283,9 @@ String getBranchName({
     return luciBranch.trim();
   }
   final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain']);
-  if (gitResult.exitCode != 0)
+  if (gitResult.exitCode != 0) {
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  }
   final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
       (gitResult.stdout as String).trim().split('\n').first);
   return gitBranchMatch == null ? '' : gitBranchMatch.group(1)!.split('...').first;
@@ -291,8 +295,9 @@ String gitRevision() {
   const int kGitRevisionLength = 10;
 
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  if (gitResult.exitCode != 0)
+  if (gitResult.exitCode != 0) {
     throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
+  }
   final String gitRevision = (gitResult.stdout as String).trim();
 
   return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
@@ -339,11 +344,13 @@ void createSearchMetadata(String templatePath, String metadataPath) {
 ///
 /// Creates `destDir` if needed.
 void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile)? onFileCopied]) {
-  if (!srcDir.existsSync())
+  if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+  }
 
-  if (!destDir.existsSync())
+  if (!destDir.existsSync()) {
     destDir.createSync(recursive: true);
+  }
 
   for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = path.join(destDir.path, path.basename(entity.path));
@@ -413,8 +420,9 @@ void sanityCheckDocs() {
     '$kPublishRoot/api/widgets/Widget-class.html',
   ];
   for (final String canary in canaries) {
-    if (!File(canary).existsSync())
+    if (!File(canary).existsSync()) {
       throw Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
+    }
   }
   // Make sure at least one example of each kind includes source code.
 
@@ -524,8 +532,9 @@ List<Directory> findPackages() {
   return Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) {
-      if (entity is! Directory)
+      if (entity is! Directory) {
         return false;
+      }
       final File pubspec = File('${entity.path}/pubspec.yaml');
       if (!pubspec.existsSync()) {
         print("Unexpected package '${entity.path}' found in packages directory");
@@ -561,8 +570,9 @@ void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> f
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
     .listen((String line) {
-      if (!filter.any((Pattern pattern) => line.contains(pattern)))
+      if (!filter.any((Pattern pattern) => line.contains(pattern))) {
         print('$prefix$line'.trim());
+      }
     });
 }
 
