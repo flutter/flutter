@@ -273,7 +273,7 @@ class PageMetrics extends FixedScrollMetrics {
     required super.viewportDimension,
     required super.axisDirection,
     required this.viewportFraction,
-    super.scrollInsets,
+    super.contentInsets,
   });
 
   @override
@@ -284,7 +284,7 @@ class PageMetrics extends FixedScrollMetrics {
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? viewportFraction,
-    EdgeInsets? scrollInsets,
+    EdgeInsets? contentInsets,
   }) {
     return PageMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -293,7 +293,7 @@ class PageMetrics extends FixedScrollMetrics {
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       viewportFraction: viewportFraction ?? this.viewportFraction,
-      scrollInsets: scrollInsets ?? this.scrollInsets,
+      contentInsets: contentInsets ?? this.contentInsets,
     );
   }
 
@@ -480,12 +480,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero}) {
+  bool applyContentMetrics(double minScrollExtent, double maxScrollExtent, EdgeInsets contentInsets) {
     final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
-    return super.applyContentDimensions(
+    return super.applyContentMetrics(
       newMinScrollExtent,
       math.max(newMinScrollExtent, maxScrollExtent - _initialPageOffset),
-      scrollInsets: scrollInsets,
+      contentInsets,
     );
   }
 
@@ -497,7 +497,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? viewportFraction,
-    EdgeInsets? scrollInsets,
+    EdgeInsets? contentInsets,
   }) {
     return PageMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -506,7 +506,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       viewportFraction: viewportFraction ?? this.viewportFraction,
-      scrollInsets: scrollInsets ?? this.scrollInsets,
+      contentInsets: contentInsets ?? this.contentInsets,
     );
   }
 }

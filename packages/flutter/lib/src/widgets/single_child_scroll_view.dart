@@ -519,7 +519,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     }
 
     offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+    offset.applyContentMetrics(_minScrollExtent, _maxScrollExtent, EdgeInsets.zero);
   }
 
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);

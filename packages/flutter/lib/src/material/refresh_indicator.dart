@@ -251,7 +251,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
   static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
 
-  double? get _edgeOffset => widget.edgeOffset ?? (_isIndicatorAtTop! ?_lastMetrics?.scrollInsets?.top : _lastMetrics?.scrollInsets?.bottom);
+  double? get _edgeOffset => widget.edgeOffset ?? (_isIndicatorAtTop! ?_lastMetrics?.contentInsets?.top : _lastMetrics?.contentInsets?.bottom);
 
 
   @override

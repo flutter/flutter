@@ -46,7 +46,7 @@ mixin ScrollMetrics {
     double? pixels,
     double? viewportDimension,
     AxisDirection? axisDirection,
-    EdgeInsets? scrollInsets,
+    EdgeInsets? contentInsets,
   }) {
     return FixedScrollMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -54,7 +54,7 @@ mixin ScrollMetrics {
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
-      scrollInsets: scrollInsets ?? (hasContentDimensions ? this.scrollInsets : EdgeInsets.zero),
+      contentInsets: contentInsets ?? (hasContentDimensions ? this.contentInsets : EdgeInsets.zero),
     );
   }
 
@@ -75,7 +75,7 @@ mixin ScrollMetrics {
   double get maxScrollExtent;
 
   /// Doc me!
-  EdgeInsets get scrollInsets;
+  EdgeInsets get contentInsets;
 
   /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.
   bool get hasContentDimensions;
@@ -142,12 +142,12 @@ class FixedScrollMetrics with ScrollMetrics {
     required double? pixels,
     required double? viewportDimension,
     required this.axisDirection,
-    EdgeInsets scrollInsets = EdgeInsets.zero,
+    EdgeInsets contentInsets = EdgeInsets.zero,
   }) : _minScrollExtent = minScrollExtent,
        _maxScrollExtent = maxScrollExtent,
        _pixels = pixels,
        _viewportDimension = viewportDimension,
-      _scrollInsets = scrollInsets;
+      _contentInsets = contentInsets;
 
   @override
   double get minScrollExtent => _minScrollExtent!;
@@ -158,8 +158,8 @@ class FixedScrollMetrics with ScrollMetrics {
   final double? _maxScrollExtent;
 
   @override
-  EdgeInsets get scrollInsets => _scrollInsets;
-  final EdgeInsets _scrollInsets;
+  EdgeInsets get contentInsets => _contentInsets;
+  final EdgeInsets _contentInsets;
 
   @override
   bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;

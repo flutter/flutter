@@ -1460,7 +1460,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   // Out-of-band data computed during layout.
   late double _minScrollExtent;
   late double _maxScrollExtent;
-  EdgeInsets _scrollInsets = EdgeInsets.zero;
+  EdgeInsets _contentInsets = EdgeInsets.zero;
   bool _hasVisualOverflow = false;
 
   @override
@@ -1480,9 +1480,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       assert(firstChild == null);
       _minScrollExtent = 0.0;
       _maxScrollExtent = 0.0;
-      _scrollInsets = EdgeInsets.zero;
+      _contentInsets = EdgeInsets.zero;
       _hasVisualOverflow = false;
-      offset.applyContentDimensions(0.0, 0.0);
+      offset.applyContentMetrics(0.0, 0.0, EdgeInsets.zero);
       return;
     }
     assert(center!.parent == this);
@@ -1510,10 +1510,10 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
-        if (offset.applyContentDimensions(
+        if (offset.applyContentMetrics(
               math.min(0.0, _minScrollExtent + mainAxisExtent * anchor),
               math.max(0.0, _maxScrollExtent - mainAxisExtent * (1.0 - anchor)),
-              scrollInsets: _scrollInsets,
+              _contentInsets,
            )) {
           break;
         }
@@ -1554,7 +1554,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     assert(correctedOffset.isFinite);
     _minScrollExtent = 0.0;
     _maxScrollExtent = 0.0;
-    _scrollInsets = EdgeInsets.zero;
+    _contentInsets = EdgeInsets.zero;
     _hasVisualOverflow = false;
 
     // centerOffset is the offset from the leading edge of the RenderViewport
@@ -1629,8 +1629,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         _minScrollExtent -= childLayoutGeometry.scrollExtent;
         break;
     }
-    if (childLayoutGeometry.scrollInsets != null) {
-      _scrollInsets += childLayoutGeometry.scrollInsets!;
+    if (childLayoutGeometry.contentInsets != null) {
+      _contentInsets += childLayoutGeometry.contentInsets!;
     }
     if (childLayoutGeometry.hasVisualOverflow) {
       _hasVisualOverflow = true;
@@ -1866,7 +1866,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   // Out-of-band data computed during layout.
   late double _maxScrollExtent;
   late double _shrinkWrapExtent;
-  EdgeInsets _scrollInsets = EdgeInsets.zero;
+  EdgeInsets _contentInsets = EdgeInsets.zero;
   bool _hasVisualOverflow = false;
 
   @override
@@ -1885,10 +1885,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
       }
       offset.applyViewportDimension(0.0);
       _maxScrollExtent = 0.0;
-      _scrollInsets = EdgeInsets.zero;
+      _contentInsets = EdgeInsets.zero;
       _shrinkWrapExtent = 0.0;
       _hasVisualOverflow = false;
-      offset.applyContentDimensions(0.0, 0.0);
+      offset.applyContentMetrics(0.0, 0.0, EdgeInsets.zero);
       return;
     }
 
@@ -1924,10 +1924,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
             break;
         }
         final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
-        final bool didAcceptContentDimension = offset.applyContentDimensions(
+        final bool didAcceptContentDimension = offset.applyContentMetrics(
           0.0,
           math.max(0.0, _maxScrollExtent - effectiveExtent),
-          scrollInsets: _scrollInsets,
+          _contentInsets,
         );
         if (didAcceptViewportDimension && didAcceptContentDimension) {
           break;

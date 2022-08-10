@@ -146,8 +146,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double? _maxScrollExtent;
 
   @override
-  EdgeInsets get scrollInsets => _scrollInsets;
-  EdgeInsets _scrollInsets = EdgeInsets.zero;
+  EdgeInsets get contentInsets => _contentInsets;
+  EdgeInsets _contentInsets = EdgeInsets.zero;
 
   @override
   bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
@@ -531,17 +531,17 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       && currentMetrics.extentInside == _lastMetrics!.extentInside
       && currentMetrics.extentAfter == _lastMetrics!.extentAfter
       && currentMetrics.axisDirection == _lastMetrics!.axisDirection
-      && currentMetrics.scrollInsets == _lastMetrics!.scrollInsets);
+      && currentMetrics.contentInsets == _lastMetrics!.contentInsets);
   }
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero}) {
+  bool applyContentMetrics(double minScrollExtent, double maxScrollExtent, EdgeInsets contentInsets) {
     assert(minScrollExtent != null);
     assert(maxScrollExtent != null);
     assert(haveDimensions == (_lastMetrics != null));
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
-        _scrollInsets != scrollInsets ||
+        _contentInsets != contentInsets ||
         _didChangeViewportDimensionOrReceiveCorrection ||
         _lastAxis != axis) {
       assert(minScrollExtent != null);
@@ -549,7 +549,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
-      _scrollInsets = scrollInsets;
+      _contentInsets = contentInsets;
       _lastAxis = axis;
       final ScrollMetrics? currentMetrics = haveDimensions ? copyWith() : null;
       _didChangeViewportDimensionOrReceiveCorrection = false;
@@ -564,7 +564,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       applyNewDimensions();
       _pendingDimensions = false;
     }
-    assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
+    assert(
+      !_didChangeViewportDimensionOrReceiveCorrection,
+      'Use correctForNewDimensions() (and return true) to change the scroll '
+      'offset during applyContentMetrics().',
+    );
 
     if (_isMetricsChanged()) {
       // It isn't safe to trigger the ScrollMetricsNotification if we are in

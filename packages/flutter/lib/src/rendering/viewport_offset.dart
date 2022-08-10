@@ -146,7 +146,16 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// even if the values have not changed. It may be called many times if the
   /// scroll offset is corrected (if this returns false). This is always called
   /// after [applyViewportDimension], if that method is called.
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero});
+  @Deprecated(
+    'Use applyContentMetrics instead. '
+    '<Add version #>'
+  )
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+
+  ///
+  bool applyContentMetrics(double minScrollExtent, double maxScrollExtent, EdgeInsets contentInsets) {
+    return applyContentDimensions(minScrollExtent, maxScrollExtent);
+  }
 
   /// Apply a layout-time correction to the scroll offset.
   ///
@@ -269,7 +278,10 @@ class _FixedViewportOffset extends ViewportOffset {
   bool applyViewportDimension(double viewportDimension) => true;
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent, {EdgeInsets scrollInsets = EdgeInsets.zero}) => true;
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+
+  @override
+  bool applyContentMetrics(double minScrollExtent, double maxScrollExtent, EdgeInsets contentInsets) => true;
 
   @override
   void correctBy(double correction) {

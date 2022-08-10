@@ -236,7 +236,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification.accepted;
         if (_accepted[isLeading]!) {
-          controller!._paintOffset = confirmationNotification.paintOffset + (notification.metrics.scrollInsets?.top ?? 0.0);
+          controller!._paintOffset = confirmationNotification.paintOffset + (notification.metrics.contentInsets?.top ?? 0.0);
         }
       }
       assert(controller != null);
@@ -802,7 +802,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
           final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
 
-          // When re-implemented as a custom shader, offset the ScrollMetrics.scrollInsets
+          // When re-implemented as a custom shader, offset the ScrollMetrics.contentInsets
           // so as to not apply the effect to things like SliverAppBars.
           // https://github.com/flutter/flutter/issues/82906
           final Widget transform = Transform(

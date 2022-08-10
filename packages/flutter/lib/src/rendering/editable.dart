@@ -2355,7 +2355,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(0.0, _maxScrollExtent);
+    offset.applyContentMetrics(0.0, _maxScrollExtent, EdgeInsets.zero);
   }
 
   // The relative origin in relation to the distance the user has theoretically

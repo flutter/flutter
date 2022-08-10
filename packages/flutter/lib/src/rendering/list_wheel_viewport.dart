@@ -684,7 +684,7 @@ class RenderListWheelViewport
     // Apply the dimensions first in case it changes the scroll offset which
     // determines what should be shown.
     offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minEstimatedScrollExtent, _maxEstimatedScrollExtent);
+    offset.applyContentMetrics(_minEstimatedScrollExtent, _maxEstimatedScrollExtent, EdgeInsets.zero);
 
     // The height, in pixel, that children will be visible and might be laid out
     // and painted.
@@ -797,7 +797,7 @@ class RenderListWheelViewport
     final double maxScrollExtent = childManager.childExistsAt(targetLastIndex + 1)
       ? _maxEstimatedScrollExtent
       : indexToScrollOffset(targetLastIndex);
-    offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    offset.applyContentMetrics(minScrollExtent, maxScrollExtent, EdgeInsets.zero);
   }
 
   bool _shouldClipAtCurrentOffset() {

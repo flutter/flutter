@@ -405,10 +405,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     switch(_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
-        return padding.top + _lastMetrics!.scrollInsets.top;
+        return padding.top + _lastMetrics!.contentInsets.top;
       case ScrollbarOrientation.top:
       case ScrollbarOrientation.bottom:
-        return padding.left + _lastMetrics!.scrollInsets.left;
+        return padding.left + _lastMetrics!.contentInsets.left;
     }
   }
 
@@ -423,10 +423,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     switch(_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
-        return padding.top + mainAxisMargin + _lastMetrics!.scrollInsets.top;
+        return padding.top + mainAxisMargin + _lastMetrics!.contentInsets.top;
       case ScrollbarOrientation.top:
       case ScrollbarOrientation.bottom:
-        return padding.left + mainAxisMargin + _lastMetrics!.scrollInsets.left;
+        return padding.left + mainAxisMargin + _lastMetrics!.contentInsets.left;
     }
   }
   void _setThumbExtent() {
@@ -1922,6 +1922,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _maybeStartFadeoutTimer();
       }
     }
+    scrollbarPainter.update(metrics, metrics.axisDirection);
     return false;
   }
 

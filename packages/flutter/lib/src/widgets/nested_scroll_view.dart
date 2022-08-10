@@ -529,7 +529,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     required this.minRange,
     required this.maxRange,
     required this.correctionOffset,
-    super.scrollInsets,
+    super.contentInsets,
   });
 
   @override
@@ -542,7 +542,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     double? minRange,
     double? maxRange,
     double? correctionOffset,
-    EdgeInsets? scrollInsets,
+    EdgeInsets? contentInsets,
   }) {
     return _NestedScrollMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -553,7 +553,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
       minRange: minRange ?? this.minRange,
       maxRange: maxRange ?? this.maxRange,
       correctionOffset: correctionOffset ?? this.correctionOffset,
-      scrollInsets: scrollInsets ?? this.scrollInsets,
+      contentInsets: contentInsets ?? this.contentInsets,
     );
   }
 
@@ -1928,26 +1928,26 @@ class RenderSliverOverlapInjector extends RenderSliver {
       constraints.remainingPaintExtent,
     );
     final double paintExtent = math.max(0.0, clampedLayoutExtent);
-    late final EdgeInsets scrollInsets;
+    late final EdgeInsets contentInsets;
     switch (constraints.axisDirection) {
       case AxisDirection.up:
-        scrollInsets = EdgeInsets.only(bottom: paintExtent);
+        contentInsets = EdgeInsets.only(bottom: paintExtent);
         break;
       case AxisDirection.right:
-        scrollInsets = EdgeInsets.only(left: paintExtent);
+        contentInsets = EdgeInsets.only(left: paintExtent);
         break;
       case AxisDirection.down:
-        scrollInsets = EdgeInsets.only(top: paintExtent);
+        contentInsets = EdgeInsets.only(top: paintExtent);
         break;
       case AxisDirection.left:
-        scrollInsets = EdgeInsets.only(right: paintExtent);
+        contentInsets = EdgeInsets.only(right: paintExtent);
         break;
     }
     geometry = SliverGeometry(
       scrollExtent: _currentLayoutExtent!,
       paintExtent: paintExtent,
       maxPaintExtent: _currentMaxExtent!,
-      scrollInsets: scrollInsets,
+      contentInsets: contentInsets,
     );
   }
 
