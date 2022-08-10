@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_attributes.h"
 #include "flutter/display_list/display_list_color.h"
+#include "flutter/display_list/display_list_image.h"
 #include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_tile_mode.h"
 #include "flutter/display_list/types.h"
@@ -201,14 +202,13 @@ class DlMatrixColorSourceBase : public DlColorSource {
 class DlImageColorSource final : public SkRefCnt,
                                  public DlMatrixColorSourceBase {
  public:
-  // TODO(100984): Color sources must be DlImages instead of SkImages.
-  DlImageColorSource(sk_sp<const SkImage> image,
+  DlImageColorSource(sk_sp<const DlImage> image,
                      DlTileMode horizontal_tile_mode,
                      DlTileMode vertical_tile_mode,
                      DlImageSampling sampling = DlImageSampling::kLinear,
                      const SkMatrix* matrix = nullptr)
       : DlMatrixColorSourceBase(matrix),
-        sk_image_(image),
+        image_(image),
         horizontal_tile_mode_(horizontal_tile_mode),
         vertical_tile_mode_(vertical_tile_mode),
         sampling_(sampling) {}
@@ -221,39 +221,48 @@ class DlImageColorSource final : public SkRefCnt,
 
   std::shared_ptr<DlColorSource> with_sampling(
       DlImageSampling sampling) const override {
-    return std::make_shared<DlImageColorSource>(
-        sk_image_, horizontal_tile_mode_, vertical_tile_mode_, sampling,
-        matrix_ptr());
+    return std::make_shared<DlImageColorSource>(image_, horizontal_tile_mode_,
+                                                vertical_tile_mode_, sampling,
+                                                matrix_ptr());
   }
 
   DlColorSourceType type() const override { return DlColorSourceType::kImage; }
   size_t size() const override { return sizeof(*this); }
 
-  bool is_opaque() const override { return sk_image_->isOpaque(); }
+  bool is_opaque() const override {
+    // TODO(109286): Consider implementing 'isOpaque' on 'DlImage'.
+    if (!image_->skia_image()) {
+      return false;
+    }
+    return image_->skia_image()->isOpaque();
+  }
 
-  sk_sp<const SkImage> image() const { return sk_image_; }
+  sk_sp<const DlImage> image() const { return image_; }
   DlTileMode horizontal_tile_mode() const { return horizontal_tile_mode_; }
   DlTileMode vertical_tile_mode() const { return vertical_tile_mode_; }
   DlImageSampling sampling() const { return sampling_; }
 
   virtual sk_sp<SkShader> skia_object() const override {
-    return sk_image_->makeShader(ToSk(horizontal_tile_mode_),
-                                 ToSk(vertical_tile_mode_), ToSk(sampling_),
-                                 matrix_ptr());
+    if (!image_->skia_image()) {
+      return nullptr;
+    }
+    return image_->skia_image()->makeShader(ToSk(horizontal_tile_mode_),
+                                            ToSk(vertical_tile_mode_),
+                                            ToSk(sampling_), matrix_ptr());
   }
 
  protected:
   bool equals_(DlColorSource const& other) const override {
     FML_DCHECK(other.type() == DlColorSourceType::kImage);
     auto that = static_cast<DlImageColorSource const*>(&other);
-    return (sk_image_ == that->sk_image_ && matrix() == that->matrix() &&
+    return (image_->Equals(that->image_) && matrix() == that->matrix() &&
             horizontal_tile_mode_ == that->horizontal_tile_mode_ &&
             vertical_tile_mode_ == that->vertical_tile_mode_ &&
             sampling_ == that->sampling_);
   }
 
  private:
-  sk_sp<const SkImage> sk_image_;
+  sk_sp<const DlImage> image_;
   DlTileMode horizontal_tile_mode_;
   DlTileMode vertical_tile_mode_;
   DlImageSampling sampling_;
