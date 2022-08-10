@@ -18,6 +18,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'platform_selectable_region_context_menu.dart';
@@ -184,13 +185,13 @@ class SelectableRegion extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   });
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
   /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -542,7 +543,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         globalGesturePosition: globalGesturePosition,
         caretRect: caretRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,
-        currentLineBoundries: globalTransformAsOffset & _selectable!.size,
+        currentLineBoundaries: globalTransformAsOffset & _selectable!.size,
       );
   }
 

@@ -12825,12 +12825,12 @@ void main() {
       final BuildContext context = tester.firstElement(find.byType(EditableText));
 
       expect(
-        editableText.magnifierConfiguration.magnifierBuilder(
-          context,
-          MagnifierController(),
-          ValueNotifier<MagnifierOverlayInfoBearer>(const MagnifierOverlayInfoBearer.empty())
-        ),
-        isNull
+          editableText.magnifierConfiguration.magnifierBuilder(
+              context,
+              MagnifierController(),
+              ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty)
+            ),
+          isNull,
       );
     });
   });
