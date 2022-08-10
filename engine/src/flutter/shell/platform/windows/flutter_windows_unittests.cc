@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 
-#include <cstring>
 #include <thread>
 
 #include "flutter/shell/platform/windows/testing/windows_test.h"
@@ -16,8 +15,7 @@ namespace flutter {
 namespace testing {
 
 TEST(WindowsNoFixtureTest, GetTextureRegistrar) {
-  FlutterDesktopEngineProperties properties;
-  memset(&properties, 0, sizeof(FlutterDesktopEngineProperties));
+  FlutterDesktopEngineProperties properties = {};
   properties.assets_path = L"";
   properties.icu_data_path = L"icudtl.dat";
   auto engine = FlutterDesktopEngineCreate(&properties);
