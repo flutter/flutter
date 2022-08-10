@@ -194,7 +194,7 @@ abstract class SliverChildDelegate {
   ///
   /// This will be called during `performRebuild` in [SliverMultiBoxAdaptorElement]
   /// to check if a child has moved to a different position. It should return the
-  /// index of the child element with associated key, null if not found.
+  /// index of the child element with associated key, null or -1 if not found.
   ///
   /// If not provided, a child widget may not map to its existing [RenderObject]
   /// when the order of children returned from the children builder changes.
@@ -1323,7 +1323,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       }
       for (final int index in _childElements.keys.toList()) {
         final Key? key = _childElements[index]!.widget.key;
-        final int? newIndex = key == null ? null : adaptorWidget.delegate.findIndexByKey(key);
+        final int newIndex =
+            key == null ? -1 : adaptorWidget.delegate.findIndexByKey(key) ?? -1;
         final SliverMultiBoxAdaptorParentData? childParentData =
           _childElements[index]!.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 
@@ -1331,7 +1332,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           indexToLayoutOffset[index] = childParentData.layoutOffset!;
         }
 
-        if (newIndex != null && newIndex != index && newIndex >= 0) {
+        if (newIndex >= 0 && newIndex != index) {
           // The layout offset of the child being moved is no longer accurate.
           if (childParentData != null) {
             childParentData.layoutOffset = null;
