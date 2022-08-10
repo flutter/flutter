@@ -512,8 +512,10 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///   );
 ///
 /// ```
-///
-/// Instead consider the following:
+/// {@end-tool}
+/// {@tool snippet}
+/// Instead consider the following approach which directly applies a blur
+/// to the child widget.
 ///
 /// ```dart
 ///  return ImageFiltered(
