@@ -554,8 +554,8 @@ Intent? intentForMacOSSelector(String selectorName) {
     // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
     'scrollPageUp:': ScrollToDocumentBoundaryIntent(forward: false),
     'scrollPageDown:': ScrollToDocumentBoundaryIntent(forward: true),
-    'pageUpAndModifySelection': ExpandSelectionToDocumentBoundaryIntent(forward: false),
-    'pageDownAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
+    'pageUpAndModifySelection': ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
+    'pageDownAndModifySelection:': ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 
     // Escape key when there's no IME selection popup.
     'cancelOperation:': DismissIntent(),
