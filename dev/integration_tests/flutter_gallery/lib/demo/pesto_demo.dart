@@ -418,10 +418,11 @@ class _RecipePageState extends State<RecipePage> {
 
   void _toggleFavorite() {
     setState(() {
-      if (_favoriteRecipes.contains(widget.recipe))
+      if (_favoriteRecipes.contains(widget.recipe)) {
         _favoriteRecipes.remove(widget.recipe);
-      else
+      } else {
         _favoriteRecipes.add(widget.recipe);
+      }
     });
   }
 }

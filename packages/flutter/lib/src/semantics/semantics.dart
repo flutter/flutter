@@ -4,8 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
-       TextDirection, StringAttribute;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
@@ -2316,7 +2315,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     );
     assert(
       !_canPerformAction(SemanticsAction.decrease) || (value == '') == (decreasedValue == ''),
-      'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
+      'A SemanticsNode with action "decrease" needs to be annotated with either both "value" and "decreasedValue" or neither',
     );
   }
 

@@ -374,7 +374,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: <String>{projectName},
-        packagesPath: buildInfo.packagesPath
+        packagesPath: buildInfo.packagesPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath)
       );
     }
 

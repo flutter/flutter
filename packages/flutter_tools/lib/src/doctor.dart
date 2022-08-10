@@ -21,6 +21,7 @@ import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
+import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
@@ -44,31 +45,56 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 abstract class DoctorValidatorsProvider {
+  // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
+  // [FeatureFlags].
+  factory DoctorValidatorsProvider.test({
+    Platform? platform,
+    required FeatureFlags featureFlags,
+  }) {
+    return _DefaultDoctorValidatorsProvider(
+      featureFlags: featureFlags,
+      platform: platform ?? FakePlatform(),
+    );
+  }
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
-  static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
+  static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
 
   List<DoctorValidator> get validators;
   List<Workflow> get workflows;
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
+  _DefaultDoctorValidatorsProvider({
+    required this.platform,
+    required this.featureFlags,
+  });
+
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
+  final Platform platform;
+  final FeatureFlags featureFlags;
 
-  final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
-    platform: globals.platform,
+  late final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+    platform: platform,
     featureFlags: featureFlags,
   );
 
-  final WebWorkflow webWorkflow = WebWorkflow(
-    platform: globals.platform,
+  late final WebWorkflow webWorkflow = WebWorkflow(
+    platform: platform,
     featureFlags: featureFlags,
   );
 
-  final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
-    platform: globals.platform,
+  late final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
+    platform: platform,
+    featureFlags: featureFlags,
+  );
+
+  late final CustomDeviceWorkflow customDeviceWorkflow = CustomDeviceWorkflow(
     featureFlags: featureFlags,
   );
 
@@ -80,17 +106,17 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
     final List<DoctorValidator> ideValidators = <DoctorValidator>[
       if (androidWorkflow!.appliesToHostPlatform)
-        ...AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages),
+        ...AndroidStudioValidator.allValidators(globals.config, platform, globals.fs, globals.userMessages),
       ...IntelliJValidator.installedValidators(
         fileSystem: globals.fs,
-        platform: globals.platform,
+        platform: platform,
         userMessages: userMessages,
         plistParser: globals.plistParser,
         processManager: globals.processManager,
       ),
-      ...VsCodeValidator.installedValidators(globals.fs, globals.platform, globals.processManager),
+      ...VsCodeValidator.installedValidators(globals.fs, platform, globals.processManager),
     ];
-    final ProxyValidator proxyValidator = ProxyValidator(platform: globals.platform);
+    final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
     _validators = <DoctorValidator>[
       FlutterValidator(
         fileSystem: globals.fs,
@@ -179,6 +205,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows!.add(webWorkflow);
       }
 
+      if (customDeviceWorkflow.appliesToHostPlatform) {
+        _workflows!.add(customDeviceWorkflow);
+      }
     }
     return _workflows!;
   }
@@ -320,12 +349,12 @@ class Doctor {
   Future<bool> diagnose({
     bool androidLicenses = false,
     bool verbose = true,
-    bool showColor = true,
     AndroidLicenseValidator? androidLicenseValidator,
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
   }) async {
+    final bool showColor = globals.terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
     }
@@ -514,9 +543,18 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
-    final ValidationType valid = messages.every((ValidationMessage message) => message.isInformation)
-      ? ValidationType.installed
-      : ValidationType.partial;
+    ValidationType valid;
+    if (messages.every((ValidationMessage message) => message.isInformation)) {
+      valid = ValidationType.installed;
+    } else {
+      // The issues for this validator stem from broken git configuration of the local install;
+      // in that case, make it clear that it is fine to continue, but freshness check/upgrades
+      // won't be supported.
+      valid = ValidationType.partial;
+      messages.add(
+        ValidationMessage(_userMessages.flutterValidatorErrorIntentional),
+      );
+    }
 
     return ValidationResult(
       valid,
@@ -531,16 +569,22 @@ class FlutterValidator extends DoctorValidator {
   }
 
   ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {
-    final String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
+    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
 
     // The tool sets the channel as "unknown", if the current branch is on a
     // "detached HEAD" state or doesn't have an upstream, and sets the
     // frameworkVersion as "0.0.0-unknown" if  "git describe" on HEAD doesn't
     // produce an expected format to be parsed for the frameworkVersion.
-    if (versionChannel == 'unknown' || frameworkVersion == '0.0.0-unknown') {
-      return ValidationMessage.hint(flutterVersionMessage);
+    if (versionChannel != 'unknown' && frameworkVersion != '0.0.0-unknown') {
+      return ValidationMessage(flutterVersionMessage);
     }
-    return ValidationMessage(flutterVersionMessage);
+    if (versionChannel == 'unknown') {
+      flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownChannel}';
+    }
+    if (frameworkVersion == '0.0.0-unknown') {
+      flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownVersion}';
+    }
+    return ValidationMessage.hint(flutterVersionMessage);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
@@ -551,7 +595,7 @@ class FlutterValidator extends DoctorValidator {
     if (upstreamValidationError != null) {
       final String errorMessage = upstreamValidationError.message;
       if (errorMessage.contains('could not determine the remote upstream which is being tracked')) {
-        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUrl('unknown'));
+        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUnknown);
       }
       // At this point, repositoryUrl must not be null
       if (errorMessage.contains('Flutter SDK is tracking a non-standard remote')) {
@@ -644,7 +688,7 @@ class DoctorText {
 
   Future<String> _runDiagnosis(bool showPii) async {
     try {
-      await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, showPii: showPii, sendEvent: _sendDoctorEvent);
+      await _doctor.diagnose(startedValidatorTasks: _validatorTasks, showPii: showPii, sendEvent: _sendDoctorEvent);
       // Do not send the doctor event a second time.
       _sendDoctorEvent = false;
       final String text = _logger.statusText;

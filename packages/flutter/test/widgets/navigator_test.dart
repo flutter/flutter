@@ -4089,7 +4089,7 @@ class ZeroDurationPage extends Page<void> {
 
 class ZeroDurationPageRoute extends PageRoute<void> {
   ZeroDurationPageRoute({required ZeroDurationPage page})
-      : super(settings: page);
+      : super(settings: page, preferRasterization: false);
 
   @override
   Duration get transitionDuration => Duration.zero;
