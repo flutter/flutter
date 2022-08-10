@@ -14,6 +14,8 @@ impeller_component("vulkan") {
     "capabilities_vk.h",
     "command_buffer_vk.cc",
     "command_buffer_vk.h",
+    "command_pool_vk.cc",
+    "command_pool_vk.h",
     "context_vk.cc",
     "context_vk.h",
     "device_buffer_vk.cc",
