@@ -799,6 +799,8 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_function_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_function_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_library_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_library_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_producer_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_producer_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_details_vk.cc

@@ -27,9 +27,8 @@ class PlaygroundImplVK final : public PlaygroundImpl {
   using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
 
-  // surface and swapchain
+  // surface
   VkSurfaceKHR surface_;
-  std::unique_ptr<SwapchainVK> swapchain_;
 
   // |PlaygroundImpl|
   std::shared_ptr<Context> GetContext() const override;

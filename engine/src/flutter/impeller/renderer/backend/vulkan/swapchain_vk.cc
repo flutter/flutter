@@ -6,6 +6,7 @@
 
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/vulkan/formats_vk.h"
 
 namespace impeller {
 
@@ -47,9 +48,9 @@ std::unique_ptr<SwapchainVK> SwapchainVK::Create(vk::Device device,
     return nullptr;
   }
 
-  auto swapchain = std::make_unique<SwapchainVK>(std::move(swapchain_res.value),
-                                                 surface_format.format, extent);
-  if (!swapchain->CreateSwapchainImages(device)) {
+  auto swapchain = std::make_unique<SwapchainVK>(
+      device, std::move(swapchain_res.value), surface_format.format, extent);
+  if (!swapchain->CreateSwapchainImages()) {
     VALIDATION_LOG << "Failed to create swapchain images.";
     return nullptr;
   }
@@ -57,9 +58,9 @@ std::unique_ptr<SwapchainVK> SwapchainVK::Create(vk::Device device,
   return swapchain;
 }
 
-bool SwapchainVK::CreateSwapchainImages(vk::Device device) {
+bool SwapchainVK::CreateSwapchainImages() {
   FML_DCHECK(swapchain_images_.empty()) << "Swapchain images already created";
-  auto res = device.getSwapchainImagesKHR(*swapchain_);
+  auto res = device_.getSwapchainImagesKHR(*swapchain_);
   if (res.result != vk::Result::eSuccess) {
     FML_CHECK(false) << "Failed to get swapchain images: "
                      << vk::to_string(res.result);
@@ -86,7 +87,7 @@ bool SwapchainVK::CreateSwapchainImages(vk::Device device) {
     create_info.subresourceRange.baseArrayLayer = 0;
     create_info.subresourceRange.layerCount = 1;
 
-    auto img_view_res = device.createImageViewUnique(create_info);
+    auto img_view_res = device_.createImageViewUnique(create_info);
     if (img_view_res.result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Failed to create image view: "
                      << vk::to_string(img_view_res.result);
@@ -100,10 +101,12 @@ bool SwapchainVK::CreateSwapchainImages(vk::Device device) {
   return true;
 }
 
-SwapchainVK::SwapchainVK(vk::UniqueSwapchainKHR swapchain,
+SwapchainVK::SwapchainVK(vk::Device device,
+                         vk::UniqueSwapchainKHR swapchain,
                          vk::Format image_format,
                          vk::Extent2D extent)
-    : swapchain_(std::move(swapchain)),
+    : device_(device),
+      swapchain_(std::move(swapchain)),
       image_format_(image_format),
       extent_(extent) {}
 
@@ -117,6 +120,23 @@ SwapchainImageVK::SwapchainImageVK(vk::Image image,
       image_view_(std::move(image_view)),
       image_format_(image_format),
       extent_(extent) {}
+
+vk::SwapchainKHR SwapchainVK::GetSwapchain() const {
+  return *swapchain_;
+}
+
+SwapchainImageVK* SwapchainVK::GetSwapchainImage(uint32_t image_index) const {
+  FML_DCHECK(image_index < swapchain_images_.size());
+  return swapchain_images_[image_index].get();
+}
+
+PixelFormat SwapchainImageVK::GetPixelFormat() const {
+  return ToPixelFormat(image_format_);
+}
+
+ISize SwapchainImageVK::GetSize() const {
+  return ISize(extent_.width, extent_.height);
+}
 
 SwapchainImageVK::~SwapchainImageVK() = default;
 

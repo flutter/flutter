@@ -7,7 +7,9 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/size.h"
 #include "impeller/renderer/backend/vulkan/swapchain_details_vk.h"
+#include "impeller/renderer/surface.h"
 
 namespace impeller {
 
@@ -19,6 +21,10 @@ class SwapchainImageVK {
                    vk::Extent2D extent);
 
   ~SwapchainImageVK();
+
+  PixelFormat GetPixelFormat() const;
+
+  ISize GetSize() const;
 
  private:
   vk::Image image_;
@@ -35,15 +41,21 @@ class SwapchainVK {
                                              vk::SurfaceKHR surface,
                                              SwapchainDetailsVK& details);
 
-  SwapchainVK(vk::UniqueSwapchainKHR swapchain,
+  SwapchainVK(vk::Device device,
+              vk::UniqueSwapchainKHR swapchain,
               vk::Format image_format,
               vk::Extent2D extent);
 
   ~SwapchainVK();
 
- private:
-  bool CreateSwapchainImages(vk::Device device);
+  vk::SwapchainKHR GetSwapchain() const;
 
+  SwapchainImageVK* GetSwapchainImage(uint32_t image_index) const;
+
+ private:
+  bool CreateSwapchainImages();
+
+  vk::Device device_;
   vk::UniqueSwapchainKHR swapchain_;
   vk::Format image_format_;
   vk::Extent2D extent_;

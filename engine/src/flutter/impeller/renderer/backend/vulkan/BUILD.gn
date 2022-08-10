@@ -36,6 +36,8 @@ impeller_component("vulkan") {
     "shader_function_vk.h",
     "shader_library_vk.cc",
     "shader_library_vk.h",
+    "surface_producer_vk.cc",
+    "surface_producer_vk.h",
     "surface_vk.cc",
     "surface_vk.h",
     "swapchain_details_vk.cc",
