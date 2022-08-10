@@ -1069,6 +1069,81 @@ void main() {
     expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
     exception = null;
   });
+
+  test('TextPainter requires layout after providing different placeholder dimensions', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before'),
+      WidgetSpan(child: Text('widget1')),
+      WidgetSpan(child: Text('widget2')),
+      WidgetSpan(child: Text('widget3')),
+      TextSpan(text: 'after'),
+    ]);
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 20), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+
+    Object? e;
+    try {
+      painter.paint(MockCanvas(), Offset.zero);
+    } catch (exception) {
+      e = exception;
+    }
+    expect(
+      e.toString(),
+      contains('TextPainter.paint called when text geometry was not yet calculated'),
+    );
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter does not require layout after providing identical placeholder dimensions', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before'),
+      WidgetSpan(child: Text('widget1')),
+      WidgetSpan(child: Text('widget2')),
+      WidgetSpan(child: Text('widget3')),
+      TextSpan(text: 'after'),
+    ]);
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+
+    Object? e;
+    try {
+      painter.paint(MockCanvas(), Offset.zero);
+    } catch (exception) {
+      e = exception;
+    }
+    // In tests, paint() will throw an UnimplementedError due to missing drawParagraph method.
+    expect(
+      e.toString(),
+      isNot(contains('TextPainter.paint called when text geometry was not yet calculated')),
+    );
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 }
 
 class MockCanvas extends Fake implements Canvas {

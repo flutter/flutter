@@ -34,10 +34,6 @@ const float PI_ROTATE_LEFT = PI * -0.0078125;
 const float ONE_THIRD = 1./3.;
 const vec2 TURBULENCE_SCALE = vec2(0.8);
 
-float saturate(float x) {
-  return clamp(x, 0.0, 1.0);
-}
-
 float triangle_noise(highp vec2 n) {
   n = fract(n * vec2(5.3987, 5.4421));
   n += dot(n.yx, n.xy + vec2(21.5351, 14.3137));
@@ -62,7 +58,7 @@ float soft_circle(vec2 uv, vec2 xy, float radius, float blur) {
 float soft_ring(vec2 uv, vec2 xy, float radius, float thickness, float blur) {
   float circle_outer = soft_circle(uv, xy, radius + thickness, blur);
   float circle_inner = soft_circle(uv, xy, max(radius - thickness, 0.0), blur);
-  return saturate(circle_outer - circle_inner);
+  return clamp(circle_outer - circle_inner, 0.0, 1.0);
 }
 
 float circle_grid(vec2 resolution, vec2 p, vec2 xy, vec2 rotation, float cell_diameter) {
@@ -79,7 +75,7 @@ float sparkle(vec2 uv, float t) {
   s += threshold(n + sin(PI * (t + 0.35)), 0.1, 0.15);
   s += threshold(n + sin(PI * (t + 0.7)), 0.2, 0.25);
   s += threshold(n + sin(PI * (t + 1.05)), 0.3, 0.35);
-  return saturate(s) * 0.55;
+  return clamp(s, 0.0, 1.0) * 0.55;
 }
 
 float turbulence(vec2 uv) {
@@ -88,7 +84,7 @@ float turbulence(vec2 uv) {
   float g2 = circle_grid(TURBULENCE_SCALE, uv_scale, u_circle2, u_rotation2, 0.2);
   float g3 = circle_grid(TURBULENCE_SCALE, uv_scale, u_circle3, u_rotation3, 0.275);
   float v = (g1 * g1 + g2 - g3) * 0.5;
-  return saturate(0.45 + 0.8 * v);
+  return clamp(0.45 + 0.8 * v, 0.0, 1.0);
 }
 
 void main() {

@@ -1004,7 +1004,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(debugCheckHasOverlay(context));
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
     final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout

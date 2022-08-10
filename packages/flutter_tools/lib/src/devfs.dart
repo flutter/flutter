@@ -20,6 +20,8 @@ import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
 
+const String _kFontManifest = 'FontManifest.json';
+
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
   bool cacheSymlinks = false;
@@ -485,6 +487,9 @@ class DevFS {
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   bool hasSetAssetDirectory = false;
 
+  /// Whether the font manifest was uploaded during [update].
+  bool didUpdateFontManifest = false;
+
   List<Uri> sources = <Uri>[];
   DateTime? lastCompiled;
   DateTime? _previousCompiled;
@@ -589,6 +594,7 @@ class DevFS {
     assert(trackWidgetCreation != null);
     assert(generator != null);
     final DateTime candidateCompileTime = DateTime.now();
+    didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
     _widgetCacheOutputFile = _fileSystem.file('$dillOutputPath.incremental.dill.widget_cache');
 
@@ -643,6 +649,11 @@ class DevFS {
         final Uri deviceUri = _fileSystem.path.toUri(_fileSystem.path.join(assetDirectory, archivePath));
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+        }
+        // If the font manifest is updated, mark this as true so the hot runner
+        // can invoke a service extension to force the engine to reload fonts.
+        if (archivePath == _kFontManifest) {
+          didUpdateFontManifest = true;
         }
 
         if (bundle.entryKinds[archivePath] == AssetKind.shader) {
