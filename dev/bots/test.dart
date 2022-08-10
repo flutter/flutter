@@ -730,7 +730,7 @@ Future<void> _runFrameworkTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false)
       .whereType<Directory>()
-      .where((Directory dir) => dir.path.endsWith('widgets') == false && dir.path.endsWith('html') == false)
+      .where((Directory dir) => dir.path.endsWith('widgets') == false)
       .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
     print('${green}Running packages/flutter tests$reset for: $cyan${tests.join(", ")}$reset');

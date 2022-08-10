@@ -4,6 +4,8 @@
 
 // ignore_for_file: undefined_class, undefined_getter, undefined_setter
 
+@TestOn('browser') // This file contains web-only library.
+
 import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
@@ -16,6 +18,8 @@ void main() {
   final RegisterViewFactory originalFactory = PlatformSelectableRegionContextMenu.registerViewFactory;
   PlatformSelectableRegionContextMenu.registerViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
     element = fn(0) as html.Element;
+    // The element needs to be attached to the document body to receive mouse
+    // events.
     html.document.body!.append(element!);
   };
   // This force register the dom element.

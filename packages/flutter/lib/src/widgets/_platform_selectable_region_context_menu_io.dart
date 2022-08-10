@@ -9,16 +9,16 @@
 import 'framework.dart';
 import 'selection_container.dart';
 
-/// A widget that provides native selection context menu for its child subtree
+/// A widget that provides native selection context menu for its child subtree.
 ///
-/// This widget currently only support flutter web. Using this widget in non-web
+/// This widget currently only supports Flutter web. Using this widget in non-web
 /// platforms will throw [UnimplementedError]s.
 ///
-/// In web platform. this widget registers a platform view, i.e. a html dom
-/// element, with the web platform. The platform view is a singleton shared
-/// between all [PlatformSelectableRegionContextMenu]s.
+/// In web platform, this widget registers a singleton platform view, i.e. a
+/// HTML DOM element. The created platform view will be shared between all
+/// [PlatformSelectableRegionContextMenu]s.
 ///
-/// Only one [SelectionContainerDelegate] can attach to the the
+/// Only one [SelectionContainerDelegate] can attach to the
 /// [PlatformSelectableRegionContextMenu] at a time. Use [attach] method to make
 /// a [SelectionContainerDelegate] to be the active client.
 class PlatformSelectableRegionContextMenu extends StatelessWidget {
@@ -30,10 +30,10 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
     super.key,
   });
 
-  /// Attaches the `client` to be able to open browser selection context menu.
+  /// Attaches the `client` to be able to open platform-appropriate context menus.
   static void attach(SelectionContainerDelegate client) => throw UnimplementedError();
 
-  /// Detaches the `client` from the browser selection context menu.
+  /// Detaches the `client` from the platform-appropriate selection context menus.
   static void detach(SelectionContainerDelegate client) => throw UnimplementedError();
 
   @override
