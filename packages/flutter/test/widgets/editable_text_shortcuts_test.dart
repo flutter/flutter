@@ -1606,7 +1606,7 @@ void main() {
               offset: 4,
               affinity: TextAffinity.upstream,
             ));
-          }, variant: TargetPlatformVariant.all(excluding: TargetPlatform.macOS)); // intended: on macOS Page Up/Down only scrolls
+          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS})); // intended: on macOS Page Up/Down only scrolls
 
           testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =
