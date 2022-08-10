@@ -5932,7 +5932,7 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    // On macOS platforms, there's no NSStandardKeyBindingResponding
+    // On macOS, there's no NSStandardKeyBindingResponding
     // for move selection by page + collapse.
     expect(
       selection,
