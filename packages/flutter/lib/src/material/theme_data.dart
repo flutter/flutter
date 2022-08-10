@@ -263,6 +263,11 @@ class ThemeData with Diagnosticable {
   /// a component theme parameter like [sliderTheme], [toggleButtonsTheme],
   /// or [bottomNavigationBarTheme].
   ///
+  /// In Material Design 3, the [IconButton.visualDensity] isn't affected by
+  /// [Theme.of(context).visualDensity], and has [VisualDensity.standard] as its default
+  /// value. To override the default value of [IconButton.visualDensity], provide a
+  /// [iconButtonTheme] parameter.
+  ///
   /// See also:
   ///
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].

@@ -275,11 +275,17 @@ void main() {
 
   testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
+    final ThemeData themeDataM2 = ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1), useMaterial3: material3);
+    final ThemeData themeDataM3 = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+            style: IconButton.styleFrom(visualDensity: const VisualDensity(horizontal: 1, vertical: -1))),
+      useMaterial3: material3
+    );
     await tester.pumpWidget(
       wrap(
         useMaterial3: material3,
         child: Theme(
-          data: ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1), useMaterial3: material3),
+          data: material3 ? themeDataM3 : themeDataM2,
           child: IconButton(
             iconSize: 10.0,
             onPressed: mockOnPressedFunction.handler,
@@ -452,9 +458,9 @@ void main() {
       ),
     );
 
-    final RenderBox barBox = tester.renderObject(find.byType(AppBar));
     final RenderBox iconBox = tester.renderObject(find.byType(IconButton));
-    expect(iconBox.size.height, equals(barBox.size.height));
+    expect(iconBox.size.height, kMinInteractiveDimension);
+    expect(tester.getCenter(find.byType(IconButton)).dy, 28);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
@@ -1627,6 +1633,53 @@ void main() {
     expect(buttonWidget().isSelected, true);
     expect(find.byIcon(Icons.account_box), findsNothing);
     expect(find.byIcon(Icons.ac_unit), findsOneWidget);
+  });
+
+  testWidgets('The visualDensity of M3 IconButton can be configrued by IconButtonTheme, '
+      'but cannot be configured by ThemeData - M3' , (WidgetTester tester) async {
+    Future<void> buildTest({VisualDensity? iconButtonThemeVisualDensity, VisualDensity? themeVisualDensity}) async {
+      return tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true)
+              .copyWith(iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity)),
+                        visualDensity: themeVisualDensity),
+          home: Material(
+            child: Center(
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.play_arrow),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(iconButtonThemeVisualDensity: VisualDensity.standard);
+    final RenderBox box = tester.renderObject(find.byType(IconButton));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(iconButtonThemeVisualDensity: VisualDensity.compact);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(40, 40)));
+
+    await buildTest(iconButtonThemeVisualDensity: const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(64, 64)));
+
+    // ThemeData.visualDensity will be ignored
+    await buildTest(themeVisualDensity: VisualDensity.standard);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(themeVisualDensity: VisualDensity.compact);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(themeVisualDensity: const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
   });
 
   group('IconTheme tests in Material 3', () {
