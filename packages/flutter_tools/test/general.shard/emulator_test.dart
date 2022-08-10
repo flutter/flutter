@@ -17,6 +17,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
@@ -329,7 +330,7 @@ void main() {
 
       const Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       Xcode: () => xcode,

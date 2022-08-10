@@ -28,8 +28,9 @@ class ComponentDemoTabData {
 
   @override
   bool operator==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ComponentDemoTabData
         && other.tabName == tabName
         && other.description == description
@@ -67,8 +68,9 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
 
   Future<void> _showApiDocumentation(BuildContext context) async {
     final String? url = demos![DefaultTabController.of(context)!.index].documentationUrl;
-    if (url == null)
+    if (url == null) {
       return;
+    }
 
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {

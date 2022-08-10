@@ -936,7 +936,7 @@ void main() {
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // dependencies are missing.
 
-    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/lib/foo.dart')
+    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/pubspec.yaml')
       .createSync(recursive: true);
 
     expect(await pubDependencies.isUpToDate(fileSystem), true);

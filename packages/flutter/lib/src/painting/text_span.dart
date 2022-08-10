@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder, Locale, StringAttribute, LocaleStringAttribute, SpellOutStringAttribute;
+import 'dart:ui' as ui show Locale, LocaleStringAttribute, ParagraphBuilder, SpellOutStringAttribute, StringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

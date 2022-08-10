@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show SplayTreeMap, HashMap;
+import 'dart:collection' show HashMap, SplayTreeMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -571,7 +571,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
   /// null.
   ///
-  /// If the order of children` never changes, consider using the constant
+  /// If the order of children never changes, consider using the constant
   /// [SliverChildListDelegate.fixed] constructor.
   SliverChildListDelegate(
     this.children, {

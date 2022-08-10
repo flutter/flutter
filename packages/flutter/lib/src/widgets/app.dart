@@ -26,6 +26,7 @@ import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
+import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
@@ -1740,8 +1741,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
               actions: widget.actions ?? WidgetsApp.defaultActions,
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: ShortcutRegistrar(
-                  child: child,
+                child: TapRegionSurface(
+                  child: ShortcutRegistrar(
+                    child: child,
+                  ),
                 ),
               ),
             ),

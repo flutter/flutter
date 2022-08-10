@@ -212,19 +212,31 @@ class _TextEditingValueAccumulator {
   }
 }
 
-/// A [TextInputFormatter] that prevents the insertion of characters
-/// matching (or not matching) a particular pattern.
+/// A [TextInputFormatter] that prevents the insertion of characters matching
+/// (or not matching) a particular pattern, by replacing the characters with the
+/// given [replacementString].
 ///
 /// Instances of filtered characters found in the new [TextEditingValue]s
-/// will be replaced with the [replacementString] which defaults to the empty
-/// string.
+/// will be replaced by the [replacementString] which defaults to the empty
+/// string, and the current [TextEditingValue.selection] and
+/// [TextEditingValue.composing] region will be adjusted to account for the
+/// replacement.
 ///
-/// Since this formatter only removes characters from the text, it attempts to
-/// preserve the existing [TextEditingValue.selection] to values it would now
-/// fall at with the removed characters.
+/// This formatter is typically used to match potentially recurring [Pattern]s
+/// in the new [TextEditingValue]. It never completely rejects the new
+/// [TextEditingValue] and falls back to the current [TextEditingValue] when the
+/// given [filterPattern] fails to match. Consider using a different
+/// [TextInputFormatter] such as:
+/// ```dart
+/// TextInputFormatter.withFunction((oldValue, newValue) => regExp.hasMatch(newValue.text) ? newValue : oldValue)
+/// ```
+/// for accepting/rejecting new input based on a predicate on the full string.
+/// As an example, [FilteringTextInputFormatter] typically shouldn't be used
+/// with [RegExp]s that contain positional matchers (`^` or `$`) since these
+/// patterns are usually meant for matching the whole string.
 class FilteringTextInputFormatter extends TextInputFormatter {
-  /// Creates a formatter that prevents the insertion of characters
-  /// based on a filter pattern.
+  /// Creates a formatter that replaces banned patterns with the given
+  /// [replacementString].
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also

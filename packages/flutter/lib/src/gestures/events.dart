@@ -1153,7 +1153,10 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : super(
+  }) : // Dart doesn't support comparing enums with == in const contexts yet.
+       // https://github.com/dart-lang/language/issues/1811
+       assert(!identical(kind, PointerDeviceKind.trackpad)),
+       super(
          pressure: 0.0,
        );
 
@@ -1297,7 +1300,8 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : super(
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+       super(
          pressure: 0.0,
        );
 
@@ -1432,7 +1436,8 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : super(
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+       super(
          down: true,
          distance: 0.0,
        );
@@ -1548,7 +1553,8 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.platformData,
     super.synthesized,
     super.embedderId,
-  }) : super(
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+       super(
          down: true,
          distance: 0.0,
        );
@@ -1662,7 +1668,8 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : super(
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+       super(
          down: false,
        );
 
@@ -1780,7 +1787,8 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
        assert(kind != null),
        assert(device != null),
        assert(position != null),
-       assert(scrollDelta != null);
+       assert(scrollDelta != null),
+       assert(!identical(kind, PointerDeviceKind.trackpad));
 
   @override
   final Offset scrollDelta;
@@ -1823,6 +1831,91 @@ class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _Copy
   }
 }
 
+mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
+  @override
+  PointerScrollInertiaCancelEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? delta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    int? embedderId,
+  }) {
+    return PointerScrollInertiaCancelEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      embedderId: embedderId ?? this.embedderId,
+    ).transformed(transform);
+  }
+}
+
+/// The pointer issued a scroll-inertia cancel event.
+///
+/// Touching the trackpad immediately after a scroll is an example of an event
+/// that would create a [PointerScrollInertiaCancelEvent].
+///
+/// See also:
+///
+///  * [Listener.onPointerSignal], which allows callers to be notified of these
+///    events in a widget tree.
+///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
+///    participating agents may disambiguate an event's target.
+class PointerScrollInertiaCancelEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScrollInertiaCancelEvent {
+  /// Creates a pointer scroll-inertia cancel event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerScrollInertiaCancelEvent({
+    super.timeStamp,
+    super.kind,
+    super.device,
+    super.position,
+    super.embedderId,
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null);
+
+  @override
+  PointerScrollInertiaCancelEvent transformed(Matrix4? transform) {
+    if (transform == null || transform == this.transform) {
+      return this;
+    }
+    return _TransformedPointerScrollInertiaCancelEvent(original as PointerScrollInertiaCancelEvent? ?? this, transform);
+  }
+}
+
+class _TransformedPointerScrollInertiaCancelEvent extends _TransformedPointerEvent with _CopyPointerScrollInertiaCancelEvent implements PointerScrollInertiaCancelEvent {
+  _TransformedPointerScrollInertiaCancelEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
+
+  @override
+  final PointerScrollInertiaCancelEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerScrollInertiaCancelEvent transformed(Matrix4? transform) => original.transformed(transform);
+}
+
 mixin _CopyPointerPanZoomStartEvent on PointerEvent {
   @override
   PointerPanZoomStartEvent copyWith({
@@ -1849,9 +1942,9 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
     bool? synthesized,
     int? embedderId,
   }) {
+    assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomStartEvent(
       timeStamp: timeStamp ?? this.timeStamp,
-      kind: kind ?? this.kind,
       device: device ?? this.device,
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
@@ -1871,19 +1964,18 @@ class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescriptio
   /// All of the arguments must be non-null.
   const PointerPanZoomStartEvent({
     super.timeStamp,
-    super.kind = PointerDeviceKind.mouse,
     super.device,
     super.pointer,
     super.position,
     super.embedderId,
     super.synthesized,
   }) : assert(timeStamp != null),
-       assert(kind != null),
        assert(device != null),
        assert(pointer != null),
        assert(position != null),
        assert(embedderId != null),
-       assert(synthesized != null);
+       assert(synthesized != null),
+       super(kind: PointerDeviceKind.trackpad);
 
   @override
   PointerPanZoomStartEvent transformed(Matrix4? transform) {
@@ -1953,9 +2045,9 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
     double? scale,
     double? rotation,
   }) {
+    assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomUpdateEvent(
       timeStamp: timeStamp ?? this.timeStamp,
-      kind: kind ?? this.kind,
       device: device ?? this.device,
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
@@ -1979,7 +2071,6 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
   /// All of the arguments must be non-null.
   const PointerPanZoomUpdateEvent({
     super.timeStamp,
-    super.kind = PointerDeviceKind.mouse,
     super.device,
     super.pointer,
     super.position,
@@ -1990,7 +2081,6 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
     this.rotation = 0.0,
     super.synthesized,
   }) : assert(timeStamp != null),
-       assert(kind != null),
        assert(device != null),
        assert(pointer != null),
        assert(position != null),
@@ -1999,7 +2089,9 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
        assert(panDelta != null),
        assert(scale != null),
        assert(rotation != null),
-       assert(synthesized != null);
+       assert(synthesized != null),
+       super(kind: PointerDeviceKind.trackpad);
+
   @override
   final Offset pan;
   @override
@@ -2085,9 +2177,9 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
     bool? synthesized,
     int? embedderId,
   }) {
+    assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomEndEvent(
       timeStamp: timeStamp ?? this.timeStamp,
-      kind: kind ?? this.kind,
       device: device ?? this.device,
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
@@ -2107,19 +2199,18 @@ class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription,
   /// All of the arguments must be non-null.
   const PointerPanZoomEndEvent({
     super.timeStamp,
-    super.kind = PointerDeviceKind.mouse,
     super.device,
     super.pointer,
     super.position,
     super.embedderId,
     super.synthesized,
   }) : assert(timeStamp != null),
-       assert(kind != null),
        assert(device != null),
        assert(pointer != null),
        assert(position != null),
        assert(embedderId != null),
-       assert(synthesized != null);
+       assert(synthesized != null),
+       super(kind: PointerDeviceKind.trackpad);
 
   @override
   PointerPanZoomEndEvent transformed(Matrix4? transform) {
@@ -2224,7 +2315,8 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : super(
+  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+       super(
          down: false,
          pressure: 0.0,
        );

@@ -6,7 +6,7 @@ import 'dart:async' show Timer;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/physics.dart' show nearEqual, Tolerance;
+import 'package:flutter/physics.dart' show Tolerance, nearEqual;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -234,7 +234,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       if (_lastNotificationType is! OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
         confirmationNotification.dispatch(context);
-        _accepted[isLeading] = confirmationNotification._accepted;
+        _accepted[isLeading] = confirmationNotification.accepted;
         if (_accepted[isLeading]!) {
           controller!._paintOffset = confirmationNotification.paintOffset + (notification.metrics.scrollInsets?.top ?? 0.0);
         }
@@ -714,7 +714,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       if (_lastNotification.runtimeType is! OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: notification.overscroll < 0.0);
         confirmationNotification.dispatch(context);
-        _accepted = confirmationNotification._accepted;
+        _accepted = confirmationNotification.accepted;
       }
 
       assert(notification.metrics.axis == widget.axis);
@@ -981,7 +981,16 @@ class OverscrollIndicatorNotification extends Notification with ViewportNotifica
   /// This has no effect on a [StretchingOverscrollIndicator].
   double paintOffset = 0.0;
 
-  bool _accepted = true;
+  @protected
+  @visibleForTesting
+  /// Whether the current overscroll event will allow for the indicator to be
+  /// shown.
+  ///
+  /// Calling [disallowIndicator] sets this to false, preventing the over scroll
+  /// indicator from showing.
+  ///
+  /// Defaults to true, cannot be null.
+  bool accepted = true;
 
   /// Call this method if the glow should be prevented. This method is
   /// deprecated in favor of [disallowIndicator].
@@ -990,12 +999,12 @@ class OverscrollIndicatorNotification extends Notification with ViewportNotifica
     'This feature was deprecated after v2.5.0-6.0.pre.',
   )
   void disallowGlow() {
-    _accepted = false;
+    accepted = false;
   }
 
   /// Call this method if the overscroll indicator should be prevented.
   void disallowIndicator() {
-    _accepted = false;
+    accepted = false;
   }
 
   @override

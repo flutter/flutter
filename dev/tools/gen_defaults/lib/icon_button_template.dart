@@ -5,15 +5,14 @@
 import 'template.dart';
 
 class IconButtonTemplate extends TokenTemplate {
-  const IconButtonTemplate(super.fileName, super.tokens)
-      : super(colorSchemePrefix: '_colors.',
-  );
+  const IconButtonTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends ButtonStyle {
+  _${blockName}DefaultsM3(this.context)
     : super(
         animationDuration: kThemeChangeDuration,
         enableFeedback: true,
@@ -88,6 +87,10 @@ class _TokenDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
+
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    ButtonStyleButton.allOrNull<double>(${tokens["md.comp.icon-button.icon.size"]});
 
   // No default side
 

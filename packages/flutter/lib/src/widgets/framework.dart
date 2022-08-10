@@ -24,11 +24,11 @@ export 'package:flutter/foundation.dart' show
   protected,
   required,
   visibleForTesting;
-export 'package:flutter/foundation.dart' show FlutterError, ErrorSummary, ErrorDescription, ErrorHint, debugPrint, debugPrintStack;
-export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
-export 'package:flutter/foundation.dart' show DiagnosticsNode, DiagnosticLevel;
+export 'package:flutter/foundation.dart' show ErrorDescription, ErrorHint, ErrorSummary, FlutterError, debugPrint, debugPrintStack;
+export 'package:flutter/foundation.dart' show ValueChanged, ValueGetter, ValueSetter, VoidCallback;
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsNode;
 export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
-export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
+export 'package:flutter/rendering.dart' show RenderBox, RenderObject, debugDumpLayerTree, debugDumpRenderTree;
 
 // Examples can assume:
 // late BuildContext context;
@@ -781,7 +781,7 @@ abstract class StatefulWidget extends Widget {
   /// [State] objects.
   @protected
   @factory
-  State createState(); // ignore: no_logic_in_create_state, this is the original sin
+  State createState();
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
@@ -2595,7 +2595,6 @@ class BuildOwner {
         assert(_debugStateLocked);
         Element? debugPreviousBuildTarget;
         assert(() {
-          context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
           debugPreviousBuildTarget = _debugCurrentBuildTarget;
           _debugCurrentBuildTarget = context;
           return true;
@@ -2605,7 +2604,6 @@ class BuildOwner {
           callback();
         } finally {
           assert(() {
-            context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
             assert(_debugCurrentBuildTarget == context);
             _debugCurrentBuildTarget = debugPreviousBuildTarget;
             _debugElementWasRebuilt(context);
@@ -3262,6 +3260,19 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return true;
     }());
     return isDefunct;
+  }
+
+  /// Returns true if the Element is active.
+  ///
+  /// This getter always returns false in profile and release builds.
+  /// See the lifecycle documentation for [Element] for additional information.
+  bool get debugIsActive {
+    bool isActive = false;
+    assert(() {
+      isActive = _lifecycleState == _ElementLifecycle.active;
+      return true;
+    }());
+    return isActive;
   }
 
   /// The object that manages the lifecycle of this element.
@@ -4218,7 +4229,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  Map<Type, InheritedElement>? _inheritedWidgets;
+  PersistentHashMap<Type, InheritedElement>? _inheritedWidgets;
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4484,17 +4495,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   // Whether we've already built or not. Set in [rebuild].
   bool _debugBuiltOnce = false;
 
-  // We let widget authors call setState from initState, didUpdateWidget, and
-  // build even when state is locked because its convenient and a no-op anyway.
-  // This flag ensures that this convenience is only allowed on the element
-  // currently undergoing initState, didUpdateWidget, or build.
-  bool _debugAllowIgnoredCallsToMarkNeedsBuild = false;
-  bool _debugSetAllowIgnoredCallsToMarkNeedsBuild(bool value) {
-    assert(_debugAllowIgnoredCallsToMarkNeedsBuild == !value);
-    _debugAllowIgnoredCallsToMarkNeedsBuild = value;
-    return true;
-  }
-
   /// Marks the element as dirty and adds it to the global list of widgets to
   /// rebuild in the next frame.
   ///
@@ -4516,28 +4516,24 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         if (_debugIsInScope(owner!._debugCurrentBuildTarget!)) {
           return true;
         }
-        if (!_debugAllowIgnoredCallsToMarkNeedsBuild) {
-          final List<DiagnosticsNode> information = <DiagnosticsNode>[
-            ErrorSummary('setState() or markNeedsBuild() called during build.'),
-            ErrorDescription(
-              'This ${widget.runtimeType} widget cannot be marked as needing to build because the framework '
-              'is already in the process of building widgets. A widget can be marked as '
-              'needing to be built during the build phase only if one of its ancestors '
-              'is currently building. This exception is allowed because the framework '
-              'builds parent widgets before children, which means a dirty descendant '
-              'will always be built. Otherwise, the framework might not visit this '
-              'widget during this build phase.',
-            ),
-            describeElement('The widget on which setState() or markNeedsBuild() was called was'),
-          ];
-          if (owner!._debugCurrentBuildTarget != null) {
-            information.add(owner!._debugCurrentBuildTarget!.describeWidget('The widget which was currently being built when the offending call was made was'));
-          }
-          throw FlutterError.fromParts(information);
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[
+          ErrorSummary('setState() or markNeedsBuild() called during build.'),
+          ErrorDescription(
+            'This ${widget.runtimeType} widget cannot be marked as needing to build because the framework '
+            'is already in the process of building widgets. A widget can be marked as '
+            'needing to be built during the build phase only if one of its ancestors '
+            'is currently building. This exception is allowed because the framework '
+            'builds parent widgets before children, which means a dirty descendant '
+            'will always be built. Otherwise, the framework might not visit this '
+            'widget during this build phase.',
+          ),
+          describeElement('The widget on which setState() or markNeedsBuild() was called was'),
+        ];
+        if (owner!._debugCurrentBuildTarget != null) {
+          information.add(owner!._debugCurrentBuildTarget!.describeWidget('The widget which was currently being built when the offending call was made was'));
         }
-        assert(dirty); // can only get here if we're not in scope, but ignored calls are allowed, and our call would somehow be ignored (since we're already dirty)
+        throw FlutterError.fromParts(information);
       } else if (owner!._debugStateLocked) {
-        assert(!_debugAllowIgnoredCallsToMarkNeedsBuild);
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('setState() or markNeedsBuild() called when widget tree was locked.'),
           ErrorDescription(
@@ -4855,7 +4851,6 @@ abstract class ComponentElement extends Element {
   @override
   @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
-    assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget? built;
     try {
       assert(() {
@@ -4885,7 +4880,6 @@ abstract class ComponentElement extends Element {
       // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
       _dirty = false;
-      assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(false));
     }
     try {
       _child = updateChild(_child, built, slot);
@@ -4997,25 +4991,20 @@ class StatefulElement extends ComponentElement {
   @override
   void _firstBuild() {
     assert(state._debugLifecycleState == _StateLifecycle.created);
-    try {
-      _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      final Object? debugCheckForReturnedFuture = state.initState() as dynamic;
-      assert(() {
-        if (debugCheckForReturnedFuture is Future) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${state.runtimeType}.initState() returned a Future.'),
-            ErrorDescription('State.initState() must be a void method without an `async` keyword.'),
-            ErrorHint(
-              'Rather than awaiting on asynchronous work directly inside of initState, '
-              'call a separate method to do this work without awaiting it.',
-            ),
-          ]);
-        }
-        return true;
-      }());
-    } finally {
-      _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
-    }
+    final Object? debugCheckForReturnedFuture = state.initState() as dynamic;
+    assert(() {
+      if (debugCheckForReturnedFuture is Future) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('${state.runtimeType}.initState() returned a Future.'),
+          ErrorDescription('State.initState() must be a void method without an `async` keyword.'),
+          ErrorHint(
+            'Rather than awaiting on asynchronous work directly inside of initState, '
+            'call a separate method to do this work without awaiting it.',
+          ),
+        ]);
+      }
+      return true;
+    }());
     assert(() {
       state._debugLifecycleState = _StateLifecycle.initialized;
       return true;
@@ -5047,25 +5036,20 @@ class StatefulElement extends ComponentElement {
     // asserts.
     _dirty = true;
     state._widget = widget as StatefulWidget;
-    try {
-      _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      final Object? debugCheckForReturnedFuture = state.didUpdateWidget(oldWidget) as dynamic;
-      assert(() {
-        if (debugCheckForReturnedFuture is Future) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${state.runtimeType}.didUpdateWidget() returned a Future.'),
-            ErrorDescription( 'State.didUpdateWidget() must be a void method without an `async` keyword.'),
-            ErrorHint(
-              'Rather than awaiting on asynchronous work directly inside of didUpdateWidget, '
-              'call a separate method to do this work without awaiting it.',
-            ),
-          ]);
-        }
-        return true;
-      }());
-    } finally {
-      _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
-    }
+    final Object? debugCheckForReturnedFuture = state.didUpdateWidget(oldWidget) as dynamic;
+    assert(() {
+      if (debugCheckForReturnedFuture is Future) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('${state.runtimeType}.didUpdateWidget() returned a Future.'),
+          ErrorDescription( 'State.didUpdateWidget() must be a void method without an `async` keyword.'),
+          ErrorHint(
+            'Rather than awaiting on asynchronous work directly inside of didUpdateWidget, '
+            'call a separate method to do this work without awaiting it.',
+          ),
+        ]);
+      }
+      return true;
+    }());
     rebuild();
   }
 
@@ -5306,13 +5290,9 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
-    if (incomingWidgets != null) {
-      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
-    } else {
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
-    }
-    _inheritedWidgets![widget.runtimeType] = this;
+    final PersistentHashMap<Type, InheritedElement> incomingWidgets =
+        _parent?._inheritedWidgets ?? const PersistentHashMap<Type, InheritedElement>.empty();
+    _inheritedWidgets = incomingWidgets.put(widget.runtimeType, this);
   }
 
   @override

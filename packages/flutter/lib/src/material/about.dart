@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline, Flow;
+import 'dart:developer' show Flow, Timeline;
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';

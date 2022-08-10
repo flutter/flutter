@@ -14,6 +14,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'icon_button_theme.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -37,7 +38,9 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// If the [onPressed] callback is null, then the button will be disabled and
 /// will not react to touch.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. In Material Design 3,
+/// this requirement no longer exists because this widget builds a subclass of
+/// [ButtonStyleButton].
 ///
 /// The hit region of an icon button will, if possible, be at least
 /// kMinInteractiveDimension pixels in size, regardless of the actual
@@ -109,6 +112,12 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// null then it will behave as a toggle button. If [isSelected] is true then it will
 /// show [selectedIcon], if it false it will show the normal [icon].
 ///
+/// In Material Design 3, both [IconTheme] and [IconButtonTheme] are used to override the default style
+/// of [IconButton]. If both themes exist, the [IconButtonTheme] will override [IconTheme] no matter
+/// which is closer to the [IconButton]. Each [IconButton]'s property is resolved by the order of
+/// precedence: widget property, [IconButtonTheme] property, [IconTheme] property and
+/// internal default property value.
+///
 /// {@tool dartpad}
 /// This sample shows creation of [IconButton] widgets for standard, filled,
 /// filled tonal and outlined types, as described in: https://m3.material.io/components/icon-buttons/overview
@@ -139,10 +148,10 @@ class IconButton extends StatelessWidget {
   /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
   /// be used in many other places as well.
   ///
-  /// Requires one of its ancestors to be a [Material] widget.
+  /// Requires one of its ancestors to be a [Material] widget. This requirement
+  /// no longer exists if [ThemeData.useMaterial3] is set to true.
   ///
-  /// The [iconSize], [padding], [autofocus], and [alignment] arguments must not
-  /// be null (though they each have default values).
+  /// [autofocus] argument must not be null (though it has default value).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
@@ -150,8 +159,8 @@ class IconButton extends StatelessWidget {
     super.key,
     this.iconSize,
     this.visualDensity,
-    this.padding = const EdgeInsets.all(8.0),
-    this.alignment = Alignment.center,
+    this.padding,
+    this.alignment,
     this.splashRadius,
     this.color,
     this.focusColor,
@@ -164,15 +173,13 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
-    this.enableFeedback = true,
+    this.enableFeedback,
     this.constraints,
     this.style,
     this.isSelected,
     this.selectedIcon,
     required this.icon,
-  }) : assert(padding != null),
-       assert(alignment != null),
-       assert(splashRadius == null || splashRadius > 0),
+  }) : assert(splashRadius == null || splashRadius > 0),
        assert(autofocus != null),
        assert(icon != null);
 
@@ -187,6 +194,10 @@ class IconButton extends StatelessWidget {
   /// fit the [Icon]. If you were to set the size of the [Icon] using
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
+  ///
+  /// If [ThemeData.useMaterial3] is set to true and this is null, the size of the
+  /// [IconButton] would default to 24.0. The size given here is passed down to the
+  /// [ButtonStyle.iconSize] property.
   final double? iconSize;
 
   /// Defines how compact the icon button's layout will be.
@@ -202,12 +213,12 @@ class IconButton extends StatelessWidget {
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
   ///
-  /// This property must not be null. It defaults to 8.0 padding on all sides.
-  final EdgeInsetsGeometry padding;
+  /// This property can be null. If null, it defaults to 8.0 padding on all sides.
+  final EdgeInsetsGeometry? padding;
 
   /// Defines how the icon is positioned within the IconButton.
   ///
-  /// This property must not be null. It defaults to [Alignment.center].
+  /// This property can be null. If null, it defaults to [Alignment.center].
   ///
   /// See also:
   ///
@@ -215,7 +226,7 @@ class IconButton extends StatelessWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
-  final AlignmentGeometry alignment;
+  final AlignmentGeometry? alignment;
 
   /// The splash radius.
   ///
@@ -277,7 +288,7 @@ class IconButton extends StatelessWidget {
   /// IconButton(
   ///   color: Colors.blue,
   ///   onPressed: _handleTap,
-  ///   icon: Icons.widgets,
+  ///   icon: Icon(Icons.widgets),
   /// )
   /// ```
   final Color? color;
@@ -353,7 +364,7 @@ class IconButton extends StatelessWidget {
   /// See also:
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
-  final bool enableFeedback;
+  final bool? enableFeedback;
 
   /// Optional size constraints for the button.
   ///
@@ -465,6 +476,7 @@ class IconButton extends StatelessWidget {
     Size? minimumSize,
     Size? fixedSize,
     Size? maximumSize,
+    double? iconSize,
     BorderSide? side,
     OutlinedBorder? shape,
     EdgeInsetsGeometry? padding,
@@ -501,6 +513,7 @@ class IconButton extends StatelessWidget {
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
       fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
+      iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
@@ -516,25 +529,6 @@ class IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    if (!theme.useMaterial3) {
-      assert(debugCheckHasMaterial(context));
-    }
-
-    Color? currentColor;
-    if (onPressed != null) {
-      currentColor = color;
-    } else {
-      currentColor = disabledColor ?? theme.disabledColor;
-    }
-
-    final VisualDensity effectiveVisualDensity = visualDensity ?? theme.visualDensity;
-
-    final BoxConstraints unadjustedConstraints = constraints ?? const BoxConstraints(
-      minWidth: _kMinButtonSize,
-      minHeight: _kMinButtonSize,
-    );
-    final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
-    final double effectiveIconSize = iconSize ?? IconTheme.of(context).size ?? 24.0;
 
     if (theme.useMaterial3) {
       final Size? minSize = constraints == null
@@ -554,6 +548,7 @@ class IconButton extends StatelessWidget {
         padding: padding,
         minimumSize: minSize,
         maximumSize: maxSize,
+        iconSize: iconSize,
         alignment: alignment,
         enabledMouseCursor: mouseCursor,
         disabledMouseCursor: mouseCursor,
@@ -568,16 +563,11 @@ class IconButton extends StatelessWidget {
         effectiveIcon = selectedIcon!;
       }
 
-      Widget iconButton = IconTheme.merge(
-        data: IconThemeData(
-          size: effectiveIconSize,
-        ),
-        child: effectiveIcon,
-      );
+      Widget iconButton = effectiveIcon;
       if (tooltip != null) {
         iconButton = Tooltip(
           message: tooltip,
-          child: iconButton,
+          child: effectiveIcon,
         );
       }
 
@@ -591,15 +581,36 @@ class IconButton extends StatelessWidget {
       );
     }
 
+    assert(debugCheckHasMaterial(context));
+
+    Color? currentColor;
+    if (onPressed != null) {
+      currentColor = color;
+    } else {
+      currentColor = disabledColor ?? theme.disabledColor;
+    }
+
+    final VisualDensity effectiveVisualDensity = visualDensity ?? theme.visualDensity;
+
+    final BoxConstraints unadjustedConstraints = constraints ?? const BoxConstraints(
+      minWidth: _kMinButtonSize,
+      minHeight: _kMinButtonSize,
+    );
+    final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
+    final double effectiveIconSize = iconSize ?? IconTheme.of(context).size ?? 24.0;
+    final EdgeInsetsGeometry effectivePadding = padding ?? const EdgeInsets.all(8.0);
+    final AlignmentGeometry effectiveAlignment = alignment ?? Alignment.center;
+    final bool effectiveEnableFeedback = enableFeedback ?? true;
+
     Widget result = ConstrainedBox(
       constraints: adjustedConstraints,
       child: Padding(
-        padding: padding,
+        padding: effectivePadding,
         child: SizedBox(
           height: effectiveIconSize,
           width: effectiveIconSize,
           child: Align(
-            alignment: alignment,
+            alignment: effectiveAlignment,
             child: IconTheme.merge(
               data: IconThemeData(
                 size: effectiveIconSize,
@@ -628,14 +639,14 @@ class IconButton extends StatelessWidget {
         canRequestFocus: onPressed != null,
         onTap: onPressed,
         mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
-        enableFeedback: enableFeedback,
+        enableFeedback: effectiveEnableFeedback,
         focusColor: focusColor ?? theme.focusColor,
         hoverColor: hoverColor ?? theme.hoverColor,
         highlightColor: highlightColor ?? theme.highlightColor,
         splashColor: splashColor ?? theme.splashColor,
         radius: splashRadius ?? math.max(
           Material.defaultSplashRadius,
-          (effectiveIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          (effectiveIconSize + math.min(effectivePadding.horizontal, effectivePadding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
         child: result,
@@ -762,6 +773,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `minimumSize` - Size(40, 40)
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite
+  /// * `iconSize` - 24
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
@@ -775,13 +787,33 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `splashFactory` - Theme.splashFactory
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    return _TokenDefaultsM3(context);
+    return _IconButtonDefaultsM3(context);
   }
 
-  /// Returns null because [IconButton] doesn't have its component theme.
+  /// Returns the [IconButtonThemeData.style] of the closest [IconButtonTheme] ancestor.
+  /// The color and icon size can also be configured by the [IconTheme] if the same property
+  /// has a null value in [IconButtonTheme]. However, if any of the properties exist
+  /// in both [IconButtonTheme] and [IconTheme], [IconTheme] will be overridden.
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
-    return null;
+    final IconThemeData iconTheme = IconTheme.of(context);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    bool isIconThemeDefault(Color? color) {
+      if (isDark) {
+        return color == kDefaultIconLightColor;
+      }
+      return color == kDefaultIconDarkColor;
+    }
+    final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
+    final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
+
+    final ButtonStyle iconThemeStyle = IconButton.styleFrom(
+      foregroundColor: isDefaultColor ? null : iconTheme.color,
+      iconSize: isDefaultSize ? null : iconTheme.size
+    );
+
+    return IconButtonTheme.of(context).style?.merge(iconThemeStyle) ?? iconThemeStyle;
   }
 }
 
@@ -883,15 +915,17 @@ class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - IconButton
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_101
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _IconButtonDefaultsM3 extends ButtonStyle {
+  _IconButtonDefaultsM3(this.context)
     : super(
         animationDuration: kThemeChangeDuration,
         enableFeedback: true,
@@ -967,6 +1001,10 @@ class _TokenDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
 
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    ButtonStyleButton.allOrNull<double>(24.0);
+
   // No default side
 
   @override
@@ -992,4 +1030,4 @@ class _TokenDefaultsM3 extends ButtonStyle {
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - IconButton

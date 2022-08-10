@@ -43,15 +43,46 @@ void main() {
       ]);
 
       const String expected = '\n'
-      '┌────────────────────────────────────────────────────────────────────────────┐\n'
-      '│ General Info                                                               │\n'
-      '│ [✓] App Name: flutter_gallery                                              │\n'
-      '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows, fuchsia │\n'
-      '│ [✓] Is Flutter Package: yes                                                │\n'
-      '│ [✓] Uses Material Design: yes                                              │\n'
-      '│ [✓] Is Plugin: no                                                          │\n'
-      '└────────────────────────────────────────────────────────────────────────────┘\n';
+      '┌───────────────────────────────────────────────────────────────────┐\n'
+      '│ General Info                                                      │\n'
+      '│ [✓] App Name: flutter_gallery                                     │\n'
+      '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows │\n'
+      '│ [✓] Is Flutter Package: yes                                       │\n'
+      '│ [✓] Uses Material Design: yes                                     │\n'
+      '│ [✓] Is Plugin: no                                                 │\n'
+      '└───────────────────────────────────────────────────────────────────┘\n';
 
+      expect(loggerTest.statusText, contains(expected));
+    });
+
+    testUsingContext('PubDependenciesProjectValidator success ', () async {
+      final BufferLogger loggerTest = BufferLogger.test();
+      final AnalyzeCommand command = AnalyzeCommand(
+        artifacts: globals.artifacts!,
+        fileSystem: fileSystem,
+        logger: loggerTest,
+        platform: globals.platform,
+        terminal: globals.terminal,
+        processManager: globals.processManager,
+        allProjectValidators: <ProjectValidator>[
+          PubDependenciesProjectValidator(globals.processManager),
+        ],
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'analyze',
+        '--no-pub',
+        '--no-current-package',
+        '--suggestions',
+        '../../dev/integration_tests/flutter_gallery',
+      ]);
+
+      const String expected = '\n'
+        '┌────────────────────────────────────────────────────────────────────────────────────┐\n'
+        '│ Pub dependencies                                                                   │\n'
+        '│ [✓] Dart dependencies: All pub dependencies are hosted on https://pub.dartlang.org │\n'
+        '└────────────────────────────────────────────────────────────────────────────────────┘\n';
       expect(loggerTest.statusText, contains(expected));
     });
   });

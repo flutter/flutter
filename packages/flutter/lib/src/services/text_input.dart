@@ -7,8 +7,8 @@ import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
   Offset,
-  Size,
   Rect,
+  Size,
   TextAlign,
   TextDirection;
 
@@ -258,6 +258,9 @@ class TextInputType {
 ///
 ///  * [TextInput], which configures the platform's keyboard setup.
 ///  * [EditableText], which invokes callbacks when the action button is pressed.
+//
+// This class has been cloned to `flutter_driver/lib/src/common/action.dart` as `TextInputAction`,
+// and must be kept in sync.
 enum TextInputAction {
   /// Logical meaning: There is no relevant input action for the current input
   /// source, e.g., [TextField].
@@ -1162,6 +1165,11 @@ mixin TextInputClient {
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
+
+  /// Performs the specified MacOS-specific selector from the
+  /// `NSStandardKeyBindingResponding` protocol or user-specified selector
+  /// from `DefaultKeyBinding.Dict`.
+  void performSelector(String selectorName) {}
 }
 
 /// An interface to receive focus from the engine.
@@ -1815,6 +1823,10 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performSelectors':
+        final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
+        selectors.forEach(_currentConnection!._client.performSelector);
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag, DisplayFeature, DisplayFeatureType, DisplayFeatureState;
+import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType, SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -2511,10 +2511,10 @@ void main() {
     }
 
     await buildFrame();
-    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 24);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(24, 24));
 
     await buildFrame(iconSize: 50);
-    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(50, 50));
   });
 
   testWidgets('does not crash in small overlay', (WidgetTester tester) async {
@@ -2867,23 +2867,72 @@ void main() {
 
     // Popup menu with default icon size.
     await tester.pumpWidget(buildPopupMenu());
-    IconButton iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // Default PopupMenuButton icon size is 24.0.
-    expect(iconButton.iconSize, 24.0);
+    expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(24.0, 24.0));
 
     // Popup menu with custom theme icon size.
     await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0));
     await tester.pumpAndSettle();
-    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // PopupMenuButton icon inherits IconTheme's size.
-    expect(iconButton.iconSize, 30.0);
+    expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(30.0, 30.0));
 
     // Popup menu with custom icon size.
     await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0, iconSize: 50.0));
     await tester.pumpAndSettle();
-    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
     // PopupMenuButton icon size overrides IconTheme's size.
-    expect(iconButton.iconSize, 50.0);
+    expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(50.0, 50.0));
+  });
+
+  testWidgets('Popup menu clip behavior', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107215
+    final Key popupButtonKey = UniqueKey();
+    const double radius = 20.0;
+
+    Widget buildPopupMenu({required Clip clipBehavior}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupButtonKey,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(radius)),
+              ),
+              clipBehavior: clipBehavior,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.none));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.none);
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+
+    // Popup menu with custom ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.hardEdge));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.hardEdge);
   });
 }
 

@@ -14,7 +14,20 @@ import 'package:flutter/semantics.dart';
 import 'debug.dart';
 import 'layer.dart';
 
-export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, ErrorSummary, ErrorDescription, ErrorHint, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
+export 'package:flutter/foundation.dart' show
+  DiagnosticPropertiesBuilder,
+  DiagnosticsNode,
+  DiagnosticsProperty,
+  DoubleProperty,
+  EnumProperty,
+  ErrorDescription,
+  ErrorHint,
+  ErrorSummary,
+  FlagProperty,
+  FlutterError,
+  InformationCollector,
+  IntProperty,
+  StringProperty;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 

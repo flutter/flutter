@@ -390,12 +390,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return false;
   }
 
-  bool _handleGlowNotification(OverscrollIndicatorNotification notification) {
+  bool _handleIndicatorNotification(OverscrollIndicatorNotification notification) {
     if (notification.depth != 0 || !notification.leading) {
       return false;
     }
     if (_mode == _RefreshIndicatorMode.drag) {
-      notification.disallowGlow();
+      notification.disallowIndicator();
       return true;
     }
     return false;
@@ -542,7 +542,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     final Widget child = NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: _handleGlowNotification,
+        onNotification: _handleIndicatorNotification,
         child: widget.child,
       ),
     );

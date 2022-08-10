@@ -176,7 +176,7 @@ void main() {
     // framework, excluding any that are for the widget inspector
     // (see widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions).
-    const int serviceExtensionCount = 36;
+    const int serviceExtensionCount = 38;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
 
@@ -262,7 +262,10 @@ void main() {
     final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
 
     expect(result, <String, String>{
-      'data': 'Semantics not collected.',
+      'data': 'Semantics not generated.\n'
+        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
+        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
     });
   });
 
@@ -271,7 +274,10 @@ void main() {
     final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
 
     expect(result, <String, String>{
-      'data': 'Semantics not collected.',
+      'data': 'Semantics not generated.\n'
+        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
+        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
     });
   });
 

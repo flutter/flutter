@@ -1030,6 +1030,8 @@ class _ActionsMarker extends InheritedWidget {
 /// and key bindings, and provides callbacks for handling focus and hover
 /// highlights.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=R84AGg0lKs8}
+///
 /// This widget can be used to give a control the required detection modes for
 /// focus and hover handling. It is most often used when authoring a new control
 /// widget, and the new control should be enabled for keyboard traversal and

@@ -84,7 +84,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlParserException {
+    } on XmlException {
       invalidFiles[appManifestFile.path] = 'Error parsing $appManifestFile '
         'Please ensure that the android manifest is a valid XML document and '
         'try again.';

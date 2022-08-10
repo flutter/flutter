@@ -140,6 +140,14 @@ class _PreferredAppBarSize extends Size {
 /// ** See code in examples/api/lib/material/app_bar/app_bar.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to listen to a nested Scrollable's scroll notification
+/// in a nested scroll view using the [notificationPredicate] property and use it
+/// to make [scrolledUnderElevation] take effect.
+///
+/// ** See code in examples/api/lib/material/app_bar/app_bar.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], which displays the [AppBar] in its [Scaffold.appBar] slot.
@@ -876,7 +884,7 @@ class _AppBarState extends State<AppBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
-    final AppBarTheme defaults = theme.useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final AppBarTheme defaults = theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
 
@@ -2284,8 +2292,9 @@ mixin _ScrollUnderFlexibleConfig {
   EdgeInsetsGeometry? get expandedTitlePadding;
 }
 
-class _DefaultsM2 extends AppBarTheme {
-  _DefaultsM2(this.context)
+// Hand coded defaults based on Material Design 2.
+class _AppBarDefaultsM2 extends AppBarTheme {
+  _AppBarDefaultsM2(this.context)
     : super(
       elevation: 4.0,
       shadowColor: const Color(0xFF000000),
@@ -2313,15 +2322,17 @@ class _DefaultsM2 extends AppBarTheme {
   TextStyle? get titleTextStyle => _theme.textTheme.headline6;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - AppBar
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_101
-class _TokenDefaultsM3 extends AppBarTheme {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _AppBarDefaultsM3 extends AppBarTheme {
+  _AppBarDefaultsM3(this.context)
     : super(
       elevation: 0.0,
       scrolledUnderElevation: 3.0,
@@ -2421,4 +2432,4 @@ class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
   EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - AppBar

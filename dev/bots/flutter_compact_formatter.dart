@@ -133,10 +133,12 @@ class FlutterCompactFormatter {
           originalResult.errorMessage = error;
           originalResult.stackTrace = stackTrace;
         } else {
-          if (error != null)
+          if (error != null) {
             stderr.writeln(error);
-          if (stackTrace != null)
+          }
+          if (stackTrace != null) {
             stderr.writeln(stackTrace);
+          }
         }
         break;
       case 'print':
