@@ -7,7 +7,6 @@ import 'dart:math';
 
 import 'package:archive/archive.dart';
 import 'package:http/http.dart' as http;
-import 'package:io/io.dart' as io;
 import 'package:path/path.dart' as path;
 
 const String kDocRoot = 'dev/docs/doc';
@@ -81,10 +80,10 @@ Future<void> generateDocs(String url, String docName, String checkFile) async {
 
 /// Copies the files in a directory recursively to a new location.
 void copyFolder(Directory source, Directory destination) {
-  source.listSync(recursive: false)
+  source.listSync()
   .forEach((FileSystemEntity entity) {
     if (entity is Directory) {
-      Directory newDirectory = Directory(path.join(destination.absolute.path, path.basename(entity.path)));
+      final Directory newDirectory = Directory(path.join(destination.absolute.path, path.basename(entity.path)));
       newDirectory.createSync();
       copyFolder(entity.absolute, newDirectory);
     } else if (entity is File) {
