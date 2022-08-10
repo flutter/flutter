@@ -1415,5 +1415,113 @@ TEST_P(EntityTest, RRectShadowTest) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(EntityTest, ColorMatrixFilterCoverageIsCorrect) {
+  // Set up a simple color background.
+  auto fill = std::make_shared<SolidColorContents>();
+  fill->SetPath(
+      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+  fill->SetColor(Color::Coral());
+
+  // Set the color matrix filter.
+  FilterContents::ColorMatrix matrix = {
+      1, 1, 1, 1, 1,  //
+      1, 1, 1, 1, 1,  //
+      1, 1, 1, 1, 1,  //
+      1, 1, 1, 1, 1,  //
+  };
+
+  auto filter =
+      FilterContents::MakeColorMatrix(FilterInput::Make(fill), matrix);
+
+  Entity e;
+  e.SetTransformation(Matrix());
+
+  // Confirm that the actual filter coverage matches the expected coverage.
+  auto actual = filter->GetCoverage(e);
+  auto expected = Rect::MakeXYWH(0, 0, 300, 400);
+
+  ASSERT_TRUE(actual.has_value());
+  ASSERT_RECT_NEAR(actual.value(), expected);
+}
+
+TEST_P(EntityTest, ColorMatrixFilter) {
+  auto image = CreateTextureForFixture("boston.jpg");
+  ASSERT_TRUE(image);
+
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    // Set the color matrix filter.
+    FilterContents::ColorMatrix matrix = {
+        1, 0, 0, 0, 0,  //
+        0, 3, 0, 0, 0,  //
+        0, 0, 1, 0, 0,  //
+        0, 0, 0, 1, 0,  //
+    };
+
+    auto filter =
+        FilterContents::MakeColorMatrix(FilterInput::Make(image), matrix);
+
+    // Define the entity with the color matrix filter.
+    Entity entity;
+    entity.SetTransformation(Matrix::MakeScale(GetContentScale()) *
+                             Matrix::MakeTranslation({500, 300}) *
+                             Matrix::MakeScale(Vector2{0.5, 0.5}));
+    entity.SetContents(filter);
+    return entity.Render(context, pass);
+  };
+
+  // Should output the boston image with a green filter.
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, ColorMatrixFilterEditable) {
+  auto bay_bridge = CreateTextureForFixture("bay_bridge.jpg");
+  ASSERT_TRUE(bay_bridge);
+
+  bool first_frame = true;
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    // If this is the first frame, set the ImGui's initial size and postion.
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({500, 150});
+      ImGui::SetNextWindowPos({260, 600});
+    }
+
+    // UI state.
+    static FilterContents::ColorMatrix color_matrix = {
+        1, 0, 0, 0, 0,  //
+        0, 3, 0, 0, 0,  //
+        0, 0, 1, 0, 0,  //
+        0, 0, 0, 1, 0,  //
+    };
+
+    // Define the ImGui
+    ImGui::Begin("Color Matrix");
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 20; i += 5) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float,
+                          &(color_matrix.array[i]), 5, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    // Set the color matrix filter.
+    auto filter = FilterContents::MakeColorMatrix(FilterInput::Make(bay_bridge),
+                                                  color_matrix);
+
+    // Define the entity with the color matrix filter.
+    Entity entity;
+    entity.SetTransformation(Matrix::MakeScale(GetContentScale()) *
+                             Matrix::MakeTranslation({250, 200}) *
+                             Matrix::MakeScale(Vector2{0.5, 0.5}));
+    entity.SetContents(filter);
+    entity.Render(context, pass);
+
+    return true;
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
