@@ -174,7 +174,7 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<void>(
-            // Defaults to false for _ZoomPageTransition due to https://github.com/flutter/flutter/issues/108389
+            preferRasterization: false,
             builder: (BuildContext context) {
               if (settings.name == '/') {
                 return const Material(child: Text('Page 1'));
