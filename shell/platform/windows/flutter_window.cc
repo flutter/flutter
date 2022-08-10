@@ -250,8 +250,7 @@ bool FlutterWindow::OnBitmapSurfaceUpdated(const void* allocation,
                                            size_t row_bytes,
                                            size_t height) {
   HDC dc = ::GetDC(GetWindowHandle());
-  BITMAPINFO bmi;
-  memset(&bmi, 0, sizeof(bmi));
+  BITMAPINFO bmi = {};
   bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
   bmi.bmiHeader.biWidth = row_bytes / 4;
   bmi.bmiHeader.biHeight = -height;

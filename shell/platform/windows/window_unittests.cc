@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+
 #include "flutter/shell/platform/windows/testing/mock_text_input_manager.h"
 #include "flutter/shell/platform/windows/testing/mock_window.h"
 #include "gtest/gtest.h"
@@ -207,19 +209,19 @@ TEST(MockWindow, KeyDownPrintable) {
       .Times(1)
       .WillOnce(respond_false);
   EXPECT_CALL(window, OnText(_)).Times(1);
-  Win32Message messages[] = {{WM_KEYDOWN, 65, lparam, kWmResultDontCheck},
-                             {WM_CHAR, 65, lparam, kWmResultDontCheck}};
-  window.InjectMessageList(2, messages);
+  std::array<Win32Message, 2> messages = {
+      Win32Message{WM_KEYDOWN, 65, lparam, kWmResultDontCheck},
+      Win32Message{WM_CHAR, 65, lparam, kWmResultDontCheck}};
+  window.InjectMessageList(2, messages.data());
 }
 
 TEST(MockWindow, KeyDownWithCtrl) {
   MockWindow window;
 
   // Simulate CONTROL pressed
-  BYTE keyboard_state[256];
-  memset(keyboard_state, 0, 256);
+  std::array<BYTE, 256> keyboard_state;
   keyboard_state[VK_CONTROL] = -1;
-  SetKeyboardState(keyboard_state);
+  SetKeyboardState(keyboard_state.data());
 
   LPARAM lparam = CreateKeyEventLparam(30, false, false);
 
@@ -230,8 +232,8 @@ TEST(MockWindow, KeyDownWithCtrl) {
 
   window.InjectWindowMessage(WM_KEYDOWN, 65, lparam);
 
-  memset(keyboard_state, 0, 256);
-  SetKeyboardState(keyboard_state);
+  keyboard_state.fill(0);
+  SetKeyboardState(keyboard_state.data());
 }
 
 TEST(MockWindow, KeyDownWithCtrlToggled) {
@@ -244,10 +246,9 @@ TEST(MockWindow, KeyDownWithCtrlToggled) {
   };
 
   // Simulate CONTROL toggled
-  BYTE keyboard_state[256];
-  memset(keyboard_state, 0, 256);
+  std::array<BYTE, 256> keyboard_state;
   keyboard_state[VK_CONTROL] = 1;
-  SetKeyboardState(keyboard_state);
+  SetKeyboardState(keyboard_state.data());
 
   LPARAM lparam = CreateKeyEventLparam(30, false, false);
 
@@ -261,8 +262,8 @@ TEST(MockWindow, KeyDownWithCtrlToggled) {
                              {WM_CHAR, 65, lparam, kWmResultDontCheck}};
   window.InjectMessageList(2, messages);
 
-  memset(keyboard_state, 0, 256);
-  SetKeyboardState(keyboard_state);
+  keyboard_state.fill(0);
+  SetKeyboardState(keyboard_state.data());
 }
 
 TEST(MockWindow, Paint) {
