@@ -26,6 +26,15 @@ if (use_goma) {
   goma_prefix = ""
 }
 
+# Goma doesn't support the host-arm64 toolchain, so continue using Rosetta.
+if (host_cpu == "arm64" && !use_goma) {
+  rebased_clang_dir =
+      rebase_path("//buildtools/mac-arm64/clang/bin", root_build_dir)
+} else {
+  rebased_clang_dir =
+      rebase_path("//buildtools/mac-x64/clang/bin", root_build_dir)
+}
+
 # Shared toolchain definition. Invocations should set toolchain_os to set the
 # build args in this definition.
 template("mac_toolchain") {
@@ -218,14 +227,12 @@ template("mac_toolchain") {
   }
 }
 
-llvm_bin_path = "//buildtools/mac-x64/clang/bin"
-
 # Toolchain used for iOS device targets.
 mac_toolchain("ios_clang_arm") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
   if (!use_xcode) {
-    prefix = rebase_path(llvm_bin_path, root_build_dir)
+    prefix = rebased_clang_dir
     ar = "$prefix/llvm-ar"
     cc = "$prefix/clang"
     cxx = "$prefix/clang++"
@@ -244,7 +251,7 @@ mac_toolchain("ios_clang_arm_sim") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
   if (!use_xcode) {
-    prefix = rebase_path(llvm_bin_path, root_build_dir)
+    prefix = rebased_clang_dir
     ar = "$prefix/llvm-ar"
     cc = "$prefix/clang"
     cxx = "$prefix/clang++"
@@ -262,7 +269,7 @@ mac_toolchain("ios_clang_arm_sim") {
 mac_toolchain("ios_clang_x64_sim") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
-  prefix = rebase_path(llvm_bin_path, root_build_dir)
+  prefix = rebased_clang_dir
   ar = "$prefix/llvm-ar"
   cc = "$prefix/clang"
   cxx = "$prefix/clang++"
@@ -276,7 +283,7 @@ mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
   if (!use_xcode) {
-    prefix = rebase_path(llvm_bin_path, root_build_dir)
+    prefix = rebased_clang_dir
     ar = "$prefix/llvm-ar"
     cc = "$prefix/clang"
     cxx = "$prefix/clang++"
@@ -295,7 +302,7 @@ mac_toolchain("clang_arm64") {
   toolchain_cpu = "arm64"
   toolchain_os = "mac"
   if (!use_xcode) {
-    prefix = rebase_path(llvm_bin_path, root_build_dir)
+    prefix = rebased_clang_dir
     ar = "$prefix/llvm-ar"
     cc = "$prefix/clang"
     cxx = "$prefix/clang++"
