@@ -503,7 +503,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// ```dart
 ///  Stack(
-///    children: [
+///    children: <Widget>[
 ///      Positioned.fill(child: Image.asset('image.png')),
 ///        Positioned.fill(
 ///          child: BackdropFilter(
@@ -511,7 +511,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///          ),
 ///        ),
 ///      ],
-///   );
+///   )
 ///
 /// ```
 /// {@end-tool}
@@ -523,7 +523,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///  ImageFiltered(
 ///    filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
 ///    child: Image.asset('image.png'),
-///  );
+///  )
 /// ```
 ///
 /// {@end-tool}
