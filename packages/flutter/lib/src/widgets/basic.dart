@@ -522,7 +522,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// ```dart
 ///  ImageFiltered(
 ///    filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-///    child: Image.asset('image.png')),
+///    child: Image.asset('image.png'),
 ///  );
 /// ```
 ///
