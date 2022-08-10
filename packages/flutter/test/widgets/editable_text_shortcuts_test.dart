@@ -1582,8 +1582,6 @@ void main() {
               '${"aaa\n" * 50}'
               'aaaa';
 
-            final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-
             controller.selection = const TextSelection.collapsed(offset: 2);
             await tester.pumpWidget(buildEditableText());
 
@@ -1594,7 +1592,7 @@ void main() {
               affinity: TextAffinity.upstream,
             ));
 
-            await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.pageDown, alt: isApple));
+            await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.pageDown));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(offset: 81));
 
@@ -1602,13 +1600,13 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(offset: 77));
 
-            await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.pageUp, alt: isApple));
+            await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.pageUp));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 4,
               affinity: TextAffinity.upstream,
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: TargetPlatformVariant.all(excluding: TargetPlatform.macOS)); // intended: on macOS Page Up/Down only scrolls
 
           testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =

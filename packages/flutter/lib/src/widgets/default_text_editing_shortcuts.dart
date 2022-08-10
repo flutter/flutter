@@ -340,10 +340,10 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
-    const SingleActivator(LogicalKeyboardKey.pageUp, alt: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.pageDown, alt: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 
     const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
