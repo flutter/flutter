@@ -364,7 +364,7 @@ void main() {
     // and the location requires a bit of scroll.
     tester.testTextInput.updateEditingValue(TextEditingValue(
       text: text,
-      selection: TextSelection(baseOffset: 26, extentOffset: 27),
+      selection: const TextSelection(baseOffset: 26, extentOffset: 27),
     ));
     await tester.pumpAndSettle();
 
