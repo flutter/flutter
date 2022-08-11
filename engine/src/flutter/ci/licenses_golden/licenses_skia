@@ -1,4 +1,4 @@
-Signature: 7ba3b625555454cc5bcc6e22c0324174
+Signature: 0437b7e931559ee10817f7b792fd9c98
 
 UNUSED LICENSES:
 
@@ -802,7 +802,6 @@ FILE: ../../../third_party/skia/go.sum
 FILE: ../../../third_party/skia/go_repositories.bzl
 FILE: ../../../third_party/skia/include/BUILD.bazel
 FILE: ../../../third_party/skia/include/android/BUILD.bazel
-FILE: ../../../third_party/skia/include/c/BUILD.bazel
 FILE: ../../../third_party/skia/include/codec/BUILD.bazel
 FILE: ../../../third_party/skia/include/config/BUILD.bazel
 FILE: ../../../third_party/skia/include/core/BUILD.bazel
@@ -1281,7 +1280,6 @@ FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/BUILD.bazel
 FILE: ../../../third_party/skia/src/android/BUILD.bazel
-FILE: ../../../third_party/skia/src/c/BUILD.bazel
 FILE: ../../../third_party/skia/src/codec/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
@@ -1692,8 +1690,6 @@ FILE: ../../../third_party/skia/dm/DMJsonWriter.h
 FILE: ../../../third_party/skia/gm/aaa.cpp
 FILE: ../../../third_party/skia/gm/beziers.cpp
 FILE: ../../../third_party/skia/gm/blurcircles.cpp
-FILE: ../../../third_party/skia/gm/cgm.c
-FILE: ../../../third_party/skia/gm/cgms.cpp
 FILE: ../../../third_party/skia/gm/clipdrawdraw.cpp
 FILE: ../../../third_party/skia/gm/coloremoji_blendmodes.cpp
 FILE: ../../../third_party/skia/gm/colorfilters.cpp
@@ -1729,17 +1725,6 @@ FILE: ../../../third_party/skia/gm/textblobshader.cpp
 FILE: ../../../third_party/skia/gm/tiledscaledbitmap.cpp
 FILE: ../../../third_party/skia/gm/variedtext.cpp
 FILE: ../../../third_party/skia/gm/yuvtorgbsubset.cpp
-FILE: ../../../third_party/skia/include/c/sk_canvas.h
-FILE: ../../../third_party/skia/include/c/sk_data.h
-FILE: ../../../third_party/skia/include/c/sk_image.h
-FILE: ../../../third_party/skia/include/c/sk_maskfilter.h
-FILE: ../../../third_party/skia/include/c/sk_matrix.h
-FILE: ../../../third_party/skia/include/c/sk_paint.h
-FILE: ../../../third_party/skia/include/c/sk_path.h
-FILE: ../../../third_party/skia/include/c/sk_picture.h
-FILE: ../../../third_party/skia/include/c/sk_shader.h
-FILE: ../../../third_party/skia/include/c/sk_surface.h
-FILE: ../../../third_party/skia/include/c/sk_types.h
 FILE: ../../../third_party/skia/include/core/SkBBHFactory.h
 FILE: ../../../third_party/skia/include/core/SkBlurTypes.h
 FILE: ../../../third_party/skia/include/core/SkDrawable.h
@@ -1752,7 +1737,6 @@ FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
 FILE: ../../../third_party/skia/include/private/SkHalf.h
 FILE: ../../../third_party/skia/samplecode/SampleRectanizer.cpp
-FILE: ../../../third_party/skia/src/c/sk_surface.cpp
 FILE: ../../../third_party/skia/src/core/SkBBHFactory.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.h
@@ -2798,7 +2782,6 @@ FILE: ../../../third_party/skia/client_utils/android/BitmapRegionDecoder.h
 FILE: ../../../third_party/skia/client_utils/android/BitmapRegionDecoderPriv.h
 FILE: ../../../third_party/skia/dm/DMSrcSink.cpp
 FILE: ../../../third_party/skia/dm/DMSrcSink.h
-FILE: ../../../third_party/skia/experimental/c-api-example/skia-c-example.c
 FILE: ../../../third_party/skia/experimental/tools/coreGraphicsPdf2png.cpp
 FILE: ../../../third_party/skia/gm/aaxfermodes.cpp
 FILE: ../../../third_party/skia/gm/addarc.cpp
@@ -2881,9 +2864,6 @@ FILE: ../../../third_party/skia/samplecode/SampleAnimatedText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAtlas.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleXfer.cpp
-FILE: ../../../third_party/skia/src/c/sk_c_from_to.h
-FILE: ../../../third_party/skia/src/c/sk_paint.cpp
-FILE: ../../../third_party/skia/src/c/sk_types_priv.h
 FILE: ../../../third_party/skia/src/codec/SkAndroidCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkAndroidCodecAdapter.cpp
 FILE: ../../../third_party/skia/src/codec/SkAndroidCodecAdapter.h
@@ -3495,8 +3475,6 @@ FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
 FILE: ../../../third_party/skia/gm/unpremul.cpp
 FILE: ../../../third_party/skia/gm/wacky_yuv_formats.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
-FILE: ../../../third_party/skia/include/c/sk_colorspace.h
-FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkContourMeasure.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
@@ -3559,7 +3537,6 @@ FILE: ../../../third_party/skia/samplecode/SampleCusp.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
-FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkParseEncodedOrigin.cpp
 FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp
@@ -3827,7 +3804,6 @@ FILE: ../../../third_party/skia/samplecode/SampleShadowReference.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowUtils.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStrokeVerb.cpp
 FILE: ../../../third_party/skia/src/android/SkAndroidFrameworkUtils.cpp
-FILE: ../../../third_party/skia/src/c/sk_effects.cpp
 FILE: ../../../third_party/skia/src/codec/SkBmpBaseCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkBmpBaseCodec.h
 FILE: ../../../third_party/skia/src/codec/SkFrameHolder.h
