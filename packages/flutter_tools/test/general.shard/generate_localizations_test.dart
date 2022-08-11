@@ -1082,21 +1082,24 @@ class AppLocalizationsEn extends AppLocalizations {
         projectDir: projectDir,
       );
 
-      for (final FileSystemEntity file in l10nDirectory.listSync()) {
-        if (file is File && file.basename.endsWith('.dart')) {
-          final String original = file.readAsStringSync();
-          final Process process = await processManager.start(
-            <String>[
-              artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
-              'format',
-              '--output=show',
-              file.path,
-            ],
-            workingDirectory: l10nDirectory.path,
-          );
-          final String formatted = await process.stdout.transform(utf8.decoder).join();
-          expect(formatted, contains(original), reason: file.path);
-        }
+      final Iterable<File> generatedFiles = l10nDirectory
+          .listSync()
+          .whereType<File>()
+          .where((File file) => file.basename.endsWith('.dart'));
+      final List<String> command = <String>[
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        'format',
+        '--output=show',
+        ...generatedFiles.map((File file) => file.path),
+      ];
+      final Process process = await processManager.start(
+        command,
+        workingDirectory: l10nDirectory.path,
+      );
+      final String formatted = await process.stdout.transform(utf8.decoder).join();
+      for (final File file in generatedFiles) {
+        final String original = file.readAsStringSync();
+        expect(formatted, contains(original), reason: file.path);
       }
     });
   });
