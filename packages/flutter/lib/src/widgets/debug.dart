@@ -252,6 +252,10 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// assert(debugCheckHasTable(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
@@ -281,6 +285,10 @@ bool debugCheckHasTable(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasMediaQuery(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMediaQuery(BuildContext context) {
@@ -333,6 +341,10 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// Each one can be null, in which case it is skipped (this is the default).
 /// If they are non-null, they are included in the order above, interspersed
 /// with the more generic advice regarding [Directionality].
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hint, String? alternative }) {
@@ -406,6 +418,10 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
 /// assert(debugCheckHasWidgetsLocalizations(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasWidgetsLocalizations(BuildContext context) {
   assert(() {
@@ -442,6 +458,10 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasOverlay(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This method can be expensive (it walks the element tree).
 ///

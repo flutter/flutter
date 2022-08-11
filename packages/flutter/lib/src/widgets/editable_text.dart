@@ -572,7 +572,7 @@ class EditableText extends StatefulWidget {
   ///
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
-  /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
+  /// [style], [cursorColor], [cursorOpacityAnimates], [backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
   /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
   /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],

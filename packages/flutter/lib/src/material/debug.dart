@@ -23,6 +23,10 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// assert(debugCheckHasMaterial(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
@@ -66,6 +70,10 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasMaterialLocalizations(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This function has the side-effect of establishing an inheritance
 /// relationship with the nearest [Localizations] widget (see
@@ -112,6 +120,10 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// assert(debugCheckHasScaffold(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
@@ -144,6 +156,10 @@ bool debugCheckHasScaffold(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasScaffoldMessenger(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This method can be expensive (it walks the element tree).
 ///

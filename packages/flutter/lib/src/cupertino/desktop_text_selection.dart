@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -32,8 +31,11 @@ const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.wit
   darkColor: Color(0xff302928),
 );
 
-
-class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
+/// Desktop Cupertino styled text selection controls.
+///
+/// The [cupertinoDesktopTextSelectionControls] global variable has a
+/// suitable instance of this class.
+class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
   Size getHandleSize(double textLineHeight) {
@@ -87,7 +89,7 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
 /// Text selection controls that follows Mac design conventions.
 final TextSelectionControls cupertinoDesktopTextSelectionControls =
-    _CupertinoDesktopTextSelectionControls();
+    CupertinoDesktopTextSelectionControls();
 
 // Generates the child that's passed into CupertinoDesktopTextSelectionToolbar.
 class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {

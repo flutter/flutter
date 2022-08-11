@@ -533,6 +533,13 @@ class Text extends StatelessWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The color to use when painting the selection.
+  ///
+  /// This is ignored if [SelectionContainer.maybeOf] returns null
+  /// in the [BuildContext] of the [Text] widget.
+  ///
+  /// If null, the ambient [DefaultSelectionStyle] is used (if any); failing
+  /// that, the selection color defaults to [DefaultSelectionStyle.defaultColor]
+  /// (semi-transparent grey).
   final Color? selectionColor;
 
   @override
@@ -558,7 +565,7 @@ class Text extends StatelessWidget {
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
       selectionRegistrar: registrar,
-      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor,
+      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
