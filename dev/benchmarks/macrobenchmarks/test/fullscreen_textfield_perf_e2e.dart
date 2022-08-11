@@ -12,7 +12,7 @@ void main() {
   macroPerfTestE2E(
     'fullscreen_textfield_perf',
     kFullscreenTextRouteName,
-    // pageDelay: const Duration(seconds: 1),
+    pageDelay: const Duration(seconds: 1),
     body: (WidgetController controller) async {
       final Finder textfield = find.byKey(const ValueKey<String>('fullscreen-textfield'));
       controller.tap(textfield);
