@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -13,7 +15,6 @@ import 'test_utils.dart';
 void main() {
 
   late Directory tempDir;
-  late String projectPath;
 
   setUp(()  {
     Cache.flutterRoot = getFlutterRoot();
@@ -39,13 +40,14 @@ void main() {
       'flutter_project'
     ], workingDirectory: tempDir.path);
 
-    projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
+    final String projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
 
     File modulePubspec = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
     String pubspecContent = modulePubspec.readAsStringSync();
     pubspecContent = pubspecContent.replaceFirst(
       'dependencies:',
-      '''dependencies:
+      '''
+dependencies:
   image_picker: any''',
     );
     modulePubspec.writeAsStringSync(pubspecContent);
@@ -58,6 +60,8 @@ void main() {
       'aar',
       '--target-platform=android-arm',
     ], workingDirectory: projectPath);
+
+    log(result.exitCode);
 
     // Check outputDir existed
     final Directory outputDir = fileSystem.directory(fileSystem.path.join(
