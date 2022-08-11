@@ -344,8 +344,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// by this widget. The height of each action is constrained to be no bigger
   /// than the [toolbarHeight].
   ///
-  /// To avoid that the last action is covered by the debug banner, set the
-  /// [MaterialApp.debugShowCheckedModeBanner] to false.
+  /// To avoid having the last action covered by the debug banner, you may want
+  /// to set the [MaterialApp.debugShowCheckedModeBanner] to false.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
