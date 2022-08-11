@@ -451,11 +451,13 @@ TEST_P(DisplayListTest, CanDrawPoints) {
       flutter::DlStrokeCap::kRound,
       flutter::DlStrokeCap::kSquare,
   };
-  flutter::DlPaint paint = flutter::DlPaint().setStrokeWidth(20);
+  flutter::DlPaint paint =
+      flutter::DlPaint()                                         //
+          .setColor(flutter::DlColor::kYellow().withAlpha(127))  //
+          .setStrokeWidth(20);
   builder.translate(50, 50);
   for (auto cap : caps) {
     paint.setStrokeCap(cap);
-    paint.setColor(flutter::DlColor::kYellow().withAlpha(127));
     builder.save();
     builder.drawPoints(SkCanvas::kPoints_PointMode, 7, points, paint);
     builder.translate(150, 0);
@@ -463,6 +465,29 @@ TEST_P(DisplayListTest, CanDrawPoints) {
     builder.translate(150, 0);
     builder.drawPoints(SkCanvas::kPolygon_PointMode, 5, points, paint);
     builder.restore();
+    builder.translate(0, 150);
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, CanDrawZeroLengthLine) {
+  flutter::DisplayListBuilder builder;
+  std::vector<flutter::DlStrokeCap> caps = {
+      flutter::DlStrokeCap::kButt,
+      flutter::DlStrokeCap::kRound,
+      flutter::DlStrokeCap::kSquare,
+  };
+  flutter::DlPaint paint =
+      flutter::DlPaint()                                         //
+          .setColor(flutter::DlColor::kYellow().withAlpha(127))  //
+          .setDrawStyle(flutter::DlDrawStyle::kStroke)           //
+          .setStrokeCap(flutter::DlStrokeCap::kButt)             //
+          .setStrokeWidth(20);
+  SkPath path = SkPath().addPoly({{150, 50}, {150, 50}}, false);
+  for (auto cap : caps) {
+    paint.setStrokeCap(cap);
+    builder.drawLine({50, 50}, {50, 50}, paint);
+    builder.drawPath(path, paint);
     builder.translate(0, 150);
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
