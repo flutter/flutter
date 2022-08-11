@@ -59,10 +59,6 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// Whether or not the app.started event has been received.
   bool get _receivedAppStarted => appStartedCompleter.isCompleted;
 
-  /// A completer that completes when the app.debugPort event has been received.
-  @visibleForTesting
-  final Completer<void> appDebugPortCompleter = Completer<void>();
-
   /// The appId of the current running Flutter app.
   @visibleForTesting
   String? appId;
