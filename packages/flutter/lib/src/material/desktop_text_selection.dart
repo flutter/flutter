@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,7 +38,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _DesktopTextSelectionControlsToolbar(
@@ -103,7 +103,7 @@ class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.lastSecondaryTapDownPosition,
   });
 
-  final ValueListenable<ClipboardStatus>? clipboardStatus;
+  final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleCopy;

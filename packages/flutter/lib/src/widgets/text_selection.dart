@@ -119,7 +119,9 @@ abstract class TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
+    // TODO(chunhtai): Change to ValueListenable<ClipboardStatus>? once
+    // mirgration is done. https://github.com/flutter/flutter/issues/99360
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   );
 
@@ -176,7 +178,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
@@ -184,7 +188,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
-  void handleCopy(TextSelectionDelegate delegate) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.copySelection(SelectionChangedCause.toolbar);
   }
 
@@ -2472,8 +2478,18 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     ClipboardStatus value = ClipboardStatus.unknown,
   }) : super(value);
 
+  bool _disposed = false;
+  // TODO(chunhtai): remove this getter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  /// True if this instance has been disposed.
+  bool get disposed => _disposed;
+
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
+    if (_disposed) {
+      return;
+    }
+
     final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
@@ -2486,7 +2502,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
-      if (value == ClipboardStatus.unknown) {
+      if (_disposed || value == ClipboardStatus.unknown) {
         return;
       }
       value = ClipboardStatus.unknown;
@@ -2497,7 +2513,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
         ? ClipboardStatus.pasteable
         : ClipboardStatus.notPasteable;
 
-    if (nextStatus == value) {
+    if (_disposed || nextStatus == value) {
       return;
     }
     value = nextStatus;
@@ -2517,7 +2533,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    if (!hasListeners) {
+    if (!_disposed && !hasListeners) {
       WidgetsBinding.instance.removeObserver(this);
     }
   }
@@ -2538,6 +2554,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _disposed = true;
     super.dispose();
   }
 }
