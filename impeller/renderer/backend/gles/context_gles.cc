@@ -6,6 +6,7 @@
 
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
+#include "impeller/base/work_queue_common.h"
 
 namespace impeller {
 
@@ -52,10 +53,19 @@ ContextGLES::ContextGLES(
     }
   }
 
-  // Create the sampler library
+  // Create the sampler library.
   {
     sampler_library_ =
         std::shared_ptr<SamplerLibraryGLES>(new SamplerLibraryGLES());
+  }
+
+  // Create the work queue.
+  {
+    work_queue_ = WorkQueueCommon::Create();
+    if (!work_queue_) {
+      VALIDATION_LOG << "Could not create work queue.";
+      return;
+    }
   }
 
   is_valid_ = true;
@@ -86,25 +96,35 @@ bool ContextGLES::IsValid() const {
   return is_valid_;
 }
 
+// |Context|
 std::shared_ptr<Allocator> ContextGLES::GetResourceAllocator() const {
   return resource_allocator_;
 }
 
+// |Context|
 std::shared_ptr<ShaderLibrary> ContextGLES::GetShaderLibrary() const {
   return shader_library_;
 }
 
+// |Context|
 std::shared_ptr<SamplerLibrary> ContextGLES::GetSamplerLibrary() const {
   return sampler_library_;
 }
 
+// |Context|
 std::shared_ptr<PipelineLibrary> ContextGLES::GetPipelineLibrary() const {
   return pipeline_library_;
 }
 
+// |Context|
 std::shared_ptr<CommandBuffer> ContextGLES::CreateCommandBuffer() const {
   return std::shared_ptr<CommandBufferGLES>(
       new CommandBufferGLES(weak_from_this(), reactor_));
+}
+
+// |Context|
+std::shared_ptr<WorkQueue> ContextGLES::GetWorkQueue() const {
+  return work_queue_;
 }
 
 // |Context|

@@ -42,6 +42,7 @@ class ContextMTL final : public Context,
   std::shared_ptr<PipelineLibraryMTL> pipeline_library_;
   std::shared_ptr<SamplerLibrary> sampler_library_;
   std::shared_ptr<AllocatorMTL> resource_allocator_;
+  std::shared_ptr<WorkQueue> work_queue_;
   bool is_valid_ = false;
 
   ContextMTL(id<MTLDevice> device, NSArray<id<MTLLibrary>>* shader_libraries);
@@ -63,6 +64,9 @@ class ContextMTL final : public Context,
 
   // |Context|
   std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
+
+  // |Context|
+  std::shared_ptr<WorkQueue> GetWorkQueue() const override;
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;

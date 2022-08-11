@@ -450,6 +450,8 @@ FILE: ../../../flutter/impeller/base/base_unittests.cc
 FILE: ../../../flutter/impeller/base/comparable.cc
 FILE: ../../../flutter/impeller/base/comparable.h
 FILE: ../../../flutter/impeller/base/config.h
+FILE: ../../../flutter/impeller/base/platform/darwin/work_queue_darwin.cc
+FILE: ../../../flutter/impeller/base/platform/darwin/work_queue_darwin.h
 FILE: ../../../flutter/impeller/base/promise.cc
 FILE: ../../../flutter/impeller/base/promise.h
 FILE: ../../../flutter/impeller/base/strings.cc
@@ -462,6 +464,10 @@ FILE: ../../../flutter/impeller/base/validation.cc
 FILE: ../../../flutter/impeller/base/validation.h
 FILE: ../../../flutter/impeller/base/version.cc
 FILE: ../../../flutter/impeller/base/version.h
+FILE: ../../../flutter/impeller/base/work_queue.cc
+FILE: ../../../flutter/impeller/base/work_queue.h
+FILE: ../../../flutter/impeller/base/work_queue_common.cc
+FILE: ../../../flutter/impeller/base/work_queue_common.h
 FILE: ../../../flutter/impeller/blobcat/blob.cc
 FILE: ../../../flutter/impeller/blobcat/blob.h
 FILE: ../../../flutter/impeller/blobcat/blob_library.cc
