@@ -38,6 +38,7 @@ class ContextGLES final : public Context,
   std::shared_ptr<ShaderLibraryGLES> shader_library_;
   std::shared_ptr<PipelineLibraryGLES> pipeline_library_;
   std::shared_ptr<SamplerLibraryGLES> sampler_library_;
+  std::shared_ptr<WorkQueue> work_queue_;
   std::shared_ptr<AllocatorGLES> resource_allocator_;
   bool is_valid_ = false;
 
@@ -61,6 +62,9 @@ class ContextGLES final : public Context,
 
   // |Context|
   std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
+
+  // |Context|
+  std::shared_ptr<WorkQueue> GetWorkQueue() const override;
 
   // |Context|
   bool HasThreadingRestrictions() const override;

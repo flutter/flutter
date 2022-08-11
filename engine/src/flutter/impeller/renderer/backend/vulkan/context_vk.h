@@ -78,6 +78,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   std::unique_ptr<SwapchainVK> swapchain_;
   std::unique_ptr<CommandPoolVK> graphics_command_pool_;
   std::unique_ptr<SurfaceProducerVK> surface_producer_;
+  std::shared_ptr<WorkQueue> work_queue_;
   bool is_valid_ = false;
 
   ContextVK(
@@ -101,6 +102,9 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   // |Context|
   std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
+
+  // |Context|
+  std::shared_ptr<WorkQueue> GetWorkQueue() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContextVK);
 };

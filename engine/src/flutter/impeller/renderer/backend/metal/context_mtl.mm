@@ -9,6 +9,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
+#include "impeller/base/platform/darwin/work_queue_darwin.h"
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
 #include "impeller/renderer/sampler_descriptor.h"
 
@@ -40,31 +41,43 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
     shader_library_ = std::move(library);
   }
 
-  // Setup command queues.
-  command_queue_ = device_.newCommandQueue;
-
-  if (!command_queue_) {
-    return;
+  // Setup command queue.
+  {
+    command_queue_ = device_.newCommandQueue;
+    if (!command_queue_) {
+      VALIDATION_LOG << "Could not setup the command queue.";
+      return;
+    }
+    command_queue_.label = @"Impeller Command Queue";
   }
 
-  command_queue_.label = @"Impeller Command Queue";
-
   // Setup the pipeline library.
-  {  //
+  {
     pipeline_library_ =
         std::shared_ptr<PipelineLibraryMTL>(new PipelineLibraryMTL(device_));
   }
 
   // Setup the sampler library.
-  {  //
+  {
     sampler_library_ =
         std::shared_ptr<SamplerLibraryMTL>(new SamplerLibraryMTL(device_));
   }
 
+  // Setup the resource allocator.
   {
     resource_allocator_ = std::shared_ptr<AllocatorMTL>(
         new AllocatorMTL(device_, "Impeller Permanents Allocator"));
     if (!resource_allocator_) {
+      VALIDATION_LOG << "Could not setup the resource allocator.";
+      return;
+    }
+  }
+
+  // Setup the work queue.
+  {
+    work_queue_ = WorkQueueDarwin::Create();
+    if (!work_queue_) {
+      VALIDATION_LOG << "Could not setup the work queue.";
       return;
     }
   }
@@ -167,24 +180,34 @@ std::shared_ptr<Context> ContextMTL::Create(
 
 ContextMTL::~ContextMTL() = default;
 
+// |Context|
 bool ContextMTL::IsValid() const {
   return is_valid_;
 }
 
+// |Context|
 std::shared_ptr<ShaderLibrary> ContextMTL::GetShaderLibrary() const {
   return shader_library_;
 }
 
+// |Context|
 std::shared_ptr<PipelineLibrary> ContextMTL::GetPipelineLibrary() const {
   return pipeline_library_;
 }
 
+// |Context|
 std::shared_ptr<SamplerLibrary> ContextMTL::GetSamplerLibrary() const {
   return sampler_library_;
 }
 
+// |Context|
 std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBuffer() const {
   return CreateCommandBufferInQueue(command_queue_);
+}
+
+// |Context|
+std::shared_ptr<WorkQueue> ContextMTL::GetWorkQueue() const {
+  return work_queue_;
 }
 
 std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBufferInQueue(
