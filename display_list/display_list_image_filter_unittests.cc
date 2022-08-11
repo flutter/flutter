@@ -3,10 +3,14 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/display_list_attributes_testing.h"
+#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/display_list_color.h"
+#include "flutter/display_list/display_list_color_filter.h"
 #include "flutter/display_list/display_list_comparable.h"
 #include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_sampling_options.h"
+#include "flutter/display_list/display_list_tile_mode.h"
 #include "flutter/display_list/types.h"
 #include "gtest/gtest.h"
 
@@ -757,6 +761,89 @@ TEST(DisplayListImageFilter, UnknownContents) {
 
   ASSERT_EQ(filter.skia_object(), sk_filter);
   ASSERT_EQ(filter.skia_object().get(), sk_filter.get());
+}
+
+TEST(DisplayListImageFilter, LocalImageFilterBounds) {
+  auto filter_matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
+                                         0.5, 3.0, 15,  //
+                                         0.0, 0.0, 1);
+  std::vector<sk_sp<SkImageFilter>> sk_filters{
+      SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr),
+      SkImageFilters::ColorFilter(
+          SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kSrcOver), nullptr),
+      SkImageFilters::Dilate(5.0, 10.0, nullptr),
+      SkImageFilters::MatrixTransform(filter_matrix,
+                                      ToSk(DlImageSampling::kLinear), nullptr),
+      SkImageFilters::Compose(
+          SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr),
+          SkImageFilters::ColorFilter(
+              SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kSrcOver),
+              nullptr))};
+
+  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
+  std::vector<std::shared_ptr<DlImageFilter>> dl_filters{
+      std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kRepeat),
+      std::make_shared<DlColorFilterImageFilter>(dl_color_filter.shared()),
+      std::make_shared<DlDilateImageFilter>(5, 10),
+      std::make_shared<DlMatrixImageFilter>(filter_matrix,
+                                            DlImageSampling::kLinear),
+      std::make_shared<DlComposeImageFilter>(
+          std::make_shared<DlBlurImageFilter>(5.0, 6.0, DlTileMode::kRepeat),
+          std::make_shared<DlColorFilterImageFilter>(
+              dl_color_filter.shared()))};
+
+  auto persp = SkMatrix::I();
+  persp.setPerspY(0.001);
+  std::vector<SkMatrix> matrices = {
+      SkMatrix::Translate(10.0, 10.0),
+      SkMatrix::Scale(2.0, 2.0).preTranslate(10.0, 10.0),
+      SkMatrix::RotateDeg(45).preTranslate(5.0, 5.0), persp};
+  std::vector<SkMatrix> bounds_matrices{SkMatrix::Translate(5.0, 10.0),
+                                        SkMatrix::Scale(2.0, 2.0)};
+
+  for (unsigned i = 0; i < sk_filters.size(); i++) {
+    for (unsigned j = 0; j < matrices.size(); j++) {
+      for (unsigned k = 0; k < bounds_matrices.size(); k++) {
+        auto& m = matrices[j];
+        auto& bounds_matrix = bounds_matrices[k];
+        auto sk_local_filter = sk_filters[i]->makeWithLocalMatrix(m);
+        auto dl_local_filter = dl_filters[i]->makeWithLocalMatrix(m);
+        if (!sk_local_filter || !dl_local_filter) {
+          ASSERT_TRUE(!sk_local_filter);
+          ASSERT_TRUE(!dl_local_filter);
+          continue;
+        }
+        {
+          auto inputBounds = SkIRect::MakeLTRB(20, 20, 80, 80);
+          SkIRect sk_rect, dl_rect;
+          sk_rect = sk_local_filter->filterBounds(
+              inputBounds, bounds_matrix,
+              SkImageFilter::MapDirection::kForward_MapDirection);
+          dl_local_filter->map_device_bounds(inputBounds, bounds_matrix,
+                                             dl_rect);
+          ASSERT_EQ(sk_rect, dl_rect);
+        }
+        {
+          // Test for: Know the outset bounds to get the inset bounds
+          // Skia have some bounds calculate error of DilateFilter and
+          // MatrixFilter
+          // Skia issue: https://bugs.chromium.org/p/skia/issues/detail?id=13444
+          // flutter issue: https://github.com/flutter/flutter/issues/108693
+          if (i == 2 || i == 3) {
+            continue;
+          }
+          auto outsetBounds = SkIRect::MakeLTRB(20, 20, 80, 80);
+          SkIRect sk_rect, dl_rect;
+          sk_rect = sk_local_filter->filterBounds(
+              outsetBounds, bounds_matrix,
+              SkImageFilter::MapDirection::kReverse_MapDirection);
+          dl_local_filter->get_input_device_bounds(outsetBounds, bounds_matrix,
+                                                   dl_rect);
+          ASSERT_EQ(sk_rect, dl_rect);
+        }
+      }
+    }
+  }
 }
 
 TEST(DisplayListImageFilter, UnknownEquals) {

@@ -225,6 +225,7 @@ void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
         break;
       }
       case DlImageFilterType::kComposeFilter:
+      case DlImageFilterType::kLocalMatrixFilter:
       case DlImageFilterType::kColorFilter: {
         Push<SetSharedImageFilterOp>(0, 0, filter);
         break;
