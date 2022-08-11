@@ -184,11 +184,19 @@ enum class PrimitiveType {
 struct DepthRange {
   Scalar z_near = 0.0;
   Scalar z_far = 1.0;
+
+  constexpr bool operator==(const DepthRange& other) const {
+    return z_near == other.z_near && z_far == other.z_far;
+  }
 };
 
 struct Viewport {
   Rect rect;
   DepthRange depth_range;
+
+  constexpr bool operator==(const Viewport& other) const {
+    return rect == other.rect && depth_range == other.depth_range;
+  }
 };
 
 enum class MinMagFilter {
