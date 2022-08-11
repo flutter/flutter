@@ -21,6 +21,7 @@
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/contents/sweep_gradient_contents.h"
+#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -116,6 +117,47 @@ static Entity::TileMode ToTileMode(flutter::DlTileMode tile_mode) {
     case flutter::DlTileMode::kDecal:
       return Entity::TileMode::kDecal;
   }
+}
+
+static impeller::SamplerDescriptor ToSamplerDescriptor(
+    const flutter::DlImageSampling options) {
+  impeller::SamplerDescriptor desc;
+  switch (options) {
+    case flutter::DlImageSampling::kNearestNeighbor:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.label = "Nearest Sampler";
+      break;
+    case flutter::DlImageSampling::kLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.label = "Linear Sampler";
+      break;
+    case flutter::DlImageSampling::kMipmapLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.mip_filter = impeller::MipFilter::kLinear;
+      desc.label = "Mipmap Linear Sampler";
+      break;
+    default:
+      break;
+  }
+  return desc;
+}
+
+static impeller::SamplerDescriptor ToSamplerDescriptor(
+    const flutter::DlFilterMode options) {
+  impeller::SamplerDescriptor desc;
+  switch (options) {
+    case flutter::DlFilterMode::kNearest:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.label = "Nearest Sampler";
+      break;
+    case flutter::DlFilterMode::kLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.label = "Linear Sampler";
+      break;
+    default:
+      break;
+  }
+  return desc;
 }
 
 // |flutter::Dispatcher|
@@ -316,7 +358,24 @@ void DisplayListDispatcher::setColorSource(
       };
       return;
     }
-    case flutter::DlColorSourceType::kImage:
+    case flutter::DlColorSourceType::kImage: {
+      const flutter::DlImageColorSource* image_color_source = source->asImage();
+      FML_DCHECK(image_color_source &&
+                 image_color_source->image()->impeller_texture());
+      auto texture = image_color_source->image()->impeller_texture();
+      auto x_tile_mode = ToTileMode(image_color_source->horizontal_tile_mode());
+      auto y_tile_mode = ToTileMode(image_color_source->vertical_tile_mode());
+      auto desc = ToSamplerDescriptor(image_color_source->sampling());
+      paint_.color_source = [texture, x_tile_mode, y_tile_mode, desc]() {
+        auto contents = std::make_shared<TiledTextureContents>();
+        contents->SetTexture(texture);
+        contents->SetTileModes(x_tile_mode, y_tile_mode);
+        contents->SetSamplerDescriptor(desc);
+        // TODO(109384) Support 'matrix' parameter for all color sources.
+        return contents;
+      };
+      return;
+    }
     case flutter::DlColorSourceType::kConicalGradient:
     case flutter::DlColorSourceType::kUnknown:
       UNIMPLEMENTED;
@@ -906,47 +965,6 @@ void DisplayListDispatcher::drawImage(const sk_sp<flutter::DlImage> image,
       render_with_attributes,  // render with attributes
       SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint  // constraint
   );
-}
-
-static impeller::SamplerDescriptor ToSamplerDescriptor(
-    const flutter::DlImageSampling options) {
-  impeller::SamplerDescriptor desc;
-  switch (options) {
-    case flutter::DlImageSampling::kNearestNeighbor:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
-      desc.label = "Nearest Sampler";
-      break;
-    case flutter::DlImageSampling::kLinear:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
-      desc.label = "Linear Sampler";
-      break;
-    case flutter::DlImageSampling::kMipmapLinear:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
-      desc.mip_filter = impeller::MipFilter::kLinear;
-      desc.label = "Mipmap Linear Sampler";
-      break;
-    default:
-      break;
-  }
-  return desc;
-}
-
-static impeller::SamplerDescriptor ToSamplerDescriptor(
-    const flutter::DlFilterMode options) {
-  impeller::SamplerDescriptor desc;
-  switch (options) {
-    case flutter::DlFilterMode::kNearest:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
-      desc.label = "Nearest Sampler";
-      break;
-    case flutter::DlFilterMode::kLinear:
-      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
-      desc.label = "Linear Sampler";
-      break;
-    default:
-      break;
-  }
-  return desc;
 }
 
 // |flutter::Dispatcher|
