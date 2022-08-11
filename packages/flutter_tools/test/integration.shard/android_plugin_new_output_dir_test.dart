@@ -1,0 +1,69 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/cache.dart';
+
+import '../src/common.dart';
+import 'test_utils.dart';
+
+void main() {
+
+  late Directory tempDir;
+  late String projectPath;
+
+  setUp(()  {
+    Cache.flutterRoot = getFlutterRoot();
+    tempDir = createResolvedTempDirectorySync('android_plugin_new_output_dir_test.');
+  });
+
+  tearDown(() async {
+    tryToDelete(tempDir);
+  });
+
+  test("error logged when plugin's output dir was flutter_project/", () async {
+    final String flutterBin = fileSystem.path.join(
+      getFlutterRoot(),
+      'bin',
+      'flutter',
+    );
+    // create flutter module project
+    ProcessResult result = processManager.runSync(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'create',
+      '--template=module',
+      'flutter_project'
+    ], workingDirectory: tempDir.path);
+
+    projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
+
+    File modulePubspec = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
+    String pubspecContent = modulePubspec.readAsStringSync();
+    pubspecContent = pubspecContent.replaceFirst(
+      'dependencies:',
+      '''dependencies:
+  image_picker: any''',
+    );
+    modulePubspec.writeAsStringSync(pubspecContent);
+
+    // Run flutter build apk to build module example project
+    result = processManager.runSync(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'aar',
+      '--target-platform=android-arm',
+    ], workingDirectory: projectPath);
+
+    // Check outputDir existed
+    final Directory outputDir = fileSystem.directory(fileSystem.path.join(
+        projectPath, '.android', 'plugins_build_output', 'image_picker_android'
+    ));
+    expect(outputDir, exists);
+
+  });
+}
