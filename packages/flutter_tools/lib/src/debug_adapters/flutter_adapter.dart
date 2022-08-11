@@ -431,7 +431,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// Handles the app.start event from Flutter.
   void _handleAppStart(Map<String, Object?> params) {
     appId = params['appId'] as String?;
-    assert(appId != null);
+    if(appId == null) {
+      throw DebugAdapterException('Unexpected null `appId` in app.start event');
+    }
   }
 
   /// Handles the app.started event from Flutter.
