@@ -239,14 +239,14 @@ static std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count) {
 void DisplayListDispatcher::setColorSource(
     const flutter::DlColorSource* source) {
   if (!source) {
-    paint_.contents = nullptr;
+    paint_.color_source = std::nullopt;
     return;
   }
 
   switch (source->type()) {
     case flutter::DlColorSourceType::kColor: {
       const flutter::DlColorColorSource* color = source->asColor();
-      paint_.contents = nullptr;
+      paint_.color_source = std::nullopt;
       setColor(color->color());
       FML_DCHECK(color);
       return;
@@ -255,49 +255,65 @@ void DisplayListDispatcher::setColorSource(
       const flutter::DlLinearGradientColorSource* linear =
           source->asLinearGradient();
       FML_DCHECK(linear);
-      auto contents = std::make_shared<LinearGradientContents>();
-      contents->SetEndPoints(ToPoint(linear->start_point()),
-                             ToPoint(linear->end_point()));
+      auto start_point = ToPoint(linear->start_point());
+      auto end_point = ToPoint(linear->end_point());
       std::vector<Color> colors;
       for (auto i = 0; i < linear->stop_count(); i++) {
         colors.emplace_back(ToColor(linear->colors()[i]));
       }
-      contents->SetColors(std::move(colors));
-      contents->SetTileMode(ToTileMode(linear->tile_mode()));
-      paint_.contents = std::move(contents);
+      auto tile_mode = ToTileMode(linear->tile_mode());
+      paint_.color_source = [start_point, end_point, colors = std::move(colors),
+                             tile_mode]() {
+        auto contents = std::make_shared<LinearGradientContents>();
+        contents->SetEndPoints(start_point, end_point);
+        contents->SetColors(std::move(colors));
+        contents->SetTileMode(tile_mode);
+        return contents;
+      };
       return;
     }
     case flutter::DlColorSourceType::kRadialGradient: {
       const flutter::DlRadialGradientColorSource* radialGradient =
           source->asRadialGradient();
       FML_DCHECK(radialGradient);
-      auto contents = std::make_shared<RadialGradientContents>();
-      contents->SetCenterAndRadius(ToPoint(radialGradient->center()),
-                                   radialGradient->radius());
+      auto center = ToPoint(radialGradient->center());
+      auto radius = radialGradient->radius();
       std::vector<Color> colors;
       for (auto i = 0; i < radialGradient->stop_count(); i++) {
         colors.emplace_back(ToColor(radialGradient->colors()[i]));
       }
-      contents->SetColors(std::move(colors));
-      contents->SetTileMode(ToTileMode(radialGradient->tile_mode()));
-      paint_.contents = std::move(contents);
+      auto tile_mode = ToTileMode(radialGradient->tile_mode());
+      paint_.color_source = [center, radius, colors = std::move(colors),
+                             tile_mode]() {
+        auto contents = std::make_shared<RadialGradientContents>();
+        contents->SetCenterAndRadius(center, radius),
+            contents->SetColors(std::move(colors));
+        contents->SetTileMode(tile_mode);
+        return contents;
+      };
       return;
     }
     case flutter::DlColorSourceType::kSweepGradient: {
       const flutter::DlSweepGradientColorSource* sweepGradient =
           source->asSweepGradient();
       FML_DCHECK(sweepGradient);
-      auto contents = std::make_shared<SweepGradientContents>();
-      contents->SetCenterAndAngles(ToPoint(sweepGradient->center()),
-                                   Degrees(sweepGradient->start()),
-                                   Degrees(sweepGradient->end()));
+
+      auto center = ToPoint(sweepGradient->center());
+      auto start_angle = Degrees(sweepGradient->start());
+      auto end_angle = Degrees(sweepGradient->end());
       std::vector<Color> colors;
       for (auto i = 0; i < sweepGradient->stop_count(); i++) {
         colors.emplace_back(ToColor(sweepGradient->colors()[i]));
       }
-      contents->SetColors(std::move(colors));
-      contents->SetTileMode(ToTileMode(sweepGradient->tile_mode()));
-      paint_.contents = std::move(contents);
+      auto tile_mode = ToTileMode(sweepGradient->tile_mode());
+      paint_.color_source = [center, start_angle, end_angle,
+                             colors = std::move(colors), tile_mode]() {
+        auto contents = std::make_shared<SweepGradientContents>();
+        contents->SetCenterAndAngles(center, start_angle, end_angle);
+        contents->SetColors(std::move(colors));
+        contents->SetTileMode(tile_mode);
+        return contents;
+      };
       return;
     }
     case flutter::DlColorSourceType::kImage:
