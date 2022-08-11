@@ -1446,7 +1446,20 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         throw Exception('Unsupported option for macOS devices');
       case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
+        stderr.write('Compiling in Release for WINDOWS\n');
+        unawaited(stderr.flush());
+        options.insert(0, 'windows');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String basename = cwd.split('/').last;
+        final String exePath = path.join(cwd, 'build', 'windows', 'runner', 'release', '$basename.exe');
+        final File exe = file(exePath);
+        releaseSizeInBytes = exe.lengthSync();
+        // I am unsure if there is any "package" for a windows build, so [reportPackageContentSizes] is irrelevant
+        break;
     }
 
     metrics.addAll(<String, dynamic>{
@@ -1486,7 +1499,12 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
+        // TODO(schectman): Proper windows options
+        //Throw Exception('Unsupported option for Windows devices');
+        stderr.write('Compiling in Debug for WINDOWS\n');
+        unawaited(stderr.flush());
+        options.insert(0, 'windows');
+        break;
     }
     watch.start();
     await flutter('build', options: options);
