@@ -799,4 +799,22 @@ void main() {
       "'alignment', or an explicit 'textDirection', to the Stack.",
     );
   });
+
+  testWidgets('Can update clipBehavior of IndexedStack',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(IndexedStack(textDirection: TextDirection.ltr));
+    final RenderIndexedStack renderObject =
+        tester.allRenderObjects.whereType<RenderIndexedStack>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    /// Update clipBehavior to Clip.antiAlias
+
+    await tester.pumpWidget(IndexedStack(
+      textDirection: TextDirection.ltr,
+      clipBehavior: Clip.antiAlias,
+    ));
+    final RenderIndexedStack renderIndexedObject =
+      tester.allRenderObjects.whereType<RenderIndexedStack>().first;
+    expect(renderIndexedObject.clipBehavior, equals(Clip.antiAlias));
+  });
 }
