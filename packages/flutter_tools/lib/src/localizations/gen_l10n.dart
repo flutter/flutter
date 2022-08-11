@@ -1405,7 +1405,7 @@ class LocalizationsGenerator {
     });
 
     baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
-    _formatFileList.add(baseOutputFile.path);
+    _formatFileList.add(baseOutputFile.absolute.path);
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
