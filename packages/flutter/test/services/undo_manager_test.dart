@@ -27,7 +27,7 @@ void main() {
         null,
       );
 
-      expect(client.latestMethodCall, 'handlePlatformUndo(undo)');
+      expect(client.latestMethodCall, 'handlePlatformUndo(${UndoDirection.undo})');
 
       // Send handleUndo message with "undo" as the direction.
       messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
@@ -40,12 +40,12 @@ void main() {
         (ByteData? _) {},
       );
 
-      expect(client.latestMethodCall, 'handlePlatformUndo(redo)');
+      expect(client.latestMethodCall, 'handlePlatformUndo(${UndoDirection.redo})');
     });
   });
 }
 
-class _FakeUndoManagerClient implements UndoManagerClient {
+class _FakeUndoManagerClient with UndoManagerClient {
   String latestMethodCall = '';
 
   @override
@@ -61,7 +61,7 @@ class _FakeUndoManagerClient implements UndoManagerClient {
   bool get canRedo => false;
 
   @override
-  void handlePlatformUndo(String direction) {
+  void handlePlatformUndo(UndoDirection direction) {
     latestMethodCall = 'handlePlatformUndo($direction)';
   }
 }

@@ -1615,9 +1615,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ScrollController? _internalScrollController;
   ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
 
-  UndoHistoryController? _undoController;
-  UndoHistoryController get _effectiveUndoController => widget.undoController ?? (_undoController ??= UndoHistoryController());
-
   AnimationController? _cursorBlinkOpacityController;
 
   final LayerLink _toolbarLayerLink = LayerLink();
@@ -3310,7 +3307,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             return oldValue.text != newValue.text;
           },
           focusNode: widget.focusNode,
-          controller: _effectiveUndoController,
+          controller: widget.undoController,
           child: Focus(
             focusNode: widget.focusNode,
             includeSemantics: false,

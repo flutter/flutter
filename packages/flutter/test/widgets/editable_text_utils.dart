@@ -46,7 +46,7 @@ Offset textOffsetToPosition(WidgetTester tester, int offset) {
   return endpoints[0].point + const Offset(0.0, -2.0);
 }
 
-// Mimic key press events by sending key down and key up events via the [tester].
+/// Mimic key press events by sending key down and key up events via the [tester].
 Future<void> sendKeys(
     WidgetTester tester,
     List<LogicalKeyboardKey> keys, {

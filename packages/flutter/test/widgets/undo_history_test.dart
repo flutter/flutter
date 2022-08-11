@@ -356,9 +356,9 @@ void main() {
       // Undo/redo have no effect if the value has never changed.
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, false);
-      UndoManager.client!.handlePlatformUndo('undo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.undo);
       expect(value.value, 0);
-      UndoManager.client!.handlePlatformUndo('redo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.redo);
       expect(value.value, 0);
 
       value.value = 1;
@@ -369,11 +369,11 @@ void main() {
       // Can undo/redo a single change.
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, false);
-      UndoManager.client!.handlePlatformUndo('undo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.undo);
       expect(value.value, 0);
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, true);
-      UndoManager.client!.handlePlatformUndo('redo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.redo);
       expect(value.value, 1);
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, false);
@@ -384,19 +384,19 @@ void main() {
       // And can undo/redo multiple changes.
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, false);
-      UndoManager.client!.handlePlatformUndo('undo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.undo);
       expect(value.value, 1);
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, true);
-      UndoManager.client!.handlePlatformUndo('undo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.undo);
       expect(value.value, 0);
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, true);
-      UndoManager.client!.handlePlatformUndo('redo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.redo);
       expect(value.value, 1);
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, true);
-      UndoManager.client!.handlePlatformUndo('redo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.redo);
       expect(value.value, 2);
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, false);
@@ -404,7 +404,7 @@ void main() {
       // Changing the value again clears the redo stack.
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, false);
-      UndoManager.client!.handlePlatformUndo('undo');
+      UndoManager.client!.handlePlatformUndo(UndoDirection.undo);
       expect(value.value, 1);
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, true);

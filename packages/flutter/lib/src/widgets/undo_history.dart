@@ -32,7 +32,7 @@ class UndoHistory<T> extends StatefulWidget {
     required this.value,
     required this.onTriggered,
     required this.focusNode,
-    required this.controller,
+    this.controller,
     required this.child,
   });
 
@@ -56,8 +56,10 @@ class UndoHistory<T> extends StatefulWidget {
 
   /// {@template flutter.widgets.undoHistory.controller}
   /// Controls the undo state.
+  ///
+  /// If null, this widget will create its own [UndoHistoryController].
   /// {@endtemplate}
-  final UndoHistoryController controller;
+  final UndoHistoryController? controller;
 
   /// The child widget of [UndoHistory].
   final Widget child;
@@ -70,7 +72,7 @@ class UndoHistory<T> extends StatefulWidget {
 ///
 /// Provides [undo], [redo], [canUndo], and [canRedo] for programmatic access
 /// to the undo state for custom undo and redo UI implementations.
-class _UndoHistoryState<T> extends State<UndoHistory<T>> implements UndoManagerClient {
+class _UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
   final _UndoStack<T> _stack = _UndoStack<T>();
   late final _Throttled<T> _throttledPush;
   Timer? _throttleTimer;
@@ -84,6 +86,10 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> implements UndoManagerC
   // of the same value in a row onto the undo stack. For example, _push gets
   // called both in initState and when the EditableText receives focus.
   T? _lastValue;
+
+  UndoHistoryController? _controller;
+
+  UndoHistoryController get _effectiveController => widget.controller ?? (_controller ??= UndoHistoryController());
 
   @override
   void undo() {
@@ -104,7 +110,7 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> implements UndoManagerC
   bool get canRedo => _stack.canRedo;
 
   void _updateState() {
-    widget.controller.value = UndoHistoryValue(canUndo: canUndo, canRedo: canRedo);
+    _effectiveController.value = UndoHistoryValue(canUndo: canUndo, canRedo: canRedo);
 
     if (defaultTargetPlatform != TargetPlatform.iOS) {
       return;
@@ -157,11 +163,14 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> implements UndoManagerC
   }
 
   @override
-  void handlePlatformUndo(String direction) {
-    if (direction == 'undo') {
-      undo();
-    } else if (direction == 'redo') {
-      redo();
+  void handlePlatformUndo(UndoDirection direction) {
+    switch(direction) {
+      case UndoDirection.undo:
+        undo();
+        break;
+      case UndoDirection.redo:
+        redo();
+        break;
     }
   }
 
@@ -179,8 +188,8 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> implements UndoManagerC
     widget.value.addListener(_push);
     _handleFocus();
     widget.focusNode.addListener(_handleFocus);
-    widget.controller.onUndo.addListener(undo);
-    widget.controller.onRedo.addListener(redo);
+    _effectiveController.onUndo.addListener(undo);
+    _effectiveController.onRedo.addListener(redo);
   }
 
   @override
@@ -196,10 +205,12 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> implements UndoManagerC
       widget.focusNode.addListener(_handleFocus);
     }
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller.onUndo.removeListener(undo);
-      oldWidget.controller.onRedo.removeListener(redo);
-      widget.controller.onUndo.addListener(undo);
-      widget.controller.onRedo.addListener(redo);
+      _effectiveController.onUndo.removeListener(undo);
+      _effectiveController.onRedo.removeListener(redo);
+      _controller?.dispose();
+      _controller = null;
+      _effectiveController.onUndo.addListener(undo);
+      _effectiveController.onRedo.addListener(redo);
     }
   }
 
@@ -207,8 +218,9 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> implements UndoManagerC
   void dispose() {
     widget.value.removeListener(_push);
     widget.focusNode.removeListener(_handleFocus);
-    widget.controller.onUndo.removeListener(undo);
-    widget.controller.onRedo.removeListener(redo);
+    _effectiveController.onUndo.removeListener(undo);
+    _effectiveController.onRedo.removeListener(redo);
+    _controller?.dispose();
     _throttleTimer?.cancel();
     super.dispose();
   }
@@ -307,6 +319,13 @@ class UndoHistoryController extends ValueNotifier<UndoHistoryValue> {
     }
 
     onRedo.notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    onUndo.dispose();
+    onRedo.dispose();
+    super.dispose();
   }
 }
 
