@@ -185,13 +185,13 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
   final String spellCheckResultsText = spellCheckResults.spellCheckedText;
 
   if (spellCheckResultsText != value.text) {
-    spellCheckResultsSpans = correctSpellCheckResults(
+    spellCheckResultsSpans = _correctSpellCheckResults(
         value.text, spellCheckResultsText, spellCheckResultsSpans);
   }
 
   return TextSpan(
       style: style,
-      children: buildSubtreesWithMisspelledWordsIndicated(
+      children: _buildSubtreesWithMisspelledWordsIndicated(
           spellCheckResultsSpans,
           value,
           style,
