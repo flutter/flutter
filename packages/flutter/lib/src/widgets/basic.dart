@@ -3919,6 +3919,7 @@ class IndexedStack extends Stack {
     return RenderIndexedStack(
       index: index,
       fit:fit,
+      clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
     );
