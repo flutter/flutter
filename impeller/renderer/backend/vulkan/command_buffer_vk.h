@@ -17,7 +17,7 @@ class CommandBufferVK final : public CommandBuffer {
  private:
   friend class ContextMTL;
 
-  CommandBufferVK();
+  explicit CommandBufferVK(std::weak_ptr<const Context> context);
 
   // |CommandBuffer|
   void SetLabel(const std::string& label) const override;
@@ -26,7 +26,7 @@ class CommandBufferVK final : public CommandBuffer {
   bool IsValid() const override;
 
   // |CommandBuffer|
-  bool SubmitCommands(CompletionCallback callback) override;
+  bool OnSubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
   std::shared_ptr<RenderPass> OnCreateRenderPass(

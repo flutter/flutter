@@ -10,8 +10,10 @@
 
 namespace impeller {
 
-CommandBufferGLES::CommandBufferGLES(ReactorGLES::Ref reactor)
-    : reactor_(std::move(reactor)),
+CommandBufferGLES::CommandBufferGLES(std::weak_ptr<const Context> context,
+                                     ReactorGLES::Ref reactor)
+    : CommandBuffer(std::move(context)),
+      reactor_(std::move(reactor)),
       is_valid_(reactor_ && reactor_->IsValid()) {}
 
 CommandBufferGLES::~CommandBufferGLES() = default;
@@ -27,13 +29,8 @@ bool CommandBufferGLES::IsValid() const {
 }
 
 // |CommandBuffer|
-bool CommandBufferGLES::SubmitCommands(CompletionCallback callback) {
-  if (!IsValid()) {
-    return false;
-  }
-
+bool CommandBufferGLES::OnSubmitCommands(CompletionCallback callback) {
   const auto result = reactor_->React();
-
   if (callback) {
     callback(result ? CommandBuffer::Status::kCompleted
                     : CommandBuffer::Status::kError);
@@ -48,7 +45,7 @@ std::shared_ptr<RenderPass> CommandBufferGLES::OnCreateRenderPass(
     return nullptr;
   }
   auto pass = std::shared_ptr<RenderPassGLES>(
-      new RenderPassGLES(std::move(target), reactor_));
+      new RenderPassGLES(context_, std::move(target), reactor_));
   if (!pass->IsValid()) {
     return nullptr;
   }

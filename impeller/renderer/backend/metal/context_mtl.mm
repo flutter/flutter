@@ -193,7 +193,8 @@ std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBufferInQueue(
     return nullptr;
   }
 
-  auto buffer = std::shared_ptr<CommandBufferMTL>(new CommandBufferMTL(queue));
+  auto buffer = std::shared_ptr<CommandBufferMTL>(
+      new CommandBufferMTL(weak_from_this(), queue));
   if (!buffer->IsValid()) {
     return nullptr;
   }

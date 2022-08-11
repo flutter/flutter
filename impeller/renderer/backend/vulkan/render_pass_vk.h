@@ -27,8 +27,7 @@ class RenderPassVK final : public RenderPass {
   void OnSetLabel(std::string label) override;
 
   // |RenderPass|
-  bool EncodeCommands(
-      const std::shared_ptr<Allocator>& transients_allocator) const override;
+  bool OnEncodeCommands(const Context& context) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPassVK);
 };

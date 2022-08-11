@@ -37,7 +37,7 @@ bool InlinePassContext::EndPass() {
     return true;
   }
 
-  if (!pass_->EncodeCommands(context_->GetResourceAllocator())) {
+  if (!pass_->EncodeCommands()) {
     return false;
   }
 

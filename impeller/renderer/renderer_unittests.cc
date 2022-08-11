@@ -378,7 +378,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
   VS::BindUniformBuffer(
       cmd, r2t_pass->GetTransientsBuffer().EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->AddCommand(std::move(cmd)));
-  ASSERT_TRUE(r2t_pass->EncodeCommands(context->GetResourceAllocator()));
+  ASSERT_TRUE(r2t_pass->EncodeCommands());
 }
 
 #if IMPELLER_ENABLE_METAL
@@ -543,7 +543,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
 
         pass->AddCommand(std::move(cmd));
       }
-      pass->EncodeCommands(context->GetResourceAllocator());
+      pass->EncodeCommands();
     }
 
     if (!buffer->SubmitCommands()) {
@@ -664,7 +664,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 
         pass->AddCommand(std::move(cmd));
       }
-      pass->EncodeCommands(context->GetResourceAllocator());
+      pass->EncodeCommands();
     }
 
     if (!buffer->SubmitCommands()) {

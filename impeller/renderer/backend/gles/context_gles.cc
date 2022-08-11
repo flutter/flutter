@@ -103,7 +103,8 @@ std::shared_ptr<PipelineLibrary> ContextGLES::GetPipelineLibrary() const {
 }
 
 std::shared_ptr<CommandBuffer> ContextGLES::CreateCommandBuffer() const {
-  return std::shared_ptr<CommandBufferGLES>(new CommandBufferGLES(reactor_));
+  return std::shared_ptr<CommandBufferGLES>(
+      new CommandBufferGLES(weak_from_this(), reactor_));
 }
 
 // |Context|
