@@ -21,7 +21,6 @@ import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
-import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -288,13 +287,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleFocusChanged() {
     if (!widget.focusNode.hasFocus) {
-      if (kIsWeb) {
-        PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
-      }
       _clearSelection();
-    }
-    if (kIsWeb) {
-      PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
 
@@ -873,16 +866,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    Widget result = SelectionContainer(
-      registrar: this,
-      delegate: _selectionDelegate,
-      child: widget.child,
-    );
-    if (kIsWeb) {
-      result = PlatformSelectableRegionContextMenu(
-        child: result,
-      );
-    }
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
       child: RawGestureDetector(
@@ -894,7 +877,11 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
           child: Focus(
             includeSemantics: false,
             focusNode: widget.focusNode,
-            child: result,
+            child: SelectionContainer(
+              registrar: this,
+              delegate: _selectionDelegate,
+              child: widget.child,
+            ),
           ),
         ),
       ),

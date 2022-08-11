@@ -1238,16 +1238,6 @@ class RenderSelectionSpy extends RenderProxyBox
   List<SelectionEvent> events = <SelectionEvent>[];
 
   @override
-  Size get size => _size;
-  Size _size = Size.zero;
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    _size = Size(constraints.maxWidth, constraints.maxHeight);
-    return _size;
-  }
-
-  @override
   void addListener(VoidCallback listener) => listeners.add(listener);
 
   @override
