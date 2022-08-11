@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -222,160 +220,6 @@ class LongPressEndDetails {
   final Velocity velocity;
 }
 
-abstract class BaseLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  BaseLongPressGestureRecognizer({
-    Duration? duration,
-    // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
-    // ignore: avoid_init_to_null
-    super.postAcceptSlopTolerance = null,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
-    super.debugOwner,
-    super.supportedDevices,
-  }) : super(deadline: duration ?? kLongPressTimeout);
-
-  bool _longPressAccepted = false;
-  OffsetPair? _longPressOrigin;
-  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
-  // different set of buttons, the gesture is canceled.
-  int? _initialButtons;
-
-  VelocityTracker? _velocityTracker;
-
-  @protected
-  void handleLongPressDown({ required int? buttons, required PointerDownEvent down, required OffsetPair origin });
-  
-  @protected
-  void handleLongPressCancel({ required int? buttons });
-
-  @protected
-  void handleLongPressStart({ required int? buttons, required OffsetPair origin });
-
-  @protected
-  void handleLongPressMoveUpdate({ required PointerEvent event, required int? buttons, required OffsetPair origin });
-
-  @protected
-  void handleLongPressEnd({ required int? buttons, required PointerEvent event, required Velocity velocity });
-
-  @override
-  void didExceedDeadline() {
-    // Exceeding the deadline puts the gesture in the accepted state.
-    resolve(GestureDisposition.accepted);
-    _longPressAccepted = true;
-    super.acceptGesture(primaryPointer!);
-    _checkLongPressStart();
-  }
-
-  @override
-  void handlePrimaryPointer(PointerEvent event) {
-    if (!event.synthesized) {
-      if (event is PointerDownEvent) {
-        _velocityTracker = VelocityTracker.withKind(event.kind);
-        _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
-      }
-      if (event is PointerMoveEvent) {
-        assert(_velocityTracker != null);
-        _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
-      }
-    }
-
-    if (event is PointerUpEvent) {
-      if (_longPressAccepted == true) {
-        _checkLongPressEnd(event);
-      } else {
-        // Pointer is lifted before timeout.
-        resolve(GestureDisposition.rejected);
-      }
-      _reset();
-    } else if (event is PointerCancelEvent) {
-      _checkLongPressCancel();
-      _reset();
-    } else if (event is PointerDownEvent) {
-      // The first touch.
-      _longPressOrigin = OffsetPair.fromEventPosition(event);
-      _initialButtons = event.buttons;
-      _checkLongPressDown(event);
-    } else if (event is PointerMoveEvent) {
-      if (event.buttons != _initialButtons) {
-        resolve(GestureDisposition.rejected);
-        stopTrackingPointer(primaryPointer!);
-      } else if (_longPressAccepted) {
-        _checkLongPressMoveUpdate(event);
-      }
-    }
-  }
-
-  void _checkLongPressDown(PointerDownEvent event) {
-    //_longPressOrigin, and event.
-    assert(_longPressOrigin != null);
-    handleLongPressDown(buttons: _initialButtons, down: event, origin: _longPressOrigin!);
-  }
-
-  void _checkLongPressCancel() {
-    //_intialButtons
-    if (state == GestureRecognizerState.possible) {
-      handleLongPressCancel(buttons: _initialButtons);
-    }
-  }
-
-  void _checkLongPressStart() {
-    //_initialButtons, and _longPressOrigin
-    assert(_longPressOrigin != null);
-    handleLongPressStart(buttons: _initialButtons, origin: _longPressOrigin!);
-  }
-
-  void _checkLongPressMoveUpdate(PointerEvent event) {
-    //event, _initialButtons, _longPressOrigin
-    assert(_longPressOrigin != null);
-    handleLongPressMoveUpdate(buttons: _initialButtons, event: event, origin: _longPressOrigin!);
-  }
-
-  void _checkLongPressEnd(PointerEvent event) {
-    //velocity, event, _initialButtons
-    final VelocityEstimate? estimate = _velocityTracker!.getVelocityEstimate();
-    final Velocity velocity = estimate == null
-        ? Velocity.zero
-        : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
-
-    handleLongPressEnd(buttons: _initialButtons, event: event, velocity: velocity);
-
-    _velocityTracker = null;
-  }
-
-  void _reset() {
-    _longPressAccepted = false;
-    _longPressOrigin = null;
-    _initialButtons = null;
-    _velocityTracker = null;
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    // Winning the arena isn't important here since it may happen from a sweep.
-    // Explicitly exceeding the deadline puts the gesture in accepted state.
-  }
-
-  @override
-  void resolve(GestureDisposition disposition) {
-    if (disposition == GestureDisposition.rejected) {
-      if (_longPressAccepted) {
-        // This can happen if the gesture has been canceled. For example when
-        // the buttons have changed.
-        _reset();
-      } else {
-        _checkLongPressCancel();
-      }
-    }
-    super.resolve(disposition);
-  }
-
-  @override
-  String get debugDescription => 'base long press';
-}
-
 /// Recognizes when the user has pressed down at the same location for a long
 /// period of time.
 ///
@@ -387,7 +231,7 @@ abstract class BaseLongPressGestureRecognizer extends PrimaryPointerGestureRecog
 /// [LongPressGestureRecognizer] may compete on pointer events of
 /// [kPrimaryButton], [kSecondaryButton], and/or [kTertiaryButton] if at least
 /// one corresponding callback is non-null. If it has no callbacks, it is a no-op.
-class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
+class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
   /// Consider assigning the [onLongPressStart] callback after creating this
@@ -405,8 +249,10 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
-    super.duration,
-    super.postAcceptSlopTolerance,
+    Duration? duration,
+    // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
+    // ignore: avoid_init_to_null
+    super.postAcceptSlopTolerance = null,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
@@ -414,7 +260,15 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
     super.kind,
     super.supportedDevices,
     super.debugOwner,
-  });
+  }) : super(
+         deadline: duration ?? kLongPressTimeout,
+       );
+
+  bool _longPressAccepted = false;
+  OffsetPair? _longPressOrigin;
+  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
+  // different set of buttons, the gesture is canceled.
+  int? _initialButtons;
 
   /// Called when a pointer has contacted the screen at a particular location
   /// with a primary button, which might be the start of a long-press.
@@ -713,6 +567,8 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
   ///  * [LongPressEndDetails], which is passed as an argument to this callback.
   GestureLongPressEndCallback? onTertiaryLongPressEnd;
 
+  VelocityTracker? _velocityTracker;
+
   @override
   bool isPointerAllowed(PointerDownEvent event) {
     switch (event.buttons) {
@@ -755,13 +611,60 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
     return super.isPointerAllowed(event);
   }
 
-  @protected
   @override
-  void handleLongPressDown({ required int? buttons, required PointerDownEvent down, required OffsetPair origin }) {
+  void didExceedDeadline() {
+    // Exceeding the deadline puts the gesture in the accepted state.
+    resolve(GestureDisposition.accepted);
+    _longPressAccepted = true;
+    super.acceptGesture(primaryPointer!);
+    _checkLongPressStart();
+  }
+
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    if (!event.synthesized) {
+      if (event is PointerDownEvent) {
+        _velocityTracker = VelocityTracker.withKind(event.kind);
+        _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
+      }
+      if (event is PointerMoveEvent) {
+        assert(_velocityTracker != null);
+        _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
+      }
+    }
+
+    if (event is PointerUpEvent) {
+      if (_longPressAccepted == true) {
+        _checkLongPressEnd(event);
+      } else {
+        // Pointer is lifted before timeout.
+        resolve(GestureDisposition.rejected);
+      }
+      _reset();
+    } else if (event is PointerCancelEvent) {
+      _checkLongPressCancel();
+      _reset();
+    } else if (event is PointerDownEvent) {
+      // The first touch.
+      _longPressOrigin = OffsetPair.fromEventPosition(event);
+      _initialButtons = event.buttons;
+      _checkLongPressDown(event);
+    } else if (event is PointerMoveEvent) {
+      if (event.buttons != _initialButtons) {
+        resolve(GestureDisposition.rejected);
+        stopTrackingPointer(primaryPointer!);
+      } else if (_longPressAccepted) {
+        _checkLongPressMoveUpdate(event);
+      }
+    }
+  }
+
+  void _checkLongPressDown(PointerDownEvent event) {
+    assert(_longPressOrigin != null);
     final LongPressDownDetails details = LongPressDownDetails(
-      globalPosition: origin.global,
-      localPosition: origin.local,
-      kind: getKindForPointer(down.pointer),
+      globalPosition: _longPressOrigin!.global,
+      localPosition: _longPressOrigin!.local,
+      kind: getKindForPointer(event.pointer),
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -780,43 +683,41 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
         }
         break;
       default:
-        assert(false, 'Unhandled button $buttons');
+        assert(false, 'Unhandled button $_initialButtons');
     }
   }
 
-  @protected
-  @override
-  void handleLongPressCancel({ required int? buttons }) {
-    switch (buttons) {
-      case kPrimaryButton:
-        if (onLongPressCancel != null) {
-          invokeCallback<void>('onLongPressCancel', onLongPressCancel!);
-        }
-        break;
-      case kSecondaryButton:
-        if (onSecondaryLongPressCancel != null) {
-          invokeCallback<void>('onSecondaryLongPressCancel', onSecondaryLongPressCancel!);
-        }
-        break;
-      case kTertiaryButton:
-        if (onTertiaryLongPressCancel != null) {
-          invokeCallback<void>('onTertiaryLongPressCancel', onTertiaryLongPressCancel!);
-        }
-        break;
-      default:
-        assert(false, 'Unhandled button $buttons');
+  void _checkLongPressCancel() {
+    if (state == GestureRecognizerState.possible) {
+      switch (_initialButtons) {
+        case kPrimaryButton:
+          if (onLongPressCancel != null) {
+            invokeCallback<void>('onLongPressCancel', onLongPressCancel!);
+          }
+          break;
+        case kSecondaryButton:
+          if (onSecondaryLongPressCancel != null) {
+            invokeCallback<void>('onSecondaryLongPressCancel', onSecondaryLongPressCancel!);
+          }
+          break;
+        case kTertiaryButton:
+          if (onTertiaryLongPressCancel != null) {
+            invokeCallback<void>('onTertiaryLongPressCancel', onTertiaryLongPressCancel!);
+          }
+          break;
+        default:
+          assert(false, 'Unhandled button $_initialButtons');
+      }
     }
   }
 
-  @protected
-  @override
-  void handleLongPressStart({ required int? buttons, required OffsetPair origin }) {
+  void _checkLongPressStart() {
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressStart != null) {
           final LongPressStartDetails details = LongPressStartDetails(
-            globalPosition: origin.global,
-            localPosition: origin.local,
+            globalPosition: _longPressOrigin!.global,
+            localPosition: _longPressOrigin!.local,
           );
           invokeCallback<void>('onLongPressStart', () => onLongPressStart!(details));
         }
@@ -827,8 +728,8 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
       case kSecondaryButton:
         if (onSecondaryLongPressStart != null) {
           final LongPressStartDetails details = LongPressStartDetails(
-            globalPosition: origin.global,
-            localPosition: origin.local,
+            globalPosition: _longPressOrigin!.global,
+            localPosition: _longPressOrigin!.local,
           );
           invokeCallback<void>('onSecondaryLongPressStart', () => onSecondaryLongPressStart!(details));
         }
@@ -839,8 +740,8 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
       case kTertiaryButton:
         if (onTertiaryLongPressStart != null) {
           final LongPressStartDetails details = LongPressStartDetails(
-            globalPosition: origin.global,
-            localPosition: origin.local,
+            globalPosition: _longPressOrigin!.global,
+            localPosition: _longPressOrigin!.local,
           );
           invokeCallback<void>('onTertiaryLongPressStart', () => onTertiaryLongPressStart!(details));
         }
@@ -849,20 +750,18 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
         }
         break;
       default:
-        assert(false, 'Unhandled button $buttons');
+        assert(false, 'Unhandled button $_initialButtons');
     }
   }
 
-  @protected
-  @override
-  void handleLongPressMoveUpdate({ required PointerEvent event, required int? buttons, required OffsetPair origin }) {
+  void _checkLongPressMoveUpdate(PointerEvent event) {
     final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
-      offsetFromOrigin: event.position - origin.global,
-      localOffsetFromOrigin: event.localPosition - origin.local,
+      offsetFromOrigin: event.position - _longPressOrigin!.global,
+      localOffsetFromOrigin: event.localPosition - _longPressOrigin!.local,
     );
-    switch (buttons) {
+    switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressMoveUpdate != null) {
           invokeCallback<void>('onLongPressMoveUpdate', () => onLongPressMoveUpdate!(details));
@@ -879,20 +778,23 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
         }
         break;
       default:
-        assert(false, 'Unhandled button $buttons');
+        assert(false, 'Unhandled button $_initialButtons');
     }
   }
 
-  @protected
-  @override
-  void handleLongPressEnd({ required int? buttons, required PointerEvent event, required Velocity velocity }) {
+  void _checkLongPressEnd(PointerEvent event) {
+    final VelocityEstimate? estimate = _velocityTracker!.getVelocityEstimate();
+    final Velocity velocity = estimate == null
+        ? Velocity.zero
+        : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
     final LongPressEndDetails details = LongPressEndDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
       velocity: velocity,
     );
 
-    switch (buttons) {
+    _velocityTracker = null;
+    switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressEnd != null) {
           invokeCallback<void>('onLongPressEnd', () => onLongPressEnd!(details));
@@ -918,8 +820,35 @@ class LongPressGestureRecognizer extends BaseLongPressGestureRecognizer {
         }
         break;
       default:
-        assert(false, 'Unhandled button $buttons');
+        assert(false, 'Unhandled button $_initialButtons');
     }
+  }
+
+  void _reset() {
+    _longPressAccepted = false;
+    _longPressOrigin = null;
+    _initialButtons = null;
+    _velocityTracker = null;
+  }
+
+  @override
+  void resolve(GestureDisposition disposition) {
+    if (disposition == GestureDisposition.rejected) {
+      if (_longPressAccepted) {
+        // This can happen if the gesture has been canceled. For example when
+        // the buttons have changed.
+        _reset();
+      } else {
+        _checkLongPressCancel();
+      }
+    }
+    super.resolve(disposition);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    // Winning the arena isn't important here since it may happen from a sweep.
+    // Explicitly exceeding the deadline puts the gesture in accepted state.
   }
 
   @override
