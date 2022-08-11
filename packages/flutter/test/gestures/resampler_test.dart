@@ -868,4 +868,53 @@ void main() {
     // No pointer events should have been returned.
     expect(result.length, 6);
   });
+
+  test('retains endOfBatch', () {
+    final PointerEventResampler resampler = PointerEventResampler();
+
+    resampler
+      ..addEvent(const PointerAddedEvent(
+        pointer: 1,
+        timeStamp: Duration(microseconds: 1000),
+        position: Offset(0, 100),
+      ))
+      ..addEvent(const PointerDownEvent(
+        pointer: 1,
+        timeStamp: Duration(microseconds: 1000),
+        position: Offset(0, 100),
+      ))
+      ..addEvent(const PointerMoveEvent(
+        pointer: 1,
+        timeStamp: Duration(microseconds: 1500),
+        position: Offset(0, 200),
+        endOfBatch: false,
+      ))
+      ..addEvent(const PointerMoveEvent(
+        pointer: 1,
+        timeStamp: Duration(microseconds: 2000),
+        position: Offset(0, 300),
+        // endOfBatch: true,
+      ));
+
+    final List<PointerEvent> result = <PointerEvent>[];
+    resampler.sample(const Duration(microseconds: 1000), const Duration(microseconds: 1250), result.add);
+    result.clear();
+
+    resampler.sample(const Duration(microseconds: 1250), const Duration(microseconds: 1750), result.add);
+    expect(result.length, 1);
+    expect(result[0].timeStamp, const Duration(microseconds: 1250));
+    expect(result[0], isA<PointerMoveEvent>());
+    expect(result[0].position.dx, 0.0);
+    expect(result[0].position.dy, 150);
+    expect(result[0].endOfBatch, false);
+    result.clear();
+
+    resampler.sample(const Duration(microseconds: 1750), const Duration(microseconds: 2250), result.add);
+    expect(result.length, 1);
+    expect(result[0].timeStamp, const Duration(microseconds: 1750));
+    expect(result[0], isA<PointerMoveEvent>());
+    expect(result[0].position.dx, 0.0);
+    expect(result[0].position.dy, 250);
+    expect(result[0].endOfBatch, true);
+  });
 }
