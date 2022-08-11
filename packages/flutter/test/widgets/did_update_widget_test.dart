@@ -50,7 +50,7 @@ class _WidgetUnderTestState extends State<WidgetUnderTest> {
     super.didUpdateWidget(oldWidget);
     didUpdateWidgetCalled += 1;
     if (oldWidget.text != widget.text) {
-      // This setState is load-barring for the test.
+      // This setState is load bearing for the test.
       setState(() {
         text = widget.text;
       });
