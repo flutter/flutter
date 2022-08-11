@@ -104,7 +104,8 @@ class OverlayEntry implements Listenable {
     _overlay?._didChangeEntryOpacity();
   }
 
-  _RootOverlayLocation? _overlayLocation;
+  //_RootOverlayLocation? _overlayLocation;
+  _OverlayEntryLocation? _renderChildModel;
 
   /// Whether this entry must be included in the tree even if there is a fully
   /// [opaque] entry above it.
@@ -856,38 +857,33 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
 }
 
 class _OverlayEntryLocation extends OverlayLocation with LinkedListEntry<_OverlayEntryLocation> {
+  _OverlayEntryLocation(this._theatreChildModel) : super._();
+
+  @override
+  final LinkedList<LocationOccupants> _theatreChildModel;
 
   @override
   void _activate(_RenderDeferredLayoutBox child) {
   }
 
   @override
-  void _addToChildModel(_RenderDeferredLayoutBox child) {
-    // TODO: implement _addToChildModel
-  }
-
-  @override
   void _deactivate(_RenderDeferredLayoutBox child) {
-    // TODO: implement _deactivate
   }
 
   @override
-  bool _isTheSameLocation(OverlayLocation other) {
-    // TODO: implement _isTheSameLocation
-    throw UnimplementedError();
+  void _addToChildModel(_RenderDeferredLayoutBox child) {
   }
 
   @override
   void _removeFromChildModel(_RenderDeferredLayoutBox child) {
-    // TODO: implement _removeFromChildModel
   }
 
   @override
-  _RenderTheatreChildModel get _theatreChildModel => throw UnimplementedError();
+  bool _isTheSameLocation(OverlayLocation other) => identical(this, other);
 }
 
-class _OverlayChildModel extends _RenderTheatreChildModel with _SortedLinkedListChildModel<_OverlayEntryLocation> {
-  _OverlayChildModel(this._theatre);
+class _OverlayEntryChildModel extends _RenderTheatreChildModel with _SortedLinkedListChildModel<_OverlayEntryLocation> {
+  _OverlayEntryChildModel(this._theatre);
 
   final LinkedList<_OverlayEntryLocation> _children = LinkedList<_OverlayEntryLocation>();
 
@@ -911,7 +907,6 @@ class _OverlayChildModel extends _RenderTheatreChildModel with _SortedLinkedList
 
   @override
   _ChildIterator? _hitTestOrderIterator() => _backwardIterator();
-
 }
 
 
@@ -925,11 +920,8 @@ class _OverlayChildModel extends _RenderTheatreChildModel with _SortedLinkedList
 /// [Overlay]. If multiple children in the same [Overlay] occupy the same
 /// [OverlayLocation], their paint order relative to one another is undefined.
 abstract class OverlayLocation {
-  OverlayLocation._(
-    //this._overlayEntryIdentifier,
-  );
+  OverlayLocation._();
 
-  //_RenderTheatre get _overlayRenderObject;
   _RenderTheatreChildModel get _theatreChildModel;
 
   /// Returns an [OverlayLocation] that represents a location in the same
@@ -1000,7 +992,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   void initState() {
     super.initState();
     widget.entry._overlayStateMounted.value = true;
-    widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!)..attach();
+    //widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!)..attach();
+    widget.entry._renderChildModel = _OverlayEntryLocation(_theatreChildModel)
   }
 
   @override
