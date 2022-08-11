@@ -646,7 +646,6 @@ if (is_win) {
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
-    "-Wno-unused-but-set-variable",  # libpng
   ]
 
   if (is_wasm) {
