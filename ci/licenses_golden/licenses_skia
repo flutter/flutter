@@ -1,4 +1,4 @@
-Signature: 24f87351754fbe4ea9439a61f7c79002
+Signature: f364b1245968c49ae838fc2876eedd02
 
 UNUSED LICENSES:
 
@@ -5584,6 +5584,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/AttachmentTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack_graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandTypes.h
+FILE: ../../../third_party/skia/src/gpu/graphite/ComputePassTask.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/ComputePassTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipeline.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipeline.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ComputePipelineDesc.h
