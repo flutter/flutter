@@ -25,6 +25,7 @@ struct Paint {
   using MaskFilterProc =
       std::function<std::shared_ptr<FilterContents>(FilterInput::Ref,
                                                     bool is_solid_color)>;
+  using ColorSourceProc = std::function<std::shared_ptr<PathContents>()>;
 
   enum class Style {
     kFill,
@@ -40,7 +41,7 @@ struct Paint {
   };
 
   Color color = Color::Black();
-  std::shared_ptr<PathContents> contents;
+  std::optional<ColorSourceProc> color_source;
 
   Scalar stroke_width = 0.0;
   SolidStrokeContents::Cap stroke_cap = SolidStrokeContents::Cap::kButt;

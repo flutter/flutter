@@ -10,7 +10,9 @@ namespace impeller {
 
 std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
                                                          bool cover) const {
-  if (contents) {
+  if (color_source.has_value()) {
+    auto& source = color_source.value();
+    auto contents = source();
     contents->SetPath(std::move(path));
     return contents;
   }
@@ -41,7 +43,7 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
 std::shared_ptr<Contents> Paint::WithFilters(
     std::shared_ptr<Contents> input,
     std::optional<bool> is_solid_color) const {
-  bool is_solid_color_val = is_solid_color.value_or(!contents);
+  bool is_solid_color_val = is_solid_color.value_or(!color_source);
 
   if (mask_blur_descriptor.has_value()) {
     input = mask_blur_descriptor->CreateMaskBlur(FilterInput::Make(input),
