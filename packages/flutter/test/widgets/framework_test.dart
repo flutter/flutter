@@ -1965,9 +1965,9 @@ class StatefulElementSpy extends StatefulElement {
   _Stateful get _statefulWidget => widget as _Stateful;
 
   @override
-  void rebuild({bool force = true}) {
+  void rebuild({bool force = false}) {
     _statefulWidget.onElementRebuild?.call(this);
-    super.rebuild();
+    super.rebuild(force: force);
   }
 }
 
