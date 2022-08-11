@@ -67,7 +67,8 @@ void main() {
   late MemoryFileSystem fs;
   late BufferLogger logger;
   late Artifacts artifacts;
-  late ProcessManager processManager;
+  late FakeProcessManager processManager;
+
   late String defaultL10nPathString;
   late String syntheticPackagePath;
   late String syntheticL10nPackagePath;
@@ -76,13 +77,67 @@ void main() {
     fs = MemoryFileSystem.test();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    processManager = FakeProcessManager.any();
+    processManager = FakeProcessManager.empty();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
     syntheticL10nPackagePath = fs.path.join(syntheticPackagePath, 'gen_l10n');
     precacheLanguageAndRegionTags();
   });
+
+  void generateFakeCommand(
+    Directory inputDirectory,
+    Directory outputDirectory,
+    String outputFileName,
+  ) {
+    final List<String> command = <String>[
+      artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      'format',
+    ];
+    final int extensionIndex = outputFileName.indexOf('.');
+    final String outputFilePrefix, outputFileExtension;
+    // Throw no exceptions when the test is intend throw later.
+    if (extensionIndex == -1) {
+      outputFilePrefix = '';
+      outputFileExtension = '';
+    } else {
+      outputFilePrefix = outputFileName.substring(0, extensionIndex);
+      outputFileExtension = outputFileName.substring(extensionIndex);
+    }
+    final AppResourceBundleCollection allBundles = AppResourceBundleCollection(inputDirectory);
+    final List<LocaleInfo> allLocales = allBundles.locales.toList()..sort();
+    for (final LocaleInfo locale in allLocales) {
+      if (locale.countryCode == null && locale.scriptCode == null) {
+        final String filename = '${outputFilePrefix}_$locale$outputFileExtension';
+        final File file = fs.file(fs.path.join(outputDirectory.path, filename));
+        command.add(file.absolute.path);
+      }
+    }
+    final File baseFile = fs.file(fs.path.join(outputDirectory.path, outputFileName));
+    command.add(baseFile.absolute.path);
+    processManager.addCommand(FakeCommand(command: command));
+  }
+
+  void generateFakeCommandFromOptions(LocalizationOptions options) {
+    final Directory? projectDirectory = LocalizationsGenerator.projectDirFromPath(fs, fs.currentDirectory.path);
+    final String inputPathString = options.arbDirectory?.path ?? fs.path.join('lib', 'l10n');
+    final String? outputPathString = options.outputDirectory?.path;
+    final Directory outputDirectory = LocalizationsGenerator.outputDirectoryFromPath(
+      fs,
+      outputPathString ?? inputPathString,
+      options.useSyntheticPackage,
+      projectDirectory,
+    );
+    final String outputFileName = options.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
+    generateFakeCommand(fs.directory(inputPathString), outputDirectory, outputFileName);
+  }
+
+  void generateFakeCommandFromGenerator(LocalizationsGenerator generator) {
+    final Directory inputDirectory = generator.inputDirectory;
+    final Directory outputDirectory = generator.outputDirectory;
+    final String outputFileName = generator.baseOutputFile.basename;
+    generateFakeCommand(inputDirectory, outputDirectory, outputFileName);
+  }
 
   group('Setters', () {
     testWithoutContext('setInputDirectory fails if the directory does not exist', () {
@@ -125,7 +180,7 @@ void main() {
 
       // Run localizations generator in specified absolute path.
       final String flutterProjectPath = fs.path.join('absolute', 'path', 'to', 'flutter_project');
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -136,7 +191,9 @@ void main() {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       // Output files should be generated in the provided absolute path.
       expect(
@@ -323,7 +380,7 @@ void main() {
       .writeAsStringSync(singleMessageArbFileString);
     l10nDirectory.childFile('app_localizations_es.arb')
       .writeAsStringSync(singleEsMessageArbFileString);
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -332,7 +389,9 @@ void main() {
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final Directory outputDirectory = fs.directory(syntheticL10nPackagePath);
     expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
@@ -374,7 +433,7 @@ void main() {
       ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
       ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -385,7 +444,9 @@ void main() {
       classNameString: defaultClassNameString,
       untranslatedMessagesFile: fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final File unimplementedOutputFile = fs.file(
       fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
@@ -407,7 +468,7 @@ void main() {
       ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
       ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -419,7 +480,9 @@ void main() {
       useSyntheticPackage: false,
       untranslatedMessagesFile: fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final File unimplementedOutputFile = fs.file(
       fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
@@ -444,7 +507,7 @@ void main() {
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
         ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -455,7 +518,10 @@ void main() {
         classNameString: defaultClassNameString,
         useSyntheticPackage: false,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
+
 
       expect(
         logger.statusText,
@@ -477,7 +543,7 @@ void main() {
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
         ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -486,7 +552,9 @@ void main() {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate(isFromYaml: true);
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate(isFromYaml: true);
 
       expect(
         logger.statusText,
@@ -508,7 +576,7 @@ void main() {
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
         ..childFile(esArbFileName).writeAsStringSync(twoMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -518,7 +586,9 @@ void main() {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       expect(logger.statusText, '');
     },
@@ -527,7 +597,7 @@ void main() {
   testWithoutContext('untranslated messages file included in generated JSON list of outputs', () async {
     _standardFlutterDirectoryL10nSetup(fs);
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -538,7 +608,9 @@ void main() {
       inputsAndOutputsListPath: syntheticL10nPackagePath,
       untranslatedMessagesFile: fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final File inputsAndOutputsList = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'gen_l10n_inputs_and_outputs.json'),
@@ -557,7 +629,7 @@ void main() {
     'null while not using the synthetic package option',
     () async {
       _standardFlutterDirectoryL10nSetup(fs);
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -568,7 +640,9 @@ void main() {
         classNameString: defaultClassNameString,
         useSyntheticPackage: false,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final Directory outputDirectory = fs.directory('lib').childDirectory('l10n');
       expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
@@ -595,7 +669,7 @@ void main() {
         .childFile(esArbFileName)
         .writeAsStringSync(singleEsMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -606,7 +680,9 @@ void main() {
         classNameString: defaultClassNameString,
         useSyntheticPackage: false,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
       expect(outputDirectory.existsSync(), isTrue);
@@ -622,7 +698,7 @@ void main() {
     () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -633,7 +709,9 @@ void main() {
         classNameString: defaultClassNameString,
         useSyntheticPackage: false,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
       expect(outputDirectory.existsSync(), isTrue);
@@ -649,7 +727,7 @@ void main() {
     () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -660,7 +738,9 @@ void main() {
         classNameString: defaultClassNameString,
         useSyntheticPackage: false,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
       expect(outputDirectory.existsSync(), isTrue);
@@ -681,7 +761,7 @@ void main() {
     () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -693,7 +773,9 @@ void main() {
         useSyntheticPackage: false,
         usesNullableGetter: false,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
       expect(outputDirectory.existsSync(), isTrue);
@@ -712,7 +794,7 @@ void main() {
   testWithoutContext('creates list of inputs and outputs when file path is specified', () async {
     _standardFlutterDirectoryL10nSetup(fs);
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -722,7 +804,9 @@ void main() {
       classNameString: defaultClassNameString,
       inputsAndOutputsListPath: syntheticL10nPackagePath,
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final File inputsAndOutputsList = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'gen_l10n_inputs_and_outputs.json'),
@@ -823,6 +907,7 @@ void main() {
         areResourceAttributesRequired: true,
         usesNullableGetter: false,
       );
+      generateFakeCommandFromOptions(options);
 
       // Verify that values are correctly passed through the localizations target.
       final LocalizationsGenerator generator = await generateLocalizations(
@@ -910,16 +995,18 @@ flutter:
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Test without headers.
+      LocalizationOptions options = LocalizationOptions(
+        arbDirectory: Uri.directory(defaultL10nPathString),
+        outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+        useSyntheticPackage: false,
+      );
+      generateFakeCommandFromOptions(options);
       await generateLocalizations(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
-        options: LocalizationOptions(
-          arbDirectory: Uri.directory(defaultL10nPathString),
-          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
-          useSyntheticPackage: false,
-        ),
+        options: options,
         logger: BufferLogger.test(),
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
@@ -937,24 +1024,26 @@ class AppLocalizationsEn extends AppLocalizations {
 }
 ''');
 
-    // Test with headers.
-    await generateLocalizations(
-      fileSystem: fs,
-      artifacts: artifacts,
-      processManager: processManager,
-      options: LocalizationOptions(
+      // Test with headers.
+      options = LocalizationOptions(
         header: 'HEADER',
         arbDirectory: Uri.directory(defaultL10nPathString),
         outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
         templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
         useSyntheticPackage: false,
-      ),
-      logger: logger,
-      projectDir: fs.currentDirectory,
-      dependenciesDir: fs.currentDirectory,
-    );
+      );
+      generateFakeCommandFromOptions(options);
+      await generateLocalizations(
+        fileSystem: fs,
+        artifacts: artifacts,
+        processManager: processManager,
+        options: options,
+        logger: logger,
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+      );
 
-    expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
+      expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 HEADER
 
 import 'app_localizations.dart';
@@ -1379,7 +1468,7 @@ class AppLocalizationsEn extends AppLocalizations {
   group('writeOutputFiles', () {
     testWithoutContext('message without placeholders - should generate code comment with description and template message translation', () async {
       _standardFlutterDirectoryL10nSetup(fs);
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -1389,7 +1478,9 @@ class AppLocalizationsEn extends AppLocalizations {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final File baseLocalizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
@@ -1419,7 +1510,7 @@ class AppLocalizationsEn extends AppLocalizations {
       l10nDirectory.childFile(esArbFileName)
         .writeAsStringSync(singleEsMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -1429,7 +1520,9 @@ class AppLocalizationsEn extends AppLocalizations {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final File baseLocalizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
@@ -1468,7 +1561,7 @@ class AppLocalizationsEn extends AppLocalizations {
   "price": "el precio de este artículo es: ${price}"
 }''');
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -1478,7 +1571,9 @@ class AppLocalizationsEn extends AppLocalizations {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final File baseLocalizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
@@ -1503,7 +1598,7 @@ class AppLocalizationsEn extends AppLocalizations {
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
         ..childFile('app_en_CA.arb').writeAsStringSync(singleEnCaMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -1513,7 +1608,9 @@ class AppLocalizationsEn extends AppLocalizations {
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')), true);
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en_US.dart')), false);
@@ -1532,7 +1629,7 @@ class AppLocalizationsEn extends AppLocalizations {
         ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
 
       const List<String> preferredSupportedLocale = <String>['zh'];
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -1543,7 +1640,9 @@ class AppLocalizationsEn extends AppLocalizations {
         classNameString: defaultClassNameString,
         preferredSupportedLocales: preferredSupportedLocale,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, defaultOutputFileString),
@@ -1561,7 +1660,7 @@ import 'output-localization-file_zh.dart';
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -1571,7 +1670,9 @@ import 'output-localization-file_zh.dart';
         outputFileString: 'output-localization-file.g.dart',
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String baseLocalizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.g.dart'),
@@ -1594,60 +1695,60 @@ import 'output-localization-file.g.dart';
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
 
-        expect(
-          () => LocalizationsGenerator(
-            fileSystem: fs,
-            artifacts: artifacts,
-            processManager: processManager,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: 'asdf',
-            classNameString: defaultClassNameString,
-            logger: logger,
-          ).generate(),
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            allOf(
-              contains('output-localization-file'),
-              contains('asdf'),
-              contains('is invalid'),
-              contains('The file name must have a .dart extension.'),
-            ),
-          )),
-        );
+      expect(
+        () => LocalizationsGenerator(
+          fileSystem: fs,
+          artifacts: artifacts,
+          processManager: processManager,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: 'asdf',
+          classNameString: defaultClassNameString,
+          logger: logger,
+        ).generate(),
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          allOf(
+            contains('output-localization-file'),
+            contains('asdf'),
+            contains('is invalid'),
+            contains('The file name must have a .dart extension.'),
+          ),
+        )),
+      );
 
-        expect(
-          () => LocalizationsGenerator(
-            fileSystem: fs,
-            artifacts: artifacts,
-            processManager: processManager,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: '.g.dart',
-            classNameString: defaultClassNameString,
-            logger: logger,
-          ).generate(),
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            allOf(
-              contains('output-localization-file'),
-              contains('.g.dart'),
-              contains('is invalid'),
-              contains('The base name cannot be empty.'),
-            ),
-          )),
-        );
-      });
+      expect(
+        () => LocalizationsGenerator(
+          fileSystem: fs,
+          artifacts: artifacts,
+          processManager: processManager,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: '.g.dart',
+          classNameString: defaultClassNameString,
+          logger: logger,
+        ).generate(),
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          allOf(
+            contains('output-localization-file'),
+            contains('.g.dart'),
+            contains('is invalid'),
+            contains('The base name cannot be empty.'),
+          ),
+        )),
+      );
+    });
 
     testWithoutContext('imports are deferred and loaded when useDeferredImports are set', () async {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -1657,7 +1758,9 @@ import 'output-localization-file.g.dart';
         classNameString: defaultClassNameString,
         useDeferredLoading: true,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, defaultOutputFileString),
@@ -1688,7 +1791,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
           ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleDateMessageArbFileString);
 
-        await LocalizationsGenerator(
+        final LocalizationsGenerator generator = LocalizationsGenerator(
           fileSystem: fs,
           artifacts: artifacts,
           processManager: processManager,
@@ -1698,7 +1801,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
-        ).generate();
+        );
+        generateFakeCommandFromGenerator(generator);
+        await generator.generate();
 
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
@@ -1770,7 +1875,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         l10nDirectory.childFile(defaultTemplateArbFileName)
             .writeAsStringSync(singleDateMessageArbFileString);
 
-        await LocalizationsGenerator(
+        final LocalizationsGenerator generator = LocalizationsGenerator(
           fileSystem: fs,
           artifacts: artifacts,
           processManager: processManager,
@@ -1779,7 +1884,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
-        ).generate();
+        );
+        generateFakeCommandFromGenerator(generator);
+        await generator.generate();
 
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
@@ -1808,7 +1915,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         l10nDirectory.childFile(defaultTemplateArbFileName)
             .writeAsStringSync(singleDateMessageArbFileString);
 
-        await LocalizationsGenerator(
+        final LocalizationsGenerator generator = LocalizationsGenerator(
           fileSystem: fs,
           artifacts: artifacts,
           processManager: processManager,
@@ -1817,7 +1924,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
-        ).generate();
+        );
+        generateFakeCommandFromGenerator(generator);
+        await generator.generate();
 
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
@@ -1844,17 +1953,21 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           .writeAsStringSync(singleDateMessageArbFileString);
 
         expect(
-          () => LocalizationsGenerator(
-            fileSystem: fs,
-            artifacts: artifacts,
-            processManager: processManager,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-            logger: logger,
-          ).generate(),
+          () async {
+            final LocalizationsGenerator generator = LocalizationsGenerator(
+              fileSystem: fs,
+              artifacts: artifacts,
+              processManager: processManager,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+            );
+            generateFakeCommandFromGenerator(generator);
+            await generator.generate();
+          },
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
@@ -1884,7 +1997,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           ..childFile(defaultTemplateArbFileName).writeAsStringSync(
               singleDateMessageArbFileString);
 
-        await LocalizationsGenerator(
+        final LocalizationsGenerator generator = LocalizationsGenerator(
           fileSystem: fs,
           artifacts: artifacts,
           processManager: processManager,
@@ -1894,7 +2007,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
-        ).generate();
+        );
+        generateFakeCommandFromGenerator(generator);
+        await generator.generate();
 
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
@@ -2063,7 +2178,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(
           () async {
-            await LocalizationsGenerator(
+            final LocalizationsGenerator generator = LocalizationsGenerator(
               fileSystem: fs,
               artifacts: artifacts,
               processManager: processManager,
@@ -2073,7 +2188,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               outputFileString: defaultOutputFileString,
               classNameString: defaultClassNameString,
               logger: logger,
-            ).generate();
+            );
+            generateFakeCommandFromGenerator(generator);
+            await generator.generate();
           },
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
@@ -2102,7 +2219,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
           .writeAsStringSync(pluralMessageWithIncorrectPlaceholderType);
-        await LocalizationsGenerator(
+        final LocalizationsGenerator generator = LocalizationsGenerator(
           fileSystem: fs,
           artifacts: artifacts,
           processManager: processManager,
@@ -2112,7 +2229,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           logger: logger,
-        ).generate();
+        );
+        generateFakeCommandFromGenerator(generator);
+        await generator.generate();
         expect(logger.warningText, contains("Placeholders for plurals are automatically converted to type 'num'"));
       });
     });
@@ -2134,7 +2253,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(
           () async {
-            await LocalizationsGenerator(
+            final LocalizationsGenerator generator = LocalizationsGenerator(
               fileSystem: fs,
               artifacts: artifacts,
               processManager: processManager,
@@ -2144,7 +2263,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               outputFileString: defaultOutputFileString,
               classNameString: defaultClassNameString,
               logger: logger,
-            ).generate();
+            );
+            generateFakeCommandFromGenerator(generator);
+            await generator.generate();
           },
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
@@ -2236,7 +2357,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         expect(
           () async {
-            await LocalizationsGenerator(
+            final LocalizationsGenerator generator = LocalizationsGenerator(
               fileSystem: fs,
               artifacts: artifacts,
               processManager: processManager,
@@ -2246,7 +2367,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               outputFileString: defaultOutputFileString,
               classNameString: defaultClassNameString,
               logger: logger,
-            ).generate();
+            );
+            generateFakeCommandFromGenerator(generator);
+            await generator.generate();
           },
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
@@ -2304,7 +2427,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
         ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2314,7 +2437,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
@@ -2345,7 +2470,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(pluralMessageArb)
         ..childFile('app_es.arb').writeAsStringSync(pluralMessageEsArb);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2355,7 +2480,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
@@ -2386,7 +2513,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(selectMessageArb)
         ..childFile('app_es.arb').writeAsStringSync(selectMessageEsArb);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2396,7 +2523,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
@@ -2407,7 +2536,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     testWithoutContext('check indentation on generated files', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2417,7 +2546,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart'),
@@ -2441,7 +2572,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
         ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2452,7 +2583,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         classNameString: defaultClassNameString,
         useDeferredLoading: true,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart'),
@@ -2465,7 +2598,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
         ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2475,7 +2608,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart'),
@@ -2590,7 +2725,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(enArbCheckList)
         ..childFile('app_es.arb').writeAsStringSync(esArbCheckList);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2600,7 +2735,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
@@ -2660,7 +2797,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(enArbCheckList)
         ..childFile('app_es.arb').writeAsStringSync(esArbCheckList);
 
-      await LocalizationsGenerator(
+      final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
         artifacts: artifacts,
         processManager: processManager,
@@ -2670,7 +2807,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
         logger: logger,
-      ).generate();
+      );
+      generateFakeCommandFromGenerator(generator);
+      await generator.generate();
 
       final String localizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
@@ -2896,7 +3035,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
   testWithoutContext('should generate a valid pubspec.yaml file when using synthetic package if it does not already exist', () async {
     _standardFlutterDirectoryL10nSetup(fs);
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -2905,7 +3044,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final Directory outputDirectory = fs.directory(syntheticPackagePath);
     final File pubspecFile = outputDirectory.childFile('pubspec.yaml');
@@ -2927,7 +3068,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       ..createSync(recursive: true)
       ..writeAsStringSync('abcd');
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -2936,7 +3077,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     // The original pubspec file should not be overwritten.
     expect(pubspecFile.readAsStringSync(), 'abcd');
@@ -2961,7 +3104,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     l10nDirectory.childFile(defaultTemplateArbFileName)
         .writeAsStringSync(arbFile);
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -2971,7 +3114,9 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final String localizationsFile = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
@@ -2990,7 +3135,7 @@ String orderNumber(int number) {
     l10nDirectory.childFile(defaultTemplateArbFileName)
         .writeAsStringSync(singleMessageArbFileString);
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -3000,7 +3145,9 @@ String orderNumber(int number) {
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final String localizationsFile = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart'),
@@ -3035,7 +3182,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     l10nDirectory.childFile(defaultTemplateArbFileName)
         .writeAsStringSync(arbFile);
 
-    await LocalizationsGenerator(
+    final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
       artifacts: artifacts,
       processManager: processManager,
@@ -3045,7 +3192,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
-    ).generate();
+    );
+    generateFakeCommandFromGenerator(generator);
+    await generator.generate();
 
     final String localizationsFile = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
