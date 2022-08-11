@@ -42,7 +42,7 @@ void main() {
 
     final String projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
 
-    File modulePubspec = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
+    final File modulePubspec = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
     String pubspecContent = modulePubspec.readAsStringSync();
     pubspecContent = pubspecContent.replaceFirst(
       'dependencies:',
