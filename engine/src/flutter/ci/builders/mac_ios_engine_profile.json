@@ -61,10 +61,38 @@
             "name": "ios_profile",
             "ninja": {
                 "config": "ios_profile",
-                "targets": []
+                "targets": [
+                    "flutter/shell/platform/darwin/ios:flutter_framework",
+                    "flutter/lib/snapshot:generate_snapshot_bin"
+                ]
             },
             "tests": []
         }
     ],
-    "tests": []
+    "tests": [],
+    "generators": {
+        "tasks": [
+            {
+                "name": "Profile-FlutterMacOS.framework",
+                "parameters": [
+                    "--dst",
+                    "out/profile",
+                    "--arm64-out-dir",
+                    "out/ios_profile",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python"
+            }
+        ]
+    },
+    "archives": [
+        {
+            "source": "out/profile/artifacts.zip",
+            "destination": "ios-profile/artifacts.zip"
+        }
+    ]
 }
