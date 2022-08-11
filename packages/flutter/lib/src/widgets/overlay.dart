@@ -387,8 +387,8 @@ class _LocationOccupants extends LinkedList<_RenderDeferredLayoutBox> with _Sort
 
 class _RootOverlayLocation extends _DoublyLinkedOverlayLocation {
   _RootOverlayLocation(
-    _RenderTheatreChildModel overlayRenderObject,
-  ) : super(null, overlayRenderObject);
+    _RenderTheatreChildModel childModel,
+  ) : super(null, childModel);
 
   late _DoublyLinkedOverlayLocation first = this;
   late _DoublyLinkedOverlayLocation last = this;
@@ -590,9 +590,9 @@ class TopmostOverlayChildWidget extends StatefulWidget {
 }
 
 class _TopmostLocation extends LinkedListEntry<_TopmostLocation> implements OverlayLocation {
-  _TopmostLocation(this._showTimestamp, this._theaterChildModel);
-  final DateTime _showTimestamp;
+  _TopmostLocation(this._showTimestamp, this._theatreChildModel);
 
+  final DateTime _showTimestamp;
   @override
   final _TopOfTheatreChildModel _theatreChildModel;
   _RenderDeferredLayoutBox? _overlayChildRenderBox;
@@ -719,7 +719,7 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
         child: widget.child,
       );
     }
-    final _TopOfTheatreChildModel? top = context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.location._theatreChildModel._topChildren;
+    final _TopOfTheatreChildModel? top = context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.location._theatreChildModel._theatre._topChildren;
     _location ??= _TopmostLocation(timestamp, top!);
     return OverlayPortal.withLocation(
       overlayLocation: _location,
@@ -729,6 +729,53 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
   }
 }
 
+abstract class _RenderTheatreChildModel {
+  /// The underlying [RenderObject] of the [Overlay] this [OverlayLocation]
+  /// targets.
+  _RenderTheatre get _theatre;
+
+  _ChildIterator? _paintOrderIterator();
+  _ChildIterator? _hitTestOrderIterator();
+
+  void visitChildren(RenderObjectVisitor visitor) {
+    final _ChildIterator? iterator = _paintOrderIterator();
+    if (iterator == null) {
+      return;
+    }
+    RenderBox? child = iterator();
+    while (child != null) {
+      visitor(child);
+      child = iterator();
+    }
+  }
+
+  bool hitTestChildren(BoxHitTestResult result, Offset position) {
+    final _ChildIterator? iterator = _hitTestOrderIterator();
+    if (iterator == null) {
+      return false;
+    }
+    RenderBox? child = iterator();
+    while (child != null) {
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: _toBoxHitTest(child.hitTest)
+      );
+      if (isHit) {
+        return true;
+      }
+      child = iterator();
+    }
+    return false;
+  }
+}
+
+// The data structure for managing the stack of theatre children that claim the
+// topmost position in terms of paint order.
+//
+// The children with more recent timestamps (i.e. those called `show` recently)
+// will be painted last.
 class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinkedListChildModel<_TopmostLocation> {
   _TopOfTheatreChildModel(this._theatre);
 
@@ -737,6 +784,8 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
   @override
   final _RenderTheatre _theatre;
 
+  // Worst-case O(N) where N is the number of children added to the top spot
+  // in the same frame.
   void _add(_TopmostLocation child) {
     assert(!_sortedChildren.contains(child));
     _TopmostLocation? insertPosition;
@@ -785,16 +834,19 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
   }
 
   static _ChildIterator? _mapIterator(_Iterator<_TopmostLocation>? fromIterator) {
-    return fromIterator == null
-      ? null
-      : () {
-        final _TopmostLocation? location = fromIterator();
-        if (location == null) {
-          return null;
-        }
-        assert(location._overlayChildRenderBox != null);
-        return location._overlayChildRenderBox;
-      };
+    if (fromIterator == null) {
+      return null;
+    }
+
+    _RenderDeferredLayoutBox? iter() {
+      final _TopmostLocation? location = fromIterator();
+      if (location == null) {
+        return null;
+      }
+      return location._overlayChildRenderBox ?? iter();
+    }
+
+    return iter;
   }
 
   @override
@@ -803,47 +855,65 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
   _ChildIterator? _hitTestOrderIterator() => _TopOfTheatreChildModel._mapIterator(_backwardIterator());
 }
 
-abstract class _RenderTheatreChildModel {
-  /// The underlying [RenderObject] of the [Overlay] this [OverlayLocation]
-  /// targets.
-  _RenderTheatre get _theatre;
+class _OverlayEntryLocation extends OverlayLocation with LinkedListEntry<_OverlayEntryLocation> {
 
-  _ChildIterator? _paintOrderIterator();
-  _ChildIterator? _hitTestOrderIterator();
-
-  void visitChildren(RenderObjectVisitor visitor) {
-    final _ChildIterator? iterator = _paintOrderIterator();
-    if (iterator == null) {
-      return;
-    }
-    RenderBox? child = iterator();
-    while (child != null) {
-      visitor(child);
-      child = iterator();
-    }
+  @override
+  void _activate(_RenderDeferredLayoutBox child) {
   }
 
-  bool hitTestChildren(BoxHitTestResult result, Offset position) {
-    final _ChildIterator? iterator = _hitTestOrderIterator();
-    if (iterator == null) {
-      return false;
-    }
-    RenderBox? child = iterator();
-    while (child != null) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset,
-        position: position,
-        hitTest: _toBoxHitTest(child.hitTest)
-      );
-      if (isHit) {
-        return true;
-      }
-      child = iterator();
-    }
-    return false;
+  @override
+  void _addToChildModel(_RenderDeferredLayoutBox child) {
+    // TODO: implement _addToChildModel
   }
+
+  @override
+  void _deactivate(_RenderDeferredLayoutBox child) {
+    // TODO: implement _deactivate
+  }
+
+  @override
+  bool _isTheSameLocation(OverlayLocation other) {
+    // TODO: implement _isTheSameLocation
+    throw UnimplementedError();
+  }
+
+  @override
+  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
+    // TODO: implement _removeFromChildModel
+  }
+
+  @override
+  _RenderTheatreChildModel get _theatreChildModel => throw UnimplementedError();
 }
+
+class _OverlayChildModel extends _RenderTheatreChildModel with _SortedLinkedListChildModel<_OverlayEntryLocation> {
+  _OverlayChildModel(this._theatre);
+
+  final LinkedList<_OverlayEntryLocation> _children = LinkedList<_OverlayEntryLocation>();
+
+  @override
+  final _RenderTheatre _theatre;
+
+  @override
+  _OverlayEntryLocation? _childAfter(_OverlayEntryLocation? child) {
+    assert(child == null || child.list == _children);
+    return child == null ? _children.first : child.next;
+  }
+
+  @override
+  _OverlayEntryLocation? _childBefore(_OverlayEntryLocation? child) {
+    assert(child == null || child.list == _children);
+    return child == null ? _children.last : child.previous;
+  }
+
+  @override
+  _ChildIterator? _paintOrderIterator() => _forwardIterator();
+
+  @override
+  _ChildIterator? _hitTestOrderIterator() => _backwardIterator();
+
+}
+
 
 /// A location in a particular [Overlay].
 ///
