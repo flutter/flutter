@@ -263,7 +263,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     return nullptr;
   }
 
-  if (!sub_renderpass->EncodeCommands(context->GetResourceAllocator())) {
+  if (!sub_renderpass->EncodeCommands()) {
     return nullptr;
   }
 

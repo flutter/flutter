@@ -22,7 +22,9 @@ class RenderPassGLES final : public RenderPass {
   std::string label_;
   bool is_valid_ = false;
 
-  RenderPassGLES(RenderTarget target, ReactorGLES::Ref reactor);
+  RenderPassGLES(std::weak_ptr<const Context> context,
+                 RenderTarget target,
+                 ReactorGLES::Ref reactor);
 
   // |RenderPass|
   bool IsValid() const override;
@@ -31,8 +33,7 @@ class RenderPassGLES final : public RenderPass {
   void OnSetLabel(std::string label) override;
 
   // |RenderPass|
-  bool EncodeCommands(
-      const std::shared_ptr<Allocator>& transients_allocator) const override;
+  bool OnEncodeCommands(const Context& context) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPassGLES);
 };

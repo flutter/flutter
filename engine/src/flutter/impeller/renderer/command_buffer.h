@@ -59,7 +59,7 @@ class CommandBuffer {
   ///
   /// @param[in]  callback  The completion callback.
   ///
-  [[nodiscard]] virtual bool SubmitCommands(CompletionCallback callback) = 0;
+  [[nodiscard]] bool SubmitCommands(CompletionCallback callback);
 
   [[nodiscard]] bool SubmitCommands();
 
@@ -82,12 +82,16 @@ class CommandBuffer {
   std::shared_ptr<BlitPass> CreateBlitPass() const;
 
  protected:
-  CommandBuffer();
+  std::weak_ptr<const Context> context_;
+
+  explicit CommandBuffer(std::weak_ptr<const Context> context);
 
   virtual std::shared_ptr<RenderPass> OnCreateRenderPass(
       RenderTarget render_target) const = 0;
 
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() const = 0;
+
+  [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);

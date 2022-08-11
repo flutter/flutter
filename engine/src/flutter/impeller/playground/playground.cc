@@ -244,7 +244,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
         ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass);
 
-        pass->EncodeCommands(renderer->GetContext()->GetResourceAllocator());
+        pass->EncodeCommands();
         if (!buffer->SubmitCommands()) {
           return false;
         }
@@ -284,7 +284,7 @@ bool Playground::OpenPlaygroundHere(SinglePassCallback pass_callback) {
           return false;
         }
 
-        pass->EncodeCommands(context->GetResourceAllocator());
+        pass->EncodeCommands();
         if (!buffer->SubmitCommands()) {
           return false;
         }
