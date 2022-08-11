@@ -12,17 +12,15 @@ export 'events.dart' show PointerEvent;
 /// [PointerEventResampler.stop] to process a resampled `event`.
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-/// Class for pointer event resampling.
+/// Resamples the movement of a single pointer using linear interpolation.
 ///
-/// An instance of this class can be used to resample one sequence
-/// of pointer events. Multiple instances are expected to be used for
-/// multi-touch support. The sampling frequency and the sampling
-/// offset is determined by the caller.
+/// Multi-touch should use multiple instances of this class. The sampling
+/// frequency and the sampling offset is determined by the caller.
 ///
-/// This can be used to get smooth touch event processing at the cost
-/// of adding some latency. Devices with low frequency sensors or when
-/// the frequency is not a multiple of the display frequency
-/// (e.g., 120Hz input and 90Hz display) benefit from this.
+/// This class can be used to get smooth touch event processing at the cost
+/// of adding some latency, mostly benefiting devices with low frequency sensors
+/// or when the frequency is not a multiple of the display frequency (e.g.,
+/// 120Hz input and 90Hz display).
 ///
 /// The following pointer event types are supported:
 /// [PointerAddedEvent], [PointerHoverEvent], [PointerDownEvent],
@@ -73,6 +71,7 @@ class PointerEventResampler {
       orientation: event.orientation,
       tilt: event.tilt,
       synthesized: event.synthesized,
+      endOfBatch: event.endOfBatch,
       embedderId: event.embedderId,
     );
   }
@@ -107,6 +106,7 @@ class PointerEventResampler {
       tilt: event.tilt,
       platformData: event.platformData,
       synthesized: event.synthesized,
+      endOfBatch: event.endOfBatch,
       embedderId: event.embedderId,
     );
   }
@@ -283,17 +283,18 @@ class PointerEventResampler {
     _queuedEvents.add(event);
   }
 
-  /// Dispatch resampled pointer events for the specified `sampleTime`
-  /// by calling [callback].
+  /// Process enqueued events and dispatch resampled events to [callback].
   ///
-  /// This may dispatch multiple events if position is not the only
+  /// The `sampleTime` is the timestamp of the current frame.
+  ///
+  /// The `nextSampleTime` is the timestamp of the next frame. A positive value
+  /// allows early processing of up and removed events. This improves
+  /// resampling of these events, which is important for fling animations.
+  ///
+  /// This method may dispatch multiple events if position is not the only
   /// state that has changed since last sample.
   ///
   /// Calling [callback] must not add or sample events.
-  ///
-  /// Positive value for `nextSampleTime` allow early processing of
-  /// up and removed events. This improves resampling of these events,
-  /// which is important for fling animations.
   void sample(
     Duration sampleTime,
     Duration nextSampleTime,
