@@ -178,7 +178,7 @@ void main() {
     });
 
     testWithoutContext('j unsupported jank metrics for web', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: true, web: true);
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], web: true);
       await terminalHandler.processTerminalInput('j');
       expect(terminalHandler.logger.warningText.contains('Unable to get jank metrics for web'), true);
     });
