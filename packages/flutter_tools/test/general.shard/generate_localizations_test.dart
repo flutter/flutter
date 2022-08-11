@@ -66,6 +66,7 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 void main() {
   late MemoryFileSystem fs;
   late BufferLogger logger;
+  late Artifacts artifacts;
   late ProcessManager processManager;
   late String defaultL10nPathString;
   late String syntheticPackagePath;
@@ -74,6 +75,7 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     logger = BufferLogger.test();
+    artifacts = Artifacts.test();
     processManager = FakeProcessManager.any();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
@@ -125,7 +127,7 @@ void main() {
       final String flutterProjectPath = fs.path.join('absolute', 'path', 'to', 'flutter_project');
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         projectPathString: flutterProjectPath,
         inputPathString: defaultL10nPathString,
@@ -174,7 +176,7 @@ void main() {
       expect(
         () => LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           projectPathString: 'absolute/path/to/flutter_project',
           inputPathString: defaultL10nPathString,
@@ -203,7 +205,7 @@ void main() {
       expect(
         () => LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           projectPathString: './',
           inputPathString: defaultL10nPathString,
@@ -277,7 +279,7 @@ void main() {
 
     final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       outputPathString: defaultL10nPathString,
@@ -300,7 +302,7 @@ void main() {
 
     final LocalizationsGenerator generator = LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       outputPathString: defaultL10nPathString,
@@ -323,7 +325,7 @@ void main() {
       .writeAsStringSync(singleEsMessageArbFileString);
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       templateArbFileName: 'app_localizations_en.arb',
@@ -349,7 +351,7 @@ void main() {
       () {
         LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           templateArbFileName: 'app_localizations_en.arb',
@@ -374,7 +376,7 @@ void main() {
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       outputPathString: defaultL10nPathString,
@@ -407,7 +409,7 @@ void main() {
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       outputPathString: defaultL10nPathString,
@@ -444,7 +446,7 @@ void main() {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -477,7 +479,7 @@ void main() {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         templateArbFileName: defaultTemplateArbFileName,
@@ -508,7 +510,7 @@ void main() {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -527,7 +529,7 @@ void main() {
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       templateArbFileName: defaultTemplateArbFileName,
@@ -557,7 +559,7 @@ void main() {
       _standardFlutterDirectoryL10nSetup(fs);
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         // outputPathString is intentionally not defined
@@ -595,7 +597,7 @@ void main() {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: fs.path.join('lib', 'l10n', 'output'),
@@ -622,7 +624,7 @@ void main() {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: fs.path.join('lib', 'l10n', 'output'),
@@ -649,7 +651,7 @@ void main() {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: fs.path.join('lib', 'l10n', 'output'),
@@ -681,7 +683,7 @@ void main() {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: fs.path.join('lib', 'l10n', 'output'),
@@ -712,7 +714,7 @@ void main() {
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       templateArbFileName: defaultTemplateArbFileName,
@@ -751,7 +753,7 @@ void main() {
       () {
         LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -785,7 +787,7 @@ void main() {
       () {
         LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -825,7 +827,7 @@ void main() {
       // Verify that values are correctly passed through the localizations target.
       final LocalizationsGenerator generator = await generateLocalizations(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         options: options,
         logger: logger,
@@ -890,7 +892,7 @@ flutter:
       expect(
         () => generateLocalizations(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           options: options,
           logger: BufferLogger.test(),
@@ -910,7 +912,7 @@ flutter:
       // Test without headers.
       await generateLocalizations(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         options: LocalizationOptions(
           arbDirectory: Uri.directory(defaultL10nPathString),
@@ -938,7 +940,7 @@ class AppLocalizationsEn extends AppLocalizations {
     // Test with headers.
     await generateLocalizations(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       options: LocalizationOptions(
         header: 'HEADER',
@@ -1016,7 +1018,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
       final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1043,7 +1045,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
       final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1072,7 +1074,7 @@ class AppLocalizationsEn extends AppLocalizations {
       const List<String> preferredSupportedLocale = <String>['zh', 'es'];
       final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1106,7 +1108,7 @@ class AppLocalizationsEn extends AppLocalizations {
           () {
             LocalizationsGenerator(
               fileSystem: fs,
-              artifacts: Artifacts.test(),
+              artifacts: artifacts,
               processManager: processManager,
               inputPathString: defaultL10nPathString,
               outputPathString: defaultL10nPathString,
@@ -1139,7 +1141,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
       final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1183,7 +1185,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
       final LocalizationsGenerator generator = LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1228,7 +1230,7 @@ class AppLocalizationsEn extends AppLocalizations {
         () {
           LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1255,7 +1257,7 @@ class AppLocalizationsEn extends AppLocalizations {
         () {
           LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1290,7 +1292,7 @@ class AppLocalizationsEn extends AppLocalizations {
       expect(
         () => LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -1327,7 +1329,7 @@ class AppLocalizationsEn extends AppLocalizations {
         () {
           LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1355,7 +1357,7 @@ class AppLocalizationsEn extends AppLocalizations {
         () {
           LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1379,7 +1381,7 @@ class AppLocalizationsEn extends AppLocalizations {
       _standardFlutterDirectoryL10nSetup(fs);
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1419,7 +1421,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1468,7 +1470,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1503,7 +1505,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1532,7 +1534,7 @@ class AppLocalizationsEn extends AppLocalizations {
       const List<String> preferredSupportedLocale = <String>['zh'];
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1561,7 +1563,7 @@ import 'output-localization-file_zh.dart';
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -1595,7 +1597,7 @@ import 'output-localization-file.g.dart';
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1619,7 +1621,7 @@ import 'output-localization-file.g.dart';
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1647,7 +1649,7 @@ import 'output-localization-file.g.dart';
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         templateArbFileName: defaultTemplateArbFileName,
@@ -1688,7 +1690,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         await LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -1727,7 +1729,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
@@ -1770,7 +1772,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         await LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
@@ -1808,7 +1810,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         await LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
@@ -1844,7 +1846,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1884,7 +1886,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
         await LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -1922,7 +1924,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1962,7 +1964,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -1997,7 +1999,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -2028,7 +2030,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
               fileSystem: fs,
-              artifacts: Artifacts.test(),
+              artifacts: artifacts,
               processManager: processManager,
               inputPathString: defaultL10nPathString,
               outputPathString: defaultL10nPathString,
@@ -2063,7 +2065,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           () async {
             await LocalizationsGenerator(
               fileSystem: fs,
-              artifacts: Artifacts.test(),
+              artifacts: artifacts,
               processManager: processManager,
               inputPathString: defaultL10nPathString,
               outputPathString: defaultL10nPathString,
@@ -2102,7 +2104,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           .writeAsStringSync(pluralMessageWithIncorrectPlaceholderType);
         await LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -2134,7 +2136,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           () async {
             await LocalizationsGenerator(
               fileSystem: fs,
-              artifacts: Artifacts.test(),
+              artifacts: artifacts,
               processManager: processManager,
               inputPathString: defaultL10nPathString,
               outputPathString: defaultL10nPathString,
@@ -2170,7 +2172,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -2201,7 +2203,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -2236,7 +2238,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           () async {
             await LocalizationsGenerator(
               fileSystem: fs,
-              artifacts: Artifacts.test(),
+              artifacts: artifacts,
               processManager: processManager,
               inputPathString: defaultL10nPathString,
               outputPathString: defaultL10nPathString,
@@ -2276,7 +2278,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -2304,7 +2306,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2345,7 +2347,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2386,7 +2388,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2407,7 +2409,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2441,7 +2443,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2465,7 +2467,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2590,7 +2592,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2660,7 +2662,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       await LocalizationsGenerator(
         fileSystem: fs,
-        artifacts: Artifacts.test(),
+        artifacts: artifacts,
         processManager: processManager,
         inputPathString: defaultL10nPathString,
         outputPathString: defaultL10nPathString,
@@ -2706,7 +2708,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -2741,7 +2743,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(
         () => LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -2776,7 +2778,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -2809,7 +2811,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             outputPathString: defaultL10nPathString,
@@ -2842,7 +2844,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(
           () => LocalizationsGenerator(
             fileSystem: fs,
-            artifacts: Artifacts.test(),
+            artifacts: artifacts,
             processManager: processManager,
             inputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
@@ -2874,7 +2876,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(
         () => LocalizationsGenerator(
           fileSystem: fs,
-          artifacts: Artifacts.test(),
+          artifacts: artifacts,
           processManager: processManager,
           inputPathString: defaultL10nPathString,
           outputPathString: defaultL10nPathString,
@@ -2896,7 +2898,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     _standardFlutterDirectoryL10nSetup(fs);
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       templateArbFileName: defaultTemplateArbFileName,
@@ -2927,7 +2929,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       templateArbFileName: defaultTemplateArbFileName,
@@ -2961,7 +2963,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       outputPathString: defaultL10nPathString,
@@ -2990,7 +2992,7 @@ String orderNumber(int number) {
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       outputPathString: defaultL10nPathString,
@@ -3035,7 +3037,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
 
     await LocalizationsGenerator(
       fileSystem: fs,
-      artifacts: Artifacts.test(),
+      artifacts: artifacts,
       processManager: processManager,
       inputPathString: defaultL10nPathString,
       outputPathString: defaultL10nPathString,
