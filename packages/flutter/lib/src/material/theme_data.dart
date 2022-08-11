@@ -1254,7 +1254,7 @@ class ThemeData with Diagnosticable {
   /// In Material Design 3, the [visualDensity] does not override the value of
   /// [IconButton.visualDensity] which defaults to [VisualDensity.standard]
   /// for all platforms. To override the default value of [IconButton.visualDensity],
-  /// use [iconButtonTheme] parameter instead.
+  /// use [ThemeData.iconButtonTheme] instead.
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
