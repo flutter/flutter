@@ -9,6 +9,10 @@ import subprocess
 import sys
 import os
 
+buildroot_dir = os.path.abspath(
+    os.path.join(os.path.realpath(__file__), '..', '..', '..', '..')
+)
+
 
 def main():
   parser = argparse.ArgumentParser(
@@ -23,21 +27,36 @@ def main():
 
   args = parser.parse_args()
 
+  dst = (
+      args.dst
+      if os.path.isabs(args.dst) else os.path.join(buildroot_dir, args.dst)
+  )
+
   if args.x64_out_dir:
-    generate_gen_snapshot(
-        args.x64_out_dir, os.path.join(args.dst, 'gen_snapshot_x64')
+    x64_out_dir = (
+        args.x64_out_dir if os.path.isabs(args.x64_out_dir) else
+        os.path.join(buildroot_dir, args.x64_out_dir)
     )
+    generate_gen_snapshot(x64_out_dir, os.path.join(dst, 'gen_snapshot_x64'))
 
   if args.arm64_out_dir:
+    arm64_out_dir = (
+        args.arm64_out_dir if os.path.isabs(args.arm64_out_dir) else
+        os.path.join(buildroot_dir, args.arm64_out_dir)
+    )
     generate_gen_snapshot(
-        os.path.join(args.arm64_out_dir, args.clang_dir),
-        os.path.join(args.dst, 'gen_snapshot_arm64')
+        os.path.join(arm64_out_dir, args.clang_dir),
+        os.path.join(dst, 'gen_snapshot_arm64')
     )
 
   if args.armv7_out_dir:
+    armv7_out_dir = (
+        args.armv7_out_dir if os.path.isabs(args.armv7_out_dir) else
+        os.path.join(buildroot_dir, args.armv7_out_dir)
+    )
     generate_gen_snapshot(
-        os.path.join(args.armv7_out_dir, args.clang_dir),
-        os.path.join(args.dst, 'gen_snapshot_armv7')
+        os.path.join(armv7_out_dir, args.clang_dir),
+        os.path.join(dst, 'gen_snapshot_armv7')
     )
 
 
