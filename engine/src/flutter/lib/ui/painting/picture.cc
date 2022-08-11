@@ -68,7 +68,7 @@ void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
 
   auto image = CanvasImage::Create();
   const SkImageInfo image_info = SkImageInfo::Make(
-      width, height, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+      width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
   auto dl_image = DlDeferredImageGPU::Make(
       image_info, std::move(display_list), std::move(snapshot_delegate),
       std::move(raster_task_runner), std::move(unref_queue));
