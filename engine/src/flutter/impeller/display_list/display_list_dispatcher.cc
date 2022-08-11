@@ -888,7 +888,6 @@ void DisplayListDispatcher::drawArc(const SkRect& oval_bounds,
 void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
                                        uint32_t count,
                                        const SkPoint points[]) {
-  // auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
   Paint paint = paint_;
   paint.style = Paint::Style::kStroke;
   switch (mode) {
@@ -897,29 +896,28 @@ void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
         paint.stroke_cap = SolidStrokeContents::Cap::kSquare;
       }
       for (uint32_t i = 0; i < count; i++) {
-        SkPoint p0 = points[i];
-        // kEhCloseEnough works around a bug where Impeller does not draw
-        // anything for zero-length lines.
-        // See: https://github.com/flutter/flutter/issues/109077
-        SkPoint p1 = points[i] + SkPoint{kEhCloseEnough, 0.0};
-        auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
+        Point p0 = ToPoint(points[i]);
+        auto path = PathBuilder{}.AddLine(p0, p0).TakePath();
         canvas_.DrawPath(std::move(path), paint);
       }
       break;
     case SkCanvas::kLines_PointMode:
       for (uint32_t i = 1; i < count; i += 2) {
-        SkPoint p0 = points[i - 1];
-        SkPoint p1 = points[i];
-        auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
+        Point p0 = ToPoint(points[i - 1]);
+        Point p1 = ToPoint(points[i]);
+        auto path = PathBuilder{}.AddLine(p0, p1).TakePath();
         canvas_.DrawPath(std::move(path), paint);
       }
       break;
     case SkCanvas::kPolygon_PointMode:
-      for (uint32_t i = 1; i < count; i++) {
-        SkPoint p0 = points[i - 1];
-        SkPoint p1 = points[i];
-        auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
-        canvas_.DrawPath(std::move(path), paint);
+      if (count > 1) {
+        Point p0 = ToPoint(points[0]);
+        for (uint32_t i = 1; i < count; i++) {
+          Point p1 = ToPoint(points[i]);
+          auto path = PathBuilder{}.AddLine(p0, p1).TakePath();
+          canvas_.DrawPath(std::move(path), paint);
+          p0 = p1;
+        }
       }
       break;
   }

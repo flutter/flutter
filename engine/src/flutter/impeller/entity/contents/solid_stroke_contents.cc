@@ -72,10 +72,6 @@ static VertexBuffer CreateSolidStrokeVertices(
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
   auto polyline = path.CreatePolyline();
 
-  if (polyline.points.size() < 2) {
-    return {};  // Nothing to render.
-  }
-
   VS::PerVertexData vtx;
 
   // Normal state.
@@ -95,8 +91,17 @@ static VertexBuffer CreateSolidStrokeVertices(
     std::tie(contour_start_point_i, contour_end_point_i) =
         polyline.GetContourPointBounds(contour_i);
 
-    if (contour_end_point_i - contour_start_point_i < 2) {
-      continue;  // This contour has no renderable content.
+    switch (contour_end_point_i - contour_start_point_i) {
+      case 1: {
+        Point p = polyline.points[contour_start_point_i];
+        cap_proc(vtx_builder, p, {-1, 0}, smoothing);
+        cap_proc(vtx_builder, p, {1, 0}, smoothing);
+        continue;
+      }
+      case 0:
+        continue;  // This contour has no renderable content.
+      default:
+        break;
     }
 
     // The first point's normal is always the same as
