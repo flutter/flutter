@@ -589,6 +589,8 @@ FILE: ../../../flutter/impeller/entity/contents/text_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/text_contents.h
 FILE: ../../../flutter/impeller/entity/contents/texture_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/texture_contents.h
+FILE: ../../../flutter/impeller/entity/contents/tiled_texture_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/tiled_texture_contents.h
 FILE: ../../../flutter/impeller/entity/contents/vertices_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/vertices_contents.h
 FILE: ../../../flutter/impeller/entity/entity.cc
@@ -645,6 +647,8 @@ FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
+FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.frag
+FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/vertices.frag
 FILE: ../../../flutter/impeller/entity/shaders/vertices.vert
 FILE: ../../../flutter/impeller/geometry/color.cc

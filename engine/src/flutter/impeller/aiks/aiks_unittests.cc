@@ -10,10 +10,12 @@
 #include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/image.h"
+#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_unittests.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/snapshot.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
@@ -68,6 +70,82 @@ TEST_P(AiksTest, CanRenderImage) {
   paint.color = Color::Red();
   canvas.DrawImage(image, Point::MakeXY(100.0, 100.0), paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+bool GenerateMipmap(std::shared_ptr<Context> context,
+                    std::shared_ptr<Texture> texture,
+                    std::string label) {
+  auto buffer = context->CreateCommandBuffer();
+  if (!buffer) {
+    return false;
+  }
+  auto pass = buffer->CreateBlitPass();
+  if (!pass) {
+    return false;
+  }
+  pass->GenerateMipmap(texture, label);
+  pass->EncodeCommands(context->GetResourceAllocator());
+  return true;
+}
+
+TEST_P(AiksTest, CanRenderTiledTexture) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  bool first_frame = true;
+  auto texture = CreateTextureForFixture("table_mountain_nx.png");
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      GenerateMipmap(context, texture, "table_mountain_nx");
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+    const char* mip_filter_names[] = {"None", "Nearest", "Linear"};
+    const MipFilter mip_filters[] = {MipFilter::kNone, MipFilter::kNearest,
+                                     MipFilter::kLinear};
+    const char* min_mag_filter_names[] = {"Nearest", "Linear"};
+    const MinMagFilter min_mag_filters[] = {MinMagFilter::kNearest,
+                                            MinMagFilter::kLinear};
+    static int selected_x_tile_mode = 0;
+    static int selected_y_tile_mode = 0;
+    static int selected_mip_filter = 0;
+    static int selected_min_mag_filter = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("X tile mode", &selected_x_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    ImGui::Combo("Y tile mode", &selected_y_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    ImGui::Combo("Mip filter", &selected_mip_filter, mip_filter_names,
+                 sizeof(mip_filter_names) / sizeof(char*));
+    ImGui::Combo("Min Mag filter", &selected_min_mag_filter,
+                 min_mag_filter_names,
+                 sizeof(min_mag_filter_names) / sizeof(char*));
+    ImGui::End();
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto x_tile_mode = tile_modes[selected_x_tile_mode];
+    auto y_tile_mode = tile_modes[selected_y_tile_mode];
+    SamplerDescriptor descriptor;
+    descriptor.mip_filter = mip_filters[selected_mip_filter];
+    descriptor.min_filter = min_mag_filters[selected_min_mag_filter];
+    descriptor.mag_filter = min_mag_filters[selected_min_mag_filter];
+    paint.color_source = [texture, x_tile_mode, y_tile_mode, descriptor]() {
+      auto contents = std::make_shared<TiledTextureContents>();
+      contents->SetTexture(texture);
+      contents->SetTileModes(x_tile_mode, y_tile_mode);
+      contents->SetSamplerDescriptor(descriptor);
+      return contents;
+    };
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CanRenderImageRect) {

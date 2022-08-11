@@ -54,6 +54,8 @@
 #include "impeller/entity/sweep_gradient_fill.vert.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
+#include "impeller/entity/tiled_texture_fill.frag.h"
+#include "impeller/entity/tiled_texture_fill.vert.h"
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/vertices.vert.h"
 #include "impeller/renderer/formats.h"
@@ -104,6 +106,8 @@ using BlendSoftLightPipeline =
     PipelineT<AdvancedBlendVertexShader, AdvancedBlendSoftlightFragmentShader>;
 using TexturePipeline =
     PipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
+using TiledTexturePipeline =
+    PipelineT<TiledTextureFillVertexShader, TiledTextureFillFragmentShader>;
 using GaussianBlurPipeline =
     PipelineT<GaussianBlurVertexShader, GaussianBlurFragmentShader>;
 using BorderMaskBlurPipeline =
@@ -187,6 +191,11 @@ class ContentContext {
   std::shared_ptr<Pipeline> GetTexturePipeline(
       ContentContextOptions opts) const {
     return GetPipeline(texture_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline> GetTiledTexturePipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(tiled_texture_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline> GetGaussianBlurPipeline(
@@ -333,6 +342,7 @@ class ContentContext {
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
   mutable Variants<BlendPipeline> texture_blend_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;
+  mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
   mutable Variants<BorderMaskBlurPipeline> border_mask_blur_pipelines_;
   mutable Variants<ColorMatrixColorFilterPipeline>
