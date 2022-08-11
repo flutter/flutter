@@ -39,12 +39,14 @@ std::shared_ptr<DlImageFilter> DlImageFilter::makeWithLocalMatrix(
         // Nothing we can do at this point
         return nullptr;
       }
+      break;
     }
     case MatrixCapability::kScaleTranslate: {
       if (!matrix.isScaleTranslate()) {
         // Nothing we can do at this point
         return nullptr;
       }
+      break;
     }
     default:
       break;
