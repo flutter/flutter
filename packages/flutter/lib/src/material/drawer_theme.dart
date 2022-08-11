@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [Drawer] widgets.
 ///
 /// Descendant widgets obtain the current [DrawerThemeData] object
@@ -79,8 +82,9 @@ class DrawerThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static DrawerThemeData? lerp(DrawerThemeData? a, DrawerThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return DrawerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       scrimColor: Color.lerp(a?.scrimColor, b?.scrimColor, t),
@@ -101,10 +105,12 @@ class DrawerThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DrawerThemeData
         && other.backgroundColor == backgroundColor
         && other.scrimColor == scrimColor

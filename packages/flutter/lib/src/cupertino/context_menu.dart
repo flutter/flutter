@@ -4,8 +4,9 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
+import 'package:flutter/gestures.dart' show kLongPressTimeout, kMinFlingVelocity;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -362,7 +363,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         );
       },
     );
-    Overlay.of(context, rootOverlay: true)!.insert(_lastOverlayEntry!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: widget)!.insert(_lastOverlayEntry!);
     _openController.forward();
   }
 
@@ -958,7 +959,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
         end: Offset(
-          endX.clamp(-_kPadding, _kPadding),
+          clampDouble(endX, -_kPadding, _kPadding),
           endY,
         ),
       ).animate(

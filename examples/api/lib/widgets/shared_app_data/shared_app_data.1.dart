@@ -34,7 +34,7 @@ class SharedObject {
 // An example of a widget which depends on the SharedObject's value,
 // which might be provided - along with SharedObject - in a Dart package.
 class CustomWidget extends StatelessWidget {
-  const CustomWidget({ Key? key }) : super(key: key);
+  const CustomWidget({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class CustomWidget extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({ super.key });
 
   @override
   Widget build(BuildContext context) {

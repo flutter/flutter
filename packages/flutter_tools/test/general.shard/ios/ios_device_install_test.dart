@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,7 +15,6 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -28,10 +25,10 @@ const Map<String, String> kDyLdLibEntry = <String, String>{
 };
 
 void main() {
-  Artifacts artifacts;
-  String iosDeployPath;
-  FileSystem fileSystem;
-  Directory bundleDirectory;
+  late Artifacts artifacts;
+  late String iosDeployPath;
+  late FileSystem fileSystem;
+  late Directory bundleDirectory;
 
   setUp(() {
     artifacts = Artifacts.test();
@@ -319,11 +316,11 @@ void main() {
 }
 
 IOSDevice setUpIOSDevice({
-  @required ProcessManager processManager,
-  FileSystem fileSystem,
-  Logger logger,
-  IOSDeviceConnectionInterface interfaceType,
-  Artifacts artifacts,
+  required ProcessManager processManager,
+  FileSystem? fileSystem,
+  Logger? logger,
+  IOSDeviceConnectionInterface? interfaceType,
+  Artifacts? artifacts,
 }) {
   logger ??= BufferLogger.test();
   final FakePlatform platform = FakePlatform(
@@ -360,6 +357,6 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
-    interfaceType: interfaceType,
+    interfaceType: interfaceType ?? IOSDeviceConnectionInterface.usb,
   );
 }

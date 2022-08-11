@@ -9,6 +9,9 @@ import 'debug.dart';
 import 'time.dart';
 import 'typography.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 // ADDING A NEW STRING
 //
 // If you (someone contributing to the Flutter framework) want to add a new
@@ -28,16 +31,15 @@ import 'typography.dart';
 //
 //    Then you need to add new entries for the string to all of the other
 //    language locale files by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_missing_localizations.dart
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_missing_localizations.dart
+//
 //    Which will copy the english strings into the other locales as placeholders
 //    until they can be translated.
 //
 //    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 //
 //    There is a README file with further information in the lib/src/l10n/
 //    directory.
@@ -57,9 +59,8 @@ import 'typography.dart';
 //    strings in lib/src/l10n/material_en.arb.
 //
 //    You also need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 //
 //    This script may result in your updated getters being created in newer
 //    locales and set to the old value of the strings. This is to be expected.
@@ -348,9 +349,9 @@ abstract class MaterialLocalizations {
   /// This getter is compatible with [narrowWeekdays]. For example:
   ///
   /// ```dart
-  /// var localizations = MaterialLocalizations.of(context);
+  ///  MaterialLocalizations localizations = MaterialLocalizations.of(context);
   /// // The name of the first day of week for the current locale.
-  /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
+  /// String firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
 
@@ -762,8 +763,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
           (year % 400 == 0);
-      if (isLeapYear)
+      if (isLeapYear) {
         return 29;
+      }
       return 28;
     }
     const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -791,8 +793,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String _formatTwoDigitZeroPad(int number) {
     assert(0 <= number && number < 100);
 
-    if (number < 10)
+    if (number < 10) {
       return '0$number';
+    }
 
     return '$number';
   }
@@ -968,16 +971,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatDecimal(int number) {
-    if (number > -1000 && number < 1000)
+    if (number > -1000 && number < 1000) {
       return number.toString();
+    }
 
     final String digits = number.abs().toString();
     final StringBuffer result = StringBuffer(number < 0 ? '-' : '');
     final int maxDigitIndex = digits.length - 1;
     for (int i = 0; i <= maxDigitIndex; i += 1) {
       result.write(digits[i]);
-      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0)
+      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0) {
         result.write(',');
+      }
     }
     return result.toString();
   }

@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/tester/flutter_tester.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
@@ -167,7 +168,7 @@ Hello!
       expect(result.started, isTrue);
       expect(result.observatoryUri, observatoryUri);
       expect(logLines.last, 'Hello!');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: startOverrides);
 
     testUsingContext('performs a build and starts in debug mode with track-widget-creation', () async {
@@ -200,7 +201,7 @@ Hello!
       expect(result.started, isTrue);
       expect(result.observatoryUri, observatoryUri);
       expect(logLines.last, 'Hello!');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: startOverrides);
   });
 }

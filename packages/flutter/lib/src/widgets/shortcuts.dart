@@ -11,7 +11,6 @@ import 'actions.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
-import 'inherited_notifier.dart';
 import 'platform_menu_bar.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
@@ -286,8 +285,9 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
-    if (event is! RawKeyDownEvent)
+    if (event is! RawKeyDownEvent) {
       return false;
+    }
     final Set<LogicalKeyboardKey> collapsedRequired = LogicalKeyboardKey.collapseSynonyms(keys);
     final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
     final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty
@@ -393,12 +393,13 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 class SingleActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
-  /// The `trigger` should be the non-modifier key that is pressed after all the
+  /// The [trigger] should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
   /// a modifier key (sided or unsided).
   ///
-  /// The `control`, `shift`, `alt`, and `meta` flags represent whether
-  /// the respect modifier keys should be held (true) or released (false)
+  /// The [control], [shift], [alt], and [meta] flags represent whether
+  /// the respect modifier keys should be held (true) or released (false).
+  /// They default to false.
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
   /// the [trigger] key. If `includeRepeats` is false, only the [trigger] key
@@ -445,8 +446,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) control keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all control keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Control keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Control keys must be pressed.
   ///
   /// See also:
   ///
@@ -456,8 +458,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) shift keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all shift keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Shift keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Shift keys must be pressed.
   ///
   /// See also:
   ///
@@ -467,8 +470,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) alt keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all alt keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Alt keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Alt keys must be pressed.
   ///
   /// See also:
   ///
@@ -478,8 +482,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) meta keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all meta keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Meta keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Meta keys must be pressed.
   ///
   /// See also:
   ///
@@ -545,7 +550,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('keys', debugDescribeKeys()));
+    properties.add(MessageProperty('keys', debugDescribeKeys()));
     properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
@@ -577,8 +582,54 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 ///  * [SingleActivator], an activator that represents a single key combined
 ///    with modifiers, such as `Ctrl+C`.
 class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
-  /// Create a [CharacterActivator] from the triggering character.
-  const CharacterActivator(this.character);
+  /// Triggered when the key event yields the given character.
+  ///
+  /// The [control] and [meta] flags represent whether the respect modifier
+  /// keys should be held (true) or released (false). They default to false.
+  /// [CharacterActivator] can not check Shift keys or Alt keys yet, and will
+  /// accept whether they are pressed or not.
+  ///
+  /// By default, the activator is checked on all [RawKeyDownEvent] events for
+  /// the [character]. If `includeRepeats` is false, only the [character]
+  /// events with a false [RawKeyDownEvent.repeat] attribute will be
+  /// considered.
+  const CharacterActivator(this.character, {
+    this.control = false,
+    this.meta = false,
+    this.includeRepeats = true,
+  });
+
+  /// Whether either (or both) control keys should be held for the [character]
+  /// to activate the shortcut.
+  ///
+  /// It defaults to false, meaning all Control keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Control keys must be pressed.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
+  final bool control;
+
+  /// Whether either (or both) meta keys should be held for the [character] to
+  /// activate the shortcut.
+  ///
+  /// It defaults to false, meaning all Meta keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Meta keys must be pressed.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
+  final bool meta;
+
+  /// Whether this activator accepts repeat events of the [character].
+  ///
+  /// If [includeRepeats] is true, the activator is checked on all
+  /// [RawKeyDownEvent] events for the [character]. If `includeRepeats` is
+  /// false, only the [character] events with a false [RawKeyDownEvent.repeat]
+  /// attribute will be considered.
+  final bool includeRepeats;
 
   /// The character of the triggering event.
   ///
@@ -598,15 +649,24 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
+    final Set<LogicalKeyboardKey> pressed = state.keysPressed;
     return event is RawKeyDownEvent
-        && event.character == character;
+      && event.character == character
+      && (includeRepeats || !event.repeat)
+      && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
+      && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
   @override
   String debugDescribeKeys() {
     String result = '';
     assert(() {
-      result = "'$character'";
+      final List<String> keys = <String>[
+        if (control) 'Control',
+        if (meta) 'Meta',
+        "'$character'",
+      ];
+      result = keys.join(' + ');
       return true;
     }());
     return result;
@@ -620,7 +680,8 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('character', character));
+    properties.add(MessageProperty('character', debugDescribeKeys()));
+    properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
 
@@ -637,11 +698,16 @@ class _ActivatorIntentPair with Diagnosticable {
   }
 }
 
-/// A manager of keyboard shortcut bindings.
+/// A manager of keyboard shortcut bindings used by [Shortcuts] to handle key
+/// events.
 ///
-/// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
-/// the widget that you want to find a manager for.
-class ShortcutManager extends ChangeNotifier with Diagnosticable {
+/// The manager may be listened to (with [addListener]/[removeListener]) for
+/// change notifications when the shortcuts change.
+///
+/// Typically, a [Shortcuts] widget supplies its own manager, but in uncommon
+/// cases where overriding the usual shortcut manager behavior is desired, a
+/// subclassed [ShortcutManager] may be supplied.
+class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// Constructs a [ShortcutManager].
   ShortcutManager({
     Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
@@ -690,9 +756,11 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     });
     return result;
   }
+
   Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> get _indexedShortcuts {
-    return _indexedShortcutsCache ??= _indexShortcuts(_shortcuts);
+    return _indexedShortcutsCache ??= _indexShortcuts(shortcuts);
   }
+
   Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>>? _indexedShortcutsCache;
 
   /// Returns the [Intent], if any, that matches the current set of pressed
@@ -757,7 +825,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Map<ShortcutActivator, Intent>>('shortcuts', _shortcuts));
+    properties.add(DiagnosticsProperty<Map<ShortcutActivator, Intent>>('shortcuts', shortcuts));
     properties.add(FlagProperty('modal', value: modal, ifTrue: 'modal', defaultValue: false));
   }
 }
@@ -768,6 +836,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// This widget establishes a [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
+///
+/// See the article on [Using Actions and
+/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// for a detailed explanation.
 ///
 /// {@tool dartpad}
 /// Here, we will use the [Shortcuts] and [Actions] widgets to add and subtract
@@ -806,35 +878,61 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///  * [Action], a class for defining an invocation of a user action.
 ///  * [CallbackAction], a class for creating an action from a callback.
 class Shortcuts extends StatefulWidget {
-  /// Creates a const [Shortcuts] widget.
+  /// Creates a const [Shortcuts] widget that owns the map of shortcuts and
+  /// creates its own manager.
+  ///
+  /// When using this constructor, [manager] will return null.
   ///
   /// The [child] and [shortcuts] arguments are required.
+  ///
+  /// See also:
+  ///
+  ///  * [Shortcuts.manager], a constructor that uses a [ShortcutManager] to
+  ///    manage the shortcuts list instead.
   const Shortcuts({
     super.key,
-    this.manager,
-    required this.shortcuts,
+    required Map<ShortcutActivator, Intent> shortcuts,
     required this.child,
     this.debugLabel,
-  }) : assert(shortcuts != null),
+  }) : _shortcuts = shortcuts,
+       manager = null,
+       assert(shortcuts != null),
+       assert(child != null);
+
+  /// Creates a const [Shortcuts] widget that uses the [manager] to
+  /// manage the map of shortcuts.
+  ///
+  /// If this constructor is used, [shortcuts] will return the contents of
+  /// [ShortcutManager.shortcuts].
+  ///
+  /// The [child] and [manager] arguments are required.
+  const Shortcuts.manager({
+    super.key,
+    required ShortcutManager this.manager,
+    required this.child,
+    this.debugLabel,
+  }) : _shortcuts = const <ShortcutActivator, Intent>{},
+       assert(manager != null),
        assert(child != null);
 
   /// The [ShortcutManager] that will manage the mapping between key
   /// combinations and [Action]s.
   ///
-  /// If not specified, uses a default-constructed [ShortcutManager].
-  ///
-  /// This manager will be given new [shortcuts] to manage whenever the
-  /// [shortcuts] change materially.
+  /// If this widget was created with [Shortcuts.manager], then
+  /// [ShortcutManager.shortcuts] will be used as the source for shortcuts. If
+  /// the unnamed constructor is used, this manager will be null, and a
+  /// default-constructed [ShortcutManager] will be used.
   final ShortcutManager? manager;
 
   /// {@template flutter.widgets.shortcuts.shortcuts}
-  /// The map of shortcuts that the [ShortcutManager] will be given to manage.
-  ///
-  /// For performance reasons, it is recommended that a pre-built map is passed
-  /// in here (e.g. a final variable from your widget class) instead of defining
-  /// it inline in the build function.
+  /// The map of shortcuts that describes the mapping between a key sequence
+  /// defined by a [ShortcutActivator] and the [Intent] that will be emitted
+  /// when that key sequence is pressed.
   /// {@endtemplate}
-  final Map<ShortcutActivator, Intent> shortcuts;
+  Map<ShortcutActivator, Intent> get shortcuts {
+    return manager == null ? _shortcuts : manager!.shortcuts;
+  }
+  final Map<ShortcutActivator, Intent> _shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
   ///
@@ -849,52 +947,6 @@ class Shortcuts extends StatefulWidget {
   /// This allows simplifying the diagnostic output to avoid cluttering it
   /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
-
-  /// Returns the [ShortcutManager] that most tightly encloses the given
-  /// [BuildContext].
-  ///
-  /// If no [Shortcuts] widget encloses the context given, will assert in debug
-  /// mode and throw an exception in release mode.
-  ///
-  /// See also:
-  ///
-  ///  * [maybeOf], which is similar to this function, but will return null if
-  ///    it doesn't find a [Shortcuts] ancestor.
-  static ShortcutManager of(BuildContext context) {
-    assert(context != null);
-    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
-    assert(() {
-      if (inherited == null) {
-        throw FlutterError(
-          'Unable to find a $Shortcuts widget in the context.\n'
-          '$Shortcuts.of() was called with a context that does not contain a '
-          '$Shortcuts widget.\n'
-          'No $Shortcuts ancestor could be found starting from the context that was '
-          'passed to $Shortcuts.of().\n'
-          'The context used was:\n'
-          '  $context',
-        );
-      }
-      return true;
-    }());
-    return inherited!.manager;
-  }
-
-  /// Returns the [ShortcutManager] that most tightly encloses the given
-  /// [BuildContext].
-  ///
-  /// If no [Shortcuts] widget encloses the context given, will return null.
-  ///
-  /// See also:
-  ///
-  ///  * [of], which is similar to this function, but returns a non-nullable
-  ///    result, and will throw an exception if it doesn't find a [Shortcuts]
-  ///    ancestor.
-  static ShortcutManager? maybeOf(BuildContext context) {
-    assert(context != null);
-    final _ShortcutsMarker? inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
-    return inherited?.manager;
-  }
 
   @override
   State<Shortcuts> createState() => _ShortcutsState();
@@ -922,8 +974,8 @@ class _ShortcutsState extends State<Shortcuts> {
     super.initState();
     if (widget.manager == null) {
       _internalManager = ShortcutManager();
+      _internalManager!.shortcuts = widget.shortcuts;
     }
-    manager.shortcuts = widget.shortcuts;
   }
 
   @override
@@ -937,7 +989,7 @@ class _ShortcutsState extends State<Shortcuts> {
         _internalManager ??= ShortcutManager();
       }
     }
-    manager.shortcuts = widget.shortcuts;
+    _internalManager?.shortcuts = widget.shortcuts;
   }
 
   KeyEventResult _handleOnKey(FocusNode node, RawKeyEvent event) {
@@ -953,23 +1005,9 @@ class _ShortcutsState extends State<Shortcuts> {
       debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKey: _handleOnKey,
-      child: _ShortcutsMarker(
-        manager: manager,
-        child: widget.child,
-      ),
+      child: widget.child,
     );
   }
-}
-
-class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
-  const _ShortcutsMarker({
-    required ShortcutManager manager,
-    required super.child,
-  })  : assert(manager != null),
-        assert(child != null),
-        super(notifier: manager);
-
-  ShortcutManager get manager => super.notifier!;
 }
 
 /// A widget that provides an uncomplicated mechanism for binding a key
@@ -1056,5 +1094,293 @@ class CallbackShortcuts extends StatelessWidget {
       },
       child: child,
     );
+  }
+}
+
+/// A entry returned by [ShortcutRegistry.addAll] that allows the caller to
+/// identify the shortcuts they registered with the [ShortcutRegistry] through
+/// the [ShortcutRegistrar].
+///
+/// When the entry is no longer needed, [dispose] should be called, and the
+/// entry should no longer be used.
+class ShortcutRegistryEntry {
+  // Tokens can only be created by the ShortcutRegistry.
+  const ShortcutRegistryEntry._(this.registry);
+
+  /// The [ShortcutRegistry] that this entry was issued by.
+  final ShortcutRegistry registry;
+
+  /// Replaces the given shortcut bindings in the [ShortcutRegistry] that this
+  /// entry was created from.
+  ///
+  /// This method will assert in debug mode if another [ShortcutRegistryEntry]
+  /// exists (i.e. hasn't been disposed of) that has already added a given
+  /// shortcut.
+  ///
+  /// It will also assert if this entry has already been disposed.
+  ///
+  /// If two equivalent, but different, [ShortcutActivator]s are added, all of
+  /// them will be executed when triggered. For example, if both
+  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
+  /// are added, then both will be executed when an "a" key is pressed.
+  void replaceAll(Map<ShortcutActivator, Intent> value) {
+    registry._replaceAll(this, value);
+  }
+
+  /// Called when the entry is no longer needed.
+  ///
+  /// Call this will remove all shortcuts associated with this
+  /// [ShortcutRegistryEntry] from the [registry].
+  @mustCallSuper
+  void dispose() {
+    registry._disposeToken(this);
+  }
+}
+
+/// A class used by [ShortcutRegistrar] that allows adding or removing shortcut
+/// bindings by descendants of the [ShortcutRegistrar].
+///
+/// You can reach the nearest [ShortcutRegistry] using [of] and [maybeOf].
+///
+/// The registry may be listened to (with [addListener]/[removeListener]) for
+/// change notifications when the registered shortcuts change.
+class ShortcutRegistry with ChangeNotifier {
+  /// Gets the combined shortcut bindings from all contexts that are registered
+  /// with this [ShortcutRegistry], in addition to the bindings passed to
+  /// [ShortcutRegistry].
+  ///
+  /// Listeners will be notified when the value returned by this getter changes.
+  ///
+  /// Returns a copy: modifying the returned map will have no effect.
+  Map<ShortcutActivator, Intent> get shortcuts {
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    return <ShortcutActivator, Intent>{
+      for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> entry in _tokenShortcuts.entries)
+        ...entry.value,
+    };
+  }
+  final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> _tokenShortcuts =
+    <ShortcutRegistryEntry, Map<ShortcutActivator, Intent>>{};
+
+  /// Adds all the given shortcut bindings to this [ShortcutRegistry], and
+  /// returns a entry for managing those bindings.
+  ///
+  /// The entry should have [ShortcutRegistryEntry.dispose] called on it when
+  /// these shortcuts are no longer needed. This will remove them from the
+  /// registry, and invalidate the entry.
+  ///
+  /// This method will assert in debug mode if another entry exists (i.e. hasn't
+  /// been disposed of) that has already added a given shortcut.
+  ///
+  /// If two equivalent, but different, [ShortcutActivator]s are added, all of
+  /// them will be executed when triggered. For example, if both
+  /// `SingleActivator(LogicalKeyboardKey.keyA)` and `CharacterActivator('a')`
+  /// are added, then both will be executed when an "a" key is pressed.
+  ///
+  /// See also:
+  ///
+  ///  * [ShortcutRegistryEntry.replaceAll], a function used to replace the set of
+  ///    shortcuts associated with a particular entry.
+  ///  * [ShortcutRegistryEntry.dispose], a function used to remove the set of
+  ///    shortcuts associated with a particular entry.
+  ShortcutRegistryEntry addAll(Map<ShortcutActivator, Intent> value) {
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
+    _tokenShortcuts[entry] = value;
+    assert(_debugCheckForDuplicates());
+    notifyListeners();
+    return entry;
+  }
+
+  /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
+  /// which most tightly encloses the given [BuildContext].
+  ///
+  /// If no [ShortcutRegistrar] widget encloses the context given, `of` will
+  /// throw an exception in debug mode.
+  ///
+  /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if
+  /// [WidgetsApp], [MaterialApp] or [CupertinoApp] are used, an additional
+  /// [ShortcutRegistrar] isn't needed.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar to this function, but will return null if
+  ///    it doesn't find a [ShortcutRegistrar] ancestor.
+  static ShortcutRegistry of(BuildContext context) {
+    assert(context != null);
+    final _ShortcutRegistrarMarker? inherited =
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
+    assert(() {
+      if (inherited == null) {
+        throw FlutterError(
+          'Unable to find a $ShortcutRegistrar widget in the context.\n'
+          '$ShortcutRegistrar.of() was called with a context that does not contain a '
+          '$ShortcutRegistrar widget.\n'
+          'No $ShortcutRegistrar ancestor could be found starting from the context that was '
+          'passed to $ShortcutRegistrar.of().\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return inherited!.registry;
+  }
+
+  /// Returns [ShortcutRegistry] of the [ShortcutRegistrar] that most tightly
+  /// encloses the given [BuildContext].
+  ///
+  /// If no [ShortcutRegistrar] widget encloses the given context, `maybeOf`
+  /// will return null.
+  ///
+  /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if
+  /// [WidgetsApp], [MaterialApp] or [CupertinoApp] are used, an additional
+  /// [ShortcutRegistrar] isn't needed.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar to this function, but returns a non-nullable
+  ///    result, and will throw an exception if it doesn't find a
+  ///    [ShortcutRegistrar] ancestor.
+  static ShortcutRegistry? maybeOf(BuildContext context) {
+    assert(context != null);
+    final _ShortcutRegistrarMarker? inherited =
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
+    return inherited?.registry;
+  }
+
+  // Replaces all the shortcuts associated with the given entry from this
+  // registry.
+  void _replaceAll(ShortcutRegistryEntry entry, Map<ShortcutActivator, Intent> value) {
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(_debugCheckTokenIsValid(entry));
+    _tokenShortcuts[entry] = value;
+    assert(_debugCheckForDuplicates());
+    notifyListeners();
+  }
+
+  // Removes all the shortcuts associated with the given entry from this
+  // registry.
+  void _disposeToken(ShortcutRegistryEntry entry) {
+    assert(_debugCheckTokenIsValid(entry));
+    if (_tokenShortcuts.remove(entry) != null) {
+      notifyListeners();
+    }
+  }
+
+  bool _debugCheckTokenIsValid(ShortcutRegistryEntry entry) {
+    if (!_tokenShortcuts.containsKey(entry)) {
+      if (entry.registry == this) {
+        throw FlutterError('entry ${describeIdentity(entry)} is invalid.\n'
+          'The entry has already been disposed of. Tokens are not valid after '
+          'dispose is called on them, and should no longer be used.');
+      } else {
+        throw FlutterError('Foreign entry ${describeIdentity(entry)} used.\n'
+          'This entry was not created by this registry, it was created by '
+          '${describeIdentity(entry.registry)}, and should be used with that '
+          'registry instead.');
+      }
+    }
+    return true;
+  }
+
+  bool _debugCheckForDuplicates() {
+    final Map<ShortcutActivator, ShortcutRegistryEntry?> previous = <ShortcutActivator, ShortcutRegistryEntry?>{};
+    for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry in _tokenShortcuts.entries) {
+      for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
+        if (previous.containsKey(shortcut)) {
+          throw FlutterError(
+            '$ShortcutRegistry: Received a duplicate registration for the '
+            'shortcut $shortcut in ${describeIdentity(tokenEntry.key)} and ${previous[shortcut]}.');
+        }
+        previous[shortcut] = tokenEntry.key;
+      }
+    }
+    return true;
+  }
+}
+
+/// A widget that holds a [ShortcutRegistry] which allows descendants to add,
+/// remove, or replace shortcuts.
+///
+/// This widget holds a [ShortcutRegistry] so that its descendants can find it
+/// with [ShortcutRegistry.of] or [ShortcutRegistry.maybeOf].
+///
+/// The registered shortcuts are valid whenever a widget below this one in the
+/// hierarchy has focus.
+///
+/// To add shortcuts to the registry, call [ShortcutRegistry.of] or
+/// [ShortcutRegistry.maybeOf] to get the [ShortcutRegistry], and then add them
+/// using [ShortcutRegistry.addAll], which will return a [ShortcutRegistryEntry]
+/// which must be disposed by calling [ShortcutRegistryEntry.dispose] when the
+/// shortcuts are no longer needed.
+///
+/// To replace or update the shortcuts in the registry, call
+/// [ShortcutRegistryEntry.replaceAll].
+///
+/// To remove previously added shortcuts from the registry, call
+/// [ShortcutRegistryEntry.dispose] on the entry returned by
+/// [ShortcutRegistry.addAll].
+class ShortcutRegistrar extends StatefulWidget {
+  /// Creates a const [ShortcutRegistrar].
+  ///
+  /// The [child] parameter is required.
+  const ShortcutRegistrar({super.key, required this.child});
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  @override
+  State<ShortcutRegistrar> createState() => _ShortcutRegistrarState();
+}
+
+class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
+  final ShortcutRegistry registry = ShortcutRegistry();
+  final ShortcutManager manager = ShortcutManager();
+
+  @override
+  void initState() {
+    super.initState();
+    registry.addListener(_shortcutsChanged);
+  }
+
+  void _shortcutsChanged() {
+    // This shouldn't need to update the widget, and avoids calling setState
+    // during build phase.
+    manager.shortcuts = registry.shortcuts;
+  }
+
+  @override
+  void dispose() {
+    registry.removeListener(_shortcutsChanged);
+    registry.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Shortcuts.manager(
+      manager: manager,
+      child: _ShortcutRegistrarMarker(
+        registry: registry,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _ShortcutRegistrarMarker extends InheritedWidget {
+  const _ShortcutRegistrarMarker({
+    required this.registry,
+    required super.child,
+  });
+
+  final ShortcutRegistry registry;
+
+  @override
+  bool updateShouldNotify(covariant _ShortcutRegistrarMarker oldWidget) {
+    return registry != oldWidget.registry;
   }
 }

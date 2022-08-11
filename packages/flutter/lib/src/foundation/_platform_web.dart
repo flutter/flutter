@@ -7,6 +7,8 @@ import 'dart:ui' as ui;
 
 import 'platform.dart' as platform;
 
+export 'platform.dart' show TargetPlatform;
+
 /// The dart:html implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   // To get a better guess at the targetPlatform we need to be able to reference

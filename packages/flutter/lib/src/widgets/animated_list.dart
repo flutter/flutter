@@ -252,11 +252,27 @@ class AnimatedList extends StatefulWidget {
 /// can refer to the [AnimatedList]'s state with a global key:
 ///
 /// ```dart
+/// // (e.g. in a stateful widget)
 /// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
-/// ...
-/// AnimatedList(key: listKey, ...);
-/// ...
-/// listKey.currentState.insert(123);
+///
+/// // ...
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return AnimatedList(
+///     key: listKey,
+///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///       return const Placeholder();
+///     },
+///   );
+/// }
+///
+/// // ...
+///
+/// void _updateList() {
+///   // adds "123" to the AnimatedList
+///   listKey.currentState!.insertItem(123);
+/// }
 /// ```
 ///
 /// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
@@ -440,11 +456,27 @@ class SliverAnimatedList extends StatefulWidget {
 /// can refer to the [SliverAnimatedList]'s state with a global key:
 ///
 /// ```dart
-/// GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
-/// ...
-/// SliverAnimatedList(key: listKey, ...);
-/// ...
-/// listKey.currentState.insert(123);
+/// // (e.g. in a stateful widget)
+/// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+///
+/// // ...
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return AnimatedList(
+///     key: listKey,
+///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///       return const Placeholder();
+///     },
+///   );
+/// }
+///
+/// // ...
+///
+/// void _updateList() {
+///   // adds "123" to the AnimatedList
+///   listKey.currentState!.insertItem(123);
+/// }
 /// ```
 ///
 /// [SliverAnimatedList] item input handlers can also refer to their
@@ -488,10 +520,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   int _indexToItemIndex(int index) {
     int itemIndex = index;
     for (final _ActiveItem item in _outgoingItems) {
-      if (item.itemIndex <= itemIndex)
+      if (item.itemIndex <= itemIndex) {
         itemIndex += 1;
-      else
+      } else {
         break;
+      }
     }
     return itemIndex;
   }
@@ -500,10 +533,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     int index = itemIndex;
     for (final _ActiveItem item in _outgoingItems) {
       assert(item.itemIndex != itemIndex);
-      if (item.itemIndex < itemIndex)
+      if (item.itemIndex < itemIndex) {
         index -= 1;
-      else
+      } else {
         break;
+      }
     }
     return index;
   }
@@ -512,7 +546,12 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     return SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: _itemsCount,
-      findChildIndexCallback: widget.findChildIndexCallback,
+      findChildIndexCallback: widget.findChildIndexCallback == null
+          ? null
+          : (Key key) {
+              final int? index = widget.findChildIndexCallback!(key);
+              return index != null ? _indexToItemIndex(index) : null;
+            },
     );
   }
 
@@ -532,12 +571,14 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     // Increment the incoming and outgoing item indices to account
     // for the insertion.
     for (final _ActiveItem item in _incomingItems) {
-      if (item.itemIndex >= itemIndex)
+      if (item.itemIndex >= itemIndex) {
         item.itemIndex += 1;
+      }
     }
     for (final _ActiveItem item in _outgoingItems) {
-      if (item.itemIndex >= itemIndex)
+      if (item.itemIndex >= itemIndex) {
         item.itemIndex += 1;
+      }
     }
 
     final AnimationController controller = AnimationController(
@@ -596,12 +637,14 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
       // Decrement the incoming and outgoing item indices to account
       // for the removal.
       for (final _ActiveItem item in _incomingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex)
+        if (item.itemIndex > outgoingItem.itemIndex) {
           item.itemIndex -= 1;
+        }
       }
       for (final _ActiveItem item in _outgoingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex)
+        if (item.itemIndex > outgoingItem.itemIndex) {
           item.itemIndex -= 1;
+        }
       }
 
       setState(() => _itemsCount -= 1);

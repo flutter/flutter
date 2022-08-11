@@ -875,6 +875,101 @@ void main() {
       });
     });
   });
+
+  testWidgets('supportedDevices is respected', (WidgetTester tester) async {
+    bool didStartPan = false;
+    Offset? panDelta;
+    bool didEndPan = false;
+
+    await tester.pumpWidget(
+      GestureDetector(
+        onPanStart: (DragStartDetails details) {
+          didStartPan = true;
+        },
+        onPanUpdate: (DragUpdateDetails details) {
+          panDelta = (panDelta ?? Offset.zero) + details.delta;
+        },
+        onPanEnd: (DragEndDetails details) {
+          didEndPan = true;
+        },
+        supportedDevices: const <PointerDeviceKind>{PointerDeviceKind.mouse},
+        child: Container(
+          color: const Color(0xFF00FF00),
+        )
+      ),
+    );
+
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.mouse);
+
+    // Matching device should allow gesture.
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
+
+    didStartPan = false;
+    panDelta = null;
+    didEndPan = false;
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.stylus);
+
+    // Non-matching device should not lead to any callbacks.
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+  });
+
+  group('DoubleTap', () {
+    testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onDoubleTap: () => log.add('double-tap'),
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: const Color(0xFF00FF00),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Container));
+      await tester.pump(kDoubleTapMinTime);
+      await tester.tap(find.byType(Container));
+      await tester.pumpAndSettle();
+      expect(log, <String>['double-tap']);
+    });
+
+    testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onDoubleTapDown: (_) => log.add('double-tap-down'),
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: const Color(0xFF00FF00),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Container));
+      await tester.pump(kDoubleTapMinTime);
+      await tester.tap(find.byType(Container));
+      await tester.pumpAndSettle();
+      expect(log, <String>['double-tap-down']);
+    });
+  });
 }
 
 class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {

@@ -13,6 +13,9 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Used with [ButtonTheme] and [ButtonThemeData] to define a button's base
 /// colors, and the defaults for the button's minimum size, internal padding,
 /// and shape.
@@ -232,14 +235,7 @@ class ButtonThemeData with Diagnosticable {
   final ButtonBarLayoutBehavior layoutBehavior;
 
   /// Simply a convenience that returns [minWidth] and [height] as a
-  /// [BoxConstraints] object:
-  ///
-  /// ```dart
-  /// return BoxConstraints(
-  ///   minWidth: minWidth,
-  ///   minHeight: height,
-  /// );
-  /// ```
+  /// [BoxConstraints] object.
   BoxConstraints get constraints {
     return BoxConstraints(
       minWidth: minWidth,
@@ -257,8 +253,9 @@ class ButtonThemeData with Diagnosticable {
   ///  * [getPadding], which is used to calculate padding for the [button]'s
   ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
-    if (_padding != null)
+    if (_padding != null) {
       return _padding!;
+    }
     switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
@@ -284,8 +281,9 @@ class ButtonThemeData with Diagnosticable {
   ///  * [getShape], which is used to calculate the shape of the [button]'s
   ///    [Material].
   ShapeBorder get shape {
-    if (_shape != null)
+    if (_shape != null) {
       return _shape!;
+    }
     switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
@@ -460,14 +458,17 @@ class ButtonThemeData with Diagnosticable {
   ///    with opacity 0.12.
   Color? getFillColor(MaterialButton button) {
     final Color? fillColor = button.enabled ? button.color : button.disabledColor;
-    if (fillColor != null)
+    if (fillColor != null) {
       return fillColor;
+    }
 
-    if (button.runtimeType == MaterialButton)
+    if (button.runtimeType == MaterialButton) {
       return null;
+    }
 
-    if (button.enabled && _buttonColor != null)
+    if (button.enabled && _buttonColor != null) {
       return _buttonColor;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -497,11 +498,13 @@ class ButtonThemeData with Diagnosticable {
   ///  * [ButtonTextTheme.primary]: If [getFillColor] is dark then [Colors.white],
   ///    otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
-    if (!button.enabled)
+    if (!button.enabled) {
       return getDisabledTextColor(button);
+    }
 
-    if (button.textColor != null)
+    if (button.textColor != null) {
       return button.textColor!;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -532,8 +535,9 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Otherwise, returns [getTextColor] with an opacity of 0.12.
   Color getSplashColor(MaterialButton button) {
-    if (button.splashColor != null)
+    if (button.splashColor != null) {
       return button.splashColor!;
+    }
 
     if (_splashColor != null) {
       switch (getTextTheme(button)) {
@@ -584,8 +588,9 @@ class ButtonThemeData with Diagnosticable {
   ///    otherwise the value of [getTextColor] with opacity 0.16.
   ///  * [ButtonTextTheme.primary], returns [Colors.transparent].
   Color getHighlightColor(MaterialButton button) {
-    if (button.highlightColor != null)
+    if (button.highlightColor != null) {
       return button.highlightColor!;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -638,14 +643,17 @@ class ButtonThemeData with Diagnosticable {
   /// [getTextTheme] is [ButtonTextTheme.primary], 16.0 on the left and right
   /// otherwise.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
-    if (button.padding != null)
+    if (button.padding != null) {
       return button.padding!;
+    }
 
-    if (button is MaterialButtonWithIconMixin)
+    if (button is MaterialButtonWithIconMixin) {
       return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
+    }
 
-    if (_padding != null)
+    if (_padding != null) {
       return _padding!;
+    }
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -729,8 +737,9 @@ class ButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ButtonThemeData
         && other.textTheme == textTheme
         && other.minWidth == minWidth

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// bool _giveVerse = false;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -206,8 +209,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     super.didUpdateWidget(oldWidget);
     _drag.dragStartBehavior = widget.dragStartBehavior;
 
-    if (needsPositionAnimation || oldWidget.value != widget.value)
+    if (needsPositionAnimation || oldWidget.value != widget.value) {
       _resumePositionAnimation(isLinear: needsPositionAnimation);
+    }
   }
 
   // `isLinear` must be true if the position animation is trying to move the
@@ -221,15 +225,17 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     position
       ..curve = isLinear ? Curves.linear : Curves.ease
       ..reverseCurve = isLinear ? Curves.linear : Curves.ease.flipped;
-    if (widget.value)
+    if (widget.value) {
       _positionController.forward();
-    else
+    } else {
       _positionController.reverse();
+    }
   }
 
   void _handleTapDown(TapDownDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       needsPositionAnimation = false;
+    }
       _reactionController.forward();
   }
 
@@ -248,8 +254,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   void _handleTapCancel() {
-    if (isInteractive)
+    if (isInteractive) {
       _reactionController.reverse();
+    }
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -281,8 +288,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     // Deferring the animation to the next build phase.
     setState(() { needsPositionAnimation = true; });
     // Call onChanged when the user's intent to change value is clear.
-    if (position.value >= 0.5 != widget.value)
+    if (position.value >= 0.5 != widget.value) {
       widget.onChanged!(!widget.value);
+    }
     _reactionController.reverse();
   }
 
@@ -302,8 +310,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    if (needsPositionAnimation)
+    if (needsPositionAnimation) {
       _resumePositionAnimation();
+    }
     return MouseRegion(
       cursor: isInteractive && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: Opacity(
@@ -423,8 +432,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool _value;
   set value(bool value) {
     assert(value != null);
-    if (value == _value)
+    if (value == _value) {
       return;
+    }
     _value = value;
     markNeedsSemanticsUpdate();
   }
@@ -433,8 +443,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color _activeColor;
   set activeColor(Color value) {
     assert(value != null);
-    if (value == _activeColor)
+    if (value == _activeColor) {
       return;
+    }
     _activeColor = value;
     markNeedsPaint();
   }
@@ -443,8 +454,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color _trackColor;
   set trackColor(Color value) {
     assert(value != null);
-    if (value == _trackColor)
+    if (value == _trackColor) {
       return;
+    }
     _trackColor = value;
     markNeedsPaint();
   }
@@ -453,8 +465,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   CupertinoThumbPainter _thumbPainter;
   set thumbColor(Color value) {
     assert(value != null);
-    if (value == thumbColor)
+    if (value == thumbColor) {
       return;
+    }
     _thumbPainter = CupertinoThumbPainter.switchThumb(color: value);
     markNeedsPaint();
   }
@@ -462,8 +475,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   ValueChanged<bool>? get onChanged => _onChanged;
   ValueChanged<bool>? _onChanged;
   set onChanged(ValueChanged<bool>? value) {
-    if (value == _onChanged)
+    if (value == _onChanged) {
       return;
+    }
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive) {
@@ -476,8 +490,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsPaint();
   }
@@ -500,8 +515,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (isInteractive)
+    if (isInteractive) {
       config.onTap = _state._handleTap;
+    }
 
     config.isEnabled = isInteractive;
     config.isToggled = _value;

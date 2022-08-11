@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of the routes used to display popup menus
 /// as well as [PopupMenuItem] and [PopupMenuDivider] widgets.
 ///
@@ -91,8 +94,9 @@ class PopupMenuThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return PopupMenuThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -115,10 +119,12 @@ class PopupMenuThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is PopupMenuThemeData
         && other.elevation == elevation
         && other.color == color

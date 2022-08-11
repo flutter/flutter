@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [TextButton]s when it's used with [TextButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.textButtonTheme].
@@ -47,8 +50,9 @@ class TextButtonThemeData with Diagnosticable {
   /// Linearly interpolate between two text button themes.
   static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return TextButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
@@ -59,10 +63,12 @@ class TextButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextButtonThemeData && other.style == style;
   }
 

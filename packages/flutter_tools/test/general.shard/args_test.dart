@@ -15,19 +15,6 @@ import '../src/context.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
-class CommandDummy extends FlutterCommand{
-  @override
-  String get description => 'description';
-
-  @override
-  String get name => 'test';
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
-}
-
 void main() {
   test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
@@ -47,6 +34,9 @@ void main() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
     command.argParser.addFlag('key-false');
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown.
+    expect(() => command.boolArg('key'), throwsA(const TypeMatcher<TypeError>()));
 
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--key']);
@@ -62,17 +52,55 @@ void main() {
   });
 
   testUsingContext('String? safe argResults', () async {
-    final CommandDummy command = CommandDummy();
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown
+    expect(() => command.stringArg('key'), throwsA(const TypeMatcher<TypeError>()));
+
     runner.addCommand(command);
-    await runner.run(<String>['test', '--key=value']);
+    await runner.run(<String>['dummy', '--key=value']);
 
     expect(command.stringArg('key'), 'value');
     expect(command.stringArg('empty'), null);
 
     expect(command.stringArgDeprecated('key'), 'value');
     expect(() => command.stringArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+  });
+
+  testUsingContext('List<String> safe argResults', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    command.argParser.addMultiOption(
+      'key',
+      allowed: <String>['a', 'b', 'c'],
+    );
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown.
+    expect(() => command.stringsArg('key'), throwsA(const TypeMatcher<TypeError>()));
+
+    runner.addCommand(command);
+    await runner.run(<String>['dummy', '--key', 'a']);
+
+    // throws error when trying to parse non-existent key.
+    expect(() => command.stringsArg('empty'),throwsA(const TypeMatcher<ArgumentError>()));
+
+    expect(command.stringsArg('key'), <String>['a']);
+
+    await runner.run(<String>['dummy', '--key', 'a', '--key', 'b']);
+    expect(command.stringsArg('key'), <String>['a', 'b']);
+
+    await runner.run(<String>['dummy']);
+    expect(command.stringsArg('key'), <String>[]);
   });
 }
 
@@ -87,6 +115,10 @@ void verifyCommandRunner(CommandRunner<Object> runner) {
 void verifyCommand(Command<Object> runner) {
   expect(runner.argParser, isNotNull, reason: 'command ${runner.name} has no argParser');
   verifyOptions(runner.name, runner.argParser.options.values);
+
+  final String firstDescriptionLine = runner.description.split('\n').first;
+  expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected single period that a full sentence should end with");
+
   if (runner.hidden == false && runner.parent == null) {
     expect(
       runner.category,
@@ -109,7 +141,7 @@ final RegExp _bannedArgumentNamePattern = RegExp(r'-uri$');
 
 // Patterns for help messages.
 final RegExp _bannedLeadingPatterns = RegExp(r'^[-a-z]', multiLine: true);
-final RegExp _allowedTrailingPatterns = RegExp(r'([^ ][.!:]\)?|: https?://[^ ]+[^.]|^)$');
+final RegExp _allowedTrailingPatterns = RegExp(r'([^ ]([^.^!^:][.!:])\)?|: https?://[^ ]+[^.]|^)$');
 final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
 final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
 final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');

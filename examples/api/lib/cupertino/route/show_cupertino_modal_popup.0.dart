@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const ModalPopupApp());
 
 class ModalPopupApp extends StatelessWidget {
-  const ModalPopupApp({Key? key}) : super(key: key);
+  const ModalPopupApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class ModalPopupApp extends StatelessWidget {
 }
 
 class ModalPopupExample extends StatelessWidget {
-  const ModalPopupExample({Key? key}) : super(key: key);
+  const ModalPopupExample({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -10,6 +10,9 @@ import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 
@@ -24,9 +27,14 @@ const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 ///
 /// ```dart
 /// ScaffoldMessenger.of(context).showMaterialBanner(
-///   MaterialBanner( ... )
+///   const MaterialBanner(
+///     content: Text('Message...'),
+///     actions: <Widget>[
+///       // ...
+///     ],
+///   )
 /// ).closed.then((MaterialBannerClosedReason reason) {
-///    ...
+///    // ...
 /// });
 /// ```
 enum MaterialBannerClosedReason {
@@ -332,8 +340,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     // This provides a static banner for backwards compatibility.
-    if (widget.animation == null)
+    if (widget.animation == null) {
       return materialBanner;
+    }
 
     materialBanner = SafeArea(
       child: materialBanner,

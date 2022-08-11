@@ -10,13 +10,18 @@
 ///
 /// See also:
 ///
-///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
-///    for a catalog of commonly-used Flutter widgets.
+///  * [flutter.dev/widgets/material](https://flutter.dev/widgets/material)
+///    for a catalog of commonly-used Material component widgets.
 ///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.
+///  * [material.io/components](https://material.io/components?platform=flutter)
+///    for the Material 2 specification.
+///  * [m3.material.io](https://m3.material.io)
+///    for the Material 3 specification.
 library material;
 
 export 'src/material/about.dart';
+export 'src/material/action_chip.dart';
 export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
 export 'src/material/app_bar.dart';
@@ -45,11 +50,8 @@ export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/checkbox_theme.dart';
 export 'src/material/chip.dart';
-export 'src/material/chip_action.dart';
-export 'src/material/chip_choice.dart';
-export 'src/material/chip_filter.dart';
-export 'src/material/chip_input.dart';
 export 'src/material/chip_theme.dart';
+export 'src/material/choice_chip.dart';
 export 'src/material/circle_avatar.dart';
 export 'src/material/color_scheme.dart';
 export 'src/material/colors.dart';
@@ -78,6 +80,7 @@ export 'src/material/expansion_panel.dart';
 export 'src/material/expansion_tile.dart';
 export 'src/material/expansion_tile_theme.dart';
 export 'src/material/feedback.dart';
+export 'src/material/filter_chip.dart';
 export 'src/material/flexible_space_bar.dart';
 export 'src/material/floating_action_button.dart';
 export 'src/material/floating_action_button_location.dart';
@@ -86,6 +89,7 @@ export 'src/material/flutter_logo.dart';
 export 'src/material/grid_tile.dart';
 export 'src/material/grid_tile_bar.dart';
 export 'src/material/icon_button.dart';
+export 'src/material/icon_button_theme.dart';
 export 'src/material/icons.dart';
 export 'src/material/ink_decoration.dart';
 export 'src/material/ink_highlight.dart';
@@ -94,10 +98,12 @@ export 'src/material/ink_sparkle.dart';
 export 'src/material/ink_splash.dart';
 export 'src/material/ink_well.dart';
 export 'src/material/input_border.dart';
+export 'src/material/input_chip.dart';
 export 'src/material/input_date_picker_form_field.dart';
 export 'src/material/input_decorator.dart';
 export 'src/material/list_tile.dart';
 export 'src/material/list_tile_theme.dart';
+export 'src/material/magnifier.dart';
 export 'src/material/material.dart';
 export 'src/material/material_button.dart';
 export 'src/material/material_localizations.dart';
@@ -129,6 +135,7 @@ export 'src/material/scrollbar.dart';
 export 'src/material/scrollbar_theme.dart';
 export 'src/material/search.dart';
 export 'src/material/selectable_text.dart';
+export 'src/material/selection_area.dart';
 export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';

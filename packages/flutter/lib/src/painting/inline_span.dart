@@ -12,6 +12,9 @@ import 'text_painter.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
+// Examples can assume:
+// late InlineSpan myInlineSpan;
+
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
 class Accumulator {
@@ -308,8 +311,9 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// Returns null if the `index` is out of bounds.
   int? codeUnitAt(int index) {
-    if (index < 0)
+    if (index < 0) {
       return null;
+    }
     final Accumulator offset = Accumulator();
     int? result;
     visitChildren((InlineSpan span) {
@@ -353,10 +357,12 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is InlineSpan
         && other.style == style;
   }

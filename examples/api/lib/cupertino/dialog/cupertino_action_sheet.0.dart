@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const ActionSheetApp());
 
 class ActionSheetApp extends StatelessWidget {
-  const ActionSheetApp({Key? key}) : super(key: key);
+  const ActionSheetApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class ActionSheetApp extends StatelessWidget {
 }
 
 class ActionSheetExample extends StatelessWidget {
-  const ActionSheetExample({Key? key}) : super(key: key);
+  const ActionSheetExample({super.key});
 
   // This shows a CupertinoModalPopup which hosts a CupertinoActionSheet.
   void _showActionSheet(BuildContext context) {

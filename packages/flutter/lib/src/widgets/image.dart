@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io' show File;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -28,10 +27,14 @@ export 'package:flutter/painting.dart' show
   FilterQuality,
   ImageConfiguration,
   ImageInfo,
-  ImageStream,
   ImageProvider,
+  ImageStream,
   MemoryImage,
   NetworkImage;
+
+// Examples can assume:
+// late Widget image;
+// late ImageProvider _image;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -581,11 +584,9 @@ class Image extends StatefulWidget {
   /// bundled, the app has to specify which ones to include. For instance a
   /// package named `fancy_backgrounds` could have:
   ///
-  /// ```
-  /// lib/backgrounds/background1.png
-  /// lib/backgrounds/background2.png
-  /// lib/backgrounds/background3.png
-  /// ```
+  ///     lib/backgrounds/background1.png
+  ///     lib/backgrounds/background2.png
+  ///     lib/backgrounds/background3.png
   ///
   /// To include, say the first image, the `pubspec.yaml` of the app should
   /// specify it in the assets section:
@@ -733,14 +734,14 @@ class Image extends StatefulWidget {
   /// {@template flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   /// ```dart
   /// Image(
-  ///   ...
-  ///   frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+  ///   image: _image,
+  ///   frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
   ///     return Padding(
-  ///       padding: EdgeInsets.all(8.0),
+  ///       padding: const EdgeInsets.all(8.0),
   ///       child: child,
   ///     );
   ///   },
-  ///   loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+  ///   loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
   ///     return Center(child: child);
   ///   },
   /// )
@@ -750,11 +751,11 @@ class Image extends StatefulWidget {
   ///
   /// ```dart
   /// Center(
-  ///   Padding(
-  ///     padding: EdgeInsets.all(8.0),
-  ///     child: <image>,
+  ///   child: Padding(
+  ///     padding: const EdgeInsets.all(8.0),
+  ///     child: image,
   ///   ),
-  /// )
+  /// ),
   /// ```
   /// {@endtemplate}
   ///
@@ -1065,10 +1066,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    if (TickerMode.of(context))
+    if (TickerMode.of(context)) {
       _listenToStream();
-    else
+    } else {
       _stopListeningToStream(keepStreamAlive: true);
+    }
 
     super.didChangeDependencies();
   }
@@ -1082,8 +1084,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.addListener(_getListener(recreateListener: true));
       _imageStream!.removeListener(oldListener);
     }
-    if (widget.image != oldWidget.image)
+    if (widget.image != oldWidget.image) {
       _resolveImage();
+    }
   }
 
   @override
@@ -1176,14 +1179,17 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   // registration from the old stream to the new stream (if a listener was
   // registered).
   void _updateSourceStream(ImageStream newStream) {
-    if (_imageStream?.key == newStream.key)
+    if (_imageStream?.key == newStream.key) {
       return;
+    }
 
-    if (_isListeningToStream)
+    if (_isListeningToStream) {
       _imageStream!.removeListener(_getListener());
+    }
 
-    if (!widget.gaplessPlayback)
+    if (!widget.gaplessPlayback) {
       setState(() { _replaceImage(info: null); });
+    }
 
     setState(() {
       _loadingProgress = null;
@@ -1192,13 +1198,15 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
 
     _imageStream = newStream;
-    if (_isListeningToStream)
+    if (_isListeningToStream) {
       _imageStream!.addListener(_getListener());
+    }
   }
 
   void _listenToStream() {
-    if (_isListeningToStream)
+    if (_isListeningToStream) {
       return;
+    }
 
     _imageStream!.addListener(_getListener());
     _completerHandle?.dispose();
@@ -1215,8 +1223,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   /// to true, which create [ImageStreamCompleterHandle] to keep the completer
   /// alive and is compatible with the [TickerMode] being off.
   void _stopListeningToStream({bool keepStreamAlive = false}) {
-    if (!_isListeningToStream)
+    if (!_isListeningToStream) {
       return;
+    }
 
     if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
       _completerHandle = _imageStream!.completer!.keepAlive();
@@ -1257,10 +1266,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_lastException != null) {
-      if (widget.errorBuilder != null)
+      if (widget.errorBuilder != null) {
         return widget.errorBuilder!(context, _lastException!, _lastStack);
-      if (kDebugMode)
+      }
+      if (kDebugMode) {
         return _debugBuildErrorWidget(context, _lastException!);
+      }
     }
 
     Widget result = RawImage(
@@ -1295,11 +1306,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       );
     }
 
-    if (widget.frameBuilder != null)
+    if (widget.frameBuilder != null) {
       result = widget.frameBuilder!(context, result, _frameNumber, _wasSynchronouslyLoaded);
+    }
 
-    if (widget.loadingBuilder != null)
+    if (widget.loadingBuilder != null) {
       result = widget.loadingBuilder!(context, result, _loadingProgress);
+    }
 
     return result;
   }

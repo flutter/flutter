@@ -294,34 +294,53 @@ class FlutterWebConnection {
 
   /// Sends command via WebDriver to Flutter web application.
   Future<dynamic> sendCommand(String script, Duration? duration) async {
-    dynamic result;
+    // This code should not be reachable before the VM service extension is
+    // initialized. The VM service extension is expected to initialize both
+    // `$flutterDriverResult` and `$flutterDriver` variables before attempting
+    // to send commands. This part checks that `$flutterDriverResult` is present.
+    // `$flutterDriver` is not checked because it is covered by the `script`
+    // that's executed next.
     try {
-      await _driver.execute(script, <void>[]);
-    } catch (error) {
-      // We should not just arbitrarily throw all exceptions on the ground.
-      // This is probably hiding real errors.
-      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
+      await _driver.execute(r'return $flutterDriverResult', <String>[]);
+    } catch (error, stackTrace) {
+      throw DriverError(
+        'Driver extension has not been initialized correctly.\n'
+        'If the test uses a custom VM service extension, make sure it conforms '
+        'to the protocol used by package:integration_test and '
+        'package:flutter_driver.\n'
+        'If the test uses VM service extensions provided by the Flutter SDK, '
+        'then this error is likely caused by a bug in Flutter. Please report it '
+        'by filing a bug on GitHub:\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+        error,
+        stackTrace,
+      );
     }
 
+    String phase = 'executing';
     try {
-      result = await waitFor<dynamic>(
+      // Execute the script, which should leave the result in the `$flutterDriverResult` global variable.
+      await _driver.execute(script, <void>[]);
+
+      // Read the result.
+      phase = 'reading';
+      final dynamic result = await waitFor<dynamic>(
         () => _driver.execute(r'return $flutterDriverResult', <String>[]),
         matcher: isNotNull,
         timeout: duration ?? const Duration(days: 30),
       );
-    } catch (error) {
-      // We should not just arbitrarily throw all exceptions on the ground.
-      // This is probably hiding real errors.
-      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
-      // Returns null if exception thrown.
-      return null;
-    } finally {
-      // Resets the result.
-      await _driver.execute(r'''
-        $flutterDriverResult = null
-      ''', <void>[]);
+
+      // Reset the result to null to avoid polluting the results of future commands.
+      phase = 'resetting';
+      await _driver.execute(r'$flutterDriverResult = null', <void>[]);
+      return result;
+    } catch (error, stackTrace) {
+      throw DriverError(
+        'Error while $phase FlutterDriver result for command: $script',
+        error,
+        stackTrace,
+      );
     }
-    return result;
   }
 
   /// Gets performance log from WebDriver.

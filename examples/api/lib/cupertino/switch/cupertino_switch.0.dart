@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 void main() => runApp(const CupertinoSwitchApp());
 
 class CupertinoSwitchApp extends StatelessWidget {
-  const CupertinoSwitchApp({Key? key}) : super(key: key);
+  const CupertinoSwitchApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CupertinoSwitchApp extends StatelessWidget {
 }
 
 class CupertinoSwitchExample extends StatefulWidget {
-  const CupertinoSwitchExample({Key? key}) : super(key: key);
+  const CupertinoSwitchExample({super.key});
 
   @override
   State<CupertinoSwitchExample> createState() => _CupertinoSwitchExampleState();

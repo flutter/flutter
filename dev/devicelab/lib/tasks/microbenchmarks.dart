@@ -49,21 +49,24 @@ TaskFunction createMicrobenchmarkTask() {
     }
 
     final Map<String, double> allResults = <String, double>{
-      ...await runMicrobench('lib/stocks/layout_bench.dart'),
-      ...await runMicrobench('lib/stocks/build_bench.dart'),
+      ...await runMicrobench('lib/foundation/all_elements_bench.dart'),
+      ...await runMicrobench('lib/foundation/change_notifier_bench.dart'),
+      ...await runMicrobench('lib/foundation/clamp.dart'),
+      ...await runMicrobench('lib/foundation/platform_asset_bundle.dart'),
+      ...await runMicrobench('lib/foundation/standard_message_codec_bench.dart'),
+      ...await runMicrobench('lib/foundation/standard_method_codec_bench.dart'),
+      ...await runMicrobench('lib/foundation/timeline_bench.dart'),
       ...await runMicrobench('lib/geometry/matrix_utils_transform_bench.dart'),
       ...await runMicrobench('lib/geometry/rrect_contains_bench.dart'),
-      ...await runMicrobench('lib/gestures/velocity_tracker_bench.dart'),
       ...await runMicrobench('lib/gestures/gesture_detector_bench.dart'),
-      ...await runMicrobench('lib/stocks/animation_bench.dart'),
+      ...await runMicrobench('lib/gestures/velocity_tracker_bench.dart'),
       ...await runMicrobench('lib/language/compute_bench.dart'),
       ...await runMicrobench('lib/language/sync_star_bench.dart'),
       ...await runMicrobench('lib/language/sync_star_semantics_bench.dart'),
-      ...await runMicrobench('lib/foundation/all_elements_bench.dart'),
-      ...await runMicrobench('lib/foundation/change_notifier_bench.dart'),
-      ...await runMicrobench('lib/foundation/standard_method_codec_bench.dart'),
-      ...await runMicrobench('lib/foundation/standard_message_codec_bench.dart'),
-      ...await runMicrobench('lib/foundation/timeline_bench.dart'),
+      ...await runMicrobench('lib/stocks/animation_bench.dart'),
+      ...await runMicrobench('lib/stocks/build_bench_profiled.dart'),
+      ...await runMicrobench('lib/stocks/build_bench.dart'),
+      ...await runMicrobench('lib/stocks/layout_bench.dart'),
       ...await runMicrobench('lib/ui/image_bench.dart'),
     };
 

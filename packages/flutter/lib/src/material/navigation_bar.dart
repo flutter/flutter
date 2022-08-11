@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -15,6 +16,10 @@ import 'navigation_bar_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
+
+// Examples can assume:
+// late BuildContext context;
+// late bool _isDrawerOpen;
 
 /// Material 3 Navigation Bar component.
 ///
@@ -47,12 +52,15 @@ import 'tooltip.dart';
 ///  * [NavigationDestination]
 ///  * [BottomNavigationBar]
 ///  * <https://api.flutter.dev/flutter/material/NavigationDestination-class.html>
+///  * <https://m3.material.io/components/navigation-bar>
 class NavigationBar extends StatelessWidget {
   /// Creates a Material 3 Navigation Bar component.
   ///
   /// The value of [destinations] must be a list of two or more
   /// [NavigationDestination] values.
-  const NavigationBar({
+  // TODO(goderbauer): This class cannot be const constructed, https://github.com/dart-lang/linter/issues/3366.
+  // ignore: prefer_const_constructors_in_immutables
+  NavigationBar({
     super.key,
     this.animationDuration,
     this.selectedIndex = 0,
@@ -440,12 +448,25 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// Which destination index is this in the navigation bar.
   ///
   /// For example:
+  ///
   /// ```dart
   /// NavigationBar(
-  ///   destinations: [
-  ///     NavigationDestination(), // This is destination index 0.
-  ///     NavigationDestination(), // This is destination index 1.
-  ///     NavigationDestination(), // This is destination index 2.
+  ///   destinations: const <Widget>[
+  ///     NavigationDestination(
+  ///       // This is destination index 0.
+  ///       icon: Icon(Icons.surfing),
+  ///       label: 'Surfing',
+  ///     ),
+  ///     NavigationDestination(
+  ///       // This is destination index 1.
+  ///       icon: Icon(Icons.support),
+  ///       label: 'Support',
+  ///     ),
+  ///     NavigationDestination(
+  ///       // This is destination index 2.
+  ///       icon: Icon(Icons.local_hospital),
+  ///       label: 'Hospital',
+  ///     ),
   ///   ]
   /// )
   /// ```
@@ -884,17 +905,18 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
 
 /// Utility Widgets
 
-/// Clamps [MediaQueryData.textScaleFactor] so that if it is greater than
-/// [upperLimit] or less than [lowerLimit], [upperLimit] or [lowerLimit] will be
-/// used instead for the [child] widget.
-///
-/// Example:
-/// ```
-/// _ClampTextScaleFactor(
-///   upperLimit: 2.0,
-///   child: Text('Foo'), // If textScaleFactor is 3.0, this will only scale 2x.
-/// )
-/// ```
+// Clamps [MediaQueryData.textScaleFactor] so that if it is greater than
+// [upperLimit] or less than [lowerLimit], [upperLimit] or [lowerLimit] will be
+// used instead for the [child] widget.
+//
+// Example:
+//
+// ```dart
+// _ClampTextScaleFactor(
+//   upperLimit: 2.0,
+//   child: const Text('Foo'), // If textScaleFactor is 3.0, this will only scale 2x.
+// )
+// ```
 class _ClampTextScaleFactor extends StatelessWidget {
   /// Clamps the text scale factor of descendants by modifying the [MediaQuery]
   /// surrounding [child].
@@ -918,7 +940,7 @@ class _ClampTextScaleFactor extends StatelessWidget {
   Widget build(BuildContext context) {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        textScaleFactor: MediaQuery.of(context).textScaleFactor.clamp(
+        textScaleFactor: clampDouble(MediaQuery.of(context).textScaleFactor,
           0.0,
           upperLimit,
         ),
@@ -961,36 +983,36 @@ class _StatusTransitionWidgetBuilder extends StatusTransitionWidget {
   Widget build(BuildContext context) => builder(context, child);
 }
 
-/// Builder widget for widgets that need to be animated from 0 (unselected) to
-/// 1.0 (selected).
-///
-/// This widget creates and manages an [AnimationController] that it passes down
-/// to the child through the [builder] function.
-///
-/// When [isSelected] is `true`, the animation controller will animate from
-/// 0 to 1 (for [duration] time).
-///
-/// When [isSelected] is `false`, the animation controller will animate from
-/// 1 to 0 (for [duration] time).
-///
-/// If [isSelected] is updated while the widget is animating, the animation will
-/// be reversed until it is either 0 or 1 again. If [alwaysDoFullAnimation] is
-/// true, the animation will reset to 0 or 1 before beginning the animation, so
-/// that the full animation is done.
-///
-/// Usage:
-/// ```dart
-/// _SelectableAnimatedBuilder(
-///   isSelected: _isDrawerOpen,
-///   builder: (context, animation) {
-///     return AnimatedIcon(
-///       icon: AnimatedIcons.menu_arrow,
-///       progress: animation,
-///       semanticLabel: 'Show menu',
-///     );
-///   }
-/// )
-/// ```
+// Builder widget for widgets that need to be animated from 0 (unselected) to
+// 1.0 (selected).
+//
+// This widget creates and manages an [AnimationController] that it passes down
+// to the child through the [builder] function.
+//
+// When [isSelected] is `true`, the animation controller will animate from
+// 0 to 1 (for [duration] time).
+//
+// When [isSelected] is `false`, the animation controller will animate from
+// 1 to 0 (for [duration] time).
+//
+// If [isSelected] is updated while the widget is animating, the animation will
+// be reversed until it is either 0 or 1 again. If [alwaysDoFullAnimation] is
+// true, the animation will reset to 0 or 1 before beginning the animation, so
+// that the full animation is done.
+//
+// Usage:
+// ```dart
+// _SelectableAnimatedBuilder(
+//   isSelected: _isDrawerOpen,
+//   builder: (context, animation) {
+//     return AnimatedIcon(
+//       icon: AnimatedIcons.menu_arrow,
+//       progress: animation,
+//       semanticLabel: 'Show menu',
+//     );
+//   }
+// )
+// ```
 class _SelectableAnimatedBuilder extends StatefulWidget {
   /// Builds and maintains an [AnimationController] that will animate from 0 to
   /// 1 and back depending on when [isSelected] is true.
@@ -1171,11 +1193,12 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 }
 
 NavigationBarThemeData _defaultsFor(BuildContext context) {
-  return Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _Defaults(context);
+  return Theme.of(context).useMaterial3 ? _NavigationBarDefaultsM3(context) : _NavigationBarDefaultsM2(context);
 }
 
-class _Defaults extends NavigationBarThemeData {
-  _Defaults(BuildContext context)
+// Hand coded defaults based on Material Design 2.
+class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
+  _NavigationBarDefaultsM2(BuildContext context)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(
@@ -1188,12 +1211,12 @@ class _Defaults extends NavigationBarThemeData {
   final ThemeData _theme;
   final ColorScheme _colors;
 
-  // With Material 3, the NavigationBar uses an overlay blend for the
+  // With Material 2, the NavigationBar uses an overlay blend for the
   // default color regardless of light/dark mode.
   @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.all(IconThemeData(
+    return MaterialStatePropertyAll<IconThemeData>(IconThemeData(
       size: 24,
       color: _colors.onSurface,
     ));
@@ -1201,18 +1224,20 @@ class _Defaults extends NavigationBarThemeData {
 
   @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStateProperty.all(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
+  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - NavigationBar
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
-class _TokenDefaultsM3 extends NavigationBarThemeData {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
+  _NavigationBarDefaultsM3(this.context)
       : super(
           height: 80.0,
           elevation: 3.0,
@@ -1252,4 +1277,4 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
   }
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - NavigationBar

@@ -8,6 +8,9 @@ import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// An optional container for grouping together multiple form field widgets
 /// (e.g. [TextField] widgets).
 ///
@@ -46,12 +49,13 @@ class Form extends StatefulWidget {
   }) : assert(child != null),
        autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
-  /// Returns the closest [FormState] which encloses the given context.
+  /// Returns the closest [FormState] which encloses the given context,
+  /// or null if there is no such form.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// FormState form = Form.of(context);
+  /// FormState form = Form.of(context)!;
   /// form.save();
   /// ```
   static FormState? of(BuildContext context) {
@@ -156,8 +160,9 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.save();
+    }
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
@@ -168,8 +173,9 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidateMode] property is [AutovalidateMode.always],
   /// the fields will all be revalidated after being reset.
   void reset() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.reset();
+    }
     _hasInteractedByUser = false;
     _fieldDidChange();
   }
@@ -186,8 +192,9 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+    }
     return !hasError;
   }
 }
@@ -391,8 +398,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   void _validate() {
-    if (widget.validator != null)
+    if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
+    }
   }
 
   /// Updates this field's state to the new value. Useful for responding to

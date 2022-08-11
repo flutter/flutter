@@ -9,6 +9,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of [MaterialBanner] widgets.
 ///
 /// Descendant widgets obtain the current [MaterialBannerThemeData] object using
@@ -101,10 +104,12 @@ class MaterialBannerThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is MaterialBannerThemeData
         && other.backgroundColor == backgroundColor
         && other.contentTextStyle == contentTextStyle

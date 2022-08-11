@@ -13,10 +13,11 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
 
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
@@ -252,6 +253,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onTapOutside,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -273,6 +275,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -413,6 +416,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
+    this.onTapOutside,
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
@@ -434,6 +438,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -694,6 +699,9 @@ class CupertinoTextField extends StatefulWidget {
   ///    the user is done editing.
   final ValueChanged<String>? onSubmitted;
 
+  /// {@macro flutter.widgets.editableText.onTapOutside}
+  final TapRegionCallback? onTapOutside;
+
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
 
@@ -780,6 +788,21 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
+  /// platforms. If it is desired to supress the magnifier, consider passing
+  /// [TextMagnifierConfiguration.disabled].
+  ///
+  // TODO(antholeole): https://github.com/flutter/flutter/issues/108041
+  // once the magnifier PR lands, I should enrich this area of the
+  // docs with images of what a magnifier is.
+  final TextMagnifierConfiguration? magnifierConfiguration;
+
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
@@ -828,6 +851,27 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
+
+  static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
+    magnifierBuilder: (
+    BuildContext context,
+    MagnifierController controller,
+    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer
+  ) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return CupertinoTextMagnifier(
+        controller: controller,
+        magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
+      );
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return null;
+    }
+  });
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
@@ -936,21 +980,26 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
       return false;
+    }
 
     // On iOS, we don't show handles when the selection is collapsed.
-    if (_effectiveController.selection.isCollapsed)
+    if (_effectiveController.selection.isCollapsed) {
       return false;
+    }
 
-    if (cause == SelectionChangedCause.keyboard)
+    if (cause == SelectionChangedCause.keyboard) {
       return false;
+    }
 
-    if (cause == SelectionChangedCause.scribble)
+    if (cause == SelectionChangedCause.scribble) {
       return true;
+    }
 
-    if (_effectiveController.text.isNotEmpty)
+    if (_effectiveController.text.isNotEmpty) {
       return true;
+    }
 
     return false;
   }
@@ -970,7 +1019,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             || cause == SelectionChangedCause.drag) {
           _editableText.bringIntoView(selection.extent);
         }
-        return;
+        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
@@ -978,7 +1027,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         if (cause == SelectionChangedCause.drag) {
           _editableText.bringIntoView(selection.extent);
         }
-        return;
+        break;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        if (cause == SelectionChangedCause.drag) {
+          _editableText.hideToolbar();
+        }
+        break;
     }
   }
 
@@ -1094,8 +1157,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
                 // Also call onChanged when the clear button is tapped.
                 final bool textChanged = _effectiveController.text.isNotEmpty;
                 _effectiveController.clear();
-                if (widget.onChanged != null && textChanged)
+                if (widget.onChanged != null && textChanged) {
                   widget.onChanged!(_effectiveController.text);
+                }
               } : null,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6.0),
@@ -1256,6 +1320,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             maxLines: widget.maxLines,
             minLines: widget.minLines,
             expands: widget.expands,
+            magnifierConfiguration: widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
             // Only show the selection highlight when the text field is focused.
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled
@@ -1264,6 +1329,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
+            onTapOutside: widget.onTapOutside,
             inputFormatters: formatters,
             rendererIgnoresPointer: true,
             cursorWidth: widget.cursorWidth,
@@ -1302,18 +1368,20 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         _requestKeyboard();
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: Container(
-          decoration: effectiveDecoration,
-          color: !enabled && effectiveDecoration == null ? disabledColor : null,
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: Align(
-              alignment: Alignment(-1.0, _textAlignVertical.y),
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+      child: TextFieldTapRegion(
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: Container(
+            decoration: effectiveDecoration,
+            color: !enabled && effectiveDecoration == null ? disabledColor : null,
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: Align(
+                alignment: Alignment(-1.0, _textAlignVertical.y),
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+              ),
             ),
           ),
         ),

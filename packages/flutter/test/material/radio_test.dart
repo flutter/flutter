@@ -441,8 +441,8 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check when the radio isn't selected.
@@ -519,13 +519,12 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(radioKey)));
 
     // Check when the radio isn't selected.
@@ -704,7 +703,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -935,7 +933,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(radioKey)));
     await tester.pumpAndSettle();
 
@@ -997,7 +994,7 @@ void main() {
             value: active,
             groupValue: true,
             onChanged: (_) { },
-            fillColor: MaterialStateProperty.all(fillColor),
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
@@ -1080,7 +1077,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(findRadio()));
     await tester.pumpAndSettle();
 

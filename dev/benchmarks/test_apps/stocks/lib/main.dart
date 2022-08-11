@@ -6,10 +6,10 @@ library stocks;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show
-  debugPaintSizeEnabled,
   debugPaintBaselinesEnabled,
   debugPaintLayerBordersEnabled,
   debugPaintPointersEnabled,
+  debugPaintSizeEnabled,
   debugRepaintRainbowEnabled;
 
 import 'i18n/stock_strings.dart';

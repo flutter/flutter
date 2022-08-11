@@ -33,10 +33,11 @@ Future<String> dataHandler(String message) async {
       });
       completer.complete(json.encode(result));
     }
-    if (SchedulerBinding.instance.hasScheduledFrame)
+    if (SchedulerBinding.instance.hasScheduledFrame) {
       SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
-    else
+    } else {
       completeSemantics();
+    }
     return completer.future;
   }
   if (message.contains('setClipboard')) {
@@ -48,10 +49,11 @@ Future<String> dataHandler(String message) async {
       });
       completer.complete('');
     }
-    if (SchedulerBinding.instance.hasScheduledFrame)
+    if (SchedulerBinding.instance.hasScheduledFrame) {
       SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
-    else
+    } else {
       completeSetClipboard();
+    }
     return completer.future;
   }
   throw UnimplementedError();

@@ -12,6 +12,10 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// bool _throwShotAway = false;
+// late StateSetter setState;
+
 /// A Material Design checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
@@ -147,7 +151,7 @@ class Checkbox extends StatefulWidget {
 
   /// The color to use when this checkbox is checked.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [fillColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -185,7 +189,7 @@ class Checkbox extends StatefulWidget {
   /// If null, then the value of [activeColor] is used in the selected
   /// state. If that is also null, the value of [CheckboxThemeData.fillColor]
   /// is used. If that is also null, then [ThemeData.disabledColor] is used in
-  /// the disabled state, [ThemeData.toggleableActiveColor] is used in the
+  /// the disabled state, [ColorScheme.secondary] is used in the
   /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
   /// default state.
   final MaterialStateProperty<Color?>? fillColor;
@@ -272,7 +276,7 @@ class Checkbox extends StatefulWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [CheckboxThemeData.overlayColor] is used. If that is
-  /// also null, then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
@@ -385,17 +389,19 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         return themeData.disabledColor;
       }
       if (states.contains(MaterialState.selected)) {
-        return themeData.toggleableActiveColor;
+        return themeData.colorScheme.secondary;
       }
       return themeData.unselectedWidgetColor;
     });
   }
 
   BorderSide? _resolveSide(BorderSide? side) {
-    if (side is MaterialStateBorderSide)
+    if (side is MaterialStateBorderSide) {
       return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
-    if (!states.contains(MaterialState.selected))
+    }
+    if (!states.contains(MaterialState.selected)) {
       return side;
+    }
     return null;
   }
 
@@ -647,10 +653,11 @@ class _CheckboxPainter extends ToggleablePainter {
       } else {
         _drawBox(canvas, outer, paint, side, true);
         final double tShrink = (t - 0.5) * 2.0;
-        if (previousValue == null || value == null)
+        if (previousValue == null || value == null) {
           _drawDash(canvas, origin, tShrink, strokePaint);
-        else
+        } else {
           _drawCheck(canvas, origin, tShrink, strokePaint);
+        }
       }
     } else { // Two cases: null to true, true to null
       final Rect outer = _outerRectAt(origin, 1.0);
@@ -659,16 +666,18 @@ class _CheckboxPainter extends ToggleablePainter {
       _drawBox(canvas, outer, paint, side, true);
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
-        if (previousValue ?? false)
+        if (previousValue ?? false) {
           _drawCheck(canvas, origin, tShrink, strokePaint);
-        else
+        } else {
           _drawDash(canvas, origin, tShrink, strokePaint);
+        }
       } else {
         final double tExpand = (tNormalized - 0.5) * 2.0;
-        if (value ?? false)
+        if (value ?? false) {
           _drawCheck(canvas, origin, tExpand, strokePaint);
-        else
+        } else {
           _drawDash(canvas, origin, tExpand, strokePaint);
+        }
       }
     }
   }

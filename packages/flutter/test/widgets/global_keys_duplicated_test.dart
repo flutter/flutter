@@ -72,8 +72,9 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               nestedSetState = setState;
-              if (flag)
+              if (flag) {
                 return const DummyWidget(key: GlobalObjectKey(0));
+              }
               return const DummyWidget();
             },
           ),

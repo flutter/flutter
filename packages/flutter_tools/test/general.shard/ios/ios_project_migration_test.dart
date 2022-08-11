@@ -6,13 +6,14 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
-import 'package:flutter_tools/src/ios/migrations/deployment_target_migration.dart';
-import 'package:flutter_tools/src/ios/migrations/minimum_frame_duration_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/host_app_info_plist_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/ios_deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
-import 'package:flutter_tools/src/ios/migrations/project_object_version_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
+import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
+import 'package:flutter_tools/src/migrations/xcode_script_build_phase_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
@@ -514,7 +515,7 @@ keep this 3
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+        final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
           project,
           testLogger,
         );
@@ -525,7 +526,7 @@ keep this 3
 
         expect(testLogger.traceText, contains('Xcode project not found, skipping iOS deployment target version migration'));
         expect(testLogger.traceText, contains('AppFrameworkInfo.plist not found, skipping minimum OS version migration'));
-        expect(testLogger.traceText, contains('Podfile not found, skipping global platform version migration'));
+        expect(testLogger.traceText, contains('Podfile not found, skipping global platform iOS version migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -545,7 +546,7 @@ keep this 3
         podfile.writeAsStringSync(podfileFileContents);
         final DateTime podfileLastModified = podfile.lastModifiedSync();
 
-        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+        final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
           project,
           testLogger,
         );
@@ -591,7 +592,7 @@ keep this 3
 platform :ios, '9.0'
 ''');
 
-        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+        final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
           project,
           testLogger,
         );
@@ -650,7 +651,7 @@ platform :ios, '11.0'
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final ProjectObjectVersionMigration iosProjectMigration = ProjectObjectVersionMigration(
+        final XcodeProjectObjectVersionMigration iosProjectMigration = XcodeProjectObjectVersionMigration(
           project,
           testLogger,
         );
@@ -667,7 +668,7 @@ platform :ios, '11.0'
         const String xcodeProjectInfoFileContents = '''
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 			attributes = {
 				LastUpgradeCheck = 1300;
@@ -682,7 +683,7 @@ platform :ios, '11.0'
 
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-        final ProjectObjectVersionMigration iosProjectMigration = ProjectObjectVersionMigration(
+        final XcodeProjectObjectVersionMigration iosProjectMigration = XcodeProjectObjectVersionMigration(
           project,
           testLogger,
         );
@@ -695,7 +696,7 @@ platform :ios, '11.0'
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('Xcode project is migrated to Xcode 13', () {
+      testWithoutContext('Xcode project is migrated to newest objectVersion', () {
         xcodeProjectInfoFile.writeAsStringSync('''
 	classes = {
 	};
@@ -712,7 +713,7 @@ platform :ios, '11.0'
    version = "1.3">
 ''');
 
-        final ProjectObjectVersionMigration iosProjectMigration = ProjectObjectVersionMigration(
+        final XcodeProjectObjectVersionMigration iosProjectMigration = XcodeProjectObjectVersionMigration(
           project,
           testLogger,
         );
@@ -721,7 +722,7 @@ platform :ios, '11.0'
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 			attributes = {
 				LastUpgradeCheck = 1300;
@@ -738,7 +739,7 @@ platform :ios, '11.0'
       });
     });
 
-    group('add CADisableMinimumFrameDurationOnPhone key to info.plist migration', () {
+    group('update info.plist migration', () {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger testLogger;
       late FakeIosProject project;
@@ -753,14 +754,14 @@ platform :ios, '11.0'
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final MinimumFrameDurationMigration iosProjectMigration = MinimumFrameDurationMigration(
+        final HostAppInfoPlistMigration iosProjectMigration = HostAppInfoPlistMigration(
           project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
         expect(infoPlistFile.existsSync(), isFalse);
 
-        expect(testLogger.traceText, contains('Info.plist not found, skipping minimum frame duration migration.'));
+        expect(testLogger.traceText, contains('Info.plist not found, skipping host app Info.plist migration.'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -772,12 +773,14 @@ platform :ios, '11.0'
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>
 ''';
         infoPlistFile.writeAsStringSync(infoPlistFileContent);
 
-        final MinimumFrameDurationMigration iosProjectMigration = MinimumFrameDurationMigration(
+        final HostAppInfoPlistMigration iosProjectMigration = HostAppInfoPlistMigration(
           project,
           testLogger,
         );
@@ -788,7 +791,7 @@ platform :ios, '11.0'
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('info.plist is migrated to use CADisableMinimumFrameDurationOnPhone', () {
+      testWithoutContext('info.plist is migrated', () {
         const String infoPlistFileContent = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -799,7 +802,7 @@ platform :ios, '11.0'
 ''';
         infoPlistFile.writeAsStringSync(infoPlistFileContent);
 
-        final MinimumFrameDurationMigration iosProjectMigration = MinimumFrameDurationMigration(
+        final HostAppInfoPlistMigration iosProjectMigration = HostAppInfoPlistMigration(
           project,
           testLogger,
         );
@@ -811,10 +814,113 @@ platform :ios, '11.0'
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>
 '''));
       });
+    });
+  });
+
+  group('update Xcode script build phase', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeIosProject project;
+    late File xcodeProjectInfoFile;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      testLogger = BufferLogger.test();
+      project = FakeIosProject();
+      xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
+      project.xcodeProjectInfoFile = xcodeProjectInfoFile;
+    });
+
+    testWithoutContext('skipped if files are missing', () {
+      final XcodeScriptBuildPhaseMigration iosProjectMigration = XcodeScriptBuildPhaseMigration(
+        project,
+        testLogger,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+      expect(xcodeProjectInfoFile.existsSync(), isFalse);
+
+      expect(testLogger.traceText, contains('Xcode project not found, skipping script build phase dependency analysis removal'));
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if nothing to upgrade', () {
+      const String xcodeProjectInfoFileContents = '''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+      ''';
+      xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
+
+      final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
+
+      final XcodeScriptBuildPhaseMigration iosProjectMigration = XcodeScriptBuildPhaseMigration(
+        project,
+        testLogger,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+
+      expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
+      expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('alwaysOutOfDate is migrated', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+''');
+
+      final XcodeScriptBuildPhaseMigration iosProjectMigration = XcodeScriptBuildPhaseMigration(
+        project,
+        testLogger,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+
+      expect(xcodeProjectInfoFile.readAsStringSync(), '''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+''');
+      expect(testLogger.statusText, contains('Removing script build phase dependency analysis'));
     });
   });
 }

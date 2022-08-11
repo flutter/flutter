@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AccessibilityFeatures, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -39,7 +39,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// lifecycle messages. See [didChangeAppLifecycleState].
 ///
 /// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
-/// ```
+///
 /// {@end-tool}
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
@@ -103,7 +103,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class MetricsReactor extends StatefulWidget {
-  ///   const MetricsReactor({ Key? key }) : super(key: key);
+  ///   const MetricsReactor({ super.key });
   ///
   ///   @override
   ///   State<MetricsReactor> createState() => _MetricsReactorState();
@@ -161,7 +161,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
-  ///   const TextScaleFactorReactor({ Key? key }) : super(key: key);
+  ///   const TextScaleFactorReactor({ super.key });
   ///
   ///   @override
   ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
@@ -375,8 +375,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           getter: () =>
           Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
           setter: (bool value) {
-            if (WidgetsApp.showPerformanceOverlayOverride == value)
+            if (WidgetsApp.showPerformanceOverlayOverride == value) {
               return Future<void>.value();
+            }
             WidgetsApp.showPerformanceOverlayOverride = value;
             return _forceRebuild();
           },
@@ -431,16 +432,18 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         name: 'profileWidgetBuilds',
         getter: () async => debugProfileBuildsEnabled,
         setter: (bool value) async {
-          if (debugProfileBuildsEnabled != value)
+          if (debugProfileBuildsEnabled != value) {
             debugProfileBuildsEnabled = value;
+          }
         },
       );
       registerBoolServiceExtension(
         name: 'profileUserWidgetBuilds',
         getter: () async => debugProfileBuildsEnabledUserWidgets,
         setter: (bool value) async {
-          if (debugProfileBuildsEnabledUserWidgets != value)
+          if (debugProfileBuildsEnabledUserWidgets != value) {
             debugProfileBuildsEnabledUserWidgets = value;
+          }
         },
       );
     }
@@ -450,8 +453,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         name: 'debugAllowBanner',
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
-          if (WidgetsApp.debugAllowBannerOverride == value)
+          if (WidgetsApp.debugAllowBannerOverride == value) {
             return Future<void>.value();
+          }
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
         },
@@ -463,8 +467,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           name: 'debugWidgetInspector',
           getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
           setter: (bool value) {
-            if (WidgetsApp.debugShowWidgetInspectorOverride == value)
+            if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
               return Future<void>.value();
+            }
             WidgetsApp.debugShowWidgetInspectorOverride = value;
             return _forceRebuild();
           },
@@ -541,29 +546,33 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeMetrics();
+    }
   }
 
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeTextScaleFactor();
+    }
   }
 
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangePlatformBrightness();
+    }
   }
 
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeAccessibilityFeatures();
+    }
   }
 
   /// Called when the system locale changes.
@@ -586,8 +595,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeLocales(locales);
+    }
   }
 
   /// Notify all the observers that the active set of [AccessibilityFeatures]
@@ -599,8 +609,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeAccessibilityFeatures();
+    }
   }
 
   /// Called when the system pops the current route.
@@ -620,8 +631,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   Future<void> handlePopRoute() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPopRoute())
+      if (await observer.didPopRoute()) {
         return;
+      }
     }
     SystemNavigator.pop();
   }
@@ -640,8 +652,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPushRoute(route))
+      if (await observer.didPushRoute(route)) {
         return;
+      }
     }
   }
 
@@ -654,8 +667,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             state: routeArguments['state'] as Object?,
           ),
         )
-      )
-      return;
+      ) {
+        return;
+      }
     }
   }
 
@@ -674,15 +688,17 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeAppLifecycleState(state);
+    }
   }
 
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didHaveMemoryPressure();
+    }
   }
 
   bool _needToReportFirstFrame = true;
@@ -862,8 +878,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
 
     try {
-      if (renderViewElement != null)
+      if (renderViewElement != null) {
         buildOwner!.buildScope(renderViewElement!);
+      }
       super.drawFrame();
       buildOwner!.finalizeTree();
     } finally {
@@ -1128,8 +1145,9 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (_child != null)
+    if (_child != null) {
       visitor(_child!);
+    }
   }
 
   @override
@@ -1239,8 +1257,9 @@ class WidgetsFlutterBinding extends BindingBase with GestureBinding, SchedulerBi
   /// [WidgetsFlutterBinding]. See
   /// [TestWidgetsFlutterBinding.ensureInitialized].
   static WidgetsBinding ensureInitialized() {
-    if (WidgetsBinding._instance == null)
+    if (WidgetsBinding._instance == null) {
       WidgetsFlutterBinding();
+    }
     return WidgetsBinding.instance;
   }
 }

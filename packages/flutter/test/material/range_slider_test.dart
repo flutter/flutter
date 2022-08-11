@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
@@ -12,6 +12,113 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/105833
+  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.1, 0.5);
+    bool dragStarted = false;
+    final Key sliderKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 20)),
+                      child: RangeSlider(
+                        key: sliderKey,
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    // Less than configured touch slop, more than default touch slop
+    await drag.moveBy(const Offset(19.0, 0));
+    await tester.pump();
+
+    expect(values, const RangeValues(0.1, 0.5));
+    expect(dragStarted, true);
+
+    dragStarted = false;
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    bool sliderEnd = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 10)),
+                      child: RangeSlider(
+                        key: sliderKey,
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                        onChangeEnd: (RangeValues newValues) {
+                          sliderEnd = true;
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // More than touch slop.
+    await drag.moveBy(const Offset(12.0, 0));
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(sliderEnd, true);
+    expect(dragStarted, false);
+  });
+
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
@@ -1276,8 +1383,10 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..paragraph(),
+        ..paragraph()
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
@@ -1360,7 +1469,7 @@ void main() {
     );
 
     // Represents the Raised Button and Range Slider.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 4));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 6));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
 
     await tester.tap(find.text('Next'));
@@ -1370,11 +1479,11 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-       paints
-         ..path(color: fillColor)
-         ..paragraph()
-         ..path(color: fillColor)
-         ..paragraph(),
+      paints
+        ..path(color: fillColor)
+        ..paragraph()
+        ..path(color: fillColor)
+        ..paragraph(),
       ),
     );
 
@@ -1519,6 +1628,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1594,6 +1705,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1938,8 +2051,9 @@ void main() {
 
     late Rect activeTrackRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect)
+      if (method != #drawRect) {
         return false;
+      }
       activeTrackRect = arguments[0] as Rect;
       return true;
     }));

@@ -360,7 +360,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
-  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///   const SegmentedControlExample({super.key});
   ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();
@@ -494,7 +494,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
-    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
+    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1); // ignore_clamp_double_lint
 
     switch (Directionality.of(context)) {
       case TextDirection.ltr:
@@ -534,8 +534,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   void onHighlightChangedByGesture(T newValue) {
-    if (highlighted == newValue)
+    if (highlighted == newValue) {
       return;
+    }
     setState(() { highlighted = newValue; });
     // Additionally, start the thumb animation if the highlighted segment
     // changes. If the thumbController is already running, the render object's
@@ -548,14 +549,16 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   void onPressedChangedByGesture(T? newValue) {
-    if (pressed != newValue)
+    if (pressed != newValue) {
       setState(() { pressed = newValue; });
+    }
   }
 
   void onTapUp(TapUpDetails details) {
     // No gesture should interfere with an ongoing thumb drag.
-    if (isThumbDragging)
+    if (isThumbDragging) {
       return;
+    }
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
     if (segment != widget.groupValue) {
@@ -818,8 +821,9 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
 
     _thumbScale = value;
-    if (state.highlighted != null)
+    if (state.highlighted != null) {
       markNeedsPaint();
+    }
   }
 
   int? get highlightedIndex => _highlightedIndex;
@@ -995,8 +999,9 @@ class _RenderSegmentedControl<T> extends RenderBox
   Rect? moveThumbRectInBound(Rect? thumbRect, List<RenderBox> children) {
     assert(hasSize);
     assert(children.length >= 2);
-    if (thumbRect == null)
+    if (thumbRect == null) {
       return null;
+    }
 
     final Offset firstChildOffset = (children.first.parentData! as _SegmentedControlContainerBoxParentData).offset;
     final double leftMost = firstChildOffset.dx;

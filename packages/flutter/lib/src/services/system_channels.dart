@@ -7,6 +7,8 @@ import 'dart:ui';
 import 'message_codecs.dart';
 import 'platform_channel.dart';
 
+export 'platform_channel.dart' show BasicMessageChannel, MethodChannel;
+
 /// Platform channels used by the Flutter system.
 class SystemChannels {
   // This class is not meant to be instantiated or extended; this constructor
@@ -413,7 +415,7 @@ class SystemChannels {
   ///    a list of [MenuItem]s, and ends up looking like this example:
   ///
   /// ```dart
-  /// List<Map<String, Object?>> menu = <String, Object?>{
+  /// Map<String, Object?> menu = <String, Object?>{
   ///   '0': <Map<String, Object?>>[
   ///     <String, Object?>{
   ///       'id': 1,

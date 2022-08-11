@@ -17,6 +17,10 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// bool _giveVerse = true;
+// late StateSetter setState;
+
 const double _kTrackHeight = 14.0;
 const double _kTrackWidth = 33.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
@@ -44,6 +48,20 @@ enum _SwitchType { material, adaptive }
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [Switch]. When the thumb slides to the other
+/// side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/material/switch/switch.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to customize [Switch] using [MaterialStateProperty]
+/// switch properties.
+///
+/// ** See code in examples/api/lib/material/switch/switch.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -51,6 +69,8 @@ enum _SwitchType { material, adaptive }
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
+///  * [MaterialStateProperty], an interface for objects that "resolve" to
+///    different values depending on a widget's material state.
 ///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatelessWidget {
   /// Creates a Material Design switch.
@@ -166,7 +186,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [thumbColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -174,7 +194,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
@@ -257,7 +277,7 @@ class Switch extends StatelessWidget {
   /// | State    | Light theme                       | Dark theme                        |
   /// |----------|-----------------------------------|-----------------------------------|
   /// | Default  | `Colors.grey.shade50`             | `Colors.grey.shade400`            |
-  /// | Selected | [ThemeData.toggleableActiveColor] | [ThemeData.toggleableActiveColor] |
+  /// | Selected | [ColorScheme.secondary] | [ColorScheme.secondary] |
   /// | Disabled | `Colors.grey.shade400`            | `Colors.grey.shade800`            |
   final MaterialStateProperty<Color?>? thumbColor;
 
@@ -377,7 +397,7 @@ class Switch extends StatelessWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [SwitchThemeData.overlayColor] is used. If that is
-  /// also null, then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
@@ -598,7 +618,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         return isDark ? Colors.grey.shade800 : Colors.grey.shade400;
       }
       if (states.contains(MaterialState.selected)) {
-        return theme.toggleableActiveColor;
+        return theme.colorScheme.secondary;
       }
       return isDark ? Colors.grey.shade400 : Colors.grey.shade50;
     });
@@ -637,8 +657,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
   double get _trackInnerLength => widget.size.width - _kSwitchMinSize;
 
   void _handleDragStart(DragStartDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       reactionController.forward();
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -734,7 +755,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
         ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+        ?? effectiveInactiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
@@ -791,8 +812,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get activeThumbImage => _activeThumbImage;
   ImageProvider? _activeThumbImage;
   set activeThumbImage(ImageProvider? value) {
-    if (value == _activeThumbImage)
+    if (value == _activeThumbImage) {
       return;
+    }
     _activeThumbImage = value;
     notifyListeners();
   }
@@ -810,8 +832,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get inactiveThumbImage => _inactiveThumbImage;
   ImageProvider? _inactiveThumbImage;
   set inactiveThumbImage(ImageProvider? value) {
-    if (value == _inactiveThumbImage)
+    if (value == _inactiveThumbImage) {
       return;
+    }
     _inactiveThumbImage = value;
     notifyListeners();
   }
@@ -830,8 +853,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _activeTrackColor;
   set activeTrackColor(Color value) {
     assert(value != null);
-    if (value == _activeTrackColor)
+    if (value == _activeTrackColor) {
       return;
+    }
     _activeTrackColor = value;
     notifyListeners();
   }
@@ -840,8 +864,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _inactiveTrackColor;
   set inactiveTrackColor(Color value) {
     assert(value != null);
-    if (value == _inactiveTrackColor)
+    if (value == _inactiveTrackColor) {
       return;
+    }
     _inactiveTrackColor = value;
     notifyListeners();
   }
@@ -850,8 +875,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageConfiguration? _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     notifyListeners();
   }
@@ -860,8 +886,9 @@ class _SwitchPainter extends ToggleablePainter {
   TextDirection? _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     notifyListeners();
   }
@@ -870,8 +897,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _surfaceColor;
   set surfaceColor(Color value) {
     assert(value != null);
-    if (value == _surfaceColor)
+    if (value == _surfaceColor) {
       return;
+    }
     _surfaceColor = value;
     notifyListeners();
   }
@@ -917,8 +945,9 @@ class _SwitchPainter extends ToggleablePainter {
     // during paint. There's no reason to mark ourselves as needing paint if we
     // are already in the middle of painting. (In fact, doing so would trigger
     // an assert).
-    if (!_isPainting)
+    if (!_isPainting) {
       notifyListeners();
+    }
   }
 
   @override

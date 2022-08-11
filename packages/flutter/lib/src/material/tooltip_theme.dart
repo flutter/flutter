@@ -9,6 +9,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of [Tooltip] widgets.
 ///
 /// Used by [TooltipTheme] to control the visual properties of tooltips in a
@@ -146,8 +149,9 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
@@ -181,10 +185,12 @@ class TooltipThemeData with Diagnosticable {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TooltipThemeData
         && other.height == height
         && other.padding == padding

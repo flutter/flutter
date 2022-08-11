@@ -32,22 +32,22 @@ import 'typography.dart';
 /// bodyText1 and bodyText2.
 ///
 /// The 2018 spec has thirteen text styles:
-/// ```
-/// NAME         SIZE  WEIGHT  SPACING
-/// headline1    96.0  light   -1.5
-/// headline2    60.0  light   -0.5
-/// headline3    48.0  regular  0.0
-/// headline4    34.0  regular  0.25
-/// headline5    24.0  regular  0.0
-/// headline6    20.0  medium   0.15
-/// subtitle1    16.0  regular  0.15
-/// subtitle2    14.0  medium   0.1
-/// body1        16.0  regular  0.5   (bodyText1)
-/// body2        14.0  regular  0.25  (bodyText2)
-/// button       14.0  medium   1.25
-/// caption      12.0  regular  0.4
-/// overline     10.0  regular  1.5
-/// ```
+///
+/// | NAME       | SIZE |  WEIGHT |  SPACING |             |
+/// |------------|------|---------|----------|-------------|
+/// | headline1  | 96.0 | light   | -1.5     |             |
+/// | headline2  | 60.0 | light   | -0.5     |             |
+/// | headline3  | 48.0 | regular |  0.0     |             |
+/// | headline4  | 34.0 | regular |  0.25    |             |
+/// | headline5  | 24.0 | regular |  0.0     |             |
+/// | headline6  | 20.0 | medium  |  0.15    |             |
+/// | subtitle1  | 16.0 | regular |  0.15    |             |
+/// | subtitle2  | 14.0 | medium  |  0.1     |             |
+/// | body1      | 16.0 | regular |  0.5     | (bodyText1) |
+/// | body2      | 14.0 | regular |  0.25    | (bodyText2) |
+/// | button     | 14.0 | medium  |  1.25    |             |
+/// | caption    | 12.0 | regular |  0.4     |             |
+/// | overline   | 10.0 | regular |  1.5     |             |
 ///
 /// ...where "light" is `FontWeight.w300`, "regular" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`.
@@ -289,7 +289,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorThemeCopy extends StatelessWidget {
-  ///   const TitleColorThemeCopy({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorThemeCopy({super.key, required this.titleColor, required this.child});
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -399,7 +399,7 @@ class TextTheme with Diagnosticable {
   /// /// A Widget that sets the ambient theme's title text color for its
   /// /// descendants, while leaving other ambient theme attributes alone.
   /// class TitleColorTheme extends StatelessWidget {
-  ///   const TitleColorTheme({Key? key, required this.child, required this.titleColor}) : super(key: key);
+  ///   const TitleColorTheme({super.key, required this.child, required this.titleColor});
   ///
   ///   final Color titleColor;
   ///   final Widget child;
@@ -426,8 +426,9 @@ class TextTheme with Diagnosticable {
   ///    individual fields in the [TextTheme] instead of merging all of the
   ///    fields of two [TextTheme]s.
   TextTheme merge(TextTheme? other) {
-    if (other == null)
+    if (other == null) {
       return this;
+    }
     return copyWith(
       displayLarge: displayLarge?.merge(other.displayLarge) ?? other.displayLarge,
       displayMedium: displayMedium?.merge(other.displayMedium) ?? other.displayMedium,
@@ -632,10 +633,12 @@ class TextTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextTheme
       && displayLarge == other.displayLarge
       && displayMedium == other.displayMedium

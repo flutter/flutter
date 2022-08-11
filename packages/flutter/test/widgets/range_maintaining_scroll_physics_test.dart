@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -377,7 +378,7 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   const RangeMaintainingTestScrollBehavior();
 
   @override
-  TargetPlatform getPlatform(BuildContext context) => throw 'should not be called';
+  TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {

@@ -155,7 +155,7 @@ class Template {
   /// May throw a [ToolExit] if the directory is not writable.
   int render(
     Directory destination,
-    Map<String, Object> context, {
+    Map<String, Object?> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
   }) {

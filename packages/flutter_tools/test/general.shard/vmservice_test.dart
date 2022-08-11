@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -19,31 +18,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/context.dart' hide testLogger;
 import '../src/fake_vm_services.dart';
-
-final Map<String, Object> vm = <String, dynamic>{
-  'type': 'VM',
-  'name': 'vm',
-  'architectureBits': 64,
-  'targetCPU': 'x64',
-  'hostCPU': '      Intel(R) Xeon(R) CPU    E5-1650 v2 @ 3.50GHz',
-  'version': '2.1.0-dev.7.1.flutter-45f9462398 (Fri Oct 19 19:27:56 2018 +0000) on "linux_x64"',
-  '_profilerMode': 'Dart',
-  '_nativeZoneMemoryUsage': 0,
-  'pid': 103707,
-  'startTime': 1540426121876,
-  '_embedder': 'Flutter',
-  '_maxRSS': 312614912,
-  '_currentRSS': 33091584,
-  'isolates': <dynamic>[
-    <String, dynamic>{
-      'type': '@Isolate',
-      'fixedId': true,
-      'id': 'isolates/242098474',
-      'name': 'main.dart:main()',
-      'number': 242098474,
-    },
-  ],
-};
 
 const String kExtensionName = 'ext.flutter.test.interestingExtension';
 
@@ -54,7 +28,6 @@ final vm_service.Isolate isolate = vm_service.Isolate(
     timestamp: 0
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
       id: '1',
@@ -86,8 +59,6 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
     ],
   },
 );
-
-typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
   testWithoutContext('VmService registers reloadSources', () async {
@@ -243,6 +214,7 @@ void main() {
       assetsDirectory: Uri(path: 'abc', scheme: 'file'),
       viewId: 'abc',
       uiIsolateId: 'def',
+      windows: false,
     ));
 
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
@@ -252,6 +224,34 @@ void main() {
       containsPair('params', allOf(<Matcher>[
         containsPair('viewId', 'abc'),
         containsPair('assetDirectory', '/abc'),
+        containsPair('isolateId', 'def'),
+      ])),
+    ]));
+  });
+
+  testWithoutContext('setAssetDirectory forwards arguments correctly - windows', () async {
+    final Completer<String> completer = Completer<String>();
+    final vm_service.VmService  vmService = vm_service.VmService(
+      const Stream<String>.empty(),
+      completer.complete,
+    );
+    final FlutterVmService flutterVmService = FlutterVmService(vmService);
+    unawaited(flutterVmService.setAssetDirectory(
+      assetsDirectory: Uri(path: 'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets', scheme: 'file'),
+      viewId: 'abc',
+      uiIsolateId: 'def',
+      // If windows is not set to `true`, then the file path below is incorrectly prepended with a `/` which
+      // causes the engine asset manager to interpret the file scheme as invalid.
+      windows: true,
+    ));
+
+    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+
+    expect(rawRequest, allOf(<Matcher>[
+      containsPair('method', kSetAssetBundlePathMethod),
+      containsPair('params', allOf(<Matcher>[
+        containsPair('viewId', 'abc'),
+        containsPair('assetDirectory', r'C:\Users\Tester\AppData\Local\Temp\hello_worldb42a6da5\hello_world\build\flutter_assets'),
         containsPair('isolateId', 'def'),
       ])),
     ]));
@@ -879,11 +879,6 @@ class MockVMService extends Fake implements vm_service.VmService {
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device { }
-
-class FakeFlutterVersion extends Fake implements FlutterVersion {
-  @override
-  Map<String, Object> toJson() => const <String, Object>{'Fake': 'Version'};
-}
 
 /// A [WebSocketConnector] that always throws an [io.SocketException].
 Future<io.WebSocket> failingWebSocketConnector(

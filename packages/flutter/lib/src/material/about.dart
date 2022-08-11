@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline, Flow;
+import 'dart:developer' show Flow, Timeline;
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -29,6 +29,9 @@ import 'scrollbar.dart';
 import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// BuildContext context;
 
 /// A [ListTile] that shows an about box.
 ///
@@ -425,6 +428,12 @@ class LicensePage extends StatefulWidget {
 
 class _LicensePageState extends State<LicensePage> {
   final ValueNotifier<int?> selectedId = ValueNotifier<int?>(null);
+
+  @override
+  void dispose() {
+    selectedId.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1056,14 +1065,14 @@ class _MasterDetailFlow extends StatefulWidget {
   @override
   _MasterDetailFlowState createState() => _MasterDetailFlowState();
 
-  /// The master detail flow proxy from the closest instance of this class that encloses the given
-  /// context.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// _MasterDetailFlow.of(context).openDetailPage(arguments);
-  /// ```
+  // The master detail flow proxy from the closest instance of this class that encloses the given
+  // context.
+  //
+  // Typical usage is as follows:
+  //
+  // ```dart
+  // _MasterDetailFlow.of(context).openDetailPage(arguments);
+  // ```
   static _MasterDetailFlowProxy? of(BuildContext context) {
     _PageOpener? pageOpener = context.findAncestorStateOfType<_MasterDetailScaffoldState>();
     pageOpener ??= context.findAncestorStateOfType<_MasterDetailFlowState>();
@@ -1319,6 +1328,12 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
     detailPageFABGutterWidth = _kDetailPageFABGutterWidth;
     masterViewWidth = _kMasterViewWidth;
     floatingActionButtonLocation = FloatingActionButtonLocation.endTop;
+  }
+
+  @override
+  void dispose() {
+    _detailArguments.dispose();
+    super.dispose();
   }
 
   @override

@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A key can be used to persist the widget state in storage after
 /// the destruction and will be restored when recreated.
 ///
@@ -33,8 +36,9 @@ class _StorageEntryIdentifier {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _StorageEntryIdentifier
         && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
@@ -56,8 +60,9 @@ class PageStorageBucket {
   static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
     final Key? key = widget.key;
-    if (key is PageStorageKey)
+    if (key is PageStorageKey) {
       keys.add(key);
+    }
     return widget is! PageStorage;
   }
 
@@ -91,8 +96,9 @@ class PageStorageBucket {
       _storage![identifier] = data;
     } else {
       final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-      if (contextIdentifier.isNotEmpty)
+      if (contextIdentifier.isNotEmpty) {
         _storage![contextIdentifier] = data;
+      }
     }
   }
 
@@ -105,10 +111,12 @@ class PageStorageBucket {
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
   dynamic readState(BuildContext context, { Object? identifier }) {
-    if (_storage == null)
+    if (_storage == null) {
       return null;
-    if (identifier != null)
+    }
+    if (identifier != null) {
       return _storage![identifier];
+    }
     final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
     return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
@@ -173,7 +181,7 @@ class PageStorage extends StatelessWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// PageStorageBucket bucket = PageStorage.of(context);
+  /// PageStorageBucket bucket = PageStorage.of(context)!;
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).

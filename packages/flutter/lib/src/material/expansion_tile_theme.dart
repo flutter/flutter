@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Used with [ExpansionTileTheme] to define default property values for
 /// descendant [ExpansionTile] widgets.
@@ -105,8 +107,9 @@ class ExpansionTileThemeData with Diagnosticable {
   /// Linearly interpolate between ExpansionTileThemeData objects.
   static ExpansionTileThemeData? lerp(ExpansionTileThemeData? a, ExpansionTileThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ExpansionTileThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       collapsedBackgroundColor: Color.lerp(a?.collapsedBackgroundColor, b?.collapsedBackgroundColor, t),
@@ -137,10 +140,12 @@ class ExpansionTileThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ExpansionTileThemeData
       && other.backgroundColor == backgroundColor
       && other.collapsedBackgroundColor == collapsedBackgroundColor

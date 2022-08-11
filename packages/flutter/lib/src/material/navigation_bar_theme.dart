@@ -12,6 +12,9 @@ import 'material_state.dart';
 import 'navigation_bar.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [NavigationBar]
 /// widgets.
 ///
@@ -117,8 +120,9 @@ class NavigationBarThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static NavigationBarThemeData? lerp(NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return NavigationBarThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -126,8 +130,8 @@ class NavigationBarThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
-      labelTextStyle: _lerpProperties<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
-      iconTheme: _lerpProperties<IconThemeData?>(a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
+      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
+      iconTheme: MaterialStateProperty.lerp<IconThemeData?>(a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
       labelBehavior: t < 0.5 ? a?.labelBehavior : b?.labelBehavior,
     );
   }
@@ -147,10 +151,12 @@ class NavigationBarThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is NavigationBarThemeData
         && other.height == height
         && other.backgroundColor == backgroundColor
@@ -175,34 +181,6 @@ class NavigationBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
-  }
-
-  static MaterialStateProperty<T>? _lerpProperties<T>(
-    MaterialStateProperty<T>? a,
-    MaterialStateProperty<T>? b,
-    double t,
-    T Function(T?, T?, double) lerpFunction,
-  ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
-      return null;
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-}
-
-class _LerpProperties<T> implements MaterialStateProperty<T> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T Function(T?, T?, double) lerpFunction;
-
-  @override
-  T resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
   }
 }
 

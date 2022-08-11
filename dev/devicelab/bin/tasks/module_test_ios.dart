@@ -157,12 +157,10 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        // One dynamic framework, one static framework, one Dart-only,
-        // and one that does not support iOS.
+        // One framework, one Dart-only, and one that does not support iOS.
         '''
 dependencies:
   url_launcher: 6.0.20
-  google_sign_in: 5.2.4
   android_alarm_manager: 0.4.5+11
   $dartPluginName:
     path: ../$dartPluginName
@@ -196,7 +194,6 @@ dependencies:
       if (!podfileLockOutput.contains(':path: Flutter')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
-        || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
         || podfileLockOutput.contains('android_alarm_manager')
         || podfileLockOutput.contains(dartPluginName)) {
         print(podfileLockOutput);
@@ -205,9 +202,6 @@ dependencies:
 
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'url_launcher_ios.framework', 'url_launcher_ios'));
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
-
-      // Static, no embedded framework.
-      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'google_sign_in.framework'));
 
       // Android-only, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'android_alarm_manager.framework'));
@@ -278,7 +272,6 @@ end
         if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/url_launcher_ios/ios"')
-            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
             || hostPodfileLockOutput.contains('android_alarm_manager')
             || hostPodfileLockOutput.contains(dartPluginName)) {
           print(hostPodfileLockOutput);

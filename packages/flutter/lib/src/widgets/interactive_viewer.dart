@@ -4,15 +4,22 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
+
+// Examples can assume:
+// late BuildContext context;
+// late Offset? _childWasTappedAt;
+// late TransformationController _transformationController;
+// Widget child = const Placeholder();
 
 /// A signature for widget builders that take a [Quad] of the current viewport.
 ///
@@ -386,7 +393,7 @@ class InteractiveViewer extends StatefulWidget {
     // the point.
     final Vector3 l1P = point - l1;
     final Vector3 l1L2 = l2 - l1;
-    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0);
+    final double fraction = clampDouble(l1P.dot(l1L2) / lengthSquared, 0.0, 1.0);
     return l1 + l1L2 * fraction;
   }
 
@@ -659,7 +666,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _viewport.height / _boundaryRect.height,
       ),
     );
-    final double clampedTotalScale = totalScale.clamp(
+    final double clampedTotalScale = clampDouble(totalScale,
       widget.minScale,
       widget.maxScale,
     );
@@ -1140,7 +1147,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///
   /// ```dart
   /// @override
-  /// void build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   ///   return GestureDetector(
   ///     onTapUp: (TapUpDetails details) {
   ///       _childWasTappedAt = _transformationController.toScene(

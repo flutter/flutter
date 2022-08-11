@@ -421,6 +421,27 @@ void main() {
     expect(state.builds, equals(2));
   });
 
+  testWidgets('AnimatedFractionallySizedBox onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        callback: mockOnEndFunction.handler,
+        switchKey: switchKey,
+        state: _TestAnimatedFractionallySizedBoxWidgetState(),
+      ),
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+
+    await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
+  });
 
   testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(TestAnimatedWidget(
@@ -592,8 +613,9 @@ void main() {
 
     final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? firstState = key.currentState;
     final Animation<double>? firstAnimation = firstState?.animation;
-    if (firstAnimation == null)
+    if (firstAnimation == null) {
       fail('animation was null!');
+    }
 
     final CurvedAnimation firstCurvedAnimation =
         firstAnimation as CurvedAnimation;
@@ -605,8 +627,9 @@ void main() {
 
     final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? secondState = key.currentState;
     final Animation<double>? secondAnimation = secondState?.animation;
-    if (secondAnimation == null)
+    if (secondAnimation == null) {
       fail('animation was null!');
+    }
 
     final CurvedAnimation secondCurvedAnimation = secondAnimation as CurvedAnimation;
 
@@ -805,6 +828,19 @@ class _TestAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
       duration: duration,
       onEnd: widget.callback,
       opacity: toggle ? 1.0 : 0.0,
+      child: child,
+    );
+  }
+}
+
+class _TestAnimatedFractionallySizedBoxWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedFractionallySizedBox(
+      duration: duration,
+      onEnd: widget.callback,
+      heightFactor: toggle ? 0.25 : 0.75,
+      widthFactor: toggle ? 0.25 : 0.75,
       child: child,
     );
   }
