@@ -503,17 +503,18 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// The implementation below is unnecessarily expensive.
 ///
 /// ```dart
-///  Stack(
-///    children: <Widget>[
-///      Positioned.fill(child: Image.asset('image.png')),
+///  Widget buildBackdrop() {
+///    return Stack(
+///      children: <Widget>[
+///        Positioned.fill(child: Image.asset('image.png')),
 ///        Positioned.fill(
-///        child: BackdropFilter(
-///          filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///          child: BackdropFilter(
+///            filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///          ),
 ///        ),
-///      ),
-///    ],
-///  )
-///
+///      ],
+///    );
+///  }
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
@@ -521,10 +522,12 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// to the child widget.
 ///
 /// ```dart
-///  ImageFiltered(
-///    imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-///    child: Image.asset('image.png'),
-///  )
+///  Widget buildFilter() {
+///    return ImageFiltered(
+///      imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///      child: Image.asset('image.png'),
+///    );
+///  }
 /// ```
 ///
 /// {@end-tool}
