@@ -275,11 +275,17 @@ void main() {
 
   testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
-    final ThemeData themeDataM2 = ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1), useMaterial3: material3);
+    final ThemeData themeDataM2 = ThemeData(
+      useMaterial3: material3,
+      visualDensity: const VisualDensity(horizontal: 1, vertical: -1),
+    );
     final ThemeData themeDataM3 = ThemeData(
-        iconButtonTheme: IconButtonThemeData(
-            style: IconButton.styleFrom(visualDensity: const VisualDensity(horizontal: 1, vertical: -1))),
-      useMaterial3: material3
+      useMaterial3: material3,
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+            visualDensity: const VisualDensity(horizontal: 1, vertical: -1)
+        )
+      ),
     );
     await tester.pumpWidget(
       wrap(
@@ -1635,14 +1641,17 @@ void main() {
     expect(find.byIcon(Icons.ac_unit), findsOneWidget);
   });
 
-  testWidgets('The visualDensity of M3 IconButton can be configrued by IconButtonTheme, '
+  testWidgets('The visualDensity of M3 IconButton can be configured by IconButtonTheme, '
       'but cannot be configured by ThemeData - M3' , (WidgetTester tester) async {
     Future<void> buildTest({VisualDensity? iconButtonThemeVisualDensity, VisualDensity? themeVisualDensity}) async {
       return tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true)
-              .copyWith(iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity)),
-                        visualDensity: themeVisualDensity),
+          theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
+            iconButtonTheme: IconButtonThemeData(
+              style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity)
+            ),
+            visualDensity: themeVisualDensity
+          ),
           home: Material(
             child: Center(
               child: IconButton(
@@ -1668,7 +1677,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(64, 64)));
 
-    // ThemeData.visualDensity will be ignored
+    // ThemeData.visualDensity will be ignored because useMaterial3 is true
     await buildTest(themeVisualDensity: VisualDensity.standard);
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(48, 48)));
