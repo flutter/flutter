@@ -59,8 +59,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// Whether or not the app.started event has been received.
   bool get _receivedAppStarted => appStartedCompleter.isCompleted;
 
-  /// The VM Service URI received from the app.debugPort event.
-  Uri? _vmServiceUri;
+  /// A completer that completes when the app.debugPort event has been received.
+  @visibleForTesting
+  final Completer<void> appDebugPortCompleter = Completer<void>();
 
   /// The appId of the current running Flutter app.
   @visibleForTesting
@@ -411,12 +412,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   }
 
   /// Connects to the VM Service if the app.started event has fired, and a VM Service URI is available.
-  void _connectDebuggerIfReady() {
-    final Uri? serviceUri = _vmServiceUri;
-
-    if (_receivedAppStarted && serviceUri != null) {
+  Future<void> _connectDebugger(Uri vmServiceUri) async {
       if (enableDebugger) {
-        connectDebugger(serviceUri);
+        await connectDebugger(vmServiceUri);
       } else {
         // Usually, `connectDebugger` (in the base Dart adapter) will send this
         // event when it connects a debugger. Since we're not connecting a
@@ -427,12 +425,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
         //   adapter once rolled into Flutter.
         sendEvent(
           RawEventBody(<String, Object?>{
-            'vmServiceUri': serviceUri.toString(),
+            'vmServiceUri': vmServiceUri.toString(),
           }),
           eventType: 'dart.debuggerUris',
         );
       }
-    }
   }
 
   /// Handles the app.start event from Flutter.
@@ -442,14 +439,14 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   }
 
   /// Handles the app.started event from Flutter.
-  void _handleAppStarted() {
+  Future<void> _handleAppStarted() async {
     appStartedCompleter.complete();
-    _connectDebuggerIfReady();
 
     // Send a custom event so the editor knows the app has started.
     //
     // This may be useful when there's no VM Service (for example Profile mode)
     // but the editor still wants to know that startup has finished.
+    await debuggerInitialized; // Ensure we're fully initialized before sending.
     sendEvent(
       RawEventBody(<String, Object?>{}),
       eventType: 'flutter.appStarted',
@@ -468,13 +465,16 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   }
 
   /// Handles the app.debugPort event from Flutter, connecting to the VM Service if everything else is ready.
-  void _handleDebugPort(Map<String, Object?> params) {
+  Future<void> _handleDebugPort(Map<String, Object?> params) async {
     // Capture the VM Service URL which we'll connect to when we get app.started.
     final String? wsUri = params['wsUri'] as String?;
     if (wsUri != null) {
-      _vmServiceUri = Uri.parse(wsUri);
+      final Uri vmServiceUri = Uri.parse(wsUri);
+      // Also wait for app.started before we connect, to ensure Flutter's
+      // initialization is all complete.
+      await appStartedCompleter.future;
+      await _connectDebugger(vmServiceUri);
     }
-    _connectDebuggerIfReady();
   }
 
   /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
