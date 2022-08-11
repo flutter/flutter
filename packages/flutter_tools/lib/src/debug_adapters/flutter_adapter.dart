@@ -63,7 +63,8 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   Uri? _vmServiceUri;
 
   /// The appId of the current running Flutter app.
-  String? _appId;
+  @visibleForTesting
+  String? appId;
 
   /// The ID to use for the next request sent to the Flutter run daemon.
   int _flutterRequestId = 1;
@@ -311,13 +312,6 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       processArgs: processArgs,
       env: args.env,
     );
-
-    // Delay responding until the app is launched and (optionally) the debugger
-    // is connected.
-    await appStartedCompleter.future;
-    if (enableDebugger) {
-      await debuggerInitialized;
-    }
   }
 
   @visibleForOverriding
@@ -404,11 +398,13 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     // Send a request to stop/detach to give Flutter chance to do some cleanup.
     // It's possible the Flutter process will terminate before we process the
     // response, so accept either a response or the process exiting.
-    final String method = isAttach ? 'app.detach' : 'app.stop';
-    await Future.any<void>(<Future<void>>[
-      sendFlutterRequest(method, <String, Object?>{'appId': _appId}),
-      _process?.exitCode ?? Future<void>.value(),
-    ]);
+    if (appId != null) {
+      final String method = isAttach ? 'app.detach' : 'app.stop';
+      await Future.any<void>(<Future<void>>[
+        sendFlutterRequest(method, <String, Object?>{'appId': appId}),
+        _process?.exitCode ?? Future<void>.value(),
+      ]);
+    }
 
     terminatePids(ProcessSignal.sigterm);
     await _process?.exitCode;
@@ -441,8 +437,8 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
   /// Handles the app.start event from Flutter.
   void _handleAppStart(Map<String, Object?> params) {
-    _appId = params['appId'] as String?;
-    assert(_appId != null);
+    appId = params['appId'] as String?;
+    assert(appId != null);
   }
 
   /// Handles the app.started event from Flutter.
@@ -601,7 +597,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   ]) async {
     try {
       await sendFlutterRequest('app.restart', <String, Object?>{
-        'appId': _appId,
+        'appId': appId,
         'fullRestart': fullRestart,
         'pause': enableDebugger,
         'reason': reason,
