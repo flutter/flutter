@@ -9,6 +9,7 @@ import 'events.dart';
 import 'drag_details.dart';
 import 'recognizer.dart';
 import 'tap.dart' show TapUpDetails, TapDownDetails;
+import 'velocity_tracker.dart';
 
 enum _DragState {
   ready,
@@ -169,3 +170,4 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
     print('reject gesture $pointer');
   }
 }
+
