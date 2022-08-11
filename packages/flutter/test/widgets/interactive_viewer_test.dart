@@ -476,7 +476,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      // Translation didn't happen because the only axis allowed to do panning 
+      // Translation didn't happen because the only axis allowed to do panning
       // is the horizontal.
       final Vector3 translation = transformationController.value.getTranslation();
       expect(translation.x, 0.0);

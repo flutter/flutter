@@ -152,10 +152,10 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// When set to [PanAxis.aligned] panning is only allowed in the horizontal 
+  /// When set to [PanAxis.aligned] panning is only allowed in the horizontal
   /// axis or the vertical axis, diagonal panning not allowed.
   ///
-  /// When set to [PanAxis.vertical] or [PanAxis.horizontal] panning is only 
+  /// When set to [PanAxis.vertical] or [PanAxis.horizontal] panning is only
   /// allowed in the specified axis. For example, if set to [PanAxis.vertical]
   /// if you try to pan in the horizontal axis the InteractiveViewer will not
   /// pan. And if you try to pan in diagonal directions the InteractiveViewer will
@@ -1316,7 +1316,7 @@ enum PanAxis{
   /// The user can pan the viewport along the vertical axis.
   vertical,
 
-  /// The user can pan the viewport along the horizontal and vertical axes but 
+  /// The user can pan the viewport along the horizontal and vertical axes but
   /// not diagonally.
   aligned,
 
