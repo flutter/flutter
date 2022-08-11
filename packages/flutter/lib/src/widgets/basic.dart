@@ -493,6 +493,45 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
 /// easier to use and less expensive than [BackdropFilter].
 ///
+/// {@tool snippet}
+///
+/// This example shows how the common case of applying a [BackdropFilter] blur
+/// to a single sibling can be replaced with an [ImageFiltered] widget. This code
+/// is generally simpler and the performance will be improved dramatically for
+/// complex filters like blurs.
+///
+/// The implementation below is unnecessarily expensive.
+///
+/// ```dart
+///  Widget buildBackdrop() {
+///    return Stack(
+///      children: <Widget>[
+///        Positioned.fill(child: Image.asset('image.png')),
+///        Positioned.fill(
+///          child: BackdropFilter(
+///            filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///          ),
+///        ),
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+/// Instead consider the following approach which directly applies a blur
+/// to the child widget.
+///
+/// ```dart
+///  Widget buildFilter() {
+///    return ImageFiltered(
+///      imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///      child: Image.asset('image.png'),
+///    );
+///  }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ImageFiltered], which applies an [ImageFilter] to its child.
