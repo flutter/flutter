@@ -55,7 +55,6 @@ class LoggingSocketTest : public ::testing::Test {
 
     fx_logger_config_t config = {
         .min_severity = FX_LOG_INFO,
-        .console_fd = -1,
         .log_sink_socket = local.release(),
         .tags = nullptr,
         .num_tags = 0,
