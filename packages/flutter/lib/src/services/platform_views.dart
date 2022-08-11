@@ -763,12 +763,15 @@ abstract class AndroidViewController extends PlatformViewController {
   /// Sends the message to dispose the platform view.
   Future<void> _sendDisposeMessage();
 
+  /// True if [_sendCreateMessage] can only be called with a non-null size.
+  bool get _createRequiresSize;
+
   /// Sends the message to create the platform view with an initial [size].
   ///
-  /// Returns true if the view was actually created. In some cases (e.g.,
-  /// trying to create a texture-based view with a null size) creation will
-  /// fail and need to be re-attempted later.
-  Future<bool> _sendCreateMessage({Size? size});
+  /// If [_createRequiresSize] is true, it is a programming error to call this
+  /// with a null size, and the call should instead be deferred until the size
+  /// is available.
+  Future<void> _sendCreateMessage({Size? size});
 
   /// Sends the message to resize the platform view to [size].
   Future<Size> _sendResizeMessage(Size size);
@@ -779,18 +782,19 @@ abstract class AndroidViewController extends PlatformViewController {
   @override
   Future<void> create({Size? size}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
-
     assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
-    _state = _AndroidViewState.creating;
-    final bool created = await _sendCreateMessage(size: size);
 
-    if (created) {
-      _state = _AndroidViewState.created;
-      for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
-        callback(viewId);
-      }
-    } else {
-      _state = _AndroidViewState.waitingForSize;
+    if (_createRequiresSize && size == null) {
+      // Wait for a setSize call.
+      return;
+    }
+
+    _state = _AndroidViewState.creating;
+    await _sendCreateMessage(size: size);
+    _state = _AndroidViewState.created;
+
+    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
+      callback(viewId);
     }
   }
 
@@ -998,7 +1002,10 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   })  : super._();
 
   @override
-  Future<bool> _sendCreateMessage({Size? size}) async {
+  bool get _createRequiresSize => false;
+
+  @override
+  Future<void> _sendCreateMessage({Size? size}) async {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
@@ -1015,7 +1022,6 @@ class ExpensiveAndroidViewController extends AndroidViewController {
       );
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    return true;
   }
 
   @override
@@ -1116,17 +1122,18 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<bool> _sendCreateMessage({Size? size}) async {
-    if (size == null) {
-      return false;
-    }
+  bool get _createRequiresSize => true;
 
-    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+  @override
+  Future<void> _sendCreateMessage({Size? size}) async {
+    // Size must not be null due to _createRequiresSize returning true.
+    assert(size != null, 'trying to create $TextureAndroidViewController with a null size.');
+    assert(!size!.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
-      'width': size.width,
+      'width': size!.width,
       'height': size.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
     };
@@ -1139,7 +1146,6 @@ class TextureAndroidViewController extends AndroidViewController {
       );
     }
     _textureId = await SystemChannels.platform_views.invokeMethod<int>('create', args);
-    return true;
   }
 
   @override
