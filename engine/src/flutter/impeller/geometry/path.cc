@@ -237,7 +237,7 @@ Path::Polyline Path::CreatePolyline(
     for (const auto& point : collection) {
       if (previous_contour_point.has_value() &&
           previous_contour_point.value() == point) {
-        // Slip over duplicate points in the same contour.
+        // Skip over duplicate points in the same contour.
         continue;
       }
       previous_contour_point = point;

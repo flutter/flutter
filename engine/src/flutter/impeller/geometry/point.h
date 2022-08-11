@@ -189,7 +189,7 @@ struct TPoint {
   constexpr TPoint Normalize() const {
     const auto length = GetLength();
     if (length == 0) {
-      return {};
+      return {1, 0};
     }
     return {x / length, y / length};
   }
