@@ -25,7 +25,9 @@ class RenderPassMTL final : public RenderPass {
   std::string label_;
   bool is_valid_ = false;
 
-  RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target);
+  RenderPassMTL(std::weak_ptr<const Context> context,
+                RenderTarget target,
+                id<MTLCommandBuffer> buffer);
 
   // |RenderPass|
   bool IsValid() const override;
@@ -34,8 +36,7 @@ class RenderPassMTL final : public RenderPass {
   void OnSetLabel(std::string label) override;
 
   // |RenderPass|
-  bool EncodeCommands(
-      const std::shared_ptr<Allocator>& transients_allocator) const override;
+  bool OnEncodeCommands(const Context& context) const override;
 
   bool EncodeCommands(const std::shared_ptr<Allocator>& transients_allocator,
                       id<MTLRenderCommandEncoder> pass) const;

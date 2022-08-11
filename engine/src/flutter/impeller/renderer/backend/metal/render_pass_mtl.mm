@@ -128,8 +128,10 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
   return result;
 }
 
-RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target)
-    : RenderPass(std::move(target)),
+RenderPassMTL::RenderPassMTL(std::weak_ptr<const Context> context,
+                             RenderTarget target,
+                             id<MTLCommandBuffer> buffer)
+    : RenderPass(std::move(context), std::move(target)),
       buffer_(buffer),
       desc_(ToMTLRenderPassDescriptor(GetRenderTarget())) {
   if (!buffer_ || !desc_ || !render_target_.IsValid()) {
@@ -151,8 +153,7 @@ void RenderPassMTL::OnSetLabel(std::string label) {
   label_ = std::move(label);
 }
 
-bool RenderPassMTL::EncodeCommands(
-    const std::shared_ptr<Allocator>& transients_allocator) const {
+bool RenderPassMTL::OnEncodeCommands(const Context& context) const {
   TRACE_EVENT0("impeller", "RenderPassMTL::EncodeCommands");
   if (!IsValid()) {
     return false;
@@ -173,7 +174,7 @@ bool RenderPassMTL::EncodeCommands(
   fml::ScopedCleanupClosure auto_end(
       [render_command_encoder]() { [render_command_encoder endEncoding]; });
 
-  return EncodeCommands(transients_allocator, render_command_encoder);
+  return EncodeCommands(context.GetResourceAllocator(), render_command_encoder);
 }
 
 //-----------------------------------------------------------------------------

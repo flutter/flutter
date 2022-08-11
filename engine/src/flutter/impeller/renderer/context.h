@@ -17,7 +17,7 @@ class CommandBuffer;
 class PipelineLibrary;
 class Allocator;
 
-class Context {
+class Context : public std::enable_shared_from_this<Context> {
  public:
   virtual ~Context();
 

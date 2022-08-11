@@ -173,8 +173,7 @@ bool EntityPass::Render(ContentContext& renderer,
       entity.Render(renderer, *render_pass);
     }
 
-    if (!render_pass->EncodeCommands(
-            renderer.GetContext()->GetResourceAllocator())) {
+    if (!render_pass->EncodeCommands()) {
       return false;
     }
     if (!command_buffer->SubmitCommands()) {
