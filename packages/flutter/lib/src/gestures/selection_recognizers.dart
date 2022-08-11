@@ -23,7 +23,31 @@ typedef GestureTapAndDragUpdateCallback = void Function(DragUpdateDetails detail
 typedef GestureTapUpAndDragEndCallback = void Function(TapUpDetails upDetails, DragEndDetails endDetails, int tapCount);
 typedef GestureTapAndDragCancelCallback = void Function();
 
-class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
+mixin ConsecutiveTapMixin {
+  // For consecutive tap
+  RestartableTimer? consecutiveTapTimer;
+  Offset? lastTapOffset;
+  int tapCount = 0;
+
+  bool isWithinConsecutiveTapTolerance(Offset secondTapOffset) {
+    assert(secondTapOffset != null);
+    if (lastTapOffset == null) {
+      return false;
+    }
+
+    final Offset difference = secondTapOffset - lastTapOffset!;
+    return difference.distance <= kDoubleTapSlop;
+  }
+
+  void consecutiveTapTimeout() {
+    print('consecutive tap timeout');
+    consecutiveTapTimer = null;
+    lastTapOffset = null;
+    tapCount = 0;
+  }
+}
+
+class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with ConsecutiveTapMixin {
   TapAndDragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -43,32 +67,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   GestureTapAndDragCancelCallback? onCancel;
 
+  // For local tap drag count
+  int? _dragTapCount;
+  
   // Drag related state
   late OffsetPair _initialPosition;
   _DragState _state = _DragState.ready;
-
-  // For consecutive tap
-  RestartableTimer? _consecutiveTapTimer;
-  Offset? _lastTapOffset;
-  int _tapCount = 0;
-  int? _dragTapCount;
-
-  bool _isWithinConsecutiveTapTolerance(Offset secondTapOffset) {
-    assert(secondTapOffset != null);
-    if (_lastTapOffset == null) {
-      return false;
-    }
-
-    final Offset difference = secondTapOffset - _lastTapOffset!;
-    return difference.distance <= kDoubleTapSlop;
-  }
-
-  void _consecutiveTapTimeout() {
-    print('consecutive tap timeout');
-    _consecutiveTapTimer = null;
-    _lastTapOffset = null;
-    _tapCount = 0;
-  }
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -103,19 +107,19 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
         kind: getKindForPointer(event.pointer),
       );
 
-      if (_lastTapOffset == null) {
-        _tapCount += 1;
-        _lastTapOffset = details.globalPosition;
+      if (lastTapOffset == null) {
+        tapCount += 1;
+        lastTapOffset = details.globalPosition;
       } else {
-        if (_consecutiveTapTimer != null && _isWithinConsecutiveTapTolerance(details.globalPosition)) {
-          _tapCount += 1;
-          _consecutiveTapTimer!.reset();
+        if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(details.globalPosition)) {
+          tapCount += 1;
+          consecutiveTapTimer!.reset();
         }
       }
 
-      _dragTapCount = _tapCount;
+      _dragTapCount = tapCount;
 
-      invokeCallback('onDown', () => onDown!(details, _tapCount));
+      invokeCallback('onDown', () => onDown!(details, tapCount));
     } else if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       print('handle PointerMoveEvent $event');
 
@@ -152,9 +156,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
         localPosition: event.localPosition,
       );
       DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
-      invokeCallback<void>('onUpAndEnd', () => onUpAndEnd!(upDetails, endDetails, _tapCount));
+      invokeCallback<void>('onUpAndEnd', () => onUpAndEnd!(upDetails, endDetails, tapCount));
       _dragTapCount = null;
-      _consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, _consecutiveTapTimeout);
+      consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, consecutiveTapTimeout);
     } else {
       print('handle unknown pointer $event');
     }
@@ -170,4 +174,5 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer {
     print('reject gesture $pointer');
   }
 }
+
 
