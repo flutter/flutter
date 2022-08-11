@@ -260,8 +260,9 @@ class UndoHistoryValue {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is UndoHistoryValue && other.canUndo == canUndo && other.canRedo == canRedo;
   }
 
