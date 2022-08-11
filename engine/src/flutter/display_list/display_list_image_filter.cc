@@ -27,6 +27,31 @@ std::shared_ptr<DlImageFilter> DlImageFilter::From(
   return std::make_shared<DlUnknownImageFilter>(sk_ref_sp(sk_filter));
 }
 
+std::shared_ptr<DlImageFilter> DlImageFilter::makeWithLocalMatrix(
+    const SkMatrix& matrix) {
+  if (matrix.isIdentity()) {
+    return shared();
+  }
+  // Matrix
+  switch (this->matrix_capability()) {
+    case MatrixCapability::kTranslate: {
+      if (!matrix.isTranslate()) {
+        // Nothing we can do at this point
+        return nullptr;
+      }
+    }
+    case MatrixCapability::kScaleTranslate: {
+      if (!matrix.isScaleTranslate()) {
+        // Nothing we can do at this point
+        return nullptr;
+      }
+    }
+    default:
+      break;
+  }
+  return std::make_shared<DlLocalMatrixImageFilter>(matrix, shared());
+}
+
 SkRect* DlComposeImageFilter::map_local_bounds(const SkRect& input_bounds,
                                                SkRect& output_bounds) const {
   SkRect cur_bounds = input_bounds;

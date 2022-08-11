@@ -441,6 +441,7 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
     case flutter::DlImageFilterType::kDilate:
     case flutter::DlImageFilterType::kErode:
     case flutter::DlImageFilterType::kMatrix:
+    case flutter::DlImageFilterType::kLocalMatrixFilter:
     case flutter::DlImageFilterType::kComposeFilter:
     case flutter::DlImageFilterType::kColorFilter:
     case flutter::DlImageFilterType::kUnknown:
