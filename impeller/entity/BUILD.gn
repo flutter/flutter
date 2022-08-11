@@ -50,6 +50,8 @@ impeller_shaders("entity_shaders") {
     "shaders/sweep_gradient_fill.vert",
     "shaders/texture_fill.frag",
     "shaders/texture_fill.vert",
+    "shaders/tiled_texture_fill.frag",
+    "shaders/tiled_texture_fill.vert",
     "shaders/vertices.frag",
     "shaders/vertices.vert",
   ]
@@ -101,6 +103,8 @@ impeller_component("entity") {
     "contents/text_contents.h",
     "contents/texture_contents.cc",
     "contents/texture_contents.h",
+    "contents/tiled_texture_contents.cc",
+    "contents/tiled_texture_contents.h",
     "contents/vertices_contents.cc",
     "contents/vertices_contents.h",
     "entity.cc",
