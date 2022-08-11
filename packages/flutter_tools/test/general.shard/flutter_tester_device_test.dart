@@ -95,7 +95,7 @@ void main() {
       }),
     ]);
     await device.start('example.dill');
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -144,7 +144,7 @@ void main() {
       processManager.addCommand(flutterTestCommand('true'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('as true when set to true', () async {
@@ -152,7 +152,7 @@ void main() {
       processManager.addCommand(flutterTestCommand('true'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('as false when set to false', () async {
@@ -160,7 +160,7 @@ void main() {
       processManager.addCommand(flutterTestCommand('false'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('unchanged when set', () async {
@@ -168,7 +168,7 @@ void main() {
       processManager.addCommand(flutterTestCommand('neither true nor false'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 

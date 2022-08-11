@@ -12,6 +12,10 @@ import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// typedef MyAppHome = Placeholder;
+
 /// The visual properties that most buttons have in common.
 ///
 /// Buttons and their themes have a ButtonStyle property which defines the visual
@@ -37,13 +41,18 @@ import 'theme_data.dart';
 ///   style: ButtonStyle(
 ///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
 ///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.pressed))
+///         if (states.contains(MaterialState.pressed)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
+///         }
 ///         return null; // Use the component's default.
 ///       },
 ///     ),
 ///   ),
-/// )
+///   child: const Text('Fly me to the moon'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// In this case the background color for all other button states would fallback
@@ -52,10 +61,14 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// ElevatedButton(
-///   style: ButtonStyle(
+///   style: const ButtonStyle(
 ///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
 ///   ),
-/// )
+///   child: const Text('Let me play among the stars'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// Configuring a ButtonStyle directly makes it possible to very
@@ -75,21 +88,26 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// TextButton(
-///   style: TextButton.styleFrom(primary: Colors.green),
-/// )
+///   style: TextButton.styleFrom(foregroundColor: Colors.green),
+///   child: const Text('Let me see what spring is like'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// To configure all of the application's text buttons in the same
 /// way, specify the overall theme's `textButtonTheme`:
+///
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
 ///     textButtonTheme: TextButtonThemeData(
-///       style: TextButton.styleFrom(primary: Colors.green),
+///       style: TextButton.styleFrom(foregroundColor: Colors.green),
 ///     ),
 ///   ),
-///   home: MyAppHome(),
-/// )
+///   home: const MyAppHome(),
+/// ),
 /// ```
 ///
 /// ## Material 3 button types
@@ -285,7 +303,7 @@ class ButtonStyle with Diagnosticable {
   ///     splashFactory: NoSplash.splashFactory,
   ///   ),
   ///   onPressed: () { },
-  ///   child: Text('No Splash'),
+  ///   child: const Text('No Splash'),
   /// )
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;

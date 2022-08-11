@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Used with [ExpansionTileTheme] to define default property values for
 /// descendant [ExpansionTile] widgets.

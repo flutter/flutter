@@ -379,6 +379,35 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
+    test('TextInputClient performSelectors method is called', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.performedSelectors, isEmpty);
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send performSelectors message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[
+          1,
+          <dynamic>[
+            'selector1',
+            'selector2',
+          ]
+        ],
+        'method': 'TextInputClient.performSelectors',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'performSelector');
+      expect(client.performedSelectors, <String>['selector1', 'selector2']);
+    });
+
     test('TextInputClient performPrivateCommand method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
@@ -704,6 +733,7 @@ class FakeTextInputClient with TextInputClient {
   FakeTextInputClient(this.currentTextEditingValue);
 
   String latestMethodCall = '';
+  final List<String> performedSelectors = <String>[];
 
   @override
   TextEditingValue currentTextEditingValue;
@@ -756,5 +786,11 @@ class FakeTextInputClient with TextInputClient {
   @override
   void removeTextPlaceholder() {
     latestMethodCall = 'removeTextPlaceholder';
+  }
+
+  @override
+  void performSelector(String selectorName) {
+    latestMethodCall = 'performSelector';
+    performedSelectors.add(selectorName);
   }
 }

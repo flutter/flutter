@@ -342,10 +342,12 @@ class _DemoButtonState extends State<DemoButton> {
       style: ButtonStyle(
         foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
         overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused))
+          if (states.contains(MaterialState.focused)) {
             return Colors.red;
-          if (states.contains(MaterialState.hovered))
+          }
+          if (states.contains(MaterialState.hovered)) {
             return Colors.blue;
+          }
           return Colors.transparent;
         }),
       ),

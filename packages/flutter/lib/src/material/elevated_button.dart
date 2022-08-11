@@ -100,14 +100,12 @@ class ElevatedButton extends ButtonStyleButton {
   /// A static convenience method that constructs an elevated button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [onPrimary], and [onSurface] colors are used to create a
-  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
-  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
-  /// names. Specify a value for [onPrimary] to specify the color of the
-  /// button's text and icons as well as the overlay colors used to indicate the
-  /// hover, focus, and pressed states. Use [primary] for the button's background
-  /// fill color and [onSurface] to specify the button's disabled text, icon,
-  /// and fill color.
+  /// The [foregroundColor] and [disabledForegroundColor] colors are used
+  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// a derived [ButtonStyle.overlayColor].
+  ///
+  /// The [backgroundColor] and [disabledBackgroundColor] colors are
+  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
@@ -131,9 +129,26 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// ```dart
   /// ElevatedButton(
-  ///   style: ElevatedButton.styleFrom(primary: Colors.green),
-  /// )
+  ///   style: ElevatedButton.styleFrom(foregroundColor: Colors.green),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Jump'),
+  /// ),
   /// ```
+  ///
+  /// And to change the fill color:
+  ///
+  /// ```dart
+  /// ElevatedButton(
+  ///   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Meow'),
+  /// ),
+  /// ```
+  ///
   static ButtonStyle styleFrom({
     Color? foregroundColor,
     Color? backgroundColor,

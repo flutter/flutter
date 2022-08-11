@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:io';
+import 'dart:core' hide print;
+import 'dart:io' hide exit;
 
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
@@ -29,6 +29,7 @@ enum ServiceWorkerTestType {
   withoutFlutterJs,
   withFlutterJs,
   withFlutterJsShort,
+  withFlutterJsEntrypointLoadedEvent,
 }
 
 // Run a web service worker test as a standalone Dart program.
@@ -36,10 +37,16 @@ Future<void> main() async {
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
+  await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
+  await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent);
   await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
+  if (hasError) {
+    print('One or more tests failed.');
+    reportErrorsAndExit();
+  }
 }
 
 Future<void> _setAppVersion(int version) async {
@@ -66,6 +73,9 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
       break;
     case ServiceWorkerTestType.withFlutterJsShort:
       indexFile = 'index_with_flutterjs_short.html';
+      break;
+    case ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent:
+      indexFile = 'index_with_flutterjs_entrypoint_loaded.html';
       break;
   }
   return indexFile;

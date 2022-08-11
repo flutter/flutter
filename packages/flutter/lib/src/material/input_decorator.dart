@@ -19,6 +19,9 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late Widget _myIcon;
+
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
@@ -2877,7 +2880,7 @@ class InputDecoration {
   /// ```dart
   /// prefixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
-  ///   child: myIcon, // myIcon is a 48px-wide widget.
+  ///   child: _myIcon, // _myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
@@ -2999,7 +3002,7 @@ class InputDecoration {
   /// ```dart
   /// suffixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
-  ///   child: myIcon, // myIcon is a 48px-wide widget.
+  ///   child: _myIcon, // myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
@@ -4476,9 +4479,6 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
         if (states.contains(MaterialState.hovered)) {
           return BorderSide(color: _colors.onErrorContainer);
         }
-        if (states.contains(MaterialState.focused)) {
-          return BorderSide(color: _colors.error);
-        }
         return BorderSide(color: _colors.error);
       }
       if (states.contains(MaterialState.hovered)) {
@@ -4499,9 +4499,6 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
         if (states.contains(MaterialState.hovered)) {
           return BorderSide(color: _colors.onErrorContainer);
         }
-        if (states.contains(MaterialState.focused)) {
-          return BorderSide(color: _colors.error);
-        }
         return BorderSide(color: _colors.error);
       }
       if (states.contains(MaterialState.hovered)) {
@@ -4521,21 +4518,6 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurfaceVariant;
-      }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.onSurfaceVariant;
-      }
-      return _colors.onSurfaceVariant;
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return _colors.onSurfaceVariant;
-    }
-    if (states.contains(MaterialState.focused)) {
-      return _colors.onSurfaceVariant;
-    }
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
@@ -4548,16 +4530,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       if (states.contains(MaterialState.hovered)) {
         return _colors.onErrorContainer;
       }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.error;
-      }
       return _colors.error;
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return _colors.onSurfaceVariant;
-    }
-    if (states.contains(MaterialState.focused)) {
-      return _colors.onSurfaceVariant;
     }
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
@@ -4616,12 +4589,6 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
-    }
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
-    }
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
     }
@@ -4631,12 +4598,6 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.error);
-    }
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.error);
-    }
     return textStyle.copyWith(color:_colors.error);
   });
 }

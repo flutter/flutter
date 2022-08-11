@@ -38,7 +38,7 @@ void main() {
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
-      androidSdk: null, // ignore: avoid_redundant_argument_values
+      androidSdk: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -391,7 +391,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     final AndroidValidator androidValidator = AndroidValidator(
-      androidStudio: null, // ignore: avoid_redundant_argument_values
+      androidStudio: null,
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -439,7 +439,7 @@ Review licenses that have not been accepted (y/N)?
       ..directory = fileSystem.directory('/foo/bar');
 
     final AndroidValidator androidValidator = AndroidValidator(
-      androidStudio: null, // ignore: avoid_redundant_argument_values
+      androidStudio: null,
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -488,7 +488,7 @@ Review licenses that have not been accepted (y/N)?
 
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: sdk,
-      androidStudio: null, // ignore: avoid_redundant_argument_values
+      androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
@@ -510,8 +510,8 @@ Review licenses that have not been accepted (y/N)?
 
   testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
-      androidSdk: null, // ignore: avoid_redundant_argument_values
-      androidStudio: null, // ignore: avoid_redundant_argument_values
+      androidSdk: null,
+      androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
