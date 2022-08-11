@@ -343,6 +343,8 @@ class DisplayListBuilder final : public virtual Dispatcher,
   sk_sp<DisplayList> Build();
 
  private:
+  void checkForDeferredSave();
+
   SkAutoTMalloc<uint8_t> storage_;
   size_t used_ = 0;
   size_t allocated_ = 0;
@@ -396,6 +398,8 @@ class DisplayListBuilder final : public virtual Dispatcher,
     // is handled (e.g., |cannot_inherit_opacity| == false).
     // This offset is only valid if |has_layer| is true.
     size_t save_layer_offset;
+
+    bool has_deferred_save_op_ = false;
 
     bool has_layer;
     bool cannot_inherit_opacity;
