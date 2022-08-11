@@ -50,8 +50,7 @@ class SamplingClock {
 class _Resampler {
   _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged, this._samplingInterval);
 
-  // Resamplers used to filter incoming pointer events.
-  final Map<int, PointerEventResampler> _resamplers = <int, PointerEventResampler>{};
+  final MultiDeviceResampler _multiResampler = MultiDeviceResampler();
 
   // Flag to track if a frame callback has been scheduled.
   bool _frameCallbackScheduled = false;
@@ -90,11 +89,7 @@ class _Resampler {
       // Save last event time for debugPrint of resampling margin.
       _lastEventTime = event.timeStamp;
 
-      final PointerEventResampler resampler = _resamplers.putIfAbsent(
-        event.device,
-        () => PointerEventResampler(),
-      );
-      resampler.addEvent(event);
+      _multiResampler.addEvent(event);
     } else {
       _handlePointerEvent(event);
     }
@@ -141,22 +136,13 @@ class _Resampler {
     // to the current sample time.
     final Duration nextSampleTime = sampleTime + _samplingInterval;
 
-    // Iterate over active resamplers and sample pointer events for
-    // current sample time.
-    for (final PointerEventResampler resampler in _resamplers.values) {
-      resampler.sample(sampleTime, nextSampleTime, _handlePointerEvent);
-    }
-
-    // Remove inactive resamplers.
-    _resamplers.removeWhere((int key, PointerEventResampler resampler) {
-      return !resampler.hasPendingEvents && !resampler.isDown;
-    });
+    _multiResampler.sample(sampleTime, nextSampleTime, _handlePointerEvent);
 
     // Save last sample time for debugPrint of resampling margin.
     _lastSampleTime = sampleTime;
 
     // Early out if another call to `sample` isn't needed.
-    if (_resamplers.isEmpty) {
+    if (_multiResampler.isEmpty) {
       _timer!.cancel();
       return;
     }
@@ -185,10 +171,7 @@ class _Resampler {
 
   // Stop all resampling and dispatched any queued events.
   void stop() {
-    for (final PointerEventResampler resampler in _resamplers.values) {
-      resampler.stop(_handlePointerEvent);
-    }
-    _resamplers.clear();
+    _multiResampler.stop(_handlePointerEvent);
     _frameTime = Duration.zero;
     _timer?.cancel();
   }

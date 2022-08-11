@@ -569,6 +569,7 @@ abstract class PointerEvent with Diagnosticable {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   });
 
@@ -800,12 +801,14 @@ mixin _CopyPointerAddedEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerAddedEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       kind: kind ?? this.kind,
       device: device ?? this.device,
+      pointer: pointer ?? this.pointer,
       position: position ?? this.position,
       obscured: obscured ?? this.obscured,
       pressureMin: pressureMin ?? this.pressureMin,
@@ -816,7 +819,7 @@ mixin _CopyPointerAddedEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -898,12 +901,14 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerRemovedEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       kind: kind ?? this.kind,
       device: device ?? this.device,
+      pointer: pointer ?? this.pointer,
       position: position ?? this.position,
       obscured: obscured ?? this.obscured,
       pressureMin: pressureMin ?? this.pressureMin,
@@ -911,7 +916,7 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
       distanceMax: distanceMax ?? this.distanceMax,
       radiusMin: radiusMin ?? this.radiusMin,
       radiusMax: radiusMax ?? this.radiusMax,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -991,12 +996,14 @@ mixin _CopyPointerHoverEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerHoverEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       kind: kind ?? this.kind,
       device: device ?? this.device,
+      pointer: pointer ?? this.pointer,
       position: position ?? this.position,
       delta: delta ?? this.delta,
       buttons: buttons ?? this.buttons,
@@ -1013,7 +1020,7 @@ mixin _CopyPointerHoverEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1110,12 +1117,14 @@ mixin _CopyPointerEnterEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerEnterEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       kind: kind ?? this.kind,
       device: device ?? this.device,
+      pointer: pointer ?? this.pointer,
       position: position ?? this.position,
       delta: delta ?? this.delta,
       buttons: buttons ?? this.buttons,
@@ -1132,7 +1141,7 @@ mixin _CopyPointerEnterEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1259,12 +1268,14 @@ mixin _CopyPointerExitEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerExitEvent(
       timeStamp: timeStamp ?? this.timeStamp,
       kind: kind ?? this.kind,
       device: device ?? this.device,
+      pointer: pointer ?? this.pointer,
       position: position ?? this.position,
       delta: delta ?? this.delta,
       buttons: buttons ?? this.buttons,
@@ -1281,7 +1292,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1407,6 +1418,7 @@ mixin _CopyPointerDownEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerDownEvent(
@@ -1428,7 +1440,7 @@ mixin _CopyPointerDownEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1518,6 +1530,7 @@ mixin _CopyPointerMoveEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerMoveEvent(
@@ -1541,7 +1554,7 @@ mixin _CopyPointerMoveEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1639,6 +1652,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerUpEvent(
@@ -1661,7 +1675,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1782,6 +1796,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerScrollEvent(
@@ -1790,7 +1805,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
       device: device ?? this.device,
       position: position ?? this.position,
       scrollDelta: scrollDelta,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1891,6 +1906,7 @@ mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerScrollInertiaCancelEvent(
@@ -1898,7 +1914,7 @@ mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
       kind: kind ?? this.kind,
       device: device ?? this.device,
       position: position ?? this.position,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -1978,6 +1994,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
@@ -1985,7 +2002,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
       position: position ?? this.position,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -2083,6 +2100,7 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
     double? scale,
     double? rotation,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
@@ -2094,7 +2112,7 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
       panDelta: panDelta ?? this.panDelta,
       scale: scale ?? this.scale,
       rotation: rotation ?? this.rotation,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -2217,6 +2235,7 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
@@ -2224,7 +2243,7 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
       position: position ?? this.position,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
@@ -2303,6 +2322,7 @@ mixin _CopyPointerCancelEvent on PointerEvent {
     double? orientation,
     double? tilt,
     bool? synthesized,
+    bool? endOfBatch,
     int? embedderId,
   }) {
     return PointerCancelEvent(
@@ -2324,7 +2344,7 @@ mixin _CopyPointerCancelEvent on PointerEvent {
       radiusMax: radiusMax ?? this.radiusMax,
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
-      endOfBatch: endOfBatch,
+      endOfBatch: endOfBatch ?? this.endOfBatch,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }

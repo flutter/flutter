@@ -12,6 +12,11 @@ export 'events.dart' show PointerEvent;
 /// [PointerEventResampler.stop] to process a resampled `event`.
 typedef HandleEventCallback = void Function(PointerEvent event);
 
+/// A [PointerEvent] that has everything ready except for `endOfBatch`.
+///
+/// Used as the result of [PointerEventResampler.sample].
+typedef BatchEventBuilder = PointerEvent Function(bool endOfBatch);
+
 /// Resamples the movement of a single pointer using linear interpolation.
 ///
 /// Multi-touch should use multiple instances of this class. The sampling
@@ -50,6 +55,7 @@ class PointerEventResampler {
     Offset delta,
     Duration timeStamp,
     int buttons,
+    bool endOfBatch,
   ) {
     return PointerHoverEvent(
       timeStamp: timeStamp,
@@ -71,7 +77,7 @@ class PointerEventResampler {
       orientation: event.orientation,
       tilt: event.tilt,
       synthesized: event.synthesized,
-      endOfBatch: event.endOfBatch,
+      endOfBatch: endOfBatch,
       embedderId: event.embedderId,
     );
   }
@@ -83,6 +89,7 @@ class PointerEventResampler {
     int pointerIdentifier,
     Duration timeStamp,
     int buttons,
+    bool endOfBatch,
   ) {
     return PointerMoveEvent(
       timeStamp: timeStamp,
@@ -106,7 +113,7 @@ class PointerEventResampler {
       tilt: event.tilt,
       platformData: event.platformData,
       synthesized: event.synthesized,
-      endOfBatch: event.endOfBatch,
+      endOfBatch: endOfBatch,
       embedderId: event.embedderId,
     );
   }
@@ -119,11 +126,12 @@ class PointerEventResampler {
     Duration timeStamp,
     bool isDown,
     int buttons,
+    bool endOfBatch,
   ) {
     return isDown
         ? _toMoveEvent(
-            event, position, delta, pointerIdentifier, timeStamp, buttons)
-        : _toHoverEvent(event, position, delta, timeStamp, buttons);
+            event, position, delta, pointerIdentifier, timeStamp, buttons, endOfBatch)
+        : _toHoverEvent(event, position, delta, timeStamp, buttons, endOfBatch);
   }
 
   Offset _positionAt(Duration sampleTime) {
@@ -173,7 +181,7 @@ class PointerEventResampler {
   void _dequeueAndSampleNonHoverOrMovePointerEventsUntil(
     Duration sampleTime,
     Duration nextSampleTime,
-    HandleEventCallback callback,
+    List<BatchEventBuilder> eventBuilders,
   ) {
     Duration endTime = sampleTime;
     // Scan queued events to determine end time.
@@ -245,16 +253,21 @@ class PointerEventResampler {
         // therefore never produce `hover` events.
         if (position != _position) {
           final Offset delta = position - _position;
-          callback(_toMoveOrHoverEvent(event, position, delta,
-              _pointerIdentifier, sampleTime, wasDown, hadButtons));
+          eventBuilders.add((bool endOfBatch) =>
+            _toMoveOrHoverEvent(event, position, delta,
+              _pointerIdentifier, sampleTime, wasDown, hadButtons, endOfBatch),
+          );
           _position = position;
         }
-        callback(event.copyWith(
-          position: position,
-          delta: Offset.zero,
-          pointer: pointerIdentifier,
-          timeStamp: sampleTime,
-        ));
+        eventBuilders.add((bool endOfBatch) =>
+          event.copyWith(
+            position: position,
+            delta: Offset.zero,
+            pointer: pointerIdentifier,
+            timeStamp: sampleTime,
+            endOfBatch: endOfBatch,
+          ),
+        );
       }
 
       _queuedEvents.removeFirst();
@@ -263,7 +276,7 @@ class PointerEventResampler {
 
   void _samplePointerPosition(
     Duration sampleTime,
-    HandleEventCallback callback,
+    List<BatchEventBuilder> eventBuilders,
   ) {
     // Position at `sampleTime`.
     final Offset position = _positionAt(sampleTime);
@@ -272,8 +285,10 @@ class PointerEventResampler {
     final PointerEvent? next = _next;
     if (position != _position && next != null) {
       final Offset delta = position - _position;
-      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier,
-          sampleTime, _isDown, _hasButtons));
+      eventBuilders.add((bool endOfBatch) =>
+        _toMoveOrHoverEvent(next, position, delta, _pointerIdentifier,
+            sampleTime, _isDown, _hasButtons, endOfBatch),
+      );
       _position = position;
     }
   }
@@ -283,32 +298,35 @@ class PointerEventResampler {
     _queuedEvents.add(event);
   }
 
-  /// Process enqueued events and dispatch resampled events to [callback].
-  ///
-  /// The `sampleTime` is the timestamp of the current frame.
+  /// Resample enqueued events according to the given `sampleTime`.
   ///
   /// The `nextSampleTime` is the timestamp of the next frame. A positive value
   /// allows early processing of up and removed events. This improves
   /// resampling of these events, which is important for fling animations.
   ///
-  /// This method may dispatch multiple events if position is not the only
-  /// state that has changed since last sample.
+  /// This method returns the sampling result as a list of [BatchEventBuilder],
+  /// which becomesd a [PointerEvent] once an `endOfBatch` is provided. This is
+  /// needed when multiple [PopinterEventResampler]s sample at the same frame
+  /// and the resulting events must be counted as the same batch, therefore
+  /// `endOfBatch` must be calculated based on the aggregated result.
   ///
-  /// Calling [callback] must not add or sample events.
-  void sample(
+  /// This method may return multiple events if position is not the only
+  /// state that has changed since last sample.
+  List<BatchEventBuilder> sample(
     Duration sampleTime,
     Duration nextSampleTime,
-    HandleEventCallback callback,
   ) {
     _processPointerEvents(sampleTime);
 
+    final List<BatchEventBuilder> eventBuilders = <BatchEventBuilder>[];
     // Dequeue and sample pointer events until `sampleTime`.
-    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(sampleTime, nextSampleTime, callback);
+    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(sampleTime, nextSampleTime, eventBuilders);
 
     // Dispatch resampled pointer location event if tracked.
     if (_isTracked) {
-      _samplePointerPosition(sampleTime, callback);
+      _samplePointerPosition(sampleTime, eventBuilders);
     }
+    return eventBuilders;
   }
 
   /// Stop resampling.
@@ -335,4 +353,55 @@ class PointerEventResampler {
 
   /// Returns `true` if pointer is currently down.
   bool get isDown => _isDown;
+}
+
+/// Resamples pointer events from multiple devices.
+class MultiDeviceResampler {
+  // Resamplers used to filter incoming pointer events.
+  final Map<int, PointerEventResampler> _resamplers = <int, PointerEventResampler>{};
+
+  /// Enqueue `event` for resampling.
+  void addEvent(PointerEvent event) {
+    final PointerEventResampler resampler = _resamplers.putIfAbsent(
+      event.device,
+      () => PointerEventResampler(),
+    );
+    resampler.addEvent(event);
+  }
+
+  /// Resample enqueued events according to the given `sampleTime` and dispatch
+  /// results through `handlePointerEvent`.
+  ///
+  /// The `nextSampleTime` is the timestamp of the next frame. A positive value
+  /// allows early processing of up and removed events. This improves
+  /// resampling of these events, which is important for fling animations.
+  void sample(Duration sampleTime, Duration nextSampleTime, HandleEventCallback handlePointerEvent) {
+    // Iterate over active resamplers and sample pointer events for
+    // current sample time.
+    final List<BatchEventBuilder> batchBuilder = <BatchEventBuilder>[];
+    for (final PointerEventResampler resampler in _resamplers.values) {
+      batchBuilder.addAll(resampler.sample(sampleTime, nextSampleTime));
+    }
+    int remaining = batchBuilder.length;
+    for (final BatchEventBuilder builder in batchBuilder) {
+      remaining -= 1;
+      handlePointerEvent(builder(remaining == 0));
+    }
+
+    // Remove inactive resamplers.
+    _resamplers.removeWhere((int key, PointerEventResampler resampler) {
+      return !resampler.hasPendingEvents && !resampler.isDown;
+    });
+  }
+
+  /// Whether there are any active devices left.
+  bool get isEmpty => _resamplers.isEmpty;
+
+  /// Stop all resampling and dispatched all queued events.
+  void stop(HandleEventCallback handlePointerEvent) {
+    for (final PointerEventResampler resampler in _resamplers.values) {
+      resampler.stop(handlePointerEvent);
+    }
+    _resamplers.clear();
+  }
 }
