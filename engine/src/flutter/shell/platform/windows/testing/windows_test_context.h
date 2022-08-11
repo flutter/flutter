@@ -23,8 +23,10 @@ class WindowsTestContext {
   explicit WindowsTestContext(std::string_view assets_path = "");
   virtual ~WindowsTestContext();
 
+  // Returns the path to assets required by the Flutter runtime.
   const std::wstring& GetAssetsPath() const;
 
+  // Returns the path to the ICU library data file.
   const std::wstring& GetIcuDataPath() const;
 
  private:
