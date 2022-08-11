@@ -1,4 +1,4 @@
-Signature: f09a7634433d451c5b2cb06fa47af0d8
+Signature: 5a5c8c6ce3e85881d892e5772a48ffa9
 
 UNUSED LICENSES:
 
@@ -2596,8 +2596,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/DrawPass.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawWriter.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawWriter.h
-FILE: ../../../third_party/skia/src/gpu/graphite/Gpu.cpp
-FILE: ../../../third_party/skia/src/gpu/graphite/Gpu.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GpuWorkSubmission.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GraphicsPipeline.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/GraphicsPipeline.h
@@ -2614,6 +2612,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/Renderer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ResourceTypes.h
+FILE: ../../../third_party/skia/src/gpu/graphite/SharedContext.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/SharedContext.h
 FILE: ../../../third_party/skia/src/gpu/graphite/SkStuff.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Surface_Graphite.h
@@ -2640,12 +2640,12 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCaps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCaps.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.mm
-FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGpu.h
-FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGpu.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlResourceProvider.mm
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSharedContext.h
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSharedContext.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTypesPriv.mm
