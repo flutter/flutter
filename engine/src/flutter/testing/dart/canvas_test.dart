@@ -505,6 +505,39 @@ void main() {
     expect(data.buffer.asUint8List()[3], 0xFF);
   });
 
+  test('toImage and toImageSync have identical contents', () async {
+    // Note: on linux this stil seems to be different.
+    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/108835
+    if (Platform.isLinux) {
+      return;
+    }
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(20, 20, 100, 100),
+      Paint()..color = const Color(0xA0FF6D00),
+    );
+    final Picture picture = recorder.endRecording();
+    final Image toImageImage = await picture.toImage(200, 200);
+    final Image toImageSyncImage = picture.toImageSync(200, 200);
+
+    // To trigger observable difference in alpha, draw image
+    // on a second canvas.
+    Future<ByteData> drawOnCanvas(Image image) async {
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawPaint(Paint()..color = const Color(0x4FFFFFFF));
+      canvas.drawImage(image, Offset.zero, Paint());
+      final Image resultImage = await recorder.endRecording().toImage(200, 200);
+      return (await resultImage.toByteData())!;
+    }
+
+    final ByteData dataSync = await drawOnCanvas(toImageImage);
+    final ByteData data = await drawOnCanvas(toImageSyncImage);
+    expect(data, listEquals(dataSync));
+  });
+
   test('Canvas.drawParagraph throws when Paragraph.layout was not called', () async {
     // Regression test for https://github.com/flutter/flutter/issues/97172
     bool assertsEnabled = false;
@@ -896,3 +929,12 @@ void main() {
     expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
   });
 }
+
+Matcher listEquals(ByteData expected) => (dynamic v) {
+  Expect.type<ByteData>(v);
+  final ByteData value = v as ByteData;
+  expect(value.lengthInBytes, expected.lengthInBytes);
+  for (int i = 0; i < value.lengthInBytes; i++) {
+    expect(value.getUint8(i), expected.getUint8(i));
+  }
+};
