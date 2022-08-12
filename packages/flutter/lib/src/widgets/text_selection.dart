@@ -2641,7 +2641,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
-  final GestureTapAndDragDownCallback? onTapDown;
+  final GestureTapDownWithCountCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
@@ -2709,10 +2709,6 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  // True if a second tap down of a double tap is detected. Used to discard
-  // subsequent tap up / tap hold of the same tap.
-  bool _isDoubleTap = false;
-
   @override
   void dispose() {
     _dragUpdateThrottleTimer?.cancel();
@@ -2722,7 +2718,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDownDetails details, int tapCount) {
-    print('tap down?');
+    print('tap down? and tap count $tapCount');
     widget.onTapDown?.call(details, tapCount);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
@@ -2806,7 +2802,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _handleLongPressStart(LongPressStartDetails details) {
     print('long press start');
-    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+    if (widget.onSingleLongTapStart != null) {
       print('long press start run');
       widget.onSingleLongTapStart!(details);
     }
@@ -2814,7 +2810,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     print('long press update');
-    if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
+    if (widget.onSingleLongTapMoveUpdate != null) {
       print('long press update run');
       widget.onSingleLongTapMoveUpdate!(details);
     }
@@ -2822,11 +2818,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _handleLongPressEnd(LongPressEndDetails details) {
     print('long press end');
-    if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
+    if (widget.onSingleLongTapEnd != null) {
       print('long press end run');
       widget.onSingleLongTapEnd!(details);
     }
-    _isDoubleTap = false;
   }
 
   @override
@@ -2848,13 +2843,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (widget.onSingleLongTapStart != null ||
         widget.onSingleLongTapMoveUpdate != null ||
         widget.onSingleLongTapEnd != null) {
-      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.touch),
-        (LongPressGestureRecognizer instance) {
+      gestures[TapAndLongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndLongPressGestureRecognizer>(
+        () => TapAndLongPressGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
+        (TapAndLongPressGestureRecognizer instance) {
           instance
+            ..onTapDown = _handleTapDown
             ..onLongPressStart = _handleLongPressStart
             ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
-            ..onLongPressEnd = _handleLongPressEnd;
+            ..onLongPressEnd = _handleLongPressEnd
+            ..onTapUp = _handleTapUp;
         },
       );
     }
