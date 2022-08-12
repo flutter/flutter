@@ -1093,24 +1093,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress
-            || cause == SelectionChangedCause.drag) {
-          _editableText?.bringIntoView(selection.extent);
-        }
-        break;
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        if (cause == SelectionChangedCause.drag) {
-          _editableText?.bringIntoView(selection.extent);
-        }
-        break;
-    }
-
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
         break;

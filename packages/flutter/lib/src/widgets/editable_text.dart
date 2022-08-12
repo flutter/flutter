@@ -2657,6 +2657,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
+    final TextSelection oldSelection = widget.controller.selection;
     widget.controller.selection = selection;
 
     // This will show the keyboard for all selection changes on the
@@ -2698,6 +2699,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // https://github.com/flutter/flutter/issues/76349.
     try {
       widget.onSelectionChanged?.call(selection, cause);
+      _bringIntoView(cause, oldSelection, selection);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
@@ -2711,6 +2713,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_cursorTimer != null) {
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
+    }
+  }
+
+  void _bringIntoView(SelectionChangedCause? cause, TextSelection oldSelection, TextSelection newSelection){
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          bringIntoView(newSelection.extent);
+        }
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        if (cause == SelectionChangedCause.drag) {
+          if (oldSelection.baseOffset != newSelection.baseOffset) {
+            bringIntoView(newSelection.base);
+          } else if (oldSelection.extentOffset != newSelection.extentOffset) {
+            bringIntoView(newSelection.extent);
+          }
+        }
+        break;
     }
   }
 
