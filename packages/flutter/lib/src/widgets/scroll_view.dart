@@ -1915,6 +1915,10 @@ class GridView extends BoxScrollView {
          semanticChildCount: semanticChildCount ?? children.length,
        );
 
+  // TODO(DavBot02): GridView.stagger ?
+
+  // TODO(snat-s): GridView.wrap ?
+
   /// A delegate that controls the layout of the children within the [GridView].
   ///
   /// The [GridView], [GridView.builder], and [GridView.custom] constructors let you specify this

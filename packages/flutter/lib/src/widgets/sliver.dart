@@ -1238,7 +1238,8 @@ class SliverGrid extends StatelessWidget {
 
       case SliverGridLayoutType.fixed:
         return _FixedSliverGrid(delegate: effectiveDelegate, gridDelegate: gridDelegate);
-      case SliverGridLayoutType.dynamic:
+      case SliverGridLayoutType.wrap:
+      case SliverGridLayoutType.stagger:
         return _DynamicSliverGrid(delegate: effectiveDelegate, gridDelegate: gridDelegate);
     }
   }
@@ -1306,23 +1307,6 @@ class _DynamicSliverGrid extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, RenderDynamicSliverGrid renderObject) {
     renderObject.gridDelegate = gridDelegate;
-  }
-
-  @override
-  double estimateMaxScrollOffset(
-      SliverConstraints? constraints,
-      int firstIndex,
-      int lastIndex,
-      double leadingScrollOffset,
-      double trailingScrollOffset,
-      ) {
-    return super.estimateMaxScrollOffset(
-      constraints,
-      firstIndex,
-      lastIndex,
-      leadingScrollOffset,
-      trailingScrollOffset,
-    ) ?? gridDelegate.getLayout(constraints!).computeMaxScrollOffset(delegate.estimatedChildCount!);
   }
 }
 
