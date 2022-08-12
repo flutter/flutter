@@ -272,7 +272,7 @@ end
 # https://flutter.dev/go/plugins-list-migration
 def flutter_parse_plugins_file(file, platform)
   file_path = File.expand_path(file)
-  return [] unless File.exists? file_path
+  return [] unless File.exist? file_path
 
   dependencies_file = File.read(file)
   dependencies_hash = JSON.parse(dependencies_file)
