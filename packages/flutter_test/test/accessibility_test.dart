@@ -28,12 +28,12 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           Column(
-            children: [
-              const Text(
+            children: const [
+              Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
               ),
-              const Text(
+              Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
               ),
