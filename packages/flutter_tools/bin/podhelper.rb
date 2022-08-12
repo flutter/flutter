@@ -63,6 +63,7 @@ def flutter_additional_ios_build_settings(target)
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       elsif xcframework_file.start_with?('ios-') # ios-arm64
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
+       # else Info.plist or another platform.
       end
     end
     build_configuration.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Flutter'
