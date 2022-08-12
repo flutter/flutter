@@ -2321,14 +2321,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final Offset button = tester.getTopRight(find.byKey(buttonKey));
-    // The topPadding is 32 + (56 - 20) / 2, and the 56 pixels is the app bar height.
-    expect(button, const Offset(800.0, 50.0));
+    expect(button, const Offset(800.0, 32.0)); // The topPadding is 32.0.
 
     final Offset popupMenu = tester.getTopRight(find.byType(SingleChildScrollView));
 
     // The menu should be positioned directly next to the top of the button.
     // The 8.0 pixels is [_kMenuScreenPadding].
-    expect(popupMenu, Offset(button.dx - 8.0, button.dy));
+    expect(popupMenu, Offset(button.dx - 8.0, button.dy + 8.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/82874
@@ -2388,7 +2387,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Offset button = tester.getTopRight(find.byKey(buttonKey));
-    expect(button, Offset(800.0 - padding.right, 50.0)); // The topPadding is 32 + (56 - 20) / 2.
+    expect(button, Offset(800.0 - padding.right, padding.top)); // The topPadding is 32.0.
 
     final Offset popupMenuTopRight = tester.getTopRight(find.byType(SingleChildScrollView));
 
