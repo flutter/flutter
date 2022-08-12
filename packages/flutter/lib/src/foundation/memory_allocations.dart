@@ -12,20 +12,31 @@ class ObjectCreated implements ObjectEvent {
   final String library;
   final String klass;
   final Object object;
+  final Object? token;
   final List<Object> details;
 }
 
 class ObjectDisposed implements ObjectEvent {
-  ObjectDisposed(this.object, { this.details: const <Object>[] });
+  ObjectDisposed(
+    this.object, {
+    this.details: const <Object>[],
+    this.token }
+  );
 
   final Object object;
+  final Object? token;
   final List<Object> details;
 }
 
 class ObjectDetailsDiscovered implements ObjectEvent {
-  ObjectDetailsDiscovered(this.object, { this.details: const <Object>[] });
+  ObjectDetailsDiscovered(
+    this.object, {
+    this.details: const <Object>[],
+    this.token, }
+  );
 
   final Object object;
+  final Object? token;
   final List<Object> details;
 }
 
