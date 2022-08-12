@@ -7,6 +7,7 @@ import 'package:async/async.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'drag_details.dart';
+import 'long_press.dart' show GestureLongPressStartCallback, GestureLongPressMoveUpdateCallback, GestureLongPressEndCallback, GestureLongPressCancelCallback, LongPressStartDetails, LongPressMoveUpdateDetails, LongPressEndDetails;
 import 'recognizer.dart';
 import 'tap.dart' show TapUpDetails, TapDownDetails;
 import 'velocity_tracker.dart';
@@ -17,7 +18,8 @@ enum _DragState {
   accepted,
 }
 
-typedef GestureTapAndDragDownCallback  = void Function(TapDownDetails details, int tapCount);
+typedef GestureTapDownWithCountCallback  = void Function(TapDownDetails details, int tapCount);
+typedef GestureTapUpWithCountCallback  = void Function(TapUpDetails details, int tapCount);
 typedef GestureTapAndDragStartCallback = void Function(DragStartDetails details, int tapCount);
 typedef GestureTapAndDragUpdateCallback = void Function(DragUpdateDetails details, int tapCount);
 typedef GestureTapUpAndDragEndCallback = void Function(TapUpDetails upDetails, DragEndDetails endDetails, int tapCount);
@@ -57,7 +59,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
 
   DragStartBehavior dragStartBehavior;
 
-  GestureTapAndDragDownCallback? onDown;
+  GestureTapDownWithCountCallback? onDown;
 
   GestureTapAndDragStartCallback? onStart;
 
@@ -175,4 +177,271 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
   }
 }
 
+class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer with ConsecutiveTapMixin {
+  TapAndLongPressGestureRecognizer({
+    Duration? duration,
+    // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
+    // ignore: avoid_init_to_null
+    super.postAcceptSlopTolerance = null,
+    super.supportedDevices,
+    super.debugOwner,
+  }) : super(
+         deadline: duration ?? kLongPressTimeout,
+       );
+
+  GestureTapDownWithCountCallback? onTapDown;
+  GestureLongPressStartCallback? onLongPressStart;
+  GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
+  GestureLongPressEndCallback? onLongPressEnd;
+  GestureLongPressCancelCallback? onLongPressCancel;
+  GestureTapUpWithCountCallback? onTapUp;
+
+  bool _isDoubleTap = false;
+  bool _longPressAccepted = false;
+  OffsetPair? _longPressOrigin;
+  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
+  // different set of buttons, the gesture is canceled.
+  int? _initialButtons;
+
+  VelocityTracker? _velocityTracker;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    switch (event.buttons) {
+      case kPrimaryButton:
+        if (onTapDown == null &&
+            onLongPressCancel == null &&
+            onLongPressStart == null &&
+            onLongPressMoveUpdate == null &&
+            onLongPressEnd == null &&
+            onTapUp == null) {
+          return false;
+        }
+        break;
+      default:
+        return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  @override
+  void didExceedDeadline() {
+    // Exceeding the deadline puts the gesture in the accepted state.
+    resolve(GestureDisposition.accepted);
+    _longPressAccepted = true;
+    super.acceptGesture(primaryPointer!);
+    _checkLongPressStart();
+  }
+
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    if (!event.synthesized) {
+      if (event is PointerDownEvent) {
+        _velocityTracker = VelocityTracker.withKind(event.kind);
+        _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
+      }
+      if (event is PointerMoveEvent) {
+        assert(_velocityTracker != null);
+        _velocityTracker!.addPosition(event.timeStamp, event.localPosition);
+      }
+    }
+
+    if (event is PointerUpEvent) {
+      if (_longPressAccepted == true) {
+        _checkLongPressEnd(event);
+      } else {
+        // Pointer is lifted before timeout.
+        // resolve(GestureDisposition.rejected);
+        _checkTapUp(event);
+      }
+      _reset();
+    } else if (event is PointerCancelEvent) {
+      _checkLongPressCancel();
+      _reset();
+    } else if (event is PointerDownEvent) {
+      // The first touch.
+      _longPressOrigin = OffsetPair.fromEventPosition(event);
+      _initialButtons = event.buttons;
+      _checkTapDown(event);
+    } else if (event is PointerMoveEvent) {
+      if (event.buttons != _initialButtons) {
+        resolve(GestureDisposition.rejected);
+        stopTrackingPointer(primaryPointer!);
+      } else if (_longPressAccepted) {
+        _checkLongPressMoveUpdate(event);
+      }
+    }
+  }
+
+  void _checkTapDown(PointerDownEvent event) {
+    assert(_longPressOrigin != null);
+    print('from recognizer check tap down');
+    final TapDownDetails details = TapDownDetails(
+      globalPosition: _longPressOrigin!.global,
+      localPosition: _longPressOrigin!.local,
+      kind: getKindForPointer(event.pointer),
+    );
+
+    if (lastTapOffset == null) {
+      tapCount += 1;
+      lastTapOffset = details.globalPosition;
+    } else {
+      if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(details.globalPosition)) {
+        tapCount += 1;
+        consecutiveTapTimer!.reset();
+      }
+    }
+
+    _isDoubleTap = tapCount == 2;
+
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onTapDown != null) {
+          invokeCallback<void>('onTapDown', () => onTapDown!(details, tapCount));
+        }
+        break;
+      default:
+        assert(false, 'Unhandled button $_initialButtons');
+    }
+  }
+
+  void _checkTapUp(PointerUpEvent event) {
+    print('from recognizer check tap up');
+    final TapUpDetails details = TapUpDetails(
+      globalPosition: event.position,
+      localPosition: event.localPosition,
+      kind: getKindForPointer(event.pointer),
+    );
+
+    _velocityTracker = null;
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onTapUp != null) {
+          invokeCallback<void>('onTapUp', () => onTapUp!(details, tapCount));
+        }
+        break;
+      default:
+        assert(false, 'Unhandled button $_initialButtons');
+    }
+    consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, consecutiveTapTimeout);
+  }
+
+  void _checkLongPressCancel() {
+    print('from recognizer check tap cancel');
+    if (state == GestureRecognizerState.possible) {
+      switch (_initialButtons) {
+        case kPrimaryButton:
+          if (onLongPressCancel != null) {
+            invokeCallback<void>('onLongPressCancel', onLongPressCancel!);
+          }
+          break;
+        default:
+          assert(false, 'Unhandled button $_initialButtons');
+      }
+    }
+  }
+
+  void _checkLongPressStart() {
+    print('from recognizer check long press start');
+    if (_isDoubleTap) {
+      resolve(GestureDisposition.rejected);
+      return;
+    }
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onLongPressStart != null) {
+          final LongPressStartDetails details = LongPressStartDetails(
+            globalPosition: _longPressOrigin!.global,
+            localPosition: _longPressOrigin!.local,
+          );
+          invokeCallback<void>('onLongPressStart', () => onLongPressStart!(details));
+        }
+        break;
+      default:
+        assert(false, 'Unhandled button $_initialButtons');
+    }
+  }
+
+  void _checkLongPressMoveUpdate(PointerEvent event) {
+    print('from recognizer check long press move update');
+    if (_isDoubleTap) {
+      resolve(GestureDisposition.rejected);
+      return;
+    }
+    final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
+      globalPosition: event.position,
+      localPosition: event.localPosition,
+      offsetFromOrigin: event.position - _longPressOrigin!.global,
+      localOffsetFromOrigin: event.localPosition - _longPressOrigin!.local,
+    );
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onLongPressMoveUpdate != null) {
+          invokeCallback<void>('onLongPressMoveUpdate', () => onLongPressMoveUpdate!(details));
+        }
+        break;
+      default:
+        assert(false, 'Unhandled button $_initialButtons');
+    }
+  }
+
+  void _checkLongPressEnd(PointerEvent event) {
+    print('from recognizer check long press end');
+    if (_isDoubleTap) {
+      _isDoubleTap = false;
+      resolve(GestureDisposition.rejected);
+      return;
+    }
+    final VelocityEstimate? estimate = _velocityTracker!.getVelocityEstimate();
+    final Velocity velocity = estimate == null
+        ? Velocity.zero
+        : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+    final LongPressEndDetails details = LongPressEndDetails(
+      globalPosition: event.position,
+      localPosition: event.localPosition,
+      velocity: velocity,
+    );
+
+    _velocityTracker = null;
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onLongPressEnd != null) {
+          invokeCallback<void>('onLongPressEnd', () => onLongPressEnd!(details));
+        }
+        break;
+      default:
+        assert(false, 'Unhandled button $_initialButtons');
+    }
+  }
+
+  void _reset() {
+    _longPressAccepted = false;
+    _longPressOrigin = null;
+    _initialButtons = null;
+    _velocityTracker = null;
+  }
+
+  @override
+  void resolve(GestureDisposition disposition) {
+    if (disposition == GestureDisposition.rejected) {
+      if (_longPressAccepted) {
+        // This can happen if the gesture has been canceled. For example when
+        // the buttons have changed.
+        _reset();
+      } else {
+        _checkLongPressCancel();
+      }
+    }
+    super.resolve(disposition);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    // Winning the arena isn't important here since it may happen from a sweep.
+    // Explicitly exceeding the deadline puts the gesture in accepted state.
+  }
+
+  @override
+  String get debugDescription => 'tap_and_long_press';
+}
 
