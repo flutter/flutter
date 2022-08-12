@@ -8,10 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-
-import 'basic.dart';
-import 'framework.dart';
-import 'ticker_provider.dart';
+import 'package:flutter/widgets.dart';
 
 typedef _ChildIterator = _Iterator<RenderBox>;
 typedef _Iterator<T> = T? Function();
@@ -103,9 +100,6 @@ class OverlayEntry implements Listenable {
     _opaque = value;
     _overlay?._didChangeEntryOpacity();
   }
-
-  //_RootOverlayLocation? _overlayLocation;
-  _OverlayEntryLocation? _renderChildModel;
 
   /// Whether this entry must be included in the tree even if there is a fully
   /// [opaque] entry above it.
@@ -228,86 +222,28 @@ class OverlayEntry implements Listenable {
   String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
 }
 
-class _OverlayLocationWidget extends StatefulWidget {
-  const _OverlayLocationWidget({
-    required this.referenceLocation,
-    required this.child,
+class _OverlayLocationInheritedModel extends InheritedModel<String> {
+  const _OverlayLocationInheritedModel({
+    required this.location,
+    required super.child,
   });
 
-  // This widget ensures that the `referenceLocation` it uses will never be
-  // disposed when still being used by OverlayPortals. Once all OverlayPortals
-  // stop using referenceLocation, unlink and dispose the location.
-  //
-  // For root locations owned by OverlayEntries no ref counting is needed.
-  final _DoublyLinkedOverlayLocation referenceLocation;
-  final Widget child;
+  final OverlayLocation location;
 
   @override
-  _OverlayLocationState createState() => _OverlayLocationState();
-}
-
-class _OverlayLocationState extends State<_OverlayLocationWidget> {
-  _DoublyLinkedOverlayLocation get location => widget.referenceLocation.createNextIfAbsent(_OverlayLocation.new);
-
-  @override
-  void initState() {
-    super.initState();
-    widget.referenceLocation.attach();
+  bool updateShouldNotify(_OverlayLocationInheritedModel oldWidget) {
+    return oldWidget.location._isTheSameLocation(location);
   }
 
   @override
-  void didUpdateWidget(_OverlayLocationWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.referenceLocation != oldWidget.referenceLocation) {
-      oldWidget.referenceLocation.detach();
-      widget.referenceLocation.attach();
-    }
+  bool isSupportedAspect(Object aspect) {
+    return super.isSupportedAspect(aspect);
   }
 
   @override
-  void dispose() {
-    widget.referenceLocation.detach();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _OverlayLocationInheritedWidget(
-      state: this,
-      rootLocation: null,
-      child: widget.child,
-    );
-  }
-}
-
-class _OverlayLocationInheritedWidget extends InheritedWidget {
-  const _OverlayLocationInheritedWidget({
-    required this.state,
-    required this.rootLocation,
-    required super.child,
-  }) : assert(state != null || rootLocation != null),
-       assert(state == null || rootLocation == null);
-
-  final _OverlayLocationState? state;
-  final _RootOverlayLocation? rootLocation;
-
-  OverlayLocation get location {
-    final _DoublyLinkedOverlayLocation location = rootLocation ?? state!.location;
-    assert(!location._debugDisposed);
-    return location;
-  }
-
-  @override
-  bool updateShouldNotify(_OverlayLocationInheritedWidget oldWidget) {
-    final _RootOverlayLocation? rootLocation = this.rootLocation;
-    if (rootLocation != null && (oldWidget.rootLocation?._isTheSameLocation(rootLocation) ?? false)) {
-      return true;
-    }
-    final _DoublyLinkedOverlayLocation? referenceLocation = state?.widget.referenceLocation;
-    if (referenceLocation != null && (oldWidget.state?.widget.referenceLocation._isTheSameLocation(referenceLocation) ?? false)) {
-      return true;
-    }
-    return false;
+  bool updateShouldNotifyDependent(_OverlayLocationInheritedModel oldWidget, Set<String> dependencies) {
+    return dependencies.contains('theatre')
+        && oldWidget.location._theatreChildModel._theatre != location._theatreChildModel._theatre;
   }
 }
 
@@ -348,229 +284,11 @@ mixin _SortedLinkedListChildModel<T extends Object> {
   }
 }
 
-class _LocationOccupants extends LinkedList<_RenderDeferredLayoutBox> with _SortedLinkedListChildModel<_RenderDeferredLayoutBox>, _RenderTheatreChildModel {
-  _LocationOccupants(this._theatre);
-
-  @override
-  final _RenderTheatre _theatre;
-
-  @override
-  void add(_RenderDeferredLayoutBox entry) {
-    if (contains(entry)) {
-      return;
-    }
-    super.add(entry);
-  }
-
-  @override
-  _RenderDeferredLayoutBox? _childAfter(_RenderDeferredLayoutBox? child) {
-    if (isEmpty) {
-      return null;
-    }
-    final _RenderDeferredLayoutBox? next = child == null ? first : child.next;
-    return next != null && next.parent == null ? _childAfter(next) : next;
-  }
-
-  @override
-  _RenderDeferredLayoutBox? _childBefore(_RenderDeferredLayoutBox? child) {
-    if (isEmpty) {
-      return null;
-    }
-    final _RenderDeferredLayoutBox? prev = child == null ? last : child.previous;
-    return prev != null && prev.parent == null ? _childBefore(prev) : prev;
-  }
-
-  @override
-  _ChildIterator? _paintOrderIterator() => _forwardIterator();
-  @override
-  _ChildIterator? _hitTestOrderIterator() => _backwardIterator();
-}
-
-class _RootOverlayLocation extends _DoublyLinkedOverlayLocation {
-  _RootOverlayLocation(
-    _RenderTheatreChildModel childModel,
-  ) : super(null, childModel);
-
-  late _DoublyLinkedOverlayLocation first = this;
-  late _DoublyLinkedOverlayLocation last = this;
-
-  @override
-  _RootOverlayLocation get root => this;
-
-  @override
-  String toString() {
-    final String base = '${describeIdentity(this)}[$_children](root)';
-    final _DoublyLinkedOverlayLocation? next = this.next;
-    if (next == null) {
-      return base;
-    }
-    return '$base -> ${describeIdentity(next)}';
-  }
-}
-
-class _OverlayLocation extends _DoublyLinkedOverlayLocation {
-  _OverlayLocation(_DoublyLinkedOverlayLocation referenceLocation)
-    : root = referenceLocation.root,
-      assert(referenceLocation._debugNotDisposed()),
-      super(referenceLocation, referenceLocation._theatreChildModel);
-
-  @override
-  final _RootOverlayLocation root;
-
-  @override
-  void _dispose() {
-    final _DoublyLinkedOverlayLocation? next = this.next;
-    final _DoublyLinkedOverlayLocation? prev = this.prev;
-    prev?.next = null;
-
-    assert(linked);
-    assert(next == null || next._debugNotDisposed());
-
-    if (prev == null) {
-      root.first = next!;
-    } else if (next == null) {
-      root.last = prev;
-    }
-    this.next = null;
-    super._dispose();
-    next?._dispose();
-    assert(prev?.next == null);
-  }
-
-  @override
-  String toString() {
-    return _debugDisposed
-      ? describeIdentity(this)
-      : '${describeIdentity(this)}(disposed: $_debugDisposed)';
-  }
-}
-
-abstract class _DoublyLinkedOverlayLocation extends OverlayLocation {
-  _DoublyLinkedOverlayLocation(this.prev, this._theatreChildModel)
-    : super._();
-
-  final _DoublyLinkedOverlayLocation? prev;
-  _DoublyLinkedOverlayLocation? next;
-  _RootOverlayLocation get root;
-
-  @override
-  final _RenderTheatreChildModel _theatreChildModel;
-
-  _DoublyLinkedOverlayLocation createNextIfAbsent(_DoublyLinkedOverlayLocation Function(_DoublyLinkedOverlayLocation) f) {
-    assert(_debugNotDisposed());
-    final _DoublyLinkedOverlayLocation? next = this.next;
-    if (next != null) {
-      assert(next._debugNotDisposed());
-      return next;
-    }
-    final _DoublyLinkedOverlayLocation value = this.next = f(this);
-    root.last = value;
-    return value;
-  }
-
-  bool get linked => prev != null || next != null;
-
-  int refCount = 0;
-  void attach() {
-    assert(_debugNotDisposed());
-    refCount += 1;
-  }
-
-  void detach() {
-    assert(_debugNotDisposed());
-    refCount -= 1;
-    assert(refCount >= 0);
-    if (refCount > 0) {
-      return;
-    }
-
-    // Clean up if the node is unused.
-    _DoublyLinkedOverlayLocation? location = this;
-    while (location != null && location.refCount <= 0 && location.next == null) {
-      print('>>> $location(already disposed? ${location._debugDisposed}) refCount reaches 0, disposing.');
-      location._dispose();
-      location = location.prev;
-    }
-  }
-
-  @override
-  void _activate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-  }
-
-  @override
-  void _deactivate(_RenderDeferredLayoutBox child) {
-  }
-
-  @override
-  _ChildIterator? _paintOrderIterator() {
-    _ChildIterator? currentIterator = _children._forwardIterator();
-    bool lastIterator = false;
-    if (currentIterator == null) {
-      return next?._paintOrderIterator();
-    }
-    return () {
-      final _ChildIterator? iter = currentIterator;
-      if (iter == null) {
-        return null;
-      }
-      final RenderBox? child = iter();
-      if (child != null) {
-        return child;
-      }
-      currentIterator = lastIterator ? null : next?._paintOrderIterator();
-      lastIterator = true;
-      return currentIterator?.call();
-    };
-  }
-
-  @override
-  _ChildIterator? _hitTestOrderIterator() {
-    _ChildIterator? currentIterator = _children._backwardIterator();
-    if (currentIterator == null) {
-      return prev?._hitTestOrderIterator();
-    }
-    bool lastIterator = false;
-    return () {
-      final _ChildIterator? iter = currentIterator;
-      if (iter == null) {
-        return null;
-      }
-      final RenderBox? child = iter();
-      if (child != null) {
-        return child;
-      }
-      currentIterator = lastIterator ? null : prev?._hitTestOrderIterator();
-      lastIterator = true;
-      return currentIterator?.call();
-    };
-  }
-
-  late final _LocationOccupants _children = _LocationOccupants(_theatreChildModel._theatre);
-
-  @override
-  void _addToChildModel(_RenderDeferredLayoutBox child) {
-    _children.add(child);
-  }
-
-  @override
-  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
-    _children.remove(child);
-  }
-
-  @override
-  bool _isTheSameLocation(OverlayLocation other) => identical(other, this);
-}
-
 class TopmostOverlayChildController {
   _TopmostOverlayChildState? _attachTarget;
-  void show() {
-    _attachTarget!.show();
-  }
-  void hide() {
-    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
-    _attachTarget!.hide();
-  }
+  void show() => _attachTarget!.show();
+  void toggle() => _attachTarget!.toggle();
+  void hide() => _attachTarget!.hide();
 }
 
 class TopmostOverlayChildWidget extends StatefulWidget {
@@ -590,16 +308,17 @@ class TopmostOverlayChildWidget extends StatefulWidget {
   State<TopmostOverlayChildWidget> createState() => _TopmostOverlayChildState();
 }
 
-class _TopmostLocation extends LinkedListEntry<_TopmostLocation> implements OverlayLocation {
-  _TopmostLocation(this._showTimestamp, this._theatreChildModel);
+class _TopmostLocation extends OverlayLocation with LinkedListEntry<_TopmostLocation> {
+  _TopmostLocation(this._showTimestamp, this._theatreChildModel) : super._();
 
-  final DateTime _showTimestamp;
+  final int _showTimestamp;
   @override
   final _TopOfTheatreChildModel _theatreChildModel;
   _RenderDeferredLayoutBox? _overlayChildRenderBox;
 
   @override
   void _addToChildModel(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
     assert(_overlayChildRenderBox == null, 'Failed to add $child. $_overlayChildRenderBox is attached to $this');
     _overlayChildRenderBox = child;
     assert(_showTimestamp != null);
@@ -616,31 +335,15 @@ class _TopmostLocation extends LinkedListEntry<_TopmostLocation> implements Over
 
   @override
   void _activate(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
     _overlayChildRenderBox = null;
   }
 
   @override
   void _deactivate(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
     assert(_overlayChildRenderBox == null);
     _overlayChildRenderBox = child;
-  }
-
-  @override
-  bool _debugNotDisposed() {
-    if (!_debugDisposed) {
-      return true;
-    }
-    throw FlutterError('$this is already disposed');
-  }
-  @override
-  bool _debugDisposed = false;
-  @override
-  void _dispose() {
-    assert(!_debugDisposed);
-    assert(() {
-      _debugDisposed = true;
-      return true;
-    }());
   }
 
   @override
@@ -658,17 +361,21 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
   // The developer must call `show` to reveal the overlay so we can get the
   // timestamp of the user interaction for sorting.
   _TopmostLocation? _location;
-  DateTime? _showTimestamp;
+  int? _showTimestamp;
+  // Using
+  static int wallTime = -9007199254740991;
 
   @override
   void initState() {
     super.initState();
+    assert(widget.controller._attachTarget == null || widget.controller._attachTarget == this);
     widget.controller._attachTarget = this;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _location?._dispose();
     _location = null;
   }
 
@@ -677,6 +384,7 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._attachTarget = null;
+      assert(widget.controller._attachTarget == null || widget.controller._attachTarget == this);
       widget.controller._attachTarget = this;
     }
   }
@@ -691,16 +399,19 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
   /// children inserted in the same frame at baseLocation.
   void show() {
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
-    final DateTime now = DateTime.now();
-    final DateTime? lastTimeStampe = _showTimestamp;
+    final int now = wallTime += 1;
+    final int? lastTimeStampe = _showTimestamp;
     if (lastTimeStampe != null) {
       // Bring to the front.
-      assert(lastTimeStampe.isBefore(now));
+      assert(lastTimeStampe < now);
     } else {
       setState(() { _showTimestamp = now; });
     }
+    _location?._dispose();
     _location = null;
   }
+
+  void toggle() => _showTimestamp == null ? show() : hide();
 
   /// O(1);
   void hide() {
@@ -708,11 +419,12 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     _showTimestamp = null;
     _location = null;
+    _location?._dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final DateTime? timestamp = _showTimestamp;
+    final int? timestamp = _showTimestamp;
     if (timestamp == null) {
       return OverlayPortal.withLocation(
         overlayLocation: null,
@@ -720,7 +432,9 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
         child: widget.child,
       );
     }
-    final _TopOfTheatreChildModel? top = context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.location._theatreChildModel._theatre._topChildren;
+    final _TopOfTheatreChildModel? top = InheritedModel
+      .inheritFrom<_OverlayLocationInheritedModel>(context, aspect: 'theatre')
+      ?.location._theatreChildModel._theatre._topChildren;
     _location ??= _TopmostLocation(timestamp, top!);
     return OverlayPortal.withLocation(
       overlayLocation: _location,
@@ -770,6 +484,19 @@ abstract class _RenderTheatreChildModel {
     }
     return false;
   }
+
+  void paintChildren(PaintingContext context, Offset offset) {
+    final _ChildIterator? iterator = _paintOrderIterator();
+    if (iterator == null) {
+      return;
+    }
+    RenderBox? child = iterator();
+    while(child != null) {
+      final StackParentData parentData = child.parentData! as StackParentData;
+      context.paintChild(child, parentData.offset + offset);
+      child = iterator();
+    }
+  }
 }
 
 // The data structure for managing the stack of theatre children that claim the
@@ -790,7 +517,8 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
   void _add(_TopmostLocation child) {
     assert(!_sortedChildren.contains(child));
     _TopmostLocation? insertPosition;
-    while (insertPosition != null && insertPosition._showTimestamp.isAfter(child._showTimestamp)) {
+    while (insertPosition != null && insertPosition._showTimestamp > child._showTimestamp) {
+      assert(insertPosition._showTimestamp < child._showTimestamp);
       insertPosition = insertPosition.previous;
     }
     if (insertPosition == null) {
@@ -856,60 +584,6 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
   _ChildIterator? _hitTestOrderIterator() => _TopOfTheatreChildModel._mapIterator(_backwardIterator());
 }
 
-class _OverlayEntryLocation extends OverlayLocation with LinkedListEntry<_OverlayEntryLocation> {
-  _OverlayEntryLocation(this._theatreChildModel) : super._();
-
-  @override
-  final LinkedList<LocationOccupants> _theatreChildModel;
-
-  @override
-  void _activate(_RenderDeferredLayoutBox child) {
-  }
-
-  @override
-  void _deactivate(_RenderDeferredLayoutBox child) {
-  }
-
-  @override
-  void _addToChildModel(_RenderDeferredLayoutBox child) {
-  }
-
-  @override
-  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
-  }
-
-  @override
-  bool _isTheSameLocation(OverlayLocation other) => identical(this, other);
-}
-
-class _OverlayEntryChildModel extends _RenderTheatreChildModel with _SortedLinkedListChildModel<_OverlayEntryLocation> {
-  _OverlayEntryChildModel(this._theatre);
-
-  final LinkedList<_OverlayEntryLocation> _children = LinkedList<_OverlayEntryLocation>();
-
-  @override
-  final _RenderTheatre _theatre;
-
-  @override
-  _OverlayEntryLocation? _childAfter(_OverlayEntryLocation? child) {
-    assert(child == null || child.list == _children);
-    return child == null ? _children.first : child.next;
-  }
-
-  @override
-  _OverlayEntryLocation? _childBefore(_OverlayEntryLocation? child) {
-    assert(child == null || child.list == _children);
-    return child == null ? _children.last : child.previous;
-  }
-
-  @override
-  _ChildIterator? _paintOrderIterator() => _forwardIterator();
-
-  @override
-  _ChildIterator? _hitTestOrderIterator() => _backwardIterator();
-}
-
-
 /// A location in a particular [Overlay].
 ///
 /// An [OverlayLocation] is an immutable object that contains information about
@@ -937,7 +611,7 @@ abstract class OverlayLocation {
   /// This method returns null when no enclosing [Overlay] can be found in the
   /// given [context].
   static OverlayLocation? _above(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedWidget>()?.location;
+    return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedModel>()?.location;
   }
 
   void _addToChildModel(_RenderDeferredLayoutBox child);
@@ -987,13 +661,14 @@ class _OverlayEntryWidget extends StatefulWidget {
 }
 
 class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
+  late OverlayLocation location;
 
   @override
   void initState() {
     super.initState();
     widget.entry._overlayStateMounted.value = true;
-    //widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!)..attach();
-    widget.entry._renderChildModel = _OverlayEntryLocation(_theatreChildModel)
+    final _TopOfTheatreChildModel childModel = context.findAncestorRenderObjectOfType<_RenderTheatre>()!._topChildren;
+    location = _TopmostLocation(0, childModel);
   }
 
   @override
@@ -1003,16 +678,13 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
     // so it's safe to assume that state equality implies render object equality.
     if (oldWidget.overlayState != widget.overlayState) {
       assert(oldWidget.entry == widget.entry);
-      oldWidget.entry._overlayLocation?._dispose();
-      oldWidget.entry._overlayLocation = null;
-      widget.entry._overlayLocation = _RootOverlayLocation(context.findAncestorRenderObjectOfType<_RenderTheatre>()!)..attach();
+      final _TopOfTheatreChildModel childModel = context.findAncestorRenderObjectOfType<_RenderTheatre>()!._topChildren;
+      location = _TopmostLocation(0, childModel);
     }
   }
 
   @override
   void dispose() {
-    widget.entry._overlayLocation?._dispose();
-    widget.entry._overlayLocation = null;
     widget.entry._overlayStateMounted.value = false;
     widget.entry._didUnmount();
     super.dispose();
@@ -1022,9 +694,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   Widget build(BuildContext context) {
     return TickerMode(
       enabled: widget.tickerEnabled,
-      child: _OverlayLocationInheritedWidget(
-        state: null,
-        rootLocation: widget.entry._overlayLocation,
+      child: _OverlayLocationInheritedModel(
+        location: location,
         child: Builder(builder: widget.entry.builder),
       ),
     );
@@ -1415,23 +1086,6 @@ class _TheatreElement extends MultiChildRenderObjectElement {
     assert(children.length >= theatre.skipCount);
     children.skip(theatre.skipCount).forEach(visitor);
   }
-
-  @override
-  void insertRenderObjectChild(RenderBox child, IndexedSlot<Element?> slot) {
-    super.insertRenderObjectChild(child, slot);
-    final _TheatreParentData parentData = child.parentData! as _TheatreParentData;
-    parentData.location = ((widget as _Theatre).children[slot.index] as _OverlayEntryWidget).entry._overlayLocation;
-    assert(parentData.location != null);
-  }
-
-  @override
-  void moveRenderObjectChild(RenderBox child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
-    super.moveRenderObjectChild(child, oldSlot, newSlot);
-    assert(() {
-      final _TheatreParentData parentData = child.parentData! as _TheatreParentData;
-      return parentData.location == ((widget as _Theatre).children[newSlot.index] as _OverlayEntryWidget).entry._overlayLocation;
-    }());
-  }
 }
 
 // A `RenderBox` that sizes itself to its parent's size, implements the stack
@@ -1480,7 +1134,6 @@ mixin _RenderTheatreMixin on RenderBox {
     }
     // Same BoxConstraints as used by RenderStack for StackFit.expand.
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
-    final Alignment alignment = theatre._resolvedAlignment;
     while (child != null) {
       final StackParentData childParentData = child.parentData! as StackParentData;
       layoutChild(child, nonPositionedChildConstraints);
@@ -1521,12 +1174,7 @@ mixin _RenderTheatreMixin on RenderBox {
   }
 }
 
-class _TheatreParentData extends StackParentData {
-  // Only RenderObjects created by OverlayEntries make use of this.
-  _RootOverlayLocation? location;
-}
-
-class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox, _TheatreParentData>, _RenderTheatreMixin {
+class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheatreMixin {
   _RenderTheatre({
     List<RenderBox>? children,
     required TextDirection textDirection,
@@ -1589,45 +1237,21 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _TheatreParentData) {
-      child.parentData = _TheatreParentData();
+    if (child.parentData is! StackParentData) {
+      child.parentData = StackParentData();
     }
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
-      final _ChildIterator? forwardIterator = childParentData.location!._paintOrderIterator();
-      RenderBox? deferredChild = forwardIterator?.call();
-      while (deferredChild != null) {
-        print('> attaching $deferredChild');
-        deferredChild.attach(owner);
-        deferredChild = forwardIterator!();
-      }
-      // The super implementation already attaches `child`.
-      child = childParentData.nextSibling;
-    }
+    _topChildren.visitChildren((RenderObject child) => child.attach(owner));
   }
 
   @override
   void detach() {
     super.detach();
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
-      final _ChildIterator? forwardIterator = childParentData.location!._paintOrderIterator();
-      RenderBox? deferredChild = forwardIterator?.call();
-      while (deferredChild != null) {
-        print('< detaching $deferredChild');
-        deferredChild.detach();
-        deferredChild = forwardIterator!();
-      }
-      // The super implementation already detaches `child`.
-      child = childParentData.nextSibling;
-    }
+    _topChildren.visitChildren((RenderObject child) => child.detach);
   }
 
   @override
@@ -1751,23 +1375,24 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
     RenderBox? child = _firstOnstageChild;
     if (child == null) {
+      assert(_topChildren._sortedChildren.isEmpty);
       return;
     }
     // Same BoxConstraints as used by RenderStack for StackFit.expand.
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
     while (child != null) {
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       layoutChild(child, nonPositionedChildConstraints);
-      final _ChildIterator? forwardIterator = childParentData.location!._paintOrderIterator();
-      RenderBox? deferredChild = forwardIterator?.call();
-      //print('Deferred child > $deferredChild');
-      while (deferredChild != null) {
-        print('laying out deferred child > $deferredChild');
-        layoutChild(deferredChild, nonPositionedChildConstraints);
-        deferredChild = forwardIterator!();
-      }
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
+    }
+    final _ChildIterator? iterator = _topChildren._paintOrderIterator();
+    if (iterator != null) {
+      child = iterator();
+      while (child != null) {
+        layoutChild(child, nonPositionedChildConstraints);
+        child = iterator();
+      }
     }
   }
 
@@ -1777,17 +1402,11 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   void paintStack(PaintingContext context, Offset offset) {
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       context.paintChild(child, childParentData.offset + offset);
-      //print('painting: $child ${childParentData.location!}, ${childParentData.location!._children}');
-      final _ChildIterator? forwardIterator = childParentData.location!.first._paintOrderIterator();
-      RenderBox? deferredLayoutBox = forwardIterator?.call();
-      while(deferredLayoutBox != null) {
-        context.paintChild(deferredLayoutBox, childParentData.offset + offset);
-        deferredLayoutBox = forwardIterator?.call();
-      }
       child = childParentData.nextSibling;
     }
+    _topChildren.paintChildren(context, offset);
   }
 
   @override
@@ -1811,32 +1430,19 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    _topChildren.hitTestChildren(result, position);
+    if (_topChildren.hitTestChildren(result, position)) {
+      return true;
+    }
     RenderBox? child = _lastOnstageChild;
     int childCount = _onstageChildCount;
-    bool hitTest(bool currentValue, _ChildIterator iterator) {
-      if (currentValue) {
-        return true;
-      }
-      final RenderBox? child = iterator();
-      if (child == null) {
-        return false;
-      }
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
-      final bool newValue = result.addWithPaintOffset(offset: childParentData.offset, position: position, hitTest: _toBoxHitTest(child.hitTest));
-      return hitTest(newValue, iterator);
-    }
     while (child != null) {
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
-      final _ChildIterator? iterator = childParentData.location!.last._hitTestOrderIterator();
-      final bool isHit = (iterator != null && hitTest(false, iterator))
-                      || result.addWithPaintOffset(
-                           offset: childParentData.offset,
-                           position: position,
-                           hitTest: _toBoxHitTest(child.hitTest),
-                         );
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: _toBoxHitTest(child.hitTest),
+      );
 
-      print('${isHit ? 'HIT' : 'NOT HIT'} @ $position == $child (${childParentData.offset})');
       if (isHit) {
         return true;
       }
@@ -1858,15 +1464,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       visitor(child);
-      //print('-- visiting child (entry): $child');
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
-      final _ChildIterator? forwardIterator = childParentData.location!.first._paintOrderIterator();
-      RenderBox? renderChild = forwardIterator?.call();
-      while (renderChild != null) {
-        visitor(renderChild);
-        //print('   visiting child: $renderChild');
-        renderChild = forwardIterator!();
-      }
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
     }
     _topChildren.visitChildren(visitor);
@@ -1877,13 +1475,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
       visitor(child);
-      final _TheatreParentData childParentData = child.parentData! as _TheatreParentData;
-      final _ChildIterator? forwardIterator = childParentData.location!.first._paintOrderIterator();
-      RenderBox? renderChild = forwardIterator?.call();
-      while (renderChild != null) {
-        visitor(renderChild);
-        renderChild = forwardIterator!();
-      }
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
     }
     _topChildren.visitChildren(visitor);
@@ -2034,10 +1626,7 @@ class OverlayPortal extends StatelessWidget {
     final OverlayLocation location = _overlayLocation ?? _overlayLocationGetter(context);
     return _OverlayPortal(
       overlayLocation: location,
-      overlayChild: _OverlayLocationWidget(
-        referenceLocation: location,
-        child: _DeferredLayout(child: overlayChild),
-      ),
+      overlayChild: _DeferredLayout(child: overlayChild),
       child: child,
     );
   }

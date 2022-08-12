@@ -456,7 +456,7 @@ void main() {
                           // features aren't clipped by it.
                           child: Material(
                             color: Colors.black,
-                            child: OverlayPortal(
+                            child: _OverlayPortal(
                               overlayChild: Positioned(
                                 right: 0,
                                 bottom: 0,

@@ -85,7 +85,7 @@ void verifyTreeIsClean() {
 void verifyOverlayChildReadyForLayout(GlobalKey overlayWidgetKey) {
   final RenderObjectElement element = overlayWidgetKey.currentContext! as RenderObjectElement;
   final RenderBox layoutSurrogate = element.renderObject as RenderBox;
-  assert(element.runtimeType.toString() == '_OverlayPortalElement');
+  assert(element.runtimeType.toString() == 'OverlayPortalElement');
 
   if (layoutSurrogate.debugNeedsLayout) {
     assert(layoutSurrogate.debugDoingThisLayout);
@@ -112,7 +112,7 @@ void main() {
                     setState = setter;
                     return Directionality(
                       textDirection: textDirection,
-                      child: OverlayPortal(
+                      child: OverlayPortal.closest(
                         overlayChild: Builder(builder: (BuildContext context) {
                           buildCount += 1;
                           directionSeenByOverlayChild = Directionality.maybeOf(context);
@@ -148,7 +148,7 @@ void main() {
         initialEntries: <OverlayEntry>[
           OverlayEntry(
             builder: (BuildContext context) {
-              return const OverlayPortal(
+              return const OverlayPortal.closest(
                 overlayChild: SizedBox(),
                 child: SizedBox(),
               );
@@ -176,7 +176,7 @@ void main() {
                 return StatefulBuilder(
                   builder: (BuildContext context, StateSetter setter) {
                     setState = setter;
-                    return OverlayPortal(
+                    return OverlayPortal.closest(
                       overlayChild: Positioned(
                         width: dimensions,
                         height: dimensions,
@@ -221,7 +221,7 @@ void main() {
                 return StatefulBuilder(
                   builder: (BuildContext context, StateSetter setter) {
                     setState = setter;
-                    return OverlayPortal(
+                    return OverlayPortal.closest(
                       overlayChild: Positioned(
                         left: offset,
                         top: offset,
@@ -268,7 +268,7 @@ void main() {
               builder: (BuildContext context) {
                 return LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
-                    return const OverlayPortal(
+                    return const OverlayPortal.closest(
                       overlayChild: SizedBox(),
                       child: SizedBox(),
                     );
@@ -289,7 +289,7 @@ void main() {
     bool shouldShowChild = false;
 
     Widget layoutBuilder(BuildContext context, BoxConstraints constraints) {
-      return const OverlayPortal(
+      return const OverlayPortal.closest(
         overlayChild: SizedBox(),
         child: SizedBox(),
       );
@@ -302,7 +302,7 @@ void main() {
           initialEntries: <OverlayEntry>[
             OverlayStatefulEntry(builder: (BuildContext context, StateSetter setter) {
               setState = setter;
-              return OverlayPortal(
+              return OverlayPortal.closest(
                 overlayChild: const SizedBox(),
                 child: shouldShowChild ? LayoutBuilder(builder: layoutBuilder) : null,
               );
@@ -325,7 +325,7 @@ void main() {
         return SizedBox.square(
           dimension: 50,
           child: OverlayPortal.forOverlay(
-            overlayLocation: OverlayLocation.above(context),
+            overlayLocation: OverlayLocation._above(context),
             overlayChild: const SizedBox(),
             child: const SizedBox(),
           ),
@@ -349,7 +349,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SizedBox.square(
           dimension: 50,
-          child: OverlayPortal(
+          child: OverlayPortal.closest(
             overlayChild: SizedBox(),
             child: SizedBox(),
           ),
@@ -374,7 +374,7 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 return _ManyRelayoutBoundaries(levels: 50, child: Builder(builder: (BuildContext context) {
-                  return OverlayPortal(
+                  return OverlayPortal.closest(
                     key: widgetKey,
                     overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                       verifyOverlayChildReadyForLayout(widgetKey);
@@ -434,7 +434,7 @@ void main() {
                   return StatefulBuilder(
                     builder: (BuildContext context, StateSetter stateSetter) {
                       setState = stateSetter;
-                      return OverlayPortal(
+                      return OverlayPortal.closest(
                         key: widgetKey,
                         overlayChild: !buildWithOverlayChild ? null : LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                           layoutCount += 1;
@@ -501,7 +501,7 @@ void main() {
                           child: _ManyRelayoutBoundaries(
                             levels: 50,
                             child: Builder(builder: (BuildContext context) {
-                              return OverlayPortal(
+                              return OverlayPortal.closest(
                                 key: widgetKey,
                                 overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                   layoutCount += 1;
@@ -585,7 +585,7 @@ void main() {
                               OverlayEntry(builder: (BuildContext innerEntryContext) {
                                 return OverlayPortal.forOverlay(
                                   key: widgetOuterKey,
-                                  overlayLocation: OverlayLocation.above(outerEntryContext), // The outer widget targets the outer Overlay.
+                                  overlayLocation: OverlayLocation._above(outerEntryContext), // The outer widget targets the outer Overlay.
                                   overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                     layoutCountOuter += 1;
                                     // Both overlays need to be clean at this point.
@@ -595,7 +595,7 @@ void main() {
                                     );
                                     return OverlayPortal.forOverlay(
                                       key: widgetInnerKey,
-                                      overlayLocation: OverlayLocation.above(innerEntryContext),
+                                      overlayLocation: OverlayLocation._above(innerEntryContext),
                                       overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                         layoutCountInner += 1;
                                         // Both overlays need to be clean at this point.
@@ -687,7 +687,7 @@ void main() {
                                 OverlayEntry(builder: (BuildContext innerEntryContext) {
                                   return OverlayPortal.forOverlay(
                                     key: widgetOuterKey,
-                                    overlayLocation: OverlayLocation.above(outerEntryContext), // The outer widget targets the outer Overlay.
+                                    overlayLocation: OverlayLocation._above(outerEntryContext), // The outer widget targets the outer Overlay.
                                     overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                       layoutCountOuter += 1;
                                       // Both overlays need to be clean at this point.
@@ -697,7 +697,7 @@ void main() {
                                       );
                                       return OverlayPortal.forOverlay(
                                         key: widgetInnerKey,
-                                        overlayLocation: OverlayLocation.above(innerEntryContext),
+                                        overlayLocation: OverlayLocation._above(innerEntryContext),
                                         overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                                           layoutCountInner += 1;
                                           // Both overlays need to be clean at this point.
@@ -781,7 +781,7 @@ void main() {
         return _ManyRelayoutBoundaries(
           levels: 50,
           child: Builder(builder: (BuildContext context) {
-            return OverlayPortal(
+            return OverlayPortal.closest(
               key: widgetKey,
               overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                 layoutCount += 1;
@@ -844,7 +844,7 @@ void main() {
                   levels: 50,
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                     setState1 = stateSetter;
-                    return targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal(
+                    return targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal.closest(
                       key: targetGlobalKey,
                       overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                         layoutCount1 += 1;
@@ -861,7 +861,7 @@ void main() {
                 return SizedBox(
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                     setState2 = stateSetter;
-                    return !targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal(
+                    return !targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal.closest(
                       key: targetGlobalKey,
                       overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                         layoutCount2 += 1;
@@ -922,7 +922,7 @@ void main() {
                   levels: 50,
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                     setState1 = stateSetter;
-                    return targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal(
+                    return targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal.closest(
                       key: targetGlobalKey,
                       overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                         layoutCount1 += 1;
@@ -942,7 +942,7 @@ void main() {
                     OverlayEntry(builder: (BuildContext context) {
                       return StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                         setState2 = stateSetter;
-                        return !targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal(
+                        return !targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal.closest(
                           key: targetGlobalKey,
                           overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                             layoutCount2 += 1;
@@ -1018,7 +1018,7 @@ void main() {
                     levels: 50,
                     child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                       setState1 = stateSetter;
-                      return targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal(
+                      return targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal.closest(
                         key: targetGlobalKey,
                         overlayChild: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                           verifyOverlayChildReadyForLayout(targetGlobalKey);
@@ -1036,7 +1036,7 @@ void main() {
                       OverlayEntry(builder: (BuildContext context) {
                         return StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                           setState2 = stateSetter;
-                          return !targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal(
+                          return !targetMovedToOverlayEntry3 ? const SizedBox() : OverlayPortal.closest(
                             key: targetGlobalKey,
                             overlayChild: null,
                             child: WidgetToRenderBoxAdapter(renderBox: childBox),
@@ -1088,7 +1088,7 @@ void main() {
                   levels: 50,
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                     setState = stateSetter;
-                    return OverlayPortal(
+                    return OverlayPortal.closest(
                       overlayChild: swapChildAndRemoteChild ? child1 : child2,
                       child: swapChildAndRemoteChild ? child2 : child1,
                     );
@@ -1125,7 +1125,7 @@ void main() {
               OverlayEntry(builder: (BuildContext context) {
                 return StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                   setState2 = stateSetter;
-                  return OverlayPortal(
+                  return OverlayPortal.closest(
                     overlayChild: takeChildren ? child2 : null,
                     child: takeChildren ? child1 : null,
                   );
@@ -1136,7 +1136,7 @@ void main() {
                   levels: 50,
                   child: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                     setState1 = stateSetter;
-                    return OverlayPortal(
+                    return OverlayPortal.closest(
                       overlayChild: takeChildren ? null : child1,
                       child: takeChildren ? null : child2,
                     );
@@ -1178,12 +1178,12 @@ void main() {
               OverlayEntry(builder: (BuildContext context) {
                 return StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
                   setState = stateSetter;
-                  return OverlayPortal(
+                  return OverlayPortal.closest(
                     key: swapped ? outerKey : innerKey,
                     overlayChild: Builder(builder: (BuildContext context) {
-                      return OverlayPortal(
+                      return OverlayPortal.closest(
                         key: swapped ? innerKey : outerKey,
-                        overlayChild: OverlayPortal(
+                        overlayChild: OverlayPortal.closest(
                           child: null,
                           overlayChild: child3,
                         ),
@@ -1224,20 +1224,20 @@ void main() {
       // Expected Order child1 -> innerKey -> child4.
       Widget widget = Column(
         children: <Widget>[
-          const OverlayPortal(
+          const OverlayPortal.closest(
             overlayChild: child1,
             child: null,
           ),
-          OverlayPortal(
+          OverlayPortal.closest(
             key: outerKey,
-            overlayChild: OverlayPortal(
+            overlayChild: OverlayPortal.closest(
               key: innerKey,
               overlayChild: child4,
               child: child3,
             ),
             child: child2,
           ),
-          const OverlayPortal(
+          const OverlayPortal.closest(
             overlayChild: null,
             child: null,
           ),
@@ -1278,20 +1278,20 @@ void main() {
       setState(() {
         widget = Column(
           children: <Widget>[
-            const OverlayPortal(
+            const OverlayPortal.closest(
               overlayChild: child1,
               child: null,
             ),
-            OverlayPortal(
+            OverlayPortal.closest(
               key: outerKey,
-              overlayChild: OverlayPortal(
+              overlayChild: OverlayPortal.closest(
                 key: innerKey,
                 overlayChild: child4,
                 child: child3,
               ),
               child: child2,
             ),
-            const OverlayPortal(
+            const OverlayPortal.closest(
               overlayChild: child5,
               child: null,
             ),
@@ -1316,14 +1316,14 @@ void main() {
       setState(() {
         widget = Column(
           children: <Widget>[
-            const OverlayPortal(
+            const OverlayPortal.closest(
               overlayChild: child1,
               child: null,
             ),
             Center(
-              child: OverlayPortal(
+              child: OverlayPortal.closest(
                 key: outerKey,
-                overlayChild: OverlayPortal(
+                overlayChild: OverlayPortal.closest(
                   key: innerKey,
                   overlayChild: child4,
                   child: child3,
@@ -1331,7 +1331,7 @@ void main() {
                 child: child2,
               ),
             ),
-            const OverlayPortal(
+            const OverlayPortal.closest(
               overlayChild: child5,
               child: null,
             ),
@@ -1356,14 +1356,14 @@ void main() {
       setState(() {
         widget = Column(
           children: <Widget>[
-            const OverlayPortal(
+            const OverlayPortal.closest(
               overlayChild: child1,
               child: null,
             ),
             Center(
-              child: OverlayPortal(
+              child: OverlayPortal.closest(
                 key: innerKey,
-                overlayChild: OverlayPortal(
+                overlayChild: OverlayPortal.closest(
                   key: outerKey,
                   overlayChild: child4,
                   child: child2,
@@ -1371,7 +1371,7 @@ void main() {
                 child: child3,
               ),
             ),
-            const OverlayPortal(
+            const OverlayPortal.closest(
               overlayChild: child5,
               child: null,
             ),
@@ -1424,7 +1424,7 @@ void main() {
                 }),
                 OverlayStatefulEntry(builder: (BuildContext context, StateSetter stateSetter) {
                   setState2 = stateSetter;
-                  return OverlayPortal(
+                  return OverlayPortal.closest(
                     overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter1 : counter2),
                     child: const SizedBox(),
                   );
@@ -1467,7 +1467,7 @@ void main() {
                   setState2 = stateSetter;
                   return LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
-                      return OverlayPortal(
+                      return OverlayPortal.closest(
                         overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter1 : counter2),
                         child: const SizedBox(),
                       );
@@ -1506,7 +1506,7 @@ void main() {
               initialEntries: <OverlayEntry>[
                 OverlayStatefulEntry(builder: (BuildContext context, StateSetter stateSetter) {
                   setState1 = stateSetter;
-                  return OverlayPortal(
+                  return OverlayPortal.closest(
                     // WidgetToRenderBoxAdapter is keyed by the render box.
                     overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter2 : counter1),
                     child: const SizedBox(),
@@ -1514,7 +1514,7 @@ void main() {
                 }),
                 OverlayStatefulEntry(builder: (BuildContext context, StateSetter stateSetter) {
                   setState2 = stateSetter;
-                  return OverlayPortal(
+                  return OverlayPortal.closest(
                     overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter1 : counter2),
                     child: const SizedBox(),
                   );
@@ -1553,7 +1553,7 @@ void main() {
                   setState1 = stateSetter;
                   return LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
-                      return OverlayPortal(
+                      return OverlayPortal.closest(
                         overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter2 : counter1),
                         child: const SizedBox(),
                       );
@@ -1564,7 +1564,7 @@ void main() {
                   setState2 = stateSetter;
                   return LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
-                      return OverlayPortal(
+                      return OverlayPortal.closest(
                         overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter1 : counter2),
                         child: const SizedBox(),
                       );
@@ -1603,7 +1603,7 @@ void main() {
               initialEntries: <OverlayEntry>[
                 OverlayStatefulEntry(builder: (BuildContext context, StateSetter stateSetter) {
                   setState1 = stateSetter;
-                  return OverlayPortal(
+                  return OverlayPortal.closest(
                     // WidgetToRenderBoxAdapter is keyed by the render box.
                     overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter2 : counter1),
                     child: WidgetToRenderBoxAdapter(renderBox: swapped ? counter1 : counter2),
@@ -1643,7 +1643,7 @@ void main() {
                   setState1 = stateSetter;
                   return LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
-                      return OverlayPortal(
+                      return OverlayPortal.closest(
                         // WidgetToRenderBoxAdapter is keyed by the render box.
                         overlayChild: WidgetToRenderBoxAdapter(renderBox: swapped ? counter2 : counter1),
                         child: WidgetToRenderBoxAdapter(renderBox: swapped ? counter1 : counter2),
@@ -1688,7 +1688,7 @@ void main() {
       final Widget child1 = WidgetToRenderBoxAdapter(renderBox: child1Box);
       final Widget child2 = WidgetToRenderBoxAdapter(renderBox: child2Box);
 
-      final Widget overlayPortal1 = OverlayPortal(
+      final Widget overlayPortal1 = OverlayPortal.closest(
         key: key,
         overlayChild: child1,
         child: const SizedBox(),
@@ -1706,7 +1706,7 @@ void main() {
                       setState = stateSetter;
                       return reparented ? SizedBox(child: overlayPortal1) : overlayPortal1;
                     }),
-                    OverlayPortal(
+                    OverlayPortal.closest(
                       overlayChild: child2,
                       child: const SizedBox(),
                     ),
