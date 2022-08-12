@@ -768,10 +768,9 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Sends the message to create the platform view with an initial [size].
   ///
-  /// If [_createRequiresSize] is true, it is a programming error to call this
-  /// with a null size, and the call should instead be deferred until the size
-  /// is available.
-  Future<void> _sendCreateMessage({Size? size});
+  /// If [_createRequiresSize] is true, `size` is non-nullable, and the call
+  /// should instead be deferred until the size is available.
+  Future<void> _sendCreateMessage({required covariant Size? size});
 
   /// Sends the message to resize the platform view to [size].
   Future<Size> _sendResizeMessage(Size size);
@@ -1005,7 +1004,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => false;
 
   @override
-  Future<void> _sendCreateMessage({Size? size}) async {
+  Future<void> _sendCreateMessage({required Size? size}) async {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
@@ -1125,15 +1124,14 @@ class TextureAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<void> _sendCreateMessage({Size? size}) async {
-    // Size must not be null due to _createRequiresSize returning true.
-    assert(size != null, 'trying to create $TextureAndroidViewController with a null size.');
-    assert(!size!.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+  // Size is non-nullable due to _createRequiresSize returning true.
+  Future<void> _sendCreateMessage({required Size size}) async {
+    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
-      'width': size!.width,
+      'width': size.width,
       'height': size.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
     };
