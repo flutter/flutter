@@ -23,6 +23,28 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('Multiple text with same label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          const Column(
+            children: [
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          )
+        ),
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
     testWidgets('white text on black background - Text Widget - direct style',
         (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

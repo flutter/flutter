@@ -346,7 +346,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       ui.Image image,
       ByteData byteData,
       ) async {
-    Evaluation result = const Evaluation.pass();
+    const Evaluation result = Evaluation.pass();
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
     double? fontSize;
