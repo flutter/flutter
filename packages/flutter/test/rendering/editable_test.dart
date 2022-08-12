@@ -117,7 +117,7 @@ void main() {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 1000.0, maxWidth: 1000.0);
     final TestPushLayerPaintingContext context = TestPushLayerPaintingContext();
 
-    const paintOffset = Offset(100, 200);
+    const Offset paintOffset = Offset(100, 200);
 
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(text: 'text'),
@@ -131,7 +131,7 @@ void main() {
     layout(editable, constraints: viewport, phase: EnginePhase.composite);
     editable.paint(context, paintOffset);
 
-    final leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
+    final List<LeaderLayer> leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
     expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
     expect(leaderLayers.single.offset, const Offset(0, 14) + paintOffset, reason: 'offset should respect paintOffset');
   });
