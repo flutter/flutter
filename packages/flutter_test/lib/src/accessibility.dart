@@ -331,6 +331,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     if (shouldSkipNode(data)) {
       return result;
     }
+    final String text = data.label.isEmpty ? data.value : data.label;
     final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
     for (final Element element in elements) {
       result += await _evaluateElement(node, element, tester, image, byteData);
@@ -350,7 +351,6 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     late bool isBold;
     double? fontSize;
 
-    final String text = data.label.isEmpty ? data.value : data.label;
     late final Rect paintBounds;
 
     final RenderObject? renderBox = element.renderObject;
