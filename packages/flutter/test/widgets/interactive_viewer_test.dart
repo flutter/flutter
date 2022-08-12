@@ -1377,6 +1377,34 @@ void main() {
       expect(scaleHighZoomedIn, greaterThan(scaleHighZoomedOut));
       expect(scaleHighZoomedIn - scaleHighZoomedOut, lessThan(scaleZoomedIn - scaleZoomedOut));
     });
+
+    testWidgets('scrollFrictionCoefficient', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      Future<void> pumpScrollFrictionCoefficient(double scrollFrictionCoefficient) {
+        return tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: InteractiveViewer(
+                  constrained: false,
+                  scrollFrictionCoefficient: scrollFrictionCoefficient,                  
+                  transformationController: transformationController,
+                  child: const SizedBox(width: 2000.0, height: 2000.0),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Start with the default scrollFrictionCoefficient.
+      await pumpScrollFrictionCoefficient(0.0000135);
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Next try a custom scrollFrictionCoefficient.
+      await pumpScrollFrictionCoefficient(0.01);
+      expect(transformationController.value, equals(Matrix4.identity()));
+    });
   });
 
   group('getNearestPointOnLine', () {

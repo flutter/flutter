@@ -21,6 +21,9 @@ import 'ticker_provider.dart';
 // late TransformationController _transformationController;
 // Widget child = const Placeholder();
 
+/// Default coefficient of friction.
+const double _kDefaultScrollFrictionCoefficient = 0.0000135;
+
 /// A signature for widget builders that take a [Quad] of the current viewport.
 ///
 /// See also:
@@ -74,7 +77,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.scrollFrictionCoefficient = 0.0000135,
+    this.scrollFrictionCoefficient = _kDefaultScrollFrictionCoefficient,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
@@ -122,7 +125,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.scrollFrictionCoefficient = 0.0000135,
+    this.scrollFrictionCoefficient = _kDefaultScrollFrictionCoefficient,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
