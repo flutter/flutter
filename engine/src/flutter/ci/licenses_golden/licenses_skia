@@ -1,4 +1,4 @@
-Signature: f639c71cab37393bf09667ec9290d50d
+Signature: 189ef4d7eb3b776bfa1d304375c7f184
 
 UNUSED LICENSES:
 
@@ -4039,8 +4039,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrYUVABackendTextures.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/StencilMaskHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/StencilMaskHelper.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/SurfaceFillContext_v1.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/SurfaceFillContext_v1.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/d3d/GrD3DAMDMemoryAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/d3d/GrD3DAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/d3d/GrD3DAttachment.cpp
