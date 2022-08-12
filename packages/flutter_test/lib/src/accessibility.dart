@@ -331,50 +331,52 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     if (shouldSkipNode(data)) {
       return result;
     }
+    final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
+    for (final Element element in elements) {
+      result += await _evaluateElement(node, element, tester, image, byteData);
+    }
+    return result;
+  }
 
+  Future<Evaluation> _evaluateElement(
+      SemanticsNode node,
+      Element element,
+      WidgetTester tester,
+      ui.Image image,
+      ByteData byteData,
+      ) async {
+    Evaluation result = const Evaluation.pass();
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
     double? fontSize;
 
     final String text = data.label.isEmpty ? data.value : data.label;
-    final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
     late final Rect paintBounds;
 
-    if (elements.length == 1) {
-      final Element element = elements.single;
-      final RenderObject? renderBox = element.renderObject;
-      if (renderBox is! RenderBox) {
-        throw StateError('Unexpected renderObject type: $renderBox');
-      }
+    final RenderObject? renderBox = element.renderObject;
+    if (renderBox is! RenderBox) {
+      throw StateError('Unexpected renderObject type: $renderBox');
+    }
 
-      const Offset offset = Offset(4.0, 4.0);
-      paintBounds = Rect.fromPoints(
-        renderBox.localToGlobal(renderBox.paintBounds.topLeft - offset),
-        renderBox.localToGlobal(renderBox.paintBounds.bottomRight + offset),
-      );
-      final Widget widget = element.widget;
-      final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
-      if (widget is Text) {
-        final TextStyle? style = widget.style;
-        final TextStyle effectiveTextStyle = style == null || style.inherit
-            ? defaultTextStyle.style.merge(widget.style)
-            : style;
-        isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
-        fontSize = effectiveTextStyle.fontSize;
-      } else if (widget is EditableText) {
-        isBold = widget.style.fontWeight == FontWeight.bold;
-        fontSize = widget.style.fontSize;
-      } else {
-        throw StateError('Unexpected widget type: ${widget.runtimeType}');
-      }
-    } else if (elements.length > 1) {
-      return Evaluation.fail(
-        'Multiple nodes with the same label: ${data.label}\n',
-      );
+    const Offset offset = Offset(4.0, 4.0);
+    paintBounds = Rect.fromPoints(
+      renderBox.localToGlobal(renderBox.paintBounds.topLeft - offset),
+      renderBox.localToGlobal(renderBox.paintBounds.bottomRight + offset),
+    );
+    final Widget widget = element.widget;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
+    if (widget is Text) {
+      final TextStyle? style = widget.style;
+      final TextStyle effectiveTextStyle = style == null || style.inherit
+          ? defaultTextStyle.style.merge(widget.style)
+          : style;
+      isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
+      fontSize = effectiveTextStyle.fontSize;
+    } else if (widget is EditableText) {
+      isBold = widget.style.fontWeight == FontWeight.bold;
+      fontSize = widget.style.fontSize;
     } else {
-      // If we can't find the text node then assume the label does not
-      // correspond to actual text.
-      return result;
+      throw StateError('Unexpected widget type: ${widget.runtimeType}');
     }
 
     if (isNodeOffScreen(paintBounds, tester.binding.window)) {
