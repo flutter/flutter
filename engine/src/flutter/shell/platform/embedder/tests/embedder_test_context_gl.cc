@@ -39,7 +39,7 @@ bool EmbedderTestContextGL::GLClearCurrent() {
   return gl_surface_->ClearCurrent();
 }
 
-bool EmbedderTestContextGL::GLPresent(uint32_t fbo_id) {
+bool EmbedderTestContextGL::GLPresent(FlutterPresentInfo present_info) {
   FML_CHECK(gl_surface_) << "GL surface must be initialized.";
   gl_surface_present_count_++;
 
@@ -50,7 +50,7 @@ bool EmbedderTestContextGL::GLPresent(uint32_t fbo_id) {
   }
 
   if (callback) {
-    callback(fbo_id);
+    callback(present_info);
   }
 
   FireRootSurfacePresentCallbackIfPresent(
@@ -62,6 +62,12 @@ bool EmbedderTestContextGL::GLPresent(uint32_t fbo_id) {
 void EmbedderTestContextGL::SetGLGetFBOCallback(GLGetFBOCallback callback) {
   std::scoped_lock lock(gl_callback_mutex_);
   gl_get_fbo_callback_ = callback;
+}
+
+void EmbedderTestContextGL::SetGLPopulateExistingDamageCallback(
+    GLPopulateExistingDamageCallback callback) {
+  std::scoped_lock lock(gl_callback_mutex_);
+  gl_populate_existing_damage_callback_ = callback;
 }
 
 void EmbedderTestContextGL::SetGLPresentCallback(GLPresentCallback callback) {
@@ -84,6 +90,22 @@ uint32_t EmbedderTestContextGL::GLGetFramebuffer(FlutterFrameInfo frame_info) {
 
   const auto size = frame_info.size;
   return gl_surface_->GetFramebuffer(size.width, size.height);
+}
+
+void EmbedderTestContextGL::GLPopulateExistingDamage(
+    const intptr_t id,
+    FlutterDamage* existing_damage) {
+  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+
+  GLPopulateExistingDamageCallback callback;
+  {
+    std::scoped_lock lock(gl_callback_mutex_);
+    callback = gl_populate_existing_damage_callback_;
+  }
+
+  if (callback) {
+    callback(id, existing_damage);
+  }
 }
 
 bool EmbedderTestContextGL::GLMakeResourceCurrent() {

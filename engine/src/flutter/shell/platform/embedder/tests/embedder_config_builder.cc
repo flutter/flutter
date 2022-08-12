@@ -52,13 +52,14 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
   opengl_renderer_config_.present_with_info =
       [](void* context, const FlutterPresentInfo* present_info) -> bool {
     return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(
-        present_info->fbo_id);
+        *present_info);
   };
   opengl_renderer_config_.fbo_with_frame_info_callback =
       [](void* context, const FlutterFrameInfo* frame_info) -> uint32_t {
     return reinterpret_cast<EmbedderTestContextGL*>(context)->GLGetFramebuffer(
         *frame_info);
   };
+  opengl_renderer_config_.populate_existing_damage = nullptr;
   opengl_renderer_config_.make_resource_current = [](void* context) -> bool {
     return reinterpret_cast<EmbedderTestContextGL*>(context)
         ->GLMakeResourceCurrent();
@@ -160,7 +161,10 @@ void EmbedderConfigBuilder::SetOpenGLPresentCallBack() {
   FML_CHECK(renderer_config_.type == FlutterRendererType::kOpenGL);
   renderer_config_.open_gl.present = [](void* context) -> bool {
     // passing a placeholder fbo_id.
-    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(0);
+    return reinterpret_cast<EmbedderTestContextGL*>(context)->GLPresent(
+        FlutterPresentInfo{
+            .fbo_id = 0,
+        });
   };
 #endif
 }
@@ -310,6 +314,10 @@ void EmbedderConfigBuilder::SetupVsyncCallback() {
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     context->RunVsyncCallback(baton);
   };
+}
+
+FlutterRendererConfig& EmbedderConfigBuilder::GetRendererConfig() {
+  return renderer_config_;
 }
 
 void EmbedderConfigBuilder::SetRenderTaskRunner(

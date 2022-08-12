@@ -181,10 +181,10 @@ bool GPUSurfaceGLSkia::CreateOrUpdateSurfaces(const SkISize& size) {
 
   GLFrameInfo frame_info = {static_cast<uint32_t>(size.width()),
                             static_cast<uint32_t>(size.height())};
-  const uint32_t fbo_id = delegate_->GLContextFBO(frame_info);
+  const GLFBOInfo fbo_info = delegate_->GLContextFBO(frame_info);
   onscreen_surface = WrapOnscreenSurface(context_.get(),  // GL context
                                          size,            // root surface size
-                                         fbo_id           // window FBO ID
+                                         fbo_info.fbo_id  // window FBO ID
   );
 
   if (onscreen_surface == nullptr) {
@@ -195,7 +195,9 @@ bool GPUSurfaceGLSkia::CreateOrUpdateSurfaces(const SkISize& size) {
   }
 
   onscreen_surface_ = std::move(onscreen_surface);
-  fbo_id_ = fbo_id;
+  fbo_id_ = fbo_info.fbo_id;
+  supports_partial_repaint_ = fbo_info.partial_repaint_enabled;
+  existing_damage_ = fbo_info.existing_damage;
 
   return true;
 }
@@ -248,6 +250,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLSkia::AcquireFrame(
       };
 
   framebuffer_info = delegate_->GLContextFramebufferInfo();
+  // Partial repaint is enabled by default
+  framebuffer_info.supports_partial_repaint = supports_partial_repaint_;
+  framebuffer_info.existing_damage = existing_damage_;
   return std::make_unique<SurfaceFrame>(surface, std::move(framebuffer_info),
                                         submit_callback,
                                         std::move(context_switch));
@@ -268,8 +273,9 @@ bool GPUSurfaceGLSkia::PresentSurface(const SurfaceFrame& frame,
 
   GLPresentInfo present_info = {
       .fbo_id = fbo_id_,
-      .damage = frame.submit_info().frame_damage,
+      .frame_damage = frame.submit_info().frame_damage,
       .presentation_time = frame.submit_info().presentation_time,
+      .buffer_damage = frame.submit_info().buffer_damage,
   };
   if (!delegate_->GLContextPresent(present_info)) {
     return false;
@@ -284,11 +290,11 @@ bool GPUSurfaceGLSkia::PresentSurface(const SurfaceFrame& frame,
 
     // The FBO has changed, ask the delegate for the new FBO and do a surface
     // re-wrap.
-    const uint32_t fbo_id = delegate_->GLContextFBO(frame_info);
+    const GLFBOInfo fbo_info = delegate_->GLContextFBO(frame_info);
     auto new_onscreen_surface =
         WrapOnscreenSurface(context_.get(),  // GL context
                             current_size,    // root surface size
-                            fbo_id           // window FBO ID
+                            fbo_info.fbo_id  // window FBO ID
         );
 
     if (!new_onscreen_surface) {
@@ -296,7 +302,9 @@ bool GPUSurfaceGLSkia::PresentSurface(const SurfaceFrame& frame,
     }
 
     onscreen_surface_ = std::move(new_onscreen_surface);
-    fbo_id_ = fbo_id;
+    fbo_id_ = fbo_info.fbo_id;
+    supports_partial_repaint_ = fbo_info.partial_repaint_enabled;
+    existing_damage_ = fbo_info.existing_damage;
   }
 
   return true;

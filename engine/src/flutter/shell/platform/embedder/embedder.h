@@ -433,6 +433,16 @@ typedef struct {
   FlutterSize lower_left_corner_radius;
 } FlutterRoundedRect;
 
+/// A structure to represent a damage region.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterDamage).
+  size_t struct_size;
+  /// The number of rectangles within the damage region.
+  size_t num_rects;
+  /// The actual damage region(s) in question.
+  FlutterRect* damage;
+} FlutterDamage;
+
 /// This information is passed to the embedder when requesting a frame buffer
 /// object.
 ///
@@ -449,6 +459,13 @@ typedef uint32_t (*UIntFrameInfoCallback)(
     void* /* user data */,
     const FlutterFrameInfo* /* frame info */);
 
+/// Callback for when a frame buffer object is requested with necessary
+/// information for partial repaint.
+typedef void (*FlutterFrameBufferWithDamageCallback)(
+    void* /* user data */,
+    const intptr_t /* fbo id */,
+    FlutterDamage* /* existing damage */);
+
 /// This information is passed to the embedder when a surface is presented.
 ///
 /// See: \ref FlutterOpenGLRendererConfig.present_with_info.
@@ -457,6 +474,10 @@ typedef struct {
   size_t struct_size;
   /// Id of the fbo backing the surface that was presented.
   uint32_t fbo_id;
+  /// Damage representing the area that the compositor needs to render.
+  FlutterDamage frame_damage;
+  /// Damage used to set the buffer's damage region.
+  FlutterDamage buffer_damage;
 } FlutterPresentInfo;
 
 /// Callback for when a surface is presented.
@@ -471,7 +492,10 @@ typedef struct {
   BoolCallback clear_current;
   /// Specifying one (and only one) of `present` or `present_with_info` is
   /// required. Specifying both is an error and engine initialization will be
-  /// terminated. The return value indicates success of the present call.
+  /// terminated. The return value indicates success of the present call. If
+  /// the intent is to use dirty region management, present_with_info must be
+  /// defined as present will not succeed in communicating information about
+  /// damage.
   BoolCallback present;
   /// Specifying one (and only one) of the `fbo_callback` or
   /// `fbo_with_frame_info_callback` is required. Specifying both is an error
@@ -520,8 +544,27 @@ typedef struct {
   /// required. Specifying both is an error and engine initialization will be
   /// terminated. When using this variant, the embedder is passed a
   /// `FlutterPresentInfo` struct that the embedder can use to release any
-  /// resources. The return value indicates success of the present call.
+  /// resources. The return value indicates success of the present call. This
+  /// callback is essential for dirty region management. If not defined, all the
+  /// pixels on the screen will be rendered at every frame (regardless of
+  /// whether damage is actually being computed or not). This is because the
+  /// information that is passed along to the callback contains the frame and
+  /// buffer damage that are essential for dirty region management.
   BoolPresentInfoCallback present_with_info;
+  /// Specifying this callback is a requirement for dirty region management.
+  /// Dirty region management will only render the areas of the screen that have
+  /// changed in between frames, greatly reducing rendering times and energy
+  /// consumption. To take advantage of these benefits, it is necessary to
+  /// define populate_existing_damage as a callback that takes user
+  /// data, an FBO ID, and an existing damage FlutterDamage. The callback should
+  /// use the given FBO ID to identify the FBO's exisiting damage (i.e. areas
+  /// that have changed since the FBO was last used) and use it to populate the
+  /// given existing damage variable. This callback is dependent on either
+  /// fbo_callback or fbo_with_frame_info_callback being defined as they are
+  /// responsible for providing populate_existing_damage with the FBO's
+  /// ID. Not specifying populate_existing_damage will result in full
+  /// repaint (i.e. rendering all the pixels on the screen at every frame).
+  FlutterFrameBufferWithDamageCallback populate_existing_damage;
 } FlutterOpenGLRendererConfig;
 
 /// Alias for id<MTLDevice>.
