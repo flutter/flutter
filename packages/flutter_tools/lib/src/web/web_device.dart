@@ -131,7 +131,7 @@ abstract class ChromiumDevice extends Device {
     // for the web initialization and server logic.
     String url;
     if (debuggingOptions.webLaunchUrl != null) {
-      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+      final RegExp pattern = RegExp(r'^((http|https)?:\/\/)[^\s]+');
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {

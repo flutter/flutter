@@ -876,7 +876,7 @@ void main() {
     final DebuggingOptions options = await command.createDebuggingOptions(true);
     expect(options.webLaunchUrl, 'http://flutter.dev');
 
-    final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+    final RegExp pattern = RegExp(r'^((http|https)?:\/\/)[^\s]+');
     expect(pattern.hasMatch(options.webLaunchUrl), true);
   }, overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.any(),
