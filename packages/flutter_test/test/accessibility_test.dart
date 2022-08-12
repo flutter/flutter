@@ -28,7 +28,7 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           Column(
-            children: const [
+            children: const <Widget>[
               Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
