@@ -24,4 +24,4 @@ FOR /F "usebackq tokens=*" %%a IN (`dart --enable-asserts ..\tools\bin\find_comm
 ECHO.
 ECHO Running tests...
 CD ..\..\bin\cache\pkg\tests
-CALL dart --enable-asserts ..\..\..\..\dev\customer_testing\run_tests.dart --verbose --skip-on-fetch-failure --skip-template registry/*.test
+CALL dart --enable-asserts ..\..\..\..\dev\customer_testing\run_tests.dart --verbose registry/*.test
