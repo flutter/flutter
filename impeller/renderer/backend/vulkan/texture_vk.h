@@ -7,29 +7,52 @@
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {
 
+enum class TextureBackingTypeVK {
+  kAllocatedTexture,
+  kWrappedTexture,
+};
+
+struct WrappedTextureInfoVK {
+  SwapchainImageVK* swapchain_image = nullptr;
+};
+
+struct AllocatedTextureInfoVK {
+  VmaAllocator* allocator = nullptr;
+  VmaAllocation allocation = nullptr;
+  VmaAllocationInfo allocation_info = {};
+  VkImage image = nullptr;
+};
+
+struct TextureInfoVK {
+  TextureBackingTypeVK backing_type;
+  union {
+    WrappedTextureInfoVK wrapped_texture;
+    AllocatedTextureInfoVK allocated_texture;
+  };
+};
+
 class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
  public:
   TextureVK(TextureDescriptor desc,
-            ContextVK& context,
-            const VmaAllocator& allocator,
-            VkImage image,
-            VmaAllocation allocation,
-            VmaAllocationInfo allocation_info);
+            ContextVK* context,
+            std::unique_ptr<TextureInfoVK> texture_info);
 
   // |Texture|
   ~TextureVK() override;
 
+  bool IsWrapped() const;
+
  private:
-  ContextVK& context_;
-  const VmaAllocator& allocator_;
-  VkImage image_;
-  VmaAllocation allocation_;
-  VmaAllocationInfo allocation_info_;
+  ContextVK* context_;
+  std::unique_ptr<TextureInfoVK> texture_info_;
+
+  vk::Image GetImage() const;
 
   // |Texture|
   void SetLabel(std::string_view label) override;

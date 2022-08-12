@@ -7,32 +7,32 @@
 namespace impeller {
 
 TextureVK::TextureVK(TextureDescriptor desc,
-                     ContextVK& context,
-                     const VmaAllocator& allocator,
-                     VkImage image,
-                     VmaAllocation allocation,
-                     VmaAllocationInfo allocation_info)
+                     ContextVK* context,
+                     std::unique_ptr<TextureInfoVK> texture_info)
     : Texture(desc),
       context_(context),
-      allocator_(allocator),
-      image_(image),
-      allocation_(allocation),
-      allocation_info_(allocation_info) {}
+      texture_info_(std::move(texture_info)) {}
 
 TextureVK::~TextureVK() {
-  if (image_) {
-    vmaDestroyImage(allocator_, image_, allocation_);
+  if (!IsWrapped() && IsValid()) {
+    const auto& texture = texture_info_->allocated_texture;
+    vmaDestroyImage(*texture.allocator, texture.image, texture.allocation);
   }
 }
 
 void TextureVK::SetLabel(std::string_view label) {
-  context_.SetDebugName(vk::Image{image_}, label);
+  context_->SetDebugName(GetImage(), label);
 }
 
 bool TextureVK::OnSetContents(const uint8_t* contents,
                               size_t length,
                               size_t slice) {
-  if (!image_ || !contents) {
+  if (IsWrapped()) {
+    FML_LOG(ERROR) << "Cannot set contents of a wrapped texture";
+    return false;
+  }
+
+  if (!IsValid() || !contents) {
     return false;
   }
 
@@ -45,7 +45,8 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
   }
 
   // currently we are only supporting 2d textures, no cube textures etc.
-  memcpy(allocation_info_.pMappedData, contents, length);
+  auto mapping = texture_info_->allocated_texture.allocation_info.pMappedData;
+  memcpy(mapping, contents, length);
 
   return true;
 }
@@ -58,11 +59,29 @@ bool TextureVK::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
 }
 
 bool TextureVK::IsValid() const {
-  return image_;
+  switch (texture_info_->backing_type) {
+    case TextureBackingTypeVK::kAllocatedTexture:
+      return texture_info_->allocated_texture.image;
+    case TextureBackingTypeVK::kWrappedTexture:
+      return texture_info_->wrapped_texture.swapchain_image;
+  }
 }
 
 ISize TextureVK::GetSize() const {
   return GetTextureDescriptor().size;
+}
+
+bool TextureVK::IsWrapped() const {
+  return texture_info_->backing_type == TextureBackingTypeVK::kWrappedTexture;
+}
+
+vk::Image TextureVK::GetImage() const {
+  switch (texture_info_->backing_type) {
+    case TextureBackingTypeVK::kAllocatedTexture:
+      return texture_info_->allocated_texture.image;
+    case TextureBackingTypeVK::kWrappedTexture:
+      return texture_info_->wrapped_texture.swapchain_image->GetImage();
+  }
 }
 
 }  // namespace impeller

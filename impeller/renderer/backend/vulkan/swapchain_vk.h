@@ -26,6 +26,8 @@ class SwapchainImageVK {
 
   ISize GetSize() const;
 
+  vk::Image GetImage() const;
+
  private:
   vk::Image image_;
   vk::UniqueImageView image_view_;

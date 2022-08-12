@@ -19,6 +19,7 @@ class SurfaceVK final : public Surface {
 
   static std::unique_ptr<SurfaceVK> WrapSwapchainImage(
       SwapchainImageVK* swapchain_image,
+      ContextVK* context,
       SwapCallback swap_callback);
 
   SurfaceVK(RenderTarget target,

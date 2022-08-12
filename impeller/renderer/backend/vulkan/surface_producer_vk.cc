@@ -12,8 +12,10 @@
 namespace impeller {
 
 std::unique_ptr<SurfaceProducerVK> SurfaceProducerVK::Create(
+    std::weak_ptr<Context> context,
     const SurfaceProducerCreateInfoVK& create_info) {
-  auto surface_producer = std::make_unique<SurfaceProducerVK>(create_info);
+  auto surface_producer =
+      std::make_unique<SurfaceProducerVK>(context, create_info);
   if (!surface_producer->SetupSyncObjects()) {
     FML_LOG(ERROR) << "Failed to setup sync objects.";
     return nullptr;
@@ -23,8 +25,9 @@ std::unique_ptr<SurfaceProducerVK> SurfaceProducerVK::Create(
 }
 
 SurfaceProducerVK::SurfaceProducerVK(
+    std::weak_ptr<Context> context,
     const SurfaceProducerCreateInfoVK& create_info)
-    : create_info_(create_info) {}
+    : context_(context), create_info_(create_info) {}
 
 SurfaceProducerVK::~SurfaceProducerVK() = default;
 
@@ -63,9 +66,14 @@ std::unique_ptr<Surface> SurfaceProducerVK::AcquireSurface(
     return Present(image_index);
   };
 
-  return SurfaceVK::WrapSwapchainImage(
-      create_info_.swapchain->GetSwapchainImage(image_index),
-      std::move(swap_callback));
+  if (auto context = context_.lock()) {
+    ContextVK* context_vk = reinterpret_cast<ContextVK*>(context.get());
+    return SurfaceVK::WrapSwapchainImage(
+        create_info_.swapchain->GetSwapchainImage(image_index), context_vk,
+        std::move(swap_callback));
+  } else {
+    return nullptr;
+  }
 }
 
 bool SurfaceProducerVK::SetupSyncObjects() {

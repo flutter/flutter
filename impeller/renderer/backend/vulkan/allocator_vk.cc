@@ -102,8 +102,17 @@ std::shared_ptr<Texture> AllocatorVK::CreateTexture(
     return nullptr;
   }
 
-  return std::make_shared<TextureVK>(desc, context_, allocator_, img,
-                                     allocation, allocation_info);
+  auto texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
+      .backing_type = TextureBackingTypeVK::kAllocatedTexture,
+      .allocated_texture =
+          {
+              .allocator = &allocator_,
+              .allocation = allocation,
+              .allocation_info = allocation_info,
+              .image = img,
+          },
+  });
+  return std::make_shared<TextureVK>(desc, &context_, std::move(texture_info));
 }
 
 // |Allocator|
