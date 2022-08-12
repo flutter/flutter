@@ -27,13 +27,13 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          const Column(
+          Column(
             children: [
-              Text(
+              const Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
               ),
-              Text(
+              const Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
               ),
