@@ -97,6 +97,45 @@ void main() {
       );
     });
 
+    test('default view does not use view composition by default', () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController controller = PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      expect(controller.requiresViewComposition, false);
+    });
+
+    test('default view does not use view composition in fallback mode', () async {
+      viewsController.registerViewType('webview');
+      viewsController.allowTextureLayerMode = false;
+      final AndroidViewController controller = PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      viewsController.allowTextureLayerMode = true;
+      expect(controller.requiresViewComposition, false);
+    });
+
+    test('surface view does not use view composition by default', () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController controller = PlatformViewsService.initSurfaceAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      expect(controller.requiresViewComposition, false);
+    });
+
+    test('surface view does uses view composition in fallback mode', () async {
+      viewsController.registerViewType('webview');
+      viewsController.allowTextureLayerMode = false;
+      final AndroidViewController controller = PlatformViewsService.initSurfaceAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      viewsController.allowTextureLayerMode = true;
+      expect(controller.requiresViewComposition, true);
+    });
+
+    test('expensive view uses view composition', () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController controller = PlatformViewsService.initExpensiveAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      expect(controller.requiresViewComposition, true);
+    });
+
     test('reuse Android view id', () async {
       viewsController.registerViewType('webview');
       final AndroidViewController controller = PlatformViewsService.initAndroidView(

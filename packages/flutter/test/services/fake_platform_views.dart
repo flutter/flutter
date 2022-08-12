@@ -156,6 +156,11 @@ class FakeAndroidPlatformViewsController {
 
   Map<int, Offset> offsets = <int, Offset>{};
 
+  /// True if Texture Layer Hybrid Composition mode should be enabled.
+  ///
+  /// When false, `create` will simulate the engine's fallback mode.
+  bool allowTextureLayerMode = true;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -223,8 +228,17 @@ class FakeAndroidPlatformViewsController {
         hybridFallback: hybridFallback,
         creationParams: creationParams,
     );
+    // Return a hybrid result (null rather than a texture ID) if:
+    final bool hybridResult =
+      // hybrid was explicitly requested, or
+      (hybrid ?? false) ||
+      // hybrid fallback was requested and simulated.
+      (!allowTextureLayerMode && (hybridFallback ?? false));
+    if (hybridResult) {
+      return Future<void>.value();
+    }
     final int textureId = _textureCounter++;
-    return Future<int>.sync(() => textureId);
+    return Future<int>.value(textureId);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
