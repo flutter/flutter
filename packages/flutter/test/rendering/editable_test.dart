@@ -113,6 +113,29 @@ void main() {
     expect(visited, true);
   });
 
+  test('RenderEditable.paint respects offset argument', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 1000.0, maxWidth: 1000.0);
+    final TestPushLayerPaintingContext context = TestPushLayerPaintingContext();
+
+    const paintOffset = Offset(100, 200);
+
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(text: 'text'),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    layout(editable, constraints: viewport, phase: EnginePhase.composite);
+    editable.paint(context, paintOffset);
+
+    final leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
+    expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
+    expect(leaderLayers.single.offset, const Offset(0, 14) + paintOffset, reason: 'offset should respect paintOffset');
+  });
+  
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
