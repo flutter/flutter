@@ -514,7 +514,7 @@ void main() {
       exception.toString(),
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'If multiple keyed widgets exist as children of another widget, they must have unique keys.\n'
         'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
       ),
     );
@@ -541,7 +541,7 @@ void main() {
       exception.toString(),
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'If multiple keyed widgets exist as children of another widget, they must have unique keys.\n'
         'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
       ),
     );
@@ -717,7 +717,7 @@ void main() {
       exception.toString(),
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'If multiple keyed widgets exist as children of another widget, they must have unique keys.\n'
         'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].',
       ),
     );

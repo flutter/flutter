@@ -602,7 +602,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      preferRasterization: false, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/108389
+      preferRasterization: route?.preferRasterization ?? true,
       child: child,
     );
   }

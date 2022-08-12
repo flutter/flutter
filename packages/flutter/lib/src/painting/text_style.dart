@@ -357,9 +357,7 @@ const double _kDefaultFontSize = 14.0;
 /// the app can use these selectively when declaring a font. Suppose a package
 /// named `my_package` has:
 ///
-/// ```
-/// lib/fonts/Raleway-Medium.ttf
-/// ```
+///     lib/fonts/Raleway-Medium.ttf
 ///
 /// Then the app can declare a font like in the example below:
 ///
@@ -790,9 +788,9 @@ class TextStyle with Diagnosticable {
   /// For example, to control the weight axis of the Roboto Slab variable font
   /// (https://fonts.google.com/specimen/Roboto+Slab):
   /// ```dart
-  /// TextStyle(
+  /// const TextStyle(
   ///   fontFamily: 'RobotoSlab',
-  ///   fontVariations: <FontVariation>[FontVariation('wght', 900.0)]
+  ///   fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 900.0)]
   /// )
   /// ```
   final List<ui.FontVariation>? fontVariations;
