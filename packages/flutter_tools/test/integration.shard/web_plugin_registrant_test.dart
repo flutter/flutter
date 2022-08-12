@@ -44,8 +44,8 @@ void main() {
   testUsingContext('generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
-    await _addDependency(projectDir, 'shared_preferences',
-        version: '^2.0.0');
+    await _editPubspecFile(projectDir, _addDependencyEditor('shared_preferences',
+        version: '^2.0.0'));
     // The plugin registrant is created on build...
     await _buildWebProject(projectDir);
 
@@ -63,7 +63,9 @@ void main() {
     // Ensure the contents match what we expect for a non-empty plugin registrant.
     final String contents = registrant.readAsStringSync();
     expect(contents, contains("import 'package:shared_preferences_web/shared_preferences_web.dart';"));
-    expect(contents, contains('void registerPlugins([final Registrar? pluginRegistrar]) {'));
+    expect(contents, contains('void registerPlugins() {'));
+    expect(contents, contains('  registerPluginsWithRegistrar(webPluginRegistrar);'));
+    expect(contents, contains('void registerPluginsWithRegistrar(final Registrar registrar) {'));
     expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
@@ -76,6 +78,55 @@ void main() {
           platform: globals.platform,
         ),
   });
+
+  testUsingContext('generated plugin registrant passes analysis without null safety', () async {
+    await _createProject(projectDir, <String>[]);
+    // We need a dependency so the plugin registrant is not completely empty.
+    await _editPubspecFile(projectDir,
+      _composeEditors(<PubspecEditor>[
+        _addDependencyEditor('shared_preferences', version: '^2.0.0'),
+
+        // This turns null safety off
+        _setDartSDKVersionEditor('>=2.11.0 <3.0.0'),
+      ]));
+
+    // The generated main.dart file has a bunch of stuff that is invalid without null safety, so
+    // replace it with a no-op dummy main file. We aren't testing it in this scenario anyway.
+    await _replaceMainFile(projectDir, 'void main() {}');
+
+    // The plugin registrant is created on build...
+    await _buildWebProject(projectDir);
+
+    // Find the web_plugin_registrant, now that it lives outside "lib":
+    final Directory buildDir = projectDir
+        .childDirectory('.dart_tool/flutter_build')
+        .listSync()
+        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+
+    // Ensure the file exists, and passes analysis.
+    final File registrant = buildDir.childFile('web_plugin_registrant.dart');
+    expect(registrant, exists);
+    await _analyzeEntity(registrant);
+
+    // Ensure the contents match what we expect for a non-empty plugin registrant.
+    final String contents = registrant.readAsStringSync();
+    expect(contents, contains("import 'package:shared_preferences_web/shared_preferences_web.dart';"));
+    expect(contents, contains('void registerPlugins() {'));
+    expect(contents, contains('  registerPluginsWithRegistrar(webPluginRegistrar);'));
+    expect(contents, contains('void registerPluginsWithRegistrar(final Registrar registrar) {'));
+    expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
+    expect(contents, contains('registrar.registerMessageHandler();'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          usage: globals.flutterUsage,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+        ),
+  });
+
 
   testUsingContext('(no-op) generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
@@ -110,8 +161,8 @@ void main() {
   // See: https://github.com/dart-lang/dart-services/pull/874
   testUsingContext('generated plugin registrant for dartpad is created on pub get', () async {
     await _createProject(projectDir, <String>[]);
-    await _addDependency(projectDir, 'shared_preferences',
-        version: '^2.0.0');
+    await _editPubspecFile(projectDir,
+      _addDependencyEditor('shared_preferences', version: '^2.0.0'));
     // The plugin registrant for dartpad is created on flutter pub get.
     await _doFlutterPubGet(projectDir);
 
@@ -154,10 +205,12 @@ void main() {
     // With the above lint rule added, we want to ensure that the `generated_plugin_registrant.dart`
     // file does not fail analysis (this is a regression test - an ignore was
     // added to cover this case).
-    await _addDependency(
+    await _editPubspecFile(
       projectDir,
-      'test_web_plugin_with_a_purposefully_extremely_long_package_name',
-      path: '../test_plugin',
+      _addDependencyEditor(
+        'test_web_plugin_with_a_purposefully_extremely_long_package_name',
+        path: '../test_plugin',
+      )
     );
     // The plugin registrant is only created after a build...
     await _buildWebProject(projectDir);
@@ -255,32 +308,76 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
   ]);
 }
 
-Future<void> _addDependency(
-  Directory projectDir,
-  String package, {
-  String? version,
-  String? path,
-}) async {
-  assert(version != null || path != null,
-      'Need to define a source for the package.');
-  assert(version == null || path == null,
-      'Cannot only load a package from path or from Pub, not both.');
+typedef PubspecEditor = void Function(List<String> pubSpecContents);
 
+Future<void> _editPubspecFile(
+  Directory projectDir,
+  PubspecEditor editor,
+) async {
   final File pubspecYaml = projectDir.childFile('pubspec.yaml');
   expect(pubspecYaml, exists);
 
   final List<String> lines = await pubspecYaml.readAsLines();
-  for (int i = 0; i < lines.length; i++) {
-    final String line = lines[i];
-    if (line.startsWith('dependencies:')) {
-      lines.insert(
-          i + 1,
-          '  $package: ${version ?? '\n'
-              '    path: $path'}');
-      break;
+  editor(lines);
+  await pubspecYaml.writeAsString(lines.join('\n'));
+}
+
+Future<void> _replaceMainFile(Directory projectDir, String fileContents) async {
+  final File mainFile = projectDir.childDirectory('lib').childFile('main.dart');
+  await mainFile.writeAsString(fileContents);
+}
+
+PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String? path}) {
+  assert(version != null || path != null,
+      'Need to define a source for the package.');
+  assert(version == null || path == null,
+      'Cannot only load a package from path or from Pub, not both.');
+  void editor(List<String> lines) {
+    for (int i = 0; i < lines.length; i++) {
+      final String line = lines[i];
+      if (line.startsWith('dependencies:')) {
+        lines.insert(
+            i + 1,
+            '  $packageToAdd: ${version ?? '\n'
+                '   path: $path'}');
+        break;
+      }
     }
   }
-  await pubspecYaml.writeAsString(lines.join('\n'));
+  return editor;
+}
+
+PubspecEditor _setDartSDKVersionEditor(String version) {
+  void editor(List<String> lines) {
+    for (int i = 0; i < lines.length; i++) {
+      final String line = lines[i];
+      if (line.startsWith('environment:')) {
+        for (i++; i < lines.length; i++) {
+          final String innerLine = lines[i];
+          final String sdkLine = "  sdk: '$version'";
+          if(innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
+            lines.insert(i, sdkLine);
+            break;
+          }
+          if(innerLine.startsWith('  sdk:')) {
+            lines[i] = sdkLine;
+            break;
+          }
+        }
+        break;
+      }
+    }
+  }
+  return editor;
+}
+
+PubspecEditor _composeEditors(Iterable<PubspecEditor> editors) {
+  void editor(List<String> lines) {
+    for (final PubspecEditor e in editors) {
+      e(lines);
+    }
+  }
+  return editor;
 }
 
 Future<void> _addAnalysisOptions(
