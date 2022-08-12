@@ -368,7 +368,7 @@ class TestClipPaintingContext extends PaintingContext {
 class TestPushLayerPaintingContext extends PaintingContext {
   TestPushLayerPaintingContext() : super(ContainerLayer(), Rect.zero);
 
-  final pushedLayers = <ContainerLayer>[];
+  final List<ContainerLayer> pushedLayers = <ContainerLayer>[];
 
   @override
   void pushLayer(
