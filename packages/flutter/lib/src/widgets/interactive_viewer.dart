@@ -304,10 +304,10 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Used as the coefficient of friction in the inertial translation animation.
   /// This value was eyeballed to give a feel similar to Google Photos.
-  /// 
+  ///
   /// Defaults to 0.0000135.
-  /// 
-  /// Cannot be null, and must be a finite number greater than zer
+  ///
+  /// Cannot be null, and must be a finite number greater than zero
   final double scrollFriction;
 
   /// Called when the user ends a pan or scale gesture on the widget.
