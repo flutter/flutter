@@ -283,7 +283,7 @@ void main() {
       useMaterial3: material3,
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-            visualDensity: const VisualDensity(horizontal: 1, vertical: -1)
+          visualDensity: const VisualDensity(horizontal: 1, vertical: -1)
         )
       ),
     );
@@ -447,6 +447,7 @@ void main() {
   });
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -464,8 +465,9 @@ void main() {
       ),
     );
 
+    final RenderBox barBox = tester.renderObject(find.byType(AppBar));
     final RenderBox iconBox = tester.renderObject(find.byType(IconButton));
-    expect(iconBox.size.height, 48.0);
+    expect(iconBox.size.height, material3 ? 48 : equals(barBox.size.height));
     expect(tester.getCenter(find.byType(IconButton)).dy, 28);
   });
 
