@@ -152,7 +152,6 @@ std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
   // ===========================================================================
   // Metadata for Vulkan =======================================================
   // ===========================================================================
-{% if length(buffers)+length(sampled_images) > 0 %}
   static constexpr std::array<DescriptorSetLayout,{{length(buffers)+length(sampled_images)}}> kDescriptorSetLayouts{
 {% for buffer in buffers %}
     DescriptorSetLayout{
@@ -171,7 +170,6 @@ std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
     },
 {% endfor %}
   };
-{% endif %}
 
 };  // struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader
 

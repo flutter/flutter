@@ -70,6 +70,31 @@ TEST_P(CompilerTest, ShaderWithSpecialCharactersHasEscapedDepfile) {
   ASSERT_TRUE(ValidateDepfileEscaped("sa\%m#ple.vert"));
 }
 
+TEST_P(CompilerTest, BindingBaseForFragShader) {
+  if (GetParam() == TargetPlatform::kFlutterSPIRV) {
+    // This is a failure of reflection which this target doesn't perform.
+    GTEST_SKIP();
+  }
+
+#ifndef IMPELLER_ENABLE_VULKAN
+  GTEST_SKIP();
+#endif
+
+  ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
+  ASSERT_TRUE(CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
+
+  auto get_binding = [&](const char* fixture) -> uint32_t {
+    auto json_fd = GetReflectionJson(fixture);
+    nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+    return shader_json["buffers"][0]["binding"].get<uint32_t>();
+  };
+
+  auto vert_uniform_binding = get_binding("sample.vert");
+  auto frag_uniform_binding = get_binding("sample.frag");
+
+  ASSERT_GT(frag_uniform_binding, vert_uniform_binding);
+}
+
 #define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)              \
   INSTANTIATE_TEST_SUITE_P(                                               \
       suite_name, CompilerTest,                                           \

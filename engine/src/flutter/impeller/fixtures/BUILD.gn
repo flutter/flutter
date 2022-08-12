@@ -44,6 +44,7 @@ test_fixtures("file_fixtures") {
     "kalimba.jpg",
     "resources_limit.vert",
     "sample.comp",
+    "sample.frag",
     "sample.tesc",
     "sample.tese",
     "sample.vert",
