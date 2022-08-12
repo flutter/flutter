@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/testing/windows_test_context.h"
 
@@ -77,6 +78,12 @@ ViewControllerPtr WindowsConfigBuilder::Run() const {
   if (!engine) {
     return {};
   }
+
+  // Register native functions.
+  FlutterWindowsEngine* windows_engine =
+      reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  windows_engine->SetRootIsolateCreateCallback(
+      context_.GetRootIsolateCallback());
 
   int width = 600;
   int height = 400;
