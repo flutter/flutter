@@ -51,7 +51,7 @@ class AndroidSurfaceMock final : public GPUSurfaceGLDelegate,
   bool GLContextPresent(const GLPresentInfo& present_info) override;
 
   // |GPUSurfaceGLDelegate|
-  intptr_t GLContextFBO(GLFrameInfo frame_info) const override;
+  GLFBOInfo GLContextFBO(GLFrameInfo frame_info) const override;
 };
 
 }  // namespace flutter

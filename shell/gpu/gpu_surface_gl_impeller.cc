@@ -62,10 +62,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
     if (weak) {
       GLPresentInfo present_info = {
           .fbo_id = 0,
-          .damage = std::nullopt,
+          .frame_damage = std::nullopt,
           // TODO (https://github.com/flutter/flutter/issues/105597): wire-up
           // presentation time to impeller backend.
           .presentation_time = std::nullopt,
+          .buffer_damage = std::nullopt,
       };
       delegate->GLContextPresent(present_info);
     }
