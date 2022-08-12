@@ -1184,17 +1184,17 @@ abstract class _AndroidViewControllerInternals {
       required String viewType,
       required TextDirection layoutDirection,
       required bool hybrid,
-      bool? hybridFallback,
+      bool hybridFallback = false,
       _CreationParams? creationParams,
       Size? size}) {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
-      'hybrid': hybrid,
+      if (hybrid == true) 'hybrid': hybrid,
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
-      if (hybridFallback != null) 'hybridFallback': hybridFallback,
+      if (hybridFallback == true) 'hybridFallback': hybridFallback,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;

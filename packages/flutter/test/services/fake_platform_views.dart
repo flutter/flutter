@@ -195,6 +195,7 @@ class FakeAndroidPlatformViewsController {
     final double? height = args['height'] as double?;
     final int layoutDirection = args['direction'] as int;
     final bool? hybrid = args['hybrid'] as bool?;
+    final bool? hybridFallback = args['hybridFallback'] as bool?;
     final Uint8List? creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
@@ -218,8 +219,9 @@ class FakeAndroidPlatformViewsController {
     _views[id] = FakeAndroidPlatformView(id, viewType,
         width != null && height != null ? Size(width, height) : null,
         layoutDirection,
-        hybrid,
-        creationParams,
+        hybrid: hybrid,
+        hybridFallback: hybridFallback,
+        creationParams: creationParams,
     );
     final int textureId = _textureCounter++;
     return Future<int>.sync(() => textureId);
@@ -509,7 +511,8 @@ class FakeHtmlPlatformViewsController {
 
 @immutable
 class FakeAndroidPlatformView {
-  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection, this.hybrid, [this.creationParams]);
+  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection,
+    {this.hybrid, this.hybridFallback, this.creationParams});
 
   final int id;
   final String type;
@@ -517,14 +520,16 @@ class FakeAndroidPlatformView {
   final Size? size;
   final int layoutDirection;
   final bool? hybrid;
+  final bool? hybridFallback;
 
   FakeAndroidPlatformView copyWith({Size? size, int? layoutDirection}) => FakeAndroidPlatformView(
     id,
     type,
     size ?? this.size,
     layoutDirection ?? this.layoutDirection,
-    hybrid,
-    creationParams,
+    hybrid: hybrid,
+    hybridFallback: hybridFallback,
+    creationParams: creationParams,
   );
 
   @override
@@ -538,6 +543,7 @@ class FakeAndroidPlatformView {
         && listEquals<int>(other.creationParams, creationParams)
         && other.size == size
         && other.hybrid == hybrid
+        && other.hybridFallback == hybridFallback
         && other.layoutDirection == layoutDirection;
   }
 
@@ -549,11 +555,14 @@ class FakeAndroidPlatformView {
     size,
     layoutDirection,
     hybrid,
+    hybridFallback,
   );
 
   @override
   String toString() {
-    return 'FakeAndroidPlatformView(id: $id, type: $type, size: $size, layoutDirection: $layoutDirection, hybrid: $hybrid, creationParams: $creationParams)';
+    return 'FakeAndroidPlatformView(id: $id, type: $type, size: $size, '
+      'layoutDirection: $layoutDirection, hybrid: $hybrid, '
+      'hybridFallback: $hybridFallback, creationParams: $creationParams)';
   }
 }
 
