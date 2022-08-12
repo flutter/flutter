@@ -4,9 +4,12 @@
 
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
+
 namespace impeller {
 std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
     SwapchainImageVK* swapchain_image,
+    ContextVK* context,
     SwapCallback swap_callback) {
   if (!swapchain_image) {
     return nullptr;
@@ -20,10 +23,15 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
   color0_tex.sample_count = SampleCount::kCount1;
 
   ColorAttachment color0;
-  // TODO (kaushikiska): this needs to be fixed.
-  // color0.texture = std::make_shared<TextureGLES>(
-  //     gl_context.GetReactor(), std::move(color0_tex),
-  //     TextureGLES::IsWrapped::kWrapped);
+  auto color_texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
+      .backing_type = TextureBackingTypeVK::kWrappedTexture,
+      .wrapped_texture =
+          {
+              .swapchain_image = swapchain_image,
+          },
+  });
+  color0.texture = std::make_shared<TextureVK>(std::move(color0_tex), context,
+                                               std::move(color_texture_info));
   color0.clear_color = Color::DarkSlateGray();
   color0.load_action = LoadAction::kClear;
   color0.store_action = StoreAction::kStore;
@@ -38,10 +46,15 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
 
   StencilAttachment stencil0;
   stencil0.clear_stencil = 0;
-  // TODO (kaushikiska): this needs to be fixed.
-  // stencil0.texture = std::make_shared<TextureGLES>(
-  //     gl_context.GetReactor(), std::move(stencil0_tex),
-  //     TextureGLES::IsWrapped::kWrapped);
+  auto stencil_texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
+      .backing_type = TextureBackingTypeVK::kWrappedTexture,
+      .wrapped_texture =
+          {
+              .swapchain_image = swapchain_image,
+          },
+  });
+  stencil0.texture = std::make_shared<TextureVK>(
+      std::move(stencil0_tex), context, std::move(stencil_texture_info));
   stencil0.load_action = LoadAction::kClear;
   stencil0.store_action = StoreAction::kDontCare;
 

@@ -138,6 +138,10 @@ ISize SwapchainImageVK::GetSize() const {
   return ISize(extent_.width, extent_.height);
 }
 
+vk::Image SwapchainImageVK::GetImage() const {
+  return image_;
+}
+
 SwapchainImageVK::~SwapchainImageVK() = default;
 
 }  // namespace impeller
