@@ -1387,7 +1387,7 @@ void main() {
               body: Center(
                 child: InteractiveViewer(
                   constrained: false,
-                  scrollFrictionCoefficient: scrollFrictionCoefficient,                  
+                  scrollFrictionCoefficient: scrollFrictionCoefficient,
                   transformationController: transformationController,
                   child: const SizedBox(width: 2000.0, height: 2000.0),
                 ),
