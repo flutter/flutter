@@ -1,4 +1,4 @@
-Signature: 0336adeae2079d62d1969c61d17ed674
+Signature: 026272190f940e2e22b194aed5a41ecc
 
 UNUSED LICENSES:
 
@@ -5603,11 +5603,15 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.mm
+FILE: ../../../third_party/skia/src/gpu/graphite/render/BitmapTextRenderStep.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/render/BitmapTextRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/DynamicInstancesPatchAllocator.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/MiddleOutFanRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/MiddleOutFanRenderStep.h
+FILE: ../../../third_party/skia/src/gpu/graphite/render/SDFTextRenderStep.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/render/SDFTextRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/StencilAndCoverDSS.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateCurvesRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateCurvesRenderStep.h
@@ -5615,10 +5619,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateStrokesRenderS
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateStrokesRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateWedgesRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateWedgesRenderStep.h
-FILE: ../../../third_party/skia/src/gpu/graphite/render/TextDirectRenderStep.cpp
-FILE: ../../../third_party/skia/src/gpu/graphite/render/TextDirectRenderStep.h
-FILE: ../../../third_party/skia/src/gpu/graphite/render/TextSDFRenderStep.cpp
-FILE: ../../../third_party/skia/src/gpu/graphite/render/TextSDFRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/VerticesRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/VerticesRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.cpp
