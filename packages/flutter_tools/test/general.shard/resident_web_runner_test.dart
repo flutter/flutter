@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -1336,6 +1337,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
     @required String dillOutputPath,
+    @required DevelopmentShaderCompiler shaderCompiler,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
@@ -1350,7 +1352,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   }
 
   @override
-  Future<ConnectionResult> connect(bool useDebugExtension) async {
+  Future<ConnectionResult> connect(bool useDebugExtension, {VmServiceFactory vmServiceFactory = createVmServiceDelegate}) async {
     if (exception != null) {
       assert(exception is Exception || exception is Error);
       // ignore: only_throw_errors, exception is either Error or Exception here.
@@ -1455,6 +1457,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
 
   @override
+  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
+
+  @override
   FlutterVmService vmService;
 
   DevFS _devFS;
@@ -1523,4 +1528,16 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
 }

@@ -2276,30 +2276,35 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'leading: Text');
-    expect(description[1], 'title: Text');
-    expect(description[2], 'subtitle: Text');
-    expect(description[3], 'trailing: Text');
-    expect(description[4], 'isThreeLine: THREE_LINE');
-    expect(description[5], 'dense: true');
-    expect(description[6], equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)'));
-    expect(description[7], 'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)');
-    expect(description[8], 'style: ListTileStyle.list');
-    expect(description[9], 'selectedColor: Color(0xff0000ff)');
-    expect(description[10], 'iconColor: Color(0xff00ff00)');
-    expect(description[11], 'textColor: Color(0xffff0000)');
-    expect(description[12], 'contentPadding: EdgeInsets.zero');
-    expect(description[13], 'enabled: false');
-    expect(description[14], 'selected: true');
-    expect(description[15], 'focusColor: Color(0xff00ffff)');
-    expect(description[16], 'hoverColor: Color(0xff0000ff)');
-    expect(description[17], 'autofocus: true');
-    expect(description[18], 'tileColor: Color(0xffffff00)');
-    expect(description[19], 'selectedTileColor: Color(0xff123456)');
-    expect(description[20], 'enableFeedback: false');
-    expect(description[21], 'horizontalTitleGap: 4.0');
-    expect(description[22], 'minVerticalPadding: 2.0');
-    expect(description[23], 'minLeadingWidth: 6.0');
+    expect(
+      description,
+      equalsIgnoringHashCodes(<String>[
+        'leading: Text',
+        'title: Text',
+        'subtitle: Text',
+        'trailing: Text',
+        'isThreeLine: THREE_LINE',
+        'dense: true',
+        'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
+        'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+        'style: ListTileStyle.list',
+        'selectedColor: Color(0xff0000ff)',
+        'iconColor: Color(0xff00ff00)',
+        'textColor: Color(0xffff0000)',
+        'contentPadding: EdgeInsets.zero',
+        'enabled: false',
+        'selected: true',
+        'focusColor: Color(0xff00ffff)',
+        'hoverColor: Color(0xff0000ff)',
+        'autofocus: true',
+        'tileColor: Color(0xffffff00)',
+        'selectedTileColor: Color(0xff123456)',
+        'enableFeedback: false',
+        'horizontalTitleGap: 4.0',
+        'minVerticalPadding: 2.0',
+        'minLeadingWidth: 6.0',
+      ]),
+    );
   });
 
   group('Material 2', () {

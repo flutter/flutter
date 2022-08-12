@@ -17,6 +17,10 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// bool _giveVerse = true;
+// late StateSetter setState;
+
 const double _kTrackHeight = 14.0;
 const double _kTrackWidth = 33.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
@@ -182,7 +186,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [thumbColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -190,7 +194,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
@@ -273,7 +277,7 @@ class Switch extends StatelessWidget {
   /// | State    | Light theme                       | Dark theme                        |
   /// |----------|-----------------------------------|-----------------------------------|
   /// | Default  | `Colors.grey.shade50`             | `Colors.grey.shade400`            |
-  /// | Selected | [ThemeData.toggleableActiveColor] | [ThemeData.toggleableActiveColor] |
+  /// | Selected | [ColorScheme.secondary] | [ColorScheme.secondary] |
   /// | Disabled | `Colors.grey.shade400`            | `Colors.grey.shade800`            |
   final MaterialStateProperty<Color?>? thumbColor;
 
@@ -393,7 +397,7 @@ class Switch extends StatelessWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [SwitchThemeData.overlayColor] is used. If that is
-  /// also null, then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
@@ -614,7 +618,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         return isDark ? Colors.grey.shade800 : Colors.grey.shade400;
       }
       if (states.contains(MaterialState.selected)) {
-        return theme.toggleableActiveColor;
+        return theme.colorScheme.secondary;
       }
       return isDark ? Colors.grey.shade400 : Colors.grey.shade50;
     });
@@ -751,7 +755,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
         ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+        ?? effectiveInactiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)

@@ -441,8 +441,8 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check when the radio isn't selected.
@@ -519,8 +519,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Start hovering

@@ -12,6 +12,10 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// bool _throwShotAway = false;
+// late StateSetter setState;
+
 /// A Material Design checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
@@ -147,7 +151,7 @@ class Checkbox extends StatefulWidget {
 
   /// The color to use when this checkbox is checked.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [fillColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -185,7 +189,7 @@ class Checkbox extends StatefulWidget {
   /// If null, then the value of [activeColor] is used in the selected
   /// state. If that is also null, the value of [CheckboxThemeData.fillColor]
   /// is used. If that is also null, then [ThemeData.disabledColor] is used in
-  /// the disabled state, [ThemeData.toggleableActiveColor] is used in the
+  /// the disabled state, [ColorScheme.secondary] is used in the
   /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
   /// default state.
   final MaterialStateProperty<Color?>? fillColor;
@@ -272,7 +276,7 @@ class Checkbox extends StatefulWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [CheckboxThemeData.overlayColor] is used. If that is
-  /// also null, then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
@@ -385,7 +389,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         return themeData.disabledColor;
       }
       if (states.contains(MaterialState.selected)) {
-        return themeData.toggleableActiveColor;
+        return themeData.colorScheme.secondary;
       }
       return themeData.unselectedWidgetColor;
     });

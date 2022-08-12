@@ -238,6 +238,35 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  testWidgets('indicatorPadding update test', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/108102
+    const Tab tab = Tab(text: 'A');
+    const EdgeInsets indicatorPadding = EdgeInsets.only(left: 7.0, right: 7.0);
+
+    await tester.pumpWidget(boilerplate(
+      child: const DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: <Tab>[tab],
+          indicatorPadding: indicatorPadding,
+        ),
+      ),
+    ));
+
+    // Change the indicatorPadding
+    await tester.pumpWidget(boilerplate(
+      child: DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: const <Tab>[tab],
+          indicatorPadding: indicatorPadding + const EdgeInsets.all(7.0),
+        ),
+      ),
+    ), Duration.zero, EnginePhase.build);
+
+    expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
+  });
+
   testWidgets('Tab sizing - icon', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0))))),

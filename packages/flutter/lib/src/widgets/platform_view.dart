@@ -13,6 +13,11 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 
+// Examples can assume:
+// PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
+// Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{};
+// late PlatformViewController _controller;
+
 /// Embeds an Android view in the Widget hierarchy.
 ///
 /// Requires Android API level 23 or greater.
@@ -126,7 +131,7 @@ class AndroidView extends StatefulWidget {
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails d) {},
-  ///   child: AndroidView(
+  ///   child: const AndroidView(
   ///     viewType: 'webview',
   ///   ),
   /// )
@@ -143,11 +148,11 @@ class AndroidView extends StatefulWidget {
   ///     height: 100.0,
   ///     child: AndroidView(
   ///       viewType: 'webview',
-  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
   ///         Factory<OneSequenceGestureRecognizer>(
   ///           () => EagerGestureRecognizer(),
   ///         ),
-  ///       ].toSet(),
+  ///       },
   ///     ),
   ///   ),
   /// )
@@ -266,7 +271,7 @@ class UiKitView extends StatefulWidget {
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
-  ///   child: UiKitView(
+  ///   child: const UiKitView(
   ///     viewType: 'webview',
   ///   ),
   /// )
@@ -283,11 +288,11 @@ class UiKitView extends StatefulWidget {
   ///     height: 100.0,
   ///     child: UiKitView(
   ///       viewType: 'webview',
-  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
   ///         Factory<OneSequenceGestureRecognizer>(
   ///           () => EagerGestureRecognizer(),
   ///         ),
-  ///       ].toSet(),
+  ///       },
   ///     ),
   ///   ),
   /// )
@@ -801,19 +806,21 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 ///
 /// To implement a new platform view widget, return this widget in the `build` method.
 /// For example:
+///
 /// ```dart
 /// class FooPlatformView extends StatelessWidget {
+///   const FooPlatformView({super.key});
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewLink(
 ///       viewType: 'webview',
 ///       onCreatePlatformView: createFooWebView,
 ///       surfaceFactory: (BuildContext context, PlatformViewController controller) {
-///        return PlatformViewSurface(
-///            gestureRecognizers: gestureRecognizers,
-///            controller: controller,
-///            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-///        );
+///         return PlatformViewSurface(
+///           gestureRecognizers: gestureRecognizers,
+///           controller: controller,
+///           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+///         );
 ///       },
 ///    );
 ///   }
@@ -864,22 +871,20 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null) {
+    final PlatformViewController? controller = _controller;
+    if (controller == null) {
       return const SizedBox.expand();
     }
     if (!_platformViewCreated) {
-      // Depending on the platform, the initial size can be used to size the platform view.
+      // Depending on the implementation, the initial size can be used to size
+      // the platform view.
       return _PlatformViewPlaceHolder(onLayout: (Size size) {
-        if (!_platformViewCreated) {
-          // TODO(stuartmorgan): Replace this call with a new API that only
-          // calls 'create' when an earlier 'create' was deferred, or when
-          // using a legacy init*AndroidView method; see comment in
-          // AndroidViewController.create.
-          _controller!.create(size: size);
+        if (controller.awaitingCreation) {
+          controller.create(size: size);
         }
       });
     }
-    _surface ??= widget._surfaceFactory(context, _controller!);
+    _surface ??= widget._surfaceFactory(context, controller);
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _handleFrameworkFocusChanged,
@@ -995,8 +1000,11 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   onVerticalDragStart: (DragStartDetails details) { },
   ///   child: PlatformViewSurface(
+  ///     gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+  ///     controller: _controller,
+  ///     hitTestBehavior: PlatformViewHitTestBehavior.opaque,
   ///   ),
   /// )
   /// ```
@@ -1006,16 +1014,18 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   onVerticalDragStart: (DragStartDetails details) { },
   ///   child: SizedBox(
   ///     width: 200.0,
   ///     height: 100.0,
   ///     child: PlatformViewSurface(
-  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
   ///         Factory<OneSequenceGestureRecognizer>(
   ///           () => EagerGestureRecognizer(),
   ///         ),
-  ///       ].toSet(),
+  ///       },
+  ///       controller: _controller,
+  ///       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
   ///     ),
   ///   ),
   /// )

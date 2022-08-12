@@ -12,21 +12,22 @@ import 'common.dart';
 
 typedef AsyncVoidCallback = Future<void> Function();
 
-Future<String> capture(AsyncVoidCallback callback, { int exitCode = 0 }) async {
+Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = false }) async {
   final StringBuffer buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
     print = (Object line) {
       buffer.writeln(line);
     };
-    try {
-      await callback();
-      expect(exitCode, 0);
-    } on ExitException catch (error) {
-      expect(error.exitCode, exitCode);
-    }
+    await callback();
+    expect(
+      hasError,
+      shouldHaveErrors,
+      reason: buffer.isEmpty ? '(No output to report.)' : hasError ? 'Unexpected errors:\n$buffer' : 'Unexpected success:\n$buffer',
+    );
   } finally {
     print = oldPrint;
+    resetErrorStatus();
   }
   if (stdout.supportsAnsiEscapes) {
     // Remove ANSI escapes when this test is running on a terminal.
@@ -42,7 +43,7 @@ void main() {
   final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName));
 
   test('analyze.dart - verifyDeprecations', () async {
-    final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), exitCode: 1);
+    final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
     final String lines = <String>[
         'test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.',
         'test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
@@ -73,11 +74,10 @@ void main() {
   });
 
   test('analyze.dart - verifyGoldenTags', () async {
-    final String result = await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), exitCode: 1);
-    const String noTag = 'Files containing golden tests must be '
-        'tagged using `@Tags(...)` at the top of the file before import statements.';
-    const String missingTag = 'Files containing golden tests must be '
-        "tagged with 'reduced-test-set'.";
+    final String result = await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), shouldHaveErrors: true);
+    const String noTag = "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
+        'at the top of the file before import statements.';
+    const String missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
     String lines = <String>[
         'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
         'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
@@ -118,7 +118,7 @@ void main() {
   });
 
   test('analyze.dart - verifyNoMissingLicense', () async {
-    final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), exitCode: 1);
+    final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), shouldHaveErrors: true);
     final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
       .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
@@ -138,7 +138,7 @@ void main() {
   });
 
   test('analyze.dart - verifyNoTrailingSpaces', () async {
-    final String result = await capture(() => verifyNoTrailingSpaces(testRootPath, minimumMatches: 2), exitCode: 1);
+    final String result = await capture(() => verifyNoTrailingSpaces(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
     final String lines = <String>[
         'test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
         'test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
@@ -156,7 +156,7 @@ void main() {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
       legacyBinaries: <Hash256>{const Hash256(0x39A050CD69434936, 0, 0, 0)},
-    ), exitCode: Platform.isWindows ? 0 : 1);
+    ), shouldHaveErrors: !Platform.isWindows);
     if (!Platform.isWindows) {
       expect(result,
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
@@ -174,7 +174,7 @@ void main() {
   });
 
   test('analyze.dart - verifyInternationalizations - comparison fails', () async {
-    final String result = await capture(() => verifyInternationalizations(testRootPath, dartPath), exitCode: 1);
+    final String result = await capture(() => verifyInternationalizations(testRootPath, dartPath), shouldHaveErrors: true);
     final String genLocalizationsScript = path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart');
     expect(result,
         contains('$dartName $genLocalizationsScript --cupertino'));
@@ -202,7 +202,7 @@ void main() {
     final String result = await capture(() => verifyNullInitializedDebugExpensiveFields(
       testRootPath,
       minimumMatches: 1,
-    ), exitCode: 1);
+    ), shouldHaveErrors: true);
 
     expect(result, contains('L15'));
     expect(result, isNot(contains('L12')));

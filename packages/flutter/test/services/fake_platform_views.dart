@@ -45,11 +45,16 @@ class FakePlatformViewController extends PlatformViewController {
 }
 
 class FakeAndroidViewController implements AndroidViewController {
-  FakeAndroidViewController(this.viewId);
+  FakeAndroidViewController(this.viewId, {this.requiresSize = false});
 
   bool disposed = false;
   bool focusCleared = false;
   bool created = false;
+  // If true, [create] won't be considered to have been called successfully
+  // unless it includes a size.
+  bool requiresSize;
+
+  bool _createCalledSuccessfully = false;
 
   /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
@@ -93,6 +98,9 @@ class FakeAndroidViewController implements AndroidViewController {
   int get textureId => 0;
 
   @override
+  bool get awaitingCreation => !_createCalledSuccessfully;
+
+  @override
   bool get isCreated => created;
 
   @override
@@ -101,9 +109,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    throw UnimplementedError();
-  }
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {}
 
   @override
   Future<void> sendMotionEvent(AndroidMotionEvent event) {
@@ -116,7 +122,10 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create({Size? size}) async {}
+  Future<void> create({Size? size}) async {
+    assert(!_createCalledSuccessfully);
+    _createCalledSuccessfully = size != null || !requiresSize;
+  }
 
   @override
   List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];
