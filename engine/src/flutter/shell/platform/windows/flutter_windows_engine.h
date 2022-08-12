@@ -13,6 +13,7 @@
 #include <string_view>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
@@ -203,6 +204,19 @@ class FlutterWindowsEngine {
   // Returns the native accessibility node with the given id.
   gfx::NativeViewAccessible GetNativeAccessibleFromId(AccessibilityNodeId id);
 
+  // Register a root isolate create callback.
+  //
+  // The root isolate create callback is invoked at creation of the root Dart
+  // isolate in the app. This may be used to be notified that execution of the
+  // main Dart entrypoint is about to begin, and is used by test infrastructure
+  // to register a native function resolver that can register and resolve
+  // functions marked as native in the Dart code.
+  //
+  // This must be called before calling |Run|.
+  void SetRootIsolateCreateCallback(const fml::closure& callback) {
+    root_isolate_create_callback_ = callback;
+  }
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;
@@ -277,6 +291,9 @@ class FlutterWindowsEngine {
 
   // The manager for WindowProc delegate registration and callbacks.
   std::unique_ptr<WindowProcDelegateManager> window_proc_delegate_manager_;
+
+  // The root isolate creation callback.
+  fml::closure root_isolate_create_callback_;
 };
 
 }  // namespace flutter

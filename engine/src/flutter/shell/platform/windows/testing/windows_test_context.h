@@ -7,8 +7,11 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
+#include "flutter/testing/test_dart_native_resolver.h"
 
 namespace flutter {
 namespace testing {
@@ -29,9 +32,23 @@ class WindowsTestContext {
   // Returns the path to the ICU library data file.
   const std::wstring& GetIcuDataPath() const;
 
+  // Registers a native function callable from Dart code in test fixtures. In
+  // the Dart test fixture, the associated function can be declared as:
+  //
+  //   ReturnType functionName() native 'IdentifyingName';
+  //
+  // where `IdentifyingName` matches the |name| parameter to this method.
+  void AddNativeFunction(std::string_view name, Dart_NativeFunction function);
+
+  // Returns the root isolate create callback to register with the Flutter
+  // runtime.
+  fml::closure GetRootIsolateCallback();
+
  private:
   std::wstring assets_path_;
   std::wstring icu_data_path_ = L"icudtl.dat";
+  std::vector<fml::closure> isolate_create_callbacks_;
+  std::shared_ptr<TestDartNativeResolver> native_resolver_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowsTestContext);
 };

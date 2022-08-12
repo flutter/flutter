@@ -319,6 +319,12 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
         host->accessibility_bridge_->AddFlutterSemanticsCustomActionUpdate(
             action);
       };
+  args.root_isolate_create_callback = [](void* user_data) {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    if (host->root_isolate_create_callback_) {
+      host->root_isolate_create_callback_();
+    }
+  };
 
   args.custom_task_runners = &custom_task_runners;
 

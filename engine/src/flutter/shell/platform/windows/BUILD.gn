@@ -225,6 +225,8 @@ executable("flutter_windows_unittests") {
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
+    "//flutter/testing:dart",
+    "//flutter/third_party/tonic",
     "//third_party/rapidjson",
   ]
 }
