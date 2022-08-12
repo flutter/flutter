@@ -13,6 +13,9 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Whether in portrait or landscape.
 enum Orientation {
   /// Taller than wide.

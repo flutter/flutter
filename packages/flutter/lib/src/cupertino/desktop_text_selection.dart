@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show clampDouble;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'desktop_text_selection_toolbar.dart';
@@ -14,10 +13,14 @@ import 'localizations.dart';
 ///
 /// Specifically does not manage the toolbar, which is left to
 /// [EditableText.contextMenuBuilder].
-class _CupertinoDesktopTextSelectionHandleControls extends _CupertinoDesktopTextSelectionControls with TextSelectionHandleControls {
+class _CupertinoDesktopTextSelectionHandleControls extends CupertinoDesktopTextSelectionControls with TextSelectionHandleControls {
 }
 
-class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
+/// Desktop Cupertino styled text selection controls.
+///
+/// The [cupertinoDesktopTextSelectionControls] global variable has a
+/// suitable instance of this class.
+class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
   Size getHandleSize(double textLineHeight) {
@@ -87,7 +90,7 @@ final TextSelectionControls cupertinoDesktopTextSelectionHandleControls =
 
 /// Text selection controls that follows MacOS design conventions.
 final TextSelectionControls cupertinoDesktopTextSelectionControls =
-    _CupertinoDesktopTextSelectionControls();
+    CupertinoDesktopTextSelectionControls();
 
 // Generates the child that's passed into CupertinoDesktopTextSelectionToolbar.
 class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {

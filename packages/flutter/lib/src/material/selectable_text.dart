@@ -16,6 +16,10 @@ import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late FocusNode myFocusNode;
+
 /// An eyeballed value that moves the cursor slightly left of where it is
 /// rendered for text on Android so its positioning more accurately matches the
 /// native iOS text cursor positioning.
@@ -314,7 +318,7 @@ class SelectableText extends StatefulWidget {
   /// to the [focusNode]:
   ///
   /// ```dart
-  /// focusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// myFocusNode.addListener(() { print(myFocusNode.hasFocus); });
   /// ```
   ///
   /// If null, this widget will create its own [FocusNode] with
@@ -449,11 +453,11 @@ class SelectableText extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress

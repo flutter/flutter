@@ -6104,11 +6104,9 @@ void main() {
             defaultCupertinoTextField.magnifierConfiguration!.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
-                )),
-            isA<Widget>().having(
-                (Widget widget) => widget.key, 'key', equals(customMagnifier.key)));
+                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+              ),
+            isA<Widget>().having((Widget widget) => widget.key, 'key', equals(customMagnifier.key)));
       });
 
       group('defaults', () {
@@ -6124,9 +6122,8 @@ void main() {
               editableText.magnifierConfiguration.magnifierBuilder(
                   context,
                   MagnifierController(),
-                  ValueNotifier<MagnifierOverlayInfoBearer>(
-                    const MagnifierOverlayInfoBearer.empty(),
-                  )),
+                  ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ),
               isA<CupertinoTextMagnifier>());
         },
             variant: const TargetPlatformVariant(
@@ -6145,9 +6142,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
-                )),
+                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+              ),
             isNull);
       },
           variant: TargetPlatformVariant.all(

@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -67,6 +66,9 @@ class CupertinoTextSelectionHandleControls extends CupertinoTextSelectionControl
 }
 
 /// iOS Cupertino styled text selection controls.
+///
+/// The [cupertinoTextSelectionControls] global variable has a
+/// suitable instance of this class.
 class CupertinoTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Cupertino handle.
   @override

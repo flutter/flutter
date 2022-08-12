@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show clampDouble;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -15,10 +14,14 @@ import 'material_localizations.dart';
 ///
 /// Specifically does not manage the toolbar, which is left to
 /// [EditableText.contextMenuBuilder].
-class _DesktopTextSelectionHandleControls extends _DesktopTextSelectionControls with TextSelectionHandleControls {
+class _DesktopTextSelectionHandleControls extends DesktopTextSelectionControls with TextSelectionHandleControls {
 }
 
-class _DesktopTextSelectionControls extends TextSelectionControls {
+/// Desktop Material styled text selection controls.
+///
+/// The [desktopTextSelectionControls] global variable has a
+/// suitable instance of this class.
+class DesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
   Size getHandleSize(double textLineHeight) {
@@ -104,7 +107,7 @@ final TextSelectionControls desktopTextSelectionHandleControls =
 /// Desktop text selection controls that loosely follow Material design
 /// conventions.
 final TextSelectionControls desktopTextSelectionControls =
-    _DesktopTextSelectionControls();
+    DesktopTextSelectionControls();
 
 // Generates the child that's passed into DesktopTextSelectionToolbar.
 class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
@@ -166,12 +169,14 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMediaQuery(context));
+
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final Offset midpointAnchor = Offset(
@@ -182,7 +187,6 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );
 
-    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> items = <Widget>[];
 

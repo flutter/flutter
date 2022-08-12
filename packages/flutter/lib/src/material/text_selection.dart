@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -32,6 +31,9 @@ class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls 
 }
 
 /// Android Material styled text selection controls.
+///
+/// The [materialTextSelectionControls] global variable has a
+/// suitable instance of this class.
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override

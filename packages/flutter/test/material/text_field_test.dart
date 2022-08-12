@@ -11991,9 +11991,8 @@ void main() {
           textField.magnifierConfiguration!.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(
-                const MagnifierOverlayInfoBearer.empty(),
-              )),
+              ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+            ),
           isA<Widget>().having(
               (Widget widget) => widget.key,
               'built magnifier key equal to passed in magnifier key',
@@ -12013,9 +12012,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
-                )),
+                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+              ),
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
@@ -12032,9 +12030,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
-                )),
+                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+              ),
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
@@ -12051,9 +12048,8 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(
-                  const MagnifierOverlayInfoBearer.empty(),
-                )),
+                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+              ),
             isNull);
       },
       variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{
