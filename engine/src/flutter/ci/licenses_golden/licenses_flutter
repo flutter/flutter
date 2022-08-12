@@ -898,6 +898,7 @@ FILE: ../../../flutter/impeller/runtime_stage/runtime_stage.h
 FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.cc
 FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.h
 FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_unittests.cc
+FILE: ../../../flutter/impeller/runtime_stage/runtime_types.h
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.h
 FILE: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart

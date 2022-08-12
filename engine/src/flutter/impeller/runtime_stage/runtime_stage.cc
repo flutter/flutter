@@ -43,18 +43,18 @@ static RuntimeUniformType ToType(fb::UniformDataType type) {
   FML_UNREACHABLE();
 }
 
-static ShaderStage ToShaderStage(fb::Stage stage) {
+static RuntimeShaderStage ToShaderStage(fb::Stage stage) {
   switch (stage) {
     case fb::Stage::kVertex:
-      return ShaderStage::kVertex;
+      return RuntimeShaderStage::kVertex;
     case fb::Stage::kFragment:
-      return ShaderStage::kFragment;
+      return RuntimeShaderStage::kFragment;
     case fb::Stage::kCompute:
-      return ShaderStage::kCompute;
+      return RuntimeShaderStage::kCompute;
     case fb::Stage::kTessellationControl:
-      return ShaderStage::kTessellationControl;
+      return RuntimeShaderStage::kTessellationControl;
     case fb::Stage::kTessellationEvaluation:
-      return ShaderStage::kTessellationEvaluation;
+      return RuntimeShaderStage::kTessellationEvaluation;
   }
   FML_UNREACHABLE();
 }
@@ -128,7 +128,7 @@ const std::string& RuntimeStage::GetEntrypoint() const {
   return entrypoint_;
 }
 
-ShaderStage RuntimeStage::GetShaderStage() const {
+RuntimeShaderStage RuntimeStage::GetShaderStage() const {
   return stage_;
 }
 

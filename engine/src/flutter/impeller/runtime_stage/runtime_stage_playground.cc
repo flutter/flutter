@@ -9,6 +9,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/testing/testing.h"
 #include "impeller/renderer/shader_library.h"
+#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 
@@ -34,7 +35,8 @@ bool RuntimeStagePlayground::RegisterStage(const RuntimeStage& stage) {
   auto future = registration.get_future();
   auto library = GetContext()->GetShaderLibrary();
   GetContext()->GetShaderLibrary()->RegisterFunction(
-      stage.GetEntrypoint(), stage.GetShaderStage(), stage.GetCodeMapping(),
+      stage.GetEntrypoint(), ToShaderStage(stage.GetShaderStage()),
+      stage.GetCodeMapping(),
       fml::MakeCopyable([reg = std::move(registration)](bool result) mutable {
         reg.set_value(result);
       }));

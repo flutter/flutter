@@ -9,7 +9,9 @@
 #include <vector>
 
 #include "flutter/fml/hash_combine.h"
+#include "flutter/fml/logging.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/runtime_stage/runtime_types.h"
 
 namespace impeller {
 
@@ -21,6 +23,22 @@ enum class ShaderStage {
   kTessellationEvaluation,
   kCompute,
 };
+
+constexpr ShaderStage ToShaderStage(RuntimeShaderStage stage) {
+  switch (stage) {
+    case RuntimeShaderStage::kVertex:
+      return ShaderStage::kVertex;
+    case RuntimeShaderStage::kFragment:
+      return ShaderStage::kFragment;
+    case RuntimeShaderStage::kCompute:
+      return ShaderStage::kCompute;
+    case RuntimeShaderStage::kTessellationControl:
+      return ShaderStage::kTessellationControl;
+    case RuntimeShaderStage::kTessellationEvaluation:
+      return ShaderStage::kTessellationEvaluation;
+  }
+  FML_UNREACHABLE();
+}
 
 enum class ShaderType {
   kUnknown,
