@@ -14,9 +14,14 @@
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/includer.h"
 #include "impeller/compiler/logger.h"
+#include "impeller/compiler/types.h"
 
 namespace impeller {
 namespace compiler {
+
+const uint32_t kFragBindingBase = 128;
+const size_t kNumUniformKinds =
+    int(shaderc_uniform_kind::shaderc_uniform_kind_buffer) + 1;
 
 static CompilerBackend CreateMSLCompiler(const spirv_cross::ParsedIR& ir,
                                          const SourceOptions& source_options) {
@@ -223,6 +228,15 @@ static void SetLimitations(shaderc::CompileOptions& compiler_opts) {
   }
 }
 
+void Compiler::SetBindingBase(shaderc::CompileOptions& compiler_opts) const {
+  for (size_t uniform_kind = 0; uniform_kind < kNumUniformKinds;
+       uniform_kind++) {
+    compiler_opts.SetBindingBaseForStage(
+        ToShaderCShaderKind(SourceType::kFragmentShader),
+        static_cast<shaderc_uniform_kind>(uniform_kind), kFragBindingBase);
+  }
+}
+
 Compiler::Compiler(const fml::Mapping& source_mapping,
                    SourceOptions source_options,
                    Reflector::Options reflector_options)
@@ -333,6 +347,9 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   }
 
   spirv_options.SetAutoBindUniforms(true);
+#ifdef IMPELLER_ENABLE_VULKAN
+  SetBindingBase(spirv_options);
+#endif
   spirv_options.SetAutoMapLocations(true);
 
   std::vector<std::string> included_file_names;
