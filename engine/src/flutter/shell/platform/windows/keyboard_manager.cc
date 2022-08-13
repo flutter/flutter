@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 #include <assert.h>
-#include <iostream>
 #include <memory>
 #include <string>
 
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/keyboard_manager.h"
 #include "flutter/shell/platform/windows/keyboard_utils.h"
 
@@ -120,15 +120,14 @@ void KeyboardManager::RedispatchEvent(std::unique_ptr<PendingEvent> event) {
     UINT result = window_delegate_->Win32DispatchMessage(
         message.action, message.wparam, message.lparam);
     if (result != 0) {
-      std::cerr << "Unable to synthesize event for keyboard event."
-                << std::endl;
+      FML_LOG(ERROR) << "Unable to synthesize event for keyboard event.";
     }
   }
   if (pending_redispatches_.size() > kMaxPendingEvents) {
-    std::cerr
+    FML_LOG(ERROR)
         << "There are " << pending_redispatches_.size()
         << " keyboard events that have not yet received a response from the "
-        << "framework. Are responses being sent?" << std::endl;
+        << "framework. Are responses being sent?";
   }
 }
 

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/path_utils.h"
@@ -156,17 +157,18 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&embedder_api_);
 
-  task_runner_ = std::make_unique<TaskRunner>(
-      embedder_api_.GetCurrentTime, [this](const auto* task) {
-        if (!engine_) {
-          std::cerr << "Cannot post an engine task when engine is not running."
-                    << std::endl;
-          return;
-        }
-        if (embedder_api_.RunTask(engine_, task) != kSuccess) {
-          std::cerr << "Failed to post an engine task." << std::endl;
-        }
-      });
+  task_runner_ =
+      std::make_unique<TaskRunner>(
+          embedder_api_.GetCurrentTime, [this](const auto* task) {
+            if (!engine_) {
+              FML_LOG(ERROR)
+                  << "Cannot post an engine task when engine is not running.";
+              return;
+            }
+            if (embedder_api_.RunTask(engine_, task) != kSuccess) {
+              FML_LOG(ERROR) << "Failed to post an engine task.";
+            }
+          });
 
   // Set up the legacy structs backing the API handles.
   messenger_ = std::make_unique<FlutterDesktopMessenger>();
@@ -206,7 +208,7 @@ bool FlutterWindowsEngine::Run() {
 
 bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   if (!project_->HasValidPaths()) {
-    std::cerr << "Missing or unresolvable paths to assets." << std::endl;
+    FML_LOG(ERROR) << "Missing or unresolvable paths to assets.";
     return false;
   }
   std::string assets_path_string = project_->assets_path().u8string();
@@ -214,7 +216,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   if (embedder_api_.RunsAOTCompiledDartCode()) {
     aot_data_ = project_->LoadAotData(embedder_api_);
     if (!aot_data_) {
-      std::cerr << "Unable to start engine without AOT data." << std::endl;
+      FML_LOG(ERROR) << "Unable to start engine without AOT data.";
       return false;
     }
   }
@@ -272,10 +274,9 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   // method and only the entrypoint specified in project_ should be used.
   if (!project_->dart_entrypoint().empty() && !entrypoint.empty() &&
       project_->dart_entrypoint() != entrypoint) {
-    std::cerr << "Conflicting entrypoints were specified in "
-                 "FlutterDesktopEngineProperties.dart_entrypoint and "
-                 "FlutterDesktopEngineRun(engine, entry_point). "
-              << std::endl;
+    FML_LOG(ERROR) << "Conflicting entrypoints were specified in "
+                      "FlutterDesktopEngineProperties.dart_entrypoint and "
+                      "FlutterDesktopEngineRun(engine, entry_point). ";
     return false;
   }
   if (!entrypoint.empty()) {
@@ -339,8 +340,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   auto result = embedder_api_.Run(FLUTTER_ENGINE_VERSION, &renderer_config,
                                   &args, this, &engine_);
   if (result != kSuccess || engine_ == nullptr) {
-    std::cerr << "Failed to start Flutter engine: error " << result
-              << std::endl;
+    FML_LOG(ERROR) << "Failed to start Flutter engine: error " << result;
     return false;
   }
 
@@ -454,7 +454,7 @@ bool FlutterWindowsEngine::SendPlatformMessage(
         embedder_api_.PlatformMessageCreateResponseHandle(
             engine_, reply, user_data, &response_handle);
     if (result != kSuccess) {
-      std::cout << "Failed to create response handle\n";
+      FML_LOG(ERROR) << "Failed to create response handle";
       return false;
     }
   }
@@ -486,9 +486,9 @@ void FlutterWindowsEngine::SendPlatformMessageResponse(
 void FlutterWindowsEngine::HandlePlatformMessage(
     const FlutterPlatformMessage* engine_message) {
   if (engine_message->struct_size != sizeof(FlutterPlatformMessage)) {
-    std::cerr << "Invalid message size received. Expected: "
-              << sizeof(FlutterPlatformMessage) << " but received "
-              << engine_message->struct_size << std::endl;
+    FML_LOG(ERROR) << "Invalid message size received. Expected: "
+                   << sizeof(FlutterPlatformMessage) << " but received "
+                   << engine_message->struct_size;
     return;
   }
 
