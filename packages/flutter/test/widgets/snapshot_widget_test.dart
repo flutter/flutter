@@ -199,7 +199,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.layers.last, isA<PlatformViewLayer>());
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
 class TestController extends SnapshotWidgetController {
