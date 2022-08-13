@@ -120,7 +120,7 @@ void main() {
 
       await tester.pumpWidget(_withTheme(theme, true));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, themedColor);
     });
 
@@ -137,7 +137,7 @@ void main() {
         home: const Scaffold(body: BottomAppBar(color: babColor)),
       ));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, babColor);
     });
 
@@ -153,7 +153,7 @@ void main() {
         home: const Scaffold(body: BottomAppBar()),
       ));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, babThemeColor);
     });
 
@@ -164,7 +164,7 @@ void main() {
         home: const Scaffold(body: BottomAppBar()),
       ));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
 
       expect(widget.color, Colors.white);
       expect(widget.elevation, equals(3.0));
