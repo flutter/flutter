@@ -8,6 +8,8 @@
 #include <chrono>
 #include <map>
 
+#include "flutter/fml/logging.h"
+
 namespace flutter {
 
 namespace {
@@ -121,7 +123,7 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
     case XBUTTON2:
       return kFlutterPointerButtonMouseForward;
   }
-  std::cerr << "Mouse button not recognized: " << button << std::endl;
+  FML_LOG(WARNING) << "Mouse button not recognized: " << button;
   return 0;
 }
 

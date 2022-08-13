@@ -6,8 +6,7 @@
 
 #include <windows.h>
 
-#include <iostream>
-
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/keyboard_utils.h"
 
 namespace flutter {
@@ -48,10 +47,10 @@ void KeyboardKeyHandler::KeyboardHook(int key,
   incoming->callback = std::move(callback);
 
   if (pending_responds_.size() > kMaxPendingEvents) {
-    std::cerr
+    FML_LOG(ERROR)
         << "There are " << pending_responds_.size()
         << " keyboard events that have not yet received a response from the "
-        << "framework. Are responses being sent?" << std::endl;
+        << "framework. Are responses being sent?";
   }
   pending_responds_.push_back(std::move(incoming));
 
