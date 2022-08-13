@@ -221,6 +221,11 @@ class _TestElement extends Element {
   _TestElement() : super(const Placeholder());
 
   @override
+  void performRebuild() {
+    // Intentionally left empty.
+  }
+
+  @override
   bool get debugDoingBuild => throw UnimplementedError();
 }
 
