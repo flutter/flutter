@@ -1862,6 +1862,9 @@ class DirtyElementWithCustomBuildOwner extends Element {
   final BuildOwner _owner;
 
   @override
+  void performRebuild() {}
+
+  @override
   BuildOwner get owner => _owner;
 
   @override
@@ -1965,9 +1968,9 @@ class StatefulElementSpy extends StatefulElement {
   _Stateful get _statefulWidget => widget as _Stateful;
 
   @override
-  void rebuild({bool force = false}) {
+  void rebuild() {
     _statefulWidget.onElementRebuild?.call(this);
-    super.rebuild(force: force);
+    super.rebuild();
   }
 }
 
@@ -2112,6 +2115,9 @@ class _EmptyElement extends Element {
 
   @override
   bool get debugDoingBuild => false;
+
+  @override
+  void performRebuild() {}
 }
 
 class _TestLeaderLayerWidget extends SingleChildRenderObjectWidget {
