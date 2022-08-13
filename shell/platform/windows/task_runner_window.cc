@@ -5,7 +5,8 @@
 #include "flutter/shell/platform/windows/task_runner_window.h"
 
 #include <algorithm>
-#include <iostream>
+
+#include "flutter/fml/logging.h"
 
 namespace flutter {
 
@@ -52,7 +53,7 @@ std::shared_ptr<TaskRunnerWindow> TaskRunnerWindow::GetSharedInstance() {
 
 void TaskRunnerWindow::WakeUp() {
   if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
-    std::cerr << "Failed to post message to main thread." << std::endl;
+    FML_LOG(ERROR) << "Failed to post message to main thread.";
   }
 }
 

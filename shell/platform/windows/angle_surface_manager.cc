@@ -4,15 +4,16 @@
 
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 
-#include <iostream>
 #include <vector>
+
+#include "flutter/fml/logging.h"
 
 // Logs an EGL error to stderr. This automatically calls eglGetError()
 // and logs the error code.
 static void LogEglError(std::string message) {
   EGLint error = eglGetError();
-  std::cerr << "EGL: " << message << std::endl;
-  std::cerr << "EGL: eglGetError returned " << error << std::endl;
+  FML_LOG(ERROR) << "EGL: " << message;
+  FML_LOG(ERROR) << "EGL: eglGetError returned " << error;
 }
 
 namespace flutter {
@@ -245,8 +246,8 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
     ClearContext();
     DestroySurface();
     if (!CreateSurface(render_target, width, height)) {
-      std::cerr << "AngleSurfaceManager::ResizeSurface failed to create surface"
-                << std::endl;
+      FML_LOG(ERROR)
+          << "AngleSurfaceManager::ResizeSurface failed to create surface";
     }
   }
 }

@@ -7,9 +7,9 @@
 #include <windows.h>
 
 #include <cstring>
-#include <iostream>
 #include <optional>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -41,14 +41,16 @@ class ScopedGlobalMemory {
   ScopedGlobalMemory(unsigned int flags, size_t bytes) {
     memory_ = ::GlobalAlloc(flags, bytes);
     if (!memory_) {
-      std::cerr << "Unable to allocate global memory: " << ::GetLastError();
+      FML_LOG(ERROR) << "Unable to allocate global memory: "
+                     << ::GetLastError();
     }
   }
 
   ~ScopedGlobalMemory() {
     if (memory_) {
       if (::GlobalFree(memory_) != nullptr) {
-        std::cerr << "Failed to free global allocation: " << ::GetLastError();
+        FML_LOG(ERROR) << "Failed to free global allocation: "
+                       << ::GetLastError();
       }
     }
   }
@@ -79,7 +81,7 @@ class ScopedGlobalLock {
     if (memory) {
       locked_memory_ = ::GlobalLock(memory);
       if (!locked_memory_) {
-        std::cerr << "Unable to acquire global lock: " << ::GetLastError();
+        FML_LOG(ERROR) << "Unable to acquire global lock: " << ::GetLastError();
       }
     }
   }
@@ -89,7 +91,8 @@ class ScopedGlobalLock {
       if (!::GlobalUnlock(source_)) {
         DWORD error = ::GetLastError();
         if (error != NO_ERROR) {
-          std::cerr << "Unable to release global lock: " << ::GetLastError();
+          FML_LOG(ERROR) << "Unable to release global lock: "
+                         << ::GetLastError();
         }
       }
     }

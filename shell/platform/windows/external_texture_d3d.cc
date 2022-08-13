@@ -6,8 +6,8 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <iostream>
 
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 
 namespace flutter {
@@ -107,7 +107,7 @@ bool ExternalTextureD3d::CreateOrUpdateTexture(
     if (egl_surface_ == EGL_NO_SURFACE ||
         eglBindTexImage(surface_manager_->egl_display(), egl_surface_,
                         EGL_BACK_BUFFER) == EGL_FALSE) {
-      std::cerr << "Binding D3D surface failed." << std::endl;
+      FML_LOG(ERROR) << "Binding D3D surface failed.";
     }
     last_surface_handle_ = handle;
   }
