@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -285,8 +283,8 @@ class _ZoomEnterTransition extends StatefulWidget {
 }
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
-  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  bool get allowRasterization => !kIsWeb && widget.preferRasterization;
+  @override
+  bool get useSnapshot => widget.preferRasterization && !kIsWeb;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -403,8 +401,8 @@ class _ZoomExitTransition extends StatefulWidget {
 }
 
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
-  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  bool get allowRasterization => !kIsWeb && widget.preferRasterization;
+  @override
+  bool get useSnapshot => widget.preferRasterization && !kIsWeb;
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -735,36 +733,9 @@ class PageTransitionsTheme with Diagnosticable {
   }
 }
 
-// Take an image and draw it centered and scaled. The image is already scaled by the [pixelRatio].
-void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double scale, double opacity, double pixelRatio) {
-  if (scale <= 0.0 || opacity <= 0.0) {
-    return;
-  }
-  final Paint paint = Paint()
-    ..filterQuality = ui.FilterQuality.low
-    ..color = Color.fromRGBO(0, 0, 0, opacity);
-  final double logicalWidth = image.width / pixelRatio;
-  final double logicalHeight = image.height / pixelRatio;
-  final double scaledLogicalWidth = logicalWidth * scale;
-  final double scaledLogicalHeight = logicalHeight * scale;
-  final double left = (logicalWidth - scaledLogicalWidth) / 2;
-  final double top = (logicalHeight - scaledLogicalHeight) / 2;
-  final Rect dst = Rect.fromLTWH(left, top, scaledLogicalWidth, scaledLogicalHeight);
-  context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
-}
-
-void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
-  transform.setIdentity();
-  if (scale == 1.0) {
-    return;
-  }
-  transform.scale(scale, scale);
-  final double dx = ((size.width * scale) - size.width) / 2;
-  final double dy = ((size.height * scale) - size.height) / 2;
-  transform.translate(-dx, -dy);
-}
-
 mixin _ZoomTransitionBase {
+  bool get useSnapshot;
+
   // Don't rasterize if:
   // 1. Rasterization is disabled by the platform.
   // 2. The animation is paused/stopped.
@@ -781,7 +752,7 @@ mixin _ZoomTransitionBase {
          fadeTransition.value == 1.0)) {
         controller.enabled = false;
       } else {
-        controller.enabled = true;
+        controller.enabled = useSnapshot;
       }
   }
 
@@ -793,7 +764,7 @@ mixin _ZoomTransitionBase {
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        controller.enabled = true;
+        controller.enabled = useSnapshot;
         break;
     }
   }
