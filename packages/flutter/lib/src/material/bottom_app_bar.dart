@@ -187,7 +187,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
         clipBehavior: widget.clipBehavior,
         child: Material(
           key: materialKey,
-          type: MaterialType.transparency,
+          type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
           elevation: elevation,
           surfaceTintColor: surfaceTintColor,
           child: widget.child == null
