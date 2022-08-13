@@ -15,12 +15,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('RasterWidget can rasterize child', (WidgetTester tester) async {
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
     final Key key = UniqueKey();
     await tester.pumpWidget(RepaintBoundary(
       key: key,
       child: Center(
-        child: RasterWidget(
+        child: SnapshotWidget(
           controller: controller,
           child: Container(
             width: 100,
@@ -38,10 +38,10 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RasterWidget is not a repaint boundary when rasterizing', (WidgetTester tester) async {
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
-        child: RasterWidget(
+        child: SnapshotWidget(
           controller: controller,
           child: Container(
             width: 100,
@@ -55,7 +55,7 @@ void main() {
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
 
-    controller.rasterize = false;
+    controller.enabled = false;
     await tester.pump();
 
     expect(tester.layers, hasLength(3));
@@ -64,10 +64,10 @@ void main() {
 
   testWidgets('RasterWidget repaints when RasterWidgetDelegate notifies listeners', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
-        child: RasterWidget(
+        child: SnapshotWidget(
           delegate: delegate,
           controller: controller,
           child: Container(
@@ -96,10 +96,10 @@ void main() {
 
   testWidgets('RasterWidget will recreate raster when controller calls clear', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
-        child: RasterWidget(
+        child: SnapshotWidget(
           delegate: delegate,
           controller: controller,
           child: Container(
@@ -133,13 +133,13 @@ void main() {
       ..shouldRepaintValue = true;
     TestDelegate delegate = delegateA;
 
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
     late void Function(void Function()) setStateFn;
     await tester.pumpWidget(StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
         setStateFn = setState;
         return Center(
-          child: RasterWidget(
+          child: SnapshotWidget(
             delegate: delegate,
             controller: controller,
             child: Container(
@@ -165,15 +165,15 @@ void main() {
 
   testWidgets('RasterWidget can update the ValueNotifier', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controllerA = RasterWidgetController(rasterize: true);
-    final RasterWidgetController controllerB = RasterWidgetController();
-    RasterWidgetController controller = controllerA;
+    final SnapshotWidgetController controllerA = SnapshotWidgetController(enabled: true);
+    final SnapshotWidgetController controllerB = SnapshotWidgetController();
+    SnapshotWidgetController controller = controllerA;
     late void Function(void Function()) setStateFn;
     await tester.pumpWidget(StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
         setStateFn = setState;
         return Center(
-          child: RasterWidget(
+          child: SnapshotWidget(
             delegate: delegate,
             controller: controller,
             child: Container(
@@ -197,7 +197,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
 
     // changes to old notifier do not impact widget.
-    controllerA.rasterize = false;
+    controllerA.enabled = false;
     await tester.pump();
 
     expect(delegate.count, 1);
@@ -206,19 +206,19 @@ void main() {
     await tester.pumpWidget(const SizedBox());
 
     // changes to notifier do not impact widget after disposal.
-    controllerB.rasterize = true;
+    controllerB.enabled = true;
     await tester.pump();
     expect(delegate.count, 1);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderRasterWidget correctly attaches and detaches delegate callbacks', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
-    final RenderRasterWidget rasterWidget = RenderRasterWidget(
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
+    final RenderSnapshotWidget rasterWidget = RenderSnapshotWidget(
       delegate: delegate,
       controller: controller,
       devicePixelRatio: 1.0,
-      mode: RasterizeMode.enabled,
+      mode: SnapshotMode.enabled,
     );
 
     expect(delegate.addedListenerCount, 0);
@@ -246,11 +246,11 @@ void main() {
   testWidgets('RenderRasterWidget correctly attaches and detaches controller callbacks', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     final TestController controller = TestController();
-    final RenderRasterWidget rasterWidget = RenderRasterWidget(
+    final RenderSnapshotWidget rasterWidget = RenderSnapshotWidget(
       delegate: delegate,
       controller: controller,
       devicePixelRatio: 1.0,
-      mode: RasterizeMode.enabled,
+      mode: SnapshotMode.enabled,
     );
 
     expect(controller.addedListenerCount, 0);
@@ -277,13 +277,13 @@ void main() {
 
   testWidgets('RenderRasterWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
 
     await tester.pumpWidget(
       Center(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: RasterWidget(
+          child: SnapshotWidget(
             delegate: delegate,
             controller: controller,
             child: const SizedBox(),
@@ -296,13 +296,13 @@ void main() {
 
   testWidgets('RenderRasterWidget throws assertion if platform view is encountered', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
 
     await tester.pumpWidget(
       Center(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: RasterWidget(
+          child: SnapshotWidget(
             delegate: delegate,
             controller: controller,
             child: const SizedBox(
@@ -321,16 +321,16 @@ void main() {
 
   testWidgets('RenderRasterWidget does not assert if RasterizeMode.forced', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
 
     await tester.pumpWidget(
       Center(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: RasterWidget(
+          child: SnapshotWidget(
             delegate: delegate,
             controller: controller,
-            mode: RasterizeMode.forced,
+            mode: SnapshotMode.forced,
             child: const SizedBox(
               width: 100,
               height: 100,
@@ -346,13 +346,13 @@ void main() {
 
   testWidgets('RenderRasterWidget fallbacks to delegate if PlatformView is present', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
     final TestFallback fallback = TestFallback();
     await tester.pumpWidget(
       Center(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: RasterWidget(
+          child: SnapshotWidget(
             delegate: delegate,
             controller: controller,
             fallback: fallback,
@@ -372,17 +372,17 @@ void main() {
 
   testWidgets('RenderRasterWidget fallbacks to delegate if mode: RasterizeMode.fallback', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
-    final RasterWidgetController controller = RasterWidgetController(rasterize: true);
+    final SnapshotWidgetController controller = SnapshotWidgetController(enabled: true);
     final TestFallback fallback = TestFallback();
     await tester.pumpWidget(
       Center(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: RasterWidget(
+          child: SnapshotWidget(
             delegate: delegate,
             controller: controller,
             fallback: fallback,
-            mode: RasterizeMode.fallback,
+            mode: SnapshotMode.fallback,
             child: const SizedBox(
               width: 100,
               height: 100,
@@ -407,7 +407,7 @@ class TestFallback extends RasterWidgetFallbackDelegate {
 
 }
 
-class TestController extends RasterWidgetController {
+class TestController extends SnapshotWidgetController {
   int addedListenerCount = 0;
   int removedListenerCount = 0;
 

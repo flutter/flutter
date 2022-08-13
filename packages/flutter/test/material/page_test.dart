@@ -158,7 +158,7 @@ void main() {
   testWidgets('test page transition (_ZoomPageTransition) without rasterization', (WidgetTester tester) async {
     Iterable<Layer> findLayers(Finder of) {
       return tester.layerListOf(
-        find.ancestor(of: of, matching: find.byType(RasterWidget)).first,
+        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
       );
     }
 
