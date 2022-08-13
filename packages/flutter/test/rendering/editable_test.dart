@@ -135,7 +135,7 @@ void main() {
     expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
     expect(leaderLayers.single.offset, const Offset(0, 14) + paintOffset, reason: 'offset should respect paintOffset');
   });
-  
+
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
