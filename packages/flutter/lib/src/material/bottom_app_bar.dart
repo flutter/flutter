@@ -178,6 +178,11 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
     final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
 
+    final Widget? child = isMaterial3 ? Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+      child: widget.child,
+    ) : widget.child;
+
     return SizedBox(
       height: height,
       child: PhysicalShape(
@@ -190,9 +195,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
           type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
           elevation: elevation,
           surfaceTintColor: surfaceTintColor,
-          child: widget.child == null
+          child: child == null
             ? null
-            : SafeArea(child: widget.child!),
+            : SafeArea(child: child),
         ),
       ),
     );
