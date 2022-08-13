@@ -176,37 +176,24 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final double? height = widget.height ?? babTheme.height ?? defaults.height;
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
-    final Color effectiveColor = ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
 
-    if (isMaterial3) {
-      return SizedBox(
-        height: height,
+    return SizedBox(
+      height: height,
+      child: PhysicalShape(
+        clipper: clipper,
+        elevation: elevation,
+        color: effectiveColor,
+        clipBehavior: widget.clipBehavior,
         child: Material(
-          color: color,
+          key: materialKey,
+          type: MaterialType.transparency,
           elevation: elevation,
           surfaceTintColor: surfaceTintColor,
-          clipBehavior: widget.clipBehavior,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-              child: widget.child,
-            ),
-          ),
+          child: widget.child == null
+            ? null
+            : SafeArea(child: widget.child!),
         ),
-      );
-    }
-
-    return PhysicalShape(
-      clipper: clipper,
-      elevation: elevation,
-      color: effectiveColor,
-      clipBehavior: widget.clipBehavior,
-      child: Material(
-        key: materialKey,
-        type: MaterialType.transparency,
-        child: widget.child == null
-          ? null
-          : SafeArea(child: widget.child!),
       ),
     );
   }
