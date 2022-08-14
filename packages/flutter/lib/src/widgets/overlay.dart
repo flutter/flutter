@@ -284,28 +284,134 @@ mixin _SortedLinkedListChildModel<T extends Object> {
   }
 }
 
-class TopmostOverlayChildController {
-  _TopmostOverlayChildState? _attachTarget;
-  void show() => _attachTarget!.show();
-  void toggle() => _attachTarget!.toggle();
-  void hide() => _attachTarget!.hide();
+
+/// A class to show, hide and bring to top an [OverlayPortal]'s
+/// `overlayChildBuild`.
+class OverlayPortalController {
+  OverlayPortalController({ this.debugLabel });
+
+  _OverlayPortalTopState? _attachTarget;
+  int? _showTimestamp;
+  String? debugLabel;
+
+
+  /// Show the `overlayChildBuild` of the [OverlayPortal] this controller is
+  /// attached to.
+  ///
+  /// When there are more than one [OverlayPortal]s that target the same
+  /// [Overlay], the overlay child of the last [OverlayPortal] to have called
+  /// [show] appears at the top level, unobstructed.
+  ///
+  /// It
+  ///
+  /// Must be called when the controller is attached to an [OverlayPortal] in
+  /// the widget tree.
+  void show() {
+    final _OverlayPortalTopState? state = _attachTarget;
+    if (state != null) {
+      state.show();
+    } else {
+      _showTimestamp = _OverlayPortalTopState.wallTime += 1;
+    }
+  }
+
+  /// Hide the `overlayChildBuild` currently showing.
+  ///
+  /// Must be called when the controller is attached to an [OverlayPortal] in
+  /// the widget tree.
+  void hide() {
+    final _OverlayPortalTopState? state = _attachTarget;
+    if (state != null) {
+      state.hide();
+    } else {
+      assert(_showTimestamp != null);
+      _showTimestamp = null;
+    }
+  }
+
+  /// Whether the `overlayChildBuild` is currently showing.
+  ///
+  /// Must be called when the controller is attached to an [OverlayPortal] in
+  /// the widget tree.
+  bool get isShowing {
+    final _OverlayPortalTopState? state = _attachTarget;
+    return state != null
+      ? state._showTimestamp != null
+      : _showTimestamp != null;
+  }
+
+  /// Conventience method for calling show when
+  ///
+  /// Must be called when the controller is attached to an [OverlayPortal] in
+  /// the widget tree.
+  void toggle() => isShowing ? hide() : show();
+
+  @override
+  String toString() {
+    final String? debugLabel = this.debugLabel;
+    final int? timestamp = _showTimestamp;
+    final String label = debugLabel == null ? '' : '($debugLabel)';
+    final String time = timestamp == null ? '' : '[$timestamp]';
+    return '${objectRuntimeType(this, 'OverlayPortalController')}$time$label';
+  }
 }
 
-class TopmostOverlayChildWidget extends StatefulWidget {
-  const TopmostOverlayChildWidget({
+/// A widget that renders its [overlayChildBuilder] in the closest [Overlay].
+///
+/// The [overlayChildBuilder], once shown, will be rendered in the [Overlay] as
+/// if it was inserted using an [OverlayEntry], while it can depend on the same
+/// set of [InheritedWidget]s (such as [Theme]) that this widget can depend on.
+///
+/// This widget must be placed below an [Overlay].
+///
+/// {@tool dartpad}
+/// This example uses an [OverlayPortal] to build a tooltip that becomes visible
+/// when the user taps on the [child] widget. There's a [DefaultTextStyle] above
+/// the [OverlayPortal] controlling the [TextStyle] of both the [child] widget
+/// and the widget [overlayChildBuilder] builds, which isn't otherwise doable if
+/// the tooltip was added as an [OverlayEntry].
+///
+/// ** See code in examples/api/lib/widgets/overlay/overlay_portal.0.dart **
+/// {@end-tool}
+///
+/// ### When to use [OverlayPortal] over [OverlayEntry]
+///
+/// See also:
+///
+///  * [OverlayEntry], the imperative API for inserting a widget to an [Overlay].
+class OverlayPortal extends StatefulWidget {
+  const OverlayPortal({
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
     required this.child,
   });
 
-  final TopmostOverlayChildController controller;
+  /// The controller to show, hide and bring to top the widget
+  /// [overlayChildBuilder] builds.
+  final OverlayPortalController controller;
 
+  /// A [WidgetBuilder] used to build a widget below this widget in the tree,
+  /// that renders on the closest [Overlay].
+  ///
+  /// The said widget will only be built and shown at the topmost level of the
+  /// closest [Overlay]
+  ///
+  /// The [overlayChild] widget, if not null, is inserted below this widget in
+  /// the widget tree, allowing it to depend on [InheritedWidget]s above it, and
+  /// be notified when the [InheritedWidget]s change.
+  ///
+  /// Unlike [child], [overlayChild] can visually extend outside the bounds
+  /// of this widget without being clipped, and receive hit-test events outside
+  /// of this widget's bounds, as long as it does not extend outside of the
+  /// [Overlay] on which it is rendered.
   final WidgetBuilder overlayChildBuilder;
+
+  /// A widget below this widget in the tree.
   final Widget? child;
 
   @override
-  State<TopmostOverlayChildWidget> createState() => _TopmostOverlayChildState();
+  State<OverlayPortal> createState() => _OverlayPortalTopState();
 }
 
 class _TopmostLocation extends OverlayLocation with LinkedListEntry<_TopmostLocation> {
@@ -336,14 +442,14 @@ class _TopmostLocation extends OverlayLocation with LinkedListEntry<_TopmostLoca
   @override
   void _activate(_RenderDeferredLayoutBox child) {
     assert(_debugNotDisposed());
-    _overlayChildRenderBox = null;
+    assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
+    _overlayChildRenderBox = child;
   }
 
   @override
   void _deactivate(_RenderDeferredLayoutBox child) {
     assert(_debugNotDisposed());
-    assert(_overlayChildRenderBox == null);
-    _overlayChildRenderBox = child;
+    _overlayChildRenderBox = null;
   }
 
   @override
@@ -355,9 +461,12 @@ class _TopmostLocation extends OverlayLocation with LinkedListEntry<_TopmostLoca
         && other._showTimestamp == _showTimestamp
         && other._theatreChildModel == _theatreChildModel;
   }
+
+  @override
+  String toString() => '$_showTimestamp';
 }
 
-class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
+class _OverlayPortalTopState extends State<OverlayPortal> {
   // The developer must call `show` to reveal the overlay so we can get the
   // timestamp of the user interaction for sorting.
   _TopmostLocation? _location;
@@ -368,8 +477,21 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
   @override
   void initState() {
     super.initState();
-    assert(widget.controller._attachTarget == null || widget.controller._attachTarget == this);
-    widget.controller._attachTarget = this;
+    _setupController(widget.controller);
+  }
+
+  void _setupController(OverlayPortalController controller) {
+    assert(
+      controller._attachTarget == null || controller._attachTarget == this,
+      'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}'
+    );
+    final int? controllerTimeStamp = controller._showTimestamp;
+    final int? timeStamp = _showTimestamp;
+    if (timeStamp == null || (controllerTimeStamp != null && controllerTimeStamp > timeStamp)) {
+      _showTimestamp = controllerTimeStamp;
+    }
+    controller._showTimestamp = null;
+    controller._attachTarget = this;
   }
 
   @override
@@ -380,12 +502,11 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
   }
 
   @override
-  void didUpdateWidget(TopmostOverlayChildWidget oldWidget) {
+  void didUpdateWidget(OverlayPortal oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._attachTarget = null;
-      assert(widget.controller._attachTarget == null || widget.controller._attachTarget == this);
-      widget.controller._attachTarget = this;
+      _setupController(widget.controller);
     }
   }
 
@@ -426,7 +547,7 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
   Widget build(BuildContext context) {
     final int? timestamp = _showTimestamp;
     if (timestamp == null) {
-      return OverlayPortal.withLocation(
+      return _OverlayPortal(
         overlayLocation: null,
         overlayChild: null,
         child: widget.child,
@@ -435,10 +556,12 @@ class _TopmostOverlayChildState extends State<TopmostOverlayChildWidget> {
     final _TopOfTheatreChildModel? top = InheritedModel
       .inheritFrom<_OverlayLocationInheritedModel>(context, aspect: 'theatre')
       ?.location._theatreChildModel._theatre._topChildren;
+    assert(top != null);
     _location ??= _TopmostLocation(timestamp, top!);
-    return OverlayPortal.withLocation(
+
+    return _OverlayPortal(
       overlayLocation: _location,
-      overlayChild: Builder(builder: widget.overlayChildBuilder),
+      overlayChild: _DeferredLayout(child: widget.overlayChildBuilder(context)),
       child: widget.child,
     );
   }
@@ -460,6 +583,7 @@ abstract class _RenderTheatreChildModel {
     RenderBox? child = iterator();
     while (child != null) {
       visitor(child);
+      print('top: > visitChildren: $child');
       child = iterator();
     }
   }
@@ -516,9 +640,8 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
   // in the same frame.
   void _add(_TopmostLocation child) {
     assert(!_sortedChildren.contains(child));
-    _TopmostLocation? insertPosition;
+    _TopmostLocation? insertPosition = _sortedChildren.isEmpty ? null : _sortedChildren.last;
     while (insertPosition != null && insertPosition._showTimestamp > child._showTimestamp) {
-      assert(insertPosition._showTimestamp < child._showTimestamp);
       insertPosition = insertPosition.previous;
     }
     if (insertPosition == null) {
@@ -526,6 +649,7 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
     } else {
       insertPosition.insertAfter(child);
     }
+    assert(_sortedChildren.contains(child));
 
     if (child._overlayChildRenderBox != null) {
       _theatre.markNeedsPaint();
@@ -550,7 +674,7 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
       return null;
     }
     final _TopmostLocation? candidate = child == null ? _sortedChildren.first : child.next;
-    return candidate?._overlayChildRenderBox != null ? candidate : _childAfter(candidate);
+    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childAfter(candidate) : null;
   }
 
   @override
@@ -559,7 +683,7 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel with _SortedLinke
       return null;
     }
     final _TopmostLocation? candidate = child == null ? _sortedChildren.last : child.previous;
-    return candidate?._overlayChildRenderBox != null ? candidate : _childBefore(candidate);
+    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childBefore(candidate) : null;
   }
 
   static _ChildIterator? _mapIterator(_Iterator<_TopmostLocation>? fromIterator) {
@@ -598,22 +722,6 @@ abstract class OverlayLocation {
 
   _RenderTheatreChildModel get _theatreChildModel;
 
-  /// Returns an [OverlayLocation] that represents a location in the same
-  /// [Overlay] as the enclosing [OverlayEntry] or [OverlayPortal], but later in
-  /// paint order than the [OverlayEntry] or [OverlayPortal]'s `overlayChild'.
-  ///
-  /// In other words, this method returns the [afterLocation] of the enclosing
-  /// [OverlayLocation].
-  ///
-  /// The widget subtree associated with the given `context` will be notified
-  /// when the enclosing [OverlayLocation] changes.
-  ///
-  /// This method returns null when no enclosing [Overlay] can be found in the
-  /// given [context].
-  static OverlayLocation? _above(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_OverlayLocationInheritedModel>()?.location;
-  }
-
   void _addToChildModel(_RenderDeferredLayoutBox child);
   void _removeFromChildModel(_RenderDeferredLayoutBox child);
   void _activate(_RenderDeferredLayoutBox child);
@@ -625,7 +733,7 @@ abstract class OverlayLocation {
     if (!_debugDisposed) {
       return true;
     }
-    throw FlutterError('$this is already disposed');
+    throw StateError('$this is already disposed');
   }
   bool _debugDisposed = false;
   @mustCallSuper
@@ -1251,7 +1359,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void detach() {
     super.detach();
-    _topChildren.visitChildren((RenderObject child) => child.detach);
+    _topChildren.visitChildren((RenderObject child) => child.detach());
   }
 
   @override
@@ -1272,16 +1380,14 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     adoptChild(child);
     location._addToChildModel(child);
     markNeedsPaint();
-
     // When child has never been laid out before, mark its layout surrogate as
     // needing layout so it's reachable via tree walk.
     child._layoutSurrogate.markNeedsLayout();
-
     _skipMarkNeedsLayout = false;
   }
 
   void moveDeferredChild(_RenderDeferredLayoutBox child, OverlayLocation oldLocation, OverlayLocation newLocation) {
-    //throw UnimplementedError();
+    throw UnimplementedError();
   }
 
   void removeDeferredChild(_RenderDeferredLayoutBox child, OverlayLocation location) {
@@ -1390,6 +1496,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     if (iterator != null) {
       child = iterator();
       while (child != null) {
+        print('> layout child : $child');
         layoutChild(child, nonPositionedChildConstraints);
         child = iterator();
       }
@@ -1548,91 +1655,13 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 }
 
-/// A widget that renders its [overlayChild] in the [Overlay] specified by
-/// [referenceLocation].
-///
-/// The [overlayChild] will be rendered on the [Overlay] as if it was inserted
-/// using an [OverlayEntry], while it can depend on the same set of
-/// [InheritedWidget]s (such as [Theme]) that this widget can depend on.
-///
-/// This widget must be placed below the [Overlay] [referenceLocation] points to, and
-/// [referenceLocation] must not be null when [overlayChild] is not null.
-///
-/// {@tool dartpad}
-/// This example uses an [OverlayPortal] to build a tooltip that becomes visible
-/// when the user taps on the [child] widget. There's a [DefaultTextStyle] above
-/// the [OverlayPortal] controlling the [TextStyle] of both the [child] widget
-/// and the [overlayChild] widget, which isn't otherwise doable if the tooltip
-/// was added as an [OverlayEntry].
-///
-/// ** See code in examples/api/lib/widgets/overlay/overlay_portal.0.dart **
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [OverlayEntry], the imperative API for inserting a widget to an [Overlay].
-class OverlayPortal extends StatelessWidget {
-  /// Creates a widget that renders the given [overlayChild] in the closest
-  /// ancestor [Overlay].
-  const OverlayPortal.closest({
-    super.key,
-    required this.overlayChild,
-    required this.child,
-  }) : _overlayLocation = null,
-       _overlayLocationGetter = _above;
+class _OverlayPortal extends RenderObjectWidget {
 
   /// Creates a widget that renders the given [overlayChild] in the [Overlay]
   /// specified by `overlayLocation`.
   ///
   /// The `overlayLocation` parameter must not be null when [overlayChild] is not
   /// null.
-  const OverlayPortal.withLocation({
-    super.key,
-    required OverlayLocation? overlayLocation,
-    required this.overlayChild,
-    required this.child,
-  }) : _overlayLocation = overlayLocation,
-       _overlayLocationGetter = _bottom;
-
-  /// A widget below this widget in the tree, that renders on the [Overlay]
-  /// given by the [OverlayLocation] specified.
-  ///
-  /// The [overlayChild] widget, if not null, is inserted below this widget in
-  /// the widget tree, allowing it to depend on [InheritedWidget]s above it, and
-  /// be notified when the [InheritedWidget]s change.
-  ///
-  /// Unlike [child], [overlayChild] can visually extend outside the bounds
-  /// of this widget without being clipped, and receive hit-test events outside
-  /// of this widget's bounds, as long as it does not extend outside of the
-  /// [Overlay] on which it is rendered.
-  final Widget? overlayChild;
-
-  /// A widget below this widget in the tree.
-  final Widget? child;
-
-  final OverlayLocation Function(BuildContext) _overlayLocationGetter;
-  final OverlayLocation? _overlayLocation;
-
-  static Never _bottom<T>(T idc) => throw FlutterError('Unreachable!');
-  static OverlayLocation _above(BuildContext context) => OverlayLocation._above(context)!;
-
-  @override
-  Widget build(BuildContext context) {
-    final Widget? overlayChild = this.overlayChild;
-    if (overlayChild == null) {
-      return _OverlayPortal(overlayLocation: null, overlayChild: null, child: child);
-    }
-
-    final OverlayLocation location = _overlayLocation ?? _overlayLocationGetter(context);
-    return _OverlayPortal(
-      overlayLocation: location,
-      overlayChild: _DeferredLayout(child: overlayChild),
-      child: child,
-    );
-  }
-}
-
-class _OverlayPortal extends RenderObjectWidget {
   _OverlayPortal({
     required this.overlayLocation,
     required this.overlayChild,
@@ -1640,17 +1669,6 @@ class _OverlayPortal extends RenderObjectWidget {
   }) : assert(overlayChild == null || overlayLocation != null),
        assert(overlayLocation == null || overlayLocation._debugNotDisposed());
 
-  /// A widget below this widget in the tree, that renders on the [Overlay]
-  /// given by the [OverlayLocation] specified.
-  ///
-  /// The [overlayChild] widget, if not null, is inserted below this widget in
-  /// the widget tree, allowing it to depend on [InheritedWidget]s above it, and
-  /// be notified when the [InheritedWidget]s change.
-  ///
-  /// Unlike [child], [overlayChild] can visually extend outside the bounds
-  /// of this widget without being clipped, and receive hit-test events outside
-  /// of this widget's bounds, as long as it does not extend outside of the
-  /// [Overlay] on which it is rendered.
   final Widget? overlayChild;
 
   /// A widget below this widget in the tree.
@@ -1771,18 +1789,6 @@ class _OverlayPortalElement extends RenderObjectElement {
       overlayChild.slot._deactivate(box);
     }
     super.deactivate();
-  }
-
-  @override
-  void unmount() {
-    final _OverlayChild? overlayChild = _overlayChild;
-    if (overlayChild != null) {
-      final _RenderDeferredLayoutBox? child = overlayChild.element.renderObject as _RenderDeferredLayoutBox?;
-      if (child != null) {
-        overlayChild.slot._removeFromChildModel(child);
-      }
-    }
-    super.unmount();
   }
 
   @override
