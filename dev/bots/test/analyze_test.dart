@@ -16,7 +16,7 @@ Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = fal
   final StringBuffer buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
-    print = (Object line) {
+    print = (Object? line) {
       buffer.writeln(line);
     };
     await callback();
@@ -45,18 +45,18 @@ void main() {
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
     final String lines = <String>[
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        'test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
       ]
       .map((String line) {
         return line
@@ -66,55 +66,30 @@ void main() {
       })
       .join('\n');
     expect(result,
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
-      'See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '║ See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
 
   test('analyze.dart - verifyGoldenTags', () async {
-    final String result = await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), shouldHaveErrors: true);
+    final List<String> result = (await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), shouldHaveErrors: true)).split('\n');
     const String noTag = "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
-        'at the top of the file before import statements.';
+                         'at the top of the file before import statements.';
     const String missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
-    String lines = <String>[
-        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+    final List<String> lines = <String>[
+        '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+        '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
       ]
-      .map((String line) {
-        return line
-          .replaceAll('/', Platform.isWindows ? r'\' : '/');
-      })
-      .join('\n');
-
-    try {
-      expect(
-        result,
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-        '$lines\n'
-        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      );
-    } catch (_) {
-      // This list of files may come up in one order or the other.
-      lines = <String>[
-        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
-        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-      ]
-      .map((String line) {
-        return line
-          .replaceAll('/', Platform.isWindows ? r'\' : '/');
-      })
-      .join('\n');
-      expect(
-        result,
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-        '$lines\n'
-        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      );
-    }
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .toList();
+    expect(result.length, 4 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
+    expect(result[0], '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════');
+    expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
+    expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
+    expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
+    expect(result[result.length - 1], ''); // trailing newline
   });
 
   test('analyze.dart - verifyNoMissingLicense', () async {
@@ -122,33 +97,30 @@ void main() {
     final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
       .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      'The following file does not have the right license header for dart files:\n'
-      '  $file\n'
-      'The expected license header is:\n'
-      '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
-      '// Use of this source code is governed by a BSD-style license that can be\n'
-      '// found in the LICENSE file.\n'
-      '...followed by a blank line.\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      'License check failed.\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '║ The following file does not have the right license header for dart files:\n'
+      '║   $file\n'
+      '║ The expected license header is:\n'
+      '║ // Copyright 2014 The Flutter Authors. All rights reserved.\n'
+      '║ // Use of this source code is governed by a BSD-style license that can be\n'
+      '║ // found in the LICENSE file.\n'
+      '║ ...followed by a blank line.\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
 
   test('analyze.dart - verifyNoTrailingSpaces', () async {
     final String result = await capture(() => verifyNoTrailingSpaces(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
     final String lines = <String>[
-        'test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
-        'test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
+        '║ test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
+        '║ test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
       ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
 
@@ -159,16 +131,16 @@ void main() {
     ), shouldHaveErrors: !Platform.isWindows);
     if (!Platform.isWindows) {
       expect(result,
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-        'test/analyze-test-input/root/packages/foo/serviceaccount.enc:0: file is not valid UTF-8\n'
-        'All files in this repository must be UTF-8. In particular, images and other binaries\n'
-        'must not be checked into this repository. This is because we are very sensitive to the\n'
-        'size of the repository as it is distributed to all our developers. If you have a binary\n'
-        'to which you need access, you should consider how to fetch it from another repository;\n'
-        'for example, the "assets-for-api-docs" repository is used for images in API docs.\n'
-        'To add assets to flutter_tools templates, see the instructions in the wiki:\n'
-        'https://github.com/flutter/flutter/wiki/Managing-template-image-assets\n'
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+        '║ test/analyze-test-input/root/packages/foo/serviceaccount.enc:0: file is not valid UTF-8\n'
+        '║ All files in this repository must be UTF-8. In particular, images and other binaries\n'
+        '║ must not be checked into this repository. This is because we are very sensitive to the\n'
+        '║ size of the repository as it is distributed to all our developers. If you have a binary\n'
+        '║ to which you need access, you should consider how to fetch it from another repository;\n'
+        '║ for example, the "assets-for-api-docs" repository is used for images in API docs.\n'
+        '║ To add assets to flutter_tools templates, see the instructions in the wiki:\n'
+        '║ https://github.com/flutter/flutter/wiki/Managing-template-image-assets\n'
+        '╚═══════════════════════════════════════════════════════════════════════════════\n'
       );
     }
   });
