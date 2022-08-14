@@ -21,17 +21,20 @@ import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
+import 'default_text_editing_shortcuts.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'shortcuts.dart';
+import 'tap_region.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -39,6 +42,9 @@ import 'ticker_provider.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -532,11 +538,13 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// incorrectly when a [TextInputFormatter] inserts a thousands separator to
 /// a currency value text field. The following example demonstrates how to
 /// suppress the default accessibility announcements by always announcing
-/// the content of the text field as a US currency value:
+/// the content of the text field as a US currency value (the `\$` inserts
+/// a dollar sign, the `$newText interpolates the `newText` variable):
+///
 /// ```dart
 /// onChanged: (String newText) {
 ///   if (newText.isNotEmpty) {
-///     SemanticsService.announce('\$' + newText, Directionality.of(context));
+///     SemanticsService.announce('\$$newText', Directionality.of(context));
 ///   }
 /// }
 /// ```
@@ -564,7 +572,7 @@ class EditableText extends StatefulWidget {
   ///
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
-  /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
+  /// [style], [cursorColor], [cursorOpacityAnimates], [backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
   /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
   /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
@@ -608,6 +616,7 @@ class EditableText extends StatefulWidget {
     this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
+    this.onTapOutside,
     List<TextInputFormatter>? inputFormatters,
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
@@ -634,6 +643,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -951,26 +961,26 @@ class EditableText extends StatefulWidget {
   ///
   /// Input that occupies a single line and scrolls horizontally as needed.
   /// ```dart
-  /// TextField()
+  /// const TextField()
   /// ```
   ///
   /// Input whose height grows from one line up to as many lines as needed for
   /// the text that was entered. If a height limit is imposed by its parent, it
   /// will scroll vertically when its height reaches that limit.
   /// ```dart
-  /// TextField(maxLines: null)
+  /// const TextField(maxLines: null)
   /// ```
   ///
   /// The input's height is large enough for the given number of lines. If
   /// additional lines are entered the input scrolls vertically.
   /// ```dart
-  /// TextField(maxLines: 2)
+  /// const TextField(maxLines: 2)
   /// ```
   ///
   /// Input whose height grows with content between a min and max. An infinite
   /// max is possible with `maxLines: null`.
   /// ```dart
-  /// TextField(minLines: 2, maxLines: 4)
+  /// const TextField(minLines: 2, maxLines: 4)
   /// ```
   ///
   /// See also:
@@ -1014,7 +1024,7 @@ class EditableText extends StatefulWidget {
   /// point the height limit is reached. If additional lines are entered it will
   /// scroll vertically.
   /// ```dart
-  /// TextField(minLines:2, maxLines: 4)
+  /// const TextField(minLines:2, maxLines: 4)
   /// ```
   ///
   /// Defaults to null.
@@ -1045,7 +1055,7 @@ class EditableText extends StatefulWidget {
   ///
   /// Input that matches the height of its parent:
   /// ```dart
-  /// Expanded(
+  /// const Expanded(
   ///   child: TextField(maxLines: null, expands: true),
   /// )
   /// ```
@@ -1212,6 +1222,46 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.SelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
+
+  /// {@template flutter.widgets.editableText.onTapOutside}
+  /// Called for each tap that occurs outside of the[TextFieldTapRegion] group
+  /// when the text field is focused.
+  ///
+  /// If this is null, [FocusNode.unfocus] will be called on the [focusNode] for
+  /// this text field when a [PointerDownEvent] is received on another part of
+  /// the UI. However, it will not unfocus as a result of mobile application
+  /// touch events (which does not include mouse clicks), to conform with the
+  /// platform conventions. To change this behavior, a callback may be set here
+  /// that operates differently from the default.
+  ///
+  /// When adding additional controls to a text field (for example, a spinner, a
+  /// button that copies the selected text, or modifies formatting), it is
+  /// helpful if tapping on that control doesn't unfocus the text field. In
+  /// order for an external widget to be considered as part of the text field
+  /// for the purposes of tapping "outside" of the field, wrap the control in a
+  /// [TextFieldTapRegion].
+  ///
+  /// The [PointerDownEvent] passed to the function is the event that caused the
+  /// notification. It is possible that the event may occur outside of the
+  /// immediate bounding box defined by the text field, although it will be
+  /// within the bounding box of a [TextFieldTapRegion] member.
+  /// {@endtemplate}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use a `TextFieldTapRegion` to wrap a set of
+  /// "spinner" buttons that increment and decrement a value in the [TextField]
+  /// without causing the text field to lose keyboard focus.
+  ///
+  /// This example includes a generic `SpinnerField<T>` class that you can copy
+  /// into your own project and customize.
+  ///
+  /// ** See code in examples/api/lib/widgets/tap_region/text_field_tap_region.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion] for how the region group is determined.
+  final TapRegionCallback? onTapOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
@@ -1504,6 +1554,13 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
+
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -1887,8 +1944,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
       cause,
     );
+
     if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          bringIntoView(textEditingValue.selection.extent);
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          break;
+      }
     }
   }
 
@@ -2576,6 +2644,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
+      magnifierConfiguration: widget.magnifierConfiguration,
     );
   }
 
@@ -3123,10 +3192,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Toggles the visibility of the toolbar.
-  void toggleToolbar() {
+  void toggleToolbar([bool hideHandles = true]) {
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
-      hideToolbar();
+      hideToolbar(hideHandles);
     } else {
       showToolbar();
     }
@@ -3163,6 +3232,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     setState(() {
       _placeholderLocation = -1;
     });
+  }
+
+  @override
+  void performSelector(String selectorName) {
+    final Intent? intent = intentForMacOSSelector(selectorName);
+
+    if (intent != null) {
+      final BuildContext? primaryContext = primaryFocus?.context;
+      if (primaryContext != null) {
+        Actions.invoke(primaryContext, intent);
+      }
+    }
   }
 
   @override
@@ -3421,6 +3502,43 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return Actions.invoke(context, intent);
   }
 
+
+  /// The default behavior used if [onTapOutside] is null.
+  ///
+  /// The `event` argument is the [PointerDownEvent] that caused the notification.
+  void _defaultOnTapOutside(PointerDownEvent event) {
+    /// The focus dropping behavior is only present on desktop platforms
+    /// and mobile browsers.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      // On mobile platforms, we don't unfocus on touch events unless they're
+      // in the web browser, but we do unfocus for all other kinds of events.
+        switch (event.kind) {
+          case ui.PointerDeviceKind.touch:
+            if (kIsWeb) {
+              widget.focusNode.unfocus();
+            }
+            break;
+          case ui.PointerDeviceKind.mouse:
+          case ui.PointerDeviceKind.stylus:
+          case ui.PointerDeviceKind.invertedStylus:
+          case ui.PointerDeviceKind.unknown:
+            widget.focusNode.unfocus();
+            break;
+          case ui.PointerDeviceKind.trackpad:
+            throw UnimplementedError('Unexpected pointer down event for trackpad');
+        }
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        widget.focusNode.unfocus();
+        break;
+    }
+  }
+
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
@@ -3458,96 +3576,100 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    return MouseRegion(
-      cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-      child: Actions(
-        actions: _actions,
-        child: _TextEditingHistory(
-          controller: widget.controller,
-          onTriggered: (TextEditingValue value) {
-            userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
-          },
-          child: Focus(
-            focusNode: widget.focusNode,
-            includeSemantics: false,
-            debugLabel: 'EditableText',
-            child: Scrollable(
-              excludeFromSemantics: true,
-              axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-              controller: _scrollController,
-              physics: widget.scrollPhysics,
-              dragStartBehavior: widget.dragStartBehavior,
-              restorationId: widget.restorationId,
-              // If a ScrollBehavior is not provided, only apply scrollbars when
-              // multiline. The overscroll indicator should not be applied in
-              // either case, glowing or stretching.
-              scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-                scrollbars: _isMultiline,
-                overscroll: false,
-              ),
-              viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                return CompositedTransformTarget(
-                  link: _toolbarLayerLink,
-                  child: Semantics(
-                    onCopy: _semanticsOnCopy(controls),
-                    onCut: _semanticsOnCut(controls),
-                    onPaste: _semanticsOnPaste(controls),
-                    child: _ScribbleFocusable(
-                      focusNode: widget.focusNode,
-                      editableKey: _editableKey,
-                      enabled: widget.scribbleEnabled,
-                      updateSelectionRects: () {
-                        _openInputConnection();
-                        _updateSelectionRects(force: true);
-                      },
-                      child: _Editable(
-                        key: _editableKey,
-                        startHandleLayerLink: _startHandleLayerLink,
-                        endHandleLayerLink: _endHandleLayerLink,
-                        inlineSpan: buildTextSpan(),
-                        value: _value,
-                        cursorColor: _cursorColor,
-                        backgroundCursorColor: widget.backgroundCursorColor,
-                        showCursor: EditableText.debugDeterministicCursor
-                            ? ValueNotifier<bool>(widget.showCursor)
-                            : _cursorVisibilityNotifier,
-                        forceLine: widget.forceLine,
-                        readOnly: widget.readOnly,
-                        hasFocus: _hasFocus,
-                        maxLines: widget.maxLines,
-                        minLines: widget.minLines,
-                        expands: widget.expands,
-                        strutStyle: widget.strutStyle,
-                        selectionColor: widget.selectionColor,
-                        textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                        textAlign: widget.textAlign,
-                        textDirection: _textDirection,
-                        locale: widget.locale,
-                        textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                        textWidthBasis: widget.textWidthBasis,
-                        obscuringCharacter: widget.obscuringCharacter,
-                        obscureText: widget.obscureText,
-                        offset: offset,
-                        onCaretChanged: _handleCaretChanged,
-                        rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                        cursorWidth: widget.cursorWidth,
-                        cursorHeight: widget.cursorHeight,
-                        cursorRadius: widget.cursorRadius,
-                        cursorOffset: widget.cursorOffset ?? Offset.zero,
-                        selectionHeightStyle: widget.selectionHeightStyle,
-                        selectionWidthStyle: widget.selectionWidthStyle,
-                        paintCursorAboveText: widget.paintCursorAboveText,
-                        enableInteractiveSelection: widget._userSelectionEnabled,
-                        textSelectionDelegate: this,
-                        devicePixelRatio: _devicePixelRatio,
-                        promptRectRange: _currentPromptRectRange,
-                        promptRectColor: widget.autocorrectionTextRectColor,
-                        clipBehavior: widget.clipBehavior,
+    return TextFieldTapRegion(
+      onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
+      debugLabel: kReleaseMode ? null : 'EditableText',
+      child: MouseRegion(
+        cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+        child: Actions(
+          actions: _actions,
+          child: _TextEditingHistory(
+            controller: widget.controller,
+            onTriggered: (TextEditingValue value) {
+              userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+            },
+            child: Focus(
+              focusNode: widget.focusNode,
+              includeSemantics: false,
+              debugLabel: kReleaseMode ? null : 'EditableText',
+              child: Scrollable(
+                excludeFromSemantics: true,
+                axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                controller: _scrollController,
+                physics: widget.scrollPhysics,
+                dragStartBehavior: widget.dragStartBehavior,
+                restorationId: widget.restorationId,
+                // If a ScrollBehavior is not provided, only apply scrollbars when
+                // multiline. The overscroll indicator should not be applied in
+                // either case, glowing or stretching.
+                scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                  scrollbars: _isMultiline,
+                  overscroll: false,
+                ),
+                viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                  return CompositedTransformTarget(
+                    link: _toolbarLayerLink,
+                    child: Semantics(
+                      onCopy: _semanticsOnCopy(controls),
+                      onCut: _semanticsOnCut(controls),
+                      onPaste: _semanticsOnPaste(controls),
+                      child: _ScribbleFocusable(
+                        focusNode: widget.focusNode,
+                        editableKey: _editableKey,
+                        enabled: widget.scribbleEnabled,
+                        updateSelectionRects: () {
+                          _openInputConnection();
+                          _updateSelectionRects(force: true);
+                        },
+                        child: _Editable(
+                          key: _editableKey,
+                          startHandleLayerLink: _startHandleLayerLink,
+                          endHandleLayerLink: _endHandleLayerLink,
+                          inlineSpan: buildTextSpan(),
+                          value: _value,
+                          cursorColor: _cursorColor,
+                          backgroundCursorColor: widget.backgroundCursorColor,
+                          showCursor: EditableText.debugDeterministicCursor
+                              ? ValueNotifier<bool>(widget.showCursor)
+                              : _cursorVisibilityNotifier,
+                          forceLine: widget.forceLine,
+                          readOnly: widget.readOnly,
+                          hasFocus: _hasFocus,
+                          maxLines: widget.maxLines,
+                          minLines: widget.minLines,
+                          expands: widget.expands,
+                          strutStyle: widget.strutStyle,
+                          selectionColor: widget.selectionColor,
+                          textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                          textAlign: widget.textAlign,
+                          textDirection: _textDirection,
+                          locale: widget.locale,
+                          textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                          textWidthBasis: widget.textWidthBasis,
+                          obscuringCharacter: widget.obscuringCharacter,
+                          obscureText: widget.obscureText,
+                          offset: offset,
+                          onCaretChanged: _handleCaretChanged,
+                          rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                          cursorWidth: widget.cursorWidth,
+                          cursorHeight: widget.cursorHeight,
+                          cursorRadius: widget.cursorRadius,
+                          cursorOffset: widget.cursorOffset ?? Offset.zero,
+                          selectionHeightStyle: widget.selectionHeightStyle,
+                          selectionWidthStyle: widget.selectionWidthStyle,
+                          paintCursorAboveText: widget.paintCursorAboveText,
+                          enableInteractiveSelection: widget._userSelectionEnabled,
+                          textSelectionDelegate: this,
+                          devicePixelRatio: _devicePixelRatio,
+                          promptRectRange: _currentPromptRectRange,
+                          promptRectColor: widget.autocorrectionTextRectColor,
+                          clipBehavior: widget.clipBehavior,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -4318,7 +4440,16 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     }
 
     final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+
+    // "textBoundary's selection is only updated after rebuild; if the text
+    // is the same, use the selection from state, which is more recent.
+    // This is necessary on macOS where alt+up sends the moveBackward:
+    // and moveToBeginningOfParagraph: selectors at the same time.
+    final TextSelection textBoundarySelection =
+        textBoundary.textEditingValue.text == state._value.text
+            ? state._value.selection
+            : textBoundary.textEditingValue.selection;
+
     if (!textBoundarySelection.isValid) {
       return null;
     }

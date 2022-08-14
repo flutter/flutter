@@ -4,6 +4,8 @@
 
 @import XCTest;
 
+static const CGFloat kStandardTimeOut = 60.0;
+
 @interface XCUIElement(KeyboardFocus)
 @property (nonatomic, readonly) BOOL flt_hasKeyboardFocus;
 @end
@@ -27,18 +29,17 @@
   [self.app launch];
 }
 - (void)testPlatformViewFocus {
-
   XCUIElement *entranceButton = self.app.buttons[@"platform view focus test"];
-  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:1]);
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut], @"The element tree is %@", self.app.debugDescription);
   [entranceButton tap];
 
   XCUIElement *platformView = self.app.textFields[@"platform_view[0]"];
-  XCTAssertTrue([platformView waitForExistenceWithTimeout:1]);
+  XCTAssertTrue([platformView waitForExistenceWithTimeout:kStandardTimeOut]);
   XCUIElement *flutterTextField = self.app.textFields[@"Flutter Text Field"];
-  XCTAssertTrue([flutterTextField waitForExistenceWithTimeout:1]);
+  XCTAssertTrue([flutterTextField waitForExistenceWithTimeout:kStandardTimeOut]);
 
   [flutterTextField tap];
-  XCTAssertTrue([self.app.windows.element waitForExistenceWithTimeout:1]);
+  XCTAssertTrue([self.app.windows.element waitForExistenceWithTimeout:kStandardTimeOut]);
   XCTAssertFalse(platformView.flt_hasKeyboardFocus);
   XCTAssertTrue(flutterTextField.flt_hasKeyboardFocus);
 

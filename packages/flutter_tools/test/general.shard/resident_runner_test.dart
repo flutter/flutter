@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -52,7 +53,6 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
     timestamp: 0
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   extensionRPCs: <String>[],
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
@@ -89,7 +89,6 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
       resolved: true,
     ),
   ],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[],
   livePorts: 0,
   name: 'test',
@@ -143,6 +142,14 @@ const FakeVmServiceRequest evict = FakeVmServiceRequest(
   method: 'ext.flutter.evict',
   args: <String, Object>{
     'value': 'asset',
+    'isolateId': '1',
+  }
+);
+
+const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
+  method: 'ext.ui.window.reinitializeShader',
+  args: <String, Object>{
+    'assetKey': 'foo.frag',
     'isolateId': '1',
   }
 );
@@ -2242,6 +2249,30 @@ flutter:
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('HotRunner sets asset directory when first evict shaders', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      setAssetBundlePath,
+      evictShader,
+    ]);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+
+    (flutterDevice.devFS as FakeDevFS).shaderPathsToEvict = <String>{'foo.frag'};
+
+    expect(flutterDevice.devFS.hasSetAssetDirectory, false);
+    await (residentRunner as HotRunner).evictDirtyAssets();
+    expect(flutterDevice.devFS.hasSetAssetDirectory, true);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
   testUsingContext('HotRunner does not sets asset directory when no assets to evict', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
     ]);
@@ -2298,7 +2329,7 @@ class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceE
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, { Stream<Uri> observatoryUris })
-    : super(device, buildInfo: BuildInfo.debug) {
+    : super(device, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler()) {
     _observatoryUris = observatoryUris;
   }
 
@@ -2333,6 +2364,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   ResidentCompiler generator;
+
+  @override
+  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.android;
 
   @override
   Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
@@ -2422,7 +2459,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     BuildInfo buildInfo,
     ResidentCompiler residentCompiler,
     this.fakeDevFS,
-  ) : super(device, buildInfo: buildInfo, generator: residentCompiler);
+  ) : super(device, buildInfo: buildInfo, generator: residentCompiler, developmentShaderCompiler: const FakeShaderCompiler());
 
   @override
   Future<void> connect({
@@ -2593,6 +2630,12 @@ class FakeDevFS extends Fake implements DevFS {
   @override
   Set<String> assetPathsToEvict = <String>{};
 
+  @override
+  Set<String> shaderPathsToEvict = <String>{};
+
+  @override
+  bool didUpdateFontManifest = false;
+
   UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
 
   @override
@@ -2617,6 +2660,7 @@ class FakeDevFS extends Fake implements DevFS {
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
     @required String dillOutputPath,
+    @required DevelopmentShaderCompiler shaderCompiler,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
@@ -2627,5 +2671,17 @@ class FakeDevFS extends Fake implements DevFS {
     File dartPluginRegistrant,
   }) async {
     return nextUpdateReport;
+  }
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
   }
 }
