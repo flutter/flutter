@@ -389,5 +389,20 @@ TEST(FlutterWindowsEngine, ScheduleFrame) {
   EXPECT_TRUE(called);
 }
 
+TEST(FlutterWindowsEngine, SetNextFrameCallback) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  bool called = false;
+  modifier.embedder_api().SetNextFrameCallback = MOCK_ENGINE_PROC(
+      SetNextFrameCallback, ([&called](auto engine, auto callback, auto data) {
+        called = true;
+        return kSuccess;
+      }));
+
+  engine->SetNextFrameCallback([]() {});
+  EXPECT_TRUE(called);
+}
+
 }  // namespace testing
 }  // namespace flutter
