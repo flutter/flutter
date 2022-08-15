@@ -778,9 +778,24 @@ class TextSelectionOverlay {
     /// end point is [ui.TextBox] start bottom point of first or last selected word.
     final Offset offsetToTextEndPoint = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight);
 
+
+    double getOffsetXToTextMiddlePoint(
+      TextSelectionHandleType type,
+    ) {
+      switch (type) {
+        case TextSelectionHandleType.left:
+          return -handleSize.width / 2;
+        case TextSelectionHandleType.right:
+          return handleSize.width / 2;
+        case TextSelectionHandleType.collapsed:
+          return 0.0;
+      }
+    }
+
     /// For more accurate selection updates,need shift selection end point
     /// to selection middle point.
-    final Offset offsetToTextMiddlePoint = Offset(0.0, -renderObject.preferredLineHeight / 2);
+    final double offsetXToTextMiddlePoint = getOffsetXToTextMiddlePoint(type);
+    final Offset offsetToTextMiddlePoint = Offset(offsetXToTextMiddlePoint, -renderObject.preferredLineHeight / 2);
 
     return offsetToHandleAnchor + offsetToTextEndPoint + offsetToTextMiddlePoint;
   }
