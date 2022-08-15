@@ -24,16 +24,6 @@ void main() async {
     _expectShaderRendersGreen(shader);
   });
 
-  test('simple shader with space in key renders correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset(
-      'functions with_space.frag.iplr',
-    );
-    final Shader shader = program.shader(
-      floatUniforms: Float32List.fromList(<double>[1]),
-    );
-    _expectShaderRendersGreen(shader);
-  });
-
   test('blue-green image renders green', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'blue_green_sampler.frag.iplr',

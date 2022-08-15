@@ -11,7 +11,6 @@ if (enable_unittests) {
     "blue_green_sampler.frag",
     "children_and_uniforms.frag",
     "functions.frag",
-    "functions%20with_space.frag",
     "no_builtin_redefinition.frag",
     "no_uniforms.frag",
     "simple.frag",
