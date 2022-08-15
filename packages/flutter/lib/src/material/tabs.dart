@@ -843,6 +843,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example
   /// to defeat both the splash and the hover/pressed overlay, but not the
   /// keyboard focused overlay:
+  ///
   /// ```dart
   /// TabBar(
   ///   splashFactory: NoSplash.splashFactory,
@@ -851,7 +852,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///       return states.contains(MaterialState.focused) ? null : Colors.transparent;
   ///     },
   ///   ),
-  ///   ...
+  ///   tabs: const <Widget>[
+  ///     // ...
+  ///   ],
   /// )
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
@@ -859,13 +862,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
   ///
   /// This can be useful to match the [BoxDecoration.borderRadius] provided as [indicator].
+  ///
   /// ```dart
   /// TabBar(
   ///   indicator: BoxDecoration(
   ///     borderRadius: BorderRadius.circular(40),
   ///   ),
   ///   splashBorderRadius: BorderRadius.circular(40),
-  ///   ...
+  ///   tabs: const <Widget>[
+  ///     // ...
+  ///   ],
   /// )
   /// ```
   ///
@@ -1024,6 +1030,7 @@ class _TabBarState extends State<TabBar> {
     } else if (widget.indicatorColor != oldWidget.indicatorColor ||
         widget.indicatorWeight != oldWidget.indicatorWeight ||
         widget.indicatorSize != oldWidget.indicatorSize ||
+        widget.indicatorPadding != oldWidget.indicatorPadding ||
         widget.indicator != oldWidget.indicator) {
       _initIndicatorPainter();
     }
@@ -1495,15 +1502,13 @@ class _TabBarViewState extends State<TabBarView> {
     }
 
     final Duration duration = _controller!.animationDuration;
-
-    if (duration == Duration.zero) {
-      _pageController.jumpToPage(_currentIndex!);
-      return Future<void>.value();
-    }
-
     final int previousIndex = _controller!.previousIndex;
 
     if ((_currentIndex! - previousIndex).abs() == 1) {
+      if (duration == Duration.zero) {
+        _pageController.jumpToPage(_currentIndex!);
+        return Future<void>.value();
+      }
       _warpUnderwayCount += 1;
       await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
@@ -1524,6 +1529,11 @@ class _TabBarViewState extends State<TabBarView> {
       _childrenWithKey[previousIndex] = temp;
     });
     _pageController.jumpToPage(initialPage);
+
+    if (duration == Duration.zero) {
+      _pageController.jumpToPage(_currentIndex!);
+      return Future<void>.value();
+    }
 
     await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
     if (!mounted) {

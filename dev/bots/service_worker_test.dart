@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:io';
+import 'dart:core' hide print;
+import 'dart:io' hide exit;
 
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
@@ -29,6 +29,7 @@ enum ServiceWorkerTestType {
   withoutFlutterJs,
   withFlutterJs,
   withFlutterJsShort,
+  withFlutterJsEntrypointLoadedEvent,
 }
 
 // Run a web service worker test as a standalone Dart program.
@@ -36,10 +37,16 @@ Future<void> main() async {
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
+  await runWebServiceWorkerTest(headless: false, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withoutFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJs);
   await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsShort);
+  await runWebServiceWorkerTestWithCachingResources(headless: false, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent);
   await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
+  if (hasError) {
+    print('One or more tests failed.');
+    reportErrorsAndExit();
+  }
 }
 
 Future<void> _setAppVersion(int version) async {
@@ -66,6 +73,9 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
       break;
     case ServiceWorkerTestType.withFlutterJsShort:
       indexFile = 'index_with_flutterjs_short.html';
+      break;
+    case ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent:
+      indexFile = 'index_with_flutterjs_entrypoint_loaded.html';
       break;
   }
   return indexFile;
@@ -153,8 +163,8 @@ Future<void> runWebServiceWorkerTest({
   Future<void> startAppServer({
     required String cacheControl,
   }) async {
-    final int serverPort = await findAvailablePort();
-    final int browserDebugPort = await findAvailablePort();
+    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
+    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
     server = await AppServer.start(
       headless: headless,
       cacheControl: cacheControl,
@@ -191,7 +201,7 @@ Future<void> runWebServiceWorkerTest({
 
   final bool shouldExpectFlutterJs = testType != ServiceWorkerTestType.withoutFlutterJs;
 
-  print('BEGIN runWebServiceWorkerTest(headless: $headless, testType: $testType)\n');
+  print('BEGIN runWebServiceWorkerTest(headless: $headless, testType: $testType)');
 
   try {
     /////
@@ -407,7 +417,7 @@ Future<void> runWebServiceWorkerTest({
     await server?.stop();
   }
 
-  print('END runWebServiceWorkerTest(headless: $headless, testType: $testType)\n');
+  print('END runWebServiceWorkerTest(headless: $headless, testType: $testType)');
 }
 
 Future<void> runWebServiceWorkerTestWithCachingResources({
@@ -425,8 +435,8 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
   Future<void> startAppServer({
     required String cacheControl,
   }) async {
-    final int serverPort = await findAvailablePort();
-    final int browserDebugPort = await findAvailablePort();
+    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
+    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
     server = await AppServer.start(
       headless: headless,
       cacheControl: cacheControl,
@@ -462,7 +472,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
 
   final bool shouldExpectFlutterJs = testType != ServiceWorkerTestType.withoutFlutterJs;
 
-  print('BEGIN runWebServiceWorkerTestWithCachingResources(headless: $headless, testType: $testType)\n');
+  print('BEGIN runWebServiceWorkerTestWithCachingResources(headless: $headless, testType: $testType)');
 
   try {
     //////////////////////////////////////////////////////
@@ -566,7 +576,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
     await server?.stop();
   }
 
-  print('END runWebServiceWorkerTestWithCachingResources(headless: $headless, testType: $testType)\n');
+  print('END runWebServiceWorkerTestWithCachingResources(headless: $headless, testType: $testType)');
 }
 
 Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({
@@ -583,8 +593,8 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({
   Future<void> startAppServer({
     required String cacheControl,
   }) async {
-    final int serverPort = await findAvailablePort();
-    final int browserDebugPort = await findAvailablePort();
+    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
+    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
     server = await AppServer.start(
       headless: headless,
       cacheControl: cacheControl,
@@ -618,7 +628,7 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({
     workingDirectory: _testAppWebDirectory,
   );
 
-  print('BEGIN runWebServiceWorkerTestWithBlockedServiceWorkers(headless: $headless)\n');
+  print('BEGIN runWebServiceWorkerTestWithBlockedServiceWorkers(headless: $headless)');
   try {
     await _rebuildApp(version: 1, testType: ServiceWorkerTestType.blockedServiceWorkers, target: _targetWithBlockedServiceWorkers);
 
@@ -652,5 +662,5 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({
     );
     await server?.stop();
   }
-  print('END runWebServiceWorkerTestWithBlockedServiceWorkers(headless: $headless)\n');
+  print('END runWebServiceWorkerTestWithBlockedServiceWorkers(headless: $headless)');
 }

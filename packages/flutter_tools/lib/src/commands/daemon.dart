@@ -499,6 +499,7 @@ class AppDomain extends Domain {
     bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
+    String? userIdentifier,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -517,6 +518,7 @@ class AppDomain extends Domain {
       target: target,
       buildInfo: options.buildInfo,
       platform: globals.platform,
+      userIdentifier: userIdentifier,
     );
 
     ResidentRunner runner;

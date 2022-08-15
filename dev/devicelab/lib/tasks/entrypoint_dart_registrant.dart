@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Process, ProcessSignal, Directory, File;
+import 'dart:io' show Directory, File, Process, ProcessSignal;
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';

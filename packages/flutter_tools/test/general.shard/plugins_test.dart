@@ -762,7 +762,7 @@ dependencies:
           },
           throwsToolExit(
             message: 'The plugin `plugin1` requires your app to be migrated to the Android embedding v2. '
-                     'Follow the steps on https://flutter.dev/go/android-project-migration and re-run this command.'
+                     'Follow the steps on the migration doc above and re-run this command.'
           ),
         );
       }, overrides: <Type, Generator>{

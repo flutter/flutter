@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, PlaceholderAlignment, LineMetrics;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, PlaceholderAlignment, TextBox;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -385,6 +385,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _cachedBuiltInPainters?.dispose();
     _selectionStartInViewport.dispose();
     _selectionEndInViewport.dispose();
+    _autocorrectHighlightPainter.dispose();
+    _selectionPainter.dispose();
+    _caretPainter.dispose();
     super.dispose();
   }
 
@@ -586,6 +589,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _obscureText = value;
+    _cachedAttributedValue = null;
     markNeedsSemanticsUpdate();
   }
 

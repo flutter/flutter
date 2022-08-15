@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
@@ -25,8 +26,8 @@ export 'package:flutter/foundation.dart' show
   ValueNotifier;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
-  AlignmentTween,
   AlignmentGeometryTween,
+  AlignmentTween,
   Axis,
   BoxConstraints,
   BoxConstraintsTransform,
@@ -44,7 +45,6 @@ export 'package:flutter/rendering.dart' show
   MainAxisAlignment,
   MainAxisSize,
   MouseCursor,
-  SystemMouseCursors,
   MultiChildLayoutDelegate,
   PaintingContext,
   PointerCancelEvent,
@@ -62,6 +62,7 @@ export 'package:flutter/rendering.dart' show
   ShapeBorderClipper,
   SingleChildLayoutDelegate,
   StackFit,
+  SystemMouseCursors,
   TextOverflow,
   ValueChanged,
   ValueGetter,
@@ -491,6 +492,45 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// (as opposed to applying the filter to everything _beneath_ a widget), use
 /// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
 /// easier to use and less expensive than [BackdropFilter].
+///
+/// {@tool snippet}
+///
+/// This example shows how the common case of applying a [BackdropFilter] blur
+/// to a single sibling can be replaced with an [ImageFiltered] widget. This code
+/// is generally simpler and the performance will be improved dramatically for
+/// complex filters like blurs.
+///
+/// The implementation below is unnecessarily expensive.
+///
+/// ```dart
+///  Widget buildBackdrop() {
+///    return Stack(
+///      children: <Widget>[
+///        Positioned.fill(child: Image.asset('image.png')),
+///        Positioned.fill(
+///          child: BackdropFilter(
+///            filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///          ),
+///        ),
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+/// Instead consider the following approach which directly applies a blur
+/// to the child widget.
+///
+/// ```dart
+///  Widget buildFilter() {
+///    return ImageFiltered(
+///      imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///      child: Image.asset('image.png'),
+///    );
+///  }
+/// ```
+///
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1304,7 +1344,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.transformHitTests = true,
     this.filterQuality,
     super.child,
-  }) : transform = Matrix4.rotationZ(angle);
+  }) : transform = _computeRotation(angle);
 
   /// Creates a widget that transforms its child using a translation.
   ///
@@ -1380,6 +1420,38 @@ class Transform extends SingleChildRenderObjectWidget {
   })  : assert(!(scale == null && scaleX == null && scaleY == null), "At least one of 'scale', 'scaleX' and 'scaleY' is required to be non-null"),
         assert(scale == null || (scaleX == null && scaleY == null), "If 'scale' is non-null then 'scaleX' and 'scaleY' must be left null"),
         transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0);
+
+  // Computes a rotation matrix for an angle in radians, attempting to keep rotations
+  // at integral values for angles of 0, π/2, π, 3π/2.
+  static Matrix4 _computeRotation(double radians) {
+    assert(radians.isFinite, 'Cannot compute the rotation matrix for a non-finite angle: $radians');
+    if (radians == 0.0) {
+      return Matrix4.identity();
+    }
+    final double sin = math.sin(radians);
+    if (sin == 1.0) {
+      return _createZRotation(1.0, 0.0);
+    }
+    if (sin == -1.0) {
+      return _createZRotation(-1.0, 0.0);
+    }
+    final double cos = math.cos(radians);
+    if (cos == -1.0) {
+      return _createZRotation(0.0, -1.0);
+    }
+    return _createZRotation(sin, cos);
+  }
+
+  static Matrix4 _createZRotation(double sin, double cos) {
+    final Matrix4 result = Matrix4.zero();
+    result.storage[0] = cos;
+    result.storage[1] = sin;
+    result.storage[4] = -sin;
+    result.storage[5] = cos;
+    result.storage[10] = 1.0;
+    result.storage[15] = 1.0;
+    return result;
+  }
 
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
@@ -4608,10 +4680,10 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
-///     const Icon(Icons.sentiment_very_satisfied),
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -4635,12 +4707,12 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Expanded(
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
-///     const Icon(Icons.sentiment_very_satisfied),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -4665,12 +4737,12 @@ class Flex extends MultiChildRenderObjectWidget {
 /// ```dart
 /// Row(
 ///   textDirection: TextDirection.rtl,
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Expanded(
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
-///     const Icon(Icons.sentiment_very_satisfied),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -5624,9 +5696,17 @@ class RichText extends MultiChildRenderObjectWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The [SelectionRegistrar] this rich text is subscribed to.
+  ///
+  /// If this is set, [selectionColor] must be non-null.
   final SelectionRegistrar? selectionRegistrar;
 
   /// The color to use when painting the selection.
+  ///
+  /// This is ignored if [selectionRegistrar] is null.
+  ///
+  /// See the section on selections in the [RichText] top-level API
+  /// documentation for more details on enabling selection in [RichText]
+  /// widgets.
   final Color? selectionColor;
 
   @override
@@ -5966,6 +6046,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// bundle implementation:
 ///
 /// ```dart
+/// // continuing from previous example...
 /// await tester.pumpWidget(
 ///   MaterialApp(
 ///     home: DefaultAssetBundle(
@@ -7241,25 +7322,31 @@ class KeyedSubtree extends StatelessWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
-/// This widget is a simple inline alternative to defining a [StatelessWidget]
-/// subclass. For example a widget defined and used like this:
+/// This widget is an inline alternative to defining a [StatelessWidget]
+/// subclass. For example, instead of defining a widget as follows:
 ///
 /// ```dart
 /// class Foo extends StatelessWidget {
+///   const Foo({super.key});
 ///   @override
-///   Widget build(BuildContext context) => Text('foo');
+///   Widget build(BuildContext context) => const Text('foo');
 /// }
-///
-/// Center(child: Foo())
 /// ```
 ///
-/// Could equally well be defined and used like this, without
+/// ...and using it in the usual way:
+///
+/// ```dart
+/// // continuing from previous example...
+/// const Center(child: Foo())
+/// ```
+///
+/// ...one could instead define and use it in a single step, without
 /// defining a new widget class:
 ///
 /// ```dart
 /// Center(
 ///   child: Builder(
-///     builder: (BuildContext context) => Text('foo');
+///     builder: (BuildContext context) => const Text('foo'),
 ///   ),
 /// )
 /// ```
@@ -7284,7 +7371,7 @@ class KeyedSubtree extends StatelessWidget {
 ///           // above this widget's context.
 ///           print(Scaffold.of(context).hasAppBar);
 ///         },
-///         child: Text('hasAppBar'),
+///         child: const Text('hasAppBar'),
 ///       )
 ///     ),
 ///   );
@@ -7304,7 +7391,7 @@ class KeyedSubtree extends StatelessWidget {
 ///             onPressed: () {
 ///               print(Scaffold.of(context).hasAppBar);
 ///             },
-///             child: Text('hasAppBar'),
+///             child: const Text('hasAppBar'),
 ///           ),
 ///         );
 ///       },

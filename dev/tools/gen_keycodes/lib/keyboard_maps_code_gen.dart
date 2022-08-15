@@ -7,13 +7,15 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'data.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
 bool _isAsciiLetter(String? char) {
-  if (char == null)
+  if (char == null) {
     return false;
+  }
   const int charUpperA = 0x41;
   const int charUpperZ = 0x5A;
   const int charLowerA = 0x61;
@@ -25,8 +27,9 @@ bool _isAsciiLetter(String? char) {
 }
 
 bool _isDigit(String? char) {
-  if (char == null)
+  if (char == null) {
     return false;
+  }
   final int charDigit0 = '0'.codeUnitAt(0);
   final int charDigit9 = '9'.codeUnitAt(0);
   assert(char.length == 1);
@@ -246,6 +249,16 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return lines.sortedJoin().trimRight();
   }
 
+  /// This generates the map of iOS key label to logical keys for special keys.
+  String get _iOSSpecialMap {
+    final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
+    kIosSpecialKeyMapping.forEach((String key, String logicalName) {
+      final LogicalKeyEntry entry = logicalData.entryByName(logicalName);
+      lines.add(entry.value, "  '$key': LogicalKeyboardKey.${entry.constantName},");
+    });
+    return lines.join().trimRight();
+  }
+
   /// This generates the map of iOS number pad key codes to logical keys.
   String get _iOSNumpadMap {
     final OutputLines<int> lines = OutputLines<int>('iOS numpad map');
@@ -353,6 +366,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'MACOS_FUNCTION_KEY_MAP': _macOSFunctionKeyMap,
       'MACOS_KEY_CODE_MAP': _macOSKeyCodeMap,
       'IOS_SCAN_CODE_MAP': _iOSScanCodeMap,
+      'IOS_SPECIAL_MAP': _iOSSpecialMap,
       'IOS_NUMPAD_MAP': _iOSNumpadMap,
       'IOS_KEY_CODE_MAP': _iOSKeyCodeMap,
       'GLFW_KEY_CODE_MAP': _glfwKeyCodeMap,

@@ -100,7 +100,7 @@ class FlutterVersion {
 
   String? _repositoryUrl;
   String? get repositoryUrl {
-    final String _ = channel; // ignore: no_leading_underscores_for_local_identifiers
+    final String _ = channel;
     return _repositoryUrl;
   }
 
