@@ -4018,6 +4018,7 @@ targets:
   
   - name: Windows hello_world_windows__compile
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       tags: >
