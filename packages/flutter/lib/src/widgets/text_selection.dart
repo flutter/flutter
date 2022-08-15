@@ -771,33 +771,21 @@ class TextSelectionOverlay {
     /// The drag events always happens near the center of handle.
     /// so ues half of the handle size to shift drag point to handle anchor.
     /// handle anchor is left top point of handle rect.
-    final Offset offsetToHandleAnchor = Offset(-handleSize.width / 2, -handleSize.height / 2);
+    final double offsetYToHandleAnchor =  -handleSize.height / 2;
 
     /// [getHandleAnchor] use to shift selection end point to handle anchor.
     /// now need shift handle anchor to selection end point.
     /// end point is [ui.TextBox] start bottom point of first or last selected word.
-    final Offset offsetToTextEndPoint = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight);
-
-
-    double getOffsetXToTextMiddlePoint(
-      TextSelectionHandleType type,
-    ) {
-      switch (type) {
-        case TextSelectionHandleType.left:
-          return -handleSize.width / 2;
-        case TextSelectionHandleType.right:
-          return handleSize.width / 2;
-        case TextSelectionHandleType.collapsed:
-          return 0.0;
-      }
-    }
+    final double offsetYToTextEndPoint = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight).dy;
 
     /// For more accurate selection updates,need shift selection end point
     /// to selection middle point.
-    final double offsetXToTextMiddlePoint = getOffsetXToTextMiddlePoint(type);
-    final Offset offsetToTextMiddlePoint = Offset(offsetXToTextMiddlePoint, -renderObject.preferredLineHeight / 2);
+    final double offsetYToTextMiddlePoint = -renderObject.preferredLineHeight / 2;
 
-    return offsetToHandleAnchor + offsetToTextEndPoint + offsetToTextMiddlePoint;
+    /// When dragging handle and move,the pointX from drag event is accurate.
+    /// Only need to compute different offsetY from different handle.
+    final double offsetYFromDragPointToTextMiddlePoint = offsetYToHandleAnchor + offsetYToTextEndPoint + offsetYToTextMiddlePoint;
+    return Offset(0.0, offsetYFromDragPointToTextMiddlePoint);
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
