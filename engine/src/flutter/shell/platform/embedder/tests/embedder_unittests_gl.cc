@@ -5,6 +5,7 @@
 #include "tests/embedder_test_context.h"
 #define FML_USED_ON_EMBEDDER
 
+#include <atomic>
 #include <string>
 #include <vector>
 
@@ -2030,8 +2031,7 @@ TEST_F(EmbedderTest,
 
   constexpr size_t frames_expected = 10;
   fml::CountDownLatch frame_latch(frames_expected);
-  static size_t frames_seen;
-  frames_seen = 0;
+  std::atomic_size_t frames_seen = 0;
   context.AddNativeCallback("SignalNativeTest",
                             CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                               frames_seen++;
@@ -2039,7 +2039,7 @@ TEST_F(EmbedderTest,
                             }));
   frame_latch.Wait();
 
-  ASSERT_EQ(frames_expected, frames_seen);
+  ASSERT_GE(frames_seen, frames_expected);
 
   FlutterEngineShutdown(engine.release());
 }
@@ -2071,8 +2071,7 @@ TEST_F(EmbedderTest,
 
   constexpr size_t frames_expected = 10;
   fml::CountDownLatch frame_latch(frames_expected);
-  static size_t frames_seen;
-  frames_seen = 0;
+  std::atomic_size_t frames_seen = 0;
   context.AddNativeCallback("SignalNativeTest",
                             CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                               frames_seen++;
@@ -2080,7 +2079,7 @@ TEST_F(EmbedderTest,
                             }));
   frame_latch.Wait();
 
-  ASSERT_EQ(frames_expected, frames_seen);
+  ASSERT_GE(frames_seen, frames_expected);
 
   FlutterEngineShutdown(engine.release());
 }
