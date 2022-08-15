@@ -172,6 +172,51 @@ public class PlatformViewsControllerTest {
     assertNotEquals(resolvedEvent.getAction(), original.getAction());
   }
 
+  @Test
+  public void itUsesActionEventTypeFromFrameworkEventAsActionChanged() {
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            261, // action
+            0, // x
+            0, // y
+            0 // metaState
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    PlatformViewTouch frameWorkTouch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            0, // action
+            1, // pointerCount
+            Arrays.asList(Arrays.asList(0, 0)), // pointer properties
+            Arrays.asList(Arrays.asList(0., 1., 2., 3., 4., 5., 6., 7., 8.)), // pointer coords
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, // density
+            frameWorkTouch,
+            false // usingVirtualDisplays
+            );
+    assertEquals(resolvedEvent.getAction(), frameWorkTouch.action);
+    assertNotEquals(resolvedEvent.getAction(), original.getAction());
+  }
+
   @Ignore
   @Test
   public void itUsesActionEventTypeFromMotionEventForHybridPlatformViews() {
@@ -214,8 +259,7 @@ public class PlatformViewsControllerTest {
         platformViewsController.toMotionEvent(
             /*density=*/ 1, frameWorkTouch, /*usingVirtualDisplay=*/ false);
 
-    assertNotEquals(resolvedEvent.getAction(), frameWorkTouch.action);
-    assertEquals(resolvedEvent.getAction(), original.getAction());
+    assertEquals(resolvedEvent.getAction(), frameWorkTouch.action);
   }
 
   @Test
