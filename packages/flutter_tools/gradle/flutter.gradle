@@ -746,6 +746,7 @@ class FlutterPlugin implements Plugin<Project> {
         return target
     }
 
+    // TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
     /**
      * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
      * When building APKs, this causes an issue where building release requires the debug JAR,
@@ -757,7 +758,7 @@ class FlutterPlugin implements Plugin<Project> {
      * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
      * time of adding this code. Once released, this can be removed. However, after updating to
      * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Futher
-     * investigation necessary to remote this.
+     * investigation necessary to remove this.
      *
      * Tested cases:
      * * `./gradlew assembleRelease`
