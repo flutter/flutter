@@ -6322,7 +6322,7 @@ void main() {
     expect(controller.selection.baseOffset, 28);
     expect(controller.selection.extentOffset, 44);
 
-    // Drag the right handle to the first line, just after 'First'.
+    // Drag the right handle to the second line, just after 'goes'.
     handlePos = endpoints[1].point + offsetFromEndPointToMiddlePoint;
     newHandlePos = textOffsetToPosition(tester, testValue.indexOf('goes') + 4) + offsetFromEndPointToMiddlePoint;
     gesture = await tester.startGesture(handlePos, pointer: 7);
