@@ -613,11 +613,13 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
-    final Size handleSize = selectionControls!.getHandleSize(
-      renderObject.preferredLineHeight,
-    );
 
-    _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+    ///[details.globalPosition] is the drag point,need shift to
+    ///text middle point that RenderEditable use to get [TextPosition]
+    ///and update selection for end handle.
+    final Offset offsetFromDragPointToTextMiddlePoint = _getOffsetToTextMiddlePoint(_selectionOverlay.endHandleType);
+    _dragEndPosition = details.globalPosition + offsetFromDragPointToTextMiddlePoint;
+
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
     _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
@@ -689,10 +691,13 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
-    final Size handleSize = selectionControls!.getHandleSize(
-      renderObject.preferredLineHeight,
-    );
-    _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+
+    ///[details.globalPosition] is the drag point,need shift to
+    ///text middle point that RenderEditable use to get [TextPosition]
+    ///and update selection for start handle.
+    final Offset offsetFromDragPointToTextMiddlePoint = _getOffsetToTextMiddlePoint(_selectionOverlay.startHandleType);
+    _dragStartPosition = details.globalPosition + offsetFromDragPointToTextMiddlePoint;
+
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
@@ -757,6 +762,28 @@ class TextSelectionOverlay {
   }
 
   void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideMagnifier(shouldShowToolbar: !_selection.isCollapsed);
+
+  Offset _getOffsetToTextMiddlePoint(TextSelectionHandleType type) {
+    final Size handleSize = selectionControls!.getHandleSize(
+      renderObject.preferredLineHeight,
+    );
+
+    /// The drag events always happens near the center of handle.
+    /// so ues half of the handle size to shift drag point to handle anchor.
+    /// handle anchor is left top point of handle rect.
+    final Offset offsetToHandleAnchor = Offset(-handleSize.width / 2, -handleSize.height / 2);
+
+    /// [getHandleAnchor] use to shift selection end point to handle anchor.
+    /// now need shift handle anchor to selection end point.
+    /// end point is [ui.TextBox] start bottom point of first or last selected word.
+    final Offset offsetToTextEndPoint = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight);
+
+    /// For more accurate selection updates,need shift selection end point
+    /// to selection middle point.
+    final Offset offsetToTextMiddlePoint = Offset(0.0, -renderObject.preferredLineHeight / 2);
+
+    return offsetToHandleAnchor + offsetToTextEndPoint + offsetToTextMiddlePoint;
+  }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
