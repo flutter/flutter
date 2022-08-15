@@ -8,7 +8,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'ticker_provider.dart';
 
 /// Signature of a function that iterates through a non-null collection of
 /// elements of type `T`.
@@ -245,9 +248,9 @@ class _RenderTheatreMarker extends InheritedWidget {
 ///
 /// A [OverlayPortalController] can only be given to at most one [OverlayPortal]
 /// at a time. When an [OverlayPortalController] is moved from one
-/// [OverlayPortal] to another, it's [isShowing] state does not carry over.
+/// [OverlayPortal] to another, its [isShowing] state does not carry over.
 ///
-/// The [show] and [hide] methods should typically not be called when the widget
+/// The [show] and [hide] methods typically should not be called when the widget
 /// tree is being rebuilt. However it's allowed to call [show] or [hide] when
 /// the associated [OverlayPortal] widget is yet to be inflated into the widget
 /// tree.
@@ -357,8 +360,8 @@ class OverlayPortalController {
 /// [OverlayEntry] builds its widget subtree as a child of the target [Overlay],
 /// while [OverlayPortal] uses [overlayChildBuilder] to build a child widget of
 /// itself. This allows [OverlayPortal]'s overlay child to depend on the same
-/// set of [InheritedWidget]s as [OverlayPortal], and it's also guaranteed the
-/// overlay child will not outlive its [OverlayPortal].
+/// set of [InheritedWidget]s as [OverlayPortal], and it's also guaranteed that
+/// the overlay child will not outlive its [OverlayPortal].
 ///
 /// On the other hand [OverlayPortal] has a more complex implementation. For
 /// instance, it does a bit more work than a regular widget during global key
@@ -373,7 +376,7 @@ class OverlayPortalController {
 ///  * [Positioned], which can be used to size and position the overlay child in
 ///    relation to the target [Overlay]'s boundaries.
 ///  * [CompositedTransformFollower], which can be used to position the overlay
-///    child in relation to the associated [CompositedTransformTarget] widget.
+///    child in relation to the linked [CompositedTransformTarget] widget.
 class OverlayPortal extends StatefulWidget {
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
   /// builds on the closest [Overlay], when [OverlayPortalController.show] is
@@ -723,9 +726,9 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel {
   }
 
   @override
-  _ChildIterator? _paintOrderIterator() => _TopOfTheatreChildModel._mapIterator(_forwardIterator());
+  _ChildIterator? _paintOrderIterator() => _mapIterator(_forwardIterator());
   @override
-  _ChildIterator? _hitTestOrderIterator() => _TopOfTheatreChildModel._mapIterator(_backwardIterator());
+  _ChildIterator? _hitTestOrderIterator() => _mapIterator(_backwardIterator());
 }
 
 /// A location in a particular [Overlay]'s child model.
