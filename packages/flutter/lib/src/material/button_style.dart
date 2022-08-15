@@ -242,7 +242,7 @@ class ButtonStyle with Diagnosticable {
   ///
   /// This shape is combined with [side] to create a shape decorated
   /// with an outline.
-  final MaterialStateProperty<OutlinedBorder?>? shape;
+  final MaterialStateProperty<ShapeBorder?>? shape;
 
   /// The cursor for a mouse pointer when it enters or is hovering over
   /// this button's [InkWell].
@@ -324,7 +324,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<Size?>? maximumSize,
     MaterialStateProperty<double?>? iconSize,
     MaterialStateProperty<BorderSide?>? side,
-    MaterialStateProperty<OutlinedBorder?>? shape,
+    MaterialStateProperty<ShapeBorder?>? shape,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
     MaterialTapTargetSize? tapTargetSize,
@@ -468,7 +468,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<ShapeBorder?>>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(EnumProperty<MaterialTapTargetSize>('tapTargetSize', tapTargetSize, defaultValue: null));
@@ -497,7 +497,7 @@ class ButtonStyle with Diagnosticable {
       maximumSize: _lerpProperties<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
       iconSize: _lerpProperties<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       side: _lerpSides(a?.side, b?.side, t),
-      shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
+      shape: MaterialStateProperty.lerp<ShapeBorder?>(a?.shape, b?.shape, t, ShapeBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       tapTargetSize: t < 0.5 ? a?.tapTargetSize : b?.tapTargetSize,
