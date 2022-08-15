@@ -220,20 +220,8 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
     return std::nullopt;
   }
 
-  // Render the filter into a new texture.
-  auto texture = renderer.MakeSubpass(
-      ISize(coverage->size),
-      [=](const ContentContext& renderer, RenderPass& pass) -> bool {
-        return RenderFilter(inputs_, renderer, entity_with_local_transform,
-                            pass, coverage.value());
-      });
-
-  if (!texture) {
-    return std::nullopt;
-  }
-
-  return Snapshot{.texture = texture,
-                  .transform = Matrix::MakeTranslation(coverage->origin)};
+  return RenderFilter(inputs_, renderer, entity_with_local_transform,
+                      coverage.value());
 }
 
 Matrix FilterContents::GetLocalTransform() const {

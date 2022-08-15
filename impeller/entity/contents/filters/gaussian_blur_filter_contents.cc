@@ -11,8 +11,10 @@
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/scalar.h"
+#include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
 #include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 
@@ -80,30 +82,31 @@ void DirectionalGaussianBlurFilterContents::SetSourceOverride(
   source_override_ = source_override;
 }
 
-bool DirectionalGaussianBlurFilterContents::RenderFilter(
+std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass,
     const Rect& coverage) const {
-  if (inputs.empty()) {
-    return true;
-  }
-
   using VS = GaussianBlurPipeline::VertexShader;
   using FS = GaussianBlurPipeline::FragmentShader;
 
-  auto& host_buffer = pass.GetTransientsBuffer();
+  //----------------------------------------------------------------------------
+  /// Handle inputs.
+  ///
+
+  if (inputs.empty()) {
+    return std::nullopt;
+  }
 
   // Input 0 snapshot and UV mapping.
 
   auto input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
   if (!input_snapshot.has_value()) {
-    return true;
+    return std::nullopt;
   }
   auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
   if (!maybe_input_uvs.has_value()) {
-    return true;
+    return std::nullopt;
   }
   auto input_uvs = maybe_input_uvs.value();
 
@@ -112,66 +115,84 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   auto source = source_override_ ? source_override_ : inputs[0];
   auto source_snapshot = source->GetSnapshot(renderer, entity);
   if (!source_snapshot.has_value()) {
-    return true;
+    return std::nullopt;
   }
   auto maybe_source_uvs = source_snapshot->GetCoverageUVs(coverage);
   if (!maybe_source_uvs.has_value()) {
-    return true;
+    return std::nullopt;
   }
   auto source_uvs = maybe_source_uvs.value();
 
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-  vtx_builder.AddVertices({
-      {Point(0, 0), input_uvs[0], source_uvs[0]},
-      {Point(1, 0), input_uvs[1], source_uvs[1]},
-      {Point(1, 1), input_uvs[3], source_uvs[3]},
-      {Point(0, 0), input_uvs[0], source_uvs[0]},
-      {Point(1, 1), input_uvs[3], source_uvs[3]},
-      {Point(0, 1), input_uvs[2], source_uvs[2]},
-  });
-  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
+  //----------------------------------------------------------------------------
+  /// Render to texture.
+  ///
 
-  auto transformed_blur = entity.GetTransformation().TransformDirection(
-      blur_direction_ * blur_sigma_.sigma);
+  ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
+                                                 RenderPass& pass) {
+    auto& host_buffer = pass.GetTransientsBuffer();
 
-  VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+    vtx_builder.AddVertices({
+        {Point(0, 0), input_uvs[0], source_uvs[0]},
+        {Point(1, 0), input_uvs[1], source_uvs[1]},
+        {Point(1, 1), input_uvs[3], source_uvs[3]},
+        {Point(0, 0), input_uvs[0], source_uvs[0]},
+        {Point(1, 1), input_uvs[3], source_uvs[3]},
+        {Point(0, 1), input_uvs[2], source_uvs[2]},
+    });
+    auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
-  FS::FragInfo frag_info;
-  frag_info.texture_sampler_y_coord_scale =
-      input_snapshot->texture->GetYCoordScale();
-  frag_info.alpha_mask_sampler_y_coord_scale =
-      source_snapshot->texture->GetYCoordScale();
-  frag_info.blur_sigma = transformed_blur.GetLength();
-  frag_info.blur_radius = Radius{Sigma{frag_info.blur_sigma}}.radius;
-  frag_info.blur_direction = input_snapshot->transform.Invert()
-                                 .TransformDirection(transformed_blur)
-                                 .Normalize();
-  frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
-  frag_info.src_factor = src_color_factor_;
-  frag_info.inner_blur_factor = inner_blur_factor_;
-  frag_info.outer_blur_factor = outer_blur_factor_;
-  frag_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
+    auto transformed_blur = entity.GetTransformation().TransformDirection(
+        blur_direction_ * blur_sigma_.sigma);
 
-  SamplerDescriptor sampler_desc;
-  sampler_desc.min_filter = MinMagFilter::kLinear;
-  sampler_desc.mag_filter = MinMagFilter::kLinear;
-  auto sampler =
-      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
+    VS::FrameInfo frame_info;
+    frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
 
-  Command cmd;
-  cmd.label = "Gaussian Blur Filter";
-  auto options = OptionsFromPass(pass);
-  options.blend_mode = Entity::BlendMode::kSource;
-  cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
-  cmd.BindVertices(vtx_buffer);
+    FS::FragInfo frag_info;
+    frag_info.texture_sampler_y_coord_scale =
+        input_snapshot->texture->GetYCoordScale();
+    frag_info.alpha_mask_sampler_y_coord_scale =
+        source_snapshot->texture->GetYCoordScale();
+    frag_info.blur_sigma = transformed_blur.GetLength();
+    frag_info.blur_radius = Radius{Sigma{frag_info.blur_sigma}}.radius;
+    frag_info.blur_direction = input_snapshot->transform.Invert()
+                                   .TransformDirection(transformed_blur)
+                                   .Normalize();
+    frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+    frag_info.src_factor = src_color_factor_;
+    frag_info.inner_blur_factor = inner_blur_factor_;
+    frag_info.outer_blur_factor = outer_blur_factor_;
+    frag_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
 
-  FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
-  FS::BindAlphaMaskSampler(cmd, source_snapshot->texture, sampler);
-  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
-  FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+    SamplerDescriptor sampler_desc;
+    sampler_desc.min_filter = MinMagFilter::kLinear;
+    sampler_desc.mag_filter = MinMagFilter::kLinear;
+    auto sampler =
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
-  return pass.AddCommand(cmd);
+    Command cmd;
+    cmd.label = "Gaussian Blur Filter";
+    auto options = OptionsFromPass(pass);
+    options.blend_mode = Entity::BlendMode::kSource;
+    cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+    cmd.BindVertices(vtx_buffer);
+
+    FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
+    FS::BindAlphaMaskSampler(cmd, source_snapshot->texture, sampler);
+    VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+    FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+
+    return pass.AddCommand(cmd);
+  };
+
+  auto out_texture = renderer.MakeSubpass(ISize(coverage.size), callback);
+  if (!out_texture) {
+    return std::nullopt;
+  }
+  out_texture->SetLabel("DirectionalGaussianBlurFilter Texture");
+
+  return Snapshot{.texture = out_texture,
+                  .transform = Matrix::MakeTranslation(coverage.origin)};
 }
 
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
