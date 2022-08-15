@@ -58,37 +58,6 @@ static std::string SLFileName(const char* fixture_name,
   return stream.str();
 }
 
-static std::string DepfileName(const char* fixture_name) {
-  std::stringstream stream;
-  stream << fixture_name << ".d";
-  return stream.str();
-}
-
-bool CompilerTest::ValidateDepfileEscaped(const char* fixture_name) const {
-  auto depfile_name = DepfileName(fixture_name);
-  auto mapping = std::make_unique<fml::FileMapping>(
-      fml::OpenFile(intermediates_directory_, depfile_name.c_str(), false,
-                    fml::FilePermission::kRead));
-
-  std::string contents(reinterpret_cast<char const*>(mapping->GetMapping()),
-                       mapping->GetSize());
-  bool escaped = false;
-  for (auto it = contents.begin(); it != contents.end(); it++) {
-    if (*it == '\\') {
-      escaped = true;
-    } else if (*it == '%' || *it == '#') {
-      if (!escaped) {
-        VALIDATION_LOG << "Unescaped character " << *it << " in depfile.";
-        return false;
-      }
-      escaped = false;
-    } else {
-      escaped = false;
-    }
-  }
-  return true;
-}
-
 std::unique_ptr<fml::FileMapping> CompilerTest::GetReflectionJson(
     const char* fixture_name) const {
   auto filename = ReflectionJSONName(fixture_name);
@@ -196,13 +165,6 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
       VALIDATION_LOG << "Could not write reflection json intermediates.";
       return false;
     }
-  }
-
-  auto mapping = compiler.CreateDepfileContents({fixture_name});
-  if (!fml::WriteAtomically(intermediates_directory_,
-                            DepfileName(fixture_name).c_str(), *mapping)) {
-    VALIDATION_LOG << "Could not write depfile.";
-    return false;
   }
   return true;
 }

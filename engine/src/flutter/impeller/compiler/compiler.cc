@@ -481,24 +481,13 @@ const std::vector<std::string>& Compiler::GetIncludedFileNames() const {
   return included_file_names_;
 }
 
-// Escape `%` and `#` characters according to doc comment at
-// https://github.com/ninja-build/ninja/blob/master/src/depfile_parser.cc#L28
-static void EscapeString(std::string& str, std::stringstream& stream) {
-  for (auto it = str.begin(); it != str.end(); it++) {
-    if (*it == '%' || *it == '#') {
-      stream << '\\';
-    }
-    stream << *it;
-  }
-}
-
 static std::string JoinStrings(std::vector<std::string> items,
                                std::string separator) {
   std::stringstream stream;
   for (size_t i = 0, count = items.size(); i < count; i++) {
     const auto is_last = (i == count - 1);
 
-    EscapeString(items[i], stream);
+    stream << items[i];
     if (!is_last) {
       stream << separator;
     }
