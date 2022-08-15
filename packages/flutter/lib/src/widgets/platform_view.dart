@@ -871,20 +871,14 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   @override
   Widget build(BuildContext context) {
-    final PlatformViewController? controller = _controller;
-    if (controller == null) {
+    if (_controller == null) {
       return const SizedBox.expand();
     }
     if (!_platformViewCreated) {
-      // Depending on the implementation, the initial size can be used to size
-      // the platform view.
-      return _PlatformViewPlaceHolder(onLayout: (Size size) {
-        if (controller.awaitingCreation) {
-          controller.create(size: size);
-        }
-      });
+      // Depending on the platform, the initial size can be used to size the platform view.
+      return _PlatformViewPlaceHolder(onLayout: (Size size) => _controller!.create(size: size));
     }
-    _surface ??= widget._surfaceFactory(context, controller);
+    _surface ??= widget._surfaceFactory(context, _controller!);
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _handleFrameworkFocusChanged,
