@@ -26,9 +26,8 @@ enum SnapshotMode {
 
   /// The child is snapshotted and any child platform views are ignored.
   ///
-  /// In this state a [RasterWidgetFallbackDelegate] is never used. Generally this
-  /// can be useful if there is a platform view descendant that does not need to
-  /// be included in the snapshot.
+  /// This mode can be useful if there is a platform view descendant that does
+  /// not need to be included in the snapshot.
   forced,
 }
 
