@@ -220,11 +220,8 @@ void main() {
             child: SizedBox(
               width: 100,
               height: 100,
-              child: Opacity(
-                opacity: 0.5,
-                child: TextField(
-                  decoration: InputDecoration(hintText: 'Placeholder'),
-                ),
+              child: TextField(
+                decoration: InputDecoration(hintText: 'Placeholder'),
               ),
             ),
           ),
@@ -251,7 +248,6 @@ void main() {
 
     // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
     await tester.pumpAndSettle();
-    await tester.pump(const Duration(seconds: 1));
 
     // Sanity check that the toolbar widget exists.
     expect(find.text('Paste'), findsOneWidget);
