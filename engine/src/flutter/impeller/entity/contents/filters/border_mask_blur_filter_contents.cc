@@ -47,63 +47,82 @@ void BorderMaskBlurFilterContents::SetBlurStyle(BlurStyle blur_style) {
   }
 }
 
-bool BorderMaskBlurFilterContents::RenderFilter(
+std::optional<Snapshot> BorderMaskBlurFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass,
     const Rect& coverage) const {
-  if (inputs.empty()) {
-    return true;
-  }
-
   using VS = BorderMaskBlurPipeline::VertexShader;
   using FS = BorderMaskBlurPipeline::FragmentShader;
 
-  auto& host_buffer = pass.GetTransientsBuffer();
+  //----------------------------------------------------------------------------
+  /// Handle inputs.
+  ///
+
+  if (inputs.empty()) {
+    return std::nullopt;
+  }
 
   auto input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
   if (!input_snapshot.has_value()) {
-    return true;
+    return std::nullopt;
   }
   auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
   if (!maybe_input_uvs.has_value()) {
-    return true;
+    return std::nullopt;
   }
   auto input_uvs = maybe_input_uvs.value();
 
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-  vtx_builder.AddVertices({
-      {Point(0, 0), input_uvs[0]},
-      {Point(1, 0), input_uvs[1]},
-      {Point(1, 1), input_uvs[3]},
-      {Point(0, 0), input_uvs[0]},
-      {Point(1, 1), input_uvs[3]},
-      {Point(0, 1), input_uvs[2]},
-  });
-  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
+  //----------------------------------------------------------------------------
+  /// Render to texture.
+  ///
 
-  Command cmd;
-  cmd.label = "Border Mask Blur Filter";
-  auto options = OptionsFromPass(pass);
-  options.blend_mode = Entity::BlendMode::kSource;
-  cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);
-  cmd.BindVertices(vtx_buffer);
+  ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
+                                                 RenderPass& pass) {
+    auto& host_buffer = pass.GetTransientsBuffer();
 
-  VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-  frame_info.sigma_uv = Vector2(sigma_x_.sigma, sigma_y_.sigma).Abs() /
-                        input_snapshot->texture->GetSize();
-  frame_info.src_factor = src_color_factor_;
-  frame_info.inner_blur_factor = inner_blur_factor_;
-  frame_info.outer_blur_factor = outer_blur_factor_;
-  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-  VS::BindFrameInfo(cmd, uniform_view);
+    VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+    vtx_builder.AddVertices({
+        {Point(0, 0), input_uvs[0]},
+        {Point(1, 0), input_uvs[1]},
+        {Point(1, 1), input_uvs[3]},
+        {Point(0, 0), input_uvs[0]},
+        {Point(1, 1), input_uvs[3]},
+        {Point(0, 1), input_uvs[2]},
+    });
+    auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
-  auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
-  FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
+    Command cmd;
+    cmd.label = "Border Mask Blur Filter";
+    auto options = OptionsFromPass(pass);
+    options.blend_mode = Entity::BlendMode::kSource;
+    cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);
+    cmd.BindVertices(vtx_buffer);
 
-  return pass.AddCommand(std::move(cmd));
+    VS::FrameInfo frame_info;
+    frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    frame_info.sigma_uv = Vector2(sigma_x_.sigma, sigma_y_.sigma).Abs() /
+                          input_snapshot->texture->GetSize();
+    frame_info.src_factor = src_color_factor_;
+    frame_info.inner_blur_factor = inner_blur_factor_;
+    frame_info.outer_blur_factor = outer_blur_factor_;
+    auto uniform_view = host_buffer.EmplaceUniform(frame_info);
+    VS::BindFrameInfo(cmd, uniform_view);
+
+    auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
+    FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
+
+    return pass.AddCommand(std::move(cmd));
+  };
+
+  auto out_texture = renderer.MakeSubpass(ISize(coverage.size), callback);
+  if (!out_texture) {
+    return std::nullopt;
+  }
+  out_texture->SetLabel("BorderMaskBlurFilter Texture");
+
+  return Snapshot{.texture = out_texture,
+                  .transform = Matrix::MakeTranslation(coverage.origin)};
 }
 
 std::optional<Rect> BorderMaskBlurFilterContents::GetFilterCoverage(
