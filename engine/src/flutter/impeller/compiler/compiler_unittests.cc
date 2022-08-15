@@ -65,11 +65,6 @@ TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
 
-TEST_P(CompilerTest, ShaderWithSpecialCharactersHasEscapedDepfile) {
-  ASSERT_TRUE(CanCompileAndReflect("sa\%m#ple.vert"));
-  ASSERT_TRUE(ValidateDepfileEscaped("sa\%m#ple.vert"));
-}
-
 TEST_P(CompilerTest, BindingBaseForFragShader) {
   if (GetParam() == TargetPlatform::kFlutterSPIRV) {
     // This is a failure of reflection which this target doesn't perform.
