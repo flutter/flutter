@@ -16,6 +16,6 @@ void main() {
     );
 
     expect(find.byType(example.BorderSideExample), findsOneWidget);
-    expect(find.byType(example.TestBox), findsNWidgets(8));
+    expect(find.byType(example.TestBox), findsNWidgets(10));
   });
 }
