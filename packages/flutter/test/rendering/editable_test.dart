@@ -133,7 +133,7 @@ void main() {
 
     final List<LeaderLayer> leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
     expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
-    expect(leaderLayers.single.offset, const Offset(0, 14) + paintOffset, reason: 'offset should respect paintOffset');
+    expect(leaderLayers.single.offset, const Offset(0.0, 14.0) + paintOffset, reason: 'offset should respect paintOffset');
   });
 
   test('editable intrinsics', () {
