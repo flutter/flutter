@@ -78,6 +78,12 @@ class FlutterEngine : public PluginRegistry {
   // This pointer will remain valid for the lifetime of this instance.
   BinaryMessenger* messenger() { return messenger_.get(); }
 
+  // Schedule a callback to be called after the next frame is drawn.
+  //
+  // This must be called from the platform thread. The callback is executed only
+  // once on the platform thread.
+  void SetNextFrameCallback(std::function<void()> callback);
+
  private:
   // For access to RelinquishEngine.
   friend class FlutterViewController;
@@ -101,6 +107,9 @@ class FlutterEngine : public PluginRegistry {
   // or if RelinquishEngine has been called (since the view controller will
   // run the engine if it hasn't already been run).
   bool has_been_run_ = false;
+
+  // The callback to execute once the next frame is drawn.
+  std::function<void()> next_frame_callback_ = nullptr;
 };
 
 }  // namespace flutter

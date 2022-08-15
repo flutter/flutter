@@ -47,6 +47,13 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
   uint64_t EngineProcessMessages() override { return 99; }
 
   // |flutter::testing::StubFlutterWindowsApi|
+  void EngineSetNextFrameCallback(VoidCallback callback,
+                                  void* user_data) override {
+    next_frame_callback_ = callback;
+    next_frame_user_data_ = user_data;
+  }
+
+  // |flutter::testing::StubFlutterWindowsApi|
   void EngineReloadSystemFonts() override { reload_fonts_called_ = true; }
 
   bool create_called() { return create_called_; }
@@ -61,12 +68,20 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
     return dart_entrypoint_arguments_;
   }
 
+  bool has_next_frame_callback() { return next_frame_callback_ != nullptr; }
+  void run_next_frame_callback() {
+    next_frame_callback_(next_frame_user_data_);
+    next_frame_callback_ = nullptr;
+  }
+
  private:
   bool create_called_ = false;
   bool run_called_ = false;
   bool destroy_called_ = false;
   bool reload_fonts_called_ = false;
   std::vector<std::string> dart_entrypoint_arguments_;
+  VoidCallback next_frame_callback_ = nullptr;
+  void* next_frame_user_data_ = nullptr;
 };
 
 }  // namespace
@@ -166,6 +181,24 @@ TEST(FlutterEngineTest, DartEntrypointArgs) {
   ASSERT_EQ(2, arguments_ref.size());
   EXPECT_TRUE(arguments[0] == arguments_ref[0]);
   EXPECT_TRUE(arguments[1] == arguments_ref[1]);
+}
+
+TEST(FlutterEngineTest, SetNextFrameCallback) {
+  DartProject project(L"data");
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+
+  bool success = false;
+  engine.SetNextFrameCallback([&success]() { success = true; });
+
+  EXPECT_TRUE(test_api->has_next_frame_callback());
+
+  test_api->run_next_frame_callback();
+
+  EXPECT_TRUE(success);
 }
 
 }  // namespace flutter

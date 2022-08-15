@@ -506,6 +506,22 @@ void FlutterWindowsEngine::ScheduleFrame() {
   embedder_api_.ScheduleFrame(engine_);
 }
 
+void FlutterWindowsEngine::SetNextFrameCallback(fml::closure callback) {
+  next_frame_callback_ = std::move(callback);
+
+  embedder_api_.SetNextFrameCallback(
+      engine_,
+      [](void* user_data) {
+        // Embedder callback runs on raster thread. Switch back to platform
+        // thread.
+        FlutterWindowsEngine* self =
+            static_cast<FlutterWindowsEngine*>(user_data);
+
+        self->task_runner_->PostTask(std::move(self->next_frame_callback_));
+      },
+      this);
+}
+
 void FlutterWindowsEngine::SendSystemLocales() {
   std::vector<LanguageInfo> languages = GetPreferredLanguageInfo();
   std::vector<FlutterLocale> flutter_locales;
