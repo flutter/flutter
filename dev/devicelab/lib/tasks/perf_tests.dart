@@ -1446,7 +1446,6 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         throw Exception('Unsupported option for macOS devices');
       case DeviceOperatingSystem.windows:
-        stderr.write('Compiling in Release for WINDOWS\n');
         unawaited(stderr.flush());
         options.insert(0, 'windows');
         options.add('--tree-shake-icons');
@@ -1499,9 +1498,6 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.windows:
-        // TODO(schectman): Proper windows options
-        //Throw Exception('Unsupported option for Windows devices');
-        stderr.write('Compiling in Debug for WINDOWS\n');
         unawaited(stderr.flush());
         options.insert(0, 'windows');
         break;
