@@ -2595,7 +2595,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
-  final GestureTapDownWithCountCallback? onTapDown;
+  final GestureTapDownWithTapCountCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
@@ -2645,7 +2645,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// The frequency of calls is throttled to avoid excessive text layout
   /// operations in text fields. The throttling is controlled by the constant
   /// [_kDragSelectionUpdateThrottle].
-  final GestureTapAndDragUpdateCallback? onDragSelectionUpdate;
+  final GestureDragUpdateWithTapCountCallback? onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
   final GestureDragEndCallback? onDragSelectionEnd;
@@ -2730,10 +2730,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     _lastDragUpdateDetails = null;
   }
 
-  void _handleDragEnd(TapUpDetails upDetails, DragEndDetails endDetails, int tapCount) {
+  void _handleDragEnd(DragEndDetails endDetails, int tapCount) {
     print('drag end');
     print('tap count $tapCount');
-    _handleTapUp(upDetails, tapCount);
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
@@ -2820,10 +2819,13 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             // Text selection should start from the position of the first pointer
             // down event.
             ..dragStartBehavior = DragStartBehavior.down
-            ..onDown = _handleTapDown
+            ..onSecondaryTap = widget.onSecondaryTap
+            ..onSecondaryTapDown = widget.onSecondaryTapDown
+            ..onTapDown = _handleTapDown
             ..onStart = _handleDragStart
             ..onUpdate = _handleDragUpdate
-            ..onUpAndEnd = _handleDragEnd;
+            ..onEnd = _handleDragEnd
+            ..onTapUp = _handleTapUp;
         },
       );
     }
