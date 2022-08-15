@@ -31,11 +31,10 @@ class BlendFilterContents : public FilterContents {
 
  private:
   // |FilterContents|
-  bool RenderFilter(const FilterInput::Vector& inputs,
-                    const ContentContext& renderer,
-                    const Entity& entity,
-                    RenderPass& pass,
-                    const Rect& coverage) const override;
+  std::optional<Snapshot> RenderFilter(const FilterInput::Vector& inputs,
+                                       const ContentContext& renderer,
+                                       const Entity& entity,
+                                       const Rect& coverage) const override;
 
   Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;
   AdvancedBlendProc advanced_blend_proc_;
