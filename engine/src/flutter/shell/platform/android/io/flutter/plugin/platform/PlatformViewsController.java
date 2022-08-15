@@ -626,7 +626,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       return MotionEvent.obtain(
           trackedEvent.getDownTime(),
           trackedEvent.getEventTime(),
-          trackedEvent.getAction(),
+          touch.action,
           touch.pointerCount,
           pointerProperties,
           pointerCoords,
