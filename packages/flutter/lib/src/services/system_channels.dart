@@ -406,7 +406,7 @@ class SystemChannels {
   ///    encoding the list of top level menu items in window "0", which each
   ///    have a hierarchy of `Map<String, Object?>` containing the required
   ///    data, sent via a [StandardMessageCodec]. It is typically generated from
-  ///    a list of [MenuItem]s, and ends up looking like this example:
+  ///    a list of [PlatformMenuItem]s, and ends up looking like this example:
   ///
   /// ```dart
   /// Map<String, Object?> menu = <String, Object?>{
