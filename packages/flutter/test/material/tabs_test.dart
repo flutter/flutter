@@ -3950,6 +3950,141 @@ void main() {
     expect(iconTheme.color, equals(selectedTabColor));
   });
 
+  testWidgets('TabBar colors labels correctly', (WidgetTester tester) async {
+    MaterialStateColor buildMSC(Color selectedColor, Color unselectedColor) {
+      return MaterialStateColor
+          .resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.selected)) {
+              return selectedColor;
+            }
+            return unselectedColor;
+          });
+    }
+
+    final Color materialLabelColor = buildMSC(const Color(0x00000000), const Color(0x00000001));
+    const Color labelColor = Color(0x00000002);
+    const Color unselectedLabelColor = Color(0x00000003);
+
+    // this is to make sure labelStyles (in TabBar and in TabBarTheme) don't
+    // affect label's color. for details: https://github.com/flutter/flutter/pull/109541#issuecomment-1294241417
+    const TextStyle labelStyle = TextStyle(color: Color(0x00000004));
+    const TextStyle unselectedLabelStyle = TextStyle(color: Color(0x00000005));
+
+    final TabBarTheme materialTabBarTheme = TabBarTheme(
+      labelColor: buildMSC(const Color(0x00000006), const Color(0x00000007)),
+      unselectedLabelColor: const Color(0x00000008),
+      labelStyle: TextStyle(color: buildMSC(const Color(0x00000009), const Color(0x00000010))),
+      unselectedLabelStyle: const TextStyle(color: Color(0x00000011)),
+    );
+    const TabBarTheme tabBarTheme = TabBarTheme(
+      labelColor: Color(0x00000012),
+      unselectedLabelColor: Color(0x00000013),
+      labelStyle: TextStyle(color: Color(0x00000014)),
+      unselectedLabelStyle: TextStyle(color: Color(0x00000015)),
+    );
+    const TabBarTheme tabBarThemeWithNullUnselectedLabelColor = TabBarTheme(
+      labelColor: Color(0x00000016),
+      labelStyle: TextStyle(color: Color(0x00000017)),
+      unselectedLabelStyle: TextStyle(color: Color(0x00000018)),
+    );
+
+    Widget buildTabBar({
+      bool isLabelColorMSC = false,
+      bool isLabelColorNull = false,
+      bool isUnselectedLabelColorNull = false,
+      bool isTabBarThemeMSC = false,
+      bool isTabBarThemeNull = false,
+      bool isTabBarThemeUnselectedLabelColorNull = false,
+    }) {
+      final TabBarTheme? effectiveTheme = isTabBarThemeNull
+          ? null : isTabBarThemeUnselectedLabelColorNull
+            ? tabBarThemeWithNullUnselectedLabelColor
+            : isTabBarThemeMSC
+              ? materialTabBarTheme
+              : tabBarTheme;
+      return boilerplate(
+        child: Theme(
+          data: ThemeData(tabBarTheme: effectiveTheme),
+          child: DefaultTabController(
+            length: 2,
+            child: TabBar(
+              labelColor: isLabelColorNull ? null : isLabelColorMSC ? materialLabelColor : labelColor,
+              unselectedLabelColor: isUnselectedLabelColorNull ? null : unselectedLabelColor,
+              labelStyle: labelStyle,
+              unselectedLabelStyle: unselectedLabelStyle,
+              tabs: const <Widget>[Text('1'), Text('2')],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Returns int `color.value`s instead of Color `color`s to prevent false
+    // negative due to object types being different (Color != MaterialStateColor)
+    // when `expect`ing.
+    int? getTab1Color() => IconTheme.of(tester.element(find.text('1'))).color?.value;
+    int? getTab2Color() => IconTheme.of(tester.element(find.text('2'))).color?.value;
+    int getSelectedColor(Color color) => (color as MaterialStateColor)
+        .resolve(<MaterialState>{MaterialState.selected}).value;
+    int getUnselectedColor(Color color) => (color as MaterialStateColor)
+        .resolve(<MaterialState>{}).value;
+
+    // highest precedence: labelColor as MaterialStateColor
+    await tester.pumpWidget(buildTabBar(isLabelColorMSC: true));
+    expect(getTab1Color(), equals(getSelectedColor(materialLabelColor)));
+    expect(getTab2Color(), equals(getUnselectedColor(materialLabelColor)));
+
+    // next precedence: labelColor and unselectedLabelColor
+    await tester.pumpWidget(buildTabBar());
+    expect(getTab1Color(), equals(labelColor.value));
+    expect(getTab2Color(), equals(unselectedLabelColor.value));
+
+    // next precedence: tabBarTheme.labelColor as MaterialStateColor
+    await tester.pumpWidget(buildTabBar(
+      isLabelColorNull: true,
+      isTabBarThemeMSC: true,
+    ));
+    expect(getTab1Color(), equals(getSelectedColor(materialTabBarTheme.labelColor!)));
+    expect(getTab2Color(), equals(getUnselectedColor(materialTabBarTheme.labelColor!)));
+
+    // next precedence: tabBarTheme.labelColor and
+    // tabBarTheme.unselectedLabelColor
+    await tester.pumpWidget(buildTabBar(
+      isLabelColorNull: true,
+      isUnselectedLabelColorNull: true,
+    ));
+    expect(getTab1Color(), equals(tabBarTheme.labelColor!.value));
+    expect(getTab2Color(), equals(tabBarTheme.unselectedLabelColor!.value));
+
+    // next precedence: labelColor and labelColor at 70% opacity
+    await tester.pumpWidget(buildTabBar(
+      isUnselectedLabelColorNull: true,
+      isTabBarThemeUnselectedLabelColorNull: true,
+    ));
+    expect(getTab1Color(), equals(labelColor.value));
+    expect(getTab2Color(), equals(labelColor.withAlpha(0xB2).value));
+
+    // next precedence: tabBarTheme.labelColor and tabBarTheme.labelColor at 70%
+    // opacity
+    await tester.pumpWidget(buildTabBar(
+      isLabelColorNull: true,
+      isUnselectedLabelColorNull: true,
+      isTabBarThemeUnselectedLabelColorNull: true,
+    ));
+    expect(getTab1Color(), equals(tabBarThemeWithNullUnselectedLabelColor.labelColor!.value));
+    expect(getTab2Color(), equals(tabBarThemeWithNullUnselectedLabelColor.labelColor!.withAlpha(0xB2).value));
+
+    // last precedence: themeData.primaryTextTheme.bodyText1.color and
+    // themeData.primaryTextTheme.bodyText1.color.withAlpha(0xB2)
+    await tester.pumpWidget(buildTabBar(
+      isLabelColorNull: true,
+      isUnselectedLabelColorNull: true,
+      isTabBarThemeNull: true,
+    ));
+    expect(getTab1Color(), equals(ThemeData().primaryTextTheme.bodyText1!.color!.value));
+    expect(getTab2Color(), equals(ThemeData().primaryTextTheme.bodyText1!.color!.withAlpha(0xB2).value));
+  });
+
   testWidgets('Replacing the tabController after disposing the old one', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/32428
 
@@ -4309,7 +4444,7 @@ void main() {
     expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
   });
 
-  testWidgets('TabController changes offset attribute', (WidgetTester tester) async {
+  testWidgets('TabController.offset changes reflect labelColor', (WidgetTester tester) async {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: 2,
@@ -4318,11 +4453,24 @@ void main() {
     late Color firstColor;
     late Color secondColor;
 
-    await tester.pumpWidget(
-      boilerplate(
+    Widget buildTabBar({bool labelColorIsMaterialStateColor = false}) {
+      final Color labelColor = labelColorIsMaterialStateColor
+          ? MaterialStateColor
+            .resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return Colors.white;
+              } else {
+                // this is a third color to also test if unselectedLabelColor
+                // is ignored when labelColor is MaterialStateColor
+                return Colors.transparent;
+              }
+            })
+          : Colors.white;
+
+      return boilerplate(
         child: TabBar(
           controller: controller,
-          labelColor: Colors.white,
+          labelColor: labelColor,
           unselectedLabelColor: Colors.black,
           tabs: <Widget>[
             Builder(builder: (BuildContext context) {
@@ -4335,29 +4483,50 @@ void main() {
             }),
           ],
         ),
-      ),
-    );
+      );
+    }
 
-    expect(firstColor, equals(Colors.white));
-    expect(secondColor, equals(Colors.black));
+    Future<void> testLabelColor({
+      required Color selectedColor,
+      required Color unselectedColor,
+    }) async {
+      expect(firstColor, equals(selectedColor));
+      expect(secondColor, equals(unselectedColor));
 
-    controller.offset = 0.6;
+      controller.offset = 0.6;
+      await tester.pump();
+
+      expect(firstColor, equals(Color.lerp(selectedColor, unselectedColor, 0.6)));
+      expect(secondColor, equals(Color.lerp(unselectedColor, selectedColor, 0.6)));
+
+      controller.index = 1;
+      await tester.pump();
+
+      expect(firstColor, equals(unselectedColor));
+      expect(secondColor, equals(selectedColor));
+
+      controller.offset = 0.6;
+      await tester.pump();
+
+      expect(firstColor, equals(unselectedColor));
+      expect(secondColor, equals(selectedColor));
+
+      controller.offset = -0.6;
+      await tester.pump();
+
+      expect(firstColor, equals(Color.lerp(selectedColor, unselectedColor, 0.4)));
+      expect(secondColor, equals(Color.lerp(unselectedColor, selectedColor, 0.4)));
+    }
+
+    await tester.pumpWidget(buildTabBar());
+    await testLabelColor(selectedColor: Colors.white, unselectedColor: Colors.black);
+
+    // reset
+    controller.index = 0;
     await tester.pump();
 
-    expect(firstColor, equals(Color.lerp(Colors.white, Colors.black, 0.6)));
-    expect(secondColor, equals(Color.lerp(Colors.black, Colors.white, 0.6)));
-
-    controller.index = 1;
-    await tester.pump();
-
-    expect(firstColor, equals(Colors.black));
-    expect(secondColor, equals(Colors.white));
-
-    controller.offset = 0.6;
-    await tester.pump();
-
-    expect(firstColor, equals(Colors.black));
-    expect(secondColor, equals(Colors.white));
+    await tester.pumpWidget(buildTabBar(labelColorIsMaterialStateColor: true));
+    await testLabelColor(selectedColor: Colors.white, unselectedColor: Colors.transparent);
   });
 
   testWidgets('Crash on dispose', (WidgetTester tester) async {
