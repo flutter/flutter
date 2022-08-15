@@ -4015,7 +4015,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_home_scroll_perf__timeline_summary
-  
+
   - name: Windows hello_world_windows__compile
     recipe: devicelab/devicelab_drone
     bringup: true
