@@ -280,7 +280,7 @@ abstract class TextSelectionControls {
   /// To Material text selection, handle is located below the text line.
   /// To Cupertino text selection, handle overlaps the text line.
   /// To Desktop text selection, has no text selection handles.
-  ///
+  /// 
   /// For different relative position from selection handle to text line,
   /// return different offset for accurate text selection updates.
   Offset getOffsetFromHandleToTextPosition(Size handleSize);
