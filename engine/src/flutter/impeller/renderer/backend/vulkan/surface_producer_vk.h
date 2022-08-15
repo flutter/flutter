@@ -31,14 +31,14 @@ class SurfaceProducerVK {
 
   ~SurfaceProducerVK();
 
-  std::unique_ptr<Surface> AcquireSurface(vk::CommandBuffer command_buffer);
+  std::unique_ptr<Surface> AcquireSurface();
+
+  bool Submit(vk::CommandBuffer buffer);
 
  private:
   std::weak_ptr<Context> context_;
 
   bool SetupSyncObjects();
-
-  bool Submit(vk::CommandBuffer buffer);
 
   bool Present(uint32_t image_index);
 

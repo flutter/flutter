@@ -344,8 +344,13 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
   }
   pipeline_info.setLayout(pipeline_layout.value.get());
 
-  // TODO(WIP)
-  // pipeline_info.setPDepthStencilState(&depth_stencil_state_);
+  vk::PipelineDepthStencilStateCreateInfo depth_stencil_state;
+  depth_stencil_state.setDepthTestEnable(true);
+  depth_stencil_state.setDepthWriteEnable(true);
+  depth_stencil_state.setDepthCompareOp(vk::CompareOp::eLess);
+  depth_stencil_state.setDepthBoundsTestEnable(false);
+  depth_stencil_state.setStencilTestEnable(false);
+  pipeline_info.setPDepthStencilState(&depth_stencil_state);
 
   // See the note in the header about why this is a reader lock.
   ReaderLock lock(cache_mutex_);

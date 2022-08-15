@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/surface.h"
 
 namespace impeller {
 std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
@@ -68,7 +69,8 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
 
 SurfaceVK::SurfaceVK(RenderTarget target,
                      SwapchainImageVK* swapchain_image,
-                     SwapCallback swap_callback) {}
+                     SwapCallback swap_callback)
+    : Surface(target) {}
 
 SurfaceVK::~SurfaceVK() = default;
 

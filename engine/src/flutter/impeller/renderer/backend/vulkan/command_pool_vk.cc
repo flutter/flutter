@@ -21,6 +21,10 @@ std::unique_ptr<CommandPoolVK> CommandPoolVK::Create(vk::Device device,
   return std::make_unique<CommandPoolVK>(std::move(res.value));
 }
 
+vk::CommandPool CommandPoolVK::Get() const {
+  return *command_pool_;
+}
+
 CommandPoolVK::CommandPoolVK(vk::UniqueCommandPool command_pool)
     : command_pool_(std::move(command_pool)) {}
 

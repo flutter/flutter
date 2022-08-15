@@ -61,6 +61,8 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   void SetupSwapchain(vk::UniqueSurfaceKHR surface);
 
+  std::unique_ptr<Surface> AcquireSurface();
+
  private:
   std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   vk::UniqueInstance instance_;
