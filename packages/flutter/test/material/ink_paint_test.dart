@@ -437,6 +437,8 @@ void main() {
   });
 
   testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController();
+    controller.show();
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -456,16 +458,19 @@ void main() {
                           // features aren't clipped by it.
                           child: Material(
                             color: Colors.black,
-                            child: _OverlayPortal(
-                              overlayChild: Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: InkWell(
-                                  splashColor: Colors.red,
-                                  onTap: () {},
-                                  child: const SizedBox.square(dimension: 100),
-                                ),
-                              ),
+                            child: OverlayPortal(
+                              controller: controller,
+                              overlayChildBuilder: (BuildContext context) {
+                                return Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: InkWell(
+                                    splashColor: Colors.red,
+                                    onTap: () {},
+                                    child: const SizedBox.square(dimension: 100),
+                                  ),
+                                );
+                              },
                               child: null,
                             ),
                           ),
