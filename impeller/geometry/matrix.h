@@ -336,14 +336,13 @@ struct Matrix {
                                           Scalar z_far) {
     Scalar height = std::tan(fov_y.radians * 0.5);
     Scalar width = height * aspect_ratio;
-    Scalar z_diff = z_near - z_far;
 
     // clang-format off
     return {
-      1.0f / width, 0.0f,          0.0f,                              0.0f,
-      0.0f,         1.0f / height, 0.0f,                              0.0f,
-      0.0f,         0.0f,          (z_near + z_far) / z_diff,        -1.0f,
-      0.0f,         0.0f,          (2.0f * z_near * z_far) / z_diff,  0.0f
+      1.0f / width, 0.0f,           0.0f,                                 0.0f,
+      0.0f,         1.0f / height,  0.0f,                                 0.0f,
+      0.0f,         0.0f,           z_far / (z_near - z_far),            -1.0f,
+      0.0f,         0.0f,          -(z_far * z_near) / (z_far - z_near),  0.0f,
     };
     // clang-format on
   }
