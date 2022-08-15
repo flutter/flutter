@@ -343,6 +343,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The [actions] become the trailing component of the [NavigationToolbar] built
   /// by this widget. The height of each action is constrained to be no bigger
   /// than the [toolbarHeight].
+  ///
+  /// To avoid having the last action covered by the debug banner, you may want
+  /// to set the [MaterialApp.debugShowCheckedModeBanner] to false.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -995,8 +998,7 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      leading = Container(
-        alignment: Alignment.center,
+      leading = ConstrainedBox(
         constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
         child: leading,
       );
@@ -1054,6 +1056,7 @@ class _AppBarState extends State<AppBar> {
     if (widget.actions != null && widget.actions!.isNotEmpty) {
       actions = Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: widget.actions!,
       );
     } else if (hasEndDrawer) {

@@ -132,11 +132,6 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// precedence: widget property, [IconButtonTheme] property, [IconTheme] property and
 /// internal default property value.
 ///
-/// In Material Design 3, the [IconButton.visualDensity] defaults to [VisualDensity.standard]
-/// for all platforms because the button will have a rounded rectangle shape if
-/// the [IconButton.visualDensity] is set to [VisualDensity.compact]. Users can
-/// customize it by using [IconButtonTheme], [IconButton.style] or [IconButton.visualDensity].
-///
 /// {@tool dartpad}
 /// This sample shows creation of [IconButton] widgets for standard, filled,
 /// filled tonal and outlined types, as described in: https://m3.material.io/components/icon-buttons/overview
@@ -222,9 +217,6 @@ class IconButton extends StatelessWidget {
   /// Defines how compact the icon button's layout will be.
   ///
   /// {@macro flutter.material.themedata.visualDensity}
-  ///
-  /// This property can be null. If null, it defaults to [VisualDensity.standard]
-  /// in Material Design 3 to make sure the button will be circular on all platforms.
   ///
   /// See also:
   ///
@@ -819,7 +811,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `mouseCursor`
   ///   * disabled - SystemMouseCursors.basic
   ///   * others - SystemMouseCursors.click
-  /// * `visualDensity` - VisualDensity.standard
+  /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
@@ -1061,7 +1053,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  VisualDensity? get visualDensity => VisualDensity.standard;
+  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
