@@ -2142,8 +2142,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
-    if (value.selection.isCollapsed && value.selection.affinity != _value.selection.affinity) {
-      // The text input server does not know the text affinity, so should respect the client value.
+    if (_checkNeedsAdjustAffinity(value)) {
       value = value.copyWith(selection: value.selection.copyWith(affinity: _value.selection.affinity));
     }
 
@@ -2191,6 +2190,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
+  }
+
+  bool _checkNeedsAdjustAffinity(TextEditingValue value) {
+    // Trust the engine affinity if the text changes or selection changes.
+    if (value.text == _value.text &&
+        value.selection.isCollapsed == _value.selection.isCollapsed &&
+        value.selection.start == _value.selection.start &&
+        value.selection.affinity != _value.selection.affinity) {
+      return true;
+    }
+    return false;
   }
 
   @override
