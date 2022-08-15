@@ -5,19 +5,35 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
+#include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
 
 class CommandBufferVK final : public CommandBuffer {
  public:
+  static std::shared_ptr<CommandBufferVK> Create(
+      std::weak_ptr<const Context> context,
+      vk::Device device,
+      vk::CommandPool command_pool,
+      SurfaceProducerVK* surface_producer);
+
+  CommandBufferVK(std::weak_ptr<const Context> context,
+                  vk::Device device,
+                  SurfaceProducerVK* surface_producer,
+                  vk::UniqueCommandBuffer command_buffer);
+
   // |CommandBuffer|
   ~CommandBufferVK() override;
 
  private:
-  friend class ContextMTL;
+  friend class ContextVK;
 
-  explicit CommandBufferVK(std::weak_ptr<const Context> context);
+  vk::Device device_;
+  vk::UniqueCommandBuffer command_buffer_;
+  SurfaceProducerVK* surface_producer_;
+  bool is_valid_ = false;
 
   // |CommandBuffer|
   void SetLabel(const std::string& label) const override;
