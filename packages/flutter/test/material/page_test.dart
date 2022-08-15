@@ -155,33 +155,32 @@ void main() {
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('test page transition (_ZoomPageTransition) without rasterization', (WidgetTester tester) async {
-    Iterable<Layer> findLayers(Finder of) {
-      return tester.layerListOf(
-        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
+  testWidgets('test page transition (_ZoomPageTransition)', (WidgetTester tester) async {
+    Iterable<T> findWidgets<T extends Widget>(Finder of) {
+      return tester.widgetList<T>(
+        find.ancestor(of: of, matching: find.byType(T)),
       );
     }
 
-    OpacityLayer findForwardFadeTransition(Finder of) {
-      return findLayers(of).whereType<OpacityLayer>().first;
+    FadeTransition findForwardFadeTransition(Finder of) {
+      return findWidgets<FadeTransition>(of).where(
+        (FadeTransition t) => t.opacity.status == AnimationStatus.forward,
+      ).first;
     }
 
-    TransformLayer findForwardScaleTransition(Finder of) {
-      return findLayers(of).whereType<TransformLayer>().first;
+    ScaleTransition findForwardScaleTransition(Finder of) {
+      return findWidgets<ScaleTransition>(of).where(
+        (ScaleTransition t) => t.scale.status == AnimationStatus.forward,
+      ).first;
     }
 
     await tester.pumpWidget(
       MaterialApp(
-        onGenerateRoute: (RouteSettings settings) {
-          return MaterialPageRoute<void>(
-            preferRasterization: false,
-            builder: (BuildContext context) {
-              if (settings.name == '/') {
-                return const Material(child: Text('Page 1'));
-              }
-              return const Material(child: Text('Page 2'));
-            },
-          );
+        home: const Material(child: Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(child: Text('Page 2'));
+          },
         },
       ),
     );
@@ -190,46 +189,42 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    TransformLayer widget1Scale = findForwardScaleTransition(find.text('Page 1'));
-    TransformLayer widget2Scale = findForwardScaleTransition(find.text('Page 2'));
-    OpacityLayer widget2Opacity = findForwardFadeTransition(find.text('Page 2'));
+    ScaleTransition widget1Scale = findForwardScaleTransition(find.text('Page 1'));
+    ScaleTransition widget2Scale = findForwardScaleTransition(find.text('Page 2'));
+    FadeTransition widget2Opacity = findForwardFadeTransition(find.text('Page 2'));
 
     double getScale(TransformLayer layer) {
       return layer.transform!.storage[0];
     }
 
-    // Page 1 is enlarging, starts from 1.0.
-    expect(getScale(widget1Scale), greaterThan(1.0));
+     // Page 1 is enlarging, starts from 1.0.
+    expect(widget1Scale.scale.value, greaterThan(1.0));
     // Page 2 is enlarging from the value less than 1.0.
-    expect(getScale(widget2Scale), lessThan(1.0));
+    expect(widget2Scale.scale.value, lessThan(1.0));
     // Page 2 is becoming none transparent.
-    expect(widget2Opacity.alpha, lessThan(255));
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
 
     await tester.pump(const Duration(milliseconds: 250));
     await tester.pump(const Duration(milliseconds: 1));
-
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
-
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-
     widget1Scale = findForwardScaleTransition(find.text('Page 1'));
     widget2Scale = findForwardScaleTransition(find.text('Page 2'));
     widget2Opacity = findForwardFadeTransition(find.text('Page 2'));
 
     // Page 1 is narrowing down, but still larger than 1.0.
-    expect(getScale(widget1Scale), greaterThan(1.0));
+    expect(widget1Scale.scale.value, greaterThan(1.0));
     // Page 2 is smaller than 1.0.
-    expect(getScale(widget2Scale), lessThan(1.0));
+    expect(widget2Scale.scale.value, lessThan(1.0));
     // Page 2 is becoming transparent.
-    expect(widget2Opacity.alpha, lessThan(255));
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
 
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 1));
-
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
