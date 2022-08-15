@@ -1453,11 +1453,19 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String basename = cwd.split('/').last;
-        final String exePath = path.join(cwd, 'build', 'windows', 'runner', 'release', '$basename.exe');
+        final String basename = path.basename(cwd);
+        final String exePath = path.join(
+          cwd,
+          'build',
+          'windows',
+          'runner',
+          'release',
+          '$basename.exe');
         final File exe = file(exePath);
+        // On Windows, we do not produce a single installation package file,
+        // rather a directory containing an .exe and .dll files.
+        // The release size is set to the size of the produced .exe file
         releaseSizeInBytes = exe.lengthSync();
-        // I am unsure if there is any "package" for a windows build, so [reportPackageContentSizes] is irrelevant
         break;
     }
 
