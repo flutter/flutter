@@ -40,14 +40,6 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     return Size.zero;
   }
 
-  /// Returns the offset from text selection handle to actual location in text line.
-  ///
-  /// Desktop has no text selection handles, return [Offset.zero].
-  @override
-  Offset getOffsetFromHandleToTextPosition(Size handleSize) {
-    return Offset.zero;
-  }
-
   /// Builder for the Mac-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(

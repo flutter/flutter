@@ -275,16 +275,6 @@ abstract class TextSelectionControls {
   /// Returns the size of the selection handle.
   Size getHandleSize(double textLineHeight);
 
-  /// Returns the offset from text selection handle to actual location in text line.
-  ///
-  /// To Material text selection, handle is located below the text line.
-  /// To Cupertino text selection, handle overlaps the text line.
-  /// To Desktop text selection, has no text selection handles.
-  /// 
-  /// For different relative position from selection handle to text line,
-  /// return different offset for accurate text selection updates.
-  Offset getOffsetFromHandleToTextPosition(Size handleSize);
-
   /// Whether the current selection of the text field managed by the given
   /// `delegate` can be removed from the text field and placed into the
   /// [Clipboard].
@@ -627,10 +617,7 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
 
-    final Offset offsetFromHandleToTextPosition = selectionControls!
-        .getOffsetFromHandleToTextPosition(handleSize);
-
-    _dragEndPosition = details.globalPosition + offsetFromHandleToTextPosition;
+    _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
     _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(
@@ -705,11 +692,7 @@ class TextSelectionOverlay {
     final Size handleSize = selectionControls!.getHandleSize(
       renderObject.preferredLineHeight,
     );
-
-    final Offset offsetFromHandleToTextPosition = selectionControls!
-        .getOffsetFromHandleToTextPosition(handleSize);
-
-    _dragStartPosition = details.globalPosition + offsetFromHandleToTextPosition;
+    _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     _selectionOverlay.showMagnifier(MagnifierOverlayInfoBearer._fromRenderEditable(

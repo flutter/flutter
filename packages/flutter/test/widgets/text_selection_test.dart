@@ -1471,11 +1471,6 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   Size getHandleSize(double textLineHeight) {
     return Size(textLineHeight, textLineHeight);
   }
-
-  @override
-  Offset getOffsetFromHandleToTextPosition(Size handleSize) {
-    return Offset.zero;
-  }
 }
 
 class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {

@@ -26,16 +26,6 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   @override
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
 
-  /// Returns the offset from text selection handle to actual location in text line.
-  ///
-  /// To Material text selection style,handle is located below the text line.
-  /// The OffsetX from selection handle to text line is 0.0, OffsetY is handle height;
-  /// Return [Offset(0.0, -handleSize.height)]
-  @override
-  Offset getOffsetFromHandleToTextPosition(Size handleSize) {
-    return Offset(0.0, -handleSize.height);
-  }
-
   /// Builder for material-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
