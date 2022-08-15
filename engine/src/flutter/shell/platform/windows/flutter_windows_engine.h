@@ -177,6 +177,9 @@ class FlutterWindowsEngine {
   // Informs the engine that a new frame is needed to redraw the content.
   void ScheduleFrame();
 
+  // Set the callback that is called when the next frame is drawn.
+  void SetNextFrameCallback(fml::closure callback);
+
   // Attempts to register the texture with the given |texture_id|.
   bool RegisterExternalTexture(int64_t texture_id);
 
@@ -294,6 +297,9 @@ class FlutterWindowsEngine {
 
   // The root isolate creation callback.
   fml::closure root_isolate_create_callback_;
+
+  // The on frame drawn callback.
+  fml::closure next_frame_callback_;
 };
 
 }  // namespace flutter
