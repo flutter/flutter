@@ -6,12 +6,17 @@
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_TESTS_FAKES_FOCUSER_H_
 
 #include <fuchsia/ui/views/cpp/fidl.h>
+#include <fuchsia/ui/views/cpp/fidl_test_base.h>
+
+#include <string>
+
+#include "flutter/fml/logging.h"
 
 using Focuser = fuchsia::ui::views::Focuser;
 
 namespace flutter_runner::testing {
 
-class FakeFocuser : public Focuser {
+class FakeFocuser : public fuchsia::ui::views::testing::Focuser_TestBase {
  public:
   bool request_focus_called() const { return request_focus_called_; }
 
@@ -30,6 +35,11 @@ class FakeFocuser : public Focuser {
             : fuchsia::ui::views::Focuser_RequestFocus_Result::WithResponse(
                   fuchsia::ui::views::Focuser_RequestFocus_Response());
     callback(std::move(result));
+  }
+
+  void NotImplemented_(const std::string& name) {
+    FML_LOG(FATAL) << "flutter_runner::Testing::FakeFocuser does not implement "
+                   << name;
   }
 
   bool request_focus_called_ = false;
