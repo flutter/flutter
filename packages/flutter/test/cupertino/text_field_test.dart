@@ -6247,11 +6247,6 @@ void main() {
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
-    const String kThreeLines =
-        'First line of text is\n'
-        'Second line goes until\n'
-        'Third line of stuff';
-
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -6268,7 +6263,11 @@ void main() {
       ),
     );
 
-    const String testValue = kThreeLines;
+    const String testValue =
+        'First line of text is\n'
+        'Second line goes until\n'
+        'Third line of stuff';
+
     const String cutValue =
         'First line of text is\n'
         'Second until\n'
