@@ -10,8 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
-import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'magnifier.dart';
@@ -279,7 +279,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -422,7 +422,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -759,7 +759,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [DefaultCupertinoTextSelectionToolbar], which is built by default.
+  ///  * [CupertinoAdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextToolbarBuilder? contextMenuBuilder;
 
   /// The platform that the current `defaultTargetPlatform` will be treated as.
@@ -784,16 +784,26 @@ class CupertinoTextField extends StatefulWidget {
     }
   }
 
-  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return DefaultCupertinoTextSelectionToolbar(
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    final List<ContextMenuButtonItem>? buttonItems =
+        EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+        );
+    if (buttonItems != null) {
+      return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
+        primaryAnchor: primaryAnchor,
+        secondaryAnchor: secondaryAnchor,
+        buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+          _cupertinoPlatform,
+        ),
+      );
+    }
+    return CupertinoAdaptiveTextSelectionToolbar.adaptiveButtons(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,
       targetPlatform: _cupertinoPlatform,
-      buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
-        editableTextState,
-        _cupertinoPlatform,
-      ),
     );
   }
 

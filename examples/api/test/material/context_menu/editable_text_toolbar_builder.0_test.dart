@@ -16,21 +16,21 @@ void main() {
     await tester.tap(find.byType(EditableText));
     await tester.pump();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
     // Long pressing the field shows the default context menu but with custom
     // buttons.
     await tester.longPress(find.byType(EditableText));
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.byType(CupertinoButton), findsAtLeastNWidgets(1));
 
     // Tap to dismiss.
     await tester.tapAt(tester.getTopLeft(find.byType(EditableText)));
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byType(CupertinoButton), findsNothing);
   });
 }

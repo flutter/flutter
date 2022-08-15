@@ -22,7 +22,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: DefaultTextSelectionToolbar(
+            child: AdaptiveTextSelectionToolbar.buttonItems(
               primaryAnchor: Offset.zero,
               buttonItems: <ContextMenuButtonItem>[
                 ContextMenuButtonItem(
@@ -79,7 +79,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: DefaultTextSelectionToolbar(
+            child: AdaptiveTextSelectionToolbar(
               primaryAnchor: Offset.zero,
               children: <Widget>[
                 Container(key: key),

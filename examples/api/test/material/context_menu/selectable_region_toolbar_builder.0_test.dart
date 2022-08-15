@@ -16,7 +16,7 @@ void main() {
     // Allow the selection overlay geometry to be created.
     await tester.pump();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
     // Right clicking the Text in the SelectionArea shows the custom context
     // menu.
@@ -29,13 +29,13 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.text('Print'), findsOneWidget);
 
     // Tap to dismiss.
     await tester.tapAt(tester.getCenter(find.byType(Scaffold)));
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
   });
 }

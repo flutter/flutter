@@ -26,7 +26,7 @@ enum ContextMenuButtonType {
 ///
 /// See also:
 ///
-///  * [DefaultTextSelectionToolbar], which can take a list of
+///  * [AdaptiveTextSelectionToolbar], which can take a list of
 ///    ContextMenuButtonItems and create a platform-specific context menu with
 ///    the indicated buttons.
 @immutable

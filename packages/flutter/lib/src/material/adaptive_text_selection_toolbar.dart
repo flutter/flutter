@@ -11,11 +11,25 @@ import 'theme.dart';
 
 /// The default context menu for text selection for the current platform.
 ///
-/// The children can be customized using the [children] or [buttonItems]
-/// parameters. If neither is given, then the default buttons will be used.
+/// {@template flutter.material.AdaptiveTextSelectionToolbar.constructor.adaptiveButtons}
+/// To adaptively generate the default buttons for the current platform, use
+/// [AdaptiveTextSelectionToolbar.adaptiveButtons].
+/// {@endtemplate}
 ///
-/// Typically, this widget would be passed to [EditableText.contextMenuBuilder],
-/// [TextField.contextMenuBuilder], or [CupertinoTextField.contextMenuBuilder].
+/// {@template flutter.material.AdaptiveTextSelectionToolbar.constructor.buttonItems}
+/// To specify the button labels and callbacks but still adaptively generate
+/// the look of the buttons based on the current platform, use
+/// [AdaptiveTextSelectionToolbar.buttonItems].
+/// {@endtemplate}
+///
+/// Typically, this widget would passed to `contextMenuBuilder` in a supported
+/// parent widget, such as:
+///
+/// * [EditableText.contextMenuBuilder]
+/// * [TextField.contextMenuBuilder]
+/// * [CupertinoTextField.contextMenuBuilder]
+/// * [SelectionArea.contextMenuBuilder]
+/// * [SelectableText.contextMenuBuilder]
 ///
 /// See also:
 ///
@@ -23,51 +37,87 @@ import 'theme.dart';
 ///   [ContextMenuButtonItem]s.
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextMenuButtonItem]s.
-/// * [DefaultCupertinoTextSelectionToolbar], which does the same thing as this
+/// * [CupertinoAdaptiveTextSelectionToolbar], which does the same thing as this
 ///   widget but only for Cupertino context menus.
 /// * [TextSelectionToolbar], the default toolbar for Android.
 /// * [DesktopTextSelectionToolbar], the default toolbar for desktop platforms
 ///    other than MacOS.
 /// * [CupertinoTextSelectionToolbar], the default toolbar for iOS.
 /// * [CupertinoDesktopTextSelectionToolbar], the default toolbar for MacOS.
-class DefaultTextSelectionToolbar extends StatelessWidget {
-  /// Create an instance of [DefaultTextSelectionToolbar].
-  const DefaultTextSelectionToolbar({
+class AdaptiveTextSelectionToolbar extends StatelessWidget {
+  /// Create an instance of [AdaptiveTextSelectionToolbar] with the
+  /// given [children].
+  const AdaptiveTextSelectionToolbar({
     super.key,
+    required this.children,
     required this.primaryAnchor,
     this.secondaryAnchor,
-    this.buttonItems,
-    this.children,
-    this.editableTextState,
-  }) : assert(
-         buttonItems == null || children == null,
-         'No need for both buttonItems and children, use one or the other, or neither.',
-       ),
-       assert(
-         !(buttonItems == null && children == null && editableTextState == null),
-         'If not providing buttonItems or children, provide editableTextState to generate them.',
-       );
+  }) : buttonItems = null,
+       editableTextState = null;
 
-  /// If provided, used to generate the buttons.
+  /// Create an instance of [AdaptiveTextSelectionToolbar] and
+  /// adaptively generate the buttons based on the current platform and the
+  /// given [editableTextState].
   ///
-  /// Otherwise, manually pass in [buttonItems] or [children].
-  final EditableTextState? editableTextState;
-
-  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.primaryAnchor}
-  final Offset primaryAnchor;
-
-  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.secondaryAnchor}
-  final Offset? secondaryAnchor;
-
-  /// The information needed to create each child button of the menu.
+  /// {@template flutter.material.AdaptiveTextSelectionToolbar}
+  /// To specify the [children] widgets directly, use the main constructor
+  /// [AdaptiveTextSelectionToolbar.AdaptiveTextSelectionToolbar].
+  /// {@endtemplate}
   ///
-  /// If provided, [children] cannot also be provided.
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.buttonItems}
+  const AdaptiveTextSelectionToolbar.adaptiveButtons({
+    super.key,
+    required this.editableTextState,
+    required this.primaryAnchor,
+    this.secondaryAnchor,
+  }) : buttonItems = null,
+       children = null;
+
+  /// Create an instance of [AdaptiveTextSelectionToolbar] and
+  /// adaptively generate the buttons based on the current platform and
+  /// [buttonItems].
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar}
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.adaptiveButtons}
+  const AdaptiveTextSelectionToolbar.buttonItems({
+    super.key,
+    required this.buttonItems,
+    required this.primaryAnchor,
+    this.secondaryAnchor,
+  }) : children = null,
+       editableTextState = null;
+
+  /// {@template flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
+  /// The data that will be used to adaptively generate each child button of the
+  /// menu.
+  /// {@endtemplate}
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar}
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.adaptiveButtons}
   final List<ContextMenuButtonItem>? buttonItems;
 
-  /// The children of the toolbar.
+  /// The children of the toolbar, typically buttons.
   ///
-  /// If provided, buttonItems cannot also be provided.
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.adaptiveButtons}
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.buttonItems}
   final List<Widget>? children;
+
+  /// Used to adaptively generate the default buttons for this
+  /// [EditableTextState] on the current platform.
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar}
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.buttonItems}
+  final EditableTextState? editableTextState;
+
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.primaryAnchor}
+  final Offset primaryAnchor;
+
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.secondaryAnchor}
+  final Offset? secondaryAnchor;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +127,7 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
     }
 
     if (children?.isNotEmpty ?? false) {
-      return _DefaultTextSelectionToolbarFromChildren(
+      return _AdaptiveTextSelectionToolbarFromChildren(
         primaryAnchor: primaryAnchor,
         secondaryAnchor: secondaryAnchor,
         children: children!,
@@ -85,7 +135,7 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
     }
 
     if (buttonItems?.isNotEmpty ?? false) {
-      return _DefaultTextSelectionToolbarFromButtonItems(
+      return _AdaptiveTextSelectionToolbarFromButtonItems(
         primaryAnchor: primaryAnchor,
         secondaryAnchor: secondaryAnchor,
         buttonItems: buttonItems!,
@@ -95,7 +145,7 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
     return EditableTextContextMenuButtonItemsBuilder(
       editableTextState: editableTextState!,
       builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-        return _DefaultTextSelectionToolbarFromButtonItems(
+        return _AdaptiveTextSelectionToolbarFromButtonItems(
           primaryAnchor: primaryAnchor,
           secondaryAnchor: secondaryAnchor,
           buttonItems: buttonItems,
@@ -107,17 +157,17 @@ class DefaultTextSelectionToolbar extends StatelessWidget {
 
 /// The default text selection toolbar by platform given the [children] for the
 /// platform.
-class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
-  const _DefaultTextSelectionToolbarFromChildren({
+class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
+  const _AdaptiveTextSelectionToolbarFromChildren({
     required this.primaryAnchor,
     this.secondaryAnchor,
     required this.children,
   }) : assert(children != null);
 
-  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.primaryAnchor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
 
-  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.secondaryAnchor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.secondaryAnchor}
   final Offset? secondaryAnchor;
 
   /// The children of the toolbar, typically buttons.
@@ -161,17 +211,17 @@ class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
 
 /// The default text selection toolbar by platform given [buttonItems]
 /// representing the children for the platform.
-class _DefaultTextSelectionToolbarFromButtonItems extends StatelessWidget {
-  const _DefaultTextSelectionToolbarFromButtonItems({
+class _AdaptiveTextSelectionToolbarFromButtonItems extends StatelessWidget {
+  const _AdaptiveTextSelectionToolbarFromButtonItems({
     required this.primaryAnchor,
     this.secondaryAnchor,
     required this.buttonItems,
   }) : assert(buttonItems != null);
 
-  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.primaryAnchor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
 
-  /// {@macro flutter.cupertino.DefaultCupertinoTextSelectionToolbar.secondaryAnchor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.secondaryAnchor}
   final Offset? secondaryAnchor;
 
   /// The information needed to create each child button of the menu.
@@ -187,7 +237,7 @@ class _DefaultTextSelectionToolbarFromButtonItems extends StatelessWidget {
     return TextSelectionToolbarButtonsBuilder(
       buttonItems: buttonItems,
       builder: (BuildContext context, List<Widget> children) {
-        return _DefaultTextSelectionToolbarFromChildren(
+        return _AdaptiveTextSelectionToolbarFromChildren(
           primaryAnchor: primaryAnchor,
           secondaryAnchor: secondaryAnchor,
           children: children,

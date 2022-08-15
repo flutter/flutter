@@ -27,7 +27,7 @@ typedef _ClipboardStatusWidgetBuilder = Widget Function(
 ///
 /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
 ///   given [ContextMenuButtonItem]s.
-/// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
+/// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself.
 /// * [SelectableRegionContextMenuButtonItemsBuilder], which is like this widget
 ///   but for a [SelectableRegion] instead of an [EditableText].
 class EditableTextContextMenuButtonItemsBuilder extends StatefulWidget {

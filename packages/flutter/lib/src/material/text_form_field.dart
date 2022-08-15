@@ -5,7 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'default_text_selection_toolbar.dart';
+import 'adaptive_text_selection_toolbar.dart';
 import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
@@ -153,7 +153,7 @@ class TextFormField extends FormField<String> {
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
-    EditableTextToolbarBuilder? contextMenuBuilder = _defaultBuildContextMenu,
+    EditableTextToolbarBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -254,14 +254,24 @@ class TextFormField extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
-  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return DefaultTextSelectionToolbar(
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    final List<ContextMenuButtonItem>? buttonItems =
+        EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+        );
+    if (buttonItems != null) {
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        primaryAnchor: primaryAnchor,
+        secondaryAnchor: secondaryAnchor,
+        buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+        ),
+      );
+    }
+    return AdaptiveTextSelectionToolbar.adaptiveButtons(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,
-      buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
-        editableTextState,
-      ),
     );
   }
 

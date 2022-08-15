@@ -70,7 +70,7 @@ class _CupertinoToolbarButtonDivider extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [DefaultTextSelectionToolbar], which builds the toolbar for the current
+///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
 ///    platform.
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.

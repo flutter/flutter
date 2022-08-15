@@ -20,7 +20,7 @@ const double _kToolbarWidth = 222.0;
 ///
 /// See also:
 ///
-///  * [DefaultTextSelectionToolbar], which builds the toolbar for the current
+///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
 ///    platform.
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.

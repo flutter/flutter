@@ -11896,7 +11896,7 @@ void main() {
   });
 
   group('context menu', () {
-    testWidgets('builds DefaultTextSelectionToolbar by default', (WidgetTester tester) async {
+    testWidgets('builds AdaptiveTextSelectionToolbar by default', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: '');
       await tester.pumpWidget(
         MaterialApp(
@@ -11914,7 +11914,7 @@ void main() {
 
       await tester.pump(); // Wait for autofocus to take effect.
 
-      expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
       // Long-press to bring up the context menu.
       final Finder textFinder = find.byType(EditableText);
@@ -11922,7 +11922,7 @@ void main() {
       tester.state<EditableTextState>(textFinder).showToolbar();
       await tester.pumpAndSettle();
 
-      expect(find.byType(DefaultTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );

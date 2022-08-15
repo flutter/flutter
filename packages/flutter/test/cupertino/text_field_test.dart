@@ -6010,7 +6010,7 @@ void main() {
   });
 
   group('context menu', () {
-    testWidgets('builds DefaultCupertinoTextSelectionToolbar by default', (WidgetTester tester) async {
+    testWidgets('builds CupertinoAdaptiveTextSelectionToolbar by default', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: '');
       await tester.pumpWidget(
         CupertinoApp(
@@ -6027,7 +6027,7 @@ void main() {
 
       await tester.pump(); // Wait for autofocus to take effect.
 
-      expect(find.byType(DefaultCupertinoTextSelectionToolbar), findsNothing);
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
 
       // Long-press to bring up the context menu.
       final Finder textFinder = find.byType(EditableText);
@@ -6035,7 +6035,7 @@ void main() {
       tester.state<EditableTextState>(textFinder).showToolbar();
       await tester.pumpAndSettle();
 
-      expect(find.byType(DefaultCupertinoTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
     },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );

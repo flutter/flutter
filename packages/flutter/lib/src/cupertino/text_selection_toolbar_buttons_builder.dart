@@ -30,10 +30,10 @@ typedef ContextMenuFromChildrenBuilder = Widget Function(
 ///
 /// See also:
 ///
-/// * [DefaultTextSelectionToolbar], which builds the toolbar itself. By
+/// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself. By
 ///   wrapping [TextSelectionToolbarButtonsBuilder] with
-///   [DefaultTextSelectionToolbar] and passing the given children to
-///   [DefaultTextSelectionToolbar.children], a default toolbar can be built
+///   [AdaptiveTextSelectionToolbar] and passing the given children to
+///   [AdaptiveTextSelectionToolbar.children], a default toolbar can be built
 ///   with custom button actions and labels.
 /// * [TextSelectionToolbarButtonsBuilder], which is in the Material library and
 ///   builds native-looking buttons for all platforms.

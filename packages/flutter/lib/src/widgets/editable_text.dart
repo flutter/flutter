@@ -1588,7 +1588,7 @@ class EditableText extends StatefulWidget {
   /// {@end-tool}
   ///
   /// See also:
-  ///   * [DefaultTextSelectionToolbar], which builds the default text selection
+  ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
   ///     toolbar for the current platform, but allows customization of the
   ///     buttons.
   ///   * [TextSelectionToolbarButtonsBuilder], which builds the default buttons

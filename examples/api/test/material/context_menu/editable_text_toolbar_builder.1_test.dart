@@ -13,7 +13,7 @@ void main() {
       example.MyApp(),
     );
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
     // Right clicking the Text in the TextField shows the custom context menu,
     // but no email button since no email address is selected.
@@ -26,14 +26,14 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.text('Send email'), findsNothing);
 
     // Tap to dismiss.
     await tester.tapAt(tester.getTopLeft(find.byType(EditableText)));
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
     // Select the email address.
     final EditableTextState state =
@@ -57,13 +57,13 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.text('Send email'), findsOneWidget);
 
     // Tap to dismiss.
     await tester.tapAt(tester.getTopLeft(find.byType(EditableText)));
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
   });
 }

@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
                   return EditableTextContextMenuButtonItemsBuilder(
                     editableTextState: editableTextState,
                     builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-                      return DefaultTextSelectionToolbar(
+                      return AdaptiveTextSelectionToolbar(
                         primaryAnchor: primaryAnchor,
                         secondaryAnchor: secondaryAnchor,
                         // Build the default buttons, but make them look custom.

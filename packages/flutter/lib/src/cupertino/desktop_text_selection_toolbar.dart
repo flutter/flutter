@@ -36,9 +36,9 @@ const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.wit
 ///
 /// See also:
 ///
-///  * [DefaultCupertinoTextSelectionToolbar], where this is used to build the
+///  * [CupertinoAdaptiveTextSelectionToolbar], where this is used to build the
 ///    toolbar for desktop platforms.
-///  * [DefaultTextSelectionToolbar], where this is used to build the toolbar on
+///  * [AdaptiveTextSelectionToolbar], where this is used to build the toolbar on
 ///    MacOS.
 ///  * [DesktopTextSelectionToolbar], which is similar but builds a
 ///    Material-style desktop toolbar.

@@ -19,10 +19,10 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-/// * [DefaultTextSelectionToolbar], which builds the toolbar itself. By
+/// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself. By
 ///   wrapping [TextSelectionToolbarButtonsBuilder] with
-///   [DefaultTextSelectionToolbar] and passing the given children to
-///   [DefaultTextSelectionToolbar.children], a default toolbar can be built
+///   [AdaptiveTextSelectionToolbar] and passing the given children to
+///   [AdaptiveTextSelectionToolbar.children], a default toolbar can be built
 ///   with custom button actions and labels.
 /// * [EditableTextContextMenuButtonItemsBuilder], which is similar to this class,
 ///   but calls its builder with [ContextMenuButtonItem]s instead of with fully

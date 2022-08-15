@@ -35,7 +35,7 @@ const double _kToolbarContentDistance = 8.0;
 ///
 /// See also:
 ///
-///  * [DefaultTextSelectionToolbar], which builds the toolbar for the current
+///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
 ///    platform.
 ///  * [CupertinoTextSelectionToolbar], which is similar, but builds an iOS-
 ///    style toolbar.

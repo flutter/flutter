@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
-import 'default_text_selection_toolbar.dart';
+import 'adaptive_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'magnifier.dart';
@@ -213,7 +213,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
@@ -271,7 +271,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
@@ -442,14 +442,24 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   final EditableTextToolbarBuilder? contextMenuBuilder;
 
-  static Widget _defaultBuildContextMenu(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return DefaultTextSelectionToolbar(
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    final List<ContextMenuButtonItem>? buttonItems =
+        EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+        );
+    if (buttonItems != null) {
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        primaryAnchor: primaryAnchor,
+        secondaryAnchor: secondaryAnchor,
+        buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+        ),
+      );
+    }
+    return AdaptiveTextSelectionToolbar.adaptiveButtons(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,
-      buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
-        editableTextState,
-      ),
     );
   }
 

@@ -10,8 +10,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'debug.dart';
-import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'input_decorator.dart';
@@ -793,17 +793,27 @@ class TextField extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [DefaultTextSelectionToolbar], which is built by default.
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextToolbarBuilder? contextMenuBuilder;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return DefaultTextSelectionToolbar(
+    final List<ContextMenuButtonItem>? buttonItems =
+        EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+        );
+    if (buttonItems != null) {
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        primaryAnchor: primaryAnchor,
+        secondaryAnchor: secondaryAnchor,
+        buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
+          editableTextState,
+        ),
+      );
+    }
+    return AdaptiveTextSelectionToolbar.adaptiveButtons(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,
-      buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
-        editableTextState,
-      ),
     );
   }
 

@@ -4,8 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'debug.dart';
-import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'magnifier.dart';
 import 'text_selection.dart';
@@ -41,7 +41,7 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
-    this.contextMenuBuilder = _defaultBuildContextMenu,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     required this.child,
   });
@@ -78,7 +78,7 @@ class SelectionArea extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [DefaultTextSelectionToolbar], which is built by default.
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
   final SelectableRegionToolbarBuilder? contextMenuBuilder;
 
   /// The child widget this selection area applies to.
@@ -86,11 +86,11 @@ class SelectionArea extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  static Widget _defaultBuildContextMenu(BuildContext context, SelectableRegionState delegate, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+  static Widget _defaultContextMenuBuilder(BuildContext context, SelectableRegionState delegate, Offset primaryAnchor, [Offset? secondaryAnchor]) {
     return SelectableRegionContextMenuButtonItemsBuilder(
       selectableRegionState: delegate,
       builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-        return DefaultTextSelectionToolbar(
+        return AdaptiveTextSelectionToolbar.buttonItems(
           primaryAnchor: primaryAnchor,
           secondaryAnchor: secondaryAnchor,
           buttonItems: buttonItems,

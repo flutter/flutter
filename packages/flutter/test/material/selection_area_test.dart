@@ -51,7 +51,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
     // Show the toolbar by longpressing.
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
@@ -62,7 +62,7 @@ void main() {
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
   },
     skip: kIsWeb, // [intended]
   );
@@ -86,7 +86,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byKey(key), findsNothing);
 
     // Show the toolbar by longpressing.
@@ -98,7 +98,7 @@ void main() {
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
     await tester.pumpAndSettle();
 
-    expect(find.byType(DefaultTextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byKey(key), findsOneWidget);
   },
     skip: kIsWeb, // [intended]
