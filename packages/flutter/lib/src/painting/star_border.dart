@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'basic_types.dart';
 import 'borders.dart';
 import 'circle_border.dart';
+import 'edge_insets.dart';
 import 'rounded_rectangle_border.dart';
 import 'stadium_border.dart';
 
@@ -404,7 +405,7 @@ class StarBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Rect adjustedRect = rect.inflate(side.halfStrokeOffset);
+        final Rect adjustedRect = rect.inflate(side.strokeOffset / 2);
         final Path path = _StarGenerator(
           points: points,
           rotation: _rotationRadians,

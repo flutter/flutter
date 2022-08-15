@@ -128,7 +128,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
-    // Has to deflate first to get the right radius when we inflate again.
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 

@@ -135,9 +135,11 @@ class BorderSide with Diagnosticable {
   /// The relative position of the stroke on a [BorderSide] in an
   /// [OutlinedBorder] or [Border].
   ///
-  /// Values typically range from -1.0 (inside border, default) to
-  /// 1.0 (outside border), without any bound constraints (e.g., a
-  /// value of -2.0 is is not typical, but allowed).
+  /// Values typically range from -1.0 ([strokeAlignInside], inside border,
+  /// default) to 1.0 ([strokeAlignOutside], outside border), without any
+  /// bound constraints (e.g., a value of -2.0 is is not typical, but allowed).
+  /// A value of 0 ([strokeAlignCenter]) will center the border on the edge
+  /// of the widget.
   ///
   /// When set to [strokeAlignInside], the stroke is drawn completely inside
   /// the widget. For [strokeAlignCenter] and [strokeAlignOutside], a property
@@ -314,10 +316,10 @@ class BorderSide with Diagnosticable {
 
   /// The offset of the stroke, taking into account the stroke alignment.
   ///
-  /// For example, this will return the negative half [width] of the stroke
-  /// for a [strokeAlign] of -1, 0 for a [strokeAlign] of 0, and half the
+  /// For example, this will return the negative [width] of the stroke
+  /// for a [strokeAlign] of -1, 0 for a [strokeAlign] of 0, and the
   /// [width] for a [strokeAlign] of -1.
-  double get halfStrokeOffset => width * strokeAlign / 2;
+  double get strokeOffset => width * strokeAlign;
 
   @override
   bool operator ==(Object other) {
