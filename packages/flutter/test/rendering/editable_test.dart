@@ -118,9 +118,17 @@ void main() {
     final TestPushLayerPaintingContext context = TestPushLayerPaintingContext();
 
     const Offset paintOffset = Offset(100, 200);
+    const double fontSize = 20.0;
+    const endpoint = Offset(0.0, fontSize);
 
     final RenderEditable editable = RenderEditable(
-      text: const TextSpan(text: 'text'),
+      text: const TextSpan(
+        text: 'text',
+        style: TextStyle(
+          fontSize: fontSize,
+          height: 1.0,
+        ),
+      ),
       textDirection: TextDirection.ltr,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -133,7 +141,7 @@ void main() {
 
     final List<LeaderLayer> leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
     expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
-    expect(leaderLayers.single.offset, const Offset(0.0, 14.0) + paintOffset, reason: 'offset should respect paintOffset');
+    expect(leaderLayers.single.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
   });
 
   test('editable intrinsics', () {
