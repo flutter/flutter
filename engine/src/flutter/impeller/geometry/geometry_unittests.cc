@@ -284,8 +284,8 @@ TEST(GeometryTest, MatrixMakePerspective) {
     auto expect = Matrix{
         3.4641, 0,       0,        0,   //
         0,      1.73205, 0,        0,   //
-        0,      0,       -1.22222, -1,  //
-        0,      0,       -2.22222, 0,   //
+        0,      0,       -1.11111, -1,  //
+        0,      0,       -1.11111, 0,   //
     };
     ASSERT_MATRIX_NEAR(m, expect);
   }
@@ -295,8 +295,8 @@ TEST(GeometryTest, MatrixMakePerspective) {
     auto expect = Matrix{
         0.915244, 0,       0,   0,   //
         0,        1.83049, 0,   0,   //
-        0,        0,       -3,  -1,  //
-        0,        0,       -40, 0,   //
+        0,        0,       -2,  -1,  //
+        0,        0,       -20, 0,   //
     };
     ASSERT_MATRIX_NEAR(m, expect);
   }
