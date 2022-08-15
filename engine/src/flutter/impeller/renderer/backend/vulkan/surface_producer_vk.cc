@@ -7,6 +7,7 @@
 #include <array>
 
 #include "fml/logging.h"
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 
 namespace impeller {
@@ -31,8 +32,7 @@ SurfaceProducerVK::SurfaceProducerVK(
 
 SurfaceProducerVK::~SurfaceProducerVK() = default;
 
-std::unique_ptr<Surface> SurfaceProducerVK::AcquireSurface(
-    vk::CommandBuffer command_buffer) {
+std::unique_ptr<Surface> SurfaceProducerVK::AcquireSurface() {
   auto fence_wait_res = create_info_.device.waitForFences({*in_flight_fence_},
                                                           VK_TRUE, UINT64_MAX);
   if (fence_wait_res != vk::Result::eSuccess) {
@@ -52,17 +52,19 @@ std::unique_ptr<Surface> SurfaceProducerVK::AcquireSurface(
   auto acuire_image_res = create_info_.device.acquireNextImageKHR(
       create_info_.swapchain->GetSwapchain(), UINT64_MAX,
       *image_available_semaphore_, {}, &image_index);
-  if (acuire_image_res != vk::Result::eSuccess) {
+
+  if (acuire_image_res != vk::Result::eSuccess &&
+      acuire_image_res != vk::Result::eSuboptimalKHR) {
     VALIDATION_LOG << "Failed to acquire next image: "
                    << vk::to_string(acuire_image_res);
     return nullptr;
   }
 
-  SurfaceVK::SwapCallback swap_callback = [this, image_index,
-                                           command_buffer]() {
-    if (!Submit(command_buffer)) {
-      return false;
-    }
+  if (acuire_image_res == vk::Result::eSuboptimalKHR) {
+    VALIDATION_LOG << "Suboptimal image acquired.";
+  }
+
+  SurfaceVK::SwapCallback swap_callback = [this, image_index]() {
     return Present(image_index);
   };
 

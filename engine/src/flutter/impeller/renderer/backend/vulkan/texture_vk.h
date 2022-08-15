@@ -48,11 +48,11 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   bool IsWrapped() const;
 
+  vk::Image GetImage() const;
+
  private:
   ContextVK* context_;
   std::unique_ptr<TextureInfoVK> texture_info_;
-
-  vk::Image GetImage() const;
 
   // |Texture|
   void SetLabel(std::string_view label) override;

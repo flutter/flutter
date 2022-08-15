@@ -107,7 +107,8 @@ PlaygroundImpl::WindowHandle PlaygroundImplVK::GetWindowHandle() const {
 // |PlaygroundImpl|
 std::unique_ptr<Surface> PlaygroundImplVK::AcquireSurfaceFrame(
     std::shared_ptr<Context> context) {
-  FML_UNREACHABLE();
+  ContextVK* context_vk = reinterpret_cast<ContextVK*>(context_.get());
+  return context_vk->AcquireSurface();
 }
 
 }  // namespace impeller

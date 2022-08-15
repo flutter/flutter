@@ -18,6 +18,8 @@ class CommandPoolVK {
 
   ~CommandPoolVK();
 
+  vk::CommandPool Get() const;
+
  private:
   vk::UniqueCommandPool command_pool_;
 
