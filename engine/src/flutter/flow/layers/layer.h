@@ -227,16 +227,14 @@ class Layer {
 
     ~AutoCachePaint() { context_.inherited_opacity = sk_paint_.getAlphaf(); }
 
-    void setImageFilter(sk_sp<SkImageFilter> filter) {
-      sk_paint_.setImageFilter(filter);
-      dl_paint_.setImageFilter(DlImageFilter::From(filter));
+    void setImageFilter(const DlImageFilter* filter) {
+      sk_paint_.setImageFilter(!filter ? nullptr : filter->skia_object());
+      dl_paint_.setImageFilter(filter);
       update_needs_paint();
     }
 
     void setColorFilter(const DlColorFilter* filter) {
-      if (!filter)
-        return;
-      sk_paint_.setColorFilter(filter->skia_object());
+      sk_paint_.setColorFilter(!filter ? nullptr : filter->skia_object());
       dl_paint_.setColorFilter(filter);
       update_needs_paint();
     }

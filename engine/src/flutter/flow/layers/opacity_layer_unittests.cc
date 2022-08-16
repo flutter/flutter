@@ -523,7 +523,7 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughImageFilter) {
   auto opacityLayer =
       std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
   auto filterLayer = std::make_shared<ImageFilterLayer>(
-      SkImageFilters::Blur(5.0, 5.0, nullptr));
+      std::make_shared<DlBlurImageFilter>(5.0, 5.0, DlTileMode::kClamp));
   auto mockLayer = MockLayer::MakeOpacityCompatible(SkPath());
   filterLayer->Add(mockLayer);
   opacityLayer->Add(filterLayer);
