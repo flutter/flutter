@@ -34,9 +34,7 @@ bool PaintPassDelegate::CanCollapseIntoParentPass() {
 // |EntityPassDelgate|
 std::shared_ptr<Contents> PaintPassDelegate::CreateContentsForSubpassTarget(
     std::shared_ptr<Texture> target) {
-  auto contents = std::make_shared<TextureContents>();
-  contents->SetPath(
-      PathBuilder{}.AddRect(Rect::MakeSize(target->GetSize())).TakePath());
+  auto contents = TextureContents::MakeRect(Rect::MakeSize(target->GetSize()));
   contents->SetTexture(target);
   contents->SetSourceRect(Rect::MakeSize(target->GetSize()));
   contents->SetOpacity(paint_.color.alpha);

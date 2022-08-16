@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {
@@ -18,11 +19,13 @@ namespace impeller {
 class ContentContext;
 class Entity;
 
-/// Represents a texture and its intended draw position.
+/// Represents a texture and its intended draw transform/sampler configuration.
 struct Snapshot {
   std::shared_ptr<Texture> texture;
   /// The transform that should be applied to this texture for rendering.
   Matrix transform;
+
+  SamplerDescriptor sampler_descriptor;
 
   std::optional<Rect> GetCoverage() const;
 

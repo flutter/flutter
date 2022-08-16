@@ -274,8 +274,7 @@ void Canvas::DrawImageRect(std::shared_ptr<Image> image,
     return;
   }
 
-  auto contents = std::make_shared<TextureContents>();
-  contents->SetPath(PathBuilder{}.AddRect(dest).TakePath());
+  auto contents = TextureContents::MakeRect(dest);
   contents->SetTexture(image->GetTexture());
   contents->SetSourceRect(source);
   contents->SetSamplerDescriptor(std::move(sampler));

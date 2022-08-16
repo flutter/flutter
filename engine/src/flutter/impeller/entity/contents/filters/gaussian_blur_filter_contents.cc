@@ -104,6 +104,7 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }
+
   auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
   if (!maybe_input_uvs.has_value()) {
     return std::nullopt;
@@ -164,12 +165,6 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     frag_info.outer_blur_factor = outer_blur_factor_;
     frag_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
 
-    SamplerDescriptor sampler_desc;
-    sampler_desc.min_filter = MinMagFilter::kLinear;
-    sampler_desc.mag_filter = MinMagFilter::kLinear;
-    auto sampler =
-        renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
-
     Command cmd;
     cmd.label = "Gaussian Blur Filter";
     auto options = OptionsFromPass(pass);
@@ -177,8 +172,14 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
     cmd.BindVertices(vtx_buffer);
 
-    FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
-    FS::BindAlphaMaskSampler(cmd, source_snapshot->texture, sampler);
+    FS::BindTextureSampler(
+        cmd, input_snapshot->texture,
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            input_snapshot->sampler_descriptor));
+    FS::BindAlphaMaskSampler(
+        cmd, source_snapshot->texture,
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            source_snapshot->sampler_descriptor));
     VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
@@ -191,8 +192,13 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   }
   out_texture->SetLabel("DirectionalGaussianBlurFilter Texture");
 
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+
   return Snapshot{.texture = out_texture,
-                  .transform = Matrix::MakeTranslation(coverage.origin)};
+                  .transform = Matrix::MakeTranslation(coverage.origin),
+                  .sampler_descriptor = sampler_desc};
 }
 
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(

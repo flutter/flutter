@@ -152,10 +152,9 @@ bool FilterContents::Render(const ContentContext& renderer,
 
   // Draw the result texture, respecting the transform and clip stack.
 
-  auto contents = std::make_shared<TextureContents>();
-  contents->SetPath(
-      PathBuilder{}.AddRect(filter_coverage.value()).GetCurrentPath());
+  auto contents = TextureContents::MakeRect(filter_coverage.value());
   contents->SetTexture(snapshot.texture);
+  contents->SetSamplerDescriptor(snapshot.sampler_descriptor);
   contents->SetSourceRect(Rect::MakeSize(snapshot.texture->GetSize()));
 
   Entity e;
