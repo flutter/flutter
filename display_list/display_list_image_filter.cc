@@ -28,7 +28,7 @@ std::shared_ptr<DlImageFilter> DlImageFilter::From(
 }
 
 std::shared_ptr<DlImageFilter> DlImageFilter::makeWithLocalMatrix(
-    const SkMatrix& matrix) {
+    const SkMatrix& matrix) const {
   if (matrix.isIdentity()) {
     return shared();
   }
