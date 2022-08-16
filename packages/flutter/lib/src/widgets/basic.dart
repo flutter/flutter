@@ -3931,6 +3931,7 @@ class IndexedStack extends Stack {
     renderObject
       ..index = index
       ..fit = fit
+      ..clipBehavior = clipBehavior
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
