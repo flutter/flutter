@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -56,9 +54,9 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
 
 void main() {
   group('fuchsia device', () {
-    MemoryFileSystem memoryFileSystem;
-    File sshConfig;
-    FakeProcessManager processManager;
+    late MemoryFileSystem memoryFileSystem;
+    late File sshConfig;
+    late FakeProcessManager processManager;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -306,8 +304,8 @@ void main() {
   });
 
   group('displays friendly error when', () {
-    File artifactFile;
-    FakeProcessManager processManager;
+    late File artifactFile;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -350,9 +348,9 @@ void main() {
 [2018-11-09 01:30:12][52580][52983][log] INFO: example_app.cm(flutter): Did thing this time
 
   ''';
-      FakeProcessManager processManager;
-      File ffx;
-      File sshConfig;
+      late FakeProcessManager processManager;
+      late File ffx;
+      late File sshConfig;
 
       setUp(() {
         processManager = FakeProcessManager.empty();
@@ -475,7 +473,7 @@ void main() {
   });
 
   group('screenshot', () {
-    FakeProcessManager processManager;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -681,8 +679,8 @@ void main() {
   });
 
   group('portForwarder', () {
-    FakeProcessManager processManager;
-    File sshConfig;
+    late FakeProcessManager processManager;
+    late File sshConfig;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -746,7 +744,7 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri, bool enableServiceAuthCodes) => null,
+        ((Device device, Uri uri, bool enableServiceAuthCodes) => null) as Future<void> Function(Device, Uri, bool),
         true, // only poll once.
       );
       return discoveryProtocol.uri;
@@ -789,7 +787,7 @@ void main() {
         // wrong name.
         FlutterView(
             id: '2',
-            uiIsolate: vm_service.Isolate.parse(<String, Object>{
+            uiIsolate: vm_service.Isolate.parse(<String, Object?>{
               ...fakeIsolate.toJson(),
               'name': 'wrong name',
             })),
@@ -854,8 +852,8 @@ void main() {
   });
 
   group('sdkNameAndVersion: ', () {
-    File sshConfig;
-    FakeProcessManager processManager;
+    late File sshConfig;
+    late FakeProcessManager processManager;
 
     setUp(() {
       sshConfig = MemoryFileSystem.test().file('ssh_config')
@@ -934,7 +932,7 @@ void main() {
 }
 
 class FuchsiaModulePackage extends ApplicationPackage {
-  FuchsiaModulePackage({@required this.name}) : super(id: name);
+  FuchsiaModulePackage({required this.name}) : super(id: name);
 
   @override
   final String name;
@@ -982,7 +980,7 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
 
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
@@ -992,7 +990,7 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 
   @override
-  Future<String> sessionShow() async {
+  Future<String?> sessionShow() async {
     return null;
   }
 
@@ -1004,10 +1002,10 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
 
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM pm,
-    FuchsiaKernelCompiler compiler,
-    FuchsiaFfx ffx,
-    String devices,
+    required FuchsiaPM pm,
+    required FuchsiaKernelCompiler compiler,
+    FuchsiaFfx? ffx,
+    String? devices,
   })  : fuchsiaPM = pm,
         fuchsiaKernelCompiler = compiler,
         fuchsiaFfx = ffx ?? FakeFuchsiaFfx(),
@@ -1022,10 +1020,10 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   @override
   final FuchsiaFfx fuchsiaFfx;
 
-  final String _devices;
+  final String? _devices;
 
   @override
-  Future<String> listDevices({Duration timeout}) async {
+  Future<String?> listDevices({Duration? timeout}) async {
     return _devices;
   }
 }
@@ -1035,10 +1033,10 @@ class FakeDartDevelopmentService extends Fake
   @override
   Future<void> startDartDevelopmentService(
     Uri observatoryUri, {
-    @required Logger logger,
-    int hostPort,
-    bool ipv6,
-    bool disableServiceAuthCodes,
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
     bool cacheStartupProfile = false,
   }) async {}
 
