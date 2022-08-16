@@ -4018,7 +4018,7 @@ targets:
 
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4031,7 +4031,7 @@ targets:
 
   - name: Windows flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4044,7 +4044,7 @@ targets:
 
   - name: Windows flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4057,7 +4057,7 @@ targets:
 
   - name: Windows complex_layout_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4070,7 +4070,7 @@ targets:
 
   - name: Windows complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4083,7 +4083,7 @@ targets:
 
   - name: Windows flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4097,7 +4097,7 @@ targets:
   - name: Windows platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     bringup: true
-    timeout: 60
+    timeout: 60 # New target https://github.com/flutter/flutter/issues/70027
     properties:
       tags: >
         ["devicelab", "hostonly"]
