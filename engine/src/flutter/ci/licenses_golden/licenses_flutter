@@ -3258,6 +3258,8 @@ ORIGIN: ../../../third_party/icu/scripts/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_data.cc
 FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_data.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac_unittest.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac_unittest.mm
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win.cc
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win_unittest.cc
