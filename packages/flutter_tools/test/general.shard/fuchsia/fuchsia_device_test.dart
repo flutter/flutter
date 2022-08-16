@@ -743,7 +743,7 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
-        ((Device device, Uri uri, bool enableServiceAuthCodes) => null) as Future<void> Function(Device, Uri, bool),
+        (Device device, Uri uri, bool enableServiceAuthCodes) async {},
         true, // only poll once.
       );
       return discoveryProtocol.uri;

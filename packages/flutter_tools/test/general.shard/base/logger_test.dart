@@ -401,8 +401,8 @@ void main() {
       stopwatchFactory = FakeStopwatchFactory(stopwatch: mockStopwatch);
     });
 
-    List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
-    List<String> outputStderr() => mockStdio.writtenToStderr.join('').split('\n');
+    List<String> outputStdout() => mockStdio.writtenToStdout.join().split('\n');
+    List<String> outputStderr() => mockStdio.writtenToStderr.join().split('\n');
 
     void doWhileAsync(FakeAsync time, bool Function() doThis) {
       do {
@@ -514,7 +514,6 @@ void main() {
           );
           final Status status = logger.startProgress(
             'Hello',
-            progressId: null,
             progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
           );
           expect(outputStderr().length, equals(1));
@@ -709,8 +708,8 @@ void main() {
       );
     });
 
-    List<String> outputStdout() => fakeStdio.writtenToStdout.join('').split('\n');
-    List<String> outputStderr() => fakeStdio.writtenToStderr.join('').split('\n');
+    List<String> outputStdout() => fakeStdio.writtenToStdout.join().split('\n');
+    List<String> outputStderr() => fakeStdio.writtenToStderr.join().split('\n');
 
     testWithoutContext('Error logs are wrapped', () async {
       final Logger logger = StdoutLogger(
@@ -736,7 +735,7 @@ void main() {
       final BufferLogger buffer = BufferLogger.test();
       final AppRunLogger logger = AppRunLogger(parent: buffer);
 
-      logger.startProgress('Test status...', timeout: null).stop();
+      logger.startProgress('Test status...').stop();
 
       expect(buffer.statusText.trim(), equals('Test status...'));
     });
@@ -943,7 +942,7 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: true),
       );
       logger.printBox('Hello world', title: 'Test title');
-      final String stdout = fakeStdio.writtenToStdout.join('');
+      final String stdout = fakeStdio.writtenToStdout.join();
       expect(stdout,
         contains(
           '\n'
@@ -964,7 +963,7 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: true),
       );
       logger.printBox('Hello world');
-      final String stdout = fakeStdio.writtenToStdout.join('');
+      final String stdout = fakeStdio.writtenToStdout.join();
       expect(stdout,
         contains(
           '\n'
@@ -985,7 +984,7 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: true),
       );
       logger.printBox('Hello world\nThis is a new line', title: 'Test title');
-      final String stdout = fakeStdio.writtenToStdout.join('');
+      final String stdout = fakeStdio.writtenToStdout.join();
       expect(stdout,
         contains(
           '\n'
@@ -1009,7 +1008,7 @@ void main() {
       const String bold = '\u001B[1m';
       const String clear = '\u001B[2J\u001B[H';
       logger.printBox('${bold}Hello world$clear', title: 'Test title');
-      final String stdout = fakeStdio.writtenToStdout.join('');
+      final String stdout = fakeStdio.writtenToStdout.join();
       expect(stdout,
         contains(
           '\n'
@@ -1031,7 +1030,7 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
       );
       logger.printBox('This line is longer than $columnLimit characters', title: 'Test');
-      final String stdout = fakeStdio.writtenToStdout.join('');
+      final String stdout = fakeStdio.writtenToStdout.join();
       final List<String> stdoutLines = stdout.split('\n');
 
       expect(stdoutLines.length, greaterThan(1));
@@ -1060,7 +1059,7 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
       );
       logger.printBox('This\nline is longer than\n\n$columnLimit characters', title: 'Test');
-      final String stdout = fakeStdio.writtenToStdout.join('');
+      final String stdout = fakeStdio.writtenToStdout.join();
       final List<String> stdoutLines = stdout.split('\n');
 
       expect(stdoutLines.length, greaterThan(1));
@@ -1092,7 +1091,7 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
       );
       logger.printBox('Thiswordislongerthan${columnLimit}characters', title: 'Test');
-      final String stdout = fakeStdio.writtenToStdout.join('');
+      final String stdout = fakeStdio.writtenToStdout.join();
       final List<String> stdoutLines = stdout.split('\n');
 
       expect(stdoutLines.length, greaterThan(1));
@@ -1124,7 +1123,6 @@ void main() {
       );
       final Status status = logger.startProgress(
         'Hello',
-        progressId: null,
         progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
       );
       expect(outputStderr().length, equals(1));
