@@ -614,9 +614,9 @@ class TextSelectionOverlay {
       return;
     }
 
-    ///[details.globalPosition] is the drag point,need shift to
-    ///text middle point that RenderEditable use to get [TextPosition]
-    ///and update selection for end handle.
+    // [details.globalPosition] is the drag point, it needs to be shifted
+    // to the text middle point that [RenderEditable] uses to get [TextPosition]
+    // and update selection for end handle.
     final Offset offsetFromDragPointToTextMiddlePoint = _getOffsetToTextMiddlePoint(_selectionOverlay.endHandleType);
     _dragEndPosition = details.globalPosition + offsetFromDragPointToTextMiddlePoint;
 
@@ -692,9 +692,9 @@ class TextSelectionOverlay {
       return;
     }
 
-    ///[details.globalPosition] is the drag point,need shift to
-    ///text middle point that RenderEditable use to get [TextPosition]
-    ///and update selection for start handle.
+    // [details.globalPosition] is the drag point, it needs to be shifted
+    // to the text middle point that [RenderEditable] uses to get [TextPosition]
+    // and update selection for end handle.
     final Offset offsetFromDragPointToTextMiddlePoint = _getOffsetToTextMiddlePoint(_selectionOverlay.startHandleType);
     _dragStartPosition = details.globalPosition + offsetFromDragPointToTextMiddlePoint;
 
@@ -768,22 +768,23 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
 
-    /// The drag events always happens near the center of handle.
-    /// so ues half of the handle size to shift drag point to handle anchor.
-    /// handle anchor is left top point of handle rect.
+    // The center of the handle is where it's easier to drag, and
+    // [details.globalPosition] is probably close to center.
+    // So use half of the handle size to shift drag point to handle anchor.
+    // Handle anchor is left top point of handle rect.
     final double offsetYToHandleAnchor =  -handleSize.height / 2;
 
-    /// [getHandleAnchor] use to shift selection end point to handle anchor.
-    /// now need shift handle anchor to selection end point.
-    /// end point is [ui.TextBox] start bottom point of first or last selected word.
+    // [getHandleAnchor] use to shift selection end point to handle anchor.
+    // Now need shift handle anchor to selection end point.
+    // End point is [ui.TextBox] start bottom point of first or last selected word.
     final double offsetYToTextEndPoint = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight).dy;
 
-    /// For more accurate selection updates,need shift selection end point
-    /// to selection middle point.
+    // For more accurate selection updates,need shift selection end point
+    // to selection middle point.
     final double offsetYToTextMiddlePoint = -renderObject.preferredLineHeight / 2;
 
-    /// When dragging handle and move,the pointX from drag event is accurate.
-    /// Only need to compute different offsetY from different handle.
+    // When dragging handle and move,the pointX from drag event is accurate.
+    // Only need to compute different offsetY from different handle.
     final double offsetYFromDragPointToTextMiddlePoint = offsetYToHandleAnchor + offsetYToTextEndPoint + offsetYToTextMiddlePoint;
     return Offset(0.0, offsetYFromDragPointToTextMiddlePoint);
   }

@@ -6274,9 +6274,8 @@ void main() {
         'Third line of stuff';
     await tester.enterText(find.byType(CupertinoTextField), testValue);
 
-    // skip past scrolling animation
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    // Skip past scrolling animation.
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     // Check that the text spans multiple lines.
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
@@ -6308,7 +6307,7 @@ void main() {
 
     final Offset offsetFromEndPointToMiddlePoint = Offset(0.0, -renderEditable.preferredLineHeight / 2);
 
-    // Drag the left handle to the second line, just after 'Second'.
+    // Drag the left handle to just after 'Second', still on the second line..
     Offset handlePos = endpoints[0].point + offsetFromEndPointToMiddlePoint;
     Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Second') + 6) + offsetFromEndPointToMiddlePoint;
     TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
@@ -6321,7 +6320,7 @@ void main() {
     expect(controller.selection.baseOffset, 28);
     expect(controller.selection.extentOffset, 44);
 
-    // Drag the right handle to the second line, just after 'goes'.
+    // Drag the right handle to just after 'goes', still on the second line.
     handlePos = endpoints[1].point + offsetFromEndPointToMiddlePoint;
     newHandlePos = textOffsetToPosition(tester, testValue.indexOf('goes') + 4) + offsetFromEndPointToMiddlePoint;
     gesture = await tester.startGesture(handlePos, pointer: 7);
