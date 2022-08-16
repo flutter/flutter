@@ -2194,13 +2194,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _checkNeedsAdjustAffinity(TextEditingValue value) {
     // Trust the engine affinity if the text changes or selection changes.
-    if (value.text == _value.text &&
-        value.selection.isCollapsed == _value.selection.isCollapsed &&
-        value.selection.start == _value.selection.start &&
-        value.selection.affinity != _value.selection.affinity) {
-      return true;
-    }
-    return false;
+    return value.text == _value.text &&
+      value.selection.isCollapsed == _value.selection.isCollapsed &&
+      value.selection.start == _value.selection.start &&
+      value.selection.affinity != _value.selection.affinity;
   }
 
   @override
