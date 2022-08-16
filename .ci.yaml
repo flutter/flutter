@@ -4029,7 +4029,7 @@ targets:
         ]
       task_name: hello_world_win_desktop__compile
 
-  -name: Windows flutter_gallery_win_desktop__compile
+  - name: Windows flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60
@@ -4042,7 +4042,7 @@ targets:
         ]
       task_name: flutter_gallery_win_desktop__compile
 
-  -name: Windows flutter_gallery_win_desktop__start_up
+  - name: Windows flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60
@@ -4055,7 +4055,7 @@ targets:
         ]
       task_name: flutter_gallery_win_desktop__start_up
 
-  -name: Windows complex_layout_win_desktop__compile
+  - name: Windows complex_layout_win_desktop__compile
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60
@@ -4068,7 +4068,7 @@ targets:
         ]
       task_name: complex_layout_win_desktop__compile
 
-  -name: Windows complex_layout_win_desktop__start_up
+  - name: Windows complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60
@@ -4081,7 +4081,7 @@ targets:
         ]
       task_name: complex_layout_win_desktop__start_up
 
-  -name: Windows flutter_view_win_desktop__start_up
+  - name: Windows flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60
@@ -4094,7 +4094,7 @@ targets:
         ]
       task_name: flutter_view_win_desktop__start_up
 
-  -name: Windows platform_view_win_desktop__start_up
+  - name: Windows platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60
