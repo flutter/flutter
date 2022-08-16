@@ -1665,6 +1665,58 @@ void main() {
     expect(controller.value, <MaterialState>{MaterialState.disabled});
     expect(count, 1);
   });
+
+  testWidgets('TextButton allows non-OutlineBorder borders', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton(
+            onPressed: () { },
+            style: const ButtonStyle(
+                shape: MaterialStatePropertyAll<ShapeBorder?>(
+                  Border.fromBorderSide(BorderSide(width: 2),
+                ),
+              ),
+            ),
+          child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    );
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.shape, const Border.fromBorderSide(BorderSide(width: 2)));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton(
+            onPressed: () { },
+            style: const ButtonStyle(
+              side: MaterialStatePropertyAll<BorderSide?>(BorderSide(width: 2)),
+              shape: MaterialStatePropertyAll<ShapeBorder?>(
+                Border.fromBorderSide(BorderSide(width: 4),
+              ),
+              ),
+            ),
+          child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.shape, const Border.fromBorderSide(BorderSide(width: 2)));
+  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
