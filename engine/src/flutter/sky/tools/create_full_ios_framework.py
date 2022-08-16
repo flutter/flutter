@@ -111,7 +111,7 @@ def main():
       simulator_x64_framework, simulator_arm64_framework
   )
   framework_binary = os.path.join(framework, 'Flutter')
-  process_framework(args, framework, framework_binary)
+  process_framework(args, dst, framework, framework_binary)
   generate_gen_snapshot(args, dst, x64_out_dir, arm64_out_dir)
   zip_archive(dst)
 
@@ -146,7 +146,9 @@ def create_framework(
         'lipo', simulator_x64_dylib, simulator_arm64_dylib, '-create',
         '-output', simulator_framework_binary
     ])
-    process_framework(args, simulator_framework, simulator_framework_binary)
+    process_framework(
+        args, dst, simulator_framework, simulator_framework_binary
+    )
     simulator_framework = simulator_framework
   else:
     simulator_framework = simulator_x64_framework
@@ -168,9 +170,12 @@ def zip_archive(dst):
       'zip', '-r', 'artifacts.zip', 'gen_snapshot_arm64', 'Flutter.xcframework'
   ],
                         cwd=dst)
+  if (os.path.exists(os.path.join(dst, 'Flutter.dSYM'))):
+    subprocess.check_call(['zip', '-r', 'Flutter.dSYM.zip', 'Flutter.dSYM'],
+                          cwd=dst)
 
 
-def process_framework(args, framework, framework_binary):
+def process_framework(args, dst, framework, framework_binary):
   if args.strip_bitcode:
     subprocess.check_call([
         'xcrun', 'bitcode_strip', '-r', framework_binary, '-o', framework_binary
