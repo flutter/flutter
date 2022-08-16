@@ -694,7 +694,7 @@ class TextSelectionOverlay {
 
     // [details.globalPosition] is the drag point, it needs to be shifted
     // to the text middle point that [RenderEditable] uses to get [TextPosition]
-    // and update selection for end handle.
+    // and update selection for start handle.
     final Offset offsetFromDragPointToTextMiddlePoint = _getOffsetToTextMiddlePoint(_selectionOverlay.startHandleType);
     _dragStartPosition = details.globalPosition + offsetFromDragPointToTextMiddlePoint;
 
