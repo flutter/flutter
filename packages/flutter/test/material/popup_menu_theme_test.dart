@@ -60,7 +60,7 @@ void main() {
 
     expect(description, <String>[
       'color: Color(0xffffffff)',
-      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'elevation: 2.0',
       'text style: TextStyle(inherit: true, color: Color(0xffffffff))',
       'mouseCursor: MaterialStateMouseCursor(clickable)',
