@@ -165,9 +165,34 @@ def create_framework(
   ])
 
 
+def embed_codesign_configuration(config_path, contents):
+  with open(config_path, 'w') as f:
+    f.writelines(contents)
+
+
 def zip_archive(dst):
+  ios_file_with_entitlements = ['gen_snapshot_arm64\n']
+  ios_file_without_entitlements = [
+      'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter\n',
+      'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter\n'
+  ]
+  embed_codesign_configuration(
+      os.path.join(dst, 'entitlements.txt'), ios_file_with_entitlements
+  )
+
+  embed_codesign_configuration(
+      os.path.join(dst, 'without_entitlements.txt'),
+      ios_file_without_entitlements
+  )
+
   subprocess.check_call([
-      'zip', '-r', 'artifacts.zip', 'gen_snapshot_arm64', 'Flutter.xcframework'
+      'zip',
+      '-r',
+      'artifacts.zip',
+      'gen_snapshot_arm64',
+      'Flutter.xcframework',
+      'entitlements.txt',
+      'without_entitlements.txt',
   ],
                         cwd=dst)
   if (os.path.exists(os.path.join(dst, 'Flutter.dSYM'))):
