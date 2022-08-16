@@ -73,6 +73,12 @@ std::vector<SkCanvas*> ShellTestExternalViewEmbedder::GetCurrentCanvases() {
 }
 
 // |ExternalViewEmbedder|
+std::vector<DisplayListBuilder*>
+ShellTestExternalViewEmbedder::GetCurrentBuilders() {
+  return {};
+}
+
+// |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
   visited_platform_views_.push_back(view_id);
 }

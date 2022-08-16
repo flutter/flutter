@@ -16,6 +16,8 @@ source_set("display_list") {
     "display_list_blend_mode.h",
     "display_list_builder.cc",
     "display_list_builder.h",
+    "display_list_builder_multiplexer.cc",
+    "display_list_builder_multiplexer.h",
     "display_list_canvas_dispatcher.cc",
     "display_list_canvas_dispatcher.h",
     "display_list_canvas_recorder.cc",

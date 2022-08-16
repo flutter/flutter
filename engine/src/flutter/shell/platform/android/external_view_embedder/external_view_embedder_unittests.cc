@@ -124,6 +124,9 @@ TEST(AndroidExternalViewEmbedder, GetCurrentCanvases) {
   ASSERT_EQ(2UL, canvases.size());
   ASSERT_EQ(SkISize::Make(10, 20), canvases[0]->getBaseLayerSize());
   ASSERT_EQ(SkISize::Make(10, 20), canvases[1]->getBaseLayerSize());
+
+  auto builders = embedder->GetCurrentBuilders();
+  ASSERT_EQ(2UL, builders.size());
 }
 
 TEST(AndroidExternalViewEmbedder, GetCurrentCanvasesCompositeOrder) {
@@ -149,6 +152,9 @@ TEST(AndroidExternalViewEmbedder, GetCurrentCanvasesCompositeOrder) {
   ASSERT_EQ(2UL, canvases.size());
   ASSERT_EQ(embedder->CompositeEmbeddedView(0).canvas, canvases[0]);
   ASSERT_EQ(embedder->CompositeEmbeddedView(1).canvas, canvases[1]);
+
+  auto builders = embedder->GetCurrentBuilders();
+  ASSERT_EQ(2UL, builders.size());
 }
 
 TEST(AndroidExternalViewEmbedder, CompositeEmbeddedView) {
@@ -178,6 +184,9 @@ TEST(AndroidExternalViewEmbedder, CancelFrame) {
 
   auto canvases = embedder->GetCurrentCanvases();
   ASSERT_EQ(0UL, canvases.size());
+
+  auto builders = embedder->GetCurrentBuilders();
+  ASSERT_EQ(0UL, builders.size());
 }
 
 TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {

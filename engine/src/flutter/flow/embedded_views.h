@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "flutter/display_list/display_list_builder.h"
 #include "flutter/flow/rtree.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/memory/ref_counted.h"
@@ -393,6 +394,7 @@ class ExternalViewEmbedder {
   }
 
   virtual std::vector<SkCanvas*> GetCurrentCanvases() = 0;
+  virtual std::vector<DisplayListBuilder*> GetCurrentBuilders() = 0;
 
   // Must be called on the UI thread.
   virtual EmbedderPaintContext CompositeEmbeddedView(int view_id) = 0;

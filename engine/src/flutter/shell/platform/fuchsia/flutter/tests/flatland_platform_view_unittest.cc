@@ -47,6 +47,9 @@ class MockExternalViewEmbedder : public flutter::ExternalViewEmbedder {
   std::vector<SkCanvas*> GetCurrentCanvases() override {
     return std::vector<SkCanvas*>();
   }
+  std::vector<flutter::DisplayListBuilder*> GetCurrentBuilders() override {
+    return std::vector<flutter::DisplayListBuilder*>();
+  }
 
   void CancelFrame() override {}
   void BeginFrame(

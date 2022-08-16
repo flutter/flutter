@@ -164,6 +164,11 @@ std::vector<SkCanvas*> GfxExternalViewEmbedder::GetCurrentCanvases() {
   return canvases;
 }
 
+std::vector<flutter::DisplayListBuilder*>
+GfxExternalViewEmbedder::GetCurrentBuilders() {
+  return std::vector<flutter::DisplayListBuilder*>({});
+}
+
 void GfxExternalViewEmbedder::PrerollCompositeEmbeddedView(
     int view_id,
     std::unique_ptr<flutter::EmbeddedViewParams> params) {

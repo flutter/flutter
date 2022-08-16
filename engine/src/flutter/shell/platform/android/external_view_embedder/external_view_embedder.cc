@@ -69,6 +69,19 @@ std::vector<SkCanvas*> AndroidExternalViewEmbedder::GetCurrentCanvases() {
   return canvases;
 }
 
+// |ExternalViewEmbedder|
+std::vector<DisplayListBuilder*>
+AndroidExternalViewEmbedder::GetCurrentBuilders() {
+  std::vector<DisplayListBuilder*> builders;
+  for (size_t i = 0; i < composition_order_.size(); i++) {
+    int64_t view_id = composition_order_[i];
+    if (slices_.count(view_id) == 1) {
+      builders.push_back(slices_.at(view_id)->builder());
+    }
+  }
+  return builders;
+}
+
 SkRect AndroidExternalViewEmbedder::GetViewRect(int view_id) const {
   const EmbeddedViewParams& params = view_params_.at(view_id);
   // TODO(egarciad): The rect should be computed from the mutator stack.

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/common/graphics/texture.h"
+#include "flutter/display_list/display_list_builder_multiplexer.h"
 #include "flutter/flow/diff_context.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/instrumentation.h"
@@ -29,7 +30,9 @@
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
+
 namespace flutter {
+
 namespace testing {
 class MockLayer;
 }  // namespace testing
@@ -150,6 +153,7 @@ struct PaintContext {
   // a |kSrcOver| blend mode.
   SkScalar inherited_opacity = SK_Scalar1;
   DisplayListBuilder* leaf_nodes_builder = nullptr;
+  DisplayListBuilderMultiplexer* builder_multiplexer = nullptr;
 };
 
 // Represents a single composited layer. Created on the UI thread but then

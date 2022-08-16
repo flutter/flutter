@@ -256,6 +256,7 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
 
     EXPECT_EQ(context.inherited_opacity, SK_Scalar1);
     EXPECT_EQ(context.leaf_nodes_builder, nullptr);
+    EXPECT_EQ(context.builder_multiplexer, nullptr);
   };
 
   // These 4 initializers are required because they are handled by reference

@@ -56,6 +56,8 @@ FILE: ../../../flutter/display_list/display_list_blend_mode.h
 FILE: ../../../flutter/display_list/display_list_builder.cc
 FILE: ../../../flutter/display_list/display_list_builder.h
 FILE: ../../../flutter/display_list/display_list_builder_benchmarks.cc
+FILE: ../../../flutter/display_list/display_list_builder_multiplexer.cc
+FILE: ../../../flutter/display_list/display_list_builder_multiplexer.h
 FILE: ../../../flutter/display_list/display_list_canvas_dispatcher.cc
 FILE: ../../../flutter/display_list/display_list_canvas_dispatcher.h
 FILE: ../../../flutter/display_list/display_list_canvas_recorder.cc
