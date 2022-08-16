@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'input_decorator.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of the widget displayed with [showTimePicker].
 ///
 /// Descendant widgets obtain the current [TimePickerThemeData] object using
@@ -133,7 +136,8 @@ class TimePickerThemeData with Diagnosticable {
   /// The color of the entry mode [IconButton].
   ///
   /// If this is null, the time picker defaults to:
-  /// ```
+  ///
+  /// ```dart
   /// Theme.of(context).colorScheme.onSurface.withOpacity(
   ///   Theme.of(context).colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
   /// )
@@ -173,8 +177,9 @@ class TimePickerThemeData with Diagnosticable {
   /// The shape of the day period that the time picker uses.
   ///
   /// If this is null, the time picker defaults to:
-  /// ```
-  /// RoundedRectangleBorder(
+  ///
+  /// ```dart
+  /// const RoundedRectangleBorder(
   ///   borderRadius: BorderRadius.all(Radius.circular(4.0)),
   ///   side: BorderSide(),
   /// )
@@ -184,10 +189,14 @@ class TimePickerThemeData with Diagnosticable {
   /// The color and weight of the day period's outline.
   ///
   /// If this is null, the time picker defaults to:
-  /// ```
+  ///
+  /// ```dart
   /// BorderSide(
-  ///   color: Color.alphaBlend(colorScheme.onBackground.withOpacity(0.38), colorScheme.surface),
-  /// )
+  ///   color: Color.alphaBlend(
+  ///     Theme.of(context).colorScheme.onBackground.withOpacity(0.38),
+  ///     Theme.of(context).colorScheme.surface,
+  ///   ),
+  /// ),
   /// ```
   final BorderSide? dayPeriodBorderSide;
 

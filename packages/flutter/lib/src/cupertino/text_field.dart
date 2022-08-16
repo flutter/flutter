@@ -102,7 +102,6 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   @override
   void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -652,8 +651,8 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.expands}
   final bool expands;
 
-  /// The maximum number of characters (Unicode scalar values) to allow in the
-  /// text field.
+  /// The maximum number of characters (Unicode grapheme clusters) to allow in
+  /// the text field.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
@@ -786,11 +785,11 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
   /// platforms. If it is desired to supress the magnifier, consider passing

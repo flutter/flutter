@@ -87,6 +87,7 @@ export 'src/widgets/pages.dart';
 export 'src/widgets/performance_overlay.dart';
 export 'src/widgets/placeholder.dart';
 export 'src/widgets/platform_menu_bar.dart';
+export 'src/widgets/platform_selectable_region_context_menu.dart';
 export 'src/widgets/platform_view.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';

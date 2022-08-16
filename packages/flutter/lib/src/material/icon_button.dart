@@ -23,6 +23,9 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 // Minimum logical pixel size of the IconButton.
 // See: <https://material.io/design/usability/accessibility.html#layout-typography>.
 const double _kMinButtonSize = kMinInteractiveDimension;
@@ -61,16 +64,27 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// When creating an icon button with an [Icon], do not override the
 /// icon's size with its [Icon.size] parameter, use the icon button's
-/// [iconSize] parameter instead.  For example do this:
+/// [iconSize] parameter instead. For example do this:
 ///
 /// ```dart
-/// IconButton(iconSize: 72, icon: Icon(Icons.favorite), ...)
+/// IconButton(
+///   iconSize: 72,
+///   icon: const Icon(Icons.favorite),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// Avoid doing this:
 ///
 /// ```dart
-/// IconButton(icon: Icon(Icons.favorite, size: 72), ...)
+/// IconButton(
+///   icon: const Icon(Icons.favorite, size: 72),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// If you do, the button's size will be based on the default icon
@@ -257,6 +271,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   focusColor: Colors.orange.withOpacity(0.3),
+  ///   icon: const Icon(Icons.sunny),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   ///
@@ -273,6 +291,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   hoverColor: Colors.orange.withOpacity(0.3),
+  ///   icon: const Icon(Icons.ac_unit),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   ///
@@ -287,8 +309,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   color: Colors.blue,
-  ///   onPressed: _handleTap,
-  ///   icon: Icon(Icons.widgets),
+  ///   icon: const Icon(Icons.sunny_snowing),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   final Color? color;
@@ -320,6 +344,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   highlightColor: Colors.orange.withOpacity(0.3),
+  ///   icon: const Icon(Icons.question_mark),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   ///
@@ -459,8 +487,12 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
+  ///   icon: const Icon(Icons.pets),
   ///   style: IconButton.styleFrom(foregroundColor: Colors.green),
-  /// )
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  /// ),
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,

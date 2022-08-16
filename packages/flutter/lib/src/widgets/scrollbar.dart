@@ -1030,9 +1030,12 @@ class RawScrollbar extends StatefulWidget {
   /// scrollbar dragging for multiple independent ListViews:
   ///
   /// ```dart
+  /// // (e.g. in a stateful widget)
+  ///
   /// final ScrollController controllerOne = ScrollController();
   /// final ScrollController controllerTwo = ScrollController();
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Column(
   ///     children: <Widget>[
@@ -1091,9 +1094,12 @@ class RawScrollbar extends StatefulWidget {
   /// {@tool snippet}
   ///
   /// ```dart
+  /// // (e.g. in a stateful widget)
+  ///
   /// final ScrollController controllerOne = ScrollController();
   /// final ScrollController controllerTwo = ScrollController();
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   /// return Column(
   ///   children: <Widget>[
@@ -1173,9 +1179,12 @@ class RawScrollbar extends StatefulWidget {
   /// {@tool snippet}
   ///
   /// ```dart
+  /// // (e.g. in a stateful widget)
+  ///
   /// final ScrollController controllerOne = ScrollController();
   /// final ScrollController controllerTwo = ScrollController();
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   /// return Column(
   ///   children: <Widget>[

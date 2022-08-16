@@ -23,6 +23,10 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
 
+// Examples can assume:
+// late BuildContext context;
+// late FocusNode myFocusNode;
+
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(
   /// The build context for the TextField.
@@ -84,7 +88,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   @override
   void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();
@@ -393,11 +396,11 @@ class TextField extends StatefulWidget {
                        paste: true,
                      )));
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
@@ -427,7 +430,7 @@ class TextField extends StatefulWidget {
   /// to the [focusNode]:
   ///
   /// ```dart
-  /// focusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// myFocusNode.addListener(() { print(myFocusNode.hasFocus); });
   /// ```
   ///
   /// If null, this widget will create its own [FocusNode].
@@ -540,8 +543,8 @@ class TextField extends StatefulWidget {
   /// part of the character counter is shown.
   static const int noMaxLength = -1;
 
-  /// The maximum number of characters (Unicode scalar values) to allow in the
-  /// text field.
+  /// The maximum number of characters (Unicode grapheme clusters) to allow in
+  /// the text field.
   ///
   /// If set, a character counter will be displayed below the
   /// field showing how many characters have been entered. If set to a number

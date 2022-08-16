@@ -27,6 +27,7 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
@@ -41,6 +42,9 @@ import 'ticker_provider.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -534,11 +538,13 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// incorrectly when a [TextInputFormatter] inserts a thousands separator to
 /// a currency value text field. The following example demonstrates how to
 /// suppress the default accessibility announcements by always announcing
-/// the content of the text field as a US currency value:
+/// the content of the text field as a US currency value (the `\$` inserts
+/// a dollar sign, the `$newText interpolates the `newText` variable):
+///
 /// ```dart
 /// onChanged: (String newText) {
 ///   if (newText.isNotEmpty) {
-///     SemanticsService.announce('\$' + newText, Directionality.of(context));
+///     SemanticsService.announce('\$$newText', Directionality.of(context));
 ///   }
 /// }
 /// ```
@@ -566,7 +572,7 @@ class EditableText extends StatefulWidget {
   ///
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
-  /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
+  /// [style], [cursorColor], [cursorOpacityAnimates], [backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
   /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
   /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
@@ -955,26 +961,26 @@ class EditableText extends StatefulWidget {
   ///
   /// Input that occupies a single line and scrolls horizontally as needed.
   /// ```dart
-  /// TextField()
+  /// const TextField()
   /// ```
   ///
   /// Input whose height grows from one line up to as many lines as needed for
   /// the text that was entered. If a height limit is imposed by its parent, it
   /// will scroll vertically when its height reaches that limit.
   /// ```dart
-  /// TextField(maxLines: null)
+  /// const TextField(maxLines: null)
   /// ```
   ///
   /// The input's height is large enough for the given number of lines. If
   /// additional lines are entered the input scrolls vertically.
   /// ```dart
-  /// TextField(maxLines: 2)
+  /// const TextField(maxLines: 2)
   /// ```
   ///
   /// Input whose height grows with content between a min and max. An infinite
   /// max is possible with `maxLines: null`.
   /// ```dart
-  /// TextField(minLines: 2, maxLines: 4)
+  /// const TextField(minLines: 2, maxLines: 4)
   /// ```
   ///
   /// See also:
@@ -1018,7 +1024,7 @@ class EditableText extends StatefulWidget {
   /// point the height limit is reached. If additional lines are entered it will
   /// scroll vertically.
   /// ```dart
-  /// TextField(minLines:2, maxLines: 4)
+  /// const TextField(minLines:2, maxLines: 4)
   /// ```
   ///
   /// Defaults to null.
@@ -1049,7 +1055,7 @@ class EditableText extends StatefulWidget {
   ///
   /// Input that matches the height of its parent:
   /// ```dart
-  /// Expanded(
+  /// const Expanded(
   ///   child: TextField(maxLines: null, expands: true),
   /// )
   /// ```
@@ -1549,11 +1555,11 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
@@ -2136,6 +2142,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
+    if (_checkNeedsAdjustAffinity(value)) {
+      value = value.copyWith(selection: value.selection.copyWith(affinity: _value.selection.affinity));
+    }
+
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
@@ -2154,7 +2164,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
-      hideToolbar();
+      // Only hide the toolbar overlay, the selection handle's visibility will be handled
+      // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
+      hideToolbar(false);
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
@@ -2178,6 +2190,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
+  }
+
+  bool _checkNeedsAdjustAffinity(TextEditingValue value) {
+    // Trust the engine affinity if the text changes or selection changes.
+    return value.text == _value.text &&
+      value.selection.isCollapsed == _value.selection.isCollapsed &&
+      value.selection.start == _value.selection.start &&
+      value.selection.affinity != _value.selection.affinity;
   }
 
   @override
@@ -3186,10 +3206,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Toggles the visibility of the toolbar.
-  void toggleToolbar() {
+  void toggleToolbar([bool hideHandles = true]) {
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
-      hideToolbar();
+      hideToolbar(hideHandles);
     } else {
       showToolbar();
     }

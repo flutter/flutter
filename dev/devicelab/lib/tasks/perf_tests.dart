@@ -1446,7 +1446,27 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         throw Exception('Unsupported option for macOS devices');
       case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
+        unawaited(stderr.flush());
+        options.insert(0, 'windows');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String basename = path.basename(cwd);
+        final String exePath = path.join(
+          cwd,
+          'build',
+          'windows',
+          'runner',
+          'release',
+          '$basename.exe');
+        final File exe = file(exePath);
+        // On Windows, we do not produce a single installation package file,
+        // rather a directory containing an .exe and .dll files.
+        // The release size is set to the size of the produced .exe file
+        releaseSizeInBytes = exe.lengthSync();
+        break;
     }
 
     metrics.addAll(<String, dynamic>{
@@ -1486,7 +1506,9 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
+        unawaited(stderr.flush());
+        options.insert(0, 'windows');
+        break;
     }
     watch.start();
     await flutter('build', options: options);

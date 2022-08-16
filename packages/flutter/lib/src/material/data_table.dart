@@ -21,6 +21,11 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late List<DataColumn> _columns;
+// late List<DataRow> _rows;
+
 /// Signature for [DataColumn.onSort] callback.
 typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
 
@@ -183,10 +188,14 @@ class DataRow {
   /// ```dart
   /// DataRow(
   ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected))
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
+  ///   cells: const <DataCell>[
+  ///     // ...
+  ///   ],
   /// )
   /// ```
   ///
@@ -474,10 +483,13 @@ class DataTable extends StatelessWidget {
   /// ```dart
   /// DataTable(
   ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected))
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
+  ///   columns: _columns,
+  ///   rows: _rows,
   /// )
   /// ```
   ///
@@ -521,9 +533,12 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.headingRowColor}
   /// ```dart
   /// DataTable(
+  ///   columns: _columns,
+  ///   rows: _rows,
   ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.hovered))
+  ///     if (states.contains(MaterialState.hovered)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
   /// )
