@@ -10,7 +10,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-/// Controls how the [SnapshotWidget] paints its child via the [SnapshotWidgetController].
+/// Controls how the [SnapshotWidget] paints its child via the [SnapshotController].
 enum SnapshotMode {
   /// the child is snapshotted, but only if all descendants can be snapshotted.
   ///
@@ -21,7 +21,7 @@ enum SnapshotMode {
   /// the child is snapshotted, but only if all descendants can be snapshotted.
   ///
   /// An error is thrown if an unrasterizable view is encountered. This setting is
-  /// the default state of the [SnapshotWidgetController].
+  /// the default state of the [SnapshotController].
   normal,
 
   /// The child is snapshotted and any child platform views are ignored.
@@ -38,11 +38,11 @@ enum SnapshotMode {
 /// widgets based on the [SnapshotMode] of the snapshot widget.
 ///
 /// To force [SnapshotWidget] to recreate the child image, call [clear].
-class SnapshotWidgetController extends ChangeNotifier {
-  /// Create a new [SnapshotWidgetController].
+class SnapshotController extends ChangeNotifier {
+  /// Create a new [SnapshotController].
   ///
   /// By default, [enabled] is `false` and cannot be `null`.
-  SnapshotWidgetController({
+  SnapshotController({
     bool enabled = false,
   }) : _enabled = enabled;
 
@@ -65,7 +65,10 @@ class SnapshotWidgetController extends ChangeNotifier {
   }
 }
 
-/// A widget that replaces its child with a snapshoted version of the child.
+/// A widget that can replace its child with a snapshoted version of the child.
+///
+/// A snapshot is a frozen texture-backed representation of all child pictures
+/// and layers stored as a [ui.Image].
 ///
 /// This widget is useful for performing short animations that would otherwise
 /// be expensive or that cannot rely on raster caching. For example, scale and
@@ -100,12 +103,13 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   const SnapshotWidget({
     super.key,
     this.mode = SnapshotMode.normal,
+    this.painter = const _DefaultSnapshotPainter(),
     required this.controller,
     required super.child
   });
 
   /// The controller that determines when to display the children as an snapshot.
-  final SnapshotWidgetController controller;
+  final SnapshotController controller;
 
   /// Configuration that controls how the snapshot widget decides to paint its children.
   ///
@@ -115,12 +119,16 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   /// See [SnapshotMode] for more information.
   final SnapshotMode mode;
 
+  /// The painter used to paint the child snapshot or child widgets.
+  final SnapshotPainter painter;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderSnapshotWidget(
       controller: controller,
       mode: mode,
       devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
+      painter: painter,
     );
   }
 
@@ -129,7 +137,8 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     renderObject
       ..controller = controller
       ..mode = mode
-      ..devicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0;
+      ..devicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0
+      ..painter = painter;
   }
 }
 
@@ -139,11 +148,13 @@ class RenderSnapshotWidget extends RenderProxyBox {
   /// Create a new [RenderSnapshotWidget].
   RenderSnapshotWidget({
     required double devicePixelRatio,
-    required SnapshotWidgetController controller,
+    required SnapshotController controller,
     required SnapshotMode mode,
+    required SnapshotPainter painter,
   }) : _devicePixelRatio = devicePixelRatio,
        _controller = controller,
-       _mode = mode;
+       _mode = mode,
+       _painter = painter;
 
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
@@ -156,11 +167,28 @@ class RenderSnapshotWidget extends RenderProxyBox {
     markNeedsPaint();
   }
 
+ /// The painter used to paint the child snapshot or child widgets.
+  SnapshotPainter get painter => _painter;
+  SnapshotPainter _painter;
+  set painter(SnapshotPainter value) {
+    if (value == painter) {
+      return;
+    }
+    final SnapshotPainter oldPainter = painter;
+    _painter = value;
+    if (painter.shouldRepaint(oldPainter)) {
+      markNeedsPaint();
+    }
+    if (attached) {
+      painter.addListener(markNeedsPaint);
+    }
+  }
+
   /// A controller that determines whether to paint the child normally or to
   /// paint a snapshotted version of that child.
-  SnapshotWidgetController get controller => _controller;
-  SnapshotWidgetController _controller;
-  set controller(SnapshotWidgetController value) {
+  SnapshotController get controller => _controller;
+  SnapshotController _controller;
+  set controller(SnapshotController value) {
     if (value == controller) {
       return;
     }
@@ -191,12 +219,14 @@ class RenderSnapshotWidget extends RenderProxyBox {
   @override
   void attach(covariant PipelineOwner owner) {
     controller.addListener(_onRasterValueChanged);
+    painter.addListener(markNeedsPaint);
     super.attach(owner);
   }
 
   @override
   void detach() {
     controller.removeListener(_onRasterValueChanged);
+    painter.removeListener(markNeedsPaint);
     _childRaster?.dispose();
     _childRaster = null;
     super.detach();
@@ -215,8 +245,6 @@ class RenderSnapshotWidget extends RenderProxyBox {
     _childRaster = null;
     markNeedsPaint();
   }
-
-  bool get alwaysNeedsCompositing => true;
 
   // Paint [child] with this painting context, then convert to a raster and detach all
   // children from this layer.
@@ -250,31 +278,22 @@ class RenderSnapshotWidget extends RenderProxyBox {
     if (controller.enabled) {
       _childRaster ??= _paintAndDetachToImage();
       if (_childRaster == null) {
-        _paintNormal(context, offset);
+        painter.paint(context, offset, size, super.paint);
       } else {
-        _paintRaster(context, offset, size, _childRaster!, devicePixelRatio);
+        painter.paintSnapshot(context, offset, size, _childRaster!, devicePixelRatio);
       }
       return;
     }
     _childRaster?.dispose();
     _childRaster = null;
-    _paintNormal(context, offset);
-  }
-
-  void _paintNormal(PaintingContext context, Offset offset) {
-    super.paint(context, offset);
-  }
-
-  void _paintRaster(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
-    final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-    final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
-    context.addLayer(SnapshotLayer(image, src, dst, 1.0));
+    painter.paint(context, offset, size, super.paint);
   }
 }
 
-/// A delegate used to draw a snapshot.
+/// A painter used to paint either a snapshot or the child widgets that
+/// would be a snapshot.
 ///
-/// The delegate can call [notifyListeners] to have the [SnapshotWidget]
+/// The painter can call [notifyListeners] to have the [SnapshotWidget]
 /// re-paint (re-using the same raster). This allows animations to be  performed
 /// without re-snapshotting of children. For certain scale or perspective changing
 /// transforms, such as a rotation, this can be significantly faster than performing
@@ -307,6 +326,8 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   ///
   /// The image is rasterized at the physical pixel resolution and should be scaled down by
   /// [pixelRatio] to account for device independent pixels.
+  ///
+  /// {@tool snippet}
   ///
   /// The following method shows how the default implementation of the delegate used by the
   /// [SnapshotPainter] paints the snapshot. This must account for the fact that the image
@@ -363,6 +384,8 @@ abstract class SnapshotPainter extends ChangeNotifier  {
 }
 
 class _DefaultSnapshotPainter implements SnapshotPainter {
+  const _DefaultSnapshotPainter();
+
   @override
   void addListener(ui.VoidCallback listener) { }
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -284,7 +286,9 @@ class _ZoomEnterTransition extends StatefulWidget {
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
   @override
-  bool get useSnapshot => widget.preferRasterization && !kIsWeb;
+  bool get useSnapshot => !kIsWeb && widget.preferRasterization;
+
+  late _ZoomEnterTransitionPainter delegate;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -323,6 +327,12 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   @override
   void initState() {
     _updateAnimations();
+    delegate = _ZoomEnterTransitionPainter(
+      reverse: widget.reverse,
+      fade: fadeTransition,
+      scale: scaleTransition,
+      animation: widget.animation,
+    );
     super.initState();
   }
 
@@ -332,6 +342,13 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       oldWidget.animation.removeListener(onAnimationValueChange);
       oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
+      delegate.dispose();
+      delegate = _ZoomEnterTransitionPainter(
+        reverse: widget.reverse,
+        fade: fadeTransition,
+        scale: scaleTransition,
+        animation: widget.animation,
+      );
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -340,47 +357,17 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
+    delegate.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.animation,
-      builder: (BuildContext context, Widget? child) {
-        double scrimOpacity = 0.0;
-        // The transition's scrim opacity only increases on the forward transition.
-        // In the reverse transition, the opacity should always be 0.0.
-        //
-        // Therefore, we need to only apply the scrim opacity animation when
-        // the transition is running forwards.
-        //
-        // The reason that we check that the animation's status is not `completed`
-        // instead of checking that it is `forward` is that this allows
-        // the interrupted reversal of the forward transition to smoothly fade
-        // the scrim away. This prevents a disjointed removal of the scrim.
-        if (!widget.reverse && widget.animation.status != AnimationStatus.completed) {
-          scrimOpacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(widget.animation)!;
-        }
-        assert(!widget.reverse || scrimOpacity == 0.0);
-        if (scrimOpacity == 0.0) {
-          return child!;
-        }
-        return ColoredBox(
-          color: Colors.black.withOpacity(scrimOpacity),
-          child: child,
-        );
-      },
-      child: ScaleTransition(
-        scale: scaleTransition,
-        child: FadeTransition(
-          opacity: fadeTransition,
-          child: SnapshotWidget(
-            controller: controller,
-            child: widget.child,
-          ),
-        ),
-      ),
+    return SnapshotWidget(
+      painter: delegate,
+      controller: controller,
+      mode: SnapshotMode.permissive,
+      child: widget.child,
     );
   }
 }
@@ -404,8 +391,10 @@ class _ZoomExitTransition extends StatefulWidget {
 }
 
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
+  late _ZoomExitTransitionPainter delegate;
+
   @override
-  bool get useSnapshot => widget.preferRasterization && !kIsWeb;
+  bool get useSnapshot => !kIsWeb && widget.preferRasterization;
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -438,6 +427,11 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   @override
   void initState() {
     _updateAnimations();
+    delegate = _ZoomExitTransitionPainter(
+      reverse: widget.reverse,
+      fade: fadeTransition,
+      scale: scaleTransition,
+    );
     super.initState();
   }
 
@@ -447,6 +441,12 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       oldWidget.animation.removeListener(onAnimationValueChange);
       oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
+      delegate.dispose();
+      delegate = _ZoomExitTransitionPainter(
+        reverse: widget.reverse,
+        fade: fadeTransition,
+        scale: scaleTransition,
+      );
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -455,20 +455,17 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
+    delegate.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: scaleTransition,
-      child: FadeTransition(
-        opacity: fadeTransition,
-        child: SnapshotWidget(
-          controller: controller,
-          child: widget.child,
-        ),
-      ),
+    return SnapshotWidget(
+      painter: delegate,
+      controller: controller,
+      mode: SnapshotMode.permissive,
+      child: widget.child,
     );
   }
 }
@@ -736,6 +733,35 @@ class PageTransitionsTheme with Diagnosticable {
   }
 }
 
+// Take an image and draw it centered and scaled. The image is already scaled by the [pixelRatio].
+void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double scale, double opacity, double pixelRatio) {
+  if (scale <= 0.0 || opacity <= 0.0) {
+    return;
+  }
+  final Paint paint = Paint()
+    ..filterQuality = ui.FilterQuality.low
+    ..color = Color.fromRGBO(0, 0, 0, opacity);
+  final double logicalWidth = image.width / pixelRatio;
+  final double logicalHeight = image.height / pixelRatio;
+  final double scaledLogicalWidth = logicalWidth * scale;
+  final double scaledLogicalHeight = logicalHeight * scale;
+  final double left = (logicalWidth - scaledLogicalWidth) / 2;
+  final double top = (logicalHeight - scaledLogicalHeight) / 2;
+  final Rect dst = Rect.fromLTWH(left, top, scaledLogicalWidth, scaledLogicalHeight);
+  context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
+}
+
+void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
+  transform.setIdentity();
+  if (scale == 1.0) {
+    return;
+  }
+  transform.scale(scale, scale);
+  final double dx = ((size.width * scale) - size.width) / 2;
+  final double dy = ((size.height * scale) - size.height) / 2;
+  transform.translate(-dx, -dy);
+}
+
 mixin _ZoomTransitionBase {
   bool get useSnapshot;
 
@@ -744,7 +770,7 @@ mixin _ZoomTransitionBase {
   // 2. The animation is paused/stopped.
   // 3. The values of the scale/fade transition do not
   //    benefit from rasterization.
-  final SnapshotWidgetController controller = SnapshotWidgetController();
+  final SnapshotController controller = SnapshotController();
 
   late Animation<double> fadeTransition;
   late Animation<double> scaleTransition;
@@ -770,5 +796,129 @@ mixin _ZoomTransitionBase {
         controller.enabled = useSnapshot;
         break;
     }
+  }
+}
+
+class _ZoomEnterTransitionPainter extends SnapshotPainter {
+  _ZoomEnterTransitionPainter({
+    required this.reverse,
+    required this.scale,
+    required this.fade,
+    required this.animation,
+  }) {
+    animation.addListener(notifyListeners);
+    scale.addListener(notifyListeners);
+    fade.addListener(notifyListeners);
+  }
+
+  final bool reverse;
+  final Animation<double> animation;
+  final Animation<double> scale;
+  final Animation<double> fade;
+
+  final Matrix4 _transform = Matrix4.zero();
+  final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
+  final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
+
+  void _drawScrim(PaintingContext context, Offset offset, Size size) {
+    double scrimOpacity = 0.0;
+    // The transition's scrim opacity only increases on the forward transition.
+    // In the reverse transition, the opacity should always be 0.0.
+    //
+    // Therefore, we need to only apply the scrim opacity animation when
+    // the transition is running forwards.
+    //
+    // The reason that we check that the animation's status is not `completed`
+    // instead of checking that it is `forward` is that this allows
+    // the interrupted reversal of the forward transition to smoothly fade
+    // the scrim away. This prevents a disjointed removal of the scrim.
+    if (!reverse && animation.status != AnimationStatus.completed) {
+      scrimOpacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
+    }
+    assert(!reverse || scrimOpacity == 0.0);
+    if (scrimOpacity > 0.0) {
+      context.canvas.drawRect(
+        offset & size,
+        Paint()..color = Colors.black.withOpacity(scrimOpacity),
+      );
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
+    _drawScrim(context, offset, size);
+    _updateScaledTransform(_transform, scale.value, size);
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+      _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
+    }, oldLayer: _transformHandler.layer);
+  }
+
+  @override
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+    _drawScrim(context, offset, size);
+    _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
+  }
+
+  @override
+  void dispose() {
+    animation.removeListener(notifyListeners);
+    scale.removeListener(notifyListeners);
+    fade.removeListener(notifyListeners);
+    _opacityHandle.layer = null;
+    _transformHandler.layer = null;
+    super.dispose();
+  }
+
+  @override
+  bool shouldRepaint(covariant _ZoomEnterTransitionPainter oldDelegate) {
+    return oldDelegate.reverse != reverse
+      || oldDelegate.animation.value != animation.value
+      || oldDelegate.scale.value != scale.value
+      || oldDelegate.fade.value != fade.value;
+  }
+}
+
+class _ZoomExitTransitionPainter extends SnapshotPainter {
+  _ZoomExitTransitionPainter({
+    required this.reverse,
+    required this.scale,
+    required this.fade,
+  }) {
+    scale.addListener(notifyListeners);
+    fade.addListener(notifyListeners);
+  }
+
+  final bool reverse;
+  final Animation<double> scale;
+  final Animation<double> fade;
+  final Matrix4 _transform = Matrix4.zero();
+  final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
+  final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
+
+  @override
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+    _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
+  }
+
+  @override
+  void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
+    _updateScaledTransform(_transform, scale.value, size);
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+      _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
+    }, oldLayer: _transformHandler.layer);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ZoomExitTransitionPainter oldDelegate) {
+    return oldDelegate.reverse != reverse || oldDelegate.fade.value != fade.value || oldDelegate.scale.value != scale.value;
+  }
+
+  @override
+  void dispose() {
+    _opacityHandle.layer = null;
+    _transformHandler.layer = null;
+    scale.removeListener(notifyListeners);
+    fade.removeListener(notifyListeners);
+    super.dispose();
   }
 }

@@ -138,10 +138,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
   static int _nextCallbackId = 0;
 
-  bool defunct = false;
-
-  void compressSnapshots() {}
-
   /// Whether the subtree rooted at this layer has any composition callback
   /// observers.
   ///
@@ -1080,16 +1076,6 @@ class ContainerLayer extends Layer {
     return true;
   }
 
-  void compressSnapshots() {
-    for (Layer? child = lastChild; child != null; child = child.previousSibling) {
-      child.compressSnapshots();
-    }
-  }
-
-  SnapshotLayer? acceptThingy(SnapshotLayer layer) {
-    return null;
-  }
-
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
   // The reason this method is in the `ContainerLayer` class rather than
@@ -1098,7 +1084,6 @@ class ContainerLayer extends Layer {
   // to render a subtree (e.g. `OffsetLayer.toImage`).
   ui.Scene buildScene(ui.SceneBuilder builder) {
     updateSubtreeNeedsAddToScene();
-    compressSnapshots();
     addToScene(builder);
     if (subtreeHasCompositionCallbacks) {
       _fireCompositionCallbacks(includeChildren: true);
@@ -1405,14 +1390,6 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  SnapshotLayer? acceptThingy(SnapshotLayer layer) {
-    if (firstChild != lastChild) {
-      return null;
-    }
-    return layer.withTransform(Matrix4.translation(Vector3(offset.dx, offset.dy, 0)));
-  }
-
-  @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
@@ -1426,21 +1403,13 @@ class OffsetLayer extends ContainerLayer {
     // retained rendering, we don't want to push the offset down to each leaf
     // node. Otherwise, changing an offset layer on the very high level could
     // cascade the change to too many leaves.
-    if (!defunct) {
-      engineLayer = builder.pushOffset(
-        offset.dx,
-        offset.dy,
-        oldLayer: _engineLayer as ui.OffsetEngineLayer?,
-      );
-    }
+    engineLayer = builder.pushOffset(
+      offset.dx,
+      offset.dy,
+      oldLayer: _engineLayer as ui.OffsetEngineLayer?,
+    );
     addChildrenToScene(builder);
-    if (!defunct) {
-      builder.pop();
-    }
-    if (defunct) {
-      engineLayer = null;
-    }
-    defunct = false;
+    builder.pop();
   }
 
   @override
@@ -1881,56 +1850,6 @@ class ImageFilterLayer extends ContainerLayer {
   }
 }
 
-class SnapshotLayer extends Layer {
-  SnapshotLayer(this.image, this.src, this.dest, this.opacity);
-
-  final ui.Image image;
-  final Rect src;
-  final Rect dest;
-  final double opacity;
-
-  SnapshotLayer? overrideValue;
-
-  SnapshotLayer withOpacity(double opacity) {
-    return SnapshotLayer(image, src, dest, opacity * this.opacity);
-  }
-
-  SnapshotLayer withTransform(Matrix4 transform) {
-    return SnapshotLayer(image, src, MatrixUtils.transformRect(transform, dest), opacity);
-  }
-
-  @override
-  void compressSnapshots() {
-    SnapshotLayer target = this;
-    ContainerLayer? parent = this.parent;
-    while (parent != null) {
-      final SnapshotLayer? newLayer = parent.acceptThingy(target);
-      if (newLayer != null) {
-        target = newLayer;
-        parent.defunct = true;
-        parent = parent.parent;
-      } else {
-        break;
-      }
-    }
-    if (target != this) {
-      overrideValue = target;
-    }
-  }
-
-  @override
-  void addToScene(ui.SceneBuilder builder) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
-    canvas.drawImageRect(image, src, overrideValue?.dest ?? dest, Paint()
-      ..filterQuality = FilterQuality.low
-      ..color = Color.fromRGBO(0, 0, 0, (overrideValue?.opacity ?? opacity))
-    );
-    final ui.Picture picture = recorder.endRecording();
-    builder.addPicture(Offset.zero, picture);
-  }
-}
-
 /// A composited layer that applies a given transformation matrix to its
 /// children.
 ///
@@ -1966,13 +1885,6 @@ class TransformLayer extends OffsetLayer {
     markNeedsAddToScene();
   }
 
-  SnapshotLayer? acceptThingy(SnapshotLayer layer) {
-    if (firstChild != lastChild) {
-      return null;
-    }
-    return layer.withTransform(transform!);
-  }
-
   Matrix4? _lastEffectiveTransform;
   Matrix4? _invertedTransform;
   bool _inverseDirty = true;
@@ -1985,20 +1897,12 @@ class TransformLayer extends OffsetLayer {
       _lastEffectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
         ..multiply(_lastEffectiveTransform!);
     }
-    if (!defunct) {
-      engineLayer = builder.pushTransform(
-        _lastEffectiveTransform!.storage,
-        oldLayer: _engineLayer as ui.TransformEngineLayer?,
-      );
-    }
+    engineLayer = builder.pushTransform(
+      _lastEffectiveTransform!.storage,
+      oldLayer: _engineLayer as ui.TransformEngineLayer?,
+    );
     addChildrenToScene(builder);
-    if (!defunct) {
-      builder.pop();
-    }
-    if (defunct) {
-      engineLayer = null;
-    }
-    defunct = false;
+    builder.pop();
   }
 
   Offset? _transformOffset(Offset localPosition) {
@@ -2082,14 +1986,6 @@ class OpacityLayer extends OffsetLayer {
   }
 
   @override
-  SnapshotLayer? acceptThingy(SnapshotLayer layer) {
-    if (firstChild != lastChild) {
-      return null;
-    }
-    return layer.withOpacity(alpha! / 255.0);
-  }
-
-  @override
   void addToScene(ui.SceneBuilder builder) {
     assert(alpha != null);
 
@@ -2112,31 +2008,21 @@ class OpacityLayer extends OffsetLayer {
     // engineLayer if it would have changed type (i.e. changed to or from 255).
     if (enabled && realizedAlpha < 255) {
       assert(_engineLayer is ui.OpacityEngineLayer?);
-      if (!defunct) {
-        engineLayer = builder.pushOpacity(
-          realizedAlpha,
-          offset: offset,
-          oldLayer: _engineLayer as ui.OpacityEngineLayer?,
-        );
-      }
+      engineLayer = builder.pushOpacity(
+        realizedAlpha,
+        offset: offset,
+        oldLayer: _engineLayer as ui.OpacityEngineLayer?,
+      );
     } else {
       assert(_engineLayer is ui.OffsetEngineLayer?);
-      if (!defunct) {
-        engineLayer = builder.pushOffset(
-          offset.dx,
-          offset.dy,
-          oldLayer: _engineLayer as ui.OffsetEngineLayer?,
-        );
-      }
+      engineLayer = builder.pushOffset(
+        offset.dx,
+        offset.dy,
+        oldLayer: _engineLayer as ui.OffsetEngineLayer?,
+      );
     }
     addChildrenToScene(builder);
-    if (!defunct) {
-      builder.pop();
-    }
-    if (defunct) {
-      engineLayer = null;
-    }
-    defunct = false;
+    builder.pop();
   }
 
   @override
