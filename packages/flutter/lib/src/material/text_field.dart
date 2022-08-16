@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'colors.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
@@ -334,7 +333,6 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -802,26 +800,6 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
-  ///
-  /// If [SpellCheckConfiguration.misspelledTextStyle] is not specified in this
-  /// configuration, then [materialMisspelledTextStyle] is used by default.
-  final SpellCheckConfiguration? spellCheckConfiguration;
-
-  /// The [TextStyle] used to indicate misspelled words in the Material style.
-  ///
-  /// See also:
-  ///  * [SpellCheckConfiguration.misspelledTextStyle], the style configured to
-  ///    mark misspelled words with.
-  ///  * [CupertinoTextField.cupertinoMisspelledTextStyle], the style configured
-  ///    to mark misspelled words with in the Cupertino style.
-  static const TextStyle materialMisspelledTextStyle =
-    TextStyle(
-      decoration: TextDecoration.underline,
-      decorationColor: Colors.red,
-      decorationStyle: TextDecorationStyle.wavy,
-  );
-
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -864,7 +842,6 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
-    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
   }
 }
 
@@ -1210,17 +1187,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
     ];
 
-    // Set configuration as disabled if not otherwise specified. If specified,
-    // ensure that configuration uses Material text style for misspelled words
-    // unless a custom style is specified.
-    final SpellCheckConfiguration spellCheckConfiguration =
-      widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
-        ? widget.spellCheckConfiguration!.copyWith(
-            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? TextField.materialMisspelledTextStyle)
-        : const SpellCheckConfiguration.disabled();
-
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
     final bool cursorOpacityAnimates;
@@ -1361,7 +1327,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
         ),
       ),
