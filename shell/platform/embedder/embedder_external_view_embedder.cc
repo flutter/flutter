@@ -111,6 +111,12 @@ std::vector<SkCanvas*> EmbedderExternalViewEmbedder::GetCurrentCanvases() {
 }
 
 // |ExternalViewEmbedder|
+std::vector<DisplayListBuilder*>
+EmbedderExternalViewEmbedder::GetCurrentBuilders() {
+  return std::vector<DisplayListBuilder*>({});
+}
+
+// |ExternalViewEmbedder|
 EmbedderPaintContext EmbedderExternalViewEmbedder::CompositeEmbeddedView(
     int view_id) {
   auto vid = EmbedderExternalView::ViewIdentifier(view_id);

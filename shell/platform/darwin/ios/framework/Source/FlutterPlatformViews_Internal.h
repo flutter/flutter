@@ -165,6 +165,8 @@ class FlutterPlatformViewsController {
 
   std::vector<SkCanvas*> GetCurrentCanvases();
 
+  std::vector<DisplayListBuilder*> GetCurrentBuilders();
+
   EmbedderPaintContext CompositeEmbeddedView(int view_id);
 
   // The rect of the platform view at index view_id. This rect has been translated into the
