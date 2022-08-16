@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'basic_types.dart';
 import 'borders.dart';
 import 'circle_border.dart';
+import 'edge_insets.dart';
 import 'rounded_rectangle_border.dart';
 import 'stadium_border.dart';
 
@@ -164,6 +165,18 @@ class StarBorder extends OutlinedBorder {
   ///
   /// Defaults to zero, and must be between zero and one, inclusive.
   final double squash;
+
+  @override
+  EdgeInsetsGeometry get dimensions {
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        return EdgeInsets.all(side.width);
+      case StrokeAlign.center:
+        return EdgeInsets.all(side.width / 2);
+      case StrokeAlign.outside:
+        return EdgeInsets.zero;
+    }
+  }
 
   @override
   ShapeBorder scale(double t) {
@@ -375,7 +388,18 @@ class StarBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    final Rect adjustedRect = rect.deflate(side.strokeInset);
+    final Rect adjustedRect;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        adjustedRect = rect.deflate(side.width);
+        break;
+      case StrokeAlign.center:
+        adjustedRect = rect.deflate(side.width / 2);
+        break;
+      case StrokeAlign.outside:
+        adjustedRect = rect;
+        break;
+    }
     return _StarGenerator(
       points: points,
       rotation: _rotationRadians,
@@ -404,7 +428,18 @@ class StarBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Rect adjustedRect = rect.inflate(side.strokeOffset / 2);
+        final Rect adjustedRect;
+        switch (side.strokeAlign) {
+          case StrokeAlign.inside:
+            adjustedRect = rect.deflate(side.width / 2);
+            break;
+          case StrokeAlign.center:
+            adjustedRect = rect;
+            break;
+          case StrokeAlign.outside:
+            adjustedRect = rect.inflate(side.width / 2);
+            break;
+        }
         final Path path = _StarGenerator(
           points: points,
           rotation: _rotationRadians,
