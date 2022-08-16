@@ -287,6 +287,17 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     if (resolvedShape is OutlinedBorder) {
       resolvedShape = resolvedShape.copyWith(side: resolvedSide);
     }
+    if (resolvedShape is Border && resolvedSide != null) {
+      resolvedShape = Border.fromBorderSide(resolvedSide);
+    }
+    if (resolvedShape is BorderDirectional && resolvedSide != null) {
+      resolvedShape = BorderDirectional(
+        start: resolvedSide,
+        top: resolvedSide,
+        end: resolvedSide,
+        bottom: resolvedSide,
+      );
+    }
 
     final MaterialStateMouseCursor mouseCursor = _MouseCursor(
       (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
