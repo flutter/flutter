@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -232,7 +230,7 @@ void main() {
   });
 
   group('AppContext', () {
-    FakeStopwatch fakeStopWatch;
+    late FakeStopwatch fakeStopWatch;
 
     setUp(() {
       fakeStopWatch = FakeStopwatch();
@@ -365,10 +363,10 @@ void main() {
   });
 
   group('Spinners', () {
-    FakeStdio mockStdio;
-    FakeStopwatch mockStopwatch;
-    FakeStopwatchFactory stopwatchFactory;
-    int called;
+    late FakeStdio mockStdio;
+    late FakeStopwatch mockStopwatch;
+    late FakeStopwatchFactory stopwatchFactory;
+    late int called;
     final List<Platform> testPlatforms = <Platform>[
       FakePlatform(
         environment: <String, String>{},
@@ -416,11 +414,11 @@ void main() {
 
     for (final Platform testPlatform in testPlatforms) {
       group('(${testPlatform.operatingSystem})', () {
-        Platform platform;
-        Platform ansiPlatform;
-        AnsiTerminal terminal;
-        AnsiTerminal coloredTerminal;
-        SpinnerStatus spinnerStatus;
+        late Platform platform;
+        late Platform ansiPlatform;
+        late AnsiTerminal terminal;
+        late AnsiTerminal coloredTerminal;
+        late SpinnerStatus spinnerStatus;
 
         setUp(() {
           platform = FakePlatform();
@@ -679,7 +677,7 @@ void main() {
             expect(times, hasLength(1));
             final Match match = times.single;
 
-            expect(lines[0], endsWith(match.group(0)));
+            expect(lines[0], endsWith(match.group(0)!));
             expect(called, equals(1));
             expect(lines.length, equals(2));
             expect(lines[1], equals(''));
@@ -696,9 +694,9 @@ void main() {
   });
 
   group('Output format', () {
-    FakeStdio fakeStdio;
-    SummaryStatus summaryStatus;
-    int called;
+    late FakeStdio fakeStdio;
+    late SummaryStatus summaryStatus;
+    late int called;
 
     setUp(() {
       fakeStdio = FakeStdio();
@@ -934,51 +932,6 @@ void main() {
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals('All good.'));
-    });
-
-    testWithoutContext('Stdout printStatus handle null inputs on colored terminal', () async {
-      final Logger logger = StdoutLogger(
-        terminal: AnsiTerminal(
-          stdio: fakeStdio,
-          platform: FakePlatform(),
-        ),
-        stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(showColor: true),
-      );
-      logger.printStatus(
-        null,
-        emphasis: null,
-        color: null,
-        newline: null,
-        indent: null,
-      );
-      final List<String> lines = outputStdout();
-
-      expect(outputStderr().length, equals(1));
-      expect(outputStderr().first, isEmpty);
-      expect(lines[0], equals(''));
-    });
-
-    testWithoutContext('Stdout printStatus handle null inputs on non-color terminal', () async {
-      final Logger logger = StdoutLogger(
-        terminal: AnsiTerminal(
-          stdio: fakeStdio,
-          platform: _kNoAnsiPlatform,
-        ),
-        stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(),
-      );
-      logger.printStatus(
-        null,
-        emphasis: null,
-        color: null,
-        newline: null,
-        indent: null,
-      );
-      final List<String> lines = outputStdout();
-      expect(outputStderr().length, equals(1));
-      expect(outputStderr().first, isEmpty);
-      expect(lines[0], equals(''));
     });
 
     testWithoutContext('Stdout printBox puts content inside a box', () {
@@ -1328,14 +1281,14 @@ Matcher _throwsInvocationFor(dynamic Function() fakeCall) =>
   throwsA(_matchesInvocation(_invocationFor(fakeCall)));
 
 class FakeStdout extends Fake implements Stdout {
-  FakeStdout({@required this.syncError, this.completeWithError = false});
+  FakeStdout({required this.syncError, this.completeWithError = false});
 
   final bool syncError;
   final bool completeWithError;
   final Completer<void> _completer = Completer<void>();
 
   @override
-  void write(Object object) {
+  void write(Object? object) {
     if (syncError) {
       throw Exception('Error!');
     }
