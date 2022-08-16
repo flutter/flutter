@@ -340,13 +340,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   }
 
   Future<Evaluation> _evaluateElement(
-      SemanticsNode node,
-      Element element,
-      WidgetTester tester,
-      ui.Image image,
-      ByteData byteData,
-      ) async {
-    const Evaluation result = Evaluation.pass();
+    SemanticsNode node,
+    Element element,
+    WidgetTester tester,
+    ui.Image image,
+    ByteData byteData,
+    ) async {
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
     double? fontSize;
@@ -380,14 +379,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     }
 
     if (isNodeOffScreen(paintBounds, tester.binding.window)) {
-      return result;
+      return const Evaluation.pass();
     }
 
     final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
 
     // Node was too far off screen.
     if (colorHistogram.isEmpty) {
-      return result;
+      return const Evaluation.pass();
     }
 
     final _ContrastReport report = _ContrastReport(colorHistogram);
@@ -396,19 +395,18 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final double targetContrastRatio = this.targetContrastRatio(fontSize, bold: isBold);
 
     if (contrastRatio - targetContrastRatio >= _tolerance) {
-      return result + const Evaluation.pass();
+      return const Evaluation.pass();
     }
-    return result +
-        Evaluation.fail(
-          '$node:\n'
-          'Expected contrast ratio of at least $targetContrastRatio '
-          'but found ${contrastRatio.toStringAsFixed(2)} '
-          'for a font size of $fontSize.\n'
-          'The computed colors was:\n'
-          'light - ${report.lightColor}, dark - ${report.darkColor}\n'
-          'See also: '
-          'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
-        );
+    return Evaluation.fail(
+      '$node:\n'
+      'Expected contrast ratio of at least $targetContrastRatio '
+      'but found ${contrastRatio.toStringAsFixed(2)} '
+      'for a font size of $fontSize.\n'
+      'The computed colors was:\n'
+      'light - ${report.lightColor}, dark - ${report.darkColor}\n'
+      'See also: '
+      'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+    );
   }
 
   /// Returns whether node should be skipped.
