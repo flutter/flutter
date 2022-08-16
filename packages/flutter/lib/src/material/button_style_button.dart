@@ -76,10 +76,14 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// Customizes this button's appearance.
   ///
-  /// Non-null properties of this style override the corresponding
-  /// properties in [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s
-  /// that resolve to non-null values will similarly override the corresponding
+  /// Non-null properties of this style override the corresponding properties in
+  /// [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s that resolve
+  /// to non-null values will similarly override the corresponding
   /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  ///
+  /// If the [ButtonStyle.side] property is set, and the [ButtonStyle.shape]
+  /// property is set to an [OutlinedBorder] subclass, then the button will use
+  /// the [ButtonStyle.side] value as its [OutlinedBorder.side].
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -286,17 +290,6 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     ShapeBorder? resolvedShape = resolve<ShapeBorder?>((ButtonStyle? style) => style?.shape);
     if (resolvedShape is OutlinedBorder) {
       resolvedShape = resolvedShape.copyWith(side: resolvedSide);
-    }
-    if (resolvedShape is Border && resolvedSide != null) {
-      resolvedShape = Border.fromBorderSide(resolvedSide);
-    }
-    if (resolvedShape is BorderDirectional && resolvedSide != null) {
-      resolvedShape = BorderDirectional(
-        start: resolvedSide,
-        top: resolvedSide,
-        end: resolvedSide,
-        bottom: resolvedSide,
-      );
     }
 
     final MaterialStateMouseCursor mouseCursor = _MouseCursor(
