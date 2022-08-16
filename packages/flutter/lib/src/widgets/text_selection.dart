@@ -2434,7 +2434,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(DragUpdateDetails details, int tapCount) {
+  void onDragSelectionUpdate(DragUpdateDetails details, int consecutiveTapCount) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2451,7 +2451,7 @@ class TextSelectionGestureDetectorBuilder {
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
       // Select word by word.
-      if (tapCount == 2) {
+      if (consecutiveTapCount == 2) {
         return renderEditable.selectWordsInRange(
           from: dragStartGlobalPosition - editableOffset - scrollableOffset,
           to: details.globalPosition,
@@ -2595,7 +2595,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
-  final GestureTapDownWithTapCountCallback? onTapDown;
+  final GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
@@ -2645,7 +2645,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// The frequency of calls is throttled to avoid excessive text layout
   /// operations in text fields. The throttling is controlled by the constant
   /// [_kDragSelectionUpdateThrottle].
-  final GestureDragUpdateWithTapCountCallback? onDragSelectionUpdate;
+  final GestureDragUpdateWithConsecutiveTapCountCallback? onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
   final GestureDragEndCallback? onDragSelectionEnd;
@@ -2671,22 +2671,22 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
-  void _handleTapDown(TapDownDetails details, int tapCount) {
-    print('tap down? and tap count $tapCount');
-    widget.onTapDown?.call(details, tapCount);
+  void _handleTapDown(TapDownDetails details, int consecutiveTapCount) {
+    print('tap down? and tap count $consecutiveTapCount');
+    widget.onTapDown?.call(details, consecutiveTapCount);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (tapCount == 2) {
+    if (consecutiveTapCount == 2) {
       print('double tap');
       widget.onDoubleTapDown?.call(details);
     }
   }
 
-  void _handleTapUp(TapUpDetails details, int tapCount) {
+  void _handleTapUp(TapUpDetails details, int consecutiveTapCount) {
     print('tap up');
-    if (tapCount != 2) {
+    if (consecutiveTapCount != 2) {
       print('running tap up');
       widget.onSingleTapUp?.call(details);
     }
@@ -2700,19 +2700,19 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   Timer? _dragUpdateThrottleTimer;
   int? _dragTapCount;
 
-  void _handleDragStart(DragStartDetails details, int tapCount) {
+  void _handleDragStart(DragStartDetails details, int consecutiveTapCount) {
     print('drag start');
-    print('tap count $tapCount');
-    if (tapCount != 2) {
+    print('tap count $consecutiveTapCount');
+    if (consecutiveTapCount != 2) {
       widget.onDragSelectionStart?.call(details);
     }
   }
 
-  void _handleDragUpdate(DragUpdateDetails details, int tapCount) {
+  void _handleDragUpdate(DragUpdateDetails details, int consecutiveTapCount) {
     print('drag update');
-    print('tap count $tapCount');
+    print('tap count $consecutiveTapCount');
     _lastDragUpdateDetails = details;
-    _dragTapCount = tapCount;
+    _dragTapCount = consecutiveTapCount;
     // Only schedule a new timer if there's no one pending.
     _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
   }
@@ -2730,9 +2730,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     _lastDragUpdateDetails = null;
   }
 
-  void _handleDragEnd(DragEndDetails endDetails, int tapCount) {
+  void _handleDragEnd(DragEndDetails endDetails, int consecutiveTapCount) {
     print('drag end');
-    print('tap count $tapCount');
+    print('tap count $consecutiveTapCount');
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
