@@ -193,10 +193,6 @@ void main() {
     ScaleTransition widget2Scale = findForwardScaleTransition(find.text('Page 2'));
     FadeTransition widget2Opacity = findForwardFadeTransition(find.text('Page 2'));
 
-    double getScale(TransformLayer layer) {
-      return layer.transform!.storage[0];
-    }
-
      // Page 1 is enlarging, starts from 1.0.
     expect(widget1Scale.scale.value, greaterThan(1.0));
     // Page 2 is enlarging from the value less than 1.0.
