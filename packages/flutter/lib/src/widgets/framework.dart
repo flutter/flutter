@@ -4507,6 +4507,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   /// Returns true if the element has been marked as needing rebuilding.
+  ///
+  /// The flag is true when the element is first created and after
+  /// [markNeedsBuild] has been called. The flag is reset to false in the
+  /// [performRebuild] implementation.
   bool get dirty => _dirty;
   bool _dirty = true;
 
@@ -4580,10 +4584,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Called by the [BuildOwner] when [BuildOwner.scheduleBuildFor] has been
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
+  ///
+  /// The method will only rebuild if [dirty] is true. To rebuild irregardless
+  /// of the [dirty] flag, set `force` to true. Forcing a rebuild is convenient
+  /// from [update], during which [dirty] is false.
   @pragma('vm:prefer-inline')
-  void rebuild() {
+  void rebuild({bool force = false}) {
     assert(_lifecycleState != _ElementLifecycle.initial);
-    if (_lifecycleState != _ElementLifecycle.active || !_dirty) {
+    if (_lifecycleState != _ElementLifecycle.active || (!_dirty && !force)) {
       return;
     }
     assert(() {
@@ -4618,8 +4626,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Cause the widget to update itself.
   ///
   /// Called by [rebuild] after the appropriate checks have been made.
+  ///
+  /// The base implementation only clears the [dirty] flag.
   @protected
-  void performRebuild();
+  @mustCallSuper
+  void performRebuild() {
+    _dirty = false;
+  }
 }
 
 class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
@@ -4901,7 +4914,7 @@ abstract class ComponentElement extends Element {
     } finally {
       // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
-      _dirty = false;
+      super.performRebuild(); // clears the "dirty" flag
     }
     try {
       _child = updateChild(_child, built, slot);
@@ -4955,8 +4968,7 @@ class StatelessElement extends ComponentElement {
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _dirty = true;
-    rebuild();
+    rebuild(force: true);
   }
 }
 
@@ -5053,10 +5065,6 @@ class StatefulElement extends ComponentElement {
     super.update(newWidget);
     assert(widget == newWidget);
     final StatefulWidget oldWidget = state._widget!;
-    // We mark ourselves as dirty before calling didUpdateWidget to
-    // let authors call setState from within didUpdateWidget without triggering
-    // asserts.
-    _dirty = true;
     state._widget = widget as StatefulWidget;
     final Object? debugCheckForReturnedFuture = state.didUpdateWidget(oldWidget) as dynamic;
     assert(() {
@@ -5072,7 +5080,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    rebuild();
+    rebuild(force: true);
   }
 
   @override
@@ -5217,8 +5225,7 @@ abstract class ProxyElement extends ComponentElement {
     super.update(newWidget);
     assert(widget == newWidget);
     updated(oldWidget);
-    _dirty = true;
-    rebuild();
+    rebuild(force: true);
   }
 
   /// Called during build when the [widget] has changed.
@@ -5746,7 +5753,7 @@ abstract class RenderObjectElement extends Element {
     }());
     assert(_slot == newSlot);
     attachRenderObject(newSlot);
-    _dirty = false;
+    super.performRebuild(); // clears the "dirty" flag
   }
 
   @override
@@ -5768,7 +5775,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  void performRebuild() {
+  void performRebuild() { // ignore: must_call_super, _performRebuild calls super.
     _performRebuild(); // calls widget.updateRenderObject()
   }
 
@@ -5783,7 +5790,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = false;
       return true;
     }());
-    _dirty = false;
+    super.performRebuild(); // clears the "dirty" flag
   }
 
   /// Updates the children of this element to use new widgets.
@@ -6539,9 +6546,6 @@ class _NullElement extends Element {
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
-
-  @override
-  void performRebuild() => throw UnimplementedError();
 }
 
 class _NullWidget extends Widget {

@@ -43,7 +43,7 @@ void main() {
       'backgroundColor: Color(0x00000099)',
       'scrimColor: Color(0x00000098)',
       'elevation: 5.0',
-      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'width: 200.0',
     ]);
   });
