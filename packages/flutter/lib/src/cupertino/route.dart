@@ -342,7 +342,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     super.settings,
     this.maintainState = true,
     super.fullscreenDialog,
-    super.preferRasterization = true,
+    super.allowSnapshotting = true,
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null) {
@@ -372,7 +372,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
-    super.preferRasterization = true,
+    super.allowSnapshotting = true,
   }) : assert(page != null),
        super(settings: page) {
     assert(opaque);
@@ -419,7 +419,7 @@ class CupertinoPage<T> extends Page<T> {
     this.maintainState = true,
     this.title,
     this.fullscreenDialog = false,
-    this.preferRasterization = true,
+    this.allowSnapshotting = true,
     super.key,
     super.name,
     super.arguments,
@@ -440,12 +440,12 @@ class CupertinoPage<T> extends Page<T> {
   /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
-  /// {@macro flutter.widgets.TransitionRoute.preferRasterization}
-  final bool preferRasterization;
+  /// {@macro flutter.widgets.TransitionRoute.allowSnapshotting}
+  final bool allowSnapshotting;
 
   @override
   Route<T> createRoute(BuildContext context) {
-    return _PageBasedCupertinoPageRoute<T>(page: this, preferRasterization: preferRasterization);
+    return _PageBasedCupertinoPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
   }
 }
 

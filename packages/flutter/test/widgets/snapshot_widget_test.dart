@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(enabled: true);
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     final Key key = UniqueKey();
     await tester.pumpWidget(RepaintBoundary(
       key: key,
@@ -58,7 +58,7 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget paints its child as a single picture layer', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(enabled: true);
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
         child: SnapshotWidget(
@@ -75,7 +75,7 @@ void main() {
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
 
-    controller.enabled = false;
+    controller.allowSnapshotting = false;
     await tester.pump();
 
     expect(tester.layers, hasLength(3));
@@ -83,7 +83,7 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(enabled: true);
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
         child: Directionality(
@@ -101,7 +101,7 @@ void main() {
 
 
   testWidgets('RenderSnapshotWidget throws assertion if platform view is encountered', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(enabled: true);
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
         child: Directionality(
@@ -123,7 +123,7 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(enabled: true);
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
         child: Directionality(
@@ -145,7 +145,7 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encounted with SnapshotMode.permissive', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(enabled: true);
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
         child: Directionality(

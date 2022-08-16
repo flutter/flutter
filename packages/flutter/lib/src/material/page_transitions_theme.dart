@@ -156,7 +156,7 @@ class _ZoomPageTransition extends StatelessWidget {
   const _ZoomPageTransition({
     required this.animation,
     required this.secondaryAnimation,
-    required this.preferRasterization,
+    required this.allowSnapshotting,
     this.child,
   }) : assert(animation != null),
        assert(secondaryAnimation != null);
@@ -194,13 +194,12 @@ class _ZoomPageTransition extends StatelessWidget {
   ///    property when the [_ZoomPageTransition] is used as a page transition.
   final Animation<double> secondaryAnimation;
 
-  /// Whether the [RasterWidget] based-rasterized strategy for the zoom page transition
-  /// will be used.
+  /// Whether the [SnapshotWidget] will be used.
   ///
   /// Notably, this improves performance by disabling animations on both the outgoing and
   /// incoming route. This also implies that ink-splashes or similar animations will
   /// not animate during the transition.
-  final bool preferRasterization;
+  final bool allowSnapshotting;
 
   /// The widget below this widget in the tree.
   ///
@@ -219,7 +218,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          preferRasterization: preferRasterization,
+          allowSnapshotting: allowSnapshotting,
           child: child,
         );
       },
@@ -230,7 +229,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomExitTransition(
           animation: animation,
-          preferRasterization: preferRasterization,
+          allowSnapshotting: allowSnapshotting,
           reverse: true,
           child: child,
         );
@@ -244,7 +243,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            preferRasterization: preferRasterization,
+            allowSnapshotting: allowSnapshotting,
             reverse: true,
             child: child,
           );
@@ -256,7 +255,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomExitTransition(
             animation: animation,
-            preferRasterization: preferRasterization,
+            allowSnapshotting: allowSnapshotting,
             child: child,
           );
         },
@@ -270,14 +269,14 @@ class _ZoomEnterTransition extends StatefulWidget {
   const _ZoomEnterTransition({
     required this.animation,
     this.reverse = false,
-    required this.preferRasterization,
+    required this.allowSnapshotting,
     this.child,
   }) : assert(animation != null),
        assert(reverse != null);
 
   final Animation<double> animation;
   final Widget? child;
-  final bool preferRasterization;
+  final bool allowSnapshotting;
   final bool reverse;
 
   @override
@@ -286,7 +285,7 @@ class _ZoomEnterTransition extends StatefulWidget {
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
   @override
-  bool get useSnapshot => !kIsWeb && widget.preferRasterization;
+  bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
   late _ZoomEnterTransitionPainter delegate;
 
@@ -376,13 +375,13 @@ class _ZoomExitTransition extends StatefulWidget {
   const _ZoomExitTransition({
     required this.animation,
     this.reverse = false,
-    required this.preferRasterization,
+    required this.allowSnapshotting,
     this.child,
   }) : assert(animation != null),
        assert(reverse != null);
 
   final Animation<double> animation;
-  final bool preferRasterization;
+  final bool allowSnapshotting;
   final bool reverse;
   final Widget? child;
 
@@ -394,7 +393,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   late _ZoomExitTransitionPainter delegate;
 
   @override
-  bool get useSnapshot => !kIsWeb && widget.preferRasterization;
+  bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -600,7 +599,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      preferRasterization: route?.preferRasterization ?? true,
+      allowSnapshotting: route?.allowSnapshotting ?? true,
       child: child,
     );
   }
@@ -779,9 +778,9 @@ mixin _ZoomTransitionBase {
     if ((scaleTransition.value == 1.0) &&
         (fadeTransition.value == 0.0 ||
          fadeTransition.value == 1.0)) {
-        controller.enabled = false;
+        controller.allowSnapshotting = false;
       } else {
-        controller.enabled = useSnapshot;
+        controller.allowSnapshotting = useSnapshot;
       }
   }
 
@@ -789,11 +788,11 @@ mixin _ZoomTransitionBase {
     switch (status) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
-        controller.enabled = false;
+        controller.allowSnapshotting = false;
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        controller.enabled = useSnapshot;
+        controller.allowSnapshotting = useSnapshot;
         break;
     }
   }

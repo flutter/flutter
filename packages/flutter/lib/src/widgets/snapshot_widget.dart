@@ -34,36 +34,36 @@ enum SnapshotMode {
 /// A controller for the [SnapshotWidget] that controls when the child image is displayed
 /// and when to regenerated the child image.
 ///
-/// When the value of [enabled] is true, the [SnapshotWidget] will paint the child
+/// When the value of [allowSnapshotting] is true, the [SnapshotWidget] will paint the child
 /// widgets based on the [SnapshotMode] of the snapshot widget.
 ///
-/// The controller notifies its listeners when the value of [enabled] changes
+/// The controller notifies its listeners when the value of [allowSnapshotting] changes
 /// or when [clear] is called.
 ///
 /// To force [SnapshotWidget] to recreate the child image, call [clear].
 class SnapshotController extends ChangeNotifier {
   /// Create a new [SnapshotController].
   ///
-  /// By default, [enabled] is `false` and cannot be `null`.
+  /// By default, [allowSnapshotting] is `false` and cannot be `null`.
   SnapshotController({
-    bool enabled = false,
-  }) : _enabled = enabled;
+    bool allowSnapshotting = false,
+  }) : _allowSnapshotting = allowSnapshotting;
 
   /// Reset the snapshot held by any listening [SnapshotWidget].
   ///
-  /// This has no effect if [enabled] is `false`.
+  /// This has no effect if [allowSnapshotting] is `false`.
   void clear() {
     notifyListeners();
   }
 
   /// Whether a snapshot of this child widget is painted in its place.
-  bool get enabled => _enabled;
-  bool _enabled;
-  set enabled(bool value) {
-    if (value == enabled) {
+  bool get allowSnapshotting => _allowSnapshotting;
+  bool _allowSnapshotting;
+  set allowSnapshotting(bool value) {
+    if (value == allowSnapshotting) {
       return;
     }
-    _enabled = value;
+    _allowSnapshotting = value;
     notifyListeners();
   }
 }
@@ -96,7 +96,7 @@ class SnapshotController extends ChangeNotifier {
 ///   platform view is encountered.
 ///
 /// * The snapshotting functionality of this widget is not supported on the HTML
-///   backend of Flutter for the Web. Setting [SnapshotController.enabled] to true
+///   backend of Flutter for the Web. Setting [SnapshotController.allowSnapshotting] to true
 ///   may cause an error to be thrown. On the CanvasKit backend of Flutter, the
 ///   performance of using this widget may regress performance due to the fact
 ///   that both the UI and engine share a single thread.
@@ -200,11 +200,11 @@ class _RenderSnapshotWidget extends RenderProxyBox {
       return;
     }
     controller.removeListener(_onRasterValueChanged);
-    final bool oldValue = controller.enabled;
+    final bool oldValue = controller.allowSnapshotting;
     _controller = value;
     if (attached) {
       controller.addListener(_onRasterValueChanged);
-      if (oldValue != controller.enabled) {
+      if (oldValue != controller.allowSnapshotting) {
         _onRasterValueChanged();
       }
     }
@@ -286,7 +286,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
       _childRaster = null;
       return;
     }
-    if (!controller.enabled || _disableSnapshotAttempt) {
+    if (!controller.allowSnapshotting || _disableSnapshotAttempt) {
       _childRaster?.dispose();
       _childRaster = null;
       painter.paint(context, offset, size, super.paint);
