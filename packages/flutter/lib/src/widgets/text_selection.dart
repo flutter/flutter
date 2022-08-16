@@ -2686,7 +2686,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _handleTapUp(TapUpDetails details, int consecutiveTapCount) {
     print('tap up');
-    if (consecutiveTapCount != 2) {
+    if (consecutiveTapCount == 1) {
       print('running tap up');
       widget.onSingleTapUp?.call(details);
     }

@@ -121,6 +121,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
 
   @override
   void handleEvent(PointerEvent event) {
+    print('handle event');
     if (event is PointerDownEvent) {
       if (_state == _DragState.ready) {
         print('handle PointerDownEvent $event');
@@ -162,6 +163,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
       print('handle PointerMoveEvent $event');
 
       if (_state == _DragState.accepted) {
+        print('PointerMoveEvent while drag is accepted');
         DragUpdateDetails details =  DragUpdateDetails(
           sourceTimeStamp: event.timeStamp,
           delta: event.delta,
@@ -173,6 +175,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
         );
         invokeCallback<void>('onUpdate', () => onUpdate!(details, _consecutiveTapCountWhileDragging!));
       } else if (_state == _DragState.possible) {
+        print('PointerMoveEvent while drag is is possible');
         print('is zoom start ${event is PointerPanZoomStartEvent}');
         _state = _DragState.accepted;
         _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
