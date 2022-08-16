@@ -6276,7 +6276,7 @@ void main() {
 
     // Skip past scrolling animation.
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     // Check that the text spans multiple lines.
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
