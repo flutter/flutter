@@ -38,7 +38,10 @@
             "name": "ios_release",
             "ninja": {
                 "config": "ios_release",
-                "targets": [],
+                "targets": [
+                    "flutter/shell/platform/darwin/ios:flutter_framework",
+                    "flutter/lib/snapshot:generate_snapshot_bin"
+                ],
                 "tool": "autoninja"
             },
             "tests": []
@@ -69,5 +72,73 @@
             "tests": []
         }
     ],
-    "tests": []
+    "tests": [],
+    "generators": {
+        "tasks": [
+            {
+                "name": "release-FlutterMacOS.framework",
+                "parameters": [
+                    "--dst",
+                    "out/release",
+                    "--arm64-out-dir",
+                    "out/ios_release",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64",
+                    "--dsym",
+                    "--strip"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python"
+            },
+            {
+                "name": "release-nobitcode-FlutterMacOS.framework",
+                "parameters": [
+                    "--dst",
+                    "out/release-nobitcode",
+                    "--arm64-out-dir",
+                    "out/ios_release",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64",
+                    "--strip-bitcode",
+                    "--dsym",
+                    "--strip"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python"
+            },
+            {
+                "name": "Release-macos-gen-snapshots",
+                "parameters": [
+                    "--dst",
+                    "out/release",
+                    "--arm64-out-dir",
+                    "out/ios_release"
+                ],
+                "script": "flutter/sky/tools/create_macos_gen_snapshots.py",
+                "language": "python"
+            }
+        ]
+    },
+    "archives": [
+        {
+            "source": "out/release/artifacts.zip",
+            "destination": "ios-release/artifacts.zip"
+        },
+        {
+            "source": "out/release/Flutter.dSYM.zip",
+            "destination": "ios-release/Flutter.dSYM.zip"
+        },
+        {
+            "source": "out/release-nobitcode/artifacts.zip",
+            "destination": "ios-release-nobitcode/artifacts.zip"
+        },
+        {
+            "source": "out/release-nobitcode/Flutter.dSYM.zip",
+            "destination": "ios-release-nobitcode/Flutter.dSYM.zip"
+        }
+    ]
 }
