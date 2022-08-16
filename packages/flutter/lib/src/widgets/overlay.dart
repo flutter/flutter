@@ -401,14 +401,14 @@ class OverlayPortal extends StatefulWidget {
   /// closest [Overlay] once [OverlayPortalController.show] is called on the
   /// associated [controller].
   ///
-  /// The [overlayChild] widget, if not null, is inserted below this widget in
-  /// the widget tree, allowing it to depend on [InheritedWidget]s above it, and
+  /// The built overlay child widget, is inserted below this widget in the
+  /// widget tree, allowing it to depend on [InheritedWidget]s above it, and
   /// be notified when the [InheritedWidget]s change.
   ///
-  /// Unlike [child], [overlayChild] can visually extend outside the bounds
-  /// of this widget without being clipped, and receive hit-test events outside
-  /// of this widget's bounds, as long as it does not extend outside of the
-  /// [Overlay] on which it is rendered.
+  /// Unlike [child], the built overlay child can visually extend outside the
+  /// bounds of this widget without being clipped, and receive hit-test events
+  /// outside of this widget's bounds, as long as it does not extend outside of
+  /// the [Overlay] on which it is rendered.
   final WidgetBuilder overlayChildBuilder;
 
   /// A widget below this widget in the tree.
