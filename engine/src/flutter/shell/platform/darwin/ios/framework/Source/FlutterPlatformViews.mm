@@ -379,6 +379,15 @@ std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
   return canvases;
 }
 
+std::vector<DisplayListBuilder*> FlutterPlatformViewsController::GetCurrentBuilders() {
+  std::vector<DisplayListBuilder*> builders;
+  for (size_t i = 0; i < composition_order_.size(); i++) {
+    int64_t view_id = composition_order_[i];
+    builders.push_back(slices_[view_id]->builder());
+  }
+  return builders;
+}
+
 int FlutterPlatformViewsController::CountClips(const MutatorsStack& mutators_stack) {
   std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.Bottom();
   int clipCount = 0;
