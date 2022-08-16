@@ -503,10 +503,14 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
             SkISize::Make(6, 2));
 
 #if IMPELLER_SUPPORTS_RENDERING
-  ASSERT_EQ(ImageDecoderImpeller::DecompressTexture(descriptor.get(),
-                                                    SkISize::Make(6, 2))
+  ASSERT_EQ(ImageDecoderImpeller::DecompressTexture(
+                descriptor.get(), SkISize::Make(6, 2), {100, 100})
                 ->dimensions(),
             SkISize::Make(6, 2));
+  ASSERT_EQ(ImageDecoderImpeller::DecompressTexture(
+                descriptor.get(), SkISize::Make(60, 20), {10, 10})
+                ->dimensions(),
+            SkISize::Make(10, 10));
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
