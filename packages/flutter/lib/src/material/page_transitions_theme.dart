@@ -363,6 +363,9 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
           scrimOpacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(widget.animation)!;
         }
         assert(!widget.reverse || scrimOpacity == 0.0);
+        if (scrimOpacity == 0.0) {
+          return child!;
+        }
         return ColoredBox(
           color: Colors.black.withOpacity(scrimOpacity),
           child: child,

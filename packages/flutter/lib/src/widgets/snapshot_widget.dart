@@ -216,6 +216,8 @@ class RenderSnapshotWidget extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  bool get alwaysNeedsCompositing => true;
+
   // Paint [child] with this painting context, then convert to a raster and detach all
   // children from this layer.
   ui.Image? _paintAndDetachToImage() {
@@ -248,7 +250,7 @@ class RenderSnapshotWidget extends RenderProxyBox {
     if (controller.enabled) {
       _childRaster ??= _paintAndDetachToImage();
       if (_childRaster == null) {
-        super.paint(context, offset);
+        _paintNormal(context, offset);
       } else {
         _paintRaster(context, offset, size, _childRaster!, devicePixelRatio);
       }
@@ -256,14 +258,140 @@ class RenderSnapshotWidget extends RenderProxyBox {
     }
     _childRaster?.dispose();
     _childRaster = null;
+    _paintNormal(context, offset);
+  }
+
+  void _paintNormal(PaintingContext context, Offset offset) {
     super.paint(context, offset);
   }
 
   void _paintRaster(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
     final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+    context.addLayer(SnapshotLayer(image, src, dst, 1.0));
+  }
+}
+
+/// A delegate used to draw a snapshot.
+///
+/// The delegate can call [notifyListeners] to have the [SnapshotWidget]
+/// re-paint (re-using the same raster). This allows animations to be  performed
+/// without re-snapshotting of children. For certain scale or perspective changing
+/// transforms, such as a rotation, this can be significantly faster than performing
+/// the same animation at the widget level.
+///
+/// By default, the [SnapshotWidget] includes a delegate that draws the child raster
+/// exactly as the child widgets would have been drawn. Nevertheless, this can
+/// also be used to efficiently transform the child raster and apply complex paint
+/// effects.
+///
+/// {@tool snippet}
+///
+/// The following method shows how to efficiently rotate the child raster.
+///
+/// ```dart
+/// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+///   const double radians = 0.5; // Could be driven by an animation.
+///   final Matrix4 transform = Matrix4.rotationZ(radians);
+///   context.canvas.transform(transform.storage);
+///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+///   final Paint paint = Paint()
+///     ..filterQuality = FilterQuality.low;
+///   context.canvas.drawImageRect(image, src, dst, paint);
+/// }
+/// ```
+/// {@end-tool}
+abstract class SnapshotPainter extends ChangeNotifier  {
+  /// Called whenever the [image] that represents a [SnapshotWidget]s child should be painted.
+  ///
+  /// The image is rasterized at the physical pixel resolution and should be scaled down by
+  /// [pixelRatio] to account for device independent pixels.
+  ///
+  /// The following method shows how the default implementation of the delegate used by the
+  /// [SnapshotPainter] paints the snapshot. This must account for the fact that the image
+  /// width and height will be given in physical pixels, while the image must be painted with
+  /// device independent pixels. That is, the width and height of the image is the widget and
+  /// height of the provided `size`, multiplied by the `pixelRatio`:
+  ///
+  /// ```dart
+  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+  ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+  ///   final Paint paint = Paint()
+  ///     ..filterQuality = FilterQuality.low;
+  ///   context.canvas.drawImageRect(image, src, dst, paint);
+  /// }
+  /// ```
+  /// {@end-tool}
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio);
+
+  /// Paint the child via [painter], applying any effects that would have been painted
+  /// in [SnapshotPainter.paintSnapshot].
+  ///
+  /// This method is called when snapshotting is disabled, or when [SnapshotMode.permissive]
+  /// is used and a child platform view prevents snapshotting.
+  ///
+  /// The [offset] and [size] are the location and dimensions of the render object.
+  void paint(PaintingContext context, Offset offset, Size size, PaintingContextCallback painter);
+
+  /// Called whenever a new instance of the raster widget delegate class is
+  /// provided to the [SnapshotWidget] object, or any time that a new
+  /// [SnapshotPainter] object is created with a new instance of the
+  /// delegate class (which amounts to the same thing, because the latter is
+  /// implemented in terms of the former).
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If the method returns false, then the [paint] call might be optimized
+  /// away.
+  ///
+  /// It's possible that the [paint] method will get called even if
+  /// [shouldRepaint] returns false (e.g. if an ancestor or descendant needed to
+  /// be repainted). It's also possible that the [paint] method will get called
+  /// without [shouldRepaint] being called at all (e.g. if the box changes
+  /// size).
+  ///
+  /// Changing the delegate will not cause the child image retained by the
+  /// [SnapshotWidget] to be updated. Instead, [SnapshotController.clear] can
+  /// be used to force the generation of a new image.
+  ///
+  /// The `oldPainter` argument will never be null.
+  bool shouldRepaint(covariant SnapshotPainter oldPainter);
+}
+
+class _DefaultSnapshotPainter implements SnapshotPainter {
+  @override
+  void addListener(ui.VoidCallback listener) { }
+
+  @override
+  void dispose() { }
+
+  @override
+  bool get hasListeners => false;
+
+  @override
+  void notifyListeners() { }
+
+  @override
+  void paint(PaintingContext context, ui.Offset offset, ui.Size size, PaintingContextCallback painter) {
+    painter(context, offset);
+  }
+
+  @override
+  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, double pixelRatio) {
+    final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
       ..filterQuality = FilterQuality.low;
     context.canvas.drawImageRect(image, src, dst, paint);
   }
+
+  @override
+  void removeListener(ui.VoidCallback listener) { }
+
+  @override
+  bool shouldRepaint(covariant _DefaultSnapshotPainter oldPainter) => false;
 }
