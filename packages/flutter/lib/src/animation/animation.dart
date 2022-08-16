@@ -173,7 +173,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// controller goes from 0.0 to 1.0:
   ///
   /// ```dart
-  /// Animation<Alignment> _alignment1 = _controller.drive(
+  /// Animation<Alignment> alignment1 = _controller.drive(
   ///   AlignmentTween(
   ///     begin: Alignment.topLeft,
   ///     end: Alignment.topRight,
@@ -208,7 +208,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// values that depend on other variables:
   ///
   /// ```dart
-  /// Animation<Alignment> _alignment3 = _controller
+  /// Animation<Alignment> alignment3 = _controller
   ///   .drive(CurveTween(curve: Curves.easeIn))
   ///   .drive(AlignmentTween(
   ///     begin: Alignment.topLeft,
@@ -226,7 +226,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// of red.
   ///
   /// ```dart
-  /// Animation<Color> _offset1 = Animation<double>.fromValueListenable(_scrollPosition)
+  /// Animation<Color> color = Animation<double>.fromValueListenable(_scrollPosition)
   ///   .drive(Animatable<Color>.fromCallback((double value) {
   ///     return Color.fromRGBO(value.round() % 255, 0, 0, 1);
   ///   }));

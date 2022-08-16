@@ -431,7 +431,7 @@ class SystemChannels {
   ///    a list of [MenuItem]s, and ends up looking like this example:
   ///
   /// ```dart
-  /// List<Map<String, Object?>> menu = <String, Object?>{
+  /// Map<String, Object?> menu = <String, Object?>{
   ///   '0': <Map<String, Object?>>[
   ///     <String, Object?>{
   ///       'id': 1,

@@ -3297,45 +3297,6 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// This callback can be used to customize the serialization of DiagnosticsNode
   /// objects for experimental features in widget inspector clients such as
   /// [Dart DevTools](https://github.com/flutter/devtools).
-  /// For example, [Dart DevTools](https://github.com/flutter/devtools)
-  /// can evaluate the following expression to register a VM Service API
-  /// with a custom serialization to experiment with visualizing layouts.
-  ///
-  /// The following code samples demonstrates adding the [RenderObject] associated
-  /// with an [Element] to the serialized data for all elements in the tree:
-  ///
-  /// ```dart
-  /// Map<String, Object> getDetailsSubtreeWithRenderObject(
-  ///   String id,
-  ///   String groupName,
-  ///   int subtreeDepth,
-  /// ) {
-  ///   return _nodeToJson(
-  ///     root,
-  ///     InspectorSerializationDelegate(
-  ///       groupName: groupName,
-  ///       summaryTree: false,
-  ///       subtreeDepth: subtreeDepth,
-  ///       includeProperties: true,
-  ///       service: this,
-  ///       addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
-  ///         final Map<String, Object> additionalJson = <String, Object>{};
-  ///         final Object value = node.value;
-  ///         if (value is Element) {
-  ///           final renderObject = value.renderObject;
-  ///           additionalJson['renderObject'] = renderObject?.toDiagnosticsNode()?.toJsonMap(
-  ///             delegate.copyWith(
-  ///               subtreeDepth: 0,
-  ///               includeProperties: true,
-  ///             ),
-  ///           );
-  ///         }
-  ///         return additionalJson;
-  ///       },
-  ///     ),
-  ///  );
-  /// }
-  /// ```
   final Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback;
 
   final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];

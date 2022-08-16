@@ -127,10 +127,14 @@ class OutlinedButton extends ButtonStyleButton {
   /// ```dart
   /// OutlinedButton(
   ///   style: OutlinedButton.styleFrom(
-  ///      shape: StadiumBorder(),
-  ///      side: BorderSide(width: 2, color: Colors.green),
+  ///      shape: const StadiumBorder(),
+  ///      side: const BorderSide(width: 2, color: Colors.green),
   ///   ),
-  /// )
+  ///   child: const Text('Seasons of Love'),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  /// ),
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,

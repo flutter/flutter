@@ -493,6 +493,45 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
 /// easier to use and less expensive than [BackdropFilter].
 ///
+/// {@tool snippet}
+///
+/// This example shows how the common case of applying a [BackdropFilter] blur
+/// to a single sibling can be replaced with an [ImageFiltered] widget. This code
+/// is generally simpler and the performance will be improved dramatically for
+/// complex filters like blurs.
+///
+/// The implementation below is unnecessarily expensive.
+///
+/// ```dart
+///  Widget buildBackdrop() {
+///    return Stack(
+///      children: <Widget>[
+///        Positioned.fill(child: Image.asset('image.png')),
+///        Positioned.fill(
+///          child: BackdropFilter(
+///            filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///          ),
+///        ),
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+/// Instead consider the following approach which directly applies a blur
+/// to the child widget.
+///
+/// ```dart
+///  Widget buildFilter() {
+///    return ImageFiltered(
+///      imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///      child: Image.asset('image.png'),
+///    );
+///  }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ImageFiltered], which applies an [ImageFilter] to its child.
@@ -3904,6 +3943,7 @@ class IndexedStack extends Stack {
     super.key,
     super.alignment,
     super.textDirection,
+    super.clipBehavior,
     StackFit sizing = StackFit.loose,
     this.index = 0,
     super.children,
@@ -3917,6 +3957,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
+      fit:fit,
+      clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
     );
@@ -3927,6 +3969,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     renderObject
       ..index = index
+      ..fit = fit
+      ..clipBehavior = clipBehavior
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
@@ -4641,10 +4685,10 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
-///     const Icon(Icons.sentiment_very_satisfied),
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -4668,12 +4712,12 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Expanded(
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
-///     const Icon(Icons.sentiment_very_satisfied),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -4698,12 +4742,12 @@ class Flex extends MultiChildRenderObjectWidget {
 /// ```dart
 /// Row(
 ///   textDirection: TextDirection.rtl,
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Expanded(
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
-///     const Icon(Icons.sentiment_very_satisfied),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -5657,9 +5701,17 @@ class RichText extends MultiChildRenderObjectWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The [SelectionRegistrar] this rich text is subscribed to.
+  ///
+  /// If this is set, [selectionColor] must be non-null.
   final SelectionRegistrar? selectionRegistrar;
 
   /// The color to use when painting the selection.
+  ///
+  /// This is ignored if [selectionRegistrar] is null.
+  ///
+  /// See the section on selections in the [RichText] top-level API
+  /// documentation for more details on enabling selection in [RichText]
+  /// widgets.
   final Color? selectionColor;
 
   @override
@@ -5999,6 +6051,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// bundle implementation:
 ///
 /// ```dart
+/// // continuing from previous example...
 /// await tester.pumpWidget(
 ///   MaterialApp(
 ///     home: DefaultAssetBundle(
@@ -7274,25 +7327,31 @@ class KeyedSubtree extends StatelessWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
-/// This widget is a simple inline alternative to defining a [StatelessWidget]
-/// subclass. For example a widget defined and used like this:
+/// This widget is an inline alternative to defining a [StatelessWidget]
+/// subclass. For example, instead of defining a widget as follows:
 ///
 /// ```dart
 /// class Foo extends StatelessWidget {
+///   const Foo({super.key});
 ///   @override
-///   Widget build(BuildContext context) => Text('foo');
+///   Widget build(BuildContext context) => const Text('foo');
 /// }
-///
-/// Center(child: Foo())
 /// ```
 ///
-/// Could equally well be defined and used like this, without
+/// ...and using it in the usual way:
+///
+/// ```dart
+/// // continuing from previous example...
+/// const Center(child: Foo())
+/// ```
+///
+/// ...one could instead define and use it in a single step, without
 /// defining a new widget class:
 ///
 /// ```dart
 /// Center(
 ///   child: Builder(
-///     builder: (BuildContext context) => Text('foo');
+///     builder: (BuildContext context) => const Text('foo'),
 ///   ),
 /// )
 /// ```
@@ -7317,7 +7376,7 @@ class KeyedSubtree extends StatelessWidget {
 ///           // above this widget's context.
 ///           print(Scaffold.of(context).hasAppBar);
 ///         },
-///         child: Text('hasAppBar'),
+///         child: const Text('hasAppBar'),
 ///       )
 ///     ),
 ///   );
@@ -7337,7 +7396,7 @@ class KeyedSubtree extends StatelessWidget {
 ///             onPressed: () {
 ///               print(Scaffold.of(context).hasAppBar);
 ///             },
-///             child: Text('hasAppBar'),
+///             child: const Text('hasAppBar'),
 ///           ),
 ///         );
 ///       },
