@@ -80,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue.shade100,
                       shape: lerpBorder(
                         StarBorder.polygon(
-                          side: const BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 2),
+                          side: const BorderSide(strokeAlign: StrokeAlign.center, width: 2),
                           sides: _model.points,
                           pointRounding: _model.pointRounding,
                           rotation: _model.rotation,
@@ -102,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue.shade100,
                       shape: lerpBorder(
                         StarBorder(
-                          side: const BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 2),
+                          side: const BorderSide(strokeAlign: StrokeAlign.center, width: 2),
                           points: _model.points,
                           innerRadiusRatio: _model.innerRadiusRatio,
                           pointRounding: _model.pointRounding,
