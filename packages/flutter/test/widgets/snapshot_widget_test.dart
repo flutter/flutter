@@ -30,10 +30,7 @@ void main() {
         ),
       ),
     ));
-    // Rasterization is not actually complete until a frame has been pumped through
-    // the engine.
-    await tester.pumpAndSettle();
-
+    await tester.pump();
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
 
     // Now change the color and assert the old snapshot still matches.
@@ -50,14 +47,13 @@ void main() {
         ),
       ),
     ));
-    await tester.pumpAndSettle();
-
+    await tester.pump();
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
 
     // Now invoke clear and the raster is re-generated.
     controller.clear();
-    await tester.pumpAndSettle();
 
+    await tester.pump();
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.red.png'));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
@@ -84,37 +80,6 @@ void main() {
 
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-
-  testWidgets('RenderSnapshotWidget correctly attaches and detaches controller callbacks', (WidgetTester tester) async {
-    final TestController controller = TestController();
-    final RenderSnapshotWidget snapshotWidget = RenderSnapshotWidget(
-      painter: TestPainter(),
-      controller: controller,
-      devicePixelRatio: 1.0,
-      mode: SnapshotMode.normal,
-    );
-
-    expect(controller.addedListenerCount, 0);
-    expect(controller.removedListenerCount, 0);
-
-    final PipelineOwner owner = PipelineOwner();
-    snapshotWidget.attach(owner);
-
-    expect(controller.addedListenerCount, 1);
-    expect(controller.removedListenerCount, 0);
-
-    snapshotWidget.detach();
-
-    expect(controller.addedListenerCount, 1);
-    expect(controller.removedListenerCount, 1);
-
-    final TestController updatedController = TestController();
-    snapshotWidget.controller = updatedController;
-
-    // No listeners added or removed while not attached.
-    expect(updatedController.addedListenerCount, 0);
-    expect(updatedController.removedListenerCount, 0);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
@@ -201,38 +166,6 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.layers.last, isA<PlatformViewLayer>());
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-
-  testWidgets('RenderSnapshotWidget correctly attaches and detaches delegate callbacks', (WidgetTester tester) async {
-    final TestPainter delegate = TestPainter();
-    final SnapshotController controller = SnapshotController(enabled: true);
-    final RenderSnapshotWidget rasterWidget = RenderSnapshotWidget(
-      painter: delegate,
-      controller: controller,
-      devicePixelRatio: 1.0,
-      mode: SnapshotMode.normal,
-    );
-
-    expect(delegate.addedListenerCount, 0);
-    expect(delegate.removedListenerCount, 0);
-
-    final PipelineOwner owner = PipelineOwner();
-    rasterWidget.attach(owner);
-
-    expect(delegate.addedListenerCount, 1);
-    expect(delegate.removedListenerCount, 0);
-
-    rasterWidget.detach();
-
-    expect(delegate.addedListenerCount, 1);
-    expect(delegate.removedListenerCount, 1);
-
-    final TestPainter updatedDelegate = TestPainter();
-    rasterWidget.painter = updatedDelegate;
-
-    // No listeners added or removed while not attached.
-    expect(updatedDelegate.addedListenerCount, 0);
-    expect(updatedDelegate.removedListenerCount, 0);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
 class TestController extends SnapshotController {
@@ -262,7 +195,6 @@ class TestPlatformView extends SingleChildRenderObjectWidget {
 }
 
 class RenderTestPlatformView extends RenderProxyBox {
-
   @override
   void paint(PaintingContext context, ui.Offset offset) {
     context.addLayer(PlatformViewLayer(rect: offset & size, viewId: 1));

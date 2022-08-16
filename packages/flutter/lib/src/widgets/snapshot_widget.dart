@@ -7,21 +7,21 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-/// Controls how the [SnapshotWidget] paints its child via the [SnapshotController].
+/// Controls how the [SnapshotWidget] paints its child.
 enum SnapshotMode {
-  /// the child is snapshotted, but only if all descendants can be snapshotted.
+  /// The child is snapshotted, but only if all descendants can be snapshotted.
   ///
   /// If there is a platform view in the children of a raster widget, the
   /// snapshot will not be used and the child will be rendered as normal.
   permissive,
 
-  /// the child is snapshotted, but only if all descendants can be snapshotted.
+  /// An error is thrown if the child cannot be snapshotted.
   ///
-  /// An error is thrown if an unrasterizable view is encountered. This setting is
-  /// the default state of the [SnapshotController].
+  /// This setting is the default state of the [SnapshotWidget].
   normal,
 
   /// The child is snapshotted and any child platform views are ignored.
@@ -36,6 +36,9 @@ enum SnapshotMode {
 ///
 /// When the value of [enabled] is true, the [SnapshotWidget] will paint the child
 /// widgets based on the [SnapshotMode] of the snapshot widget.
+///
+/// The controller notifies its listeners when the value of [enabled] changes
+/// or when [clear] is called.
 ///
 /// To force [SnapshotWidget] to recreate the child image, call [clear].
 class SnapshotController extends ChangeNotifier {
@@ -74,14 +77,14 @@ class SnapshotController extends ChangeNotifier {
 /// be expensive or that cannot rely on raster caching. For example, scale and
 /// skew animations are often expensive to perform on complex children, as are
 /// blurs. For a short animation, a widget that contains these expensive effects
-/// can be replaced with a snapshot of it self and manipulated instead.
+/// can be replaced with a snapshot of itself and manipulated instead.
 ///
 /// For example, the Android Q [ZoomPageTransitionsBuilder] uses a snapshot widget
 /// for the forward and entering route to avoid the expensive scale animation.
 /// This also has the effect of briefly pausing any animations on the page.
 ///
 /// Generally, this widget should not be used in places where users expect the
-/// child widget to continue animation or to be responsive, such as an unbounded
+/// child widget to continue animating or to be responsive, such as an unbounded
 /// animation.
 ///
 /// Caveats:
@@ -92,10 +95,11 @@ class SnapshotController extends ChangeNotifier {
 ///   defaults to [SnapshotMode.normal] which will throw an exception if a
 ///   platform view is encountered.
 ///
-/// * This widget is not supported on the HTML backend of Flutter for the web.
-///   On the CanvasKit backend of Flutter, the performance of using this widget
-///   may regress performance due to the fact that both the UI and engine share
-///   a single thread.
+/// * The snapshotting functionality of this widget is not supported on the HTML
+///   backend of Flutter for the Web. Setting [SnapshotController.enabled] to true
+///   may cause an error to be thrown. On the CanvasKit backend of Flutter, the
+///   performance of using this widget may regress performance due to the fact
+///   that both the UI and engine share a single thread.
 class SnapshotWidget extends SingleChildRenderObjectWidget {
   /// Create a new [SnapshotWidget].
   ///
@@ -108,7 +112,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     required super.child
   });
 
-  /// The controller that determines when to display the children as an snapshot.
+  /// The controller that determines when to display the children as a snapshot.
   final SnapshotController controller;
 
   /// Configuration that controls how the snapshot widget decides to paint its children.
@@ -124,29 +128,32 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderSnapshotWidget(
+    debugCheckHasMediaQuery(context);
+    return _RenderSnapshotWidget(
       controller: controller,
       mode: mode,
-      devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
+      devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
       painter: painter,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderSnapshotWidget renderObject) {
+  // ignore: library_private_types_in_public_api
+  void updateRenderObject(BuildContext context, covariant _RenderSnapshotWidget renderObject) {
+    debugCheckHasMediaQuery(context);
     renderObject
       ..controller = controller
       ..mode = mode
-      ..devicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0
+      ..devicePixelRatio = MediaQuery.of(context).devicePixelRatio
       ..painter = painter;
   }
 }
 
-/// A render object that converts its child into a [ui.Image] and then paints it
-/// in place of the child.
-class RenderSnapshotWidget extends RenderProxyBox {
-  /// Create a new [RenderSnapshotWidget].
-  RenderSnapshotWidget({
+// A render object that conditionally converts its child into a [ui.Image]
+// and then paints it in place of the child.
+class _RenderSnapshotWidget extends RenderProxyBox {
+  // Create a new [_RenderSnapshotWidget].
+  _RenderSnapshotWidget({
     required double devicePixelRatio,
     required SnapshotController controller,
     required SnapshotMode mode,
@@ -215,6 +222,9 @@ class RenderSnapshotWidget extends RenderProxyBox {
   }
 
   ui.Image? _childRaster;
+  // Set to true if the snapshot mode was not forced and a platform view
+  // was encountered while attempting to snapshot the child.
+  bool _disableSnapshotAttempt = false;
 
   @override
   void attach(covariant PipelineOwner owner) {
@@ -261,6 +271,7 @@ class RenderSnapshotWidget extends RenderProxyBox {
       if (mode == SnapshotMode.normal) {
         throw FlutterError('SnapshotWidget used with a child that contains a PlatformView.');
       }
+      _disableSnapshotAttempt = true;
       return null;
     }
     final ui.Image image = offsetLayer.toImageSync(Offset.zero & size, pixelRatio: devicePixelRatio);
@@ -275,18 +286,19 @@ class RenderSnapshotWidget extends RenderProxyBox {
       _childRaster = null;
       return;
     }
-    if (controller.enabled) {
-      _childRaster ??= _paintAndDetachToImage();
-      if (_childRaster == null) {
-        painter.paint(context, offset, size, super.paint);
-      } else {
-        painter.paintSnapshot(context, offset, size, _childRaster!, devicePixelRatio);
-      }
+    if (!controller.enabled || _disableSnapshotAttempt) {
+      _childRaster?.dispose();
+      _childRaster = null;
+      painter.paint(context, offset, size, super.paint);
       return;
     }
-    _childRaster?.dispose();
-    _childRaster = null;
-    painter.paint(context, offset, size, super.paint);
+    _childRaster ??= _paintAndDetachToImage();
+    if (_childRaster == null) {
+      painter.paint(context, offset, size, super.paint);
+    } else {
+      painter.paintSnapshot(context, offset, size, _childRaster!, devicePixelRatio);
+    }
+    return;
   }
 }
 
