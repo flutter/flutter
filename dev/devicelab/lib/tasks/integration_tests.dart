@@ -142,13 +142,6 @@ TaskFunction createEndToEndIntegrationTest() {
   );
 }
 
-TaskFunction createSpellCheckIntegrationTest() {
-  return IntegrationTest(
-    '${flutterDirectory.path}/dev/integration_tests/spell_check',
-    'integration_test/integration_test.dart',
-  );
-}
-
 class DriverTest {
   DriverTest(
     this.testDirectory,
