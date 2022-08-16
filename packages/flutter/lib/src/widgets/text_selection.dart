@@ -2360,6 +2360,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onSingleTapCancel?.call();
   }
 
+  // TODO (Renzo-Olivares): Can this be moved into the TapAndDragGestureRecognizer?
   DragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
   int? _dragTapCount;
