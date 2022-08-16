@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -166,7 +165,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(projectInfo: null),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(projectInfo: FakeXcodeProjectInfo()),
       Xcode: () => xcode,
     });
 
@@ -343,6 +342,8 @@ IOSDevice setUpIOSDevice({
   );
 }
 
+class FakeXcodeProjectInfo extends Fake implements XcodeProjectInfo {}
+
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({
     required this.projectInfo,
@@ -354,7 +355,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   });
 
   final Map<String, String> buildSettings;
-  final XcodeProjectInfo? projectInfo;
+  final XcodeProjectInfo projectInfo;
 
   @override
   final bool isInstalled = true;
@@ -369,7 +370,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo?> getInfo(
+  Future<XcodeProjectInfo> getInfo(
     String projectPath, {
     String? projectFilename,
   }) async => projectInfo;

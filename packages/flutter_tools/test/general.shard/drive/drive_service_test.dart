@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -439,7 +438,7 @@ FlutterDriverService setUpDriverService({
     logger: logger,
     processUtils: ProcessUtils(
       logger: logger,
-      processManager: processManager ?? FakeProcessManager.any(),
+      processManager: processManager,
     ),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),

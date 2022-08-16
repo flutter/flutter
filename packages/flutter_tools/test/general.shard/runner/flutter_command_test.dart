@@ -243,7 +243,7 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-        } as Future<FlutterCommandResult> Function()?
+        },
       );
       await expectLater(
         () => flutterCommand.run(),
@@ -476,7 +476,7 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-        } as Future<FlutterCommandResult> Function()?,
+        },
       );
 
       await expectLater(

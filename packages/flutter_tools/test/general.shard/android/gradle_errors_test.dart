@@ -1221,26 +1221,13 @@ Platform fakePlatform(String name) {
 }
 
 class FakeGradleUtils extends GradleUtils {
-  FakeGradleUtils._({
-    required Platform platform,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : super(
-    platform: platform,
-    logger: logger,
-    fileSystem: fileSystem,
-    cache: cache,
-    operatingSystemUtils: operatingSystemUtils,
-  );
   factory FakeGradleUtils() {
-    final platform = fakePlatform('android');
-    final logger = testLogger;
-    final fileSystem = MemoryFileSystem.test();
-    final processManager = FakeProcessManager.any();
-    final cache = Cache.test(processManager: processManager);
-    final operatingSystemUtils = OperatingSystemUtils(
+    final Platform platform = fakePlatform('android');
+    final Logger logger = testLogger;
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.any();
+    final Cache cache = Cache.test(processManager: processManager);
+    final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
@@ -1254,6 +1241,14 @@ class FakeGradleUtils extends GradleUtils {
       operatingSystemUtils: operatingSystemUtils,
     );
   }
+
+  FakeGradleUtils._({
+    required super.platform,
+    required super.logger,
+    required super.fileSystem,
+    required super.cache,
+    required super.operatingSystemUtils,
+  });
 
   @override
   String getExecutable(FlutterProject project) {

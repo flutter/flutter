@@ -325,7 +325,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
   @override
   Future<void> exitApp() async {
     callLog.add('exitApp');
-    _exitCompleter.complete();
+    _exitCompleter.complete(0);
   }
 
   @override

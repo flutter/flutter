@@ -26,7 +26,6 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -1000,14 +999,18 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 }
 
+class FakeFuchsiaPM extends Fake implements FuchsiaPM {}
+
+class FakeFuchsiaKernelCompiler extends Fake implements FuchsiaKernelCompiler {}
+
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    required FuchsiaPM pm,
-    required FuchsiaKernelCompiler compiler,
+    FuchsiaPM? pm,
+    FuchsiaKernelCompiler? compiler,
     FuchsiaFfx? ffx,
     String? devices,
-  })  : fuchsiaPM = pm,
-        fuchsiaKernelCompiler = compiler,
+  })  : fuchsiaPM = pm ?? FakeFuchsiaPM(),
+        fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
         fuchsiaFfx = ffx ?? FakeFuchsiaFfx(),
         _devices = devices;
 

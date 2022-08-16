@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/pkgctl.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -468,8 +467,7 @@ Process _createFakeProcess({
 }
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(String id, {required String name})
-      : super(id, name: name);
+  FuchsiaDeviceWithFakeDiscovery(super.id, {super.name = ''});
 
   @override
   FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(
