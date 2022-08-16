@@ -528,7 +528,7 @@ class _OverlayPortalTopState extends State<OverlayPortal> {
 
   void hide() {
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
-    _showTimestamp = null;
+    setState(() { _showTimestamp = null; });
     _location = null;
     _location?._dispose();
   }

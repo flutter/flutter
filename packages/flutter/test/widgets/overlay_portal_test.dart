@@ -211,6 +211,45 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
+  testWidgets('show/hide works', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
+    const Widget target = SizedBox();
+    final Widget widget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return OverlayPortal(
+                controller: controller,
+                overlayChildBuilder: (BuildContext context) => target,
+                child: null,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    expect(find.byWidget(target), findsNothing);
+
+    await tester.pump();
+    expect(find.byWidget(target), findsNothing);
+
+    controller.show();
+    await tester.pump();
+    expect(find.byWidget(target), findsOneWidget);
+
+    controller.hide();
+    await tester.pump();
+    expect(find.byWidget(target), findsNothing);
+
+    controller.show();
+    await tester.pump();
+    expect(find.byWidget(target), findsOneWidget);
+  });
+
   testWidgets('overlayChildBuilder is not evaluated until show is called', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
     final Widget widget = Directionality(
@@ -1482,7 +1521,7 @@ void main() {
   });
 
   group('Paint order', () {
-    testWidgets('', (WidgetTester tester) async {
+    testWidgets('show bringsToTop', (WidgetTester tester) async {
       controller1.hide();
 
       const _PaintOrder child1 = _PaintOrder();
