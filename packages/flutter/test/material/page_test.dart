@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -176,6 +174,7 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<void>(
+            allowSnapshotting: false,
             builder: (BuildContext context) {
               if (settings.name == '/') {
                 return const Material(child: Text('Page 1'));
