@@ -15,11 +15,11 @@ void main() {
         child: Ink(),
       ),
     );
-    Finder sizedBox = find.byWidgetPredicate(
-      (Widget widget) => widget is SizedBox
-          && widget.height == null
-          && widget.width == null
+    Finder sizedBox = find.descendant(
+      of: find.byType(Ink),
+      matching: find.byType(SizedBox),
     );
+    expect(sizedBox, findsOneWidget);
     expect(tester.getSize(sizedBox).height, 600.0);
     expect(tester.getSize(sizedBox).width, 800.0);
 
@@ -36,13 +36,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    sizedBox = find.byWidgetPredicate(
-      (Widget widget) => widget is SizedBox
-          && widget.height == null
-          && widget.width == null
+    sizedBox = find.descendant(
+      of: find.byType(Ink),
+      matching: find.byType(SizedBox),
     );
-    expect(tester.getSize(sizedBox).height, height);
-    expect(tester.getSize(sizedBox).width, width);
+    expect(sizedBox, findsNWidgets(2));
+    expect(tester.getSize(sizedBox.at(0)).height, height);
+    expect(tester.getSize(sizedBox.at(0)).width, width);
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
