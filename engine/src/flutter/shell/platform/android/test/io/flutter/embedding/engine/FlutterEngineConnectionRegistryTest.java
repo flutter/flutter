@@ -127,15 +127,18 @@ public class FlutterEngineConnectionRegistryTest {
     Activity activity = mock(Activity.class);
     when(appComponent.getAppComponent()).thenReturn(activity);
 
+    // Test attachToActivity with an Activity that has no Intent.
+    FlutterEngineConnectionRegistry registry =
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
+    registry.attachToActivity(appComponent, mock(Lifecycle.class));
+    verify(platformViewsController).setSoftwareRendering(false);
+
     Intent intent = mock(Intent.class);
     when(intent.getBooleanExtra("enable-software-rendering", false)).thenReturn(false);
     when(activity.getIntent()).thenReturn(intent);
 
-    FlutterEngineConnectionRegistry registry =
-        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
-
     registry.attachToActivity(appComponent, mock(Lifecycle.class));
-    verify(platformViewsController).setSoftwareRendering(false);
+    verify(platformViewsController, times(2)).setSoftwareRendering(false);
 
     when(intent.getBooleanExtra("enable-software-rendering", false)).thenReturn(true);
 

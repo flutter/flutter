@@ -331,9 +331,11 @@ import java.util.Set;
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
     final boolean useSoftwareRendering =
-        activity
-            .getIntent()
-            .getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false);
+        activity.getIntent() != null
+            ? activity
+                .getIntent()
+                .getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
+            : false;
     flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
 
     // Activate the PlatformViewsController. This must happen before any plugins attempt
