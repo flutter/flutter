@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/layers/image_filter_layer.h"
+#include "flutter/display_list/display_list_comparable.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache_util.h"
 
 namespace flutter {
 
-ImageFilterLayer::ImageFilterLayer(sk_sp<SkImageFilter> filter)
+ImageFilterLayer::ImageFilterLayer(std::shared_ptr<const DlImageFilter> filter)
     : CacheableContainerLayer(
           RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer),
       filter_(std::move(filter)),
@@ -19,7 +20,7 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   auto* prev = static_cast<const ImageFilterLayer*>(old_layer);
   if (!context->IsSubtreeDirty()) {
     FML_DCHECK(prev);
-    if (filter_ != prev->filter_) {
+    if (NotEquals(filter_, prev->filter_)) {
       context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
     }
   }
@@ -29,9 +30,10 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
     if (filter) {
       // This transform will be applied to every child rect in the subtree
       context->PushFilterBoundsAdjustment([filter](SkRect rect) {
-        return SkRect::Make(
-            filter->filterBounds(rect.roundOut(), SkMatrix::I(),
-                                 SkImageFilter::kForward_MapDirection));
+        SkIRect filter_out_bounds;
+        filter->map_device_bounds(rect.roundOut(), SkMatrix::I(),
+                                  filter_out_bounds);
+        return SkRect::Make(filter_out_bounds);
       });
     }
   }
@@ -50,7 +52,6 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
 
   SkRect child_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, matrix, &child_bounds);
-  context->subtree_can_inherit_opacity = true;
 
   // We always paint with a saveLayer (or a cached rendering),
   // so we can always apply opacity in any of those cases.
@@ -61,10 +62,11 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
     return;
   }
 
-  const SkIRect filter_input_bounds = child_bounds.roundOut();
-  SkIRect filter_output_bounds = filter_->filterBounds(
-      filter_input_bounds, SkMatrix::I(), SkImageFilter::kForward_MapDirection);
-  child_bounds = SkRect::Make(filter_output_bounds);
+  const SkIRect filter_in_bounds = child_bounds.roundOut();
+  SkIRect filter_out_bounds;
+  filter_->map_device_bounds(filter_in_bounds, SkMatrix::I(),
+                             filter_out_bounds);
+  child_bounds = SkRect::Make(filter_out_bounds);
 
   set_paint_bounds(child_bounds);
 
@@ -83,23 +85,31 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   AutoCachePaint cache_paint(context);
-
-  if (layer_raster_cache_item_->IsCacheChildren()) {
-    cache_paint.setImageFilter(transformed_filter_);
+  if (context.raster_cache) {
+    if (layer_raster_cache_item_->IsCacheChildren()) {
+      cache_paint.setImageFilter(transformed_filter_.get());
+    }
+    if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
+      return;
+    }
   }
-  if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
-    return;
+
+  cache_paint.setImageFilter(filter_.get());
+  if (context.leaf_nodes_builder) {
+    FML_DCHECK(context.builder_multiplexer);
+    context.builder_multiplexer->saveLayer(&child_paint_bounds(),
+                                           cache_paint.dl_paint());
+    PaintChildren(context);
+    context.builder_multiplexer->restore();
+  } else {
+    // Normally a save_layer is sized to the current layer bounds, but in this
+    // case the bounds of the child may not be the same as the filtered version
+    // so we use the bounds of the child container which do not include any
+    // modifications that the filter might apply.
+    Layer::AutoSaveLayer save_layer = Layer::AutoSaveLayer::Create(
+        context, child_paint_bounds(), cache_paint.sk_paint());
+    PaintChildren(context);
   }
-
-  cache_paint.setImageFilter(filter_);
-
-  // Normally a save_layer is sized to the current layer bounds, but in this
-  // case the bounds of the child may not be the same as the filtered version
-  // so we use the bounds of the child container which do not include any
-  // modifications that the filter might apply.
-  Layer::AutoSaveLayer save_layer = Layer::AutoSaveLayer::Create(
-      context, child_paint_bounds(), cache_paint.sk_paint());
-  PaintChildren(context);
 }
 
 }  // namespace flutter
