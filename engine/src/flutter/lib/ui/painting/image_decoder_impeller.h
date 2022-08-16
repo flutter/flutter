@@ -9,6 +9,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
+#include "impeller/geometry/size.h"
 
 namespace impeller {
 class Context;
@@ -33,7 +34,8 @@ class ImageDecoderImpeller final : public ImageDecoder {
 
   static std::shared_ptr<SkBitmap> DecompressTexture(
       ImageDescriptor* descriptor,
-      SkISize target_size);
+      SkISize target_size,
+      impeller::ISize max_texture_size);
 
  private:
   using FutureContext = std::shared_future<std::shared_ptr<impeller::Context>>;
