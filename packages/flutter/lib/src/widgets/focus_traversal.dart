@@ -129,16 +129,21 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// The `currentNode` argument must not be null.
   ///
-  /// The default implementation returns the [FocusScopeNode.focusedChild], if
-  /// set, on the nearest scope of the `currentNode`, otherwise, returns the
-  /// first node from [sortDescendants], or the given `currentNode` if there are
-  /// no descendants.
+  /// If `ignoreCurrentFocus` is false or not given, this function returns the
+  /// [FocusScopeNode.focusedChild], if set, on the nearest scope of the
+  /// `currentNode`, otherwise, returns the first node from [sortDescendants],
+  /// or the given `currentNode` if there are no descendants.
+  ///
+  /// If `ignoreCurrentFocus` is true, then the algorithm returns the first node
+  /// from [sortDescendants], or the given `currentNode` if there are no
+  /// descendants.
   ///
   /// See also:
   ///
-  ///  * [next], the function that is called to move the focus to the next node.
-  ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
-  ///    function that finds the first focusable widget in a particular direction.
+  /// * [next], the function that is called to move the focus to the next node.
+  /// * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
+  ///   function that finds the first focusable widget in a particular
+  ///   direction.
   FocusNode? findFirstFocus(FocusNode currentNode, {bool ignoreCurrentFocus = false}) {
     return _findInitialFocus(currentNode, ignoreCurrentFocus: ignoreCurrentFocus);
   }
@@ -152,10 +157,14 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// The `currentNode` argument must not be null.
   ///
-  /// The default implementation returns the [FocusScopeNode.focusedChild], if
-  /// set, on the nearest scope of the `currentNode`, otherwise, returns the
-  /// last node from [sortDescendants], or the given `currentNode` if there are
-  /// no descendants.
+  /// If `ignoreCurrentFocus` is false or not given, this function returns the
+  /// [FocusScopeNode.focusedChild], if set, on the nearest scope of the
+  /// `currentNode`, otherwise, returns the last node from [sortDescendants],
+  /// or the given `currentNode` if there are no descendants.
+  ///
+  /// If `ignoreCurrentFocus` is true, then the algorithm returns the last node
+  /// from [sortDescendants], or the given `currentNode` if there are no
+  /// descendants.
   ///
   /// See also:
   ///

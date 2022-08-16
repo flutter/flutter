@@ -795,7 +795,7 @@ abstract class StatefulWidget extends Widget {
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
-enum  _StateLifecycle {
+enum _StateLifecycle {
   /// The [State] object has been created. [State.initState] is called at this
   /// time.
   created,
