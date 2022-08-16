@@ -6275,7 +6275,8 @@ void main() {
     await tester.enterText(find.byType(CupertinoTextField), testValue);
 
     // Skip past scrolling animation.
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     // Check that the text spans multiple lines.
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
@@ -6293,7 +6294,8 @@ void main() {
     await tester.tapAt(untilPos);
     await tester.pumpAndSettle();
 
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    // skip past the frame where the opacity is zero
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(controller.selection.baseOffset, 39);
     expect(controller.selection.extentOffset, 44);
