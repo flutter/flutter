@@ -119,7 +119,7 @@ void main() {
 
     const Offset paintOffset = Offset(100, 200);
     const double fontSize = 20.0;
-    const endpoint = Offset(0.0, fontSize);
+    const Offset endpoint = Offset(0.0, fontSize);
 
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
