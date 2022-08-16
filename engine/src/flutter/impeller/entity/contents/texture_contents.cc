@@ -4,12 +4,14 @@
 
 #include "texture_contents.h"
 
+#include <memory>
 #include <optional>
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
+#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/tessellator/tessellator.h"
@@ -20,8 +22,16 @@ TextureContents::TextureContents() = default;
 
 TextureContents::~TextureContents() = default;
 
+std::shared_ptr<TextureContents> TextureContents::MakeRect(Rect destination) {
+  auto contents = std::make_shared<TextureContents>();
+  contents->path_ = PathBuilder{}.AddRect(destination).TakePath();
+  contents->is_rect_ = true;
+  return contents;
+}
+
 void TextureContents::SetPath(Path path) {
   path_ = std::move(path);
+  is_rect_ = false;
 }
 
 void TextureContents::SetTexture(std::shared_ptr<Texture> texture) {
@@ -42,6 +52,22 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
   }
   return path_.GetTransformedBoundingBox(entity.GetTransformation());
 };
+
+std::optional<Snapshot> TextureContents::RenderToSnapshot(
+    const ContentContext& renderer,
+    const Entity& entity) const {
+  // Passthrough textures that have simple rectangle paths and complete source
+  // rects.
+  if (is_rect_ && source_rect_ == Rect::MakeSize(texture_->GetSize())) {
+    auto scale =
+        Vector2(path_.GetBoundingBox()->size / Size(texture_->GetSize()));
+    return Snapshot{
+        .texture = texture_,
+        .transform = entity.GetTransformation() * Matrix::MakeScale(scale),
+        .sampler_descriptor = sampler_descriptor_};
+  }
+  return Contents::RenderToSnapshot(renderer, entity);
+}
 
 bool TextureContents::Render(const ContentContext& renderer,
                              const Entity& entity,
