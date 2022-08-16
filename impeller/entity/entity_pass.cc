@@ -161,8 +161,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
     {
       auto size_rect = Rect::MakeSize(offscreen_target.GetRenderTargetSize());
-      auto contents = std::make_shared<TextureContents>();
-      contents->SetPath(PathBuilder{}.AddRect(size_rect).TakePath());
+      auto contents = TextureContents::MakeRect(size_rect);
       contents->SetTexture(offscreen_target.GetRenderTargetTexture());
       contents->SetSourceRect(size_rect);
 
