@@ -27,14 +27,6 @@ DirectionalGaussianBlurFilterContents::
     ~DirectionalGaussianBlurFilterContents() = default;
 
 void DirectionalGaussianBlurFilterContents::SetSigma(Sigma sigma) {
-  if (sigma.sigma < kEhCloseEnough) {
-    // This cutoff is an implementation detail of the blur that's tied to the
-    // fragment shader. When the blur is set to 0, having a value slightly above
-    // zero makes the shader do 1 finite sample to pass the image through with
-    // no blur (while retaining correct alpha mask behavior).
-    blur_sigma_ = Sigma{kEhCloseEnough};
-    return;
-  }
   blur_sigma_ = sigma;
 }
 
@@ -103,6 +95,10 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   auto input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
   if (!input_snapshot.has_value()) {
     return std::nullopt;
+  }
+
+  if (blur_sigma_.sigma < kEhCloseEnough) {
+    return input_snapshot.value();  // No blur to render.
   }
 
   auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
