@@ -4081,6 +4081,19 @@ targets:
         ]
       task_name: complex_layout_win_desktop__start_up
 
+  -name: Windows flutter_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_view_win_desktop__start_up
+
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false

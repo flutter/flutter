@@ -223,6 +223,7 @@
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__start_up.dart @schectman @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @schectman @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_view_win_desktop__start_up.dart @schectman @flutter/desktop
 
 ## Host only framework tests
 # Linux analyze
