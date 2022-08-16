@@ -399,18 +399,21 @@ void main() {
     Widget build() {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: Navigator(
-          initialRoute: '/',
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return Material(
-                  child: buildFrame(value: 'one', onChanged: didChangeValue),
-                );
-              },
-            );
-          },
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          child: Navigator(
+            initialRoute: '/',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return Material(
+                    child: buildFrame(value: 'one', onChanged: didChangeValue),
+                  );
+                },
+              );
+            },
+          ),
         ),
       );
     }

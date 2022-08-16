@@ -19,7 +19,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(RepaintBoundary(
       key: key,
-      child: Center(
+      child: TestDependencies(
         child: SnapshotWidget(
           controller: controller,
           child: Container(
@@ -36,7 +36,7 @@ void main() {
     // Now change the color and assert the old snapshot still matches.
     await tester.pumpWidget(RepaintBoundary(
       key: key,
-      child: Center(
+      child: TestDependencies(
         child: SnapshotWidget(
           controller: controller,
           child: Container(
@@ -61,12 +61,14 @@ void main() {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(RepaintBoundary(
       child: Center(
-        child: SnapshotWidget(
-          controller: controller,
-          child: Container(
-            width: 100,
-            height: 100,
-            color: const Color(0xFFAABB11),
+        child: TestDependencies(
+          child: SnapshotWidget(
+            controller: controller,
+            child: Container(
+              width: 100,
+              height: 100,
+              color: const Color(0xFFAABB11),
+            ),
           ),
         ),
       ),
@@ -86,8 +88,7 @@ void main() {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
             child: const SizedBox(),
@@ -104,8 +105,7 @@ void main() {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
             child: const SizedBox(
@@ -126,8 +126,7 @@ void main() {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
             mode: SnapshotMode.forced,
@@ -148,8 +147,7 @@ void main() {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
             mode: SnapshotMode.permissive,
@@ -238,4 +236,21 @@ class TestPainter extends SnapshotPainter {
 
   @override
   bool shouldRepaint(covariant TestPainter oldDelegate) => shouldRepaintValue;
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: child,
+      ),
+    );
+  }
 }

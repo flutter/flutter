@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1003,8 +1005,7 @@ void main() {
     await tester.pumpWidget(
       RootRestorationScope(
         restorationId: 'root',
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             onPopPage: (Route<dynamic> route, dynamic result) { return false; },
             pages: const <Page<Object?>>[
@@ -1173,6 +1174,23 @@ class _TestRestorableWidgetState extends State<TestRestorableWidget> with Restor
           child: const Text('increment'),
         ),
       ],
+    );
+  }
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: child,
+      ),
     );
   }
 }
