@@ -804,7 +804,7 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(IndexedStack(textDirection: TextDirection.ltr));
     final RenderIndexedStack renderObject =
-        tester.allRenderObjects.whereType<RenderIndexedStack>().first;
+      tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // Update clipBehavior to Clip.antiAlias
@@ -814,7 +814,7 @@ void main() {
       clipBehavior: Clip.antiAlias,
     ));
     final RenderIndexedStack renderIndexedObject =
-      tester.allRenderObjects.whereType<RenderIndexedStack>().first;
+      tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
     expect(renderIndexedObject.clipBehavior, equals(Clip.antiAlias));
   });
 
