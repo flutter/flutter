@@ -3943,6 +3943,7 @@ class IndexedStack extends Stack {
     super.key,
     super.alignment,
     super.textDirection,
+    super.clipBehavior,
     StackFit sizing = StackFit.loose,
     this.index = 0,
     super.children,
@@ -3956,6 +3957,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
+      fit:fit,
+      clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
     );
@@ -3966,6 +3969,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     renderObject
       ..index = index
+      ..fit = fit
+      ..clipBehavior = clipBehavior
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
