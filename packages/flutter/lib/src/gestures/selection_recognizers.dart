@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:async/async.dart';
+import 'dart:async';
 
 import 'constants.dart';
 import 'events.dart';
@@ -19,18 +19,18 @@ enum _DragState {
   accepted,
 }
 
-typedef GestureTapDownWithTapCountCallback  = void Function(TapDownDetails details, int tapCount);
-typedef GestureTapUpWithTapCountCallback  = void Function(TapUpDetails details, int tapCount);
-typedef GestureDragStartWithTapCountCallback = void Function(DragStartDetails details, int tapCount);
-typedef GestureDragUpdateWithTapCountCallback = void Function(DragUpdateDetails details, int tapCount);
-typedef GestureDragEndWithTapCountCallback = void Function(DragEndDetails endDetails, int tapCount);
+typedef GestureTapDownWithConsecutiveTapCountCallback  = void Function(TapDownDetails details, int consecutiveTapCount);
+typedef GestureTapUpWithConsecutiveTapCountCallback  = void Function(TapUpDetails details, int consecutiveTapCount);
+typedef GestureDragStartWithConsecutiveTapCountCallback = void Function(DragStartDetails details, int consecutiveTapCount);
+typedef GestureDragUpdateWithConsecutiveTapCountCallback = void Function(DragUpdateDetails details, int consecutiveTapCount);
+typedef GestureDragEndWithConsecutiveTapCountCallback = void Function(DragEndDetails endDetails, int consecutiveTapCount);
 typedef GestureTapAndDragCancelCallback = void Function();
 
 mixin ConsecutiveTapMixin {
   // For consecutive tap
-  RestartableTimer? consecutiveTapTimer;
+  Timer? consecutiveTapTimer;
   Offset? lastTapOffset;
-  int tapCount = 0;
+  int consecutiveTapCount = 0;
 
   bool isWithinConsecutiveTapTolerance(Offset secondTapOffset) {
     assert(secondTapOffset != null);
@@ -44,9 +44,17 @@ mixin ConsecutiveTapMixin {
 
   void consecutiveTapTimeout() {
     print('consecutive tap timeout');
+    consecutiveTapTimer?.cancel();
     consecutiveTapTimer = null;
     lastTapOffset = null;
-    tapCount = 0;
+    consecutiveTapCount = 0;
+  }
+
+  void consecutiveTapTimerReset() {
+    print('consecutiveTapTimer reset');
+    consecutiveTapTimer?.cancel();
+    consecutiveTapTimer = null;
+    consecutiveTapTimer = Timer(kDoubleTapTimeout, consecutiveTapTimeout);
   }
 }
 
@@ -62,24 +70,24 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
 
   GestureTapCallback? onSecondaryTap;
 
-  GestureTapDownWithTapCountCallback? onTapDown;
+  GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
 
   GestureTapDownCallback? onSecondaryTapDown;
 
-  GestureDragStartWithTapCountCallback? onStart;
+  GestureDragStartWithConsecutiveTapCountCallback? onStart;
 
-  GestureDragUpdateWithTapCountCallback? onUpdate;
+  GestureDragUpdateWithConsecutiveTapCountCallback? onUpdate;
 
-  GestureDragEndWithTapCountCallback? onEnd;
+  GestureDragEndWithConsecutiveTapCountCallback? onEnd;
 
-  GestureTapUpWithTapCountCallback? onTapUp;
+  GestureTapUpWithConsecutiveTapCountCallback? onTapUp;
 
   GestureTapUpCallback? onSecondaryTapUp;
 
   GestureTapAndDragCancelCallback? onCancel;
 
   // For local tap drag count
-  int? _dragTapCount;
+  int? _consecutiveTapCountWhileDragging;
   
   // Drag related state
   late OffsetPair _initialPosition;
@@ -125,21 +133,21 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
         );
 
         if (lastTapOffset == null) {
-          tapCount += 1;
+          consecutiveTapCount += 1;
           lastTapOffset = details.globalPosition;
         } else {
           if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(details.globalPosition)) {
-            tapCount += 1;
-            consecutiveTapTimer!.reset();
+            consecutiveTapCount += 1;
+            consecutiveTapTimerReset();
           }
         }
 
-        _dragTapCount = tapCount;
+        _consecutiveTapCountWhileDragging = consecutiveTapCount;
 
         switch (_initialButtons) {
           case kPrimaryButton:
             if (onTapDown != null) {
-              invokeCallback('onTapDown', () => onTapDown!(details, tapCount));
+              invokeCallback('onTapDown', () => onTapDown!(details, consecutiveTapCount));
             }
             break;
           case kSecondaryButton:
@@ -163,7 +171,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
           offsetFromOrigin: event.position - _initialPosition.global,
           localOffsetFromOrigin: event.localPosition - _initialPosition.local,
         );
-        invokeCallback<void>('onUpdate', () => onUpdate!(details, _dragTapCount!));
+        invokeCallback<void>('onUpdate', () => onUpdate!(details, _consecutiveTapCountWhileDragging!));
       } else if (_state == _DragState.possible) {
         print('is zoom start ${event is PointerPanZoomStartEvent}');
         _state = _DragState.accepted;
@@ -175,7 +183,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
           kind: getKindForPointer(event.pointer),
         );
 
-        invokeCallback<void>('onStart', () => onStart!(details, _dragTapCount!));
+        invokeCallback<void>('onStart', () => onStart!(details, _consecutiveTapCountWhileDragging!));
       }
     } else if (event is PointerUpEvent) {
       print('handle PointerUpEvent $event');
@@ -189,7 +197,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
       switch (_initialButtons) {
         case kPrimaryButton:
           if (onTapDown != null) {
-            invokeCallback('onTapUp', () => onTapUp!(upDetails, tapCount));
+            invokeCallback('onTapUp', () => onTapUp!(upDetails, consecutiveTapCount));
           }
           break;
         case kSecondaryButton:
@@ -202,9 +210,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
           break;
         default:
       }
-      invokeCallback<void>('onEnd', () => onEnd!(endDetails, tapCount));
-      _dragTapCount = null;
-      consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, consecutiveTapTimeout);
+      invokeCallback<void>('onEnd', () => onEnd!(endDetails, consecutiveTapCount));
+      _consecutiveTapCountWhileDragging = null;
+      consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
     } else {
       print('handle unknown pointer $event');
     }
@@ -233,12 +241,12 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
          deadline: duration ?? kLongPressTimeout,
        );
 
-  GestureTapDownWithTapCountCallback? onTapDown;
+  GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
   GestureLongPressStartCallback? onLongPressStart;
   GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
   GestureLongPressEndCallback? onLongPressEnd;
   GestureLongPressCancelCallback? onLongPressCancel;
-  GestureTapUpWithTapCountCallback? onTapUp;
+  GestureTapUpWithConsecutiveTapCountCallback? onTapUp;
 
   bool _isDoubleTap = false;
   bool _longPressAccepted = false;
@@ -327,21 +335,21 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
     );
 
     if (lastTapOffset == null) {
-      tapCount += 1;
+      consecutiveTapCount += 1;
       lastTapOffset = details.globalPosition;
     } else {
       if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(details.globalPosition)) {
-        tapCount += 1;
-        consecutiveTapTimer!.reset();
+        consecutiveTapCount += 1;
+        consecutiveTapTimerReset();
       }
     }
 
-    _isDoubleTap = tapCount == 2;
+    _isDoubleTap = consecutiveTapCount == 2;
 
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapDown != null) {
-          invokeCallback<void>('onTapDown', () => onTapDown!(details, tapCount));
+          invokeCallback<void>('onTapDown', () => onTapDown!(details, consecutiveTapCount));
         }
         break;
       default:
@@ -361,13 +369,13 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapUp != null) {
-          invokeCallback<void>('onTapUp', () => onTapUp!(details, tapCount));
+          invokeCallback<void>('onTapUp', () => onTapUp!(details, consecutiveTapCount));
         }
         break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
     }
-    consecutiveTapTimer ??= RestartableTimer(kDoubleTapTimeout, consecutiveTapTimeout);
+    consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
   }
 
   void _checkLongPressCancel() {
