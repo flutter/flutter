@@ -305,7 +305,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     WidgetTester tester,
     ui.Image image,
     ByteData byteData,
-    ) async {
+  ) async {
     Evaluation result = const Evaluation.pass();
 
     // Skip disabled nodes, as they not required to pass contrast check.
@@ -345,7 +345,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     WidgetTester tester,
     ui.Image image,
     ByteData byteData,
-    ) async {
+  ) async {
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
     double? fontSize;
