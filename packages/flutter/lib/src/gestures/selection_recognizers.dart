@@ -219,14 +219,20 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
   }
 
   @override
-  // TODO: implement debugDescription
-  String get debugDescription => 'tap_and_drag';
-
-  @override
   void rejectGesture(int pointer) {
     // TODO: implement rejectGesture
     print('reject gesture $pointer');
   }
+
+  @override
+  void dispose() {
+    consecutiveTapTimeout();
+    super.dispose();
+  }
+
+  @override
+  // TODO: implement debugDescription
+  String get debugDescription => 'tap_and_drag';
 }
 
 class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer with ConsecutiveTapMixin {
@@ -491,6 +497,12 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
   void acceptGesture(int pointer) {
     // Winning the arena isn't important here since it may happen from a sweep.
     // Explicitly exceeding the deadline puts the gesture in accepted state.
+  }
+
+  @override
+  void dispose() {
+    consecutiveTapTimeout();
+    super.dispose();
   }
 
   @override
