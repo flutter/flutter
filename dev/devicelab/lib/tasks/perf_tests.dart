@@ -708,7 +708,7 @@ class StartupTest {
             '--profile',
             '--target=$target',
           ]);
-          String basename = path.basename(testDirectory);
+          final String basename = path.basename(testDirectory);
           applicationBinaryPath = path.join(
             testDirectory,
             'build',
