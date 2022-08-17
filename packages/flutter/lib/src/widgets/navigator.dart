@@ -17,6 +17,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'heroes.dart';
 import 'overlay.dart';
@@ -217,7 +218,7 @@ abstract class Route<T> {
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
       if (navigator?.widget.requestFocus ?? false) {
-        navigator!.focusScopeNode.requestFocus();
+        navigator!.focusNode.enclosingScope?.requestFocus();
       }
     });
   }
@@ -255,7 +256,7 @@ abstract class Route<T> {
         // Since the reference to the navigator will be set to null after it is
         // disposed, we have to do a null-safe operation in case that happens
         // within the same frame when it is added.
-        navigator?.focusScopeNode.requestFocus();
+        navigator?.focusNode.enclosingScope?.requestFocus();
       });
     }
   }
@@ -3207,8 +3208,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
   final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
 
-  /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
-  final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'Navigator Scope');
+  /// The [FocuseScopeNode] for the [FocusScope] that encloses the topmost navigator.
+  @Deprecated(
+    'Use focusNode.enclosingScope! instead. '
+    'This feature was deprecated after v3.1.0-0.'
+  )
+  FocusScopeNode get focusScopeNode => focusNode.enclosingScope!;
+
+  /// The [FocuseNode] for the [Focus] that encloses the routes.
+  final FocusNode focusNode = FocusNode(debugLabel: 'Navigator');
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
@@ -3531,7 +3539,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }());
     _updateHeroController(null);
-    focusScopeNode.dispose();
+    focusNode.dispose();
     for (final _RouteEntry entry in _history) {
       entry.dispose();
     }
@@ -5226,14 +5234,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         onPointerCancel: _handlePointerUpOrCancel,
         child: AbsorbPointer(
           absorbing: false, // it's mutated directly by _cancelActivePointers above
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: UnmanagedRestorationScope(
-              bucket: bucket,
-              child: Overlay(
-                key: _overlayKey,
-                initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+          child: FocusTraversalGroup(
+            child: Focus(
+              focusNode: focusNode,
+              autofocus: true,
+              includeSemantics: false,
+              skipTraversal: true,
+              child: UnmanagedRestorationScope(
+                bucket: bucket,
+                child: Overlay(
+                  key: _overlayKey,
+                  initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                ),
               ),
             ),
           ),
