@@ -1310,9 +1310,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         child: result,
       ),
     );
-    // if (height != null) {
-    //   result = SizedBox(height: height, child: result);
-    // }
     return Semantics(
       button: widget.tapEnabled,
       container: true,
@@ -1323,7 +1320,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 }
 
-/// Redirects the [position.dy] passed to [RenderBox.hitTest] to the vertical
+/// Redirects the [buttonRect.dy] passed to [RenderBox.hitTest] to the vertical
 /// center of the widget.
 ///
 /// The primary purpose of this widget is to allow padding around the [RawChip]

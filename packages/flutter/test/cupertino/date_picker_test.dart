@@ -1601,6 +1601,53 @@ void main() {
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
+
+  testWidgets('TimerPicker minDate - maxDate with minuteInterval', (WidgetTester tester) async {
+    late DateTime date;
+    final DateTime minimum = DateTime(2022, 6, 14, 3, 31);
+    final DateTime initial = DateTime(2022, 6, 14, 3, 40);
+    final DateTime maximum = DateTime(2022, 6, 14, 3, 49);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              initialDateTime: initial,
+              minimumDate: minimum,
+              maximumDate: maximum,
+              minuteInterval: 5,
+              use24hFormat: true,
+              onDateTimeChanged: (DateTime newDate) {
+                date = newDate;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag picker minutes to min date
+    await tester.drag(find.text('40'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Returns to min date.
+    expect(
+      date,
+      DateTime(2022, 6, 14, 3, 35),
+    );
+
+    // Drag picker minutes to max date
+    await tester.drag(find.text('50'), const Offset(0.0, -64.0), touchSlopY: 0.0, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Returns to max date.
+    expect(
+      date,
+      DateTime(2022, 6, 14, 3, 45),
+    );
+  });
 }
 
 Widget _buildPicker({

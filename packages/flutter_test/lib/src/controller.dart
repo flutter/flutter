@@ -92,6 +92,21 @@ abstract class WidgetController {
     });
   }
 
+  /// Find all layers that are children of the provided [finder].
+  ///
+  /// The [finder] must match exactly one element.
+  Iterable<Layer> layerListOf(Finder finder) {
+    TestAsyncUtils.guardSync();
+    final Element element = finder.evaluate().single;
+    final RenderObject object = element.renderObject!;
+    RenderObject current = object;
+    while (current.debugLayer == null) {
+      current = current.parent! as RenderObject;
+    }
+    final ContainerLayer layer = current.debugLayer!;
+    return _walkLayers(layer);
+  }
+
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
   /// The returned iterable is lazy. It does not walk the entire widget tree
@@ -1334,9 +1349,6 @@ class LiveWidgetController extends WidgetController {
     assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      // hitTestHistory is an equivalence of _hitTests in [GestureBinding],
-      // used as state for all pointers which are currently down.
-      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime? startTime;
       for (final PointerEventRecord record in records) {
@@ -1361,9 +1373,7 @@ class LiveWidgetController extends WidgetController {
           record.events.forEach(binding.handlePointerEvent);
         }
       }
-      // This makes sure that a gesture is completed, with no more pointers
-      // active.
-      assert(hitTestHistory.isEmpty);
+
       return handleTimeStampDiff;
     });
   }

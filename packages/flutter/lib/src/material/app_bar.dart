@@ -25,6 +25,10 @@ import 'tabs.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late String _logoAsset;
+// double _myToolbarHeight = 250.0;
+
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 const double _kMaxTitleTextScaleFactor = 1.34; // TODO(perc): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
 
@@ -138,6 +142,14 @@ class _PreferredAppBarSize extends Size {
 /// color set to [ColorScheme.onPrimary].
 ///
 /// ** See code in examples/api/lib/material/app_bar/app_bar.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to listen to a nested Scrollable's scroll notification
+/// in a nested scroll view using the [notificationPredicate] property and use it
+/// to make [scrolledUnderElevation] take effect.
+///
+/// ** See code in examples/api/lib/material/app_bar/app_bar.3.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -311,10 +323,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   home: Scaffold(
   ///     appBar: AppBar(
   ///       title: SizedBox(
-  ///         height: toolbarHeight,
-  ///         child: Image.asset(logoAsset),
+  ///         height: _myToolbarHeight,
+  ///         child: Image.asset(_logoAsset),
   ///       ),
-  ///       toolbarHeight: toolbarHeight,
+  ///       toolbarHeight: _myToolbarHeight,
   ///     ),
   ///   ),
   /// )
@@ -331,6 +343,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The [actions] become the trailing component of the [NavigationToolbar] built
   /// by this widget. The height of each action is constrained to be no bigger
   /// than the [toolbarHeight].
+  ///
+  /// To avoid having the last action covered by the debug banner, you may want
+  /// to set the [MaterialApp.debugShowCheckedModeBanner] to false.
   /// {@endtemplate}
   ///
   /// {@tool snippet}

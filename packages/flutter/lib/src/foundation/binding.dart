@@ -5,7 +5,7 @@
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
+import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -119,6 +119,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// class.
 ///
 /// ```dart
+/// // continuing from previous example...
 /// class FooLibraryBinding extends BindingBase with BarBinding, FooBinding {
 ///   static FooBinding ensureInitialized() {
 ///     if (FooBinding._instance == null) {

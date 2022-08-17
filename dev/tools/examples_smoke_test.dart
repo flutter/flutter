@@ -9,7 +9,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show stdout, stderr, exitCode, Process, ProcessException;
+import 'dart:io' show Process, ProcessException, exitCode, stderr, stdout;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';

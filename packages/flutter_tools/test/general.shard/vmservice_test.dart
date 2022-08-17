@@ -28,7 +28,6 @@ final vm_service.Isolate isolate = vm_service.Isolate(
     timestamp: 0
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
       id: '1',
@@ -215,6 +214,7 @@ void main() {
       assetsDirectory: Uri(path: 'abc', scheme: 'file'),
       viewId: 'abc',
       uiIsolateId: 'def',
+      windows: false,
     ));
 
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
@@ -224,6 +224,34 @@ void main() {
       containsPair('params', allOf(<Matcher>[
         containsPair('viewId', 'abc'),
         containsPair('assetDirectory', '/abc'),
+        containsPair('isolateId', 'def'),
+      ])),
+    ]));
+  });
+
+  testWithoutContext('setAssetDirectory forwards arguments correctly - windows', () async {
+    final Completer<String> completer = Completer<String>();
+    final vm_service.VmService  vmService = vm_service.VmService(
+      const Stream<String>.empty(),
+      completer.complete,
+    );
+    final FlutterVmService flutterVmService = FlutterVmService(vmService);
+    unawaited(flutterVmService.setAssetDirectory(
+      assetsDirectory: Uri(path: 'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets', scheme: 'file'),
+      viewId: 'abc',
+      uiIsolateId: 'def',
+      // If windows is not set to `true`, then the file path below is incorrectly prepended with a `/` which
+      // causes the engine asset manager to interpret the file scheme as invalid.
+      windows: true,
+    ));
+
+    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+
+    expect(rawRequest, allOf(<Matcher>[
+      containsPair('method', kSetAssetBundlePathMethod),
+      containsPair('params', allOf(<Matcher>[
+        containsPair('viewId', 'abc'),
+        containsPair('assetDirectory', r'C:\Users\Tester\AppData\Local\Temp\hello_worldb42a6da5\hello_world\build\flutter_assets'),
         containsPair('isolateId', 'def'),
       ])),
     ]));

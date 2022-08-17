@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [Drawer] widgets.
 ///
 /// Descendant widgets obtain the current [DrawerThemeData] object

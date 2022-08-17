@@ -1351,6 +1351,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
+    coordinator.updateUserScrollDirection(ScrollDirection.idle);
   }
 
   // This is called by activities when they finish their work and want to go

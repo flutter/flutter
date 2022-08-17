@@ -26,7 +26,7 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// [RenderCustomPaint] (in the rendering library).
 ///
 /// To implement a custom painter, either subclass or implement this interface
-/// to define your custom paint delegate. [CustomPaint] subclasses must
+/// to define your custom paint delegate. [CustomPainter] subclasses must
 /// implement the [paint] and [shouldRepaint] methods, and may optionally also
 /// implement the [hitTest] and [shouldRebuildSemantics] methods, and the
 /// [semanticsBuilder] getter.
