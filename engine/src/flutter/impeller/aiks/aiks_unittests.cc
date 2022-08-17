@@ -93,7 +93,8 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
   auto context = GetContext();
   ASSERT_TRUE(context);
   bool first_frame = true;
-  auto texture = CreateTextureForFixture("table_mountain_nx.png");
+  auto texture = CreateTextureForFixture("table_mountain_nx.png",
+                                         /*enable_mipmapping=*/true);
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     if (first_frame) {
       first_frame = false;
