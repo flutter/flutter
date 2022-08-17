@@ -302,7 +302,7 @@ class BuildInfo {
         map[key] = value;
       });
     }else{
-      map.addAll(environmentMap);
+      return environmentMap;
     }
     return map;
   }
