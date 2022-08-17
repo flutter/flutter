@@ -301,10 +301,10 @@ class BuildInfo {
         // System priority is greater than user priority
         map[key] = value;
       });
+      return map;
     }else{
       return environmentMap;
     }
-    return map;
   }
 
   /// Convert this config to a series of project level arguments to be passed
