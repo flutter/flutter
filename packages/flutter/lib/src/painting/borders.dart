@@ -555,8 +555,8 @@ abstract class ShapeBorder {
   /// [getOuterPath], [paintInterior], and [preferPaintInterior] as follows:
   ///
   /// ```dart
-  /// class RectangleBorder extends ShapeBorder {
-  ///   ...
+  /// abstract class RectangleBorder extends OutlinedBorder {
+  ///   // ...
   ///
   ///   @override
   ///   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
@@ -571,6 +571,8 @@ abstract class ShapeBorder {
   ///
   ///   @override
   ///   bool get preferPaintInterior => true;
+  ///   
+  ///   // ...
   /// }
   /// ```
   ///
