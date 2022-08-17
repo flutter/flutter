@@ -61,7 +61,7 @@ vars = {
   'download_dart_sdk': True,
 
   # Checkout Android dependencies only on platforms where we build for Android targets.
-  'download_android_deps': 'host_os == "mac" or host_os == "linux"',
+  'download_android_deps': 'host_os == "mac" or (host_os == "linux" and host_cpu == "x64")',
 
   # Checkout Windows dependencies only if we are building on Windows.
   'download_windows_deps' : 'host_os == "win"',
@@ -102,7 +102,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '0881a07a2203d23e21712cc5829ec5469ae19e3d',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '4dfab138e7dcc4d174ad0032c102d0f9055ba904',
 
    # Fuchsia compatibility
    #
@@ -638,7 +638,7 @@ deps = {
   'src/buildtools/linux-arm64/clang': {
     'packages': [
       {
-        'package': 'fuchsia/third_party/clang/linux-amd64',
+        'package': 'fuchsia/third_party/clang/linux-arm64',
         'version': 'git_revision:d9e02a30b16ea65a7da87913c40af03e22c9571f'
       }
     ],
