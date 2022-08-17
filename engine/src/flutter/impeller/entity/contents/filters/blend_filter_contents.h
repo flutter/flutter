@@ -11,13 +11,12 @@ namespace impeller {
 
 class BlendFilterContents : public FilterContents {
  public:
-  using AdvancedBlendProc =
-      std::function<bool(const FilterInput::Vector& inputs,
-                         const ContentContext& renderer,
-                         const Entity& entity,
-                         RenderPass& pass,
-                         const Rect& coverage,
-                         std::optional<Color> foreground_color)>;
+  using AdvancedBlendProc = std::function<std::optional<Snapshot>(
+      const FilterInput::Vector& inputs,
+      const ContentContext& renderer,
+      const Entity& entity,
+      const Rect& coverage,
+      std::optional<Color> foreground_color)>;
 
   BlendFilterContents();
 
