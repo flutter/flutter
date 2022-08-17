@@ -180,7 +180,6 @@ List<FlutterCommand> generateCommands({
     logger: globals.logger,
     artifacts: globals.artifacts,
     processManager: globals.processManager,
-
   ),
   InstallCommand(),
   LogsCommand(),
