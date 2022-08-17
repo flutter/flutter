@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <impeller/transform.glsl>
+
 uniform VertInfo {
   mat4 mvp;
+  mat4 matrix;
+  vec2 texture_size;
 }
 vert_info;
 
 in vec2 position;
-in vec2 texture_coords;
 
 out vec2 v_texture_coords;
 
 void main() {
   gl_Position = vert_info.mvp * vec4(position, 0.0, 1.0);
-  v_texture_coords = texture_coords;
+  vec2 transformed = IPVec2TransformPosition(vert_info.matrix, position);
+  v_texture_coords = transformed / vert_info.texture_size;
 }

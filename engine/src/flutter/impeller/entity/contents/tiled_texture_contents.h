@@ -9,23 +9,18 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/contents/path_contents.h"
+#include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
 #include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
 
-class TiledTextureContents final : public PathContents {
+class TiledTextureContents final : public ColorSourceContents {
  public:
   TiledTextureContents();
 
   ~TiledTextureContents() override;
-
-  void SetPath(Path path) override;
-
-  // |Contents|
-  std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -39,7 +34,6 @@ class TiledTextureContents final : public PathContents {
   void SetSamplerDescriptor(SamplerDescriptor desc);
 
  private:
-  Path path_;
   std::shared_ptr<Texture> texture_;
   SamplerDescriptor sampler_descriptor_ = {};
   Entity::TileMode x_tile_mode_;

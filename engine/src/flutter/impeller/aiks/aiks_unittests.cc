@@ -13,6 +13,7 @@
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_unittests.h"
+#include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command_buffer.h"
@@ -125,7 +126,21 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
     ImGui::Combo("Min Mag filter", &selected_min_mag_filter,
                  min_mag_filter_names,
                  sizeof(min_mag_filter_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
     ImGui::End();
+
     Canvas canvas;
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
@@ -140,6 +155,7 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
       contents->SetTexture(texture);
       contents->SetTileModes(x_tile_mode, y_tile_mode);
       contents->SetSamplerDescriptor(descriptor);
+      contents->SetMatrix(matrix);
       return contents;
     };
     canvas.DrawRect({0, 0, 600, 600}, paint);
@@ -282,86 +298,162 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
 }
 
 TEST_P(AiksTest, CanRenderLinearGradient) {
-  Canvas canvas;
-  Paint paint;
-  std::vector<Vector3> offsets = {
-      {0, 0, 0}, {0, 300, 0}, {300, 0, 0}, {300, 300, 0}};
-  std::vector<Entity::TileMode> tile_modes = {
-      Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
-      Entity::TileMode::kMirror, Entity::TileMode::kDecal};
-  for (int i = 0; i < 4; i++) {
-    canvas.Save();
-    canvas.Translate(offsets[i]);
-    Entity::TileMode tile_mode = tile_modes[i];
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
     paint.color_source = [tile_mode]() {
       auto contents = std::make_shared<LinearGradientContents>();
-      contents->SetEndPoints({0, 0}, {100, 100});
+      contents->SetEndPoints({0, 0}, {200, 200});
       std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
                                    Color{0.1294, 0.5882, 0.9529, 1.0}};
       contents->SetColors(std::move(colors));
       contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
       return contents;
     };
-    canvas.DrawRect({0, 0, 200, 200}, paint);
-    canvas.Restore();
-  }
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CanRenderRadialGradient) {
-  Canvas canvas;
-  Paint paint;
-  std::vector<Vector3> offsets = {
-      {0, 0, 0}, {0, 300, 0}, {300, 0, 0}, {300, 300, 0}};
-  std::vector<Entity::TileMode> tile_modes = {
-      Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
-      Entity::TileMode::kMirror, Entity::TileMode::kDecal};
-  for (int i = 0; i < 4; i++) {
-    canvas.Save();
-    canvas.Translate(offsets[i]);
-    Entity::TileMode tile_mode = tile_modes[i];
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
     paint.color_source = [tile_mode]() {
       auto contents = std::make_shared<RadialGradientContents>();
-      contents->SetCenterAndRadius({50, 50}, 50);
+      contents->SetCenterAndRadius({100, 100}, 100);
       std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
                                    Color{0.1294, 0.5882, 0.9529, 1.0}};
       contents->SetColors(std::move(colors));
       contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
       return contents;
     };
-    canvas.DrawRect({0, 0, 200, 200}, paint);
-    canvas.Restore();
-  }
-
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CanRenderSweepGradient) {
-  Canvas canvas;
-  Paint paint;
-  std::vector<Vector3> offsets = {
-      {0, 0, 0}, {0, 300, 0}, {300, 0, 0}, {300, 300, 0}};
-  std::vector<Entity::TileMode> tile_modes = {
-      Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
-      Entity::TileMode::kMirror, Entity::TileMode::kDecal};
-  for (int i = 0; i < 4; i++) {
-    canvas.Save();
-    canvas.Translate(offsets[i]);
-    Entity::TileMode tile_mode = tile_modes[i];
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
     paint.color_source = [tile_mode]() {
       auto contents = std::make_shared<SweepGradientContents>();
-      contents->SetCenterAndAngles({50, 50}, Degrees(45), Degrees(135));
+      contents->SetCenterAndAngles({100, 100}, Degrees(45), Degrees(135));
       std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
                                    Color{0.1294, 0.5882, 0.9529, 1.0}};
       contents->SetColors(std::move(colors));
       contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
       return contents;
     };
-    canvas.DrawRect({0, 0, 200, 200}, paint);
-    canvas.Restore();
-  }
-
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {

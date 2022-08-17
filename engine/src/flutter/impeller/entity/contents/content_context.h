@@ -40,10 +40,9 @@
 #include "impeller/entity/gaussian_blur.vert.h"
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
-#include "impeller/entity/gradient_fill.frag.h"
 #include "impeller/entity/gradient_fill.vert.h"
+#include "impeller/entity/linear_gradient_fill.frag.h"
 #include "impeller/entity/radial_gradient_fill.frag.h"
-#include "impeller/entity/radial_gradient_fill.vert.h"
 #include "impeller/entity/rrect_blur.frag.h"
 #include "impeller/entity/rrect_blur.vert.h"
 #include "impeller/entity/solid_fill.frag.h"
@@ -51,7 +50,6 @@
 #include "impeller/entity/solid_stroke.frag.h"
 #include "impeller/entity/solid_stroke.vert.h"
 #include "impeller/entity/sweep_gradient_fill.frag.h"
-#include "impeller/entity/sweep_gradient_fill.vert.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
@@ -62,14 +60,14 @@
 
 namespace impeller {
 
-using GradientFillPipeline =
-    PipelineT<GradientFillVertexShader, GradientFillFragmentShader>;
+using LinearGradientFillPipeline =
+    PipelineT<GradientFillVertexShader, LinearGradientFillFragmentShader>;
 using SolidFillPipeline =
     PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 using RadialGradientFillPipeline =
-    PipelineT<RadialGradientFillVertexShader, RadialGradientFillFragmentShader>;
+    PipelineT<GradientFillVertexShader, RadialGradientFillFragmentShader>;
 using SweepGradientFillPipeline =
-    PipelineT<SweepGradientFillVertexShader, SweepGradientFillFragmentShader>;
+    PipelineT<GradientFillVertexShader, SweepGradientFillFragmentShader>;
 using BlendPipeline = PipelineT<BlendVertexShader, BlendFragmentShader>;
 using RRectBlurPipeline =
     PipelineT<RrectBlurVertexShader, RrectBlurFragmentShader>;
@@ -160,9 +158,9 @@ class ContentContext {
 
   bool IsValid() const;
 
-  std::shared_ptr<Pipeline> GetGradientFillPipeline(
+  std::shared_ptr<Pipeline> GetLinearGradientFillPipeline(
       ContentContextOptions opts) const {
-    return GetPipeline(gradient_fill_pipelines_, opts);
+    return GetPipeline(linear_gradient_fill_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline> GetRadialGradientFillPipeline(
@@ -335,8 +333,8 @@ class ContentContext {
   // These are mutable because while the prototypes are created eagerly, any
   // variants requested from that are lazily created and cached in the variants
   // map.
-  mutable Variants<GradientFillPipeline> gradient_fill_pipelines_;
   mutable Variants<SolidFillPipeline> solid_fill_pipelines_;
+  mutable Variants<LinearGradientFillPipeline> linear_gradient_fill_pipelines_;
   mutable Variants<RadialGradientFillPipeline> radial_gradient_fill_pipelines_;
   mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;

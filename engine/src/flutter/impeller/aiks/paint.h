@@ -25,7 +25,7 @@ struct Paint {
   using MaskFilterProc =
       std::function<std::shared_ptr<FilterContents>(FilterInput::Ref,
                                                     bool is_solid_color)>;
-  using ColorSourceProc = std::function<std::shared_ptr<PathContents>()>;
+  using ColorSourceProc = std::function<std::shared_ptr<ColorSourceContents>()>;
 
   enum class Style {
     kFill,

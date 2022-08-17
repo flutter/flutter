@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/contents/path_contents.h"
+#include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
@@ -17,16 +17,11 @@
 
 namespace impeller {
 
-class RadialGradientContents final : public PathContents {
+class RadialGradientContents final : public ColorSourceContents {
  public:
   RadialGradientContents();
 
   ~RadialGradientContents() override;
-
-  void SetPath(Path path) override;
-
-  // |Contents|
-  std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -42,7 +37,6 @@ class RadialGradientContents final : public PathContents {
   const std::vector<Color>& GetColors() const;
 
  private:
-  Path path_;
   Point center_;
   Scalar radius_;
   std::vector<Color> colors_;
