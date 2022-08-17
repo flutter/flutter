@@ -47,6 +47,17 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Text _getButtonText() {
+    if (Platform.isAndroid) {
+      return Text('Continue in Android view');
+    } else if (Platform.isIOS) {
+      return Text('Continue in iOS view');
+    } else if (Platform.isWindows) {
+      return Text('Cotninue in Windows view');
+    }
+    return Text('Platform not yet supported');
+  }
+
   Future<void> _launchPlatformCount() async {
     final int? platformCounter =
         await _methodChannel.invokeMethod('switchView', _counter);
@@ -76,9 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       padding: const EdgeInsets.all(18.0),
                       child: ElevatedButton(
                         onPressed: _launchPlatformCount,
-                        child: Platform.isIOS
-                          ? const Text('Continue in iOS view')
-                          : const Text('Continue in Android view'),
+                        child: _getButtonText(),
                       ),
                     ),
                   ],
