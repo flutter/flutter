@@ -182,6 +182,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
       return;
     }
     final SnapshotPainter oldPainter = painter;
+    oldPainter.removeListener(markNeedsPaint);
     _painter = value;
     if (painter.shouldRepaint(oldPainter)) {
       markNeedsPaint();
@@ -245,6 +246,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   @override
   void dispose() {
     controller.removeListener(_onRasterValueChanged);
+    painter.removeListener(markNeedsPaint);
     _childRaster?.dispose();
     _childRaster = null;
     super.dispose();

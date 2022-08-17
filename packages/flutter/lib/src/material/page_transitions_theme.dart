@@ -430,6 +430,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       reverse: widget.reverse,
       fade: fadeTransition,
       scale: scaleTransition,
+      animation: widget.animation,
     );
     super.initState();
   }
@@ -445,6 +446,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
         reverse: widget.reverse,
         fade: fadeTransition,
         scale: scaleTransition,
+        animation: widget.animation,
       );
     }
     super.didUpdateWidget(oldWidget);
@@ -806,8 +808,13 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     required this.animation,
   }) {
     animation.addListener(notifyListeners);
+    animation.addStatusListener(_onStatusChange);
     scale.addListener(notifyListeners);
     fade.addListener(notifyListeners);
+  }
+
+  void _onStatusChange(_) {
+    notifyListeners();
   }
 
   final bool reverse;
@@ -845,6 +852,14 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
 
   @override
   void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
+    switch (animation.status) {
+      case AnimationStatus.completed:
+      case AnimationStatus.dismissed:
+        return painter(context, offset);
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+    }
+
     _drawScrim(context, offset, size);
     _updateScaledTransform(_transform, scale.value, size);
     _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
@@ -861,6 +876,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   @override
   void dispose() {
     animation.removeListener(notifyListeners);
+    animation.removeStatusListener(_onStatusChange);
     scale.removeListener(notifyListeners);
     fade.removeListener(notifyListeners);
     _opacityHandle.layer = null;
@@ -882,14 +898,21 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     required this.reverse,
     required this.scale,
     required this.fade,
+    required this.animation,
   }) {
     scale.addListener(notifyListeners);
     fade.addListener(notifyListeners);
+    animation.addStatusListener(_onStatusChange);
+  }
+
+  void _onStatusChange(_) {
+    notifyListeners();
   }
 
   final bool reverse;
   final Animation<double> scale;
   final Animation<double> fade;
+  final Animation<double> animation;
   final Matrix4 _transform = Matrix4.zero();
   final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
   final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
@@ -901,6 +924,15 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
 
   @override
   void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
+    switch (animation.status) {
+      case AnimationStatus.completed:
+      case AnimationStatus.dismissed:
+        return painter(context, offset);
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
+
     _updateScaledTransform(_transform, scale.value, size);
     _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
       _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
@@ -918,6 +950,7 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     _transformHandler.layer = null;
     scale.removeListener(notifyListeners);
     fade.removeListener(notifyListeners);
+    animation.removeStatusListener(_onStatusChange);
     super.dispose();
   }
 }
