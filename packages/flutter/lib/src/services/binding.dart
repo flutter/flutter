@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data' show UnmodifiableByteDataView;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -363,7 +364,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     // on that getter.
     ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (ByteData? reply) {
       try {
-        completer.complete(reply);
+        completer.complete(reply == null ? null : UnmodifiableByteDataView(reply));
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
