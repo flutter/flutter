@@ -1378,9 +1378,9 @@ void main() {
       expect(scaleHighZoomedIn - scaleHighZoomedOut, lessThan(scaleZoomedIn - scaleZoomedOut));
     });
 
-    testWidgets('scrollFrictionCoefficient', (WidgetTester tester) async {
+    testWidgets('interactionEndFrictionCoefficient', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
-      Future<void> pumpScrollFrictionCoefficient(double scrollFrictionCoefficient) {
+      Future<void> pumpScrollFrictionCoefficient(double interactionEndFrictionCoefficient) {
         return tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -1388,7 +1388,7 @@ void main() {
                 width: 200, height: 200,
                 child: InteractiveViewer(
                   constrained: false,
-                  scrollFrictionCoefficient: scrollFrictionCoefficient,
+                  interactionEndFrictionCoefficient: interactionEndFrictionCoefficient,
                   transformationController: transformationController,
                   child: const SizedBox(width: 2000.0, height: 2000.0),
                 ),
@@ -1398,7 +1398,7 @@ void main() {
         );
       }
 
-      // Start with the default scrollFrictionCoefficient.
+      // Start with the default interactionEndFrictionCoefficient.
       await pumpScrollFrictionCoefficient(0.0000135);
       expect(transformationController.value, equals(Matrix4.identity()));
 
@@ -1406,7 +1406,7 @@ void main() {
       final Vector3 translation1 = transformationController.value.getTranslation();
       expect(translation1.y, equals(-50.0));
 
-      // Next try a custom scrollFrictionCoefficient.
+      // Next try a custom interactionEndFrictionCoefficient.
       await pumpScrollFrictionCoefficient(0.01);
       await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 50.0));
       final Vector3 translation2 = transformationController.value.getTranslation();
