@@ -152,14 +152,16 @@ bool FilterContents::Render(const ContentContext& renderer,
 
   // Draw the result texture, respecting the transform and clip stack.
 
-  auto contents = TextureContents::MakeRect(filter_coverage.value());
+  auto texture_rect = Rect::MakeSize(snapshot.texture->GetSize());
+  auto contents = TextureContents::MakeRect(texture_rect);
   contents->SetTexture(snapshot.texture);
   contents->SetSamplerDescriptor(snapshot.sampler_descriptor);
-  contents->SetSourceRect(Rect::MakeSize(snapshot.texture->GetSize()));
+  contents->SetSourceRect(texture_rect);
 
   Entity e;
   e.SetBlendMode(entity.GetBlendMode());
   e.SetStencilDepth(entity.GetStencilDepth());
+  e.SetTransformation(snapshot.transform);
   return contents->Render(renderer, e, pass);
 }
 
