@@ -389,6 +389,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ShapeBorder expansionTileBorder = _border.value ?? const Border();
 
     return Container(
+      clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
         color: _backgroundColor.value
                   ?? expansionTileTheme.backgroundColor
