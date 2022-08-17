@@ -10,6 +10,7 @@ import 'expansion_tile_theme.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
+import 'material.dart';
 import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
@@ -68,8 +69,8 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedTextColor,
     this.iconColor,
     this.collapsedIconColor,
-    this.border,
-    this.collapsedBorder,
+    this.shape,
+    this.collapsedShape,
     this.controlAffinity,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
@@ -256,13 +257,27 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final Color? collapsedTextColor;
 
-  /// Tile's border when the sublist is expanded.
-  /// If this property is null then a [Border] with vertical direction sides default to Color [Theme.divider] is used
-  final Border? border;
+  /// Tile's border shape when the sublist is expanded.
+  ///
+  /// If this property is null then [ExpansionTileThemeData.shape] is used. If that
+  /// is also null then a [Border] with vertical direction sides default to Color [Theme.divider] is used
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final ShapeBorder? shape;
 
-  /// Tile's border when the sublist is collapsed.
-  /// If this property is null then a [Border] with vertical direction sides default to Color [Colors.transparent] is used
-  final Border? collapsedBorder;
+  /// Tile's border shape when the sublist is collapsed.
+  ///
+  /// If this property is null then [ExpansionTileThemeData.collapsedShape] is used. If that
+  /// is also null then a [Border] with vertical direction sides default to Color [Colors.transparent] is used
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final ShapeBorder? collapsedShape;
 
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
   ///
@@ -279,7 +294,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
 
-  final BorderTween _borderTween = BorderTween();
+  final ShapeBorderTween _borderTween = ShapeBorderTween();
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
@@ -287,7 +302,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   late AnimationController _controller;
   late Animation<double> _iconTurns;
   late Animation<double> _heightFactor;
-  late Animation<Border?> _border;
+  late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
@@ -371,12 +386,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final Border expansionTileBorder = _border.value ?? const Border();
+    final ShapeBorder expansionTileBorder = _border.value ?? const Border();
 
     return Container(
-      decoration: BoxDecoration(
-        color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
-        border: expansionTileBorder,
+      decoration: ShapeDecoration(
+        color: _backgroundColor.value
+                  ?? expansionTileTheme.backgroundColor
+                  ?? Colors.transparent,
+        shape: expansionTileBorder,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -413,14 +430,18 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     _borderTween
-      ..begin = widget.collapsedBorder ?? const Border(
-        top: BorderSide(color: Colors.transparent),
-        bottom: BorderSide(color: Colors.transparent)
-      )
-      ..end = widget.border ?? Border(
-        top: BorderSide(color: theme.dividerColor),
-        bottom: BorderSide(color: theme.dividerColor),
-      );
+      ..begin = widget.collapsedShape
+        ?? expansionTileTheme.collapsedShape
+        ?? const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent)
+        )
+      ..end = widget.shape
+        ?? expansionTileTheme.collapsedShape
+        ?? Border(
+          top: BorderSide(color: theme.dividerColor),
+          bottom: BorderSide(color: theme.dividerColor),
+        );
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor

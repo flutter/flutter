@@ -558,11 +558,11 @@ void main() {
   testWidgets('ExpansionTile Border', (WidgetTester tester) async {
     const Key expansionTileKey = PageStorageKey<String>('expansionTile');
 
-    const Border collapsedBorder = Border(
+    const Border collapsedShape = Border(
       top: BorderSide(color: Colors.blue),
       bottom: BorderSide(color: Colors.green)
     );
-    final Border border = Border.all(color: Colors.red);
+    final Border shape = Border.all(color: Colors.red);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -572,8 +572,8 @@ void main() {
               ExpansionTile(
                 key: expansionTileKey,
                 title: const Text('ExpansionTile'),
-                collapsedBorder: collapsedBorder,
-                border: border,
+                collapsedShape: collapsedShape,
+                shape: shape,
                 children: const <Widget>[
                   ListTile(
                     title: Text('0'),
@@ -592,15 +592,15 @@ void main() {
     ));
 
     // expansionTile should be Collapsed now.
-    BoxDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as BoxDecoration;
-    expect(expandedContainerDecoration.border, collapsedBorder);
+    ShapeDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
+    expect(expandedContainerDecoration.shape, collapsedShape);
 
     await tester.tap(find.text('ExpansionTile'));
     await tester.pumpAndSettle();
 
     // expansionTile should be Expanded now.
-    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as BoxDecoration;
-    expect(expandedContainerDecoration.border, border);
+    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
+    expect(expandedContainerDecoration.shape, shape);
   });
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
