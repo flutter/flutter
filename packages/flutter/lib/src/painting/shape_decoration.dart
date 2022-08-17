@@ -310,8 +310,9 @@ class _ShapeDecorationPainter extends BoxPainter {
   Path? _innerPath;
   Paint? _interiorPaint;
   int? _shadowCount;
-  late List<MapEntry<Rect, Paint>> _shadowBounds;
-  late List<MapEntry<Path, Paint>> _shadowPaths;
+  late List<Rect> _shadowBounds;
+  late List<Path> _shadowPaths;
+  late List<Paint> _shadowPaints;
 
   @override
   VoidCallback get onChanged => super.onChanged!;
@@ -336,23 +337,22 @@ class _ShapeDecorationPainter extends BoxPainter {
       _interiorPaint!.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
     }
     if (_decoration.shadows != null) {
-      _shadowCount ??= _decoration.shadows!.length;
+      if (_shadowCount == null) {
+        _shadowCount = _decoration.shadows!.length;
+        _shadowPaints = <Paint>[
+          ..._decoration.shadows!.map((BoxShadow shadow) => shadow.toPaint()),
+        ];
+      }
       if (_decoration.shape.preferPaintInterior) {
-        _shadowBounds = <MapEntry<Rect, Paint>>[
+        _shadowBounds = <Rect>[
           ..._decoration.shadows!.map((BoxShadow shadow) {
-            return MapEntry<Rect, Paint>(
-              rect.shift(shadow.offset).inflate(shadow.spreadRadius),
-              shadow.toPaint(),
-            );
+            return rect.shift(shadow.offset).inflate(shadow.spreadRadius);
           }),
         ];
       } else {
-        _shadowPaths = <MapEntry<Path, Paint>>[
+        _shadowPaths = <Path>[
           ..._decoration.shadows!.map((BoxShadow shadow) {
-            return MapEntry<Path, Paint>(
-              _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection),
-              shadow.toPaint(),
-            );
+            return _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
           }),
         ];
       }
@@ -372,11 +372,11 @@ class _ShapeDecorationPainter extends BoxPainter {
     if (_shadowCount != null) {
       if (_decoration.shape.preferPaintInterior) {
         for (int index = 0; index < _shadowCount!; index += 1) {
-          _decoration.shape.paintInterior(canvas, _shadowBounds[index].key, _shadowBounds[index].value, textDirection: textDirection);
+          _decoration.shape.paintInterior(canvas, _shadowBounds[index], _shadowPaints[index], textDirection: textDirection);
         }
       } else {
         for (int index = 0; index < _shadowCount!; index += 1) {
-          canvas.drawPath(_shadowPaths[index].key, _shadowPaths[index].value);
+          canvas.drawPath(_shadowPaths[index], _shadowPaints[index]);
         }
       }
     }
