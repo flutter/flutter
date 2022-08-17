@@ -843,6 +843,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example
   /// to defeat both the splash and the hover/pressed overlay, but not the
   /// keyboard focused overlay:
+  ///
   /// ```dart
   /// TabBar(
   ///   splashFactory: NoSplash.splashFactory,
@@ -851,7 +852,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///       return states.contains(MaterialState.focused) ? null : Colors.transparent;
   ///     },
   ///   ),
-  ///   ...
+  ///   tabs: const <Widget>[
+  ///     // ...
+  ///   ],
   /// )
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
@@ -859,13 +862,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
   ///
   /// This can be useful to match the [BoxDecoration.borderRadius] provided as [indicator].
+  ///
   /// ```dart
   /// TabBar(
   ///   indicator: BoxDecoration(
   ///     borderRadius: BorderRadius.circular(40),
   ///   ),
   ///   splashBorderRadius: BorderRadius.circular(40),
-  ///   ...
+  ///   tabs: const <Widget>[
+  ///     // ...
+  ///   ],
   /// )
   /// ```
   ///

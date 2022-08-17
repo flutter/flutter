@@ -13,7 +13,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// bool? _throwShotAway = false;
+// late bool? _throwShotAway;
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.

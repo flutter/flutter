@@ -643,6 +643,57 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+
+    testUsingContext('DevFS tracks when FontManifest is updated', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[createDevFSRequest],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await devFS.create();
+
+      expect(devFS.didUpdateFontManifest, false);
+
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+      final FakeBundle bundle = FakeBundle()
+        ..entries['FontManifest.json'] = DevFSByteContent(<int>[1, 2, 3, 4]);
+
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/main.dart'),
+        generator: residentCompiler,
+        dillOutputPath: 'lib/foo.dill',
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: bundle,
+      );
+
+      expect(report.success, true);
+      expect(devFS.shaderPathsToEvict, <String>{});
+      expect(devFS.assetPathsToEvict, <String>{'FontManifest.json'});
+      expect(devFS.didUpdateFontManifest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
   });
 }
 

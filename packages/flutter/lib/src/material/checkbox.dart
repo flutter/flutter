@@ -12,6 +12,10 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// bool _throwShotAway = false;
+// late StateSetter setState;
+
 /// A Material Design checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of

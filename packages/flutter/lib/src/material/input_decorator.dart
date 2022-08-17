@@ -19,6 +19,9 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late Widget _myIcon;
+
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
@@ -2877,7 +2880,7 @@ class InputDecoration {
   /// ```dart
   /// prefixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
-  ///   child: myIcon, // myIcon is a 48px-wide widget.
+  ///   child: _myIcon, // _myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
@@ -2999,7 +3002,7 @@ class InputDecoration {
   /// ```dart
   /// suffixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
-  ///   child: myIcon, // myIcon is a 48px-wide widget.
+  ///   child: _myIcon, // myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
