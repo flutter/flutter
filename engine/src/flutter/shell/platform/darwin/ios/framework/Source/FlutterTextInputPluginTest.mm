@@ -1137,6 +1137,7 @@ FLUTTER_ASSERT_ARC
       @"composingExtent" : @3
     }];
     OCMVerify([mockInputView setInputDelegate:[OCMArg isNotNil]]);
+    [inputView removeFromSuperview];
   }
 }
 
