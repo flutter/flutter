@@ -1482,8 +1482,7 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
     // If this is the first frame, set the ImGui's initial size and postion.
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({500, 150});
-      ImGui::SetNextWindowPos({260, 600});
+      ImGui::SetNextWindowPos({10, 10});
     }
 
     // UI state.
@@ -1493,15 +1492,27 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
         0, 0, 1, 0, 0,  //
         0, 0, 0, 1, 0,  //
     };
+    static float offset[2] = {500, 400};
+    static float rotation = 0;
+    static float scale[2] = {0.65, 0.65};
+    static float skew[2] = {0, 0};
 
     // Define the ImGui
-    ImGui::Begin("Color Matrix");
-    std::string label = "##1";
-    label.c_str();
-    for (int i = 0; i < 20; i += 5) {
-      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float,
-                          &(color_matrix.array[i]), 5, NULL, NULL, "%.2f", 0);
-      label[2]++;
+    ImGui::Begin("Color Matrix", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      std::string label = "##1";
+      label.c_str();
+      for (int i = 0; i < 20; i += 5) {
+        ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float,
+                            &(color_matrix.array[i]), 5, NULL, NULL, "%.2f", 0);
+        label[2]++;
+      }
+
+      ImGui::SliderFloat2("Translation", &offset[0], 0,
+                          pass.GetRenderTargetSize().width);
+      ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
+      ImGui::SliderFloat2("Scale", &scale[0], 0, 3);
+      ImGui::SliderFloat2("Skew", &skew[0], -3, 3);
     }
     ImGui::End();
 
@@ -1511,9 +1522,13 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
 
     // Define the entity with the color matrix filter.
     Entity entity;
-    entity.SetTransformation(Matrix::MakeScale(GetContentScale()) *
-                             Matrix::MakeTranslation({250, 200}) *
-                             Matrix::MakeScale(Vector2{0.5, 0.5}));
+    entity.SetTransformation(
+        Matrix::MakeScale(GetContentScale()) *
+        Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
+        Matrix::MakeRotationZ(Radians(rotation)) *
+        Matrix::MakeScale(Vector2(scale[0], scale[1])) *
+        Matrix::MakeSkew(skew[0], skew[1]) *
+        Matrix::MakeTranslation(-Point(bay_bridge->GetSize()) / 2));
     entity.SetContents(filter);
     entity.Render(context, pass);
 
