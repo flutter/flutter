@@ -62,6 +62,11 @@ enum EnginePhase {
   sendSemanticsUpdate,
 }
 
+/// Signature of callbacks to intercept messages on a given channel.
+///
+/// see [TestDefaultBinaryMessenger.setMockDecodedMessageHandler] for more details.
+typedef MockMessageHandler = Future<dynamic> Function(dynamic);
+
 /// Parts of the system that can generate pointer events that reach the test
 /// binding.
 ///
@@ -104,6 +109,14 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   TestDefaultBinaryMessenger createBinaryMessenger() {
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
+}
+
+/// An accessibility announcement.
+class Announcement {
+  Announcement(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite});
+  String message;
+  TextDirection textDirection;
+  Assertiveness? assertiveness;
 }
 
 /// Base class for bindings used by widgets library tests.
@@ -611,6 +624,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails? _pendingExceptionDetails;
 
+  MockMessageHandler? _announcementHandler;
+  List<Announcement>? _announcements;
+
+  /// Returns a list announcements made by the Flutter framework.
+  List<Announcement>? takeAnnouncements() {
+    assert(inTest);
+    return _announcements;
+  }
+
+  /// Returns the most recent announcement made by the Flutter framework.
+  Announcement? getLastAnnouncement(){
+      return _announcements?.last;
+  }
+
   static const TextStyle _messageStyle = TextStyle(
     color: Color(0xFF917FFF),
     fontSize: 40.0,
@@ -700,6 +727,27 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
   }
 
+  Future<dynamic> _handleMessage(dynamic mockMessage) async {
+    final Map<dynamic, dynamic> data =
+        (mockMessage as Map<dynamic, dynamic>)['data'] as Map<dynamic, dynamic>;
+    final String message = data['message'] as String;
+    final TextDirection textDirection = TextDirection.values[data['textDirection'] as int];
+    final dynamic assertivenessLevel = data['assertiveness'];
+    final Announcement announcement;
+    if (assertivenessLevel != null)
+    {
+      final Assertiveness assertiveness = Assertiveness.values[assertivenessLevel as int];
+      announcement = Announcement(message, textDirection, assertiveness: assertiveness);
+    }
+    else
+    {
+      announcement = Announcement(message, textDirection);
+    }
+
+    _announcements ??= <Announcement>[];
+    _announcements!.add(announcement);
+  }
+
   Future<void> _runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester,
@@ -707,6 +755,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ) {
     assert(description != null);
     assert(inTest);
+
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockDecodedMessageHandler<dynamic>(
+            SystemChannels.accessibility, _handleMessage);
+    _announcementHandler = _handleMessage;
+
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     int exceptionCount = 0; // number of un-taken exceptions
@@ -984,6 +1038,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner!.focusManager.dispose();
+
+    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(
+            SystemChannels.accessibility.name, _announcementHandler)) {
+      _announcementHandler = null;
+    }
+    _announcements = null;
 
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();

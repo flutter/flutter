@@ -946,6 +946,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return binding.takeException();
   }
 
+  /// Returns a list announcements made by the Flutter framework.
+  ///
+  /// See [TestWidgetsFlutterBinding.takeAnnouncements] for details.
+  List<Announcement>? takeAnnouncement() {
+    return binding.takeAnnouncements();
+  }
+
+  /// Returns the most recent announcement made by the Flutter framework.
+  ///
+  /// See [TestWidgetsFlutterBinding.getLastAnnouncement] for details.
+  Announcement? getLastAnnouncement(){
+    return binding.getLastAnnouncement();
+  }
+
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of
