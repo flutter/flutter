@@ -26,7 +26,7 @@ typedef GestureDragUpdateWithConsecutiveTapCountCallback = void Function(DragUpd
 typedef GestureDragEndWithConsecutiveTapCountCallback = void Function(DragEndDetails endDetails, int consecutiveTapCount);
 typedef GestureTapAndDragCancelCallback = void Function();
 
-mixin ConsecutiveTapMixin {
+mixin _ConsecutiveTapMixin {
   // For consecutive tap
   Timer? consecutiveTapTimer;
   Offset? lastTapOffset;
@@ -40,6 +40,18 @@ mixin ConsecutiveTapMixin {
 
     final Offset difference = secondTapOffset - lastTapOffset!;
     return difference.distance <= kDoubleTapSlop;
+  }
+
+  void incrementConsecutiveTapCountOnDown(Offset tapGlobalPosition) {
+    if (lastTapOffset == null) {
+      consecutiveTapCount += 1;
+      lastTapOffset = tapGlobalPosition;
+    } else {
+      if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(tapGlobalPosition)) {
+        consecutiveTapCount += 1;
+        consecutiveTapTimerReset();
+      }
+    }
   }
 
   void consecutiveTapTimeout() {
@@ -58,7 +70,7 @@ mixin ConsecutiveTapMixin {
   }
 }
 
-class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with ConsecutiveTapMixin {
+class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _ConsecutiveTapMixin {
   TapAndDragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -133,16 +145,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
           kind: getKindForPointer(event.pointer),
         );
 
-        if (lastTapOffset == null) {
-          consecutiveTapCount += 1;
-          lastTapOffset = details.globalPosition;
-        } else {
-          if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(details.globalPosition)) {
-            consecutiveTapCount += 1;
-            consecutiveTapTimerReset();
-          }
-        }
-
+        incrementConsecutiveTapCountOnDown(details.globalPosition);
         _consecutiveTapCountWhileDragging = consecutiveTapCount;
 
         switch (_initialButtons) {
@@ -238,7 +241,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with Cons
   String get debugDescription => 'tap_and_drag';
 }
 
-class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer with ConsecutiveTapMixin {
+class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer with _ConsecutiveTapMixin {
   TapAndLongPressGestureRecognizer({
     Duration? duration,
     // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
@@ -343,16 +346,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
       kind: getKindForPointer(event.pointer),
     );
 
-    if (lastTapOffset == null) {
-      consecutiveTapCount += 1;
-      lastTapOffset = details.globalPosition;
-    } else {
-      if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(details.globalPosition)) {
-        consecutiveTapCount += 1;
-        consecutiveTapTimerReset();
-      }
-    }
-
+    incrementConsecutiveTapCountOnDown(details.globalPosition);
     _isDoubleTap = consecutiveTapCount == 2;
 
     switch (_initialButtons) {
