@@ -23,11 +23,18 @@ static const CGFloat kStandardTimeOut = 60.0;
 @implementation PlatformViewUITests
 
 - (void)setUp {
+  [super setup];
   self.continueAfterFailure = NO;
 
   self.app = [[XCUIApplication alloc] init];
   [self.app launch];
 }
+
+- (void)tearDown {
+  [self.app terminate];
+  [super tearDown];
+}
+
 - (void)testPlatformViewFocus {
   XCUIElement *entranceButton = self.app.buttons[@"platform view focus test"];
   XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut], @"The element tree is %@", self.app.debugDescription);
