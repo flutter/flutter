@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else if (Platform.isIOS) {
       return const Text('Continue in iOS view');
     } else if (Platform.isWindows) {
-      return const Text('Cotninue in Windows view');
+      return const Text('Continue in Windows view');
     }
     return const Text('Platform not yet supported');
   }
