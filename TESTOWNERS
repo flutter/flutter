@@ -218,7 +218,13 @@
 /dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/entrypoint_dart_registrant.dart @aaclarke @flutter/plugin
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/hello_world_windows__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/hello_world_win_desktop__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_gallery_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_view_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/platform_view_win_desktop__start_up.dart @schectman @flutter/desktop
 
 ## Host only framework tests
 # Linux analyze
