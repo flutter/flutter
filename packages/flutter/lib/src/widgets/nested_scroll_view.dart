@@ -686,7 +686,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
   }
 
-  // TBD
   // TODO(Piinks): https://github.com/flutter/flutter/issues/100748
   @override
   Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
@@ -1368,7 +1367,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     ));
   }
 
-  // TBD
   // TODO(Piinks): see https://github.com/flutter/flutter/issues/100748
   @override
   Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
