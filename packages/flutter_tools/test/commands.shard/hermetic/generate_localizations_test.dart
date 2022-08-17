@@ -195,16 +195,16 @@ void main() {
     "description": "Sample description"
   }
 }''');
-    const FakeCommand dartFormatCommand = FakeCommand(
-      command: <String>[
-        'HostArtifact.engineDartBinary',
-        'format',
-        '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
-        '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
-      ]
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'HostArtifact.engineDartBinary',
+          'format',
+          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
+          '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+        ]
+      )
     );
-
-    processManager.addCommand(dartFormatCommand);
 
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
@@ -214,6 +214,50 @@ void main() {
     );
     
     await createTestCommandRunner(command).run(<String>['gen-l10n', '--format']);
+
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    expect(outputDirectory.existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('dart format is run when format: true is passed into l10n.yaml', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    final File configFile = fileSystem.file('l10n.yaml')..createSync();
+    configFile.writeAsStringSync('''
+format: true
+''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'HostArtifact.engineDartBinary',
+          'format',
+          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
+          '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+        ]
+      )
+    );
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
     final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
