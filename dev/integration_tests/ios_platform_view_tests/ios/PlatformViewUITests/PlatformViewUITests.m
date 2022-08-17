@@ -31,6 +31,11 @@ static const CGFloat kStandardTimeOut = 60.0;
 }
 
 - (void)tearDown {
+  // This is trying to fix a "failed to terminate" failure, which is likely a bug in Xcode.
+  // In theory the terminate call is not necessary, but many has encountered this similar
+  // issue, and fixed it by terminating the app and relaunching it if needed for each test.
+  // Here we simply try terminating the app in tearDown, but if it does not work,
+  // then alternative solution is to terminate and relaunch the app.
   [self.app terminate];
   [super tearDown];
 }
