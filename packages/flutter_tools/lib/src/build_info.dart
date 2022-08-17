@@ -258,12 +258,6 @@ class BuildInfo {
     };
   }
 
-  Map<String, dynamic>? defineConfigJsonRawMap() {
-    if (defineConfigJsonMap != null) {
-      return defineConfigJsonMap;
-    }
-    return <String, dynamic>{};
-  }
 
   /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
@@ -271,10 +265,10 @@ class BuildInfo {
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     final Map<String, String> map = <String, String>{};
-    defineConfigJsonRawMap()!.forEach((String key, dynamic value) {
-      map[key]='$value';
+    defineConfigJsonMap?.forEach((String key, dynamic value) {
+      map[key] = '$value';
     });
-    map.addAll(<String, String>{
+    final Map<String, String> environmentMap = <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
@@ -297,7 +291,17 @@ class BuildInfo {
         'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
-    });
+    };
+    if (map.isNotEmpty) {
+      environmentMap.forEach((String key, String value) {
+        if (map.containsKey(key)) {
+          globals.printWarning(
+              'The key: [$key] already exists, you cannot use environment variables that have been used by the system! ');
+        }
+        // System priority is greater than user priority
+        map[key] = value;
+      });
+    }
     return map;
   }
 
@@ -305,11 +309,11 @@ class BuildInfo {
   /// on the command line to gradle.
   List<String> toGradleConfig() {
     final List<String> result = <String>[];
-    defineConfigJsonRawMap()?.forEach((String key,dynamic value) {
+    defineConfigJsonMap?.forEach((String key, dynamic value) {
       result.add('-P$key=$value');
     });
     // PACKAGE_CONFIG not currently supported.
-    result.addAll(<String>[
+    final List<String> gradleList = <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       if (dartObfuscation != null)
@@ -332,7 +336,19 @@ class BuildInfo {
         '-Pcode-size-directory=$codeSizeDirectory',
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
-    ]);
+    ];
+    if (defineConfigJsonMap != null) {
+      defineConfigJsonMap?.forEach((String key, dynamic value) {
+        for (final String gradleConf in gradleList) {
+          final String item = gradleConf.split('=')[0];
+          if (item == '-P$key') {
+            globals.printWarning(
+                'The key: [$key] already exists, you cannot use gradle variables that have been used by the system! ');
+          }
+        }
+      });
+    }
+    result.addAll(gradleList);
     return result;
   }
 }
