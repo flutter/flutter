@@ -5238,8 +5238,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             child: Focus(
               focusNode: focusNode,
               autofocus: true,
-              includeSemantics: false,
               skipTraversal: true,
+              includeSemantics: false,
               child: UnmanagedRestorationScope(
                 bucket: bucket,
                 child: Overlay(
