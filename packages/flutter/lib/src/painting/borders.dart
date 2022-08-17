@@ -571,7 +571,7 @@ abstract class ShapeBorder {
   ///
   ///   @override
   ///   bool get preferPaintInterior => true;
-  ///   
+  ///
   ///   // ...
   /// }
   /// ```
