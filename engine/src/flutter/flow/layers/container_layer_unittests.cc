@@ -29,6 +29,14 @@ TEST_F(ContainerLayerTest, LayerWithParentHasPlatformView) {
                             "!context->has_platform_view");
 }
 
+TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayer) {
+  auto layer = std::make_shared<ContainerLayer>();
+
+  preroll_context()->has_texture_layer = true;
+  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context(), SkMatrix()),
+                            "!context->has_texture_layer");
+}
+
 TEST_F(ContainerLayerTest, PaintingEmptyLayerDies) {
   auto layer = std::make_shared<ContainerLayer>();
 
@@ -54,6 +62,34 @@ TEST_F(ContainerLayerTest, PaintBeforePrerollDies) {
                             "needs_painting\\(context\\)");
 }
 #endif
+
+TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayerNeedsResetFlag) {
+  SkPath child_path1;
+  child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  SkPath child_path2;
+  child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
+  SkPaint child_paint1(SkColors::kGray);
+  SkPaint child_paint2(SkColors::kGreen);
+
+  auto mock_layer1 = std::make_shared<MockLayer>(
+      child_path1, child_paint1, false /* fake_has_platform_view */, false,
+      false, true /* fake_has_texture_layer */);
+  auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
+
+  auto root = std::make_shared<ContainerLayer>();
+  auto container_layer1 = std::make_shared<ContainerLayer>();
+  auto container_layer2 = std::make_shared<ContainerLayer>();
+  root->Add(container_layer1);
+  root->Add(container_layer2);
+  container_layer1->Add(mock_layer1);
+  container_layer2->Add(mock_layer2);
+
+  EXPECT_EQ(preroll_context()->has_texture_layer, false);
+  root->Preroll(preroll_context(), SkMatrix());
+  EXPECT_EQ(preroll_context()->has_texture_layer, true);
+  // The flag for holding texture layer from parent needs to be clear
+  EXPECT_EQ(mock_layer2->parent_has_texture_layer(), false);
+}
 
 TEST_F(ContainerLayerTest, Simple) {
   SkPath child_path;

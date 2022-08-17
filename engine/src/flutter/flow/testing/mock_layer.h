@@ -28,7 +28,8 @@ class MockLayer : public Layer {
                      SkPaint paint = SkPaint(),
                      bool fake_has_platform_view = false,
                      bool fake_reads_surface = false,
-                     bool fake_opacity_compatible_ = false);
+                     bool fake_opacity_compatible_ = false,
+                     bool fake_has_texture_layer = false);
 
   static std::shared_ptr<MockLayer> Make(SkPath path,
                                          SkPaint paint = SkPaint()) {
@@ -46,6 +47,7 @@ class MockLayer : public Layer {
   const SkMatrix& parent_matrix() { return parent_matrix_; }
   const SkRect& parent_cull_rect() { return parent_cull_rect_; }
   bool parent_has_platform_view() { return parent_has_platform_view_; }
+  bool parent_has_texture_layer() { return parent_has_texture_layer_; }
 
   bool IsReplacing(DiffContext* context, const Layer* layer) const override;
   void Diff(DiffContext* context, const Layer* old_layer) override;
@@ -58,9 +60,11 @@ class MockLayer : public Layer {
   SkPath fake_paint_path_;
   SkPaint fake_paint_;
   bool parent_has_platform_view_ = false;
+  bool parent_has_texture_layer_ = false;
   bool fake_has_platform_view_ = false;
   bool fake_reads_surface_ = false;
   bool fake_opacity_compatible_ = false;
+  bool fake_has_texture_layer_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(MockLayer);
 };
