@@ -2675,4 +2675,46 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 121.0)) // thumb
     ); // thumb
   });
+
+  testWidgets('Scrollbar respect the NeverScrollableScrollPhysics physics', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                physics: NeverScrollableScrollPhysics(),
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(797.0, 550.0));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+  });
 }
