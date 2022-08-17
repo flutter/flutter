@@ -32,19 +32,19 @@ Contents::~Contents() = default;
 std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity) const {
-  auto bounds = GetCoverage(entity);
-  if (!bounds.has_value()) {
+  auto coverage = GetCoverage(entity);
+  if (!coverage.has_value()) {
     return std::nullopt;
   }
 
   auto texture = renderer.MakeSubpass(
-      ISize::Ceil(bounds->size),
-      [&contents = *this, &entity, &bounds](const ContentContext& renderer,
-                                            RenderPass& pass) -> bool {
+      ISize::Ceil(coverage->size),
+      [&contents = *this, &entity, &coverage](const ContentContext& renderer,
+                                              RenderPass& pass) -> bool {
         Entity sub_entity;
         sub_entity.SetBlendMode(Entity::BlendMode::kSourceOver);
         sub_entity.SetTransformation(
-            Matrix::MakeTranslation(Vector3(-bounds->origin)) *
+            Matrix::MakeTranslation(Vector3(-coverage->origin)) *
             entity.GetTransformation());
         return contents.Render(renderer, sub_entity, pass);
       });
@@ -54,7 +54,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
   }
 
   return Snapshot{.texture = texture,
-                  .transform = Matrix::MakeTranslation(bounds->origin)};
+                  .transform = Matrix::MakeTranslation(coverage->origin)};
 }
 
 bool Contents::ShouldRender(const Entity& entity,
