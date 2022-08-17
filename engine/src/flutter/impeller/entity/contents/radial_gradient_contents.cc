@@ -16,10 +16,6 @@ RadialGradientContents::RadialGradientContents() = default;
 
 RadialGradientContents::~RadialGradientContents() = default;
 
-void RadialGradientContents::SetPath(Path path) {
-  path_ = std::move(path);
-}
-
 void RadialGradientContents::SetCenterAndRadius(Point center, Scalar radius) {
   center_ = center;
   radius_ = radius;
@@ -43,11 +39,6 @@ const std::vector<Color>& RadialGradientContents::GetColors() const {
   return colors_;
 }
 
-std::optional<Rect> RadialGradientContents::GetCoverage(
-    const Entity& entity) const {
-  return path_.GetTransformedBoundingBox(entity.GetTransformation());
-};
-
 bool RadialGradientContents::Render(const ContentContext& renderer,
                                     const Entity& entity,
                                     RenderPass& pass) const {
@@ -56,13 +47,13 @@ bool RadialGradientContents::Render(const ContentContext& renderer,
 
   auto vertices_builder = VertexBufferBuilder<VS::PerVertexData>();
   {
-    auto result =
-        Tessellator{}.Tessellate(path_.GetFillType(), path_.CreatePolyline(),
-                                 [&vertices_builder](Point point) {
-                                   VS::PerVertexData vtx;
-                                   vtx.vertices = point;
-                                   vertices_builder.AppendVertex(vtx);
-                                 });
+    auto result = Tessellator{}.Tessellate(GetPath().GetFillType(),
+                                           GetPath().CreatePolyline(),
+                                           [&vertices_builder](Point point) {
+                                             VS::PerVertexData vtx;
+                                             vtx.position = point;
+                                             vertices_builder.AppendVertex(vtx);
+                                           });
 
     if (result == Tessellator::Result::kInputError) {
       return true;
@@ -75,6 +66,7 @@ bool RadialGradientContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
+  frame_info.matrix = GetInverseMatrix();
 
   FS::GradientInfo gradient_info;
   gradient_info.center = center_;

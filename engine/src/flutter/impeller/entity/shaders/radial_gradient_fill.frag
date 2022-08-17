@@ -12,12 +12,12 @@ uniform GradientInfo {
   float tile_mode;
 } gradient_info;
 
-in vec2 interpolated_vertices;
+in vec2 v_position;
 
 out vec4 frag_color;
 
 void main() {
-  float len = length(interpolated_vertices - gradient_info.center);
+  float len = length(v_position - gradient_info.center);
   float t = len / gradient_info.radius;
   if ((t < 0.0 || t > 1.0) && gradient_info.tile_mode == kTileModeDecal) {
     frag_color = vec4(0);
