@@ -103,6 +103,8 @@ source_set("flutter_windows_source") {
     "window_proc_delegate_manager.cc",
     "window_proc_delegate_manager.h",
     "window_state.h",
+    "windows_proc_table.cc",
+    "windows_proc_table.h",
   ]
 
   libs = [
@@ -189,6 +191,7 @@ executable("flutter_windows_unittests") {
     "testing/engine_modifier.h",
     "testing/flutter_window_test.cc",
     "testing/flutter_window_test.h",
+    "testing/mock_direct_manipulation.h",
     "testing/mock_gl_functions.h",
     "testing/mock_text_input_manager.cc",
     "testing/mock_text_input_manager.h",
@@ -196,6 +199,7 @@ executable("flutter_windows_unittests") {
     "testing/mock_window.h",
     "testing/mock_window_binding_handler.cc",
     "testing/mock_window_binding_handler.h",
+    "testing/mock_windows_proc_table.h",
     "testing/test_keyboard.cc",
     "testing/test_keyboard.h",
     "testing/test_keyboard_unittests.cc",
