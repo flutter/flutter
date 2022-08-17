@@ -39,7 +39,7 @@ class ClickableTooltipWidgetState extends State<ClickableTooltipWidget> {
       onPressed: _tooltipController.toggle,
       child: DefaultTextStyle(
         style: DefaultTextStyle.of(context).style.copyWith(fontSize: 50),
-        child: OverlayPortal(
+        child: OverlayPortal.top(
           controller: _tooltipController,
           overlayChildBuilder: (BuildContext context) {
             return const Positioned(
