@@ -555,7 +555,7 @@ abstract class ShapeBorder {
   /// [getOuterPath], [paintInterior], and [preferPaintInterior] as follows:
   ///
   /// ```dart
-  /// abstract class RectangleBorder extends OutlinedBorder {
+  /// class RectangleBorder extends OutlinedBorder {
   ///   // ...
   ///
   ///   @override
