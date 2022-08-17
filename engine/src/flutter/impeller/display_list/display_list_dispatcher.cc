@@ -737,8 +737,8 @@ static Path ToPath(const SkPath& path) {
       break;
     case SkPathFillType::kInverseWinding:
     case SkPathFillType::kInverseEvenOdd:
-      // TODO(104848): Support the inverse winding modes.
-      UNIMPLEMENTED;
+      // Flutter doesn't expose these path fill types. These are only visible
+      // via the dispatcher interface. We should never get here.
       fill_type = FillType::kNonZero;
       break;
   }
@@ -1003,11 +1003,9 @@ void DisplayListDispatcher::drawImageLattice(
     const SkRect& dst,
     flutter::DlFilterMode filter,
     bool render_with_attributes) {
-  // Needs https://github.com/flutter/flutter/issues/95434
   // Don't implement this one since it is not exposed by flutter,
   // Skia internally converts calls to drawImageNine into this method,
   // which is then converted back to drawImageNine by display list.
-  UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
