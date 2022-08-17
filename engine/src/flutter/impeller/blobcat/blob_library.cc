@@ -6,66 +6,49 @@
 
 #include <string>
 
+#include "impeller/base/validation.h"
+#include "impeller/blobcat/blob_flatbuffers.h"
+
 namespace impeller {
 
-BlobLibrary::BlobLibrary(std::shared_ptr<fml::Mapping> mapping)
-    : mapping_(std::move(mapping)) {
-  if (!mapping_ || mapping_->GetMapping() == nullptr) {
-    FML_LOG(ERROR) << "Invalid mapping.";
+constexpr BlobShaderType ToShaderType(fb::Stage stage) {
+  switch (stage) {
+    case fb::Stage::kVertex:
+      return BlobShaderType::kVertex;
+    case fb::Stage::kFragment:
+      return BlobShaderType::kFragment;
+  }
+  FML_UNREACHABLE();
+}
+
+BlobLibrary::BlobLibrary(std::shared_ptr<fml::Mapping> payload)
+    : payload_(std::move(payload)) {
+  if (!payload_ || payload_->GetMapping() == nullptr) {
+    VALIDATION_LOG << "Blob mapping was absent.";
     return;
   }
 
-  BlobHeader header;
-  std::vector<Blob> blobs;
-
-  size_t offset = 0u;
-
-  // Read the header.
-  {
-    const size_t read_size = sizeof(BlobHeader);
-    if (mapping_->GetSize() < offset + read_size) {
-      return;
-    }
-    std::memcpy(&header, mapping_->GetMapping() + offset, read_size);
-    offset += read_size;
-
-    // Validate the header.
-    if (header.magic != kBlobCatMagic) {
-      FML_LOG(ERROR) << "Invalid blob magic.";
-      return;
-    }
-
-    blobs.resize(header.blob_count);
+  if (!fb::BlobLibraryBufferHasIdentifier(payload_->GetMapping())) {
+    VALIDATION_LOG << "Invalid blob magic.";
+    return;
   }
 
-  // Read the blob descriptions.
-  {
-    const size_t read_size = sizeof(Blob) * header.blob_count;
-    ::memcpy(blobs.data(), mapping_->GetMapping() + offset, read_size);
-    offset += read_size;  // NOLINT(clang-analyzer-deadcode.DeadStores)
+  auto blob_library = fb::GetBlobLibrary(payload_->GetMapping());
+  if (!blob_library) {
+    return;
   }
 
-  // Read the blobs.
-  {
-    for (size_t i = 0; i < header.blob_count; i++) {
-      const auto& blob = blobs[i];
-
+  if (auto items = blob_library->items()) {
+    for (auto i = items->begin(), end = items->end(); i != end; i++) {
       BlobKey key;
-      key.type = blob.type;
-      key.name = std::string{reinterpret_cast<const char*>(blob.name)};
-      auto mapping = std::make_shared<fml::NonOwnedMapping>(
-          mapping_->GetMapping() + blob.offset,  // offset
-          blob.length,                           // length
-          [mapping = mapping_](const uint8_t* data, size_t size) {}
-          // release proc
-      );
-
-      auto inserted = blobs_.insert({key, mapping});
-      if (!inserted.second) {
-        FML_LOG(ERROR) << "Shader library had duplicate shader named "
-                       << key.name;
-        return;
-      }
+      key.name = i->name()->str();
+      key.type = ToShaderType(i->stage());
+      blobs_[key] = std::make_shared<fml::NonOwnedMapping>(
+          i->mapping()->Data(), i->mapping()->size(),
+          [payload = payload_](auto, auto) {
+            // The pointers are into the base payload. Instead of copying the
+            // data, just hold onto the payload.
+          });
     }
   }
 
@@ -84,7 +67,7 @@ size_t BlobLibrary::GetShaderCount() const {
   return blobs_.size();
 }
 
-std::shared_ptr<fml::Mapping> BlobLibrary::GetMapping(Blob::ShaderType type,
+std::shared_ptr<fml::Mapping> BlobLibrary::GetMapping(BlobShaderType type,
                                                       std::string name) const {
   BlobKey key;
   key.type = type;
@@ -94,7 +77,7 @@ std::shared_ptr<fml::Mapping> BlobLibrary::GetMapping(Blob::ShaderType type,
 }
 
 size_t BlobLibrary::IterateAllBlobs(
-    std::function<bool(Blob::ShaderType type,
+    std::function<bool(BlobShaderType type,
                        const std::string& name,
                        const std::shared_ptr<fml::Mapping>& mapping)> callback)
     const {

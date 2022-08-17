@@ -2,19 +2,30 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//third_party/flatbuffers/flatbuffers.gni")
 import("../tools/impeller.gni")
+
+config("blobcat_config") {
+  configs = [ "//flutter/impeller:impeller_public_config" ]
+  include_dirs = [ "$root_gen_dir/flutter" ]
+}
+
+flatbuffers("blobcat_flatbuffers") {
+  flatbuffers = [ "blob.fbs" ]
+  public_configs = [ ":blobcat_config" ]
+  public_deps = [ "//third_party/flatbuffers" ]
+}
 
 impeller_component("blobcat_lib") {
   sources = [
-    "blob.cc",
-    "blob.h",
     "blob_library.cc",
     "blob_library.h",
     "blob_writer.cc",
     "blob_writer.h",
   ]
 
-  deps = [
+  public_deps = [
+    ":blobcat_flatbuffers",
     "../base",
     "//flutter/fml",
   ]
