@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -28,7 +26,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
-        XcodeProjectBuildContext buildContext,
+        XcodeProjectBuildContext? buildContext,
         Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
@@ -53,9 +51,9 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  TestUsage usage;
-  FakeProcessManager fakeProcessManager;
+  late FileSystem fileSystem;
+  late TestUsage usage;
+  late FakeProcessManager fakeProcessManager;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -86,7 +84,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function() onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -104,7 +102,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function() onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function()? onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -134,7 +132,7 @@ void main() {
 
   FakeCommand exportArchiveCommand({
     String exportOptionsPlist =  '/ExportOptions.plist',
-    File cachePlist,
+    File? cachePlist,
   }) {
     return FakeCommand(
       command: <String>[
