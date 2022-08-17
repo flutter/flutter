@@ -252,7 +252,7 @@ class _NBSample {
   static const int _nbSamples = 100;
 
   // Generated from dev/tools/generate_android_spline_data.dart.
-  static final List<double> _splinePosition = <double>[
+  static const List<double> _splinePosition = <double>[
     0.000022888183591973643,
     0.028561000304762274,
     0.05705195792956655,

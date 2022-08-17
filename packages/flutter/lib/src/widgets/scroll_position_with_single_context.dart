@@ -165,7 +165,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       axisDirection: axisDirection,
     );
     final Simulation? simulation = physics.createBallisticSimulation(
-        initScrollMetrics, initVelocity);
+      initScrollMetrics,
+      initVelocity,
+    );
     if (simulation == null) {
       goIdle();
       return null;

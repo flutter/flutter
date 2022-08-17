@@ -53,6 +53,9 @@ abstract class ScrollActivityDelegate {
   ///
   /// The [initVelocity] and [initPosition] refer to the starting values of the
   /// new ballistic animation.
+  ///
+  /// Can return null if the current [ScrollPhysics.createBallisticSimulation]
+  /// returns null, which will trigger an [IdleScrollActivity] instead.
   Simulation? updateBallisticAnimation(double initVelocity, double initPosition);
 }
 
@@ -528,7 +531,9 @@ class DragScrollActivity extends ScrollActivity {
 class BallisticScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on a [simulation].
   ///
-  /// The [delegate], [simulation], and [vsync] arguments must not be null.
+  /// The [delegate], [simulation], and [vsync] arguments must not be null. The
+  /// [initVelocity] and [initPosition] arguments allow the ballistic activity
+  /// to update the simulation instead of restarting it.
   BallisticScrollActivity(
     super.delegate,
     Simulation simulation,

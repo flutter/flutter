@@ -197,8 +197,10 @@ class TestScrollPhysics extends ScrollPhysics {
     ScrollMetrics position,
     double velocity,
   ) {
-    final Simulation? scrollSimulation =
-    super.createBallisticSimulation(position, velocity);
+    final Simulation? scrollSimulation = super.createBallisticSimulation(
+      position,
+      velocity,
+    );
     if (scrollSimulation != null && scrollSimulationXList != null) {
       return TestScrollScrollSimulation(
         scrollSimulation,
