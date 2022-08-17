@@ -211,7 +211,7 @@ void main() {
       artifacts: artifacts,
       processManager: processManager,
     );
-    
+
     await createTestCommandRunner(command).run(<String>['gen-l10n', '--format']);
 
     final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));

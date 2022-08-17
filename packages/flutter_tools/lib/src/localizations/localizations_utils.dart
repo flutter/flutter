@@ -380,7 +380,7 @@ class LocalizationOptions {
   final bool usesNullableGetter;
 
   /// The `format` argument.
-  /// 
+  ///
   /// Whether or not to format the generated files.
   final bool format;
 }
