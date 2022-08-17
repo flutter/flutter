@@ -48,6 +48,11 @@ void main() {
      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
+  testWithoutContext('createSync accepts exclusive argument', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('file')..create(exclusive: false);
+  });
+
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
     final File file = FakeExistsFile()
       ..error = const FileSystemException('', '', OSError('', 2));
