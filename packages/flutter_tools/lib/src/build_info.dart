@@ -301,6 +301,8 @@ class BuildInfo {
         // System priority is greater than user priority
         map[key] = value;
       });
+    }else{
+      map.addAll(environmentMap);
     }
     return map;
   }
