@@ -50,7 +50,7 @@ void main() {
 
   testWithoutContext('create accepts exclusive argument', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file('file').create(exclusive: true);
+    expect(fileSystem.file('file').create(exclusive: true), isNotNull);
   });
 
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
