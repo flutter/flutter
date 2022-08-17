@@ -34,6 +34,8 @@ class Playground {
 
   static constexpr bool is_enabled() { return is_enabled_; }
 
+  static bool ShouldOpenNewPlaygrounds();
+
   void SetupWindow(PlaygroundBackend backend);
 
   void TeardownWindow();
