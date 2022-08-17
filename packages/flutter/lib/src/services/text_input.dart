@@ -1547,7 +1547,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
-    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
     : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }

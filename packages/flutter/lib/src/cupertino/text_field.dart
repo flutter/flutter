@@ -103,7 +103,6 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   @override
   void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -280,6 +279,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -423,6 +423,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
@@ -619,8 +620,8 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.expands}
   final bool expands;
 
-  /// The maximum number of characters (Unicode scalar values) to allow in the
-  /// text field.
+  /// The maximum number of characters (Unicode grapheme clusters) to allow in
+  /// the text field.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
@@ -822,6 +823,26 @@ class CupertinoTextField extends StatefulWidget {
   // docs with images of what a magnifier is.
   final TextMagnifierConfiguration? magnifierConfiguration;
 
+  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  ///
+  /// If [SpellCheckConfiguration.misspelledTextStyle] is not specified in this
+  /// configuration, then [cupertinoMisspelledTextStyle] is used by default.
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.misspelledTextStyle], the style configured to
+  ///    mark misspelled words with.
+  ///  * [TextField.materialMisspelledTextStyle], the style configured
+  ///    to mark misspelled words with in the Material style.
+  static const TextStyle cupertinoMisspelledTextStyle =
+    TextStyle(
+      decoration: TextDecoration.underline,
+      decorationColor: CupertinoColors.systemRed,
+      decorationStyle: TextDecorationStyle.dotted,
+  );
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -865,6 +886,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
@@ -1304,6 +1326,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       context,
     ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
+    // Set configuration as disabled if not otherwise specified. If specified,
+    // ensure that configuration uses Cupertino text style for misspelled words
+    // unless a custom style is specified.
+    final SpellCheckConfiguration spellCheckConfiguration =
+      widget.spellCheckConfiguration != null &&
+      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
+        ? widget.spellCheckConfiguration!.copyWith(
+            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
+              ?? CupertinoTextField.cupertinoMisspelledTextStyle)
+        : const SpellCheckConfiguration.disabled();
+
     final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
@@ -1369,6 +1402,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
             contextMenuBuilder: widget.contextMenuBuilder,
+            spellCheckConfiguration: spellCheckConfiguration,
           ),
         ),
       ),

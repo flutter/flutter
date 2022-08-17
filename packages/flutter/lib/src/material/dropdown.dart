@@ -826,6 +826,8 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ZzQ_PWrFihg}
+///
 /// See also:
 ///
 ///  * [DropdownButtonFormField], which integrates with the [Form] widget.

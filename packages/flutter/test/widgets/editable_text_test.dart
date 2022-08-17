@@ -12695,6 +12695,164 @@ void main() {
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
 
+  group('Spell check', () {
+    testWidgets(
+      'Spell check configured properly when spell check disabled by default',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+    });
+
+    testWidgets(
+      'Spell check configured properly when spell check disabled manually',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+    });
+
+    testWidgets(
+      'Error thrown when spell check configuration defined without specifying misspelled text style',
+        (WidgetTester tester) async {
+      expect(
+          () {
+            EditableText(
+                controller: TextEditingController(text: 'A'),
+                focusNode: FocusNode(),
+                style: const TextStyle(),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                cursorOpacityAnimates: true,
+                autofillHints: null,
+                spellCheckConfiguration: const SpellCheckConfiguration(),
+            );
+          },
+          throwsAssertionError,
+      );
+    });
+
+    testWidgets(
+      'Spell check configured properly when spell check enabled without specified spell check service and native spell check service defined',
+          (WidgetTester tester) async {
+        tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+          true;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+              ),
+            ),
+          ),
+        );
+
+        final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+        expect(state.spellCheckEnabled, isTrue);
+        expect(
+          state.spellCheckConfiguration.spellCheckService.runtimeType,
+          equals(DefaultSpellCheckService),
+        );
+        tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+    });
+
+    testWidgets(
+      'Spell check configured properly with specified spell check service',
+        (WidgetTester tester) async {
+      final FakeSpellCheckService fakeSpellCheckService = FakeSpellCheckService();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              SpellCheckConfiguration(
+                spellCheckService: fakeSpellCheckService,
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      expect(
+        state.spellCheckConfiguration.spellCheckService.runtimeType,
+        equals(FakeSpellCheckService),
+      );
+    });
+
+    testWidgets(
+      'Error thrown when spell check enabled but no default spell check service available',
+        (WidgetTester tester) async {
+        tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+          false;
+
+        await tester.pumpWidget(
+            EditableText(
+                controller: TextEditingController(text: 'A'),
+                focusNode: FocusNode(),
+                style: const TextStyle(),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                cursorOpacityAnimates: true,
+                autofillHints: null,
+                spellCheckConfiguration:
+                  const SpellCheckConfiguration(
+                    misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                ),
+            ));
+
+        expect(tester.takeException(), isA<AssertionError>());
+        tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+    });
+  });
+
   group('magnifier', () {
     testWidgets('should build nothing by default', (WidgetTester tester) async {
       final EditableText editableText = EditableText(
@@ -13084,7 +13242,7 @@ class _AccentColorTextEditingController extends TextEditingController {
   _AccentColorTextEditingController(String text) : super(text: text);
 
   @override
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing, SpellCheckConfiguration? spellCheckConfiguration}) {
     final Color color = Theme.of(context).colorScheme.secondary;
     return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
   }
@@ -13093,3 +13251,5 @@ class _AccentColorTextEditingController extends TextEditingController {
 class _TestScrollController extends ScrollController {
   bool get attached => hasListeners;
 }
+
+class FakeSpellCheckService extends DefaultSpellCheckService {}

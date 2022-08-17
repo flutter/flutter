@@ -1780,6 +1780,19 @@ class TextSelectionGestureDetectorBuilder {
         && renderEditable.selection!.end >= textPosition.offset;
   }
 
+  bool _tapWasOnSelection(Offset position) {
+    if (renderEditable.selection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = renderEditable.getPositionForPoint(
+      position,
+    );
+
+    return renderEditable.selection!.start < textPosition.offset
+        && renderEditable.selection!.end > textPosition.offset;
+  }
+
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever
@@ -2013,6 +2026,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
+          editableText.hideToolbar();
           // On desktop platforms the selection is set on tap down.
           if (_isShiftTapping) {
             _isShiftTapping = false;
@@ -2020,6 +2034,7 @@ class TextSelectionGestureDetectorBuilder {
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+          editableText.hideToolbar();
           if (isShiftPressedValid) {
             _isShiftTapping = true;
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
@@ -2053,7 +2068,16 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
               // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              final TextSelection previousSelection = editableText.textEditingValue.selection;
+              // If the tap was within the previous selection, then the selection should stay the same.
+              if (!_tapWasOnSelection(details.globalPosition)) {
+                renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              }
+              if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
+                editableText.toggleToolbar(false);
+              } else {
+                editableText.hideToolbar(false);
+              }
               break;
           }
           break;

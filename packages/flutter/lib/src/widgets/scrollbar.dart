@@ -1772,6 +1772,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleThumbPressUpdate(Offset localPosition) {
     assert(_debugCheckHasValidScrollPosition());
+    final ScrollPosition position = _currentController!.position;
+    if (!position.physics.shouldAcceptUserOffset(position)) {
+      return;
+    }
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1798,6 +1802,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // The Scrollbar should page towards the position of the tap on the track.
     assert(_debugCheckHasValidScrollPosition());
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
+
+    final ScrollPosition position = _currentController!.position;
+    if (!position.physics.shouldAcceptUserOffset(position)) {
+      return;
+    }
 
     double scrollIncrement;
     // Is an increment calculator available?

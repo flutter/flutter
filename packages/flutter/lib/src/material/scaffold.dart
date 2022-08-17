@@ -85,6 +85,8 @@ enum _ScaffoldSlot {
 /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.0.dart **
 /// {@end-tool}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lytQi-slT5Y}
+///
 /// See also:
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
