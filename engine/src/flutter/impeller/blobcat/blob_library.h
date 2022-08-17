@@ -11,13 +11,13 @@
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "impeller/blobcat/blob.h"
+#include "impeller/blobcat/blob_types.h"
 
 namespace impeller {
 
 class BlobLibrary {
  public:
-  BlobLibrary(std::shared_ptr<fml::Mapping> mapping);
+  explicit BlobLibrary(std::shared_ptr<fml::Mapping> payload);
 
   BlobLibrary(BlobLibrary&&);
 
@@ -27,17 +27,17 @@ class BlobLibrary {
 
   size_t GetShaderCount() const;
 
-  std::shared_ptr<fml::Mapping> GetMapping(Blob::ShaderType type,
+  std::shared_ptr<fml::Mapping> GetMapping(BlobShaderType type,
                                            std::string name) const;
 
   size_t IterateAllBlobs(
-      std::function<bool(Blob::ShaderType type,
+      std::function<bool(BlobShaderType type,
                          const std::string& name,
                          const std::shared_ptr<fml::Mapping>& mapping)>) const;
 
  private:
   struct BlobKey {
-    Blob::ShaderType type = Blob::ShaderType::kFragment;
+    BlobShaderType type = BlobShaderType::kFragment;
     std::string name;
 
     struct Hash {
@@ -60,7 +60,7 @@ class BlobLibrary {
                                    BlobKey::Hash,
                                    BlobKey::Equal>;
 
-  std::shared_ptr<fml::Mapping> mapping_;
+  std::shared_ptr<fml::Mapping> payload_;
   Blobs blobs_;
   bool is_valid_ = false;
 

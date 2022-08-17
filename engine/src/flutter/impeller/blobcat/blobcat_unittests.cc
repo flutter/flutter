@@ -27,15 +27,15 @@ const std::string CreateStringFromMapping(const fml::Mapping& mapping) {
 
 TEST(BlobTest, CanReadAndWriteBlobs) {
   BlobWriter writer;
-  ASSERT_TRUE(writer.AddBlob(Blob::ShaderType::kVertex, "Hello",
+  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kVertex, "Hello",
                              CreateMappingFromString("World")));
-  ASSERT_TRUE(writer.AddBlob(Blob::ShaderType::kFragment, "Foo",
+  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kFragment, "Foo",
                              CreateMappingFromString("Bar")));
-  ASSERT_TRUE(writer.AddBlob(Blob::ShaderType::kVertex, "Baz",
+  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kVertex, "Baz",
                              CreateMappingFromString("Bang")));
-  ASSERT_TRUE(writer.AddBlob(Blob::ShaderType::kVertex, "Ping",
+  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kVertex, "Ping",
                              CreateMappingFromString("Pong")));
-  ASSERT_TRUE(writer.AddBlob(Blob::ShaderType::kFragment, "Pang",
+  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kFragment, "Pang",
                              CreateMappingFromString("World")));
 
   auto mapping = writer.CreateMapping();
@@ -46,9 +46,9 @@ TEST(BlobTest, CanReadAndWriteBlobs) {
   ASSERT_EQ(library.GetShaderCount(), 5u);
 
   // Wrong type.
-  ASSERT_EQ(library.GetMapping(Blob::ShaderType::kFragment, "Hello"), nullptr);
+  ASSERT_EQ(library.GetMapping(BlobShaderType::kFragment, "Hello"), nullptr);
 
-  auto hello_vtx = library.GetMapping(Blob::ShaderType::kVertex, "Hello");
+  auto hello_vtx = library.GetMapping(BlobShaderType::kVertex, "Hello");
   ASSERT_NE(hello_vtx, nullptr);
   ASSERT_EQ(CreateStringFromMapping(*hello_vtx), "World");
 }

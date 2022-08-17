@@ -470,10 +470,10 @@ FILE: ../../../flutter/impeller/base/work_queue.cc
 FILE: ../../../flutter/impeller/base/work_queue.h
 FILE: ../../../flutter/impeller/base/work_queue_common.cc
 FILE: ../../../flutter/impeller/base/work_queue_common.h
-FILE: ../../../flutter/impeller/blobcat/blob.cc
-FILE: ../../../flutter/impeller/blobcat/blob.h
+FILE: ../../../flutter/impeller/blobcat/blob.fbs
 FILE: ../../../flutter/impeller/blobcat/blob_library.cc
 FILE: ../../../flutter/impeller/blobcat/blob_library.h
+FILE: ../../../flutter/impeller/blobcat/blob_types.h
 FILE: ../../../flutter/impeller/blobcat/blob_writer.cc
 FILE: ../../../flutter/impeller/blobcat/blob_writer.h
 FILE: ../../../flutter/impeller/blobcat/blobcat_main.cc

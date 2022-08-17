@@ -10,7 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "impeller/blobcat/blob.h"
+#include "impeller/blobcat/blob_types.h"
 
 namespace impeller {
 
@@ -22,13 +22,19 @@ class BlobWriter {
 
   [[nodiscard]] bool AddBlobAtPath(const std::string& path);
 
-  [[nodiscard]] bool AddBlob(Blob::ShaderType type,
+  [[nodiscard]] bool AddBlob(BlobShaderType type,
                              std::string name,
                              std::shared_ptr<fml::Mapping> mapping);
 
   std::shared_ptr<fml::Mapping> CreateMapping() const;
 
  private:
+  struct BlobDescription {
+    BlobShaderType type;
+    std::string name;
+    std::shared_ptr<fml::Mapping> mapping;
+  };
+
   std::vector<BlobDescription> blob_descriptions_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(BlobWriter);
