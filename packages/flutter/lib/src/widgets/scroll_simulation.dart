@@ -230,7 +230,7 @@ class _NBSample {
   _NBSample(double time, int duration) {
     // See computeScrollOffset().
     final double t = time * 1000.0 / duration;
-    final int index = (_nbSamples * t).clamp(0, _nbSamples).round();
+    final int index = (_nbSamples * t).clamp(0, _nbSamples).round(); // ignore_clamp_double_lint
     _distanceCoef = 1.0;
     _velocityCoef = 0.0;
     if (index < _nbSamples) {
