@@ -244,6 +244,32 @@ class _RenderTheatreMarker extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_RenderTheatreMarker oldWidget) => oldWidget.theatre != theatre;
+
+  @override
+  InheritedElement createElement() => _RenderTheatreMarkerElement(this);
+
+  static _RenderTheatre? of(BuildContext context, { bool targetRootOverlay = false }) {
+    final _RenderTheatreMarkerElement? element = context.getElementForInheritedWidgetOfExactType<_RenderTheatreMarker>() as _RenderTheatreMarkerElement?;
+    if (element == null) {
+      return null;
+    }
+    final _RenderTheatreMarkerElement dependency = targetRootOverlay ? element._topRenderTheatre : element;
+    return (context.dependOnInheritedElement(dependency) as _RenderTheatreMarker).theatre;
+  }
+}
+
+class _RenderTheatreMarkerElement extends InheritedElement {
+  _RenderTheatreMarkerElement(super.widget);
+
+  _RenderTheatreMarkerElement get _topRenderTheatre {
+    _RenderTheatreMarkerElement? ancestor;
+    visitAncestorElements((Element element) {
+      assert(ancestor == null);
+      ancestor = element.getElementForInheritedWidgetOfExactType<_RenderTheatreMarker>() as _RenderTheatreMarkerElement?;
+      return false;
+    });
+    return ancestor?._topRenderTheatre ?? this;
+  }
 }
 
 /// A class to show, hide and bring to top an [OverlayPortal]'s overlay child
@@ -328,12 +354,12 @@ class OverlayPortalController {
   }
 }
 
-/// A widget that renders its overlay child on the closest [Overlay].
+/// A widget that renders its overlay child on the root [Overlay].
 ///
 /// The overlay child is initially hidden until [OverlayPortalController.show]
 /// is called on the associated [controller]. The [OverlayPortal] uses
 /// [overlayChildBuilder] to build its overlay child and renders it on the
-/// closest [Overlay] as if it was inserted using an [OverlayEntry], while it
+/// root [Overlay] as if it was inserted using an [OverlayEntry], while it
 /// can depend on the same set of [InheritedWidget]s (such as [Theme]) that this
 /// widget can depend on.
 ///
@@ -382,9 +408,9 @@ class OverlayPortalController {
 ///    child in relation to the linked [CompositedTransformTarget] widget.
 class OverlayPortal extends StatefulWidget {
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
-  /// builds on the closest [Overlay], when [OverlayPortalController.show] is
+  /// builds on the root [Overlay], when [OverlayPortalController.show] is
   /// called.
-  const OverlayPortal({
+  const OverlayPortal.top({
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
@@ -395,10 +421,10 @@ class OverlayPortal extends StatefulWidget {
   final OverlayPortalController controller;
 
   /// A [WidgetBuilder] used to build a widget below this widget in the tree,
-  /// that renders on the closest [Overlay].
+  /// that renders on the root [Overlay].
   ///
   /// The said widget will only be built and shown at the topmost level of the
-  /// closest [Overlay] once [OverlayPortalController.show] is called on the
+  /// root [Overlay] once [OverlayPortalController.show] is called on the
   /// associated [controller].
   ///
   /// The built overlay child widget, is inserted below this widget in the
@@ -543,7 +569,7 @@ class _OverlayPortalTopState extends State<OverlayPortal> {
         child: widget.child,
       );
     }
-    final _RenderTheatre? theatre = context.dependOnInheritedWidgetOfExactType<_RenderTheatreMarker>()?.theatre;
+    final _RenderTheatre? theatre = _RenderTheatreMarker.of(context, targetRootOverlay: true);
     assert(theatre != null);
     _location ??= _TopmostLocation(timestamp, theatre!._topChildren);
 
@@ -734,7 +760,7 @@ class _TopOfTheatreChildModel extends _RenderTheatreChildModel {
   _ChildIterator? _hitTestOrderIterator() => _mapIterator(_backwardIterator());
 }
 
-/// A location in a particular [Overlay]'s child model.
+/// A location in a particular [Overlay].
 ///
 // An _OverlayLocation is a cursor pointing to a location in a particular
 // Overlay's child model, and provides methods to insert/remove/move a
@@ -1698,6 +1724,16 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       count += 1;
     }
 
+    _topChildren.visitChildren((RenderObject renderObject) {
+       final RenderBox child = renderObject as RenderBox;
+       onstageChildren.add(
+          child.toDiagnosticsNode(
+            name: 'onstage(top) $count',
+          ),
+        );
+        count += 1;
+    });
+
     return <DiagnosticsNode>[
       ...onstageChildren,
       if (offstageChildren.isNotEmpty)
@@ -1712,7 +1748,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 }
 
 class _OverlayPortal extends RenderObjectWidget {
-
   /// Creates a widget that renders the given [overlayChild] in the [Overlay]
   /// specified by `overlayLocation`.
   ///
