@@ -134,15 +134,19 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
   // Platform views have no children, so context->has_platform_view should
   // always be false.
   FML_DCHECK(!context->has_platform_view);
+  FML_DCHECK(!context->has_texture_layer);
+
   bool child_has_platform_view = false;
   bool child_has_texture_layer = false;
   bool subtree_can_inherit_opacity = context->subtree_can_inherit_opacity;
 
   for (auto& layer : layers_) {
-    // Reset context->has_platform_view to false so that layers aren't treated
-    // as if they have a platform view based on one being previously found in a
-    // sibling tree.
+    // Reset context->has_platform_view and context->has_texture_layer to false
+    // so that layers aren't treated as if they have a platform view or texture
+    // layer based on one being previously found in a sibling tree.
     context->has_platform_view = false;
+    context->has_texture_layer = false;
+
     // Initialize the "inherit opacity" flag to false and allow the layer to
     // override the answer during its |Preroll|
     context->subtree_can_inherit_opacity = false;
