@@ -49,13 +49,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Text _getButtonText() {
     if (Platform.isAndroid) {
-      return Text('Continue in Android view');
+      return const Text('Continue in Android view');
     } else if (Platform.isIOS) {
-      return Text('Continue in iOS view');
+      return const Text('Continue in iOS view');
     } else if (Platform.isWindows) {
-      return Text('Cotninue in Windows view');
+      return const Text('Cotninue in Windows view');
     }
-    return Text('Platform not yet supported');
+    return const Text('Platform not yet supported');
   }
 
   Future<void> _launchPlatformCount() async {
