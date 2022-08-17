@@ -1326,6 +1326,7 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
+              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[
@@ -1333,6 +1334,7 @@ void main() {
                     SemanticsFlag.namesRoute,
                   ],
                   label: 'Popup menu',
+                  textDirection: TextDirection.ltr,
                   children: <TestSemantics>[
                     TestSemantics(
                       children: <TestSemantics>[
@@ -1380,7 +1382,6 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(),
           ],
         ),
       ],
