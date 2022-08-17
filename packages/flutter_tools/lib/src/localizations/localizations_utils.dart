@@ -311,6 +311,7 @@ class LocalizationOptions {
     this.useSyntheticPackage = true,
     this.areResourceAttributesRequired = false,
     this.usesNullableGetter = true,
+    this.format = false,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
@@ -377,6 +378,11 @@ class LocalizationOptions {
   ///
   /// Whether or not the localizations class getter is nullable.
   final bool usesNullableGetter;
+
+  /// The `format` argument.
+  /// 
+  /// Whether or not to format the generated files.
+  final bool format;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -411,6 +417,7 @@ LocalizationOptions parseLocalizationsOptions({
     useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
     usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
+    format: _tryReadBool(yamlNode, 'format', logger) ?? true,
   );
 }
 

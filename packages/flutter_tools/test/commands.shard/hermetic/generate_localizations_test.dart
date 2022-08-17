@@ -11,18 +11,18 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:process/process.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   FileSystem fileSystem;
   BufferLogger logger;
   Artifacts artifacts;
-  ProcessManager processManager;
+  FakeProcessManager processManager;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -32,7 +32,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    processManager = const LocalProcessManager();
+    processManager = FakeProcessManager.empty();
   });
 
   testUsingContext('default l10n settings', () async {
@@ -53,8 +53,6 @@ void main() {
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-    final FlutterCommandResult result = await command.runCommand();
-    expect(result.exitStatus, ExitStatus.success);
     final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
@@ -91,8 +89,6 @@ void main() {
       '--no-synthetic-package',
     ]);
 
-    final FlutterCommandResult result = await command.runCommand();
-    expect(result.exitStatus, ExitStatus.success);
     expect(l10nDirectory.existsSync(), true);
     expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
@@ -153,8 +149,6 @@ void main() {
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-    final FlutterCommandResult result = await command.runCommand();
-    expect(result.exitStatus, ExitStatus.success);
     expect(logger.statusText, contains('Because l10n.yaml exists, the options defined there will be used instead.'));
     final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
@@ -186,6 +180,46 @@ void main() {
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
     expect(command.usage, contains(' If this value is set to false, then '));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('dart format is run when --format is passed', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    const FakeCommand dartFormatCommand = FakeCommand(
+      command: <String>[
+        'HostArtifact.engineDartBinary',
+        'format',
+        '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
+        '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+      ]
+    );
+
+    processManager.addCommand(dartFormatCommand);
+
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    
+    await createTestCommandRunner(command).run(<String>['gen-l10n', '--format']);
+
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    expect(outputDirectory.existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),

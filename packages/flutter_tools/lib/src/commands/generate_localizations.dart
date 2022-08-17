@@ -212,6 +212,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     List<String> outputFileList;
 
+    bool format = boolArg('format') ?? false;
+
     if (_fileSystem.file('l10n.yaml').existsSync()) {
       final LocalizationOptions options = parseLocalizationsOptions(
         file: _fileSystem.file('l10n.yaml'),
@@ -229,6 +231,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         projectDir: _fileSystem.currentDirectory,
         fileSystem: _fileSystem,
       ).outputFileList;
+      format = format || options.format;
     } else {
       final String inputPathString = stringArgDeprecated('arb-dir')!; // Has default value, cannot be null.
       final String? outputPathString = stringArgDeprecated('output-dir');
@@ -277,7 +280,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     }
 
     // All other post processing.
-    if (boolArg('format') ?? false) {
+    if (format) {
+      print('testtestsetest');
       if (_artifacts == null) {
         throwToolExit('Could not find artifacts');
       }
@@ -286,10 +290,9 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       }
       final String dartBinary = _artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
       final List<String> command = <String>[dartBinary, 'format', ...outputFileList];
-      final Process process = await _processManager.start(command);
-      final int result = await process.exitCode;
-      if (result != 0) {
-        throwToolExit('Formatting failed: $result', exitCode: result);
+      final ProcessResult result = await _processManager.run(command);
+      if (result.exitCode != 0) {
+        throwToolExit('Formatting failed: $result', exitCode: result.exitCode);
       }
     }
 
