@@ -54,6 +54,8 @@ class Canvas {
 
   void Concat(const Matrix& xformation);
 
+  void PreConcat(const Matrix& xformation);
+
   void Translate(const Vector3& offset);
 
   void Scale(const Vector2& scale);
@@ -88,8 +90,6 @@ class Canvas {
   void ClipPath(
       Path path,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
-
-  void DrawShadow(Path path, Color color, Scalar elevation);
 
   void DrawPicture(Picture picture);
 

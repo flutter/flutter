@@ -83,6 +83,10 @@ void Canvas::Concat(const Matrix& xformation) {
   xformation_stack_.back().xformation = GetCurrentTransformation() * xformation;
 }
 
+void Canvas::PreConcat(const Matrix& xformation) {
+  xformation_stack_.back().xformation = xformation * GetCurrentTransformation();
+}
+
 void Canvas::ResetTransform() {
   xformation_stack_.back().xformation = {};
 }
@@ -226,8 +230,6 @@ void Canvas::RestoreClip() {
 
   GetCurrentPass().AddEntity(std::move(entity));
 }
-
-void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {}
 
 void Canvas::DrawPicture(Picture picture) {
   if (!picture.pass) {
