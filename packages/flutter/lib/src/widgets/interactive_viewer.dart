@@ -22,7 +22,7 @@ import 'ticker_provider.dart';
 // Widget child = const Placeholder();
 
 /// Default coefficient of friction.
-const double _kDefaultScrollFrictionCoefficient = 0.0000135;
+const double _kDefaultInteractionEndFrictionCoefficient = 0.0000135;
 
 /// A signature for widget builders that take a [Quad] of the current viewport.
 ///
@@ -77,7 +77,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.scrollFrictionCoefficient = _kDefaultScrollFrictionCoefficient,
+    this.interactionEndFrictionCoefficient = _kDefaultInteractionEndFrictionCoefficient,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
@@ -91,7 +91,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(constrained != null),
        assert(minScale != null),
        assert(minScale > 0),
-       assert(scrollFrictionCoefficient > 0),
+       assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
        assert(maxScale != null),
        assert(maxScale > 0),
@@ -125,7 +125,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.scrollFrictionCoefficient = _kDefaultScrollFrictionCoefficient,
+    this.interactionEndFrictionCoefficient = _kDefaultInteractionEndFrictionCoefficient,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
@@ -138,7 +138,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(builder != null),
        assert(minScale != null),
        assert(minScale > 0),
-       assert(scrollFrictionCoefficient > 0),
+       assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
        assert(maxScale != null),
        assert(maxScale > 0),
@@ -308,10 +308,10 @@ class InteractiveViewer extends StatefulWidget {
   /// Used as the coefficient of friction in the inertial translation animation.
   /// This value was eyeballed to give a feel similar to Google Photos.
   ///
-  /// Defaults to [_kDefaultScrollFrictionCoefficient].
+  /// Defaults to [_kDefaultInteractionEndFrictionCoefficient].
   ///
   /// Cannot be null, and must be a finite number greater than zero.
-  final double scrollFrictionCoefficient;
+  final double interactionEndFrictionCoefficient;
 
   /// Called when the user ends a pan or scale gesture on the widget.
   ///
@@ -879,18 +879,18 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Vector3 translationVector = _transformationController!.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final FrictionSimulation frictionSimulationX = FrictionSimulation(
-      widget.scrollFrictionCoefficient,
+      widget.interactionEndFrictionCoefficient,
       translation.dx,
       details.velocity.pixelsPerSecond.dx,
     );
     final FrictionSimulation frictionSimulationY = FrictionSimulation(
-      widget.scrollFrictionCoefficient,
+      widget.interactionEndFrictionCoefficient,
       translation.dy,
       details.velocity.pixelsPerSecond.dy,
     );
     final double tFinal = _getFinalTime(
       details.velocity.pixelsPerSecond.distance,
-      widget.scrollFrictionCoefficient,
+      widget.interactionEndFrictionCoefficient,
     );
     _animation = Tween<Offset>(
       begin: translation,
