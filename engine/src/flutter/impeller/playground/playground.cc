@@ -126,12 +126,21 @@ void Playground::TeardownWindow() {
   impl_.reset();
 }
 
+static std::atomic_bool gShouldOpenNewPlaygrounds = true;
+
+bool Playground::ShouldOpenNewPlaygrounds() {
+  return gShouldOpenNewPlaygrounds;
+}
+
 static void PlaygroundKeyCallback(GLFWwindow* window,
                                   int key,
                                   int scancode,
                                   int action,
                                   int mods) {
   if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_RELEASE) {
+    if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_SUPER | GLFW_MOD_SHIFT)) {
+      gShouldOpenNewPlaygrounds = false;
+    }
     ::glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
 }

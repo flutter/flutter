@@ -16,6 +16,11 @@ void PlaygroundTest::SetUp() {
     return;
   }
 
+  if (!Playground::ShouldOpenNewPlaygrounds()) {
+    GTEST_SKIP_("Skipping due to user action.");
+    return;
+  }
+
   SetupWindow(GetParam());
 }
 
