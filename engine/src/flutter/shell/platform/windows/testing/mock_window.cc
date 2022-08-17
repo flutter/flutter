@@ -7,8 +7,9 @@
 namespace flutter {
 namespace testing {
 MockWindow::MockWindow() : Window(){};
-MockWindow::MockWindow(std::unique_ptr<TextInputManager> text_input_manager)
-    : Window(std::move(text_input_manager)){};
+MockWindow::MockWindow(std::unique_ptr<WindowsProcTable> window_proc_table,
+                       std::unique_ptr<TextInputManager> text_input_manager)
+    : Window(std::move(window_proc_table), std::move(text_input_manager)){};
 
 MockWindow::~MockWindow() = default;
 
@@ -21,6 +22,11 @@ LRESULT MockWindow::Win32DefWindowProc(HWND hWnd,
                                        WPARAM wParam,
                                        LPARAM lParam) {
   return kWmResultDefault;
+}
+
+void MockWindow::SetDirectManipulationOwner(
+    std::unique_ptr<DirectManipulationOwner> owner) {
+  direct_manipulation_owner_ = std::move(owner);
 }
 
 LRESULT MockWindow::InjectWindowMessage(UINT const message,
