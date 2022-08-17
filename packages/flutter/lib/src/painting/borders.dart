@@ -574,7 +574,7 @@ abstract class ShapeBorder {
   /// }
   /// ```
   ///
-  /// When a shape can only be drawn using path, [preferPaintInterior] should
+  /// When a shape can only be drawn using path, [preferPaintInterior] must
   /// return false. In that case, classes such as [ShapeDecoration] will cache
   /// the path from [getOuterPath] and call [Canvas.drawPath] directly.
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
