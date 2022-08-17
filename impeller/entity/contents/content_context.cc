@@ -149,10 +149,10 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
     return;
   }
 
-  gradient_fill_pipelines_[{}] =
-      CreateDefaultPipeline<GradientFillPipeline>(*context_);
   solid_fill_pipelines_[{}] =
       CreateDefaultPipeline<SolidFillPipeline>(*context_);
+  linear_gradient_fill_pipelines_[{}] =
+      CreateDefaultPipeline<LinearGradientFillPipeline>(*context_);
   radial_gradient_fill_pipelines_[{}] =
       CreateDefaultPipeline<RadialGradientFillPipeline>(*context_);
   sweep_gradient_fill_pipelines_[{}] =

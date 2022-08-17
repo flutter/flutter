@@ -161,6 +161,17 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
   return desc;
 }
 
+static Matrix ToMatrix(const SkMatrix& m) {
+  return Matrix{
+      // clang-format off
+      m[0], m[3], 0, m[6],
+      m[1], m[4], 0, m[7],
+      0,    0,    1, 0,
+      m[2], m[5], 0, m[8],
+      // clang-format on
+  };
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setAntiAlias(bool aa) {
   // Nothing to do because AA is implicit.
@@ -305,12 +316,14 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(linear->colors()[i]));
       }
       auto tile_mode = ToTileMode(linear->tile_mode());
+      auto matrix = ToMatrix(linear->matrix());
       paint_.color_source = [start_point, end_point, colors = std::move(colors),
-                             tile_mode]() {
+                             tile_mode, matrix]() {
         auto contents = std::make_shared<LinearGradientContents>();
         contents->SetEndPoints(start_point, end_point);
         contents->SetColors(std::move(colors));
         contents->SetTileMode(tile_mode);
+        contents->SetMatrix(matrix);
         return contents;
       };
       return;
@@ -326,12 +339,14 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(radialGradient->colors()[i]));
       }
       auto tile_mode = ToTileMode(radialGradient->tile_mode());
+      auto matrix = ToMatrix(radialGradient->matrix());
       paint_.color_source = [center, radius, colors = std::move(colors),
-                             tile_mode]() {
+                             tile_mode, matrix]() {
         auto contents = std::make_shared<RadialGradientContents>();
-        contents->SetCenterAndRadius(center, radius),
-            contents->SetColors(std::move(colors));
+        contents->SetCenterAndRadius(center, radius);
+        contents->SetColors(std::move(colors));
         contents->SetTileMode(tile_mode);
+        contents->SetMatrix(matrix);
         return contents;
       };
       return;
@@ -349,12 +364,14 @@ void DisplayListDispatcher::setColorSource(
         colors.emplace_back(ToColor(sweepGradient->colors()[i]));
       }
       auto tile_mode = ToTileMode(sweepGradient->tile_mode());
+      auto matrix = ToMatrix(sweepGradient->matrix());
       paint_.color_source = [center, start_angle, end_angle,
-                             colors = std::move(colors), tile_mode]() {
+                             colors = std::move(colors), tile_mode, matrix]() {
         auto contents = std::make_shared<SweepGradientContents>();
         contents->SetCenterAndAngles(center, start_angle, end_angle);
         contents->SetColors(std::move(colors));
         contents->SetTileMode(tile_mode);
+        contents->SetMatrix(matrix);
         return contents;
       };
       return;
@@ -367,12 +384,14 @@ void DisplayListDispatcher::setColorSource(
       auto x_tile_mode = ToTileMode(image_color_source->horizontal_tile_mode());
       auto y_tile_mode = ToTileMode(image_color_source->vertical_tile_mode());
       auto desc = ToSamplerDescriptor(image_color_source->sampling());
-      paint_.color_source = [texture, x_tile_mode, y_tile_mode, desc]() {
+      auto matrix = ToMatrix(image_color_source->matrix());
+      paint_.color_source = [texture, x_tile_mode, y_tile_mode, desc,
+                             matrix]() {
         auto contents = std::make_shared<TiledTextureContents>();
         contents->SetTexture(texture);
         contents->SetTileModes(x_tile_mode, y_tile_mode);
         contents->SetSamplerDescriptor(desc);
-        // TODO(109384) Support 'matrix' parameter for all color sources.
+        contents->SetMatrix(matrix);
         return contents;
       };
       return;

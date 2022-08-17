@@ -16,10 +16,6 @@ SweepGradientContents::SweepGradientContents() = default;
 
 SweepGradientContents::~SweepGradientContents() = default;
 
-void SweepGradientContents::SetPath(Path path) {
-  path_ = std::move(path);
-}
-
 void SweepGradientContents::SetCenterAndAngles(Point center,
                                                Degrees start_angle,
                                                Degrees end_angle) {
@@ -49,11 +45,6 @@ const std::vector<Color>& SweepGradientContents::GetColors() const {
   return colors_;
 }
 
-std::optional<Rect> SweepGradientContents::GetCoverage(
-    const Entity& entity) const {
-  return path_.GetTransformedBoundingBox(entity.GetTransformation());
-};
-
 bool SweepGradientContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const {
@@ -62,13 +53,13 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
 
   auto vertices_builder = VertexBufferBuilder<VS::PerVertexData>();
   {
-    auto result =
-        Tessellator{}.Tessellate(path_.GetFillType(), path_.CreatePolyline(),
-                                 [&vertices_builder](Point point) {
-                                   VS::PerVertexData vtx;
-                                   vtx.vertices = point;
-                                   vertices_builder.AppendVertex(vtx);
-                                 });
+    auto result = Tessellator{}.Tessellate(GetPath().GetFillType(),
+                                           GetPath().CreatePolyline(),
+                                           [&vertices_builder](Point point) {
+                                             VS::PerVertexData vtx;
+                                             vtx.position = point;
+                                             vertices_builder.AppendVertex(vtx);
+                                           });
 
     if (result == Tessellator::Result::kInputError) {
       return true;
@@ -81,6 +72,7 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
+  frame_info.matrix = GetInverseMatrix();
 
   FS::GradientInfo gradient_info;
   gradient_info.center = center_;
