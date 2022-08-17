@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/display_list_dispatcher.h"
 
+#include <algorithm>
 #include <optional>
 #include <unordered_map>
 
@@ -1061,7 +1062,66 @@ void DisplayListDispatcher::drawShadow(const SkPath& path,
                                        const SkScalar elevation,
                                        bool transparent_occluder,
                                        SkScalar dpr) {
-  UNIMPLEMENTED;
+  Color spot_color = ToColor(color);
+  spot_color.alpha *= 0.25;
+
+  // Compute the spot color -- ported from SkShadowUtils::ComputeTonalColors.
+  {
+    Scalar max =
+        std::max(std::max(spot_color.red, spot_color.green), spot_color.blue);
+    Scalar min =
+        std::min(std::min(spot_color.red, spot_color.green), spot_color.blue);
+    Scalar luminance = (min + max) * 0.5;
+
+    Scalar alpha_adjust =
+        (2.6f + (-2.66667f + 1.06667f * spot_color.alpha) * spot_color.alpha) *
+        spot_color.alpha;
+    Scalar color_alpha =
+        (3.544762f + (-4.891428f + 2.3466f * luminance) * luminance) *
+        luminance;
+    color_alpha = std::clamp(alpha_adjust * color_alpha, 0.0f, 1.0f);
+
+    Scalar greyscale_alpha =
+        std::clamp(spot_color.alpha * (1 - 0.4f * luminance), 0.0f, 1.0f);
+
+    Scalar color_scale = color_alpha * (1 - greyscale_alpha);
+    Scalar tonal_alpha = color_scale + greyscale_alpha;
+    Scalar unpremul_scale = color_scale / tonal_alpha;
+    spot_color = Color(unpremul_scale * spot_color.red,
+                       unpremul_scale * spot_color.green,
+                       unpremul_scale * spot_color.blue, tonal_alpha);
+  }
+
+  Vector3 light_position(0, -1, 1);
+  Scalar occluder_z = dpr * elevation;
+
+  constexpr Scalar kLightRadius = 800 / 600;  // Light radius / light height
+
+  Paint paint;
+  paint.style = Paint::Style::kFill;
+  paint.color = spot_color;
+  paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+      .style = FilterContents::BlurStyle::kNormal,
+      .sigma = Radius{kLightRadius * occluder_z /
+                      canvas_.GetCurrentTransformation().GetScale().y},
+  };
+
+  canvas_.Save();
+  canvas_.PreConcat(
+      Matrix::MakeTranslation(Vector2(0, -occluder_z * light_position.y)));
+
+  SkRect rect;
+  SkRRect rrect;
+  if (path.isRect(&rect)) {
+    canvas_.DrawRect(ToRect(rect), std::move(paint));
+  } else if (path.isRRect(&rrect) && rrect.isSimple()) {
+    canvas_.DrawRRect(ToRect(rrect.rect()), rrect.getSimpleRadii().fX,
+                      std::move(paint));
+  } else {
+    canvas_.DrawPath(ToPath(path), std::move(paint));
+  }
+
+  canvas_.Restore();
 }
 
 Picture DisplayListDispatcher::EndRecordingAsPicture() {

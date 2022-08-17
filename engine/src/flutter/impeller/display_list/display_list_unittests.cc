@@ -16,6 +16,7 @@
 #include "impeller/display_list/display_list_playground.h"
 #include "impeller/geometry/point.h"
 #include "impeller/playground/widgets.h"
+#include "include/core/SkRRect.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -490,6 +491,33 @@ TEST_P(DisplayListTest, CanDrawZeroLengthLine) {
     builder.drawPath(path, paint);
     builder.translate(0, 150);
   }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, CanDrawShadow) {
+  flutter::DisplayListBuilder builder;
+  std::array<SkPath, 3> paths = {
+      SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100)),
+      SkPath{}.addRRect(
+          SkRRect::MakeRectXY(SkRect::MakeXYWH(0, 0, 200, 100), 30, 30)),
+      SkPath{}.addCircle(100, 50, 50),
+  };
+  builder.setColor(flutter::DlColor::kWhite());
+  builder.drawPaint();
+  builder.setColor(flutter::DlColor::kCyan());
+  builder.translate(100, 100);
+  for (size_t x = 0; x < paths.size(); x++) {
+    builder.save();
+    for (size_t y = 0; y < 5; y++) {
+      builder.drawShadow(paths[x], flutter::DlColor::kBlack(), 3 + y * 5, false,
+                         1);
+      builder.drawPath(paths[x]);
+      builder.translate(0, 200);
+    }
+    builder.restore();
+    builder.translate(300, 0);
+  }
+
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
