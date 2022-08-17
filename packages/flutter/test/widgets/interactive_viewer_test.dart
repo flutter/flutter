@@ -1408,7 +1408,7 @@ void main() {
 
       // Next try a custom interactionEndFrictionCoefficient.
       await pumpScrollFrictionCoefficient(0.01);
-      await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, -50.0));
+      await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 50.0));
       final Vector3 translation2 = transformationController.value.getTranslation();
 
       expect(translation2.y, equals(0));
