@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -212,8 +210,9 @@ class InkSparkle extends InteractiveInkFeature {
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
+    if (status == AnimationStatus.completed) {
       dispose();
+    }
   }
 
   static const Duration _animationDuration = Duration(milliseconds: 617);
@@ -431,7 +430,6 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
 
   const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
 
-  // TODO(clocksmith): Update this once shaders are precompiled.
   static void compileShaderIfNeccessary() {
     if (!_initCalled) {
       FragmentShaderManager.inkSparkle().then((FragmentShaderManager manager) {
@@ -440,6 +438,7 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
       _initCalled = true;
     }
   }
+
   static bool _initCalled = false;
   static FragmentShaderManager? _shaderManager;
 
@@ -521,14 +520,10 @@ class FragmentShaderManager {
   /// Creates an [FragmentShaderManager] with an [InkSparkle] effect.
   static Future<FragmentShaderManager> inkSparkle() async {
     final FragmentShaderManager manager = FragmentShaderManager._();
-    await manager._compile();
+    _program = await ui.FragmentProgram.fromAsset(
+      'shaders/ink_sparkle.frag',
+    );
     return manager;
-  }
-
-  /// Compiles the spir-v bytecode into a shader program.
-  Future<void> _compile() async {
-    final ByteData data = await rootBundle.load('shaders/ink_sparkle.frag');
-    _program = await ui.FragmentProgram.compile(spirv: data.buffer);
   }
 
   /// Creates a shader with the original program and optional uniforms.

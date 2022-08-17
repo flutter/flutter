@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +12,9 @@ import 'basic.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Whether in portrait or landscape.
 enum Orientation {
@@ -159,6 +161,23 @@ class MediaQueryData {
   /// pixels are the size of the actual hardware pixels on the device. The
   /// number of physical pixels per logical pixel is described by the
   /// [devicePixelRatio].
+  ///
+  /// ## Troubleshooting
+  ///
+  /// It is considered bad practice to cache and later use the size returned
+  /// by `MediaQuery.of(context).size`. It will make the application non responsive
+  /// and might lead to unexpected behaviors.
+  /// For instance, during startup, especially in release mode, the first returned
+  /// size might be (0,0). The size will be updated when the native platform
+  /// reports the actual resolution.
+  ///
+  /// See the article on [Creating responsive and adaptive
+  /// apps](https://docs.flutter.dev/development/ui/layout/adaptive-responsive)
+  /// for an introduction.
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterView.physicalSize], which returns the size in physical pixels.
   final Size size;
 
   /// The number of device pixels for each logical pixel. This number might not

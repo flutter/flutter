@@ -1,9 +1,17 @@
-# [![Flutter logo][]][flutter.dev]
+<a href="https://flutter.dev/">
+  <h1 align="center">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://storage.googleapis.com/cms-storage-bucket/6e19fee6b47b36ca613f.png">
+      <img alt="Flutter" src="https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png">
+    </picture>
+  </h1>
+</a>
 
 [![Build Status - Cirrus][]][Build status]
 [![Discord badge][]][Discord instructions]
 [![Twitter handle][]][Twitter badge]
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5631/badge)](https://bestpractices.coreinfrastructure.org/projects/5631)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/flutter/badge)](https://api.securityscorecards.dev/projects/github.com/flutter/flutter)
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
@@ -13,19 +21,19 @@ open source.
 ## Documentation
 
 * [Install Flutter](https://flutter.dev/get-started/)
-* [Flutter documentation](https://flutter.dev/docs)
+* [Flutter documentation](https://docs.flutter.dev/)
 * [Development wiki](https://github.com/flutter/flutter/wiki)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 
 For announcements about new releases, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
 mailing list. Our documentation also tracks [breaking
-changes](https://flutter.dev/docs/release/breaking-changes) across releases.
+changes](https://docs.flutter.dev/release/breaking-changes) across releases.
 
 ## Terms of service
 
 The Flutter tool may occasionally download resources from Google servers. By
-downloading or using the Flutter SDK you agree to the Google Terms of Service:
+downloading or using the Flutter SDK, you agree to the Google Terms of Service:
 https://policies.google.com/terms
 
 For example, when installed from GitHub (as opposed to from a prepackaged
@@ -78,14 +86,13 @@ Flutter works with any development tool (or none at all), and also includes
 editor plug-ins for both [Visual Studio Code] and [IntelliJ / Android Studio].
 Flutter provides [tens of thousands of packages][Flutter packages] to speed your
 development, regardless of your target platform. And accessing other native code
-is easy, with support for both [FFI] and [platform-specific APIs][platform
-channels].
+is easy, with support for both FFI ([on Android][Android FFI], [on iOS][iOS FFI],
+and [on macOS][macOS FFI]) as well as [platform-specific APIs][platform channels].
 
 Flutter is a fully open-source project, and we welcome contributions.
 Information on how to get started can be found in our
 [contributor guide](CONTRIBUTING.md).
 
-[Flutter logo]: https://github.com/flutter/website/blob/archived-master/src/_assets/image/flutter-lockup-bg.jpg?raw=true
 [flutter.dev]: https://flutter.dev
 [Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master
@@ -93,7 +100,7 @@ Information on how to get started can be found in our
 [Discord badge]: https://img.shields.io/discord/608014603317936148
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
-[layered architecture]: https://flutter.dev/docs/resources/inside-flutter
+[layered architecture]: https://docs.flutter.dev/resources/inside-flutter
 [architectural overview]: https://docs.flutter.dev/resources/architectural-overview
 [widget catalog]: https://flutter.dev/widgets/
 [Cupertino]: https://docs.flutter.dev/development/ui/widgets/cupertino
@@ -105,6 +112,8 @@ Information on how to get started can be found in our
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
 [Flutter packages]: https://pub.dev/flutter
-[FFI]: https://flutter.dev/docs/development/platform-integration/c-interop
-[platform channels]: https://flutter.dev/docs/development/platform-integration/platform-channels
+[Android FFI]: https://docs.flutter.dev/development/platform-integration/android/c-interop
+[iOS FFI]: https://docs.flutter.dev/development/platform-integration/android/c-interop
+[macOS FFI]: https://docs.flutter.dev/development/platform-integration/macos/c-interop
+[platform channels]: https://docs.flutter.dev/development/platform-integration/platform-channels
 [interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel

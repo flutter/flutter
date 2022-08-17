@@ -8,6 +8,9 @@ import 'package:flutter/services.dart';
 
 import 'input_border.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///
@@ -321,30 +324,35 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// (the empty set of states) will be used.
   ///
   /// Usage:
+  ///
   /// ```dart
   /// ChipTheme(
   ///   data: Theme.of(context).chipTheme.copyWith(
   ///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
   ///       if (states.contains(MaterialState.selected)) {
-  ///         return const BorderSide(width: 1, color: Colors.red);
+  ///         return const BorderSide(color: Colors.red);
   ///       }
   ///       return null;  // Defer to default value on the theme or widget.
   ///     }),
   ///   ),
-  ///   child: Chip(),
-  /// )
+  ///   child: const Chip(
+  ///     label: Text('Transceiver'),
+  ///   ),
+  /// ),
+  /// ```
   ///
-  /// // OR
+  /// Alternatively:
   ///
+  /// ```dart
   /// Chip(
-  ///   ...
+  ///   label: const Text('Transceiver'),
   ///   side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.selected)) {
-  ///       return const BorderSide(width: 1, color: Colors.red);
+  ///       return const BorderSide(color: Colors.red);
   ///     }
   ///     return null;  // Defer to default value on the theme or widget.
   ///   }),
-  /// )
+  /// ),
   /// ```
   static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
       _MaterialStateBorderSide(callback);
@@ -658,6 +666,36 @@ abstract class MaterialStateProperty<T> {
   // a dart fix that will replace this with MaterialStatePropertyAll:
   // https://github.com/dart-lang/sdk/issues/49056.
   static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
+
+  /// Linearly interpolate between two [MaterialStateProperty]s.
+  static MaterialStateProperty<T?>? lerp<T>(
+    MaterialStateProperty<T>? a,
+    MaterialStateProperty<T>? b,
+    double t,
+    T? Function(T?, T?, double) lerpFunction,
+  ) {
+    // Avoid creating a _LerpProperties object for a common case.
+    if (a == null && b == null) {
+      return null;
+    }
+    return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+}
+
+class _LerpProperties<T> implements MaterialStateProperty<T?> {
+  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
+
+  final MaterialStateProperty<T>? a;
+  final MaterialStateProperty<T>? b;
+  final double t;
+  final T? Function(T?, T?, double) lerpFunction;
+
+  @override
+  T? resolve(Set<MaterialState> states) {
+    final T? resolvedA = a?.resolve(states);
+    final T? resolvedB = b?.resolve(states);
+    return lerpFunction(resolvedA, resolvedB, t);
+  }
 }
 
 class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {

@@ -529,7 +529,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
   bool ensureTooltipVisible() {
-    if (!_visible) {
+    if (!_visible || !mounted) {
       return false;
     }
     _showTimer?.cancel();
@@ -698,7 +698,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_tooltipMessage.isEmpty) {
       return widget.child ?? const SizedBox();
     }
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(debugCheckHasOverlay(context));
     final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
     final TextStyle defaultTextStyle;
@@ -769,7 +769,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 }
 
 /// A delegate for computing the layout of a tooltip to be displayed above or
-/// bellow a target specified in the global coordinate system.
+/// below a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
   ///

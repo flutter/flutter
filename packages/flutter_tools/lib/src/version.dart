@@ -100,7 +100,7 @@ class FlutterVersion {
 
   String? _repositoryUrl;
   String? get repositoryUrl {
-    final String _ = channel; // ignore: no_leading_underscores_for_local_identifiers
+    final String _ = channel;
     return _repositoryUrl;
   }
 
@@ -273,7 +273,7 @@ class FlutterVersion {
   ///
   /// Throws [VersionCheckError] if a git command fails, for example, when the
   /// remote git repository is not reachable due to a network issue.
-  static Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
+  static Future<String> fetchRemoteFrameworkCommitDate() async {
     try {
       // Fetch upstream branch's commit and tags
       await _run(<String>['git', 'fetch', '--tags']);
@@ -360,7 +360,7 @@ class FlutterVersion {
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
       final DateTime remoteFrameworkCommitDate = DateTime.parse(
-        await FlutterVersion.fetchRemoteFrameworkCommitDate(channel),
+        await FlutterVersion.fetchRemoteFrameworkCommitDate(),
       );
       await versionCheckStamp.store(
         newTimeVersionWasChecked: now,
@@ -926,11 +926,6 @@ class VersionFreshnessValidator {
 
   /// Execute validations and print warning to [logger] if necessary.
   Future<void> run() async {
-    // Don't perform update checks if we're not on an official channel.
-    if (!kOfficialChannels.contains(version.channel)) {
-      return;
-    }
-
     // Get whether there's a newer version on the remote. This only goes
     // to the server if we haven't checked recently so won't happen on every
     // command.

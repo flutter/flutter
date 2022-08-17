@@ -12,6 +12,10 @@ import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// typedef MyAppHome = Placeholder;
+
 /// The visual properties that most buttons have in common.
 ///
 /// Buttons and their themes have a ButtonStyle property which defines the visual
@@ -37,13 +41,18 @@ import 'theme_data.dart';
 ///   style: ButtonStyle(
 ///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
 ///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.pressed))
+///         if (states.contains(MaterialState.pressed)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
+///         }
 ///         return null; // Use the component's default.
 ///       },
 ///     ),
 ///   ),
-/// )
+///   child: const Text('Fly me to the moon'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// In this case the background color for all other button states would fallback
@@ -52,10 +61,14 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// ElevatedButton(
-///   style: ButtonStyle(
+///   style: const ButtonStyle(
 ///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
 ///   ),
-/// )
+///   child: const Text('Let me play among the stars'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// Configuring a ButtonStyle directly makes it possible to very
@@ -75,21 +88,26 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// TextButton(
-///   style: TextButton.styleFrom(primary: Colors.green),
-/// )
+///   style: TextButton.styleFrom(foregroundColor: Colors.green),
+///   child: const Text('Let me see what spring is like'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// To configure all of the application's text buttons in the same
 /// way, specify the overall theme's `textButtonTheme`:
+///
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
 ///     textButtonTheme: TextButtonThemeData(
-///       style: TextButton.styleFrom(primary: Colors.green),
+///       style: TextButton.styleFrom(foregroundColor: Colors.green),
 ///     ),
 ///   ),
-///   home: MyAppHome(),
-/// )
+///   home: const MyAppHome(),
+/// ),
 /// ```
 ///
 /// ## Material 3 button types
@@ -132,6 +150,7 @@ class ButtonStyle with Diagnosticable {
     this.minimumSize,
     this.fixedSize,
     this.maximumSize,
+    this.iconSize,
     this.side,
     this.shape,
     this.mouseCursor,
@@ -210,6 +229,9 @@ class ButtonStyle with Diagnosticable {
   /// This value must be greater than or equal to [minimumSize].
   final MaterialStateProperty<Size?>? maximumSize;
 
+  /// The icon's size inside of the button.
+  final MaterialStateProperty<double?>? iconSize;
+
   /// The color and weight of the button's outline.
   ///
   /// This value is combined with [shape] to create a shape decorated
@@ -281,7 +303,7 @@ class ButtonStyle with Diagnosticable {
   ///     splashFactory: NoSplash.splashFactory,
   ///   ),
   ///   onPressed: () { },
-  ///   child: Text('No Splash'),
+  ///   child: const Text('No Splash'),
   /// )
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
@@ -300,6 +322,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<Size?>? minimumSize,
     MaterialStateProperty<Size?>? fixedSize,
     MaterialStateProperty<Size?>? maximumSize,
+    MaterialStateProperty<double?>? iconSize,
     MaterialStateProperty<BorderSide?>? side,
     MaterialStateProperty<OutlinedBorder?>? shape,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
@@ -322,6 +345,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? this.minimumSize,
       fixedSize: fixedSize ?? this.fixedSize,
       maximumSize: maximumSize ?? this.maximumSize,
+      iconSize: iconSize ?? this.iconSize,
       side: side ?? this.side,
       shape: shape ?? this.shape,
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -355,6 +379,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? style.minimumSize,
       fixedSize: fixedSize ?? style.fixedSize,
       maximumSize: maximumSize ?? style.maximumSize,
+      iconSize: iconSize ?? style.iconSize,
       side: side ?? style.side,
       shape: shape ?? style.shape,
       mouseCursor: mouseCursor ?? style.mouseCursor,
@@ -368,28 +393,32 @@ class ButtonStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
-    textStyle,
-    backgroundColor,
-    foregroundColor,
-    overlayColor,
-    shadowColor,
-    surfaceTintColor,
-    elevation,
-    padding,
-    minimumSize,
-    fixedSize,
-    maximumSize,
-    side,
-    shape,
-    mouseCursor,
-    visualDensity,
-    tapTargetSize,
-    animationDuration,
-    enableFeedback,
-    alignment,
-    splashFactory,
-  );
+  int get hashCode {
+    final List<Object?> values = <Object?>[
+      textStyle,
+      backgroundColor,
+      foregroundColor,
+      overlayColor,
+      shadowColor,
+      surfaceTintColor,
+      elevation,
+      padding,
+      minimumSize,
+      fixedSize,
+      maximumSize,
+      iconSize,
+      side,
+      shape,
+      mouseCursor,
+      visualDensity,
+      tapTargetSize,
+      animationDuration,
+      enableFeedback,
+      alignment,
+      splashFactory,
+    ];
+    return Object.hashAll(values);
+  }
 
   @override
   bool operator ==(Object other) {
@@ -411,6 +440,7 @@ class ButtonStyle with Diagnosticable {
         && other.minimumSize == minimumSize
         && other.fixedSize == fixedSize
         && other.maximumSize == maximumSize
+        && other.iconSize == iconSize
         && other.side == side
         && other.shape == shape
         && other.mouseCursor == mouseCursor
@@ -436,6 +466,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
@@ -464,8 +495,9 @@ class ButtonStyle with Diagnosticable {
       minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: _lerpProperties<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: _lerpProperties<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      iconSize: _lerpProperties<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       side: _lerpSides(a?.side, b?.side, t),
-      shape: _lerpShapes(a?.shape, b?.shape, t),
+      shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       tapTargetSize: t < 0.5 ? a?.tapTargetSize : b?.tapTargetSize,
@@ -490,14 +522,6 @@ class ButtonStyle with Diagnosticable {
       return null;
     }
     return _LerpSides(a, b, t);
-  }
-
-  // TODO(hansmuller): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static MaterialStateProperty<OutlinedBorder?>? _lerpShapes(MaterialStateProperty<OutlinedBorder?>? a, MaterialStateProperty<OutlinedBorder?>? b, double t) {
-    if (a == null && b == null) {
-      return null;
-    }
-    return _LerpShapes(a, b, t);
   }
 }
 
@@ -538,20 +562,5 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
       return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
     }
     return BorderSide.lerp(resolvedA, resolvedB, t);
-  }
-}
-
-class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
-  const _LerpShapes(this.a, this.b, this.t);
-
-  final MaterialStateProperty<OutlinedBorder?>? a;
-  final MaterialStateProperty<OutlinedBorder?>? b;
-  final double t;
-
-  @override
-  OutlinedBorder? resolve(Set<MaterialState> states) {
-    final OutlinedBorder? resolvedA = a?.resolve(states);
-    final OutlinedBorder? resolvedB = b?.resolve(states);
-    return ShapeBorder.lerp(resolvedA, resolvedB, t) as OutlinedBorder?;
   }
 }

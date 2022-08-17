@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -237,12 +235,12 @@ class MatrixUtils {
     // First, consider that a full point transform using the vector math
     // package involves expanding it out into a vector3 with a Z coordinate
     // of 0.0 and then performing 3 multiplies and 3 adds per coordinate:
-    // ```
-    // xt = x*m00 + y*m10 + z*m20 + m30;
-    // yt = x*m01 + y*m11 + z*m21 + m31;
-    // zt = x*m02 + y*m12 + z*m22 + m32;
-    // wt = x*m03 + y*m13 + z*m23 + m33;
-    // ```
+    //
+    //     xt = x*m00 + y*m10 + z*m20 + m30;
+    //     yt = x*m01 + y*m11 + z*m21 + m31;
+    //     zt = x*m02 + y*m12 + z*m22 + m32;
+    //     wt = x*m03 + y*m13 + z*m23 + m33;
+    //
     // Immediately we see that we can get rid of the 3rd column of multiplies
     // since we know that Z=0.0. We can also get rid of the 3rd row because
     // we ignore the resulting Z coordinate. Finally we can get rid of the
@@ -309,26 +307,26 @@ class MatrixUtils {
     // you combine both of them, the resulting "opposite corner" will
     // actually be between the limits they established by pushing the walls
     // away from each other, as below:
-    // ```
-    //         +---------(originx,originy)--------------+
-    //         |            -----^----                  |
-    //         |       -----          ----              |
-    //         |  -----                   ----          |
-    // (+hx,+hy)<                             ----      |
-    //         |  ----                            ----  |
-    //         |      ----                             >(+wx,+wy)
-    //         |          ----                   -----  |
-    //         |              ----          -----       |
-    //         |                  ---- -----            |
-    //         |                      v                 |
-    //         +---------------(+wx+hx,+wy+hy)----------+
-    // ```
+    //
+    //             +---------(originx,originy)--------------+
+    //             |            -----^----                  |
+    //             |       -----          ----              |
+    //             |  -----                   ----          |
+    //     (+hx,+hy)<                             ----      |
+    //             |  ----                            ----  |
+    //             |      ----                             >(+wx,+wy)
+    //             |          ----                   -----  |
+    //             |              ----          -----       |
+    //             |                  ---- -----            |
+    //             |                      v                 |
+    //             +---------------(+wx+hx,+wy+hy)----------+
+    //
     // In this diagram, consider that:
-    // ```
-    // wx would be a positive number
-    // hx would be a negative number
-    // wy and hy would both be positive numbers
-    // ```
+    //
+    //  * wx would be a positive number
+    //  * hx would be a negative number
+    //  * wy and hy would both be positive numbers
+    //
     // As a result, wx pushes out the right wall, hx pushes out the left wall,
     // and both wy and hy push down the bottom wall of the bounding box. The
     // wx,hx pair (of opposite signs) worked on opposite walls and the final

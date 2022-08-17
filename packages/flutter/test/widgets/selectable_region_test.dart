@@ -1099,7 +1099,115 @@ void main() {
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
+
+    group('magnifier', () {
+      late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+      final Widget fakeMagnifier = Container(key: UniqueKey());
+
+      testWidgets('Can drag handles to show, unshow, and update magnifier',
+          (WidgetTester tester) async {
+        const String text = 'Monkies and rabbits in my soup';
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              magnifierConfiguration: TextMagnifierConfiguration(
+                magnifierBuilder: (_,
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierOverlayInfoBearer>
+                        localInfoBearer) {
+                  infoBearer = localInfoBearer;
+                  return fakeMagnifier;
+                },
+              ),
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionControls,
+              child: const Text(text),
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+            find.descendant(
+                of: find.text(text), matching: find.byType(RichText)));
+
+        // Show the selection handles.
+        final TestGesture activateSelectionGesture = await tester
+            .startGesture(textOffsetToPosition(paragraph, text.length ~/ 2));
+        addTearDown(activateSelectionGesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await activateSelectionGesture.up();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        // Drag the handle around so that the magnifier shows.
+        final TextBox selectionBox =
+            paragraph.getBoxesForSelection(paragraph.selections.first).first;
+        final Offset leftHandlePos =
+            globalize(selectionBox.toRect().bottomLeft, paragraph);
+        final TestGesture gesture = await tester.startGesture(leftHandlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, text.length - 2));
+        await tester.pump();
+
+        // Expect the magnifier to show and then store it's position.
+        expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+        final Offset firstDragGesturePosition =
+            infoBearer.value.globalGesturePosition;
+
+        await gesture.moveTo(textOffsetToPosition(paragraph, text.length));
+        await tester.pump();
+
+        // Expect the position the magnifier gets to have moved.
+        expect(firstDragGesturePosition,
+            isNot(infoBearer.value.globalGesturePosition));
+
+        // Lift the pointer and expect the magnifier to disappear.
+        await gesture.up();
+        await tester.pump();
+
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      });
+    });
   });
+
+  testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    await tester.pumpAndSettle();
+    // Text selection toolbar has appeared.
+    expect(find.text('Copy'), findsOneWidget);
+
+    // Hide the toolbar by changing orientation.
+    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    await tester.pumpAndSettle();
+    expect(find.text('Copy'), findsNothing);
+
+    // Handles should be hidden as well on Android
+    expect(
+      find.descendant(
+        of: find.byType(CompositedTransformFollower),
+        matching: find.byType(Padding),
+      ),
+      defaultTargetPlatform == TargetPlatform.android ? findsNothing : findsNWidgets(2),
+    );
+  },
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
@@ -1128,6 +1236,16 @@ class RenderSelectionSpy extends RenderProxyBox
 
   final Set<VoidCallback> listeners = <VoidCallback>{};
   List<SelectionEvent> events = <SelectionEvent>[];
+
+  @override
+  Size get size => _size;
+  Size _size = Size.zero;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    _size = Size(constraints.maxWidth, constraints.maxHeight);
+    return _size;
+  }
 
   @override
   void addListener(VoidCallback listener) => listeners.add(listener);
@@ -1252,8 +1370,9 @@ class RenderSelectAll extends RenderProxyBox
     ),
   );
   set value(SelectionGeometry other) {
-    if (other == _value)
+    if (other == _value) {
       return;
+    }
     _value = other;
     for (final VoidCallback callback in listeners) {
       callback();

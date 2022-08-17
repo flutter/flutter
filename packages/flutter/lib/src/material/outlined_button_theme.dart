@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [OutlinedButton]s when it's used with [OutlinedButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.outlinedButtonTheme].

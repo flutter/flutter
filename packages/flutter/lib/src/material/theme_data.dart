@@ -19,6 +19,7 @@ import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
@@ -26,6 +27,7 @@ import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'icon_button_theme.dart';
 import 'ink_ripple.dart';
 import 'ink_sparkle.dart';
 import 'ink_splash.dart';
@@ -54,6 +56,9 @@ import 'tooltip_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
+
+// Examples can assume:
+// late BuildContext context;
 
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
@@ -114,6 +119,7 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [OutlinedButton]
 ///   * [TextButton]
 ///   * [ElevatedButton]
+///   * [IconButton]
 ///   * The time picker widget ([showTimePicker])
 ///   * [SnackBar]
 ///   * [Chip]
@@ -310,10 +316,8 @@ class ThemeData with Diagnosticable {
     MaterialColor? primarySwatch,
     Color? scaffoldBackgroundColor,
     Color? secondaryHeaderColor,
-    Color? selectedRowColor,
     Color? shadowColor,
     Color? splashColor,
-    Color? toggleableActiveColor,
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
     String? fontFamily,
@@ -340,6 +344,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
@@ -405,6 +410,18 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after v2.13.0-0.4.pre.',
+    )
+    Color? toggleableActiveColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
+    Color? selectedRowColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -529,7 +546,7 @@ class ThemeData with Diagnosticable {
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
+    iconTheme ??= isDark ? const IconThemeData(color: kDefaultIconLightColor) : const IconThemeData(color: kDefaultIconDarkColor);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
@@ -548,6 +565,7 @@ class ThemeData with Diagnosticable {
     drawerTheme ??= const DrawerThemeData();
     elevatedButtonTheme ??= const ElevatedButtonThemeData();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    iconButtonTheme ??= const IconButtonThemeData();
     listTileTheme ??= const ListTileThemeData();
     navigationBarTheme ??= const NavigationBarThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
@@ -611,10 +629,8 @@ class ThemeData with Diagnosticable {
       primaryColorLight: primaryColorLight,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       secondaryHeaderColor: secondaryHeaderColor,
-      selectedRowColor: selectedRowColor,
       shadowColor: shadowColor,
       splashColor: splashColor,
-      toggleableActiveColor: toggleableActiveColor,
       unselectedWidgetColor: unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: iconTheme,
@@ -640,6 +656,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
+      iconButtonTheme: iconButtonTheme,
       listTileTheme: listTileTheme,
       navigationBarTheme: navigationBarTheme,
       navigationRailTheme: navigationRailTheme,
@@ -665,6 +682,8 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator,
+      toggleableActiveColor: toggleableActiveColor,
+      selectedRowColor: selectedRowColor,
     );
   }
 
@@ -716,10 +735,8 @@ class ThemeData with Diagnosticable {
     required this.primaryColorLight,
     required this.scaffoldBackgroundColor,
     required this.secondaryHeaderColor,
-    required this.selectedRowColor,
     required this.shadowColor,
     required this.splashColor,
-    required this.toggleableActiveColor,
     required this.unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
     required this.iconTheme,
@@ -745,6 +762,7 @@ class ThemeData with Diagnosticable {
     required this.elevatedButtonTheme,
     required this.expansionTileTheme,
     required this.floatingActionButtonTheme,
+    required this.iconButtonTheme,
     required this.listTileTheme,
     required this.navigationBarTheme,
     required this.navigationRailTheme,
@@ -810,6 +828,18 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
     this.androidOverscrollIndicator,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after v2.13.0-0.4.pre.',
+    )
+    Color? toggleableActiveColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
+    Color? selectedRowColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
@@ -819,6 +849,8 @@ class ThemeData with Diagnosticable {
        _buttonColor = buttonColor,
        _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
        _primaryColorBrightness = primaryColorBrightness,
+       _toggleableActiveColor = toggleableActiveColor,
+       _selectedRowColor = selectedRowColor,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -850,7 +882,6 @@ class ThemeData with Diagnosticable {
        assert(primaryColorLight != null),
        assert(scaffoldBackgroundColor != null),
        assert(secondaryHeaderColor != null),
-       assert(selectedRowColor != null),
        assert(shadowColor != null),
        assert(splashColor != null),
        assert(toggleableActiveColor != null),
@@ -879,6 +910,7 @@ class ThemeData with Diagnosticable {
        assert(elevatedButtonTheme != null),
        assert(expansionTileTheme != null),
        assert(floatingActionButtonTheme != null),
+       assert(iconButtonTheme != null),
        assert(listTileTheme != null),
        assert(navigationBarTheme != null),
        assert(navigationRailTheme != null),
@@ -961,13 +993,19 @@ class ThemeData with Diagnosticable {
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.light() => ThemeData(brightness: Brightness.light);
+  factory ThemeData.light({bool? useMaterial3}) => ThemeData(
+    brightness: Brightness.light,
+    useMaterial3: useMaterial3,
+  );
 
   /// A default dark theme with a teal secondary [ColorScheme] color.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.dark() => ThemeData(brightness: Brightness.dark);
+  factory ThemeData.dark({bool? useMaterial3}) => ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: useMaterial3,
+  );
 
   /// The default color theme. Same as [ThemeData.light].
   ///
@@ -978,7 +1016,7 @@ class ThemeData with Diagnosticable {
   ///
   /// Most applications would use [Theme.of], which provides correct localized
   /// text geometry.
-  factory ThemeData.fallback() => ThemeData.light();
+  factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
 
   /// The overall theme brightness.
   ///
@@ -1133,53 +1171,68 @@ class ThemeData with Diagnosticable {
 
   /// A temporary flag used to opt-in to Material 3 features.
   ///
-  /// If true, then components that have been migrated to Material 3 will
+  /// If true, then widgets that have been migrated to Material 3 will
   /// use new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
+  /// During the migration to Material 3, turning this on may yield
+  /// inconsistent look and feel in your app as some widgets are migrated
+  /// while others have yet to be.
+  ///
+  /// Defaults to false. When the Material 3 specification is complete
+  /// and all widgets are migrated on stable, we will change this flag to be
+  /// true by default. After that change has landed on stable, we will deprecate
+  /// this flag and remove all uses of it. At that point, the `material` library
+  /// will aim to only support Material 3.
+  ///
+  /// ## Defaults
   /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
-  /// some properties will get special defaults. However, just copying a [ThemeData]
-  /// with [useMaterial3] set to true will not change any of these properties in the
-  /// resulting [ThemeData]. These properties are:
+  /// some properties will get updated defaults. Please note that
+  /// [ThemeData.copyWith] with [useMaterial3] set to true will
+  /// not change any of these properties in the resulting [ThemeData].
+  ///
   /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
   ///
-  /// | Property        | Material 3 default           | Fallback default          |
+  /// | Property        | Material 3 default           | Material 2 default        |
   /// | :-------------- | :--------------------------- | :------------------------ |
   /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
   /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
   ///
-  /// \* if and only if the target platform is Android and the app is not
+  /// \* if the target platform is Android and the app is not
   /// running on the web, otherwise it will fallback to [InkRipple].
   ///
-  /// During the migration to Material 3, turning this on may yield
-  /// inconsistent look and feel in your app. Some components will be migrated
-  /// before others and typography changes will be coming in stages.
+  /// ## Affected widgets
   ///
-  /// [useMaterial3] defaults to false. After all the migrated components
-  /// have landed on stable, we will change this to be true by default. After
-  /// that change has landed on stable, we will deprecate this flag and remove
-  /// all uses of it. Everything will use the Material 3 look and feel at
-  /// that point.
+  /// This flag affects styles and components.
   ///
-  /// Components that have been migrated to Material 3 are:
+  /// ### Styles
+  ///   * Color: [ColorScheme], [Material]
+  ///   * Shape: (see components below)
+  ///   * Typography: `typography` (see table above)
   ///
-  ///   * [AlertDialog]
-  ///   * [AppBar]
-  ///   * [Card]
-  ///   * [Dialog]
-  ///   * [ElevatedButton]
-  ///   * [FloatingActionButton]
-  ///   * [Material]
-  ///   * [NavigationBar] (new, replacing [BottomNavigationBar])
-  ///   * [NavigationRail]
-  ///   * [OutlinedButton]
-  ///   * [StretchingOverscrollIndicator], replacing the
-  ///     [GlowingOverscrollIndicator]
-  ///   * [TextButton]
+  /// ### Components
+  ///   * Common buttons: [TextButton], [OutlinedButton], [ElevatedButton]
+  ///   * FAB: [FloatingActionButton]
+  ///   * Extended FAB: [FloatingActionButton.extended]
+  ///   * Cards: [Card]
+  ///   * TextFields: [TextField] together with its [InputDecoration]
+  ///   * Chips:
+  ///     - [ActionChip] (used for Assist and Suggestion chips),
+  ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
+  ///     - [InputChip]
+  ///   * Dialogs: [Dialog], [AlertDialog]
+  ///   * Lists: [ListTile]
+  ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
+  ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * Top app bar: [AppBar]
+  ///
+  /// In addition, this flag enables features introduced in Android 12.
+  ///   * Stretch overscroll: [MaterialScrollBehavior]
+  ///   * Ripple: `splashFactory` (see table above)
   ///
   /// See also:
   ///
-  ///   * [Material Design 3](https://m3.material.io/).
+  ///   * [Material 3 specification](https://m3.material.io/).
   final bool useMaterial3;
 
   /// The density value for specifying the compactness of various UI components.
@@ -1299,7 +1352,12 @@ class ThemeData with Diagnosticable {
   final Color secondaryHeaderColor;
 
   /// The color used to highlight selected rows.
-  final Color selectedRowColor;
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
+  Color get selectedRowColor => _selectedRowColor!;
+  final Color? _selectedRowColor;
 
   /// The color that the [Material] widget uses to draw elevation shadows.
   ///
@@ -1320,7 +1378,8 @@ class ThemeData with Diagnosticable {
 
   /// The color used to highlight the active states of toggleable widgets like
   /// [Switch], [Radio], and [Checkbox].
-  final Color toggleableActiveColor;
+  Color get toggleableActiveColor => _toggleableActiveColor!;
+  final Color? _toggleableActiveColor;
 
   /// The color used for widgets in their inactive (but enabled)
   /// state. For example, an unchecked checkbox. See also [disabledColor].
@@ -1408,6 +1467,10 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the shape, elevation, and color of a
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
+
+  /// A theme for customizing the appearance and internal layout of
+  /// [IconButton]s.
+  final IconButtonThemeData iconButtonTheme;
 
   /// A theme for customizing the appearance of [ListTile] widgets.
   final ListTileThemeData listTileTheme;
@@ -1516,9 +1579,10 @@ class ThemeData with Diagnosticable {
   ///
   /// ```dart
   /// final ThemeData theme = Theme.of(context);
-  /// theme.textTheme.headline1.copyWith(
+  /// final TextStyle style = theme.textTheme.headline1!.copyWith(
   ///   color: theme.colorScheme.onSecondary,
-  /// )
+  /// );
+  /// // ...use style...
   /// ```
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
@@ -1649,10 +1713,8 @@ class ThemeData with Diagnosticable {
     Color? primaryColorLight,
     Color? scaffoldBackgroundColor,
     Color? secondaryHeaderColor,
-    Color? selectedRowColor,
     Color? shadowColor,
     Color? splashColor,
-    Color? toggleableActiveColor,
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
     IconThemeData? iconTheme,
@@ -1678,6 +1740,7 @@ class ThemeData with Diagnosticable {
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
@@ -1743,6 +1806,18 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after v2.13.0-0.4.pre.',
+    )
+    Color? toggleableActiveColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
+    Color? selectedRowColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1783,10 +1858,8 @@ class ThemeData with Diagnosticable {
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
-      selectedRowColor: selectedRowColor ?? this.selectedRowColor,
       shadowColor: shadowColor ?? this.shadowColor,
       splashColor: splashColor ?? this.splashColor,
-      toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: iconTheme ?? this.iconTheme,
@@ -1812,6 +1885,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme ?? this.expansionTileTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
+      iconButtonTheme: iconButtonTheme ?? this.iconButtonTheme,
       listTileTheme: listTileTheme ?? this.listTileTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
@@ -1829,14 +1903,16 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: accentColor ?? this.accentColor,
-      accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
-      accentTextTheme: accentTextTheme ?? this.accentTextTheme,
-      accentIconTheme: accentIconTheme ?? this.accentIconTheme,
-      buttonColor: buttonColor ?? this.buttonColor,
-      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
-      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      accentColor: accentColor ?? _accentColor,
+      accentColorBrightness: accentColorBrightness ?? _accentColorBrightness,
+      accentTextTheme: accentTextTheme ?? _accentTextTheme,
+      accentIconTheme: accentIconTheme ?? _accentIconTheme,
+      buttonColor: buttonColor ?? _buttonColor,
+      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? _fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness ?? _primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
+      toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
+      selectedRowColor: selectedRowColor ?? _selectedRowColor,
     );
   }
 
@@ -1981,10 +2057,8 @@ class ThemeData with Diagnosticable {
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t)!,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
-      selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t)!,
       shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
       splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
-      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t)!,
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
@@ -2010,6 +2084,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t)!,
       expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t)!,
+      iconButtonTheme: IconButtonThemeData.lerp(a.iconButtonTheme, b.iconButtonTheme, t)!,
       listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
       navigationBarTheme: NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
@@ -2035,6 +2110,8 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
+      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
+      selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
     );
   }
 
@@ -2081,10 +2158,8 @@ class ThemeData with Diagnosticable {
         other.primaryColorLight == primaryColorLight &&
         other.scaffoldBackgroundColor == scaffoldBackgroundColor &&
         other.secondaryHeaderColor == secondaryHeaderColor &&
-        other.selectedRowColor == selectedRowColor &&
         other.shadowColor == shadowColor &&
         other.splashColor == splashColor &&
-        other.toggleableActiveColor == toggleableActiveColor &&
         other.unselectedWidgetColor == unselectedWidgetColor &&
         // TYPOGRAPHY & ICONOGRAPHY
         other.iconTheme == iconTheme &&
@@ -2110,6 +2185,7 @@ class ThemeData with Diagnosticable {
         other.elevatedButtonTheme == elevatedButtonTheme &&
         other.expansionTileTheme == expansionTileTheme &&
         other.floatingActionButtonTheme == floatingActionButtonTheme &&
+        other.iconButtonTheme == iconButtonTheme &&
         other.listTileTheme == listTileTheme &&
         other.navigationBarTheme == navigationBarTheme &&
         other.navigationRailTheme == navigationRailTheme &&
@@ -2134,7 +2210,9 @@ class ThemeData with Diagnosticable {
         other.buttonColor == buttonColor &&
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
         other.primaryColorBrightness == primaryColorBrightness &&
-        other.androidOverscrollIndicator == androidOverscrollIndicator;
+        other.androidOverscrollIndicator == androidOverscrollIndicator &&
+        other.toggleableActiveColor == toggleableActiveColor &&
+        other.selectedRowColor == selectedRowColor;
   }
 
   @override
@@ -2148,8 +2226,8 @@ class ThemeData with Diagnosticable {
       // GENERAL CONFIGURATION
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
-      hashList(extensions.keys),
-      hashList(extensions.values),
+      ...extensions.keys,
+      ...extensions.values,
       inputDecorationTheme,
       materialTapTargetSize,
       pageTransitionsTheme,
@@ -2178,10 +2256,8 @@ class ThemeData with Diagnosticable {
       primaryColorLight,
       scaffoldBackgroundColor,
       secondaryHeaderColor,
-      selectedRowColor,
       shadowColor,
       splashColor,
-      toggleableActiveColor,
       unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme,
@@ -2207,6 +2283,7 @@ class ThemeData with Diagnosticable {
       elevatedButtonTheme,
       expansionTileTheme,
       floatingActionButtonTheme,
+      iconButtonTheme,
       listTileTheme,
       navigationBarTheme,
       navigationRailTheme,
@@ -2232,6 +2309,8 @@ class ThemeData with Diagnosticable {
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
       androidOverscrollIndicator,
+      toggleableActiveColor,
+      selectedRowColor,
     ];
     return Object.hashAll(values);
   }
@@ -2277,10 +2356,8 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.debug));
     // TYPOGRAPHY & ICONOGRAPHY
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, level: DiagnosticLevel.debug));
@@ -2306,6 +2383,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ExpansionTileThemeData>('expansionTileTheme', expansionTileTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonTheme', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<IconButtonThemeData>('iconButtonTheme', iconButtonTheme, defaultValue: defaultData.iconButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ListTileThemeData>('listTileTheme', listTileTheme, defaultValue: defaultData.listTileTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailTheme', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
@@ -2331,6 +2409,8 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
   }
 }
 

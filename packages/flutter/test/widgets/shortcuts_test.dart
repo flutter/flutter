@@ -871,7 +871,7 @@ void main() {
                 },
                 child: Shortcuts(
                   shortcuts: <LogicalKeySet, Intent>{
-                    LogicalKeySet(LogicalKeyboardKey.keyA): DoNothingAndStopPropagationIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.keyA): const DoNothingAndStopPropagationIntent(),
                   },
                   child: TextField(key: textFieldKey, autofocus: true),
                 ),
@@ -1112,7 +1112,7 @@ void main() {
       ));
       await tester.pump();
 
-      // Press KeyC: Accepted by DumbLogicalActivator
+      // Press Shift + /
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
       expect(invoked, 1);
@@ -1142,6 +1142,53 @@ void main() {
       invoked = 0;
     }, variant: KeySimulatorTransitModeVariant.all());
 
+    testWidgets('rejects repeated events if requested', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const CharacterActivator('?', includeRepeats: false),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Press Shift + /
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 1);
+      invoked = 0;
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('handles Ctrl and Meta', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const CharacterActivator('?', meta: true, control: true),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Press Shift + /
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      expect(invoked, 0);
+
+      // Press Ctrl + Meta + Shift + /
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('isActivatedBy works as expected', (WidgetTester tester) async {
       // Collect some key events to use for testing.
@@ -1162,6 +1209,52 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
       expect(ShortcutActivator.isActivatedBy(characterActivator, events[0]), isTrue);
+    });
+
+    group('diagnostics.', () {
+      test('single key', () {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const CharacterActivator('A').debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(1));
+        expect(description[0], equals("character: 'A'"));
+      });
+
+      test('no repeats', () {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const CharacterActivator('A', includeRepeats: false)
+            .debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(2));
+        expect(description[0], equals("character: 'A'"));
+        expect(description[1], equals('excluding repeats'));
+      });
+
+      test('combination', () {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const CharacterActivator('A',
+          control: true,
+          meta: true,
+        ).debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(1));
+        expect(description[0], equals("character: Control + Meta + 'A'"));
+      });
     });
   });
 
@@ -1710,8 +1803,8 @@ void main() {
 
     testWidgets('using a disposed token asserts', (WidgetTester tester) async {
       final ShortcutRegistry registry = ShortcutRegistry();
-      final ShortcutRegistryEntry token = registry.addAll(<ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
+      final ShortcutRegistryEntry token = registry.addAll(const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
       });
       token.dispose();
       expect(() {token.replaceAll(<ShortcutActivator, Intent>{}); }, throwsFlutterError);
@@ -1719,8 +1812,8 @@ void main() {
 
     testWidgets('setting duplicate bindings asserts', (WidgetTester tester) async {
       final ShortcutRegistry registry = ShortcutRegistry();
-      final ShortcutRegistryEntry token = registry.addAll(<ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
+      final ShortcutRegistryEntry token = registry.addAll(const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.keyA): DoNothingIntent(),
       });
       expect(() {
         final ShortcutRegistryEntry token2 = registry.addAll(const <ShortcutActivator, Intent>{

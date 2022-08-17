@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -712,10 +710,14 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({ Color? activeColor, Color? fillColor }) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
-          toggleableActiveColor: toggleableActiveColor,
+          radioTheme: RadioThemeData(
+            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              return states.contains(MaterialState.selected) ? fillColor : null;
+            }),
+          ),
         ),
         home: Scaffold(
           body: Center(
@@ -736,7 +738,7 @@ void main() {
       return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
     }
 
-    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    await tester.pumpWidget(buildFrame(fillColor: activeColor));
     expect(textColor('title'), activeColor);
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));

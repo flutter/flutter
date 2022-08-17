@@ -252,9 +252,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         areResourceAttributesRequired: areResourceAttributesRequired,
         untranslatedMessagesFile: untranslatedMessagesFile,
         usesNullableGetter: usesNullableGetter,
+        logger: _logger,
       )
         ..loadResources()
-        ..writeOutputFiles(_logger);
+        ..writeOutputFiles();
     } on L10nException catch (e) {
       throwToolExit(e.message);
     }

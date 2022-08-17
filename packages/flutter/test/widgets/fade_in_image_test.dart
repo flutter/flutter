@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -58,8 +59,8 @@ class LoadTestImageProvider extends ImageProvider<Object> {
 
   final ImageProvider provider;
 
-  ImageStreamCompleter testLoad(Object key, DecoderCallback decode) {
-    return provider.load(key, decode);
+  ImageStreamCompleter testLoad(Object key, DecoderBufferCallback decode) {
+    return provider.loadBuffer(key, decode);
   }
 
   @override
@@ -339,7 +340,7 @@ Future<void> main() async {
 
     group('ImageProvider', () {
 
-      testWidgets('memory placeholder cacheWidth and cacheHeight is passed through', (WidgetTester tester) async {
+      test('memory placeholder cacheWidth and cacheHeight is passed through', () async {
         final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
         final FadeInImage image = FadeInImage.memoryNetwork(
           placeholder: testBytes,
@@ -351,22 +352,29 @@ Future<void> main() async {
         );
 
         bool called = false;
-        Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+        Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
           expect(cacheWidth, 20);
           expect(cacheHeight, 30);
           expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+          return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
         }
         final ImageProvider resizeImage = image.placeholder;
         expect(image.placeholder, isA<ResizeImage>());
         expect(called, false);
         final LoadTestImageProvider testProvider = LoadTestImageProvider(image.placeholder);
-        testProvider.testLoad(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+        final ImageStreamCompleter streamCompleter = testProvider.testLoad(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+
+        final Completer<void> completer = Completer<void>();
+        streamCompleter.addListener(ImageStreamListener((ImageInfo imageInfo, bool syncCall) {
+          completer.complete();
+        }));
+        await completer.future;
+
         expect(called, true);
       });
 
-      testWidgets('do not resize when null cache dimensions', (WidgetTester tester) async {
+      test('do not resize when null cache dimensions', () async {
         final Uint8List testBytes = Uint8List.fromList(kTransparentImage);
         final FadeInImage image = FadeInImage.memoryNetwork(
           placeholder: testBytes,
@@ -374,19 +382,26 @@ Future<void> main() async {
         );
 
         bool called = false;
-        Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+        Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
           expect(cacheWidth, null);
           expect(cacheHeight, null);
           expect(allowUpscaling, false);
           called = true;
-          return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+          return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
         }
         // image.placeholder should be an instance of MemoryImage instead of ResizeImage
         final ImageProvider memoryImage = image.placeholder;
         expect(image.placeholder, isA<MemoryImage>());
         expect(called, false);
         final LoadTestImageProvider testProvider = LoadTestImageProvider(image.placeholder);
-        testProvider.testLoad(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
+        final ImageStreamCompleter streamCompleter = testProvider.testLoad(await memoryImage.obtainKey(ImageConfiguration.empty), decode);
+
+        final Completer<void> completer = Completer<void>();
+        streamCompleter.addListener(ImageStreamListener((ImageInfo imageInfo, bool syncCall) {
+          completer.complete();
+        }));
+        await completer.future;
+
         expect(called, true);
       });
     });

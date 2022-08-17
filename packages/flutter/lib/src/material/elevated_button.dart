@@ -57,6 +57,7 @@ import 'theme_data.dart';
 ///  * [TextButton], a simple flat button without a shadow.
 ///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * <https://material.io/design/components/buttons.html>
+///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
   /// Create an ElevatedButton.
   ///
@@ -99,14 +100,12 @@ class ElevatedButton extends ButtonStyleButton {
   /// A static convenience method that constructs an elevated button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [onPrimary], and [onSurface] colors are used to create a
-  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
-  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
-  /// names. Specify a value for [onPrimary] to specify the color of the
-  /// button's text and icons as well as the overlay colors used to indicate the
-  /// hover, focus, and pressed states. Use [primary] for the button's background
-  /// fill color and [onSurface] to specify the button's disabled text, icon,
-  /// and fill color.
+  /// The [foregroundColor] and [disabledForegroundColor] colors are used
+  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// a derived [ButtonStyle.overlayColor].
+  ///
+  /// The [backgroundColor] and [disabledBackgroundColor] colors are
+  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
@@ -130,13 +129,31 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// ```dart
   /// ElevatedButton(
-  ///   style: ElevatedButton.styleFrom(primary: Colors.green),
-  /// )
+  ///   style: ElevatedButton.styleFrom(foregroundColor: Colors.green),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Jump'),
+  /// ),
   /// ```
+  ///
+  /// And to change the fill color:
+  ///
+  /// ```dart
+  /// ElevatedButton(
+  ///   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Meow'),
+  /// ),
+  /// ```
+  ///
   static ButtonStyle styleFrom({
-    Color? primary,
-    Color? onPrimary,
-    Color? onSurface,
+    Color? foregroundColor,
+    Color? backgroundColor,
+    Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     double? elevation,
@@ -155,16 +172,35 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? primary,
+    @Deprecated(
+      'Use foregroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onPrimary,
+    @Deprecated(
+      'Use disabledForegroundColor and disabledBackgroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onSurface,
   }) {
-    final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
+    final Color? background = backgroundColor ?? primary;
+    final Color? disabledBackground = disabledBackgroundColor ?? onSurface?.withOpacity(0.12);
+    final MaterialStateProperty<Color?>? backgroundColorProp = (background == null && disabledBackground == null)
       ? null
-      : _ElevatedButtonDefaultBackground(primary, onSurface);
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && onPrimary == null)
+      : _ElevatedButtonDefaultColor(background, disabledBackground);
+    final Color? foreground = foregroundColor ?? onPrimary;
+    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
-      : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (onPrimary == null)
+      : _ElevatedButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
-      : _ElevatedButtonDefaultOverlay(onPrimary);
+      : _ElevatedButtonDefaultOverlay(foreground);
     final MaterialStateProperty<double>? elevationValue = (elevation == null)
       ? null
       : _ElevatedButtonDefaultElevation(elevation);
@@ -174,8 +210,8 @@ class ElevatedButton extends ButtonStyleButton {
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColorProp,
+      foregroundColor: foregroundColorProp,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
@@ -318,11 +354,12 @@ class ElevatedButton extends ButtonStyleButton {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Theme.of(context).useMaterial3
-      ? _TokenDefaultsM3(context)
+      ? _ElevatedButtonDefaultsM3(context)
       : styleFrom(
-          primary: colorScheme.primary,
-          onPrimary: colorScheme.onPrimary,
-          onSurface: colorScheme.onSurface,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           shadowColor: theme.shadowColor,
           elevation: 2,
           textStyle: theme.textTheme.button,
@@ -359,50 +396,34 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 }
 
 @immutable
-class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultBackground(this.primary, this.onSurface);
+class _ElevatedButtonDefaultColor extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ElevatedButtonDefaultColor(this.color, this.disabled);
 
-  final Color? primary;
-  final Color? onSurface;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.12);
-    }
-    return primary;
-  }
-}
-
-@immutable
-class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultForeground(this.onPrimary, this.onSurface);
-
-  final Color? onPrimary;
-  final Color? onSurface;
+  final Color? color;
+  final Color? disabled;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.38);
+      return disabled;
     }
-    return onPrimary;
+    return color;
   }
 }
 
 @immutable
 class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultOverlay(this.onPrimary);
+  _ElevatedButtonDefaultOverlay(this.overlay);
 
-  final Color onPrimary;
+  final Color overlay;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered)) {
-      return onPrimary.withOpacity(0.08);
+      return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-      return onPrimary.withOpacity(0.24);
+      return overlay.withOpacity(0.24);
     }
     return null;
   }
@@ -500,15 +521,17 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - ElevatedButton
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _ElevatedButtonDefaultsM3 extends ButtonStyle {
+  _ElevatedButtonDefaultsM3(this.context)
    : super(
        animationDuration: kThemeChangeDuration,
        enableFeedback: true,
@@ -620,4 +643,4 @@ class _TokenDefaultsM3 extends ButtonStyle {
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - ElevatedButton

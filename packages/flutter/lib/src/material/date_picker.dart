@@ -1751,7 +1751,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
     return Column(
       children: <Widget>[
-        _DayHeaders(),
+        const _DayHeaders(),
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
           child: _CalendarKeyboardNavigator(
@@ -1947,24 +1947,25 @@ class _FocusedDate extends InheritedWidget {
 
 
 class _DayHeaders extends StatelessWidget {
+  const _DayHeaders();
+
   /// Builds widgets showing abbreviated days of week. The first widget in the
   /// returned list corresponds to the first day of week for the current locale.
   ///
   /// Examples:
   ///
-  /// ```
-  /// ┌ Sunday is the first day of week in the US (en_US)
-  /// |
-  /// S M T W T F S  <-- the returned list contains these widgets
-  /// _ _ _ _ _ 1 2
-  /// 3 4 5 6 7 8 9
+  ///     ┌ Sunday is the first day of week in the US (en_US)
+  ///     |
+  ///     S M T W T F S  ← the returned list contains these widgets
+  ///     _ _ _ _ _ 1 2
+  ///     3 4 5 6 7 8 9
   ///
-  /// ┌ But it's Monday in the UK (en_GB)
-  /// |
-  /// M T W T F S S  <-- the returned list contains these widgets
-  /// _ _ _ _ 1 2 3
-  /// 4 5 6 7 8 9 10
-  /// ```
+  ///     ┌ But it's Monday in the UK (en_GB)
+  ///     |
+  ///     M T W T F S S  ← the returned list contains these widgets
+  ///     _ _ _ _ 1 2 3
+  ///     4 5 6 7 8 9 10
+  ///
   List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
     final List<Widget> result = <Widget>[];
     for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {

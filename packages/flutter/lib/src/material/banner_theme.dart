@@ -9,6 +9,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of [MaterialBanner] widgets.
 ///
 /// Descendant widgets obtain the current [MaterialBannerThemeData] object using

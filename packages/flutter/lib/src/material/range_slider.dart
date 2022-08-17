@@ -655,7 +655,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           );
         },
       );
-      Overlay.of(context)!.insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
     }
   }
 }
@@ -704,6 +704,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
+      gestureSettings: MediaQuery.of(context).gestureSettings,
     );
   }
 
@@ -724,7 +725,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..platform = Theme.of(context).platform;
+      ..platform = Theme.of(context).platform
+      ..gestureSettings = MediaQuery.of(context).gestureSettings;
   }
 }
 
@@ -744,6 +746,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     required this.onChangeEnd,
     required _RangeSliderState state,
     required TextDirection textDirection,
+    required DeviceGestureSettings gestureSettings,
   })  : assert(values != null),
         assert(values.start >= 0.0 && values.start <= 1.0),
         assert(values.end >= 0.0 && values.end <= 1.0),
@@ -768,12 +771,14 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _handleDragCancel;
+      ..onCancel = _handleDragCancel
+      ..gestureSettings = gestureSettings;
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
-      ..onTapCancel = _handleTapCancel;
+      ..onTapCancel = _handleTapCancel
+      ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -880,6 +885,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     }
     _platform = value;
     markNeedsSemanticsUpdate();
+  }
+
+  DeviceGestureSettings? get gestureSettings => _drag.gestureSettings;
+  set gestureSettings(DeviceGestureSettings? gestureSettings) {
+    _drag.gestureSettings = gestureSettings;
+    _tap.gestureSettings = gestureSettings;
   }
 
   SemanticFormatterCallback? _semanticFormatterCallback;
