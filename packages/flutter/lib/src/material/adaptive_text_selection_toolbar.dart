@@ -113,10 +113,18 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.buttonItems}
   final EditableTextState? editableTextState;
 
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.primaryAnchor}
+  /// {@template flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
+  /// The main location on which to anchor the menu.
+  ///
+  /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
+  /// location if the menu doesn't fit here.
+  /// {@endtemplate}
   final Offset primaryAnchor;
 
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.secondaryAnchor}
+  /// {@template flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
+  /// The optional secondary location on which to anchor the menu, if it doesn't
+  /// fit at [primaryAnchor].
+  /// {@endtemplate}
   final Offset? secondaryAnchor;
 
   @override
@@ -164,10 +172,10 @@ class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
     required this.children,
   }) : assert(children != null);
 
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.primaryAnchor}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
 
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.secondaryAnchor}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
   final Offset? secondaryAnchor;
 
   /// The children of the toolbar, typically buttons.
@@ -218,10 +226,10 @@ class _AdaptiveTextSelectionToolbarFromButtonItems extends StatelessWidget {
     required this.buttonItems,
   }) : assert(buttonItems != null);
 
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.primaryAnchor}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
 
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.secondaryAnchor}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
   final Offset? secondaryAnchor;
 
   /// The information needed to create each child button of the menu.
