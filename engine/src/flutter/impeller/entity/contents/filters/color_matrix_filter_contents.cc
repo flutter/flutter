@@ -95,14 +95,16 @@ std::optional<Snapshot> ColorMatrixFilterContents::RenderFilter(
     return pass.AddCommand(std::move(cmd));
   };
 
-  auto out_texture = renderer.MakeSubpass(ISize(coverage.size), callback);
+  auto out_texture =
+      renderer.MakeSubpass(input_snapshot->texture->GetSize(), callback);
   if (!out_texture) {
     return std::nullopt;
   }
   out_texture->SetLabel("ColorMatrixFilter Texture");
 
   return Snapshot{.texture = out_texture,
-                  .transform = Matrix::MakeTranslation(coverage.origin)};
+                  .transform = input_snapshot->transform,
+                  .sampler_descriptor = input_snapshot->sampler_descriptor};
 }
 
 }  // namespace impeller
