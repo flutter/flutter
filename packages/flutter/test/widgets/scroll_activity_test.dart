@@ -153,11 +153,11 @@ void main() {
     final Set<double> checkSet = <double>{};
     checkSet.addAll(scrollSimulationXList);
     /// checkSet.length + 1 is because:
-    /// simulation.x(0.0) will be call in _startSimulation.
+    /// simulation.x(0.0) will be called in _startSimulation.
     /// The first frame of the animation will also call simulation.x(0.0).
     /// It can be tolerated that it has at most one duplicate value.
-    final bool noDuplicate = scrollSimulationXList.length == checkSet.length + 1;
-    expect(true, noDuplicate); // and ends up at the end
+    final bool hasOnlyOneDuplicate = scrollSimulationXList.length == checkSet.length + 1;
+    expect(true, hasOnlyOneDuplicate); // and ends up at the end
   });
 
   testWidgets('Check for duplicate pixels with BouncingScrollPhysics', (WidgetTester tester) async {
