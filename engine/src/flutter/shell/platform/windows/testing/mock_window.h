@@ -18,7 +18,8 @@ namespace testing {
 class MockWindow : public Window {
  public:
   MockWindow();
-  MockWindow(std::unique_ptr<TextInputManager> text_input_manager);
+  MockWindow(std::unique_ptr<WindowsProcTable> windows_proc_table,
+             std::unique_ptr<TextInputManager> text_input_manager);
   virtual ~MockWindow();
 
   // Prevent copying.
@@ -27,6 +28,10 @@ class MockWindow : public Window {
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi();
+
+  // Set the Direct Manipulation owner for testing purposes.
+  void SetDirectManipulationOwner(
+      std::unique_ptr<DirectManipulationOwner> owner);
 
   // Simulates a WindowProc message from the OS.
   LRESULT InjectWindowMessage(UINT const message,

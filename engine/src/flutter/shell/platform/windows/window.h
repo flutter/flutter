@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/windows/keyboard_manager.h"
 #include "flutter/shell/platform/windows/sequential_id_generator.h"
 #include "flutter/shell/platform/windows/text_input_manager.h"
+#include "flutter/shell/platform/windows/windows_proc_table.h"
 #include "flutter/third_party/accessibility/gfx/native_widget_types.h"
 
 namespace flutter {
@@ -28,7 +29,8 @@ namespace flutter {
 class Window : public KeyboardManager::WindowDelegate {
  public:
   Window();
-  Window(std::unique_ptr<TextInputManager> text_input_manager);
+  Window(std::unique_ptr<WindowsProcTable> windows_proc_table,
+         std::unique_ptr<TextInputManager> text_input_manager);
   virtual ~Window();
 
   // Initializes as a child window with size using |width| and |height| and
@@ -265,6 +267,10 @@ class Window : public KeyboardManager::WindowDelegate {
   // Keeps track of the last mouse coordinates by a WM_MOUSEMOVE message.
   double mouse_x_ = 0;
   double mouse_y_ = 0;
+
+  // Abstracts Windows APIs that may not be available on all supported versions
+  // of Windows.
+  std::unique_ptr<WindowsProcTable> windows_proc_table_;
 
   // Manages IME state.
   std::unique_ptr<TextInputManager> text_input_manager_;
