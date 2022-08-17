@@ -421,8 +421,7 @@ void main() {
     await tester.tap(find.text('Group 2'));
     await tester.pumpAndSettle();
 
-    // Now that we are in the second group drag to the end and
-    // click the last tab.
+    // Now in the second group drag to the end and click the last tab.
     expect(find.text('Tab 1-0'), findsOneWidget);
 
     await tester.drag(find.byType(TabBar), const Offset(-1000, 0));
