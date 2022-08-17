@@ -2111,7 +2111,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: spell_check_test
-    scheduler: luci
 
   - name: Linux_android service_extensions_test
     recipe: devicelab/devicelab_drone
