@@ -56,15 +56,20 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
 std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity) const {
+  auto bounds = path_.GetBoundingBox();
+  if (!bounds.has_value()) {
+    return std::nullopt;
+  }
+
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
   if (is_rect_ && source_rect_ == Rect::MakeSize(texture_->GetSize())) {
-    auto scale =
-        Vector2(path_.GetBoundingBox()->size / Size(texture_->GetSize()));
-    return Snapshot{
-        .texture = texture_,
-        .transform = entity.GetTransformation() * Matrix::MakeScale(scale),
-        .sampler_descriptor = sampler_descriptor_};
+    auto scale = Vector2(bounds->size / Size(texture_->GetSize()));
+    return Snapshot{.texture = texture_,
+                    .transform = entity.GetTransformation() *
+                                 Matrix::MakeTranslation(bounds->origin) *
+                                 Matrix::MakeScale(scale),
+                    .sampler_descriptor = sampler_descriptor_};
   }
   return Contents::RenderToSnapshot(renderer, entity);
 }
