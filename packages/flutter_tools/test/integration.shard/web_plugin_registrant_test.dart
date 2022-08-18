@@ -370,12 +370,12 @@ PubspecEditor _setDartSDKVersionEditor(String version) {
 }
 
 PubspecEditor _composeEditors(Iterable<PubspecEditor> editors) {
-  void editor(List<String> lines) {
-    for (final PubspecEditor e in editors) {
-      e(lines);
+  void composedEditor(List<String> lines) {
+    for (final PubspecEditor editor in editors) {
+      editor(lines);
     }
   }
-  return editor;
+  return composedEditor;
 }
 
 Future<void> _addAnalysisOptions(
