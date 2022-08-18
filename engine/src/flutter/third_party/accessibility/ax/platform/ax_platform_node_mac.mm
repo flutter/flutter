@@ -1016,7 +1016,9 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
 }
 
 - (NSRange)accessibilityRangeForPosition:(NSPoint)point {
-  BASE_UNREACHABLE();
+  // TODO(a-wallen): Framework needs to send Text Metrics
+  // to the AXTree in order for a NSPoint (x, y) to be
+  // translated to the appropriate range of UTF-16 chars.
   return NSMakeRange(0, 0);
 }
 
