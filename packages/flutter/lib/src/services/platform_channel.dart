@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:isolate' show ReceivePort;
-import 'dart:ui' as ui show PlatformDispatcher, PlatformMessageResponseCallback;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
@@ -15,6 +15,7 @@ import 'debug.dart' show debugProfilePlatformChannels;
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
+export 'dart:ui' show RootIsolateToken;
 export 'binary_messenger.dart' show BinaryMessenger;
 export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 
@@ -125,32 +126,44 @@ void _debugRecordDownStream(String channelTypeName, String name,
   _debugLaunchProfilePlatformChannels();
 }
 
-BinaryMessenger? _backgroundIsolateBinaryMessenger;
+class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
+  BackgroundIsolateBinaryMessenger._();
 
-class BackgroundIsolateBinding {
-  BackgroundIsolateBinding._() : _rootIsolateId = ui.PlatformDispatcher.instance.registerRootIsolate();
+  final ReceivePort _receivePort = ReceivePort();
+  final Map<int, Completer<ByteData?>> _completers = <int, Completer<ByteData?>>{};
+  int _messageCount = 0;
 
-  final int _rootIsolateId;
-
-  static BackgroundIsolateBinding initializeRootIsolate() {
-    return BackgroundIsolateBinding._();
+  /// The existing instance of this class, if any.
+  ///
+  /// Throws if [ensureInitialized] has not been called at least once.
+  static BinaryMessenger get instance {
+    if (_instance == null) {
+      throw StateError(
+          'Must call BackgroundIsolateBinaryMessenger.ensureInitialized.');
+    }
+    return _instance!;
   }
 
-  static void initializeBackgroundIsolate(BackgroundIsolateBinding binding) {
-    if (_backgroundIsolateBinaryMessenger == null) {
-      ui.PlatformDispatcher.instance.registerBackgroundIsolate(binding._rootIsolateId);
-      final _PortBinaryMessenger portBinaryMessenger = _PortBinaryMessenger();
-      _backgroundIsolateBinaryMessenger = portBinaryMessenger;
-      portBinaryMessenger.receivePort.listen((dynamic message) {
+  static BinaryMessenger? _instance;
+
+  /// Ensures that [BackgroundIsolateBinaryMessenger.instance] has been initialized.
+  ///
+  /// The argument should be the value obtained from [ServicesBinding.rootIsolateToken]
+  /// on the root isolate.
+  ///
+  /// This function is idempotent (calling it multiple times is harmless but has no effect).
+  static void ensureInitialized(ui.RootIsolateToken token) {
+    if (_instance == null) {
+      ui.PlatformDispatcher.instance.registerBackgroundIsolate(token);
+      final BackgroundIsolateBinaryMessenger portBinaryMessenger = BackgroundIsolateBinaryMessenger._();
+      _instance = portBinaryMessenger;
+      portBinaryMessenger._receivePort.listen((dynamic message) {
         try {
           final List<dynamic> args = message as List<dynamic>;
           final int identifier = args[0] as int;
           final Uint8List bytes = args[1] as Uint8List;
           final ByteData byteData = ByteData.sublistView(bytes);
-          final Completer<ByteData?> completer =
-              portBinaryMessenger._completers[identifier]!;
-          portBinaryMessenger._completers.remove(identifier);
-          completer.complete(byteData);
+          portBinaryMessenger._completers.remove(identifier)!.complete(byteData);
         } catch (exception, stack) {
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
@@ -163,32 +176,39 @@ class BackgroundIsolateBinding {
       });
     }
   }
-}
-
-class _PortBinaryMessenger extends BinaryMessenger {
-  final ReceivePort receivePort = ReceivePort();
-  final Map<int, Completer<ByteData?>> _completers = <int, Completer<ByteData?>>{};
-  int _messageCount = 0;
 
   @override
   Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback) {
-    throw UnimplementedError();
+    throw UnimplementedError('handlePlatformMessage is deprecated.');
   }
 
   @override
   Future<ByteData?>? send(String channel, ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
-    final int messageIdentifier = ++_messageCount;
+    _messageCount += 1;
+    final int messageIdentifier = _messageCount;
     _completers[messageIdentifier] = completer;
     ui.PlatformDispatcher.instance.sendPortPlatformMessage(
-        channel, message, messageIdentifier, receivePort.sendPort);
+      channel,
+      message,
+      messageIdentifier,
+      _receivePort.sendPort,
+    );
     return completer.future;
   }
 
   @override
   void setMessageHandler(String channel, MessageHandler? handler) {
-    throw UnimplementedError();
+    throw UnsupportedError(
+        'Background isolates do not support setMessageHandler(). Messages from the host platform always go to the root isolate.');
   }
+}
+
+BinaryMessenger _findBinaryMessenger() {
+  if (ui.RootIsolateToken.instance == null) {
+    return BackgroundIsolateBinaryMessenger.instance;
+  }
+  return ServicesBinding.instance.defaultBinaryMessenger;
 }
 
 /// A named channel for communicating with platform plugins using asynchronous
@@ -230,9 +250,7 @@ class BasicMessageChannel<T> {
 
   /// The messenger which sends the bytes for this channel, not null.
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result = _binaryMessenger ??
-        _backgroundIsolateBinaryMessenger ??
-        ServicesBinding.instance.defaultBinaryMessenger;
+    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return !kReleaseMode && debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
@@ -319,9 +337,7 @@ class MethodChannel {
   ///
   /// The messenger may not be null.
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result = _binaryMessenger ??
-        _backgroundIsolateBinaryMessenger ??
-        ServicesBinding.instance.defaultBinaryMessenger;
+    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return !kReleaseMode && debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
@@ -672,9 +688,7 @@ class EventChannel {
 
   /// The messenger used by this channel to send platform messages, not null.
   BinaryMessenger get binaryMessenger =>
-      _binaryMessenger ??
-      _backgroundIsolateBinaryMessenger ??
-      ServicesBinding.instance.defaultBinaryMessenger;
+      _binaryMessenger ?? _findBinaryMessenger();
   final BinaryMessenger? _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.
