@@ -204,6 +204,10 @@ struct TPoint {
     return *this - axis * this->Dot(axis) * 2;
   }
 
+  constexpr Radians AngleTo(const TPoint& p) const {
+    return Radians{std::atan2(this->Cross(p), this->Dot(p))};
+  }
+
   constexpr bool IsZero() const { return x == 0 && y == 0; }
 };
 
