@@ -9,7 +9,6 @@
 #include <flutter/standard_method_codec.h>
 
 #include <cstdint>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -19,7 +18,11 @@
 
 void RegisterMethodChannel(flutter::FlutterEngine* engine) {
     FlutterDesktopPluginRegistrarRef plugin_registrar_ref = engine->GetRegistrarForPlugin("platform_view");
-    flutter::PluginRegistrarWindows* registrar = flutter::PluginRegistrarManager::GetInstance()->GetRegistrar<flutter::PluginRegistrarWindows>(plugin_registrar_ref);
+    flutter::PluginRegistrarWindows* registrar =
+        flutter::PluginRegistrarManager::GetInstance()->GetRegistrar<
+            flutter::PluginRegistrarWindows>(
+                plugin_registrar_ref
+            );
     auto channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
         registrar->messenger(), "samples.flutter.io/platform_view",
         &flutter::StandardMethodCodec::GetInstance());

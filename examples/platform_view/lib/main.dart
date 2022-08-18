@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -47,15 +48,17 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Text _getButtonText() {
-    if (Platform.isAndroid) {
-      return const Text('Continue in Android view');
-    } else if (Platform.isIOS) {
-      return const Text('Continue in iOS view');
-    } else if (Platform.isWindows) {
-      return const Text('Cotninue in Windows view');
+  static Widget get _buttonText {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return const Text('Continue in Android view');
+      case TargetPlatform.iOS:
+        return const Text('Continue in iOS view');
+      case TargetPlatform.windows:
+        return const Text('Cotninue in Windows view');
+      default:
+        throw UnimplementedError('Platform not yet implemented');
     }
-    return const Text('Platform not yet supported');
   }
 
   Future<void> _launchPlatformCount() async {
@@ -87,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       padding: const EdgeInsets.all(18.0),
                       child: ElevatedButton(
                         onPressed: _launchPlatformCount,
-                        child: _getButtonText(),
+                        child: _buttonText,
                       ),
                     ),
                   ],
