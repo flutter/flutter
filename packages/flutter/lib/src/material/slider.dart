@@ -125,6 +125,7 @@ class Slider extends StatefulWidget {
   const Slider({
     super.key,
     required this.value,
+    this.secondaryValue,
     required this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -134,6 +135,7 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
+    this.secondaryActiveColor,
     this.thumbColor,
     this.mouseCursor,
     this.semanticFormatterCallback,
@@ -146,6 +148,8 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
+       assert(secondaryValue == null || (secondaryValue >= min && secondaryValue <= max),
+         'SecondaryValue $secondaryValue is not between $min and $max'),
        assert(divisions == null || divisions > 0);
 
   /// Creates an adaptive [Slider] based on the target platform, following
@@ -156,12 +160,14 @@ class Slider extends StatefulWidget {
   /// Material Design slider otherwise.
   ///
   /// If a [CupertinoSlider] is created, the following parameters are
-  /// ignored: [label], [inactiveColor], [semanticFormatterCallback].
+  /// ignored: [secondaryValue], [label], [inactiveColor], [secondaryActiveColor],
+  /// [semanticFormatterCallback].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Slider.adaptive({
     super.key,
     required this.value,
+    this.secondaryValue,
     required this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -172,6 +178,7 @@ class Slider extends StatefulWidget {
     this.mouseCursor,
     this.activeColor,
     this.inactiveColor,
+    this.secondaryActiveColor,
     this.thumbColor,
     this.semanticFormatterCallback,
     this.focusNode,
@@ -182,12 +189,21 @@ class Slider extends StatefulWidget {
        assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max),
+       assert(secondaryValue == null || (secondaryValue >= min && secondaryValue <= max)),
        assert(divisions == null || divisions > 0);
 
   /// The currently selected value for this slider.
   ///
   /// The slider's thumb is drawn at a position that corresponds to this value.
   final double value;
+
+  /// The secondary value for this slider
+  ///
+  /// If null, the secondary track is not shown.
+  ///
+  /// It can be ideal for media scenarios such as showing the buffering progress
+  /// while the [Slider.value] shows the play progress.
+  final double? secondaryValue;
 
   /// Called during a drag when the user is selecting a new value for the slider
   /// by dragging.
@@ -365,6 +381,18 @@ class Slider extends StatefulWidget {
   /// Ignored if this slider is created with [Slider.adaptive].
   final Color? inactiveColor;
 
+  /// The color to use for portion of the slider track between the thumb and the
+  /// [Slider.secondaryValue]
+  ///
+  /// Defaults to the [SliderThemeData.secondaryActiveTrackColor] of the current
+  /// [SliderTheme].
+  ///
+  /// Using a [SliderTheme] gives much more fine-grained control over the
+  /// appearance of various components of the slider.
+  ///
+  /// Ignored if this slider is created with [Slider.adaptive].
+  final Color? secondaryActiveColor;
+
   /// The color of the thumb.
   ///
   /// If this color is null:
@@ -443,6 +471,7 @@ class Slider extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('value', value));
+    properties.add(DoubleProperty('secondaryValue', secondaryValue));
     properties.add(ObjectFlagProperty<ValueChanged<double>>('onChanged', onChanged, ifNull: 'disabled'));
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeStart', onChangeStart));
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeEnd', onChangeEnd));
@@ -452,6 +481,7 @@ class Slider extends StatefulWidget {
     properties.add(StringProperty('label', label));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ColorProperty('secondaryActiveColor', secondaryActiveColor));
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
     properties.add(ObjectFlagProperty<FocusNode>.has('focusNode', focusNode));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'));
@@ -708,8 +738,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       trackHeight: sliderTheme.trackHeight ?? defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
       inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
+      secondaryActiveTrackColor: widget.secondaryActiveColor ?? sliderTheme.secondaryActiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.54),
       disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
       disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
+      disabledSecondaryActiveTrackColor: sliderTheme.disabledSecondaryActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
       activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.54),
       inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
       disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
@@ -789,6 +821,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           child: _SliderRenderObjectWidget(
             key: _renderObjectKey,
             value: _convert(widget.value),
+            secondaryValue: (widget.secondaryValue != null) ? _convert(widget.secondaryValue!) : null,
             divisions: widget.divisions,
             label: widget.label,
             sliderTheme: sliderTheme,
@@ -852,6 +885,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({
     super.key,
     required this.value,
+    required this.secondaryValue,
     required this.divisions,
     required this.label,
     required this.sliderTheme,
@@ -867,6 +901,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   });
 
   final double value;
+  final double? secondaryValue;
   final int? divisions;
   final String? label;
   final SliderThemeData sliderTheme;
@@ -884,6 +919,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   _RenderSlider createRenderObject(BuildContext context) {
     return _RenderSlider(
       value: value,
+      secondaryValue: secondaryValue,
       divisions: divisions,
       label: label,
       sliderTheme: sliderTheme,
@@ -909,6 +945,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       // setter dependent on the `divisions`.
       ..divisions = divisions
       ..value = value
+      ..secondaryValue = secondaryValue
       ..label = label
       ..sliderTheme = sliderTheme
       ..textScaleFactor = textScaleFactor
@@ -930,6 +967,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
 class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderSlider({
     required double value,
+    required double? secondaryValue,
     required int? divisions,
     required String? label,
     required SliderThemeData sliderTheme,
@@ -946,12 +984,14 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required bool hovering,
     required DeviceGestureSettings gestureSettings,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
+        assert(secondaryValue == null || (secondaryValue >= 0.0 && secondaryValue <= 1.0)),
         assert(state != null),
         assert(textDirection != null),
         _platform = platform,
         _semanticFormatterCallback = semanticFormatterCallback,
         _label = label,
         _value = value,
+        _secondaryValue = secondaryValue,
         _divisions = divisions,
         _sliderTheme = sliderTheme,
         _textScaleFactor = textScaleFactor,
@@ -1056,6 +1096,17 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else {
       _state.positionController.value = convertedValue;
     }
+    markNeedsSemanticsUpdate();
+  }
+
+  double? get secondaryValue => _secondaryValue;
+  double? _secondaryValue;
+  set secondaryValue(double? newValue) {
+    assert(newValue == null || (newValue >= 0.0 && newValue <= 1.0));
+    if (newValue == _secondaryValue) {
+      return;
+    }
+    _secondaryValue = newValue;
     markNeedsSemanticsUpdate();
   }
 
@@ -1417,17 +1468,21 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void paint(PaintingContext context, Offset offset) {
     final double value = _state.positionController.value;
+    final double? secondaryValue = _secondaryValue;
 
     // The visual position is the position of the thumb from 0 to 1 from left
     // to right. In left to right, this is the same as the value, but it is
     // reversed for right to left text.
     final double visualPosition;
+    final double? secondaryVisualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - value;
+        secondaryVisualPosition = (secondaryValue != null) ? (1.0 - secondaryValue) : null;
         break;
       case TextDirection.ltr:
         visualPosition = value;
+        secondaryVisualPosition = (secondaryValue != null) ? secondaryValue : null;
         break;
     }
 
@@ -1438,6 +1493,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete: isDiscrete,
     );
     final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    final Offset? secondaryOffset = (secondaryVisualPosition != null) ? Offset(trackRect.left + secondaryVisualPosition * trackRect.width, trackRect.center.dy) : null;
 
     _sliderTheme.trackShape!.paint(
       context,
@@ -1447,6 +1503,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       enableAnimation: _enableAnimation,
       textDirection: _textDirection,
       thumbCenter: thumbCenter,
+      secondaryOffset: secondaryOffset,
       isDiscrete: isDiscrete,
       isEnabled: isInteractive,
     );
