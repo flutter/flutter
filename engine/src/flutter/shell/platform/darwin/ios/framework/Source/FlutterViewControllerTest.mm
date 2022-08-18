@@ -126,8 +126,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)keyboardWillChangeFrame:(NSNotification*)notification;
 - (void)keyboardWillBeHidden:(NSNotification*)notification;
 - (void)startKeyBoardAnimation:(NSTimeInterval)duration;
+- (void)setupKeyboardAnimationVsyncClient;
 - (void)ensureViewportMetricsIsCorrect;
-- (void)invalidateDisplayLink;
+- (void)invalidateKeyboardAnimationVSyncClient;
 - (void)addInternalPlugins;
 - (flutter::PointerData)generatePointerDataForFake;
 - (void)sharedSetupWithProject:(nullable FlutterDartProject*)project
@@ -157,6 +158,18 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   self.mockEngine = nil;
   self.mockTextInputPlugin = nil;
   self.messageSent = nil;
+}
+
+- (void)testStartKeyboardAnimationWillInvokeSetupKeyboardAnimationVsyncClient {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  viewControllerMock.targetViewInsetBottom = 100;
+  [viewControllerMock startKeyBoardAnimation:0.25];
+  OCMVerify([viewControllerMock setupKeyboardAnimationVsyncClient]);
 }
 
 - (void)testkeyboardWillChangeFrameWillStartKeyboardAnimation {
@@ -223,7 +236,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id viewControllerMock = OCMPartialMock(viewController);
   [viewControllerMock viewDidDisappear:YES];
   OCMVerify([viewControllerMock ensureViewportMetricsIsCorrect]);
-  OCMVerify([viewControllerMock invalidateDisplayLink]);
+  OCMVerify([viewControllerMock invalidateKeyboardAnimationVSyncClient]);
 }
 
 - (void)testViewDidDisappearDoesntPauseEngineWhenNotTheViewController {
