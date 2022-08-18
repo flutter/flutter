@@ -1042,7 +1042,9 @@ void log(logging.LogRecord event) {
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
-    globals.printWarning('${event.loggerName}: ${event.message}$error');
+    if (!event.message.contains('No module for')) {
+      globals.printWarning('${event.loggerName}: ${event.message}$error');
+    }
   } else  {
     globals.printTrace('${event.loggerName}: ${event.message}$error');
   }
