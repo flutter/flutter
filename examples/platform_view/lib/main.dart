@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,7 +55,9 @@ class _MyHomePageState extends State<MyHomePage> {
         return const Text('Continue in iOS view');
       case TargetPlatform.windows:
         return const Text('Cotninue in Windows view');
-      default:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
         throw UnimplementedError('Platform not yet implemented');
     }
   }
