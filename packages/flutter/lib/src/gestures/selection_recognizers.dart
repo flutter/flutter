@@ -8,7 +8,7 @@ import 'constants.dart';
 import 'events.dart';
 import 'drag_details.dart';
 import 'long_press.dart' show GestureLongPressStartCallback, GestureLongPressMoveUpdateCallback, GestureLongPressEndCallback, GestureLongPressCancelCallback, LongPressStartDetails, LongPressMoveUpdateDetails, LongPressEndDetails;
-import 'monodrag.dart' show GestureVelocityTrackerBuilder, GestureDragEndCallback;
+import 'monodrag.dart' show GestureDragEndCallback;
 import 'recognizer.dart';
 import 'tap.dart' show GestureTapCallback, GestureTapDownCallback, GestureTapUpCallback, TapUpDetails, TapDownDetails;
 import 'velocity_tracker.dart';
@@ -258,6 +258,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       invokeCallback<void>('onEnd', () => onEnd!(endDetails, consecutiveTapCount));
       _consecutiveTapCountWhileDragging = null;
       consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
+    } else if (event is PointerCancelEvent || event is PointerPanZoomEndEvent){
+      if (onCancel != null) {
+        invokeCallback<void>('onCancel', onCancel!);
+      }
+      _giveUpPointer(event.pointer);
     } else {
       print('handle unknown pointer $event');
     }
