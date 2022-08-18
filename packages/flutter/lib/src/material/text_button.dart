@@ -137,7 +137,11 @@ class TextButton extends ButtonStyleButton {
   /// ```dart
   /// TextButton(
   ///   style: TextButton.styleFrom(foregroundColor: Colors.green),
-  /// )
+  ///   child: const Text('Give Kate a mix tape'),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  /// ),
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,

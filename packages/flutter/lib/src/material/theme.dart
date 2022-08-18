@@ -89,7 +89,7 @@ class Theme extends StatelessWidget {
   /// Widget build(BuildContext context) {
   ///   return MaterialApp(
   ///     theme: ThemeData.light(),
-  ///     body: Builder(
+  ///     home: Builder(
   ///       // Create an inner BuildContext so that we can refer to
   ///       // the Theme with Theme.of().
   ///       builder: (BuildContext context) {

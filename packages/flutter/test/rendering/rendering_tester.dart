@@ -365,6 +365,23 @@ class TestClipPaintingContext extends PaintingContext {
   Clip clipBehavior = Clip.none;
 }
 
+class TestPushLayerPaintingContext extends PaintingContext {
+  TestPushLayerPaintingContext() : super(ContainerLayer(), Rect.zero);
+
+  final List<ContainerLayer> pushedLayers = <ContainerLayer>[];
+
+  @override
+  void pushLayer(
+    ContainerLayer childLayer,
+    PaintingContextCallback painter,
+    Offset offset, {
+    Rect? childPaintBounds
+  }) {
+    pushedLayers.add(childLayer);
+    super.pushLayer(childLayer, painter, offset, childPaintBounds: childPaintBounds);
+  }
+}
+
 void expectOverflowedErrors() {
   final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
   final bool overflowed = errorDetails.toString().contains('overflowed');

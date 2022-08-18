@@ -24,6 +24,7 @@ const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
 const String kScreenshotMethod = '_flutter.screenshot';
 const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
+const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -878,6 +879,20 @@ class FlutterVmService {
       }
       await Future<void>.delayed(delay);
     }
+  }
+
+  /// Tell the provided flutter view that the font manifest has been updated
+  /// and asset fonts should be reloaded.
+  Future<void> reloadAssetFonts({
+    required String isolateId,
+    required String viewId,
+  }) async {
+    await callMethodWrapper(
+      kReloadAssetFonts,
+      isolateId: isolateId, args: <String, Object?>{
+        'viewId': viewId,
+      },
+    );
   }
 
   /// Waits for a signal from the VM service that [extensionName] is registered.
