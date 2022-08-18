@@ -25,7 +25,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
     required FileSystem fileSystem,
     required Logger logger,
-    Artifacts? artifacts,
+    required Artifacts artifacts,
     required ProcessManager processManager,
   }) :
     _fileSystem = fileSystem,
@@ -196,7 +196,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   final FileSystem _fileSystem;
   final Logger _logger;
-  final Artifacts? _artifacts;
+  final Artifacts _artifacts;
   final ProcessManager _processManager;
 
   @override
