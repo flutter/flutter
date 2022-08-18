@@ -72,6 +72,7 @@
 		689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSpellCheckPluginTest.mm; sourceTree = "<group>"; };
 		68B6091227F62F990036AC78 /* VsyncWaiterIosTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VsyncWaiterIosTest.mm; sourceTree = "<group>"; };
 		3DD7D38C27D2B81000DA365C /* FlutterUndoManagerPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterUndoManagerPluginTest.mm; sourceTree = "<group>"; };
+        73F12C22288F92FF00AFC3A6 /* FlutterViewControllerTest_mrc.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterViewControllerTest_mrc.mm; sourceTree = "<group>"; };
 		F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libios_test_flutter.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libios_test_flutter.dylib"; sourceTree = "<group>"; };
 		F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libocmock_shared.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libocmock_shared.dylib"; sourceTree = "<group>"; };
 		F77E081726FA9CE6003E6E4C /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = "../../../../out/$(FLUTTER_ENGINE)/Flutter.framework"; sourceTree = "<group>"; };
@@ -112,6 +113,7 @@
 				0AC2331224BA71D300A85907 /* FlutterEnginePlatformViewTest.mm */,
 				0AC2331924BA71D300A85907 /* FlutterPluginAppLifeCycleDelegateTest.mm */,
 				0AC2332124BA71D300A85907 /* FlutterViewControllerTest.mm */,
+				73F12C22288F92FF00AFC3A6 /* FlutterViewControllerTest_mrc.mm */,
 			);
 			name = Source;
 			path = ../../../shell/platform/darwin/ios/framework/Source;

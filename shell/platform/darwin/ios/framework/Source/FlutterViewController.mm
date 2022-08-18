@@ -26,6 +26,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
@@ -62,7 +63,7 @@ typedef struct MouseState {
  * Keyboard animation properties
  */
 @property(nonatomic, assign) double targetViewInsetBottom;
-@property(nonatomic, retain) CADisplayLink* displayLink;
+@property(nonatomic, retain) VSyncClient* keyboardAnimationVSyncClient;
 
 /*
  * Mouse and trackpad gesture recognizers
@@ -775,7 +776,7 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 - (void)viewDidDisappear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidDisappear");
   if ([_engine.get() viewController] == self) {
-    [self invalidateDisplayLink];
+    [self invalidateKeyboardAnimationVSyncClient];
     [self ensureViewportMetricsIsCorrect];
     [self surfaceUpdated:NO];
     [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.paused"];
@@ -831,7 +832,7 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
   [self removeInternalPlugins];
   [self deregisterNotifications];
 
-  [_displayLink release];
+  [self invalidateKeyboardAnimationVSyncClient];
   _scrollView.get().delegate = nil;
   _hoverGestureRecognizer.delegate = nil;
   [_hoverGestureRecognizer release];
@@ -1269,19 +1270,16 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   // Remove running animation when start another animation.
-  // After calling this line,the old display link will invalidate.
   [[self keyboardAnimationView].layer removeAllAnimations];
 
   // Set animation begin value.
   [self keyboardAnimationView].frame =
       CGRectMake(0, _viewportMetrics.physical_view_inset_bottom, 0, 0);
 
-  // Invalidate old display link if the old animation is not complete
-  [self invalidateDisplayLink];
-
-  self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink)];
-  [self.displayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
-  __block CADisplayLink* currentDisplayLink = self.displayLink;
+  // Invalidate old vsync client if old animation is not completed.
+  [self invalidateKeyboardAnimationVSyncClient];
+  [self setupKeyboardAnimationVsyncClient];
+  VSyncClient* currentVsyncClient = _keyboardAnimationVSyncClient;
 
   [UIView animateWithDuration:duration
       animations:^{
@@ -1289,19 +1287,54 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         [self keyboardAnimationView].frame = CGRectMake(0, self.targetViewInsetBottom, 0, 0);
       }
       completion:^(BOOL finished) {
-        if (self.displayLink == currentDisplayLink) {
-          // Indicates the displaylink captured by this block is the original one,which also
-          // indicates the animation has not been interrupted from its beginning. Moreover,indicates
-          // the animation is over and there is no more animation about to exectute.
-          [self invalidateDisplayLink];
+        if (_keyboardAnimationVSyncClient == currentVsyncClient) {
+          // Indicates the vsync client captured by this block is the original one, which also
+          // indicates the animation has not been interrupted from its beginning. Moreover,
+          // indicates the animation is over and there is no more to execute.
+          [self invalidateKeyboardAnimationVSyncClient];
           [self removeKeyboardAnimationView];
           [self ensureViewportMetricsIsCorrect];
         }
       }];
 }
 
-- (void)invalidateDisplayLink {
-  [self.displayLink invalidate];
+- (void)setupKeyboardAnimationVsyncClient {
+  auto callback = [weakSelf =
+                       [self getWeakPtr]](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+    if (!weakSelf) {
+      return;
+    }
+    fml::scoped_nsobject<FlutterViewController> flutterViewController(
+        [(FlutterViewController*)weakSelf.get() retain]);
+    if (!flutterViewController) {
+      return;
+    }
+
+    if ([flutterViewController keyboardAnimationView].superview == nil) {
+      // Ensure the keyboardAnimationView is in view hierarchy when animation running.
+      [flutterViewController.get().view addSubview:[flutterViewController keyboardAnimationView]];
+    }
+    if ([flutterViewController keyboardAnimationView].layer.presentationLayer) {
+      CGFloat value =
+          [flutterViewController keyboardAnimationView].layer.presentationLayer.frame.origin.y;
+      flutterViewController.get()->_viewportMetrics.physical_view_inset_bottom = value;
+      [flutterViewController updateViewportMetrics];
+    }
+  };
+  flutter::Shell& shell = [_engine.get() shell];
+  NSAssert(_keyboardAnimationVSyncClient == nil,
+           @"_keyboardAnimationVSyncClient must be nil when setup");
+  _keyboardAnimationVSyncClient =
+      [[VSyncClient alloc] initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()
+                                     callback:callback];
+  _keyboardAnimationVSyncClient.allowPauseAfterVsync = NO;
+  [_keyboardAnimationVSyncClient await];
+}
+
+- (void)invalidateKeyboardAnimationVSyncClient {
+  [_keyboardAnimationVSyncClient invalidate];
+  [_keyboardAnimationVSyncClient release];
+  _keyboardAnimationVSyncClient = nil;
 }
 
 - (void)removeKeyboardAnimationView {
@@ -1314,18 +1347,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (_viewportMetrics.physical_view_inset_bottom != self.targetViewInsetBottom) {
     // Make sure the `physical_view_inset_bottom` is the target value.
     _viewportMetrics.physical_view_inset_bottom = self.targetViewInsetBottom;
-    [self updateViewportMetrics];
-  }
-}
-
-- (void)onDisplayLink {
-  if ([self keyboardAnimationView].superview == nil) {
-    // Ensure the keyboardAnimationView is in view hierarchy when animation running.
-    [self.view addSubview:[self keyboardAnimationView]];
-  }
-  if ([self keyboardAnimationView].layer.presentationLayer) {
-    CGFloat value = [self keyboardAnimationView].layer.presentationLayer.frame.origin.y;
-    _viewportMetrics.physical_view_inset_bottom = value;
     [self updateViewportMetrics];
   }
 }

@@ -57,6 +57,7 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 
   if (self) {
     current_refresh_rate_ = [DisplayLinkManager displayRefreshRate];
+    _allowPauseAfterVsync = YES;
     callback_ = std::move(callback);
     display_link_ = fml::scoped_nsobject<CADisplayLink> {
       [[CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)] retain]
@@ -111,7 +112,9 @@ double VsyncWaiterIOS::GetRefreshRate() const {
   current_refresh_rate_ = round(1 / (frame_target_time - frame_start_time).ToSecondsF());
 
   recorder->RecordVsync(frame_start_time, frame_target_time);
-  display_link_.get().paused = YES;
+  if (_allowPauseAfterVsync) {
+    display_link_.get().paused = YES;
+  }
   callback_(std::move(recorder));
 }
 
