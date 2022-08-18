@@ -90,7 +90,7 @@ group("flutter") {
     }
   }
 
-  # If enbaled, compile the SDK / snapshot.
+  # If enabled, compile the SDK / snapshot.
   if (!is_fuchsia) {
     public_deps += [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
 
@@ -103,6 +103,9 @@ group("flutter") {
         # //flutter/lib/snapshot:generate_snapshot_bin will only build
         # gen_snapshot for the host and not the target.
         "//third_party/dart/runtime/bin:gen_snapshot",
+
+        # Built alongside gen_snapshot for 64 bit targets
+        "//third_party/dart/runtime/bin:analyze_snapshot",
 
         # Impeller artifacts - compiler and libtessellator
         "//flutter/impeller/compiler:impellerc",
