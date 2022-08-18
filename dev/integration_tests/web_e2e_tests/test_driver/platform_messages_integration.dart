@@ -19,9 +19,6 @@ void main() {
       (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -30,7 +27,7 @@ void main() {
     // 'document is not focused' platform exception.
     html.document.querySelector('input')?.focus();
     await Clipboard.setData(const ClipboardData(text: 'sample text'));
-  }, skip: true); // https://github.com/flutter/flutter/issues/54296
+  });
 
   testWidgets('Should create and dispose view embedder',
       (WidgetTester tester) async {
@@ -39,7 +36,7 @@ void main() {
     platformViewsRegistry.getNextPlatformViewId();
     // ignore: undefined_prefixed_name, avoid_dynamic_calls
     ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
-      ++viewInstanceCount;
+      viewInstanceCount += 1;
       return html.DivElement();
     });
 

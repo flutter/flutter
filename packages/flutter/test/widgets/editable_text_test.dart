@@ -4555,8 +4555,9 @@ void main() {
 
   testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -4595,8 +4596,9 @@ void main() {
 
   testWidgets('selection rects are not sent if scribbleEnabled is false', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
