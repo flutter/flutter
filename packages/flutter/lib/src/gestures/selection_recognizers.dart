@@ -371,6 +371,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
         // Pointer is lifted before timeout.
         // resolve(GestureDisposition.rejected);
         _checkTapUp(event);
+        consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
       }
       _reset();
     } else if (event is PointerCancelEvent) {
@@ -380,6 +381,8 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
       // The first touch.
       _longPressOrigin = OffsetPair.fromEventPosition(event);
       _initialButtons = event.buttons;
+      incrementConsecutiveTapCountOnDown(_longPressOrigin!.global);
+      _isDoubleTap = consecutiveTapCount == 2;
       _checkTapDown(event);
     } else if (event is PointerMoveEvent) {
       if (event.buttons != _initialButtons) {
@@ -400,8 +403,8 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
       kind: getKindForPointer(event.pointer),
     );
 
-    incrementConsecutiveTapCountOnDown(details.globalPosition);
-    _isDoubleTap = consecutiveTapCount == 2;
+    // incrementConsecutiveTapCountOnDown(details.globalPosition);
+    // _isDoubleTap = consecutiveTapCount == 2;
 
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -432,7 +435,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
       default:
         assert(false, 'Unhandled button $_initialButtons');
     }
-    consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
+    // consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
   }
 
   void _checkLongPressCancel() {
