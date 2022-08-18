@@ -14,6 +14,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
+import '../src/logging_logger.dart';
 
 void main() {
   testWithoutContext('Coverage collector Can handle coverage SentinelException', () async {
@@ -408,7 +409,8 @@ void main() {
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
       final String packagesPath = packagesFile.path;
-      final TestTimeRecorder testTimeRecorder = TestTimeRecorder();
+      final LoggingLogger logger = LoggingLogger();
+      final TestTimeRecorder testTimeRecorder = TestTimeRecorder(logger);
       final CoverageCollector collector = CoverageCollector(
           libraryNames: <String>{'foo', 'bar'},
           verbose: false,

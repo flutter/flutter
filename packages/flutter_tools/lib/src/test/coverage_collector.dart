@@ -69,13 +69,13 @@ class CoverageCollector extends TestWatcher {
   }
 
   void _addHitmap(Map<String, coverage.HitMap> hitmap) {
-    final Stopwatch? stopwatch = testTimeRecorder?.start(TestTimePhases.Coverage_addHitmap);
+    final Stopwatch? stopwatch = testTimeRecorder?.start(TestTimePhases.CoverageAddHitmap);
     if (_globalHitmap == null) {
       _globalHitmap = hitmap;
     } else {
       _globalHitmap!.merge(hitmap);
     }
-    testTimeRecorder?.stop(TestTimePhases.Coverage_addHitmap, stopwatch!);
+    testTimeRecorder?.stop(TestTimePhases.CoverageAddHitmap, stopwatch!);
   }
 
   /// The directory of the package for which coverage is being collected.
@@ -129,7 +129,7 @@ class CoverageCollector extends TestWatcher {
 
     Map<String, dynamic>? data;
 
-    final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Coverage_collect);
+    final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
     final Future<void> processComplete = testDevice.finished.catchError(
       (Object error) => throw Exception(
@@ -153,16 +153,16 @@ class CoverageCollector extends TestWatcher {
 
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
-    testTimeRecorder?.stop(TestTimePhases.Coverage_collect, collectTestTimeRecorderStopwatch!);
+    testTimeRecorder?.stop(TestTimePhases.CoverageCollect, collectTestTimeRecorderStopwatch!);
 
     _logMessage('Merging coverage data...');
-    final Stopwatch? parseTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Coverage_parseJson);
+    final Stopwatch? parseTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageParseJson);
     final Map<String, coverage.HitMap> hitmap = coverage.HitMap.parseJsonSync(
         data!['coverage'] as List<Map<String, dynamic>>,
         checkIgnoredLines: true,
         resolver: resolver ?? await CoverageCollector.getResolver(packageDirectory),
         ignoredLinesInFilesCache: _ignoredLinesInFilesCache);
-    testTimeRecorder?.stop(TestTimePhases.Coverage_parseJson, parseTestTimeRecorderStopwatch!);
+    testTimeRecorder?.stop(TestTimePhases.CoverageParseJson, parseTestTimeRecorderStopwatch!);
 
     _addHitmap(hitmap);
     _logMessage('Done merging coverage data into global coverage map.');

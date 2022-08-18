@@ -99,7 +99,7 @@ void main() {
 
   testUsingContext('TestCompiler records test timings when provided TestTimeRecorder', () async {
     residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
-    final TestTimeRecorder testTimeRecorder = TestTimeRecorder();
+    final TestTimeRecorder testTimeRecorder = TestTimeRecorder(logger);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
       FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),

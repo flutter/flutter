@@ -308,7 +308,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     TestTimeRecorder? testTimeRecorder;
     if (verbose) {
-      testTimeRecorder = TestTimeRecorder();
+      testTimeRecorder = TestTimeRecorder(globals.logger);
     }
 
     if (buildInfo.packageConfig['test_api'] == null) {
