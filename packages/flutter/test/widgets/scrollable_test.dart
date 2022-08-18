@@ -1439,9 +1439,9 @@ void main() {
     await tester.sendEventToBinding(testPointer.hover(tester.getCenter(find.byType(Scrollable))));
     await tester.sendEventToBinding(testPointer.scrollInertiaCancel()); // Cancel partway through.
     await tester.pump();
-    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
+    expect(getScrollOffset(tester), closeTo(342.5439, 0.0001));
     await tester.pump(const Duration(milliseconds: 4800));
-    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
+    expect(getScrollOffset(tester), closeTo(342.5439, 0.0001));
   });
 }
 
