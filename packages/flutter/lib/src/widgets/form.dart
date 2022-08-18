@@ -168,7 +168,7 @@ class FormState extends State<Form> {
 
     for (final FormFieldState<dynamic> field in _fields) {
       final String? key = field.submissionKey;
-      
+
       if (key == null) {
         continue;
       }
