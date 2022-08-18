@@ -46,4 +46,25 @@ TEST_F(AXPlatformNodeMacTest, CanGetCocoaPlatformNodeFromTree) {
   EXPECT_TRUE(native_root != nullptr);
 }
 
+// Test that [AXPlatformNodeCocoa accessbilityRangeForPosition:] doesn't crash.
+// https://github.com/flutter/flutter/issues/102416
+TEST_F(AXPlatformNodeMacTest, AccessibilityRangeForPositionDoesntCrash) {
+  AXNodeData root;
+  root.id = 1;
+  root.relative_bounds.bounds = gfx::RectF(0, 0, 40, 40);
+
+  Init(root);
+  AXNode* root_node = GetRootAsAXNode();
+  ASSERT_TRUE(root_node != nullptr);
+
+  AXPlatformNode* platform_node = AXPlatformNodeFromNode(root_node);
+  ASSERT_TRUE(platform_node != nullptr);
+
+  NSPoint point = NSMakePoint(0, 0);
+  AXPlatformNodeCocoa* native_root = platform_node->GetNativeViewAccessible();
+  ASSERT_TRUE(native_root != nullptr);
+
+  [native_root accessibilityRangeForPosition:(NSPoint)point];
+}
+
 }  // namespace ui
