@@ -793,7 +793,7 @@ class TextSelectionOverlay {
     // by half preferred line height.
     final double halfPreferredLineHeight = renderObject.preferredLineHeight / 2;
 
-    // When dragging handle and move,the offsetX from drag event is accurate.
+    // When dragging handle and move, the offsetX from drag event is accurate.
     // Only need to compute different offsetY from different handle.
     final double offsetYFromHandleToTextPosition = handleAnchorDy - halfHandleHeight - halfPreferredLineHeight;
     return Offset(0.0, offsetYFromHandleToTextPosition);
