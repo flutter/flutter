@@ -61,7 +61,7 @@ class WindowsVersionValidator extends DoctorValidator {
 //   ''';
 
     final ProcessResult result = await Process.run('systeminfo', <String>[]);
-    final String x = result.stdout as String;
+    final String resultStdout = result.stdout as String;
 
     // Define the major versions that are not supported
     const List<String> unsupportedVersions = <String>[
@@ -69,7 +69,7 @@ class WindowsVersionValidator extends DoctorValidator {
       '8',
     ];
 
-    final List<String> elements = x.split('\n');
+    final List<String> elements = resultStdout.split('\n');
 
     // Regular expression pattern for identifying
     // semantic versioned strings
