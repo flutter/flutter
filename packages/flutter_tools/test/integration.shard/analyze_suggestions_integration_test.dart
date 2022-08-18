@@ -43,14 +43,14 @@ void main() {
       ]);
 
       const String expected = '\n'
-      '┌────────────────────────────────────────────────────────────────────────────┐\n'
-      '│ General Info                                                               │\n'
-      '│ [✓] App Name: flutter_gallery                                              │\n'
-      '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows, fuchsia │\n'
-      '│ [✓] Is Flutter Package: yes                                                │\n'
-      '│ [✓] Uses Material Design: yes                                              │\n'
-      '│ [✓] Is Plugin: no                                                          │\n'
-      '└────────────────────────────────────────────────────────────────────────────┘\n';
+      '┌───────────────────────────────────────────────────────────────────┐\n'
+      '│ General Info                                                      │\n'
+      '│ [✓] App Name: flutter_gallery                                     │\n'
+      '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows │\n'
+      '│ [✓] Is Flutter Package: yes                                       │\n'
+      '│ [✓] Uses Material Design: yes                                     │\n'
+      '│ [✓] Is Plugin: no                                                 │\n'
+      '└───────────────────────────────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));
     });

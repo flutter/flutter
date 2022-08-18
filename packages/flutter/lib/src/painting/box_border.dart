@@ -180,6 +180,18 @@ abstract class BoxBorder extends ShapeBorder {
       ..addRect(rect);
   }
 
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    // For `ShapeDecoration(shape: Border.all())`, a rectangle with sharp edges
+    // is always painted. There is no borderRadius parameter for
+    // ShapeDecoration or Border, only for BoxDecoration, which doesn't call
+    // this method.
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
   /// Paints the border within the given [Rect] on the given [Canvas].
   ///
   /// This is an extension of the [ShapeBorder.paint] method. It allows

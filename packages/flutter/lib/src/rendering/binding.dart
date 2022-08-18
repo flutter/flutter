@@ -166,20 +166,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance.renderView.debugSemantics
-            ?.toStringDeep() ?? 'Semantics not collected.';
           return <String, Object>{
-            'data': data,
+            'data': _generateSemanticsTree(DebugSemanticsDumpOrder.traversalOrder),
           };
         },
       );
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance.renderView.debugSemantics
-            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest) ?? 'Semantics not collected.';
           return <String, Object>{
-            'data': data,
+            'data': _generateSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest),
           };
         },
       );
@@ -575,8 +571,19 @@ void debugDumpLayerTree() {
 ///
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
-void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
+void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder]) {
+  debugPrint(_generateSemanticsTree(childOrder));
+}
+
+String _generateSemanticsTree(DebugSemanticsDumpOrder childOrder) {
+  final String? tree = RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder);
+  if (tree != null) {
+    return tree;
+  }
+  return 'Semantics not generated.\n'
+    'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+    'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
+    'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.';
 }
 
 /// A concrete binding for applications that use the Rendering framework

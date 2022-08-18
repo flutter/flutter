@@ -1231,16 +1231,5 @@ class FakeVM extends Fake implements vms.VM {
 vms.Isolate createFakeIsolate() => vms.Isolate(
   id: '123',
   number: '123',
-  name: null,
-  isSystemIsolate: null,
-  isolateFlags: null,
-  startTime: null,
-  runnable: null,
-  livePorts: null,
-  pauseOnExit: null,
-  pauseEvent: null,
-  libraries: null,
-  breakpoints: null,
-  exceptionPauseMode: null,
   extensionRPCs: <String>[],
 );

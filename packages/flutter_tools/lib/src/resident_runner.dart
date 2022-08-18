@@ -26,6 +26,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/dart_plugin_registrant.dart';
 import 'build_system/targets/localizations.dart';
+import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -49,6 +50,7 @@ class FlutterDevice {
     this.targetPlatform,
     ResidentCompiler? generator,
     this.userIdentifier,
+    required this.developmentShaderCompiler,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts!.getArtifactPath(
@@ -87,6 +89,16 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
+    final DevelopmentShaderCompiler shaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: ShaderCompiler(
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+      ),
+      fileSystem: globals.fs,
+    );
+
     // For both web and non-web platforms we initialize dill to/from
     // a shared location for faster bootstrapping. If the compiler fails
     // due to a kernel target or version mismatch, no error is reported
@@ -184,6 +196,7 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
+      developmentShaderCompiler: shaderCompiler,
     );
   }
 
@@ -192,6 +205,7 @@ class FlutterDevice {
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
   final String? userIdentifier;
+  final DevelopmentShaderCompiler developmentShaderCompiler;
 
   DevFSWriter? devFSWriter;
   Stream<Uri?>? observatoryUris;
@@ -563,6 +577,7 @@ class FlutterDevice {
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
+        shaderCompiler: developmentShaderCompiler,
         dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
       );
     } on DevFSException {
@@ -686,6 +701,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
+      if (device?.targetPlatform == TargetPlatform.web_javascript) {
+        logger!.printWarning('Unable to get jank metrics for web');
+        continue;
+      }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
         final Map<String, Object>? rasterData =
@@ -1202,6 +1221,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       platform: globals.platform,
+      usage: globals.flutterUsage,
       projectDir: globals.fs.currentDirectory,
       generateDartPluginRegistry: generateDartPluginRegistry,
       defines: <String, String>{
