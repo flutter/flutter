@@ -98,7 +98,14 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
       Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader);
       auto sampling =
           ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
-      paint.setShader(decoded->shader(sampling)->skia_object());
+      auto color_source = decoded->shader(sampling);
+      // TODO(dnfield): Remove this restriction.
+      // This currently is only used by paragraph code. Once SkParagraph does
+      // not need to take an SkPaint, we won't be restricted in this way because
+      // we will not need to access the shader on the UI task runner.
+      if (color_source->owning_context() != DlImage::OwningContext::kRaster) {
+        paint.setShader(color_source->skia_object());
+      }
     }
 
     Dart_Handle color_filter = values[kColorFilterIndex];

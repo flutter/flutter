@@ -30,6 +30,12 @@ std::shared_ptr<impeller::Texture> DlImageImpeller::impeller_texture() const {
 }
 
 // |DlImage|
+bool DlImageImpeller::isOpaque() const {
+  // Impeller doesn't currently implement opaque alpha types.
+  return false;
+}
+
+// |DlImage|
 bool DlImageImpeller::isTextureBacked() const {
   // Impeller textures are always ... textures :/
   return true;

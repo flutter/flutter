@@ -22,6 +22,11 @@ std::shared_ptr<impeller::Texture> DlImageSkia::impeller_texture() const {
 }
 
 // |DlImage|
+bool DlImageSkia::isOpaque() const {
+  return image_ ? image_->isOpaque() : false;
+}
+
+// |DlImage|
 bool DlImageSkia::isTextureBacked() const {
   return image_ ? image_->isTextureBacked() : false;
 }

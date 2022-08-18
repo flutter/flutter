@@ -24,6 +24,9 @@ class DlImageImpeller final : public flutter::DlImage {
   std::shared_ptr<impeller::Texture> impeller_texture() const override;
 
   // |DlImage|
+  bool isOpaque() const override;
+
+  // |DlImage|
   bool isTextureBacked() const override;
 
   // |DlImage|
