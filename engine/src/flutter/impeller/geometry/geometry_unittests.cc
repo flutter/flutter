@@ -773,6 +773,35 @@ TEST(GeometryTest, PointAbs) {
   ASSERT_POINT_NEAR(a_abs, expected);
 }
 
+TEST(GeometryTest, PointAngleTo) {
+  // Negative result in the CCW (with up = -Y) direction.
+  {
+    Point a(1, 1);
+    Point b(1, -1);
+    Radians actual = a.AngleTo(b);
+    Radians expected = Radians{-kPi / 2};
+    ASSERT_FLOAT_EQ(actual.radians, expected.radians);
+  }
+
+  // Check the other direction to ensure the result is signed correctly.
+  {
+    Point a(1, -1);
+    Point b(1, 1);
+    Radians actual = a.AngleTo(b);
+    Radians expected = Radians{kPi / 2};
+    ASSERT_FLOAT_EQ(actual.radians, expected.radians);
+  }
+
+  // Differences in magnitude should have no impact on the result.
+  {
+    Point a(100, -100);
+    Point b(0.01, 0.01);
+    Radians actual = a.AngleTo(b);
+    Radians expected = Radians{kPi / 2};
+    ASSERT_FLOAT_EQ(actual.radians, expected.radians);
+  }
+}
+
 TEST(GeometryTest, CanUseVector3AssignmentOperators) {
   {
     Vector3 p(1, 2, 4);
