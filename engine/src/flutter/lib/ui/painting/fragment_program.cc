@@ -112,7 +112,8 @@ fml::RefPtr<FragmentShader> FragmentProgram::shader(Dart_Handle shader,
     uniform_floats[i] = uniforms[i];
   }
   uniforms.Release();
-  std::vector<sk_sp<SkShader>> sk_samplers(sampler_shaders.size());
+  std::vector<std::shared_ptr<DlColorSource>> dl_samplers(
+      sampler_shaders.size());
   for (size_t i = 0; i < sampler_shaders.size(); i++) {
     DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
     ImageShader* image_shader = sampler_shaders[i];
@@ -122,13 +123,14 @@ fml::RefPtr<FragmentShader> FragmentProgram::shader(Dart_Handle shader,
     // contain a value to be used if the developer did not specify a preference
     // when they constructed the ImageShader, so we will use kNearest which is
     // the default filterQuality in a Paint object.
-    sk_samplers[i] = image_shader->shader(sampling)->skia_object();
+    dl_samplers[i] = image_shader->shader(sampling);
     uniform_floats[uniform_count + 2 * i] = image_shader->width();
     uniform_floats[uniform_count + 2 * i + 1] = image_shader->height();
   }
-  auto sk_shader = runtime_effect_->makeShader(
-      std::move(uniform_data), sk_samplers.data(), sk_samplers.size());
-  return FragmentShader::Create(shader, std::move(sk_shader));
+  return FragmentShader::Create(
+      shader,
+      DlColorSource::MakeRuntimeEffect(runtime_effect_, std::move(dl_samplers),
+                                       std::move(uniform_data)));
 }
 
 void FragmentProgram::Create(Dart_Handle wrapper) {
