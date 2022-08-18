@@ -9,18 +9,26 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
+import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
+
+// Examples can assume:
+// FocusNode _focusNode = FocusNode();
+// late GlobalKey key;
 
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.touch,
@@ -30,12 +38,21 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 
 /// A widget that introduces an area for user selections.
 ///
-/// Flutter widgets are not selectable by default. To enable selection for
-/// a Flutter application, consider wrapping a portion of widget subtree with
-/// [SelectableRegion]. The wrapped subtree can be selected by users using mouse
-/// or touch gestures, e.g. users can select widgets by holding the mouse
+/// Flutter widgets are not selectable by default. Wrapping a widget subtree
+/// with a [SelectableRegion] widget enables selection within that subtree (for
+/// example, [Text] widgets automatically look for selectable regions to enable
+/// selection). The wrapped subtree can be selected by users using mouse or
+/// touch gestures, e.g. users can select widgets by holding the mouse
 /// left-click and dragging across widgets, or they can use long press gestures
 /// to select words on touch devices.
+///
+/// A [SelectableRegion] widget requires configuration; in particular specific
+/// [selectionControls] must be provided.
+///
+/// The [SelectionArea] widget from the [material] library configures a
+/// [SelectableRegion] in a platform-specific manner (e.g. using a Material
+/// toolbar on Android, a Cupertino toolbar on iOS), and it may therefore be
+/// simpler to use that widget rather than using [SelectableRegion] directly.
 ///
 /// ## An overview of the selection system.
 ///
@@ -73,7 +90,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// MaterialApp(
 ///   home: SelectableRegion(
 ///     selectionControls: materialTextSelectionControls,
-///     focusNode: FocusNode(),
+///     focusNode: _focusNode, // initialized to FocusNode()
 ///     child: Scaffold(
 ///       appBar: AppBar(title: const Text('Flutter Code Sample')),
 ///       body: ListView(
@@ -88,7 +105,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// ```
 /// {@end-tool}
 ///
-/// ```
 ///
 ///               SelectionContainer
 ///               (SelectableRegion)
@@ -106,7 +122,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///                     Selectable        Selectable
 ///                     ("Item 0")         ("Item 1")
 ///
-///```
 ///
 /// ## Making a widget selectable
 ///
@@ -158,6 +173,16 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// child selection area can not extend past its subtree, and the selection of
 /// the parent selection area can not extend inside the child selection area.
 ///
+/// ## Tests
+///
+/// In a test, a region can be selected either by faking drag events (e.g. using
+/// [WidgetTester.dragFrom]) or by sending intents to a widget inside the region
+/// that has been given a [GlobalKey], e.g.:
+///
+/// ```dart
+/// Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
+/// ```
+///
 /// See also:
 ///  * [SelectionArea], which creates a [SelectableRegion] with
 ///    platform-adaptive selection controls.
@@ -178,7 +203,17 @@ class SelectableRegion extends StatefulWidget {
     required this.focusNode,
     required this.selectionControls,
     required this.child,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   });
+
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
@@ -190,6 +225,9 @@ class SelectableRegion extends StatefulWidget {
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
+  ///
+  /// The [emptyTextSelectionControls] global variable provides a default
+  /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
 
   @override
@@ -276,7 +314,13 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleFocusChanged() {
     if (!widget.focusNode.hasFocus) {
+      if (kIsWeb) {
+        PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+      }
       _clearSelection();
+    }
+    if (kIsWeb) {
+      PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
 
@@ -402,7 +446,12 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       });
       return;
     }
-  }
+ }
+
+ void _onAnyDragEnd(DragEndDetails details) {
+  _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
+  _stopSelectionEndEdgeUpdate();
+ }
 
   void _stopSelectionEndEdgeUpdate() {
     _scheduledSelectionEndEdgeUpdate = false;
@@ -450,11 +499,19 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   late Offset _selectionStartHandleDragPosition;
   late Offset _selectionEndHandleDragPosition;
 
+  late List<TextSelectionPoint> points;
+
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     assert(_selectionDelegate.value.startSelectionPoint != null);
+
     final Offset localPosition = _selectionDelegate.value.startSelectionPoint!.localPosition;
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionStartHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
+
+    _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.startSelectionPoint!,
+    ));
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -463,6 +520,11 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // Offset it to the center of the line to make it feel more natural.
     _selectionStartPosition = _selectionStartHandleDragPosition - Offset(0, _selectionDelegate.value.startSelectionPoint!.lineHeight / 2);
     _triggerSelectionStartEdgeUpdate();
+
+    _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.startSelectionPoint!,
+    ));
   }
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
@@ -470,6 +532,11 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     final Offset localPosition = _selectionDelegate.value.endSelectionPoint!.localPosition;
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionEndHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
+
+    _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.endSelectionPoint!,
+    ));
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
@@ -478,6 +545,30 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // Offset it to the center of the line to make it feel more natural.
     _selectionEndPosition = _selectionEndHandleDragPosition - Offset(0, _selectionDelegate.value.endSelectionPoint!.lineHeight / 2);
     _triggerSelectionEndEdgeUpdate();
+
+    _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.endSelectionPoint!,
+    ));
+  }
+
+  MagnifierOverlayInfoBearer _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
+      final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
+      final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
+      final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
+      final Rect caretRect = Rect.fromLTWH(
+        globalSelectionPointPosition.dx,
+        globalSelectionPointPosition.dy - selectionPoint.lineHeight,
+        0,
+        selectionPoint.lineHeight
+      );
+
+      return MagnifierOverlayInfoBearer(
+        globalGesturePosition: globalGesturePosition,
+        caretRect: caretRect,
+        fieldBounds: globalTransformAsOffset & _selectable!.size,
+        currentLineBoundaries: globalTransformAsOffset & _selectable!.size,
+      );
   }
 
   void _createSelectionOverlay() {
@@ -487,7 +578,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     }
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
-    late List<TextSelectionPoint> points;
     final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
     final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
     if (startLocalPosition.dy > endLocalPosition.dy) {
@@ -508,12 +598,12 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       lineHeightAtStart: start?.lineHeight ?? end!.lineHeight,
       onStartHandleDragStart: _handleSelectionStartHandleDragStart,
       onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
-      onStartHandleDragEnd: (DragEndDetails details) => _stopSelectionStartEdgeUpdate(),
+      onStartHandleDragEnd: _onAnyDragEnd,
       endHandleType: end?.handleType ?? TextSelectionHandleType.right,
       lineHeightAtEnd: end?.lineHeight ?? start!.lineHeight,
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
-      onEndHandleDragEnd: (DragEndDetails details) => _stopSelectionEndEdgeUpdate(),
+      onEndHandleDragEnd: _onAnyDragEnd,
       selectionEndpoints: points,
       selectionControls: widget.selectionControls,
       selectionDelegate: this,
@@ -521,6 +611,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
       toolbarLayerLink: _toolbarLayerLink,
+      magnifierConfiguration: widget.magnifierConfiguration
     );
   }
 
@@ -797,6 +888,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
     _selectionDelegate.dispose();
+    // In case dispose was triggered before gesture end, remove the magnifier
+    // so it doesn't remain stuck in the overlay forever.
+    _selectionOverlay?.hideMagnifier(shouldShowToolbar: false);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     super.dispose();
@@ -804,7 +898,17 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(debugCheckHasOverlay(context));
+    Widget result = SelectionContainer(
+      registrar: this,
+      delegate: _selectionDelegate,
+      child: widget.child,
+    );
+    if (kIsWeb) {
+      result = PlatformSelectableRegionContextMenu(
+        child: result,
+      );
+    }
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
       child: RawGestureDetector(
@@ -816,11 +920,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
           child: Focus(
             includeSemantics: false,
             focusNode: widget.focusNode,
-            child: SelectionContainer(
-              registrar: this,
-              delegate: _selectionDelegate,
-              child: widget.child,
-            ),
+            child: result,
           ),
         ),
       ),

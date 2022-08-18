@@ -983,6 +983,11 @@ const String kBuildName = 'BuildName';
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
 
+/// The action Xcode is taking.
+///
+/// Will be "build" when building and "install" when archiving.
+const String kXcodeAction = 'Action';
+
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 

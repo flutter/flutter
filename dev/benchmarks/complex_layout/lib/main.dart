@@ -113,10 +113,11 @@ class ComplexLayoutState extends State<ComplexLayout> {
               key: const Key('complex-scroll'), // this key is used by the driver test
               controller: ScrollController(),  // So that the scroll offset can be tracked
               itemBuilder: (BuildContext context, int index) {
-                if (index.isEven)
+                if (index.isEven) {
                   return FancyImageItem(index, key: PageStorageKey<int>(index));
-                else
+                } else {
                   return FancyGalleryItem(index, key: PageStorageKey<int>(index));
+                }
               },
             ),
           ),
@@ -323,9 +324,9 @@ class MiniIconWithText extends StatelessWidget {
           child: Container(
             width: 16.0,
             height: 16.0,
-            decoration: BoxDecoration(
+            decoration: ShapeDecoration(
               color: Theme.of(context).primaryColor,
-              shape: BoxShape.circle,
+              shape: const CircleBorder(),
             ),
             child: Icon(icon, color: Colors.white, size: 12.0),
           ),

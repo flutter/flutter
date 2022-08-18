@@ -8,6 +8,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Gradient, Placeholder
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'box.dart';
@@ -419,6 +420,8 @@ class RenderParagraph extends RenderBox
   }
 
   /// The color to use when painting the selection.
+  ///
+  /// Ignored if the text is not selectable (e.g. if [registrar] is null).
   Color? get selectionColor => _selectionColor;
   Color? _selectionColor;
   set selectionColor(Color? value) {
@@ -640,10 +643,37 @@ class RenderParagraph extends RenderBox
     );
   }
 
+  bool _systemFontsChangeScheduled = false;
   @override
   void systemFontsDidChange() {
-    super.systemFontsDidChange();
-    _textPainter.markNeedsLayout();
+    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
+    switch (phase) {
+      case SchedulerPhase.idle:
+      case SchedulerPhase.postFrameCallbacks:
+        if (_systemFontsChangeScheduled) {
+          return;
+        }
+        _systemFontsChangeScheduled = true;
+        SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
+          assert(_systemFontsChangeScheduled);
+          _systemFontsChangeScheduled = false;
+          assert(
+            attached || (debugDisposed ?? true),
+            '$this is detached during $phase but not disposed.',
+          );
+          if (attached) {
+            super.systemFontsDidChange();
+            _textPainter.markNeedsLayout();
+          }
+        });
+        break;
+      case SchedulerPhase.transientCallbacks:
+      case SchedulerPhase.midFrameMicrotasks:
+      case SchedulerPhase.persistentCallbacks:
+        super.systemFontsDidChange();
+        _textPainter.markNeedsLayout();
+        break;
+    }
   }
 
   // Placeholder dimensions representing the sizes of child inline widgets.

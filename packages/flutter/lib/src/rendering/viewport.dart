@@ -751,8 +751,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // Steps to convert `rect` (from a RenderBox coordinate system) to its
     // scroll offset within this viewport (not in the exact order):
     //
-    // 1. Pick the outmost RenderBox (between which, and the viewport, there is
-    // nothing but RenderSlivers) as an intermediate reference frame
+    // 1. Pick the outermost RenderBox (between which, and the viewport, there
+    // is nothing but RenderSlivers) as an intermediate reference frame
     // (the `pivot`), convert `rect` to that coordinate space.
     //
     // 2. Convert `rect` from the `pivot` coordinate space to its sliver

@@ -130,8 +130,9 @@ class GestureDemoState extends State<GestureDemo> {
   void _handleColorChange() {
     setState(() {
       _swatchIndex += 1;
-      if (_swatchIndex == kSwatches.length)
+      if (_swatchIndex == kSwatches.length) {
         _swatchIndex = 0;
+      }
       _swatch = kSwatches[_swatchIndex];
     });
   }

@@ -15,6 +15,9 @@ import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 const double _singleLineVerticalPadding = 14.0;
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
@@ -40,9 +43,11 @@ const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlo
 ///
 /// ```dart
 /// ScaffoldMessenger.of(context).showSnackBar(
-///   SnackBar( ... )
+///   const SnackBar(
+///     content: Text('He likes me. I think he likes me.'),
+///   )
 /// ).closed.then((SnackBarClosedReason reason) {
-///    ...
+///    // ...
 /// });
 /// ```
 enum SnackBarClosedReason {
@@ -227,11 +232,12 @@ class SnackBar extends StatefulWidget {
   /// Typically a [Text] widget.
   final Widget content;
 
-  /// The snack bar's background color. If not specified it will use
-  /// [SnackBarThemeData.backgroundColor] of [ThemeData.snackBarTheme]. If that
-  /// is not specified it will default to a dark variation of
-  /// [ColorScheme.surface] for light themes, or [ColorScheme.onSurface] for
-  /// dark themes.
+  /// The snack bar's background color.
+  ///
+  /// If not specified, it will use [SnackBarThemeData.backgroundColor] of
+  /// [ThemeData.snackBarTheme]. If that is not specified it will default to a
+  /// dark variation of [ColorScheme.surface] for light themes, or
+  /// [ColorScheme.onSurface] for dark themes.
   final Color? backgroundColor;
 
   /// The z-coordinate at which to place the snack bar. This controls the size
@@ -256,29 +262,29 @@ class SnackBar extends StatefulWidget {
   /// The amount of padding to apply to the snack bar's content and optional
   /// action.
   ///
-  /// If this property is null, the default padding values for:
+  /// If this property is null, the default padding values are as follows:
   ///
   /// * [content]
   ///     * Top and bottom paddings are 14.
   ///     * Left padding is 24 if [behavior] is [SnackBarBehavior.fixed],
-  ///       16 if [behavior] is [SnackBarBehavior.floating]
-  ///     * Right padding is same as start padding if there is no [action], otherwise 0.
+  ///       16 if [behavior] is [SnackBarBehavior.floating].
+  ///     * Right padding is same as start padding if there is no [action],
+  ///       otherwise 0.
   /// * [action]
-  ///     * Top and bottom paddings are 14
+  ///     * Top and bottom paddings are 14.
   ///     * Left and right paddings are half of [content]'s left padding.
   ///
-  /// If this property is not null, the padding assignment for:
+  /// If this property is not null, the padding is as follows:
   ///
   /// * [content]
   ///     * Left, top and bottom paddings are assigned normally.
-  ///     * Right padding is assigned normally if there is no [action], otherwise 0.
+  ///     * Right padding is assigned normally if there is no [action],
+  ///       otherwise 0.
   /// * [action]
-  ///     * Left padding is replaced with half value of right padding.
+  ///     * Left padding is replaced with half the right padding.
   ///     * Top and bottom paddings are assigned normally.
-  ///     * Right padding has an additional half value of right padding.
-  ///       ```dart
-  ///       right + (right / 2)
-  ///       ```
+  ///     * Right padding is replaced with one and a half times the
+  ///       right padding.
   final EdgeInsetsGeometry? padding;
 
   /// The width of the snack bar.
@@ -518,7 +524,7 @@ class _SnackBarState extends State<SnackBar> {
               child: TextButtonTheme(
                 data: TextButtonThemeData(
                   style: TextButton.styleFrom(
-                    primary: buttonColor,
+                    foregroundColor: buttonColor,
                     padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   ),
                 ),

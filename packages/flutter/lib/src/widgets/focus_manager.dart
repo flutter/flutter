@@ -1466,7 +1466,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void dispose() {
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == _handleKeyMessage) {
-      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     }
     super.dispose();

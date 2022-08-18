@@ -72,6 +72,36 @@ void main() {
     expect(command.stringArgDeprecated('key'), 'value');
     expect(() => command.stringArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
   });
+
+  testUsingContext('List<String> safe argResults', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    command.argParser.addMultiOption(
+      'key',
+      allowed: <String>['a', 'b', 'c'],
+    );
+    // argResults will be null at this point, if attempt to read them is made,
+    // exception `Null check operator used on a null value` would be thrown.
+    expect(() => command.stringsArg('key'), throwsA(const TypeMatcher<TypeError>()));
+
+    runner.addCommand(command);
+    await runner.run(<String>['dummy', '--key', 'a']);
+
+    // throws error when trying to parse non-existent key.
+    expect(() => command.stringsArg('empty'),throwsA(const TypeMatcher<ArgumentError>()));
+
+    expect(command.stringsArg('key'), <String>['a']);
+
+    await runner.run(<String>['dummy', '--key', 'a', '--key', 'b']);
+    expect(command.stringsArg('key'), <String>['a', 'b']);
+
+    await runner.run(<String>['dummy']);
+    expect(command.stringsArg('key'), <String>[]);
+  });
 }
 
 void verifyCommandRunner(CommandRunner<Object> runner) {

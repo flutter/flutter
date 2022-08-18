@@ -502,6 +502,7 @@ class ResidentWebRunner extends ResidentRunner {
       invalidatedFiles: invalidationResult.uris!,
       packageConfig: invalidationResult.packageConfig!,
       trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
+      shaderCompiler: device!.developmentShaderCompiler,
     );
     devFSStatus.stop();
     _logger!.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
