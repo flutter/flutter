@@ -173,14 +173,13 @@ class FormState extends State<Form> {
         continue;
       }
 
-      if(data.containsKey(entry.key)) {
-        throw FlutterError(
+      assert(
+        !data.containsKey(entry.key),
           'Duplicate SubmissionKey found \n'
           'Two or more Formfield decendant of this Form have the same '
           'submissionKey. This will cause the Formfield value to be '
           'overwritten. Assure every formfield has a unique submissionKey'
         );
-      }
 
       data.addEntries(<MapEntry<String, dynamic>>[entry]);
     }
