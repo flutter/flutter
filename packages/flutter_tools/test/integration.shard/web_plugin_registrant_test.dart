@@ -62,10 +62,9 @@ void main() {
 
     // Ensure the contents match what we expect for a non-empty plugin registrant.
     final String contents = registrant.readAsStringSync();
+    expect(contents, contains('// @dart = 2.13'));
     expect(contents, contains("import 'package:shared_preferences_web/shared_preferences_web.dart';"));
-    expect(contents, contains('void registerPlugins() {'));
-    expect(contents, contains('  registerPluginsWithRegistrar(webPluginRegistrar);'));
-    expect(contents, contains('void registerPluginsWithRegistrar(final Registrar registrar) {'));
+    expect(contents, contains('void registerPlugins([final Registrar? pluginRegistrar]) {'));
     expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
@@ -110,10 +109,9 @@ void main() {
 
     // Ensure the contents match what we expect for a non-empty plugin registrant.
     final String contents = registrant.readAsStringSync();
+    expect(contents, contains('// @dart = 2.13'));
     expect(contents, contains("import 'package:shared_preferences_web/shared_preferences_web.dart';"));
-    expect(contents, contains('void registerPlugins() {'));
-    expect(contents, contains('  registerPluginsWithRegistrar(webPluginRegistrar);'));
-    expect(contents, contains('void registerPluginsWithRegistrar(final Registrar registrar) {'));
+    expect(contents, contains('void registerPlugins([final Registrar? pluginRegistrar]) {'));
     expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{

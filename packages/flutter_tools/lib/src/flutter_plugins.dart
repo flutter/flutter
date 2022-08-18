@@ -567,6 +567,7 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
+// @dart = 2.13
 // ignore_for_file: type=lint
 
 {{#methodChannelPlugins}}
@@ -574,11 +575,9 @@ import 'package:{{name}}/{{file}}';
 {{/methodChannelPlugins}}
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-void registerPlugins() {
-  registerPluginsWithRegistrar(webPluginRegistrar);
-}
 
-void registerPluginsWithRegistrar(final Registrar registrar) {
+void registerPlugins([final Registrar? pluginRegistrar]) {
+  final Registrar registrar = pluginRegistrar ?? webPluginRegistrar;
 {{#methodChannelPlugins}}
   {{class}}.registerWith(registrar);
 {{/methodChannelPlugins}}
