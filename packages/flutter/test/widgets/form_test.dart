@@ -118,7 +118,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    final Map<String, dynamic> data = formKey.currentState!.submit();
+    final Map<String, dynamic> data = formKey.currentState!.getFormFieldValues();
 
     expect(data.containsKey('firstKey'), isTrue);
     expect(data.containsKey('secondKey'), isTrue);
@@ -163,7 +163,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    final Map<String, dynamic> data = formKey.currentState!.submit();
+    final Map<String, dynamic> data = formKey.currentState!.getFormFieldValues();
 
     expect(data.containsKey('firstKey'), isTrue);
     expect(data.containsKey('secondKey'), isFalse);
@@ -207,7 +207,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    expect(() => formKey.currentState!.submit(), throwsFlutterError);
+    expect(() => formKey.currentState!.getFormFieldValues(), throwsAssertionError);
   });
 
   testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {

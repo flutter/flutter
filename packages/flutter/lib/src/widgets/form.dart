@@ -163,25 +163,25 @@ class FormState extends State<Form> {
 
   /// Returns a [Map] with a {submissionKey: value} entry for every
   /// child [FormField] that has a non-null submissionKey.
-  Map<String, dynamic> submit() {
+  Map<String, dynamic> getFormFieldValues() {
     final Map<String, dynamic> data = <String, dynamic>{};
 
     for (final FormFieldState<dynamic> field in _fields) {
-      final MapEntry<String, dynamic>? entry = field._onSubmit();
-
-      if (entry == null) {
+      final String? key = field.submissionKey;
+      
+      if (key == null) {
         continue;
       }
 
       assert(
-        !data.containsKey(entry.key),
+        !data.containsKey(key),
           'Duplicate SubmissionKey found \n'
           'Two or more Formfield decendant of this Form have the same '
           'submissionKey. This will cause the Formfield value to be '
           'overwritten. Assure every formfield has a unique submissionKey'
         );
 
-      data.addEntries(<MapEntry<String, dynamic>>[entry]);
+      data[key] = field.value;
     }
 
     return data;
@@ -384,6 +384,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// The current value of the form field.
   T? get value => _value;
 
+  /// the current submissionKey of the formfield
+  String? get submissionKey => widget.submissionKey;
+
   /// The current validation error returned by the [FormField.validator]
   /// callback, or null if no errors have been triggered. This only updates when
   /// [validate] is called.
@@ -405,14 +408,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
     widget.onSaved?.call(value);
-  }
-
-  /// Used by [FormState] to retrieve this [FormField] value.
-  MapEntry<String, T?>? _onSubmit() {
-    if (widget.submissionKey == null) {
-      return null;
-    }
-    return MapEntry<String, T?>(widget.submissionKey!, value);
   }
 
   /// Resets the field to its initial value.
