@@ -8,7 +8,7 @@ import 'constants.dart';
 import 'events.dart';
 import 'drag_details.dart';
 import 'long_press.dart' show GestureLongPressStartCallback, GestureLongPressMoveUpdateCallback, GestureLongPressEndCallback, GestureLongPressCancelCallback, LongPressStartDetails, LongPressMoveUpdateDetails, LongPressEndDetails;
-import 'monodrag.dart' show GestureDragEndCallback;
+import 'monodrag.dart' show GestureVelocityTrackerBuilder, GestureDragEndCallback;
 import 'recognizer.dart';
 import 'tap.dart' show GestureTapCallback, GestureTapDownCallback, GestureTapUpCallback, TapUpDetails, TapDownDetails;
 import 'velocity_tracker.dart';
@@ -109,6 +109,41 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
 
+  final Set<int> _acceptedActivePointers = <int>{};
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    if (_initialButtons == null) {
+      switch (event.buttons) {
+        case kPrimaryButton:
+          if (onTapDown == null &&
+              onStart == null &&
+              onUpdate == null &&
+              onEnd == null &&
+              onTapUp == null &&
+              onCancel == null) {
+            return false;
+          }
+          break;
+        case kSecondaryButton:
+          if (onSecondaryTap == null &&
+              onSecondaryTapDown == null &&
+              onSecondaryTapUp == null) {
+            return false;
+          }
+          break;
+        default:
+          return false;
+      }
+    } else {
+      // There can be multiple drags simultaneously. Their effects are combined.
+      if (event.buttons != _initialButtons) {
+        return false;
+      }
+    }
+    return super.isPointerAllowed(event as PointerDownEvent);
+  }
+
   @override
   void addAllowedPointer(PointerDownEvent event) {
     print('addAllowedPointer $event');
@@ -123,12 +158,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void acceptGesture(int pointer) {
-    // TODO: implement acceptGesture
+    assert(!_acceptedActivePointers.contains(pointer));
+    _acceptedActivePointers.add(pointer);
     print('accept gesture $pointer');
   }
 
   @override
   void didStopTrackingLastPointer(int pointer) {
+    print('didStopTrackingLastPointer');
+    _initialButtons = null;
+    _state = _DragState.ready;
   }
 
   @override
@@ -228,6 +267,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void rejectGesture(int pointer) {
     // TODO: implement rejectGesture
     print('reject gesture $pointer');
+    _giveUpPointer(pointer);
+  }
+
+  void _giveUpPointer(int pointer) {
+    stopTrackingPointer(pointer);
+    // If we never accepted the pointer, we reject it since we are no longer
+    // interested in winning the gesture arena for it.
+    if (!_acceptedActivePointers.remove(pointer)) {
+      resolvePointer(pointer, GestureDisposition.rejected);
+    }
   }
 
   @override
@@ -505,4 +554,3 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
   @override
   String get debugDescription => 'tap_and_long_press';
 }
-
