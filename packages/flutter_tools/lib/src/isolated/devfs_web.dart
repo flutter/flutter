@@ -1042,6 +1042,9 @@ void log(logging.LogRecord event) {
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
+    // Note: Temporary fix for https://github.com/flutter/flutter/issues/109792
+    // TODO(annagrin): Remove the condition after the bogus warning is
+    // removed in dwds: https://github.com/dart-lang/webdev/issues/1722
     if (!event.message.contains('No module for')) {
       globals.printWarning('${event.loggerName}: ${event.message}$error');
     }
