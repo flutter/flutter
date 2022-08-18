@@ -254,6 +254,7 @@ class ScrollDragController implements Drag {
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
+       _kind = details.kind,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
@@ -434,6 +435,8 @@ class ScrollDragController implements Drag {
     onDragCanceled?.call();
   }
 
+  /// The type of input device driving the drag.
+  final PointerDeviceKind? _kind;
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
   /// [DragEndDetails] object.
   dynamic get lastDetails => _lastDetails;
@@ -493,7 +496,7 @@ class DragScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  bool get shouldIgnorePointer => _controller?._kind != PointerDeviceKind.trackpad;
 
   @override
   bool get isScrolling => true;
@@ -537,7 +540,8 @@ class BallisticScrollActivity extends ScrollActivity {
   BallisticScrollActivity(
     super.delegate,
     Simulation simulation,
-    TickerProvider vsync, {
+    TickerProvider vsync,
+    this.shouldIgnorePointer, {
     double initVelocity = 0.0,
     double initPosition = 0.0,
   }) : _initVelocity = initVelocity, _initPosition = initPosition {
@@ -600,7 +604,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  final bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;
