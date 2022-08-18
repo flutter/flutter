@@ -3339,9 +3339,9 @@ TEST_F(ShellTest, ImageGeneratorRegistryNotNullAfterParentShellDestroyed) {
 TEST_F(ShellTest, UpdateAssetResolverByTypeReplaces) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
-  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
-                         ThreadHost::Type::Platform);
-  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
   auto shell = CreateShell(std::move(settings), task_runners);
@@ -3351,7 +3351,10 @@ TEST_F(ShellTest, UpdateAssetResolverByTypeReplaces) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("emptyMain");
   auto asset_manager = configuration.GetAssetManager();
-  RunEngine(shell.get(), std::move(configuration));
+
+  shell->RunEngine(std::move(configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
 
   auto platform_view =
       std::make_unique<PlatformView>(*shell.get(), std::move(task_runners));
@@ -3381,9 +3384,9 @@ TEST_F(ShellTest, UpdateAssetResolverByTypeReplaces) {
 TEST_F(ShellTest, UpdateAssetResolverByTypeAppends) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
-  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
-                         ThreadHost::Type::Platform);
-  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
   auto shell = CreateShell(std::move(settings), task_runners);
@@ -3393,7 +3396,10 @@ TEST_F(ShellTest, UpdateAssetResolverByTypeAppends) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("emptyMain");
   auto asset_manager = configuration.GetAssetManager();
-  RunEngine(shell.get(), std::move(configuration));
+
+  shell->RunEngine(std::move(configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
 
   auto platform_view =
       std::make_unique<PlatformView>(*shell.get(), std::move(task_runners));
@@ -3456,10 +3462,9 @@ TEST_F(ShellTest, UpdateAssetResolverByTypeNull) {
 TEST_F(ShellTest, UpdateAssetResolverByTypeDoesNotReplaceMismatchType) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
-  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      "io.flutter.test." + GetCurrentTestName() + ".",
-      ThreadHost::Type::Platform));
-  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
   auto shell = CreateShell(std::move(settings), task_runners);
@@ -3469,7 +3474,10 @@ TEST_F(ShellTest, UpdateAssetResolverByTypeDoesNotReplaceMismatchType) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("emptyMain");
   auto asset_manager = configuration.GetAssetManager();
-  RunEngine(shell.get(), std::move(configuration));
+
+  shell->RunEngine(std::move(configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
 
   auto platform_view =
       std::make_unique<PlatformView>(*shell.get(), std::move(task_runners));
