@@ -42,8 +42,8 @@ import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
-import 'windows/windows_workflow.dart';
 import 'windows/windows_version_validator.dart';
+import 'windows/windows_workflow.dart';
 
 abstract class DoctorValidatorsProvider {
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
