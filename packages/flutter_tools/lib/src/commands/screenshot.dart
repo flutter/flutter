@@ -132,7 +132,13 @@ class ScreenshotCommand extends FlutterCommand {
     } on Exception catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
-    _showOutputFileInfo(outputFile);
+
+    try {
+      _showOutputFileInfo(outputFile);
+    } on FileSystemException catch (error) {
+      throwToolExit('Error: $error');
+    }
+
   }
 
   Future<bool> runSkia(File? outputFile) async {
