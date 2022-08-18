@@ -1371,15 +1371,29 @@ void Shell::LoadDartDeferredLibrary(
 void Shell::LoadDartDeferredLibraryError(intptr_t loading_unit_id,
                                          const std::string error_message,
                                          bool transient) {
-  engine_->LoadDartDeferredLibraryError(loading_unit_id, error_message,
-                                        transient);
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      [engine = weak_engine_, loading_unit_id, error_message, transient] {
+        if (engine) {
+          engine->LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                               transient);
+        }
+      });
 }
 
 void Shell::UpdateAssetResolverByType(
     std::unique_ptr<AssetResolver> updated_asset_resolver,
     AssetResolver::AssetResolverType type) {
-  engine_->GetAssetManager()->UpdateResolverByType(
-      std::move(updated_asset_resolver), type);
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      fml::MakeCopyable(
+          [engine = weak_engine_, type,
+           asset_resolver = std::move(updated_asset_resolver)]() mutable {
+            if (engine) {
+              engine->GetAssetManager()->UpdateResolverByType(
+                  std::move(asset_resolver), type);
+            }
+          }));
 }
 
 // |Engine::Delegate|
