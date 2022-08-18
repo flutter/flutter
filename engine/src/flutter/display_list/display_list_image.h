@@ -54,6 +54,17 @@ class DlImage : public SkRefCnt {
   ///
   virtual std::shared_ptr<impeller::Texture> impeller_texture() const = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      If the pixel format of this image ignores alpha, this returns
+  ///             true. This method might conservatively return false when it
+  ///             cannot guarnatee an opaque image, for example when the pixel
+  ///             format of the image supports alpha but the image is made up of
+  ///             entirely opaque pixels.
+  ///
+  /// @return     True if the pixel format of this image ignores alpha.
+  ///
+  virtual bool isOpaque() const = 0;
+
   virtual bool isTextureBacked() const = 0;
 
   //----------------------------------------------------------------------------

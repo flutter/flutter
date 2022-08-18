@@ -5,6 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_OPS_H_
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_OPS_H_
 
+#include "display_list_color_source.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_dispatcher.h"
@@ -243,6 +244,28 @@ struct SetImageColorSourceOp : DLOp {
 
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.setColorSource(&source);
+  }
+};
+
+// 56 bytes: 4 byte header, 4 byte padding, 8 for vtable, 8 * 2 for sk_sps, 24
+// for the std::vector.
+struct SetRuntimeEffectColorSourceOp : DLOp {
+  static const auto kType = DisplayListOpType::kSetRuntimeEffectColorSource;
+
+  SetRuntimeEffectColorSourceOp(const DlRuntimeEffectColorSource* source)
+      : source(source->runtime_effect(),
+               source->samplers(),
+               source->uniform_data()) {}
+
+  const DlRuntimeEffectColorSource source;
+
+  void dispatch(Dispatcher& dispatcher) const {
+    dispatcher.setColorSource(&source);
+  }
+
+  DisplayListCompare equals(const SetRuntimeEffectColorSourceOp* other) const {
+    return (source == other->source) ? DisplayListCompare::kEqual
+                                     : DisplayListCompare::kNotEqual;
   }
 };
 

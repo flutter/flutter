@@ -32,12 +32,6 @@ Dart_Handle ImageShader::initWithImage(CanvasImage* image,
     return ToDart("ImageShader constructor called with non-genuine Image.");
   }
 
-  if (image->image()->owning_context() != DlImage::OwningContext::kIO) {
-    // TODO(dnfield): it should be possible to support this
-    // https://github.com/flutter/flutter/issues/105085
-    return ToDart("ImageShader constructor with GPU image is not supported.");
-  }
-
   image_ = image->image();
   tonic::Float64List matrix4(matrix_handle);
   SkMatrix local_matrix = ToSkMatrix(matrix4);

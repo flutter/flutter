@@ -30,6 +30,14 @@ std::shared_ptr<impeller::Texture> DlImageGPU::impeller_texture() const {
 }
 
 // |DlImage|
+bool DlImageGPU::isOpaque() const {
+  if (auto image = skia_image()) {
+    return image->isOpaque();
+  }
+  return false;
+}
+
+// |DlImage|
 bool DlImageGPU::isTextureBacked() const {
   if (auto image = skia_image()) {
     return image->isTextureBacked();

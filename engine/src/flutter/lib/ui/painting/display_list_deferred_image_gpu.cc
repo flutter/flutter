@@ -52,6 +52,11 @@ std::shared_ptr<impeller::Texture> DlDeferredImageGPU::impeller_texture()
 }
 
 // |DlImage|
+bool DlDeferredImageGPU::isOpaque() const {
+  return image_wrapper_ ? image_wrapper_->image_info().isOpaque() : false;
+}
+
+// |DlImage|
 bool DlDeferredImageGPU::isTextureBacked() const {
   return image_wrapper_ ? image_wrapper_->isTextureBacked() : false;
 }

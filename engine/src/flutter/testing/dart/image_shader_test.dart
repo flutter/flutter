@@ -25,11 +25,9 @@ void main() {
     final Image image = picture.toImageSync(50, 50);
     picture.dispose();
 
-    // TODO(dnfield): this should not throw once
-    // https://github.com/flutter/flutter/issues/105085 is fixed.
-    expect(
-      () => ImageShader(image, TileMode.clamp, TileMode.clamp, Float64List(16)),
-      throwsException,
-    );
+    final ImageShader shader = ImageShader(image, TileMode.clamp, TileMode.clamp, Float64List(16));
+    final Paint paint = Paint()..shader=shader;
+    const Rect rect = Rect.fromLTRB(0, 0, 100, 100);
+    testCanvas((Canvas canvas) => canvas.drawRect(rect, paint));
   });
 }
