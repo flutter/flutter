@@ -615,8 +615,8 @@ class TextSelectionOverlay {
     }
 
     // [details.globalPosition] is the drag point, it needs to be shifted
-    // to the text position point that [RenderEditable] uses to get [TextPosition]
-    // and update selection for end handle.
+    // to the text position point that [RenderEditable] uses to get
+    // [TextPosition] and update selection for end handle correctly.
     // Dx of text position point need to be consistent with dx of drag point.
     // Dy of text position point need to be locate in the correct text line.
     final Offset offsetFromHandleToTextPosition = _getOffsetToTextPositionPoint(_selectionOverlay.endHandleType);
@@ -695,8 +695,8 @@ class TextSelectionOverlay {
     }
 
     // [details.globalPosition] is the drag point, it needs to be shifted
-    // to the text position point that [RenderEditable] uses to get [TextPosition]
-    // and update selection for start handle.
+    // to the text position point that [RenderEditable] uses to get
+    // [TextPosition] and update selection for start handle correctly.
     // Dx of text position point need to be consistent with dx of drag point.
     // Dy of text position point need to be locate in the correct text line.
     final Offset offsetFromHandleToTextPosition = _getOffsetToTextPositionPoint(_selectionOverlay.startHandleType);
@@ -769,10 +769,9 @@ class TextSelectionOverlay {
 
   // The center of the handle is where it's easier to drag, and
   // [details.globalPosition] is probably close to center.
-  // Suppose center of handle as start point, center of correct
-  // text line as target point. Return offset from start
-  // point to target point to shift real drag point to text position
-  // point. Make sure even if the drag events happened on other position
+  // Return offset from center of handle to center of correct
+  // text line to shift real drag point on handle to text position point.
+  // Make sure even if the drag events happened on other position
   // of handle, not center. The text position point always locate in
   // correct text line.
   Offset _getOffsetToTextPositionPoint(TextSelectionHandleType type) {
@@ -780,24 +779,23 @@ class TextSelectionOverlay {
       renderObject.preferredLineHeight,
     );
 
-    // Dy of offset from center of handle to top is half of handle height.
-    // Try to shift drag point to point near handle top.
-    final double offsetYFromHandleCenterToTop =  -handleSize.height / 2;
+    // Try to shift center of handle to top by half of handle height.
+    final double halfHandleHeight = handleSize.height / 2;
 
     // [getHandleAnchor] use to shift selection end point to left top point
     // of handle rect when build handle widget.
-    // Selection end point is [ui.TextBox] start bottom point of first or
-    // last selected word.
-    // Now use the dy of [getHandleAnchor] try to shift handle top to selection
-    // end point.
+    // End point is at bottom of selection rect, which is at the bottom of
+    // the text line too.
+    // Try to shift handle top to selection end point by dy of handle anchor.
     final double handleAnchorDy = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight).dy;
 
-    // Try to shift selection end point to center of correct text line.
-    final double offsetYToTextLineMiddlePoint = -renderObject.preferredLineHeight / 2;
+    // Try to shift selection end point to center of correct text line
+    // by half preferred line height.
+    final double halfPreferredLineHeight = renderObject.preferredLineHeight / 2;
 
     // When dragging handle and move,the offsetX from drag event is accurate.
     // Only need to compute different offsetY from different handle.
-    final double offsetYFromHandleToTextPosition = offsetYFromHandleCenterToTop + handleAnchorDy + offsetYToTextLineMiddlePoint;
+    final double offsetYFromHandleToTextPosition = handleAnchorDy - halfHandleHeight - halfPreferredLineHeight;
     return Offset(0.0, offsetYFromHandleToTextPosition);
   }
 
