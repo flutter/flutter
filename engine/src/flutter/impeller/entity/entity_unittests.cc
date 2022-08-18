@@ -8,6 +8,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
@@ -1537,6 +1538,57 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
     entity.Render(context, pass);
 
     return true;
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, LinearToSrgbFilterCoverageIsCorrect) {
+  // Set up a simple color background.
+  auto fill = std::make_shared<SolidColorContents>();
+  fill->SetPath(
+      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+  fill->SetColor(Color::MintCream());
+
+  auto filter = FilterContents::MakeLinearToSrgbFilter(FilterInput::Make(fill));
+
+  Entity e;
+  e.SetTransformation(Matrix());
+
+  // Confirm that the actual filter coverage matches the expected coverage.
+  auto actual = filter->GetCoverage(e);
+  auto expected = Rect::MakeXYWH(0, 0, 300, 400);
+
+  ASSERT_TRUE(actual.has_value());
+  ASSERT_RECT_NEAR(actual.value(), expected);
+}
+
+TEST_P(EntityTest, LinearToSrgbFilter) {
+  auto image = CreateTextureForFixture("kalimba.jpg");
+  ASSERT_TRUE(image);
+
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    auto filtered =
+        FilterContents::MakeLinearToSrgbFilter(FilterInput::Make(image));
+
+    // Define the entity that will serve as the control image as a Gaussian blur
+    // filter with no filter at all.
+    Entity entity_left;
+    entity_left.SetTransformation(Matrix::MakeScale(GetContentScale()) *
+                                  Matrix::MakeTranslation({100, 300}) *
+                                  Matrix::MakeScale(Vector2{0.5, 0.5}));
+    auto unfiltered = FilterContents::MakeGaussianBlur(FilterInput::Make(image),
+                                                       Sigma{0}, Sigma{0});
+    entity_left.SetContents(unfiltered);
+
+    // Define the entity that will be filtered from linear to sRGB.
+    Entity entity_right;
+    entity_right.SetTransformation(Matrix::MakeScale(GetContentScale()) *
+                                   Matrix::MakeTranslation({500, 300}) *
+                                   Matrix::MakeScale(Vector2{0.5, 0.5}));
+    entity_right.SetContents(filtered);
+    return entity_left.Render(context, pass) &&
+           entity_right.Render(context, pass);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));

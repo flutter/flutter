@@ -199,6 +199,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<BorderMaskBlurPipeline>(*context_);
   color_matrix_color_filter_pipelines_[{}] =
       CreateDefaultPipeline<ColorMatrixColorFilterPipeline>(*context_);
+  linear_to_srgb_filter_pipelines_[{}] =
+      CreateDefaultPipeline<LinearToSrgbFilterPipeline>(*context_);
   solid_stroke_pipelines_[{}] =
       CreateDefaultPipeline<SolidStrokePipeline>(*context_);
   glyph_atlas_pipelines_[{}] =
