@@ -260,7 +260,7 @@ class ExpansionTile extends StatefulWidget {
   /// Tile's border shape when the sublist is expanded.
   ///
   /// If this property is null then [ExpansionTileThemeData.shape] is used. If that
-  /// is also null then a [Border] with vertical direction sides default to Color [Theme.divider] is used
+  /// is also null then a [Border] with vertical direction sides default to Color [Theme.dividerColor] is used
   ///
   /// See also:
   ///

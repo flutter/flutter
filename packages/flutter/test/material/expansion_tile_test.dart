@@ -129,7 +129,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     final ShapeDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
-    // Opacity should change but color component should remain the same.
     expect((collapsingContainerDecoration.shape as Border?)!.top.color, const Color(0x15222222));
     expect((collapsingContainerDecoration.shape as Border?)!.bottom.color, const Color(0x15222222));
 
