@@ -769,8 +769,8 @@ class TextSelectionOverlay {
 
   // The center of the handle is where it's easier to drag, and
   // [details.globalPosition] is probably close to center.
-  // Return offset from center of handle to center of correct
-  // text line to shift real drag point on handle to text position point.
+  // Return offset from center of handle to center of correct text line.
+  // The offset use to shift real drag point on handle to text position point.
   // Make sure even if the drag events happened on other position
   // of handle, not center. The text position point always locate in
   // correct text line.
