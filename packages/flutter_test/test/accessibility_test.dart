@@ -43,6 +43,29 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('White text on white background fails contrast test',
+        (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Column(
+            children: const <Widget>[
+              Text(
+                'this is a white text',
+                style: TextStyle(fontSize: 14.0, color: Colors.white),
+              ),
+              Text(
+                'this is a black text',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
     const Color surface = Color(0xFFF0F0F0);
 
     /// Shades of blue with contrast ratio of 2.9, 4.4, 4.5 from [surface].
