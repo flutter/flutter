@@ -441,9 +441,10 @@ void DisplayListDispatcher::setColorFilter(
       UNIMPLEMENTED;
       break;
     case flutter::DlColorFilterType::kLinearToSrgbGamma:
-      FML_LOG(ERROR) << "requested DlColorFilterType::kLinearToSrgbGamma";
-      UNIMPLEMENTED;
-      break;
+      paint_.color_filter = [](FilterInput::Ref input) {
+        return FilterContents::MakeLinearToSrgbFilter({input});
+      };
+      return;
     case flutter::DlColorFilterType::kUnknown:
       FML_LOG(ERROR) << "requested DlColorFilterType::kUnknown";
       UNIMPLEMENTED;
