@@ -1529,7 +1529,9 @@ class CompileTest {
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.macos:
-        throw Exception('Unsupported option for Fuchsia devices');
+        unawaited(stderr.flush());
+        options.insert(0, 'macos');
+        break;
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
