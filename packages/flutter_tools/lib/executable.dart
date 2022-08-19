@@ -178,6 +178,8 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
     logger: globals.logger,
+    artifacts: globals.artifacts!,
+    processManager: globals.processManager,
   ),
   InstallCommand(),
   LogsCommand(),
