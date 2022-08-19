@@ -1357,7 +1357,7 @@ class SelectionOverlay {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null) {
-      handle = Container();
+      handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
@@ -1384,7 +1384,7 @@ class SelectionOverlay {
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
       // Hide the second handle when collapsed.
-      handle = Container();
+      handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
@@ -1409,7 +1409,7 @@ class SelectionOverlay {
   // Build the toolbar via TextSelectionControls.
   Widget _buildToolbar(BuildContext context) {
     if (selectionControls == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
 
     final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;

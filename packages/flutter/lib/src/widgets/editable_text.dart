@@ -3929,10 +3929,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final int placeholderLocation = _value.text.length - _placeholderLocation;
       if (_isMultiline) {
         // The zero size placeholder here allows the line to break and keep the caret on the first line.
-        placeholders.add(const _ScribblePlaceholder(child: SizedBox(), size: Size.zero));
-        placeholders.add(_ScribblePlaceholder(child: const SizedBox(), size: Size(renderEditable.size.width, 0.0)));
+        placeholders.add(const _ScribblePlaceholder(child: SizedBox.shrink(), size: Size.zero));
+        placeholders.add(_ScribblePlaceholder(child: const SizedBox.shrink(), size: Size(renderEditable.size.width, 0.0)));
       } else {
-        placeholders.add(const _ScribblePlaceholder(child: SizedBox(), size: Size(100.0, 0.0)));
+        placeholders.add(const _ScribblePlaceholder(child: SizedBox.shrink(), size: Size(100.0, 0.0)));
       }
       return TextSpan(style: widget.style, children: <InlineSpan>[
           TextSpan(text: _value.text.substring(0, placeholderLocation)),

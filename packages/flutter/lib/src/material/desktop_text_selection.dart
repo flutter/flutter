@@ -174,7 +174,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -217,7 +217,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return DesktopTextSelectionToolbar(

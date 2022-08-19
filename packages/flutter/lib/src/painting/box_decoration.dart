@@ -431,7 +431,7 @@ class _BoxDecorationPainter extends BoxPainter {
         canvas.drawCircle(center, radius, paint);
         break;
       case BoxShape.rectangle:
-        if (_decoration.borderRadius == null) {
+        if (_decoration.borderRadius == null || _decoration.borderRadius == BorderRadius.zero) {
           canvas.drawRect(rect, paint);
         } else {
           canvas.drawRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect), paint);
