@@ -237,7 +237,7 @@ class DataCell {
   }) : assert(child != null);
 
   /// A cell that has no content and has zero width and height.
-  static const DataCell empty = DataCell(SizedBox(width: 0.0, height: 0.0));
+  static const DataCell empty = DataCell(SizedBox.shrink());
 
   /// The data for the row.
   ///

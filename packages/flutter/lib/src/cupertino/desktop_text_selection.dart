@@ -153,7 +153,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     assert(debugCheckHasMediaQuery(context));
@@ -203,7 +203,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return _CupertinoDesktopTextSelectionToolbar(

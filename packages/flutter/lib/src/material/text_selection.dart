@@ -250,7 +250,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
     // If there is no option available, build an empty widget.
     if (itemDatas.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return TextSelectionToolbar(
