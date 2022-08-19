@@ -14,7 +14,11 @@ import 'system_channels.dart';
 /// [List<SuggestionSpan>] suggestions of the [SpellCheckResults] corresponding
 /// to "Hello, wrold!" may be:
 /// ```dart
-/// SuggestionSpan(TextRange(7, 12), List<String>.from["word, world, old"])
+/// SuggestionSpan suggestionSpan =
+///   SuggestionSpan(
+///     const TextRange(start: 7, end: 12),
+///     List<String>.of(<String>['word', 'world', 'old']),
+/// );
 /// ```
 @immutable
 class SuggestionSpan {

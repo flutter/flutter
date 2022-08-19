@@ -2111,7 +2111,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: spell_check_test
-    scheduler: luci
 
   - name: Linux_android service_extensions_test
     recipe: devicelab/devicelab_drone
@@ -4027,9 +4026,9 @@ targets:
         ]
       task_name: windows_home_scroll_perf__timeline_summary
 
-  - name: Windows hello_world_windows__compile
+  - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4038,7 +4037,85 @@ targets:
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
-      task_name: hello_world_windows__compile
+      task_name: hello_world_win_desktop__compile
+
+  - name: Windows flutter_gallery_win_desktop__compile
+    recipe: devicelab/devicelab_drone
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__compile
+
+  - name: Windows flutter_gallery_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__start_up
+
+  - name: Windows complex_layout_win_desktop__compile
+    recipe: devicelab/devicelab_drone
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: complex_layout_win_desktop__compile
+
+  - name: Windows complex_layout_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: complex_layout_win_desktop__start_up
+
+  - name: Windows flutter_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # New target https://github.com/flutter/flutter/issues/70027
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_view_win_desktop__start_up
+
+  - name: Windows platform_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60 # New target https://github.com/flutter/flutter/issues/70027
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: platform_view_win_desktop__start_up
 
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
@@ -4050,6 +4127,7 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/109694
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
