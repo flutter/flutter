@@ -4065,6 +4065,26 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   EXPECT_TRUE(resolve_called);
 }
 
+TEST_F(EmbedderTest,
+       PresentInfoReceivesNoDamageWhenPopulateExistingDamageIsUndefined) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetDartEntrypoint("render_gradient");
+  builder.GetRendererConfig().open_gl.populate_existing_damage = nullptr;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // No damage should be passed.
+  static_cast<EmbedderTestContextGL&>(context).SetGLPresentCallback(
+      [](FlutterPresentInfo present_info) {
+        ASSERT_EQ(present_info.frame_damage.damage, nullptr);
+        ASSERT_EQ(present_info.buffer_damage.damage, nullptr);
+      });
+}
+
 INSTANTIATE_TEST_SUITE_P(
     EmbedderTestGlVk,
     EmbedderTestMultiBackend,

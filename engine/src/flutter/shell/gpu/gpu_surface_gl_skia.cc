@@ -196,7 +196,6 @@ bool GPUSurfaceGLSkia::CreateOrUpdateSurfaces(const SkISize& size) {
 
   onscreen_surface_ = std::move(onscreen_surface);
   fbo_id_ = fbo_info.fbo_id;
-  supports_partial_repaint_ = fbo_info.partial_repaint_enabled;
   existing_damage_ = fbo_info.existing_damage;
 
   return true;
@@ -250,9 +249,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLSkia::AcquireFrame(
       };
 
   framebuffer_info = delegate_->GLContextFramebufferInfo();
-  // Partial repaint is enabled by default
-  framebuffer_info.supports_partial_repaint = supports_partial_repaint_;
-  framebuffer_info.existing_damage = existing_damage_;
+  if (!framebuffer_info.existing_damage.has_value()) {
+    framebuffer_info.existing_damage = existing_damage_;
+  }
   return std::make_unique<SurfaceFrame>(surface, std::move(framebuffer_info),
                                         submit_callback,
                                         std::move(context_switch));
@@ -303,7 +302,6 @@ bool GPUSurfaceGLSkia::PresentSurface(const SurfaceFrame& frame,
 
     onscreen_surface_ = std::move(new_onscreen_surface);
     fbo_id_ = fbo_info.fbo_id;
-    supports_partial_repaint_ = fbo_info.partial_repaint_enabled;
     existing_damage_ = fbo_info.existing_damage;
   }
 
