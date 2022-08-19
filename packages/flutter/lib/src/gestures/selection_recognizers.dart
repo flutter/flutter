@@ -165,7 +165,17 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    print('didStopTrackingLastPointer');
+    print('didStopTrackingLastPointer $_state $pointer');
+    switch(_state) {
+      case _DragState.ready:
+      case _DragState.possible:
+        resolve(GestureDisposition.rejected);
+        _checkCancel();
+        break;
+      case _DragState.accepted:
+        _checkEnd();
+        break;
+    }
     _initialButtons = null;
     _state = _DragState.ready;
   }
@@ -174,95 +184,41 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void handleEvent(PointerEvent event) {
     print('handle event');
     if (event is PointerDownEvent) {
+      print('handle PointerDownEvent $event');
       if (_state == _DragState.ready) {
-        print('handle PointerDownEvent $event');
-        _initialButtons = event.buttons;
-        _state = _DragState.possible;
-        TapDownDetails details = TapDownDetails(
-          globalPosition: event.position,
-          localPosition: event.localPosition,
-          kind: getKindForPointer(event.pointer),
-        );
-
-        incrementConsecutiveTapCountOnDown(details.globalPosition);
-        _consecutiveTapCountWhileDragging = consecutiveTapCount;
-
-        switch (_initialButtons) {
-          case kPrimaryButton:
-            if (onTapDown != null) {
-              invokeCallback('onTapDown', () => onTapDown!(details, consecutiveTapCount));
-            }
-            break;
-          case kSecondaryButton:
-            if (onSecondaryTapDown != null) {
-              invokeCallback('onSecondaryTapDown', () => onSecondaryTapDown!(details));
-            }
-            break;
-          default:
-        }
+        _checkTapDown(event);
       }
-    } else if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
+    } else if (event is PointerMoveEvent) {
       print('handle PointerMoveEvent $event');
 
       if (_state == _DragState.accepted) {
         print('PointerMoveEvent while drag is accepted');
-        DragUpdateDetails details =  DragUpdateDetails(
-          sourceTimeStamp: event.timeStamp,
-          delta: event.delta,
-          primaryDelta: null,
-          globalPosition: event.position,
-          kind: getKindForPointer(event.pointer),
-          localPosition: event.localPosition,
-          offsetFromOrigin: event.position - _initialPosition.global,
-          localOffsetFromOrigin: event.localPosition - _initialPosition.local,
-        );
-        invokeCallback<void>('onUpdate', () => onUpdate!(details, _consecutiveTapCountWhileDragging!));
+        _checkUpdate(event);
       } else if (_state == _DragState.possible) {
         print('PointerMoveEvent while drag is is possible');
-        print('is zoom start ${event is PointerPanZoomStartEvent}');
-        _state = _DragState.accepted;
-        _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-        DragStartDetails details = DragStartDetails(
-          sourceTimeStamp: event.timeStamp,
-          globalPosition: event.position,
-          localPosition: event.localPosition,
-          kind: getKindForPointer(event.pointer),
-        );
-
-        invokeCallback<void>('onStart', () => onStart!(details, _consecutiveTapCountWhileDragging!));
+        _checkStart(event);
       }
     } else if (event is PointerUpEvent) {
       print('handle PointerUpEvent $event');
+      switch(_state) {
+        case _DragState.ready:
+          print('cancel from dragstate ready');
+          _giveUpPointer(event.pointer);
+          break;
+        case _DragState.possible:
+          _checkTapUp(event);
+          consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
+          break;
+        case _DragState.accepted:
+          _checkEnd();
+          break;
+      }
+
       _state = _DragState.ready;
-      TapUpDetails upDetails = TapUpDetails(
-        kind: event.kind,
-        globalPosition: event.position,
-        localPosition: event.localPosition,
-      );
-      DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
-      switch (_initialButtons) {
-        case kPrimaryButton:
-          if (onTapDown != null) {
-            invokeCallback('onTapUp', () => onTapUp!(upDetails, consecutiveTapCount));
-          }
-          break;
-        case kSecondaryButton:
-          if (onSecondaryTapUp != null) {
-            invokeCallback('onSecondaryTapUp', () => onSecondaryTapUp!(upDetails));
-          }
-          if (onSecondaryTap != null) {
-            invokeCallback<void>('onSecondaryTap', () => onSecondaryTap!());
-          }
-          break;
-        default:
-      }
-      invokeCallback<void>('onEnd', () => onEnd!(endDetails, consecutiveTapCount));
+
       _consecutiveTapCountWhileDragging = null;
-      consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
-    } else if (event is PointerCancelEvent || event is PointerPanZoomEndEvent){
-      if (onCancel != null) {
-        invokeCallback<void>('onCancel', onCancel!);
-      }
+    } else if (event is PointerCancelEvent){
+      print('cancel from pointercancel');
       _giveUpPointer(event.pointer);
     } else {
       print('handle unknown pointer $event');
@@ -273,7 +229,98 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void rejectGesture(int pointer) {
     // TODO: implement rejectGesture
     print('reject gesture $pointer');
+    print('cancel from reject');
     _giveUpPointer(pointer);
+  }
+
+  void _checkTapDown(PointerDownEvent event) {
+    _initialButtons = event.buttons;
+    _state = _DragState.possible;
+    TapDownDetails details = TapDownDetails(
+      globalPosition: event.position,
+      localPosition: event.localPosition,
+      kind: getKindForPointer(event.pointer),
+    );
+
+    incrementConsecutiveTapCountOnDown(details.globalPosition);
+    _consecutiveTapCountWhileDragging = consecutiveTapCount;
+
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onTapDown != null) {
+          invokeCallback('onTapDown', () => onTapDown!(details, consecutiveTapCount));
+        }
+        break;
+      case kSecondaryButton:
+        if (onSecondaryTapDown != null) {
+          invokeCallback('onSecondaryTapDown', () => onSecondaryTapDown!(details));
+        }
+        break;
+      default:
+    }
+  }
+
+  void _checkTapUp(PointerUpEvent event) {
+    TapUpDetails upDetails = TapUpDetails(
+      kind: event.kind,
+      globalPosition: event.position,
+      localPosition: event.localPosition,
+    );
+
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onTapDown != null) {
+          invokeCallback('onTapUp', () => onTapUp!(upDetails, consecutiveTapCount));
+        }
+        break;
+      case kSecondaryButton:
+        if (onSecondaryTapUp != null) {
+          invokeCallback('onSecondaryTapUp', () => onSecondaryTapUp!(upDetails));
+        }
+        if (onSecondaryTap != null) {
+          invokeCallback<void>('onSecondaryTap', () => onSecondaryTap!());
+        }
+        break;
+      default:
+    }
+  }
+
+  void _checkStart(PointerMoveEvent event) {
+    _state = _DragState.accepted;
+    _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+    DragStartDetails details = DragStartDetails(
+      sourceTimeStamp: event.timeStamp,
+      globalPosition: event.position,
+      localPosition: event.localPosition,
+      kind: getKindForPointer(event.pointer),
+    );
+
+    invokeCallback<void>('onStart', () => onStart!(details, _consecutiveTapCountWhileDragging!));
+  }
+
+  void _checkUpdate(PointerMoveEvent event) {
+    DragUpdateDetails details =  DragUpdateDetails(
+      sourceTimeStamp: event.timeStamp,
+      delta: event.delta,
+      primaryDelta: null,
+      globalPosition: event.position,
+      kind: getKindForPointer(event.pointer),
+      localPosition: event.localPosition,
+      offsetFromOrigin: event.position - _initialPosition.global,
+      localOffsetFromOrigin: event.localPosition - _initialPosition.local,
+    );
+    invokeCallback<void>('onUpdate', () => onUpdate!(details, _consecutiveTapCountWhileDragging!));
+  }
+
+  void _checkEnd() {
+    DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
+    invokeCallback<void>('onEnd', () => onEnd!(endDetails, consecutiveTapCount));
+  }
+
+  void _checkCancel() {
+    if (onCancel != null) {
+      invokeCallback<void>('onCancel', onCancel!);
+    }
   }
 
   void _giveUpPointer(int pointer) {
@@ -292,7 +339,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   @override
-  // TODO: implement debugDescription
   String get debugDescription => 'tap_and_drag';
 }
 
@@ -397,7 +443,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
 
   void _checkTapDown(PointerDownEvent event) {
     assert(_longPressOrigin != null);
-    print('from recognizer check tap down');
+    // print('from recognizer check tap down');
     final TapDownDetails details = TapDownDetails(
       globalPosition: _longPressOrigin!.global,
       localPosition: _longPressOrigin!.local,
@@ -455,7 +501,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
   }
 
   void _checkLongPressStart() {
-    print('from recognizer check long press start');
+    // print('from recognizer check long press start');
     if (_isDoubleTap) {
       resolve(GestureDisposition.rejected);
       return;
@@ -476,7 +522,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
   }
 
   void _checkLongPressMoveUpdate(PointerEvent event) {
-    print('from recognizer check long press move update');
+    // print('from recognizer check long press move update');
     if (_isDoubleTap) {
       resolve(GestureDisposition.rejected);
       return;
@@ -499,7 +545,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
   }
 
   void _checkLongPressEnd(PointerEvent event) {
-    print('from recognizer check long press end');
+    // print('from recognizer check long press end');
     if (_isDoubleTap) {
       _isDoubleTap = false;
       resolve(GestureDisposition.rejected);
