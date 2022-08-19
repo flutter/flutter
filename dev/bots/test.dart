@@ -341,28 +341,16 @@ final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
 Future<void> _runGeneralToolTests() async {
   final String pathOutput = path.join(flutterRoot, 'dev', 'bots', 'output.json');
-  if (!File(pathOutput).existsSync()) {
-    throw Exception('TODO');
-    // TODO(jasguerrero): create output file, https://github.com/flutter/flutter/issues/97539
-  }
+  await _dartRunTest(
+    _toolsPath,
+    testPaths: <String>[path.join('test', 'general.shard')],
+    enableFlutterToolAsserts: false,
 
-  final Map<String, dynamic> fileContent = readJsonTestsSubShardFile(pathOutput);
-  final List<dynamic> allSubShards = fileContent['general.shard'] as List<dynamic>;
-
-  for (final dynamic shardsDynamic in allSubShards) {
-    final List<String> shards = _createPathsGeneralShard(shardsDynamic as List<dynamic>);
-    print(shards[0]);
-    await _dartRunTest(
-      _toolsPath,
-      testPaths: shards,
-      enableFlutterToolAsserts: false,
-
-      // Detect unit test time regressions (poor time delay handling, etc).
-      // This overrides the 15 minute default for tools tests.
-      // See the README.md and dart_test.yaml files in the flutter_tools package.
-      perTestTimeout: const Duration(seconds: 2),
-    );
-  }
+    // Detect unit test time regressions (poor time delay handling, etc).
+    // This overrides the 15 minute default for tools tests.
+    // See the README.md and dart_test.yaml files in the flutter_tools package.
+    perTestTimeout: const Duration(seconds: 2),
+  );
 }
 
 List<String> _createPathsGeneralShard(List<dynamic> shardsDynamic) {
