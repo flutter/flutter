@@ -78,7 +78,6 @@ platform_properties:
         ]
       os: Mac-12
       device_type: none
-      cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
   mac_arm64:
     properties:
@@ -2532,7 +2531,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2552,7 +2550,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2697,8 +2694,6 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-    dimensions:
-      cpu: "arm64"
 
   - name: Mac flutter_view_macos__start_up
     presubmit: false
@@ -3067,7 +3062,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: arm64
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -3088,7 +3082,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3114,7 +3107,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3140,7 +3132,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3166,7 +3157,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3241,7 +3231,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -4914,8 +4903,6 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-    dimensions:
-      cpu: "arm64"
 
   - name: Windows flutter_packaging
     recipe: packaging_v2/packaging_v2
