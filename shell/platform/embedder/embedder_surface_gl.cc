@@ -80,6 +80,17 @@ EmbedderSurfaceGL::GLProcResolver EmbedderSurfaceGL::GetGLProcResolver() const {
   return gl_dispatch_table_.gl_proc_resolver;
 }
 
+// |GPUSurfaceGLDelegate|
+SurfaceFrame::FramebufferInfo EmbedderSurfaceGL::GLContextFramebufferInfo()
+    const {
+  // Enable partial repaint by default on the embedders.
+  auto info = SurfaceFrame::FramebufferInfo{};
+  info.supports_readback = true;
+  info.supports_partial_repaint =
+      gl_dispatch_table_.gl_populate_existing_damage != nullptr;
+  return info;
+}
+
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGL::CreateGPUSurface() {
   const bool render_to_surface = !external_view_embedder_;

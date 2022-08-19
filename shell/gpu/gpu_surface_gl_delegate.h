@@ -30,7 +30,7 @@ struct GLFBOInfo {
   // This boolean flags whether the returned FBO supports partial repaint.
   const bool partial_repaint_enabled;
   // The frame buffer's existing damage (i.e. damage since it was last used).
-  const SkIRect existing_damage;
+  const std::optional<SkIRect> existing_damage;
 };
 
 // Information passed during presentation of a frame.
