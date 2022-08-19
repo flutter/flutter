@@ -3000,6 +3000,7 @@ targets:
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/105715
     presubmit: false
     runIf:
       - dev/**
@@ -3011,6 +3012,7 @@ targets:
 
   - name: Mac_arm64_android run_release_test
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/105715
     presubmit: false
     runIf:
       - dev/**
