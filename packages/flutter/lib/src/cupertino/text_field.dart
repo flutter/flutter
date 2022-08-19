@@ -120,7 +120,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   }
 
   @override
-  void onDragSelectionEnd(DragEndDetails details) {
+  void onDragSelectionEnd(DragEndDetails details, int consecutiveTapCount) {
     _state._requestKeyboard();
   }
 }

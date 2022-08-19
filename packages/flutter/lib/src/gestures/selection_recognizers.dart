@@ -211,6 +211,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
           delta: event.delta,
           primaryDelta: null,
           globalPosition: event.position,
+          kind: getKindForPointer(event.pointer),
           localPosition: event.localPosition,
           offsetFromOrigin: event.position - _initialPosition.global,
           localOffsetFromOrigin: event.localPosition - _initialPosition.local,
