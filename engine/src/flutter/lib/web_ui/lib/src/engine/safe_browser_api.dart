@@ -328,7 +328,10 @@ class DecodeOptions {
 ///  * https://www.w3.org/TR/webcodecs/#videoframe-interface
 @JS()
 @anonymous
-class VideoFrame implements DomCanvasImageSource {
+@staticInterop
+class VideoFrame implements DomCanvasImageSource {}
+
+extension VideoFrameExtension on VideoFrame {
   external int allocationSize();
   external JsPromise copyTo(Uint8List destination);
   external String? get format;
