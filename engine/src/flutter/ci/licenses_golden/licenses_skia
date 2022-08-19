@@ -1,4 +1,4 @@
-Signature: 83a782dab232d1616f34bbcda46a0cfc
+Signature: 7d71b9695cd4213f1229bf927a59ec8f
 
 UNUSED LICENSES:
 
@@ -2575,7 +2575,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/Caps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/CommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Context.cpp
-FILE: ../../../third_party/skia/src/gpu/graphite/ContextPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ContextUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ContextUtils.h
@@ -5579,7 +5578,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.h
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.h
-FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecordingPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Resource.cpp
@@ -6568,6 +6566,7 @@ FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
 FILE: ../../../third_party/skia/include/core/SkOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp
+FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_client.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
