@@ -1424,7 +1424,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // display the hint or nothing at all.
     final Widget innerItemsWidget;
     if (items.isEmpty) {
-      innerItemsWidget = Container();
+      innerItemsWidget = const SizedBox.shrink();
     } else {
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,
