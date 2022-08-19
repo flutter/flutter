@@ -205,6 +205,19 @@ directly), follow these steps to roll to the new version:
 If you have questions, contact the Flutter Web team on Flutter Discord on the
 #hackers-web-🌍 channel.
 
+### Rolling Noto Font Data
+
+In order to generate new data for the Noto fallback fonts, you will need
+a GoogleFonts API key. Once you have one, run:
+
+```
+./dev/felt generate-fallback-font-data --key=<your GoogleFonts API key>
+```
+
+This will generate the file `lib/src/engine/canvaskit/font_fallback_data.dart` with
+the latest data from GoogleFonts. This generated file should then be rolled in with
+a PR to the engine.
+
 ### Configuration files
 
 `browser_lock.yaml` contains the version of browsers we use to test Flutter for
