@@ -1594,5 +1594,56 @@ TEST_P(EntityTest, LinearToSrgbFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(EntityTest, SrgbToLinearFilterCoverageIsCorrect) {
+  // Set up a simple color background.
+  auto fill = std::make_shared<SolidColorContents>();
+  fill->SetPath(
+      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+  fill->SetColor(Color::DeepPink());
+
+  auto filter = FilterContents::MakeSrgbToLinearFilter(FilterInput::Make(fill));
+
+  Entity e;
+  e.SetTransformation(Matrix());
+
+  // Confirm that the actual filter coverage matches the expected coverage.
+  auto actual = filter->GetCoverage(e);
+  auto expected = Rect::MakeXYWH(0, 0, 300, 400);
+
+  ASSERT_TRUE(actual.has_value());
+  ASSERT_RECT_NEAR(actual.value(), expected);
+}
+
+TEST_P(EntityTest, SrgbToLinearFilter) {
+  auto image = CreateTextureForFixture("embarcadero.jpg");
+  ASSERT_TRUE(image);
+
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    auto filtered =
+        FilterContents::MakeSrgbToLinearFilter(FilterInput::Make(image));
+
+    // Define the entity that will serve as the control image as a Gaussian blur
+    // filter with no filter at all.
+    Entity entity_left;
+    entity_left.SetTransformation(Matrix::MakeScale(GetContentScale()) *
+                                  Matrix::MakeTranslation({100, 300}) *
+                                  Matrix::MakeScale(Vector2{0.5, 0.5}));
+    auto unfiltered = FilterContents::MakeGaussianBlur(FilterInput::Make(image),
+                                                       Sigma{0}, Sigma{0});
+    entity_left.SetContents(unfiltered);
+
+    // Define the entity that will be filtered from sRGB to linear.
+    Entity entity_right;
+    entity_right.SetTransformation(Matrix::MakeScale(GetContentScale()) *
+                                   Matrix::MakeTranslation({500, 300}) *
+                                   Matrix::MakeScale(Vector2{0.5, 0.5}));
+    entity_right.SetContents(filtered);
+    return entity_left.Render(context, pass) &&
+           entity_right.Render(context, pass);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
