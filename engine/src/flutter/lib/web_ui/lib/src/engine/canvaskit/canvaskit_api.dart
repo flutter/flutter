@@ -107,6 +107,7 @@ extension CanvasKitExtension on CanvasKit {
   external SkParagraphStyle ParagraphStyle(
       SkParagraphStyleProperties properties);
   external SkTextStyle TextStyle(SkTextStyleProperties properties);
+  external SkSurface MakeWebGLCanvasSurface(DomCanvasElement canvas);
   external SkSurface MakeSurface(
     int width,
     int height,

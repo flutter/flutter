@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:ui/ui.dart' as ui;
 
+import '../dom.dart';
 import '../profiler.dart';
 import '../util.dart';
 import 'canvas.dart';
@@ -97,12 +100,27 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
   @override
   ui.Image toImageSync(int width, int height) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
-    final SkSurface skSurface = canvasKit.MakeSurface(width, height);
+    final DomCanvasElement tempCanvas =
+        createDomCanvasElement(width: width, height: height);
+    final SkSurface skSurface = canvasKit.MakeWebGLCanvasSurface(tempCanvas);
     final SkCanvas skCanvas = skSurface.getCanvas();
     skCanvas.drawPicture(skiaObject);
     final SkImage skImage = skSurface.makeImageSnapshot();
+    final SkImageInfo imageInfo = SkImageInfo(
+      alphaType: canvasKit.AlphaType.Premul,
+      colorType: canvasKit.ColorType.RGBA_8888,
+      colorSpace: SkColorSpaceSRGB,
+      width: width,
+      height: height,
+    );
+    final Uint8List pixels = skImage.readPixels(0, 0, imageInfo);
+    final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, 4 * width);
     skSurface.dispose();
-    return CkImage(skImage);
+    tempCanvas.remove();
+    if (rasterImage == null) {
+      throw StateError('Unable to convert image pixels into SkImage.');
+    }
+    return CkImage(rasterImage);
   }
 
   @override
