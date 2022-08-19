@@ -5,10 +5,8 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -1056,51 +1054,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title => 'Title';
 }
 ''');
-    });
-
-    // Use context because the test needs a local file system.
-    testUsingContext('files well formatted', () async {
-      // Use a local file system to make generated files accessible for format.
-      final FileSystem fs = globals.fs;
-      final Artifacts artifacts = globals.artifacts!;
-      final ProcessManager processManager = globals.processManager;
-      final Directory projectDir = fs.systemTempDirectory.createTempSync(
-        'flutter_tools_generate_localizations_test.',
-      );
-      final String l10nPathString = fs.path.join(projectDir.path, 'lib', 'l10n');
-      final Directory l10nDirectory = fs.directory(l10nPathString)
-        ..createSync(recursive: true)
-        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
-        ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
-
-      await generateLocalizations(
-        fileSystem: fs,
-        artifacts: artifacts,
-        processManager: processManager,
-        options: const LocalizationOptions(useSyntheticPackage: false),
-        logger: logger,
-        projectDir: projectDir,
-      );
-
-      final Iterable<File> generatedFiles = l10nDirectory
-          .listSync()
-          .whereType<File>()
-          .where((File file) => file.basename.endsWith('.dart'));
-      final List<String> command = <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
-        'format',
-        '--output=show',
-        ...generatedFiles.map((File file) => file.path),
-      ];
-      final Process process = await processManager.start(
-        command,
-        workingDirectory: l10nDirectory.path,
-      );
-      final String formatted = await process.stdout.transform(utf8.decoder).join();
-      for (final File file in generatedFiles) {
-        final String original = file.readAsStringSync();
-        expect(formatted, contains(original), reason: file.path);
-      }
     });
   });
 
