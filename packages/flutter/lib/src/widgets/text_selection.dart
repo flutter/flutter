@@ -1857,6 +1857,19 @@ class TextSelectionGestureDetectorBuilder {
         && selection.end >= textPosition.offset;
   }
 
+  /// Returns true if position was on selection.
+  bool _lastTapWasOnSelection(Offset position, TextSelection? targetSelection) {
+    if (targetSelection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = renderEditable.getPositionForPoint(position);
+    print('return ${targetSelection!.start} <= ${textPosition.offset} && ${targetSelection!.end} >= ${textPosition.offset}');
+
+    return targetSelection!.start <= textPosition.offset
+        && targetSelection!.end >= textPosition.offset;
+  }
+
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever
@@ -2389,7 +2402,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionStart], which triggers
   ///    this callback.
   @protected
-  void onDragSelectionStart(DragStartDetails details) {
+  void onDragSelectionStart(DragStartDetails details, int consecutiveTapCount) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2458,11 +2471,73 @@ class TextSelectionGestureDetectorBuilder {
           cause: SelectionChangedCause.drag,
         );
       }
-      return renderEditable.selectPositionAt(
-        from: dragStartGlobalPosition - editableOffset - scrollableOffset,
-        to: details.globalPosition,
-        cause: SelectionChangedCause.drag,
-      );
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          // With a touch device, nothing should happen, unless there was a double tap, or
+          // there was a collapsed selection, and the tap/drag position is at the collapsed selection.
+          // In that case the caret should move with the drag position.
+          //
+          // With a mouse device, a drag should select the range from the origin of the drag
+          // to the current position of the drag.
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+              return renderEditable.selectPositionAt(
+                from: dragStartGlobalPosition - startOffset,
+                to: details.globalPosition,
+                cause: SelectionChangedCause.drag,
+              );
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              if(renderEditable.hasFocus
+                  && editableText.textEditingValue.selection.isCollapsed
+                  && _lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)
+              ) {
+                print('hi from drag for ios');
+                return renderEditable.selectPositionAt(
+                  from: details.globalPosition,
+                  cause: SelectionChangedCause.drag,
+                );
+              } else {
+                print('guess that didnt work ${renderEditable.hasFocus}, ${editableText.textEditingValue.selection.isCollapsed}, ${_lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)}');
+              }
+          }
+          return;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          // With a touch device, the cursor should move with the drag.
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              return renderEditable.selectPositionAt(
+                from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+                to: details.globalPosition,
+                cause: SelectionChangedCause.drag,
+              );
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              if (renderEditable.hasFocus) {
+                return renderEditable.selectPositionAt(
+                  from: details.globalPosition,
+                  cause: SelectionChangedCause.drag,
+                );
+              }
+          }
+          return;
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return renderEditable.selectPositionAt(
+            from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+            to: details.globalPosition,
+            cause: SelectionChangedCause.drag,
+          );
+      }
     }
 
     if (_shiftTapDragSelection!.isCollapsed
@@ -2517,7 +2592,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionEnd], which triggers this
   ///    callback.
   @protected
-  void onDragSelectionEnd(DragEndDetails details) {
+  void onDragSelectionEnd(DragEndDetails details, int consecutiveTapCount) {
     if (_isShiftTapping) {
       _isShiftTapping = false;
       _shiftTapDragSelection = null;
@@ -2638,7 +2713,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapDownCallback? onDoubleTapDown;
 
   /// Called when a mouse starts dragging to select text.
-  final GestureDragStartCallback? onDragSelectionStart;
+  final GestureDragStartWithConsecutiveTapCountCallback? onDragSelectionStart;
 
   /// Called repeatedly as a mouse moves while dragging.
   ///
@@ -2648,7 +2723,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureDragUpdateWithConsecutiveTapCountCallback? onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
-  final GestureDragEndCallback? onDragSelectionEnd;
+  final GestureDragEndWithConsecutiveTapCountCallback? onDragSelectionEnd;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -2702,11 +2777,11 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   int? _dragTapCount;
 
   void _handleDragStart(DragStartDetails details, int consecutiveTapCount) {
-    // print('drag start');
+    print('drag start');
     // print('tap count $consecutiveTapCount');
-    if (consecutiveTapCount != 2) {
-      widget.onDragSelectionStart?.call(details);
-    }
+    // if (consecutiveTapCount != 2) {
+      widget.onDragSelectionStart?.call(details, consecutiveTapCount);
+    // }
   }
 
   void _handleDragUpdate(DragUpdateDetails details, int consecutiveTapCount) {
@@ -2740,7 +2815,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       _dragUpdateThrottleTimer!.cancel();
       _handleDragUpdateThrottled();
     }
-    widget.onDragSelectionEnd?.call(endDetails);
+    widget.onDragSelectionEnd?.call(endDetails, consecutiveTapCount);
     _dragTapCount = null;
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
