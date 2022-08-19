@@ -65,7 +65,7 @@ enum EnginePhase {
 /// Signature of callbacks to intercept messages on a given channel.
 ///
 /// see [TestDefaultBinaryMessenger.setMockDecodedMessageHandler] for more details.
-typedef MockMessageHandler = Future<dynamic> Function(dynamic);
+typedef _MockMessageHandler = Future<dynamic> Function(dynamic);
 
 /// Parts of the system that can generate pointer events that reach the test
 /// binding.
@@ -112,11 +112,11 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 }
 
 /// An accessibility announcement.
-class Announcement {
-  Announcement(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite});
-  String message;
-  TextDirection textDirection;
-  Assertiveness? assertiveness;
+class CapturedAccessibilityAnnouncement {
+  const CapturedAccessibilityAnnouncement(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite});
+  final String message;
+  final TextDirection textDirection;
+  final Assertiveness? assertiveness;
 }
 
 /// Base class for bindings used by widgets library tests.
@@ -624,18 +624,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails? _pendingExceptionDetails;
 
-  MockMessageHandler? _announcementHandler;
-  List<Announcement>? _announcements;
+  _MockMessageHandler? _announcementHandler;
+  List<CapturedAccessibilityAnnouncement>? _announcements;
 
   /// Returns a list announcements made by the Flutter framework.
-  List<Announcement>? takeAnnouncements() {
+  List<CapturedAccessibilityAnnouncement>? takeAnnouncements() {
     assert(inTest);
-    return _announcements;
+    final List<CapturedAccessibilityAnnouncement>? announcements = _announcements;
+    _announcements = null;
+    return announcements;
   }
 
   /// Returns the most recent announcement made by the Flutter framework.
-  Announcement? getLastAnnouncement(){
-      return _announcements?.last;
+  CapturedAccessibilityAnnouncement? getLastAnnouncement() {
+    return _announcements?.last;
   }
 
   static const TextStyle _messageStyle = TextStyle(
@@ -732,19 +734,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         (mockMessage as Map<dynamic, dynamic>)['data'] as Map<dynamic, dynamic>;
     final String message = data['message'] as String;
     final TextDirection textDirection = TextDirection.values[data['textDirection'] as int];
-    final dynamic assertivenessLevel = data['assertiveness'];
-    final Announcement announcement;
-    if (assertivenessLevel != null)
-    {
-      final Assertiveness assertiveness = Assertiveness.values[assertivenessLevel as int];
-      announcement = Announcement(message, textDirection, assertiveness: assertiveness);
-    }
-    else
-    {
-      announcement = Announcement(message, textDirection);
-    }
+    final int assertivenessLevel = (data['assertiveness'] as int?) ?? 0;
+    final Assertiveness assertiveness = Assertiveness.values[assertivenessLevel];
+    final CapturedAccessibilityAnnouncement announcement;
 
-    _announcements ??= <Announcement>[];
+    announcement = CapturedAccessibilityAnnouncement(message, textDirection, assertiveness: assertiveness);
+    _announcements ??= <CapturedAccessibilityAnnouncement>[];
     _announcements!.add(announcement);
   }
 
