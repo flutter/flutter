@@ -48,7 +48,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
  public:
   MOCK_METHOD0(DefaultRouteName, std::string());
   MOCK_METHOD1(ScheduleFrame, void(bool));
-  MOCK_METHOD1(Render, void(std::unique_ptr<flutter::LayerTree>));
+  MOCK_METHOD1(Render, void(std::shared_ptr<flutter::LayerTree>));
   MOCK_METHOD2(UpdateSemantics,
                void(SemanticsNodeUpdates, CustomAccessibilityActionUpdates));
   MOCK_METHOD1(HandlePlatformMessage, void(std::unique_ptr<PlatformMessage>));
