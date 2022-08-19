@@ -865,7 +865,7 @@ class TextPainter {
     if (plainTextLength == 0) {
       return null;
     }
-    // We cap the offset at the final index of the _text.
+    // We cap the offset at the final index of plain text.
     final int nextCodeUnit = plainText.codeUnitAt(min(offset, plainTextLength - 1));
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
