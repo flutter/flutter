@@ -834,7 +834,7 @@ class TextPainter {
         if (!needsSearch && prevCodeUnit == NEWLINE_CODE_UNIT) {
           break; // Only perform one iteration if no search is required.
         }
-        if (prevRuneOffset < -flattenedText.length) {
+        if (prevRuneOffset < -plainTextLength) {
           break; // Stop iterating when beyond the max length of the text.
         }
         // Multiply by two to log(n) time cover the entire text span. This allows
