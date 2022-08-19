@@ -63,9 +63,9 @@ class GenerateLocalizationsTarget extends Target {
       processManager: environment.processManager,
     );
 
-    final Map<String, Object> dependencies = json.decode(
+    final Map<String, Object?> dependencies = json.decode(
       environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()
-    ) as Map<String, Object>;
+    ) as Map<String, Object?>;
     final List<Object?>? inputs = dependencies['inputs'] as List<Object?>?;
     final List<Object?>? outputs = dependencies['outputs'] as List<Object?>?;
     final Depfile depfile = Depfile(

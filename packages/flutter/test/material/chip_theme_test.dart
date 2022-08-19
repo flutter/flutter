@@ -159,7 +159,7 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).shape, chipTheme.shape);
@@ -212,7 +212,7 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(getMaterial(tester).shape, chipTheme.shape);
@@ -264,7 +264,7 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: backgroundColor));
+    expect(materialBox, paints..circle(color: backgroundColor));
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).elevation, elevation);
     expect(getMaterial(tester).shape, shape);
@@ -660,11 +660,11 @@ void main() {
 
     // Default.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
   testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {
@@ -702,11 +702,11 @@ void main() {
 
     // Default.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
   testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {

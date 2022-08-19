@@ -32,6 +32,10 @@ export 'package:flutter/painting.dart' show
   MemoryImage,
   NetworkImage;
 
+// Examples can assume:
+// late Widget image;
+// late ImageProvider _image;
+
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
 ///
@@ -580,11 +584,9 @@ class Image extends StatefulWidget {
   /// bundled, the app has to specify which ones to include. For instance a
   /// package named `fancy_backgrounds` could have:
   ///
-  /// ```
-  /// lib/backgrounds/background1.png
-  /// lib/backgrounds/background2.png
-  /// lib/backgrounds/background3.png
-  /// ```
+  ///     lib/backgrounds/background1.png
+  ///     lib/backgrounds/background2.png
+  ///     lib/backgrounds/background3.png
   ///
   /// To include, say the first image, the `pubspec.yaml` of the app should
   /// specify it in the assets section:
@@ -732,14 +734,14 @@ class Image extends StatefulWidget {
   /// {@template flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   /// ```dart
   /// Image(
-  ///   ...
-  ///   frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+  ///   image: _image,
+  ///   frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
   ///     return Padding(
-  ///       padding: EdgeInsets.all(8.0),
+  ///       padding: const EdgeInsets.all(8.0),
   ///       child: child,
   ///     );
   ///   },
-  ///   loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+  ///   loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
   ///     return Center(child: child);
   ///   },
   /// )
@@ -749,11 +751,11 @@ class Image extends StatefulWidget {
   ///
   /// ```dart
   /// Center(
-  ///   Padding(
-  ///     padding: EdgeInsets.all(8.0),
-  ///     child: <image>,
+  ///   child: Padding(
+  ///     padding: const EdgeInsets.all(8.0),
+  ///     child: image,
   ///   ),
-  /// )
+  /// ),
   /// ```
   /// {@endtemplate}
   ///

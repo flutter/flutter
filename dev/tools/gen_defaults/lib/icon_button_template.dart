@@ -88,6 +88,10 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
 
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    ButtonStyleButton.allOrNull<double>(${tokens["md.comp.icon-button.icon.size"]});
+
   // No default side
 
   @override
@@ -104,7 +108,7 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
     });
 
   @override
-  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+  VisualDensity? get visualDensity => VisualDensity.standard;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;

@@ -373,13 +373,13 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.blue[600]!.withAlpha(0x80),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.blue[600]),
+        ..circle(color: const Color(0xff2196f3)),
       reason: 'Active enabled switch should match these colors',
     );
   });
@@ -806,14 +806,14 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check the false value.
@@ -910,13 +910,13 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Start hovering
@@ -930,14 +930,14 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check what happens when disabled.
@@ -1297,7 +1297,7 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x1f000000))
@@ -1318,7 +1318,7 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x1f000000))

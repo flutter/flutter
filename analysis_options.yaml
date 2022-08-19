@@ -20,12 +20,6 @@ analyzer:
     strict-casts: true
     strict-raw-types: true
   errors:
-    # treat missing required parameters as a warning (not a hint)
-    missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
-    # allow having TODO comments in the code
-    todo: ignore
     # allow self-reference to deprecated members (we do this because otherwise we have
     # to annotate every member in every test, assert, etc, when we deprecate something)
     deprecated_member_use_from_same_package: ignore
@@ -72,7 +66,7 @@ linter:
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
-    # - avoid_returning_null # still violated by some pre-nnbd code that we haven't yet migrated
+    - avoid_returning_null
     - avoid_returning_null_for_future
     - avoid_returning_null_for_void
     # - avoid_returning_this # there are enough valid reasons to return `this` that this lint ends up with too many false positives
@@ -96,7 +90,7 @@ linter:
     # - close_sinks # not reliable enough
     - combinators_ordering
     # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
-    # - conditional_uri_does_not_exist # not yet tested
+    - conditional_uri_does_not_exist
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     - curly_braces_in_flow_control_structures

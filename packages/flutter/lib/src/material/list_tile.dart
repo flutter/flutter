@@ -18,6 +18,9 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// int _act = 1;
+
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
 /// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
@@ -166,8 +169,6 @@ enum ListTileControlAffinity {
 /// tapped, the whole row has an ink splash effect (see [InkWell]).
 ///
 /// ```dart
-/// int _act = 1;
-/// // ...
 /// ListTile(
 ///   leading: const Icon(Icons.flight_land),
 ///   title: const Text("Trix's airplane"),

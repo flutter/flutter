@@ -195,7 +195,7 @@ List<FlutterCommand> generateCommands({
   RunCommand(verboseHelp: verboseHelp),
   ScreenshotCommand(),
   ShellCompletionCommand(),
-  TestCommand(verboseHelp: verboseHelp),
+  TestCommand(verboseHelp: verboseHelp, verbose: verbose),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(
     stdio: globals.stdio,

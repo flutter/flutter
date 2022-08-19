@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/version.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -71,7 +72,7 @@ void main() {
       );
 
       await runner.run(<String>['channel']);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(testLogger.errorText, hasLength(0));
       // format the status text for a simpler assertion.
       final Iterable<String> rows = testLogger.statusText
@@ -95,7 +96,7 @@ void main() {
       );
 
       await runner.run(<String>['channel']);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(rows, containsAllInOrder(kOfficialChannels));
       expect(testLogger.errorText, hasLength(0));
       // format the status text for a simpler assertion.
@@ -119,7 +120,7 @@ void main() {
       );
 
       await runner.run(<String>['channel']);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(testLogger.errorText, hasLength(0));
       // check if available official channels are in order of stability
       int prev = -1;
@@ -153,7 +154,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(testLogger.errorText, hasLength(0));
 
       // format the status text for a simpler assertion.
@@ -184,7 +185,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(testLogger.errorText, hasLength(0));
 
       // format the status text for a simpler assertion.
@@ -217,7 +218,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(
         testLogger.statusText,
         containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
@@ -238,7 +239,7 @@ void main() {
 
       await runner.run(<String>['channel', 'stable']);
 
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => fakeProcessManager,
@@ -272,7 +273,7 @@ void main() {
           "from this channel, run 'flutter upgrade'"),
       );
       expect(testLogger.errorText, hasLength(0));
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => fakeProcessManager,
@@ -314,7 +315,7 @@ void main() {
       expect(testLogger.statusText, isNot(contains('A new version of Flutter')));
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => fakeProcessManager,

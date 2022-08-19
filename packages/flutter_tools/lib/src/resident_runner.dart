@@ -701,6 +701,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
+      if (device?.targetPlatform == TargetPlatform.web_javascript) {
+        logger!.printWarning('Unable to get jank metrics for web');
+        continue;
+      }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
         final Map<String, Object>? rasterData =
@@ -1217,6 +1221,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       platform: globals.platform,
+      usage: globals.flutterUsage,
       projectDir: globals.fs.currentDirectory,
       generateDartPluginRegistry: generateDartPluginRegistry,
       defines: <String, String>{

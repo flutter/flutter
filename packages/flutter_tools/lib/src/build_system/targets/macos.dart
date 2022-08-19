@@ -9,6 +9,7 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -544,4 +545,27 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     CompileMacOSFramework(),
     ReleaseUnpackMacOS(),
   ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    bool buildSuccess = true;
+    try {
+      await super.build(environment);
+    } catch (_) {  // ignore: avoid_catches_without_on_clauses
+      buildSuccess = false;
+      rethrow;
+    } finally {
+      // Send a usage event when the app is being archived from Xcode.
+      if (environment.defines[kXcodeAction]?.toLowerCase() == 'install') {
+        environment.logger.printTrace('Sending archive event if usage enabled.');
+        UsageEvent(
+          'assemble',
+          'macos-archive',
+          label: buildSuccess ? 'success' : 'fail',
+          flutterUsage: environment.usage,
+        ).send();
+      }
+    }
+  }
+
 }

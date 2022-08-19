@@ -109,6 +109,21 @@ class PlaceholderDimensions {
   final TextBaseline? baseline;
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is PlaceholderDimensions
+        && other.size == size
+        && other.alignment == alignment
+        && other.baseline == baseline
+        && other.baselineOffset == baselineOffset;
+  }
+
+  @override
+  int get hashCode => Object.hash(size, alignment, baseline, baselineOffset);
+
+  @override
   String toString() {
     return 'PlaceholderDimensions($size, $baseline)';
   }
@@ -206,7 +221,18 @@ class TextPainter {
   // rebuilt before painting.
   bool _rebuildParagraphForPaint = true;
 
-  bool get _debugNeedsLayout => _paragraph == null;
+  bool get _debugAssertTextLayoutIsValid {
+    if (_paragraph == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Text layout not available'),
+        if (_debugMarkNeedsLayoutCallStack != null) DiagnosticsStackTrace('The calls that first invalidated the text layout were', _debugMarkNeedsLayoutCallStack)
+        else ErrorDescription('The TextPainter has never been laid out.')
+      ]);
+    }
+    return true;
+  }
+
+  StackTrace? _debugMarkNeedsLayoutCallStack;
 
   /// Marks this text painter's layout information as dirty and removes cached
   /// information.
@@ -215,6 +241,12 @@ class TextPainter {
   /// layout changes in engine. In most cases, updating text painter properties
   /// in framework will automatically invoke this method.
   void markNeedsLayout() {
+    assert(() {
+      if (_paragraph != null) {
+        _debugMarkNeedsLayoutCallStack ??= StackTrace.current;
+      }
+      return true;
+    }());
     _paragraph = null;
     _lineMetricsCache = null;
     _previousCaretPosition = null;
@@ -540,7 +572,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get minIntrinsicWidth {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _applyFloatingPointHack(_paragraph!.minIntrinsicWidth);
   }
 
@@ -548,7 +580,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get maxIntrinsicWidth {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _applyFloatingPointHack(_paragraph!.maxIntrinsicWidth);
   }
 
@@ -556,7 +588,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get width {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _applyFloatingPointHack(
       textWidthBasis == TextWidthBasis.longestLine ? _paragraph!.longestLine : _paragraph!.width,
     );
@@ -566,7 +598,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double get height {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _applyFloatingPointHack(_paragraph!.height);
   }
 
@@ -574,7 +606,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   Size get size {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return Size(width, height);
   }
 
@@ -583,7 +615,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     assert(baseline != null);
     switch (baseline) {
       case TextBaseline.alphabetic:
@@ -605,7 +637,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   bool get didExceedMaxLines {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _paragraph!.didExceedMaxLines;
   }
 
@@ -623,6 +655,10 @@ class TextPainter {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
     text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
     _inlinePlaceholderScales = builder.placeholderScales;
+    assert(() {
+      _debugMarkNeedsLayoutCallStack = null;
+      return true;
+    }());
     _paragraph = builder.build();
     _rebuildParagraphForPaint = false;
   }
@@ -859,7 +895,7 @@ class TextPainter {
   }
 
   Offset get _emptyOffset {
-    assert(!_debugNeedsLayout); // implies textDirection is non-null
+    assert(_debugAssertTextLayoutIsValid); // implies textDirection is non-null
     assert(textAlign != null);
     switch (textAlign) {
       case TextAlign.left:
@@ -920,7 +956,7 @@ class TextPainter {
   // Checks if the [position] and [caretPrototype] have changed from the cached
   // version and recomputes the metrics required to position the caret.
   void _computeCaretMetrics(TextPosition position, Rect caretPrototype) {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype) {
       return;
     }
@@ -969,7 +1005,7 @@ class TextPainter {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
     return _paragraph!.getBoxesForRange(
@@ -982,7 +1018,7 @@ class TextPainter {
 
   /// Returns the position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _paragraph!.getPositionForOffset(offset);
   }
 
@@ -996,7 +1032,7 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   /// {@endtemplate}
   TextRange getWordBoundary(TextPosition position) {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _paragraph!.getWordBoundary(position);
   }
 
@@ -1004,7 +1040,7 @@ class TextPainter {
   ///
   /// The newline (if any) is not returned as part of the range.
   TextRange getLineBoundary(TextPosition position) {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return _paragraph!.getLineBoundary(position);
   }
 
@@ -1021,7 +1057,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   List<ui.LineMetrics> computeLineMetrics() {
-    assert(!_debugNeedsLayout);
+    assert(_debugAssertTextLayoutIsValid);
     return  _lineMetricsCache ??= _paragraph!.computeLineMetrics();
   }
 }

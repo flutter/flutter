@@ -15,6 +15,12 @@ import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late Offset? _childWasTappedAt;
+// late TransformationController _transformationController;
+// Widget child = const Placeholder();
+
 /// A signature for widget builders that take a [Quad] of the current viewport.
 ///
 /// See also:
@@ -1141,7 +1147,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///
   /// ```dart
   /// @override
-  /// void build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   ///   return GestureDetector(
   ///     onTapUp: (TapUpDetails details) {
   ///       _childWasTappedAt = _transformationController.toScene(
