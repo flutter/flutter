@@ -1686,6 +1686,7 @@ FILE: ../../../flutter/shell/platform/common/geometry.h
 FILE: ../../../flutter/shell/platform/common/geometry_unittests.cc
 FILE: ../../../flutter/shell/platform/common/incoming_message_dispatcher.cc
 FILE: ../../../flutter/shell/platform/common/incoming_message_dispatcher.h
+FILE: ../../../flutter/shell/platform/common/incoming_message_dispatcher_unittests.cc
 FILE: ../../../flutter/shell/platform/common/json_message_codec.cc
 FILE: ../../../flutter/shell/platform/common/json_message_codec.h
 FILE: ../../../flutter/shell/platform/common/json_message_codec_unittests.cc
