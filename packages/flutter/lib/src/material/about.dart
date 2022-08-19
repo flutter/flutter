@@ -1451,7 +1451,7 @@ class _DetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_arguments == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     final double screenHeight = MediaQuery.of(context).size.height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
