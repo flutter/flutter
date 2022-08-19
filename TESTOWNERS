@@ -226,6 +226,7 @@
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @schectman @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_view_win_desktop__start_up.dart @schectman @flutter/desktop
 /dev/devicelab/bin/tasks/platform_view_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/hello_world_macos__compile.dart @a-wallen @flutter/desktop
 
 ## Host only framework tests
 # Linux analyze
