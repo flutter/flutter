@@ -210,7 +210,7 @@ enum MaterialTapTargetSize {
 ///     colorScheme: ColorScheme.fromSwatch().copyWith(
 ///       secondary: Colors.green,
 ///     ),
-///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
+///     textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
@@ -1584,7 +1584,7 @@ class ThemeData with Diagnosticable {
   ///
   /// ```dart
   /// final ThemeData theme = Theme.of(context);
-  /// final TextStyle style = theme.textTheme.headline1!.copyWith(
+  /// final TextStyle style = theme.textTheme.displayLarge!.copyWith(
   ///   color: theme.colorScheme.onSecondary,
   /// );
   /// // ...use style...
