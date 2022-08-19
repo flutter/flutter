@@ -378,7 +378,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
+  testWidgets('a touch drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -388,15 +388,17 @@ void main() {
     );
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
+    await gesture.moveBy(const Offset(210.0, 210.0));
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(tapCount, 0);
+    expect(tapCount, 1);
     expect(singleTapUpCount, 0);
-    expect(dragStartCount, 0);
-    expect(dragUpdateCount, 0);
-    expect(dragEndCount, 0);
+    expect(singleTapCancelCount, 1);
+    expect(dragStartCount, 1);
+    expect(dragUpdateCount, 1);
+    expect(dragEndCount, 1);
   });
 
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
@@ -421,9 +423,10 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // The tap and drag gesture recognizer will detect the tap down and tap up.
+    // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
     expect(tapCount, 1);
-    expect(singleTapUpCount, 1);
+    expect(singleTapCancelCount, 1);
+    expect(singleTapUpCount, 0);
 
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
@@ -441,9 +444,20 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveBy(const Offset(210.0, 200.0));
+    // TODO (Renzo-Olivares): The previous DragGestureRecognizer fired two PointerMoveEvents at the start of
+    // a drag when DragStartBehavior was set to DragStartBehavior.down. Currently the new TapAndDragGestureRecognizer
+    // fires one PointerMoveEvent per PointerEvent that reaches handleEvent. So where before only one
+    // gesture.moveBy was necessary to trigger drag update, now two are necessary. Is there any upside/downside to either
+    // approach?
+    await gesture.moveBy(const Offset(210.0, 210.0));
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
+
+    // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
+    expect(tapCount, 1);
+    expect(singleTapCancelCount, 1);
+    expect(singleTapUpCount, 0);
 
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);

@@ -8,9 +8,9 @@ import 'constants.dart';
 import 'events.dart';
 import 'drag_details.dart';
 import 'long_press.dart' show GestureLongPressStartCallback, GestureLongPressMoveUpdateCallback, GestureLongPressEndCallback, GestureLongPressCancelCallback, LongPressStartDetails, LongPressMoveUpdateDetails, LongPressEndDetails;
-import 'monodrag.dart' show GestureDragEndCallback;
+import 'monodrag.dart' show GestureDragCancelCallback, GestureDragEndCallback;
 import 'recognizer.dart';
-import 'tap.dart' show GestureTapCallback, GestureTapDownCallback, GestureTapUpCallback, TapUpDetails, TapDownDetails;
+import 'tap.dart' show GestureTapCallback, GestureTapDownCallback, GestureTapUpCallback, GestureTapCancelCallback, TapUpDetails, TapDownDetails;
 import 'velocity_tracker.dart';
 
 enum _DragState {
@@ -96,7 +96,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   GestureTapUpCallback? onSecondaryTapUp;
 
-  GestureTapAndDragCancelCallback? onCancel;
+  GestureTapCancelCallback? onTapCancel;
+
+  GestureDragCancelCallback? onDragCancel;
 
   // For local tap drag count
   int? _consecutiveTapCountWhileDragging;
@@ -121,7 +123,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
               onUpdate == null &&
               onEnd == null &&
               onTapUp == null &&
-              onCancel == null) {
+              onTapCancel == null &&
+              onDragCancel == null) {
             return false;
           }
           break;
@@ -168,6 +171,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     print('didStopTrackingLastPointer $_state $pointer');
     switch(_state) {
       case _DragState.ready:
+        resolve(GestureDisposition.rejected);
+        _checkCancel(isDrag: true);
+        break;
       case _DragState.possible:
         resolve(GestureDisposition.rejected);
         _checkCancel();
@@ -196,6 +202,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         _checkUpdate(event);
       } else if (_state == _DragState.possible) {
         print('PointerMoveEvent while drag is is possible');
+        _checkCancel(isDrag: false); //hmmmmmm
         _checkStart(event);
       }
     } else if (event is PointerUpEvent) {
@@ -210,6 +217,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
           consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
           break;
         case _DragState.accepted:
+          // _checkCancel(isDrag: false);
           _checkEnd();
           break;
       }
@@ -317,9 +325,31 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     invokeCallback<void>('onEnd', () => onEnd!(endDetails, consecutiveTapCount));
   }
 
-  void _checkCancel() {
-    if (onCancel != null) {
-      invokeCallback<void>('onCancel', onCancel!);
+  void _checkCancel({bool? isDrag}) {
+    print('state when cancel is called $_state');
+    if (isDrag == null) {
+      _checkTapCancel();
+      _checkDragCancel();
+    } else {
+      if (isDrag) {
+        _checkDragCancel();
+      } else {
+        _checkTapCancel();
+      }
+    }
+  }
+
+  void _checkTapCancel() {
+    print('tap cancel');
+    if (onTapCancel != null) {
+      invokeCallback<void>('onTapCancel', onTapCancel!);
+    }
+  }
+
+  void _checkDragCancel() {
+    print('drag cancel');
+    if (onDragCancel != null) {
+      invokeCallback<void>('onDragCancel', onDragCancel!);
     }
   }
 
@@ -465,7 +495,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
   }
 
   void _checkTapUp(PointerUpEvent event) {
-    print('from recognizer check tap up');
+    // print('from recognizer check tap up');
     final TapUpDetails details = TapUpDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
@@ -486,7 +516,7 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
   }
 
   void _checkLongPressCancel() {
-    print('from recognizer check tap cancel');
+    // print('from recognizer check tap cancel');
     if (state == GestureRecognizerState.possible) {
       switch (_initialButtons) {
         case kPrimaryButton:
