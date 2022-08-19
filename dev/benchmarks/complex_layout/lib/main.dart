@@ -198,7 +198,7 @@ class MenuItemWithIcon extends StatelessWidget {
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
           child: Text(title),
         ),
-        Text(subtitle, style: Theme.of(context).textTheme.caption),
+        Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -261,7 +261,7 @@ class InfoBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           const MiniIconWithText(Icons.thumb_up, '42'),
-          Text('3 Comments', style: Theme.of(context).textTheme.caption),
+          Text('3 Comments', style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );
@@ -331,7 +331,7 @@ class MiniIconWithText extends StatelessWidget {
             child: Icon(icon, color: Colors.white, size: 12.0),
           ),
         ),
-        Text(title, style: Theme.of(context).textTheme.caption),
+        Text(title, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -374,7 +374,7 @@ class UserHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 RichText(text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyText2,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   children: <TextSpan>[
                     TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' shared a new '),
@@ -383,8 +383,8 @@ class UserHeader extends StatelessWidget {
                 )),
                 Row(
                   children: <Widget>[
-                    Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.caption),
-                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption!.color),
+                    Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.bodySmall),
+                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.bodySmall!.color),
                   ],
                 ),
               ],
@@ -477,9 +477,9 @@ class ItemImageBox extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Text('Artisans of Southern India', style: Theme.of(context).textTheme.bodyText1),
-                  Text('Silk Spinners', style: Theme.of(context).textTheme.bodyText2),
-                  Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption),
+                  Text('Artisans of Southern India', style: Theme.of(context).textTheme.bodyLarge),
+                  Text('Silk Spinners', style: Theme.of(context).textTheme.bodyMedium),
+                  Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             ),
@@ -521,7 +521,7 @@ class ItemGalleryBox extends StatelessWidget {
                               child: Container(
                                 color: Theme.of(context).primaryColor,
                                 child: Center(
-                                  child: Text(tabName, style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.white)),
+                                  child: Text(tabName, style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white)),
                                 ),
                               ),
                             ),
@@ -602,7 +602,7 @@ class BottomBarButton extends StatelessWidget {
             icon: Icon(icon),
             onPressed: () { print('Pressed: $title'); },
           ),
-          Text(title, style: Theme.of(context).textTheme.caption),
+          Text(title, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );

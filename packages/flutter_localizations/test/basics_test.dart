@@ -96,7 +96,7 @@ class LocalizationTrackerState extends State<LocalizationTracker> {
 
   @override
   Widget build(BuildContext context) {
-    captionFontSize = Theme.of(context).textTheme.caption!.fontSize!;
+    captionFontSize = Theme.of(context).textTheme.bodySmall!.fontSize!;
     return Container();
   }
 }
