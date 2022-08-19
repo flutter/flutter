@@ -110,7 +110,7 @@ void main() {
       secondaryActiveTrackColor: Colors.purple.withAlpha(0x8a),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, secondaryValue: 0.75, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, secondaryTrackValue: 0.75, enabled: false));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
     expect(
@@ -134,7 +134,7 @@ void main() {
       secondaryActiveTrackColor: Colors.purple.withAlpha(0x8a),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, secondaryValue: 0.75, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, secondaryTrackValue: 0.75, enabled: false));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
     expect(
@@ -241,7 +241,7 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryValue: 0.5));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryTrackValue: 0.5));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
     const Radius radius = Radius.circular(2);
@@ -257,7 +257,7 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 400.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.secondaryActiveTrackColor),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryValue: 0.5, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryTrackValue: 0.5, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
     // The disabled slider thumb is the same size as the enabled thumb.
@@ -1374,7 +1374,7 @@ class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight extends R
 Widget _buildApp(
     SliderThemeData sliderTheme, {
       double value = 0.0,
-      double? secondaryValue,
+      double? secondaryTrackValue,
       bool enabled = true,
       int? divisions,
     }) {
@@ -1386,7 +1386,7 @@ Widget _buildApp(
           data: sliderTheme,
           child: Slider(
             value: value,
-            secondaryValue: secondaryValue,
+            secondaryTrackValue: secondaryTrackValue,
             label: '$value',
             onChanged: onChanged,
             divisions: divisions,

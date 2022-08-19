@@ -675,7 +675,7 @@ void main() {
                   data: theme,
                   child: Slider(
                     value: value,
-                    secondaryValue: 0.75,
+                    secondaryTrackValue: 0.75,
                     label: '$value',
                     divisions: divisions,
                     activeColor: activeColor,
@@ -2845,7 +2845,7 @@ void main() {
       max: 100.0,
       onChanged: null,
       value: 50.0,
-      secondaryValue: 75.0,
+      secondaryTrackValue: 75.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -2854,7 +2854,7 @@ void main() {
 
     expect(description, <String>[
       'value: 50.0',
-      'secondaryValue: 75.0',
+      'secondaryTrackValue: 75.0',
       'disabled',
       'min: 0.0',
       'max: 100.0',

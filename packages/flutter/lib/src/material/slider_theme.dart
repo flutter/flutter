@@ -375,7 +375,7 @@ class SliderThemeData with Diagnosticable {
   final Color? inactiveTrackColor;
 
   /// The color of the [Slider] track between the current thumb position and the
-  /// [Slider.secondaryValue] position.
+  /// [Slider.secondaryTrackValue] position.
   final Color? secondaryActiveTrackColor;
 
   /// The color of the [Slider] track between the [Slider.min] position and the
@@ -383,7 +383,7 @@ class SliderThemeData with Diagnosticable {
   final Color? disabledActiveTrackColor;
 
   /// The color of the [Slider] track between the current thumb position and the
-  /// [Slider.secondaryValue] position when the [Slider] is disabled.
+  /// [Slider.secondaryTrackValue] position when the [Slider] is disabled.
   final Color? disabledSecondaryActiveTrackColor;
 
   /// The color of the [Slider] track between the current thumb position and the
@@ -1627,22 +1627,22 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
     }
 
-    final bool showMiddleTrack = (secondaryOffset != null) &&
+    final bool showSecondaryTrack = (secondaryOffset != null) &&
         ((textDirection == TextDirection.ltr)
             ? (secondaryOffset.dx > thumbCenter.dx)
             : (secondaryOffset.dx < thumbCenter.dx));
 
-    if (showMiddleTrack) {
-      final ColorTween middleTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
-      final Paint middleTrackPaint = Paint()..color = middleTrackColorTween.evaluate(enableAnimation)!;
-      final Rect middleTrackSegment = Rect.fromLTRB(
+    if (showSecondaryTrack) {
+      final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
+      final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+      final Rect secondaryTrackSegment = Rect.fromLTRB(
         (textDirection == TextDirection.ltr) ? thumbCenter.dx : secondaryOffset.dx,
         trackRect.top,
         (textDirection == TextDirection.ltr) ? secondaryOffset.dx : thumbCenter.dx,
         trackRect.bottom,
       );
-      if (!middleTrackSegment.isEmpty) {
-        context.canvas.drawRect(middleTrackSegment, middleTrackPaint);
+      if (!secondaryTrackSegment.isEmpty) {
+        context.canvas.drawRect(secondaryTrackSegment, secondaryTrackPaint);
       }
     }
   }
@@ -1763,14 +1763,14 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       rightTrackPaint,
     );
 
-    final bool showMiddleTrack = (secondaryOffset != null) &&
+    final bool showSecondaryTrack = (secondaryOffset != null) &&
         ((textDirection == TextDirection.ltr)
             ? (secondaryOffset.dx > thumbCenter.dx)
             : (secondaryOffset.dx < thumbCenter.dx));
 
-    if (showMiddleTrack) {
-      final ColorTween middleTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
-      final Paint middleTrackPaint = Paint()..color = middleTrackColorTween.evaluate(enableAnimation)!;
+    if (showSecondaryTrack) {
+      final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
+      final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
       if (textDirection == TextDirection.ltr) {
         context.canvas.drawRRect(
           RRect.fromLTRBAndCorners(
@@ -1781,7 +1781,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
             topRight: trackRadius,
             bottomRight: trackRadius,
           ),
-          middleTrackPaint,
+          secondaryTrackPaint,
         );
       } else {
         context.canvas.drawRRect(
@@ -1793,7 +1793,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
             topLeft: trackRadius,
             bottomLeft: trackRadius,
           ),
-          middleTrackPaint,
+          secondaryTrackPaint,
         );
       }
     }

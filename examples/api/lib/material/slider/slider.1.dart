@@ -43,7 +43,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       children: <Widget>[
         Slider(
           value: _currentSliderPrimaryValue,
-          secondaryValue: _currentSliderSecondaryValue,
+          secondaryTrackValue: _currentSliderSecondaryValue,
           label: _currentSliderPrimaryValue.round().toString(),
           onChanged: (double value) {
             setState(() {
