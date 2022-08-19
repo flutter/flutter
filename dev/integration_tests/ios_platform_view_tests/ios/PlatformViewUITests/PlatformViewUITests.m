@@ -23,11 +23,23 @@ static const CGFloat kStandardTimeOut = 60.0;
 @implementation PlatformViewUITests
 
 - (void)setUp {
+  [super setup];
   self.continueAfterFailure = NO;
 
   self.app = [[XCUIApplication alloc] init];
   [self.app launch];
 }
+
+- (void)tearDown {
+  // This is trying to fix a "failed to terminate" failure, which is likely a bug in Xcode.
+  // In theory the terminate call is not necessary, but many has encountered this similar
+  // issue, and fixed it by terminating the app and relaunching it if needed for each test.
+  // Here we simply try terminating the app in tearDown, but if it does not work,
+  // then alternative solution is to terminate and relaunch the app.
+  [self.app terminate];
+  [super tearDown];
+}
+
 - (void)testPlatformViewFocus {
   XCUIElement *entranceButton = self.app.buttons[@"platform view focus test"];
   XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut], @"The element tree is %@", self.app.debugDescription);

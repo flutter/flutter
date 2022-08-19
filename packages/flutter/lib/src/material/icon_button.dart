@@ -23,6 +23,9 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 // Minimum logical pixel size of the IconButton.
 // See: <https://material.io/design/usability/accessibility.html#layout-typography>.
 const double _kMinButtonSize = kMinInteractiveDimension;
@@ -61,16 +64,27 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// When creating an icon button with an [Icon], do not override the
 /// icon's size with its [Icon.size] parameter, use the icon button's
-/// [iconSize] parameter instead.  For example do this:
+/// [iconSize] parameter instead. For example do this:
 ///
 /// ```dart
-/// IconButton(iconSize: 72, icon: Icon(Icons.favorite), ...)
+/// IconButton(
+///   iconSize: 72,
+///   icon: const Icon(Icons.favorite),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// Avoid doing this:
 ///
 /// ```dart
-/// IconButton(icon: Icon(Icons.favorite, size: 72), ...)
+/// IconButton(
+///   icon: const Icon(Icons.favorite, size: 72),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// If you do, the button's size will be based on the default icon
@@ -117,6 +131,11 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// which is closer to the [IconButton]. Each [IconButton]'s property is resolved by the order of
 /// precedence: widget property, [IconButtonTheme] property, [IconTheme] property and
 /// internal default property value.
+///
+/// In Material Design 3, the [IconButton.visualDensity] defaults to [VisualDensity.standard]
+/// for all platforms because the button will have a rounded rectangle shape if
+/// the [IconButton.visualDensity] is set to [VisualDensity.compact]. Users can
+/// customize it by using [IconButtonTheme], [IconButton.style] or [IconButton.visualDensity].
 ///
 /// {@tool dartpad}
 /// This sample shows creation of [IconButton] widgets for standard, filled,
@@ -204,6 +223,9 @@ class IconButton extends StatelessWidget {
   ///
   /// {@macro flutter.material.themedata.visualDensity}
   ///
+  /// This property can be null. If null, it defaults to [VisualDensity.standard]
+  /// in Material Design 3 to make sure the button will be circular on all platforms.
+  ///
   /// See also:
   ///
   ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
@@ -257,6 +279,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   focusColor: Colors.orange.withOpacity(0.3),
+  ///   icon: const Icon(Icons.sunny),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   ///
@@ -273,6 +299,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   hoverColor: Colors.orange.withOpacity(0.3),
+  ///   icon: const Icon(Icons.ac_unit),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   ///
@@ -287,8 +317,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   color: Colors.blue,
-  ///   onPressed: _handleTap,
-  ///   icon: Icon(Icons.widgets),
+  ///   icon: const Icon(Icons.sunny_snowing),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   final Color? color;
@@ -320,6 +352,10 @@ class IconButton extends StatelessWidget {
   /// ```dart
   /// IconButton(
   ///   highlightColor: Colors.orange.withOpacity(0.3),
+  ///   icon: const Icon(Icons.question_mark),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
   /// )
   /// ```
   ///
@@ -459,8 +495,12 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
+  ///   icon: const Icon(Icons.pets),
   ///   style: IconButton.styleFrom(foregroundColor: Colors.green),
-  /// )
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  /// ),
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,
@@ -779,7 +819,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `mouseCursor`
   ///   * disabled - SystemMouseCursors.basic
   ///   * others - SystemMouseCursors.click
-  /// * `visualDensity` - theme.visualDensity
+  /// * `visualDensity` - VisualDensity.standard
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
@@ -1021,7 +1061,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+  VisualDensity? get visualDensity => VisualDensity.standard;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;

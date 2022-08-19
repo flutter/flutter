@@ -130,7 +130,11 @@ class ElevatedButton extends ButtonStyleButton {
   /// ```dart
   /// ElevatedButton(
   ///   style: ElevatedButton.styleFrom(foregroundColor: Colors.green),
-  /// )
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Jump'),
+  /// ),
   /// ```
   ///
   /// And to change the fill color:
@@ -138,7 +142,11 @@ class ElevatedButton extends ButtonStyleButton {
   /// ```dart
   /// ElevatedButton(
   ///   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-  /// )
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Meow'),
+  /// ),
   /// ```
   ///
   static ButtonStyle styleFrom({

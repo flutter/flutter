@@ -73,12 +73,12 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
     //  │  └ There's a million things I haven't done, but just you wait.
     //  └ Quit
     return PlatformMenuBar(
-      menus: <MenuItem>[
+      menus: <PlatformMenuItem>[
         PlatformMenu(
           label: 'Flutter API Sample',
-          menus: <MenuItem>[
+          menus: <PlatformMenuItem>[
             PlatformMenuItemGroup(
-              members: <MenuItem>[
+              members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: 'About',
                   onSelected: () {
@@ -88,7 +88,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
               ],
             ),
             PlatformMenuItemGroup(
-              members: <MenuItem>[
+              members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   onSelected: () {
                     _handleMenuSelection(MenuSelection.showMessage);
@@ -98,7 +98,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                 ),
                 PlatformMenu(
                   label: 'Messages',
-                  menus: <MenuItem>[
+                  menus: <PlatformMenuItem>[
                     PlatformMenuItem(
                       label: 'I am not throwing away my shot.',
                       shortcut: const SingleActivator(LogicalKeyboardKey.digit1, meta: true),

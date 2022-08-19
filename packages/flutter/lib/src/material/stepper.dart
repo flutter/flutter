@@ -641,7 +641,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         child: widget.steps[index].label!,
       );
     }
-    return const SizedBox();
+    return const SizedBox.shrink();
   }
 
   Widget _buildVerticalHeader(int index) {
