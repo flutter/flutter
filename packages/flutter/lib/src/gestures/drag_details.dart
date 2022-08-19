@@ -139,6 +139,7 @@ class DragUpdateDetails {
     this.delta = Offset.zero,
     this.primaryDelta,
     required this.globalPosition,
+    this.kind,
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
@@ -188,6 +189,9 @@ class DragUpdateDetails {
   ///  * [localPosition], which is the [globalPosition] transformed to the
   ///    coordinate space of the event receiver.
   final Offset globalPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
 
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer contacted the screen.
