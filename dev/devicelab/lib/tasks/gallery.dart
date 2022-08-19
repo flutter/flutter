@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:path/path.dart' as path;
+
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
@@ -213,6 +215,16 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
 
   @override
+  void copyArtifacts() {
+    if(applicationBinaryPath != null) {
+      copy(
+        file('${galleryDirectory.path}/build/app/outputs/flutter-apk/app-profile.apk'),
+        Directory(applicationBinaryPath!),
+      );
+    }
+  }
+
+  @override
   List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
     return <String>[
       'apk',
@@ -310,7 +322,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   @override
   String getApplicationBinaryPath() {
     if (applicationBinaryPath != null) {
-      return applicationBinaryPath!;
+      return '${applicationBinaryPath!}/app-profile.apk';
     }
 
     return 'build/app/outputs/flutter-apk/app-profile.apk';
