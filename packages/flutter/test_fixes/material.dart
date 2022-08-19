@@ -593,7 +593,7 @@ void main() {
   themeData = themeData.copyWith(selectedRowColor: Brightness.dark);
   themeData.selectedRowColor; // Removing field reference not supported.
 
-  // Changes made in TBD
+  // Changes made in https://github.com/flutter/flutter/pull/109817
   var TextTheme textTheme = TextTheme(
     headline1: headline1Style,
     headline2: headline2Style,
@@ -611,7 +611,7 @@ void main() {
   );
   var TextTheme textTheme = TextTheme(error: '');
 
-  // Changes made in TBD
+  // Changes made in https://github.com/flutter/flutter/pull/109817
   var TextTheme copiedTextTheme = TextTheme.copyWith(
     headline1: headline1Style,
     headline2: headline2Style,
@@ -629,7 +629,7 @@ void main() {
   );
   var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
 
-  // Changes made in TBD
+  // Changes made in https://github.com/flutter/flutter/pull/109817
   var style;
   style = textTheme.headline1;
   style = textTheme.headline2;

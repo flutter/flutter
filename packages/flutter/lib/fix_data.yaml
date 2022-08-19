@@ -17,7 +17,7 @@
 
 version: 1
 transforms:
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'displayLarge'"
     date: 2022-08-18
     element:
@@ -28,7 +28,7 @@ transforms:
       - kind: 'rename'
         newName: 'displayLarge'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'displayMedium'"
     date: 2022-08-18
     element:
@@ -39,7 +39,7 @@ transforms:
       - kind: 'rename'
         newName: 'displayMedium'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'displaySmall'"
     date: 2022-08-18
     element:
@@ -50,7 +50,7 @@ transforms:
       - kind: 'rename'
         newName: 'displaySmall'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'headlineMedium'"
     date: 2022-08-18
     element:
@@ -61,7 +61,7 @@ transforms:
       - kind: 'rename'
         newName: 'headlineMedium'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'headlineSmall'"
     date: 2022-08-18
     element:
@@ -72,7 +72,7 @@ transforms:
       - kind: 'rename'
         newName: 'headlineSmall'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'titleLarge'"
     date: 2022-08-18
     element:
@@ -83,7 +83,7 @@ transforms:
       - kind: 'rename'
         newName: 'titleLarge'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'titleMedium'"
     date: 2022-08-18
     element:
@@ -94,7 +94,7 @@ transforms:
       - kind: 'rename'
         newName: 'titleMedium'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'titleSmall'"
     date: 2022-08-18
     element:
@@ -105,7 +105,7 @@ transforms:
       - kind: 'rename'
         newName: 'titleSmall'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'bodyLarge'"
     date: 2022-08-18
     element:
@@ -116,7 +116,7 @@ transforms:
       - kind: 'rename'
         newName: 'bodyLarge'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'bodyMedium'"
     date: 2022-08-18
     element:
@@ -127,7 +127,7 @@ transforms:
       - kind: 'rename'
         newName: 'bodyMedium'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'bodySmall'"
     date: 2022-08-18
     element:
@@ -138,7 +138,7 @@ transforms:
       - kind: 'rename'
         newName: 'bodySmall'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'labelLarge'"
     date: 2022-08-18
     element:
@@ -149,7 +149,7 @@ transforms:
       - kind: 'rename'
         newName: 'labelLarge'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: "Rename to 'labelSmall'"
     date: 2022-08-18
     element:
@@ -160,7 +160,7 @@ transforms:
       - kind: 'rename'
         newName: 'labelSmall'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: 'Rename arguments'
     date: 2022-08-18
     element:
@@ -208,7 +208,7 @@ transforms:
         oldName: 'overline'
         newName: 'labelSmall'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/109817
   - title: 'Rename arguments'
     date: 2022-08-18
     element:
