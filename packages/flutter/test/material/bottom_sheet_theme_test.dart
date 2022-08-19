@@ -51,7 +51,7 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xffffffff)',
       'elevation: 2.0',
-      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'clipBehavior: Clip.antiAlias',
       'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
     ]);
