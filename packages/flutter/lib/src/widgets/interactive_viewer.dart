@@ -21,9 +21,6 @@ import 'ticker_provider.dart';
 // late TransformationController _transformationController;
 // Widget child = const Placeholder();
 
-/// Default coefficient of friction.
-const double _kDefaultInteractionEndFrictionCoefficient = 0.0000135;
-
 /// A signature for widget builders that take a [Quad] of the current viewport.
 ///
 /// See also:
@@ -77,7 +74,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.interactionEndFrictionCoefficient = _kDefaultInteractionEndFrictionCoefficient,
+    this.interactionEndFrictionCoefficient = 0.0000135,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
@@ -125,7 +122,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.interactionEndFrictionCoefficient = _kDefaultInteractionEndFrictionCoefficient,
+    this.interactionEndFrictionCoefficient = 0.0000135,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
@@ -308,7 +305,7 @@ class InteractiveViewer extends StatefulWidget {
   /// Used as the coefficient of friction in the inertial translation animation.
   /// This value was eyeballed to give a feel similar to Google Photos.
   ///
-  /// Defaults to [_kDefaultInteractionEndFrictionCoefficient].
+  /// Defaults to 0.0000135.
   ///
   /// Cannot be null, and must be a finite number greater than zero.
   final double interactionEndFrictionCoefficient;
