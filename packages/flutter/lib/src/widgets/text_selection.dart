@@ -2905,7 +2905,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             ..onUpdate = _handleDragUpdate
             ..onEnd = _handleDragEnd
             ..onTapUp = _handleTapUp
-            ..onCancel = _handleTapCancel;
+            ..onTapCancel = _handleTapCancel;
         },
       );
     }
