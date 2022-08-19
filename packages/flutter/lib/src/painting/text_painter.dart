@@ -810,7 +810,7 @@ class TextPainter {
   // of the character upstream from the given string offset.
   Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
     final int plainTextLength = plainText.length;
-    if (plainTextLength == 0) {
+    if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
     }
     final int prevCodeUnit = plainText.codeUnitAt(max(0, offset - 1));
@@ -862,7 +862,7 @@ class TextPainter {
   // of the character downstream from the given string offset.
   Rect? _getRectFromDownstream(int offset, Rect caretPrototype) {
     final int plainTextLength = plainText.length;
-    if (plainTextLength == 0) {
+    if (plainTextLength == 0 || offset < 0) {
       return null;
     }
     // We cap the offset at the final index of plain text.
