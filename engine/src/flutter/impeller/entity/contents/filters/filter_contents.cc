@@ -20,6 +20,7 @@
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/filters/linear_to_srgb_filter_contents.h"
+#include "impeller/entity/contents/filters/srgb_to_linear_filter_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
@@ -126,6 +127,13 @@ std::shared_ptr<FilterContents> FilterContents::MakeColorMatrix(
 std::shared_ptr<FilterContents> FilterContents::MakeLinearToSrgbFilter(
     FilterInput::Ref input) {
   auto filter = std::make_shared<LinearToSrgbFilterContents>();
+  filter->SetInputs({input});
+  return filter;
+}
+
+std::shared_ptr<FilterContents> FilterContents::MakeSrgbToLinearFilter(
+    FilterInput::Ref input) {
+  auto filter = std::make_shared<SrgbToLinearFilterContents>();
   filter->SetInputs({input});
   return filter;
 }
