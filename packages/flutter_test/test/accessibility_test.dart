@@ -55,7 +55,11 @@ void main() {
                 style: TextStyle(fontSize: 14.0, color: Colors.white),
               ),
               Text(
-                'this is a black text',
+                'this is a black text test1',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              Text(
+                'this is a black text test2',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
               ),
             ],
