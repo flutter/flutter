@@ -23,7 +23,10 @@ public class LocalizationPlugin {
   @NonNull private final LocalizationChannel localizationChannel;
   @NonNull private final Context context;
 
-  @SuppressLint("AppBundleLocaleChanges") // This is optionally turned on by apps.
+  @SuppressLint({
+    "AppBundleLocaleChanges",
+    "DiscouragedApi"
+  }) // This is optionally turned on by apps.
   @VisibleForTesting
   final LocalizationChannel.LocalizationMessageHandler localizationMessageHandler =
       new LocalizationChannel.LocalizationMessageHandler() {
