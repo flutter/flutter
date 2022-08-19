@@ -1,6 +1,6 @@
-platforms;android-32:platforms
+platforms;android-33:platforms
 cmdline-tools;latest:cmdline-tools
-build-tools;33.0.0-rc4:build-tools
+build-tools;33.0.0:build-tools
 platform-tools:platform-tools
 tools:tools
-ndk-bundle:ndk-bundle
+ndk;22.1.7171670:ndk
