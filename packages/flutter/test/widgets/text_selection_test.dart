@@ -32,9 +32,9 @@ void main() {
   void handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
   void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
+  void handleDragSelectionStart(DragStartDetails details, int consecutiveTapCount) { dragStartCount++; }
   void handleDragSelectionUpdate(DragUpdateDetails details, int consecutiveTapCount) { dragUpdateCount++; }
-  void handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
+  void handleDragSelectionEnd(DragEndDetails details, int consecutiveTapCount) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
