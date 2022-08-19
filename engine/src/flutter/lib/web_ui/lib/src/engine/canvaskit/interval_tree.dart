@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'font_fallbacks.dart' show CodeunitRange;
+import 'noto_font.dart' show CodeunitRange;
 
 /// A tree which stores a set of intervals that can be queried for intersection.
 class IntervalTree<T> {

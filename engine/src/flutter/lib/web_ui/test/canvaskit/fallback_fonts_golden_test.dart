@@ -28,10 +28,20 @@ void testMain() {
     ui.PlatformMessageCallback? savedCallback;
 
     setUp(() {
+      FontFallbackData.debugReset();
       notoDownloadQueue.downloader = TestDownloader();
       TestDownloader.mockDownloads.clear();
+      final String notoSansArabicUrl = fallbackFonts
+          .singleWhere((NotoFont font) => font.name == 'Noto Sans Arabic')
+          .url;
+      final String notoEmojiUrl = fallbackFonts
+          .singleWhere((NotoFont font) => font.name == 'Noto Emoji')
+          .url;
+      TestDownloader.mockDownloads[notoSansArabicUrl] =
+          '/assets/fonts/NotoNaskhArabic-Regular.ttf';
+      TestDownloader.mockDownloads[notoEmojiUrl] =
+          '/assets/fonts/NotoColorEmoji.ttf';
       savedCallback = ui.window.onPlatformMessage;
-      FontFallbackData.debugReset();
     });
 
     tearDown(() {
@@ -42,20 +52,7 @@ void testMain() {
       expect(FontFallbackData.instance.globalFontFallbacks, contains('Roboto'));
     });
 
-    test('will download Noto Naskh Arabic if Arabic text is added', () async {
-      TestDownloader.mockDownloads[
-              'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic+UI'] =
-          '''
-/* arabic */
-@font-face {
-  font-family: 'Noto Naskh Arabic UI';
-  font-style: normal;
-  font-weight: 400;
-  src: url(/assets/fonts/NotoNaskhArabic-Regular.ttf) format('ttf');
-  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC;
-}
-''';
-
+    test('will download Noto Sans Arabic if Arabic text is added', () async {
       expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
@@ -70,7 +67,7 @@ void testMain() {
       await notoDownloadQueue.debugWhenIdle();
 
       expect(FontFallbackData.instance.globalFontFallbacks,
-          contains('Noto Naskh Arabic UI 0'));
+          contains('Noto Sans Arabic'));
 
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
@@ -96,28 +93,6 @@ void testMain() {
 
     test('will put the Noto Emoji font before other fallback fonts in the list',
         () async {
-      TestDownloader.mockDownloads[
-              'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji+Compat'] =
-          '''
-@font-face {
-  font-family: 'Noto Color Emoji';
-  src: url(/assets/fonts/NotoColorEmoji.ttf) format('ttf');
-}
-''';
-
-      TestDownloader.mockDownloads[
-              'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic+UI'] =
-          '''
-/* arabic */
-@font-face {
-  font-family: 'Noto Naskh Arabic UI';
-  font-style: normal;
-  font-weight: 400;
-  src: url(/assets/fonts/NotoNaskhArabic-Regular.ttf) format('ttf');
-  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC;
-}
-''';
-
       expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
@@ -132,7 +107,7 @@ void testMain() {
       await notoDownloadQueue.debugWhenIdle();
 
       expect(FontFallbackData.instance.globalFontFallbacks,
-          <String>['Roboto', 'Noto Naskh Arabic UI 0']);
+          <String>['Roboto', 'Noto Sans Arabic']);
 
       pb = CkParagraphBuilder(
         CkParagraphStyle(),
@@ -149,22 +124,13 @@ void testMain() {
 
       expect(FontFallbackData.instance.globalFontFallbacks, <String>[
         'Roboto',
-        'Noto Color Emoji Compat 0',
-        'Noto Naskh Arabic UI 0',
+        'Noto Emoji',
+        'Noto Sans Arabic',
       ]);
     });
 
     test('will download Noto Emojis and Noto Symbols if no matching Noto Font',
         () async {
-      TestDownloader.mockDownloads[
-              'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji+Compat'] =
-          '''
-@font-face {
-  font-family: 'Noto Color Emoji';
-  src: url(/assets/fonts/NotoColorEmoji.ttf) format('ttf');
-}
-''';
-
       expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
@@ -179,7 +145,7 @@ void testMain() {
       await notoDownloadQueue.debugWhenIdle();
 
       expect(FontFallbackData.instance.globalFontFallbacks,
-          contains('Noto Color Emoji Compat 0'));
+          contains('Noto Emoji'));
 
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
@@ -203,30 +169,6 @@ void testMain() {
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isSafari || isFirefox);
 
-    test('will gracefully fail if we cannot parse the Google Fonts CSS',
-        () async {
-      TestDownloader.mockDownloads[
-              'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic+UI'] =
-          'invalid CSS... this should cause our parser to fail';
-
-      expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
-
-      // Creating this paragraph should cause us to start to download the
-      // fallback font.
-      final CkParagraphBuilder pb = CkParagraphBuilder(
-        CkParagraphStyle(),
-      );
-      pb.addText('مرحبا');
-
-      // Flush microtasks and test that we didn't start any downloads.
-      EnginePlatformDispatcher.instance.rasterizer!
-          .debugRunPostFrameCallbacks();
-      await Future<void>.delayed(Duration.zero);
-
-      expect(notoDownloadQueue.isPending, isFalse);
-      expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
-    });
-
     // Regression test for https://github.com/flutter/flutter/issues/75836
     // When we had this bug our font fallback resolution logic would end up in an
     // infinite loop and this test would freeze and time out.
@@ -241,16 +183,12 @@ void testMain() {
       CkParagraphBuilder(CkParagraphStyle()).addText('ヽಠ');
       EnginePlatformDispatcher.instance.rasterizer!
           .debugRunPostFrameCallbacks();
-      await notoDownloadQueue.downloader.debugWhenIdle();
+      await notoDownloadQueue.debugWhenIdle();
       expect(
         loggingDownloader.log,
         <String>[
-          'https://fonts.googleapis.com/css2?family=Noto+Sans+SC',
-          'https://fonts.googleapis.com/css2?family=Noto+Sans+JP',
-          'https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada+UI',
           'Noto Sans SC',
-          'Noto Sans JP',
-          'Noto Sans Kannada UI',
+          'Noto Sans Kannada',
         ],
       );
 
@@ -259,7 +197,7 @@ void testMain() {
       CkParagraphBuilder(CkParagraphStyle()).addText('ヽಠ');
       EnginePlatformDispatcher.instance.rasterizer!
           .debugRunPostFrameCallbacks();
-      await notoDownloadQueue.downloader.debugWhenIdle();
+      await notoDownloadQueue.debugWhenIdle();
       expect(loggingDownloader.log, isEmpty);
     });
 
@@ -276,7 +214,7 @@ void testMain() {
           FontFallbackData.instance.notoTree;
       for (final NotoFont font in notoTree.root.enumerateAllElements()) {
         testedFonts.add(font.name);
-        for (final CodeunitRange range in font.approximateUnicodeRanges) {
+        for (final CodeunitRange range in font.computeUnicodeRanges()) {
           for (int codeUnit = range.start;
               codeUnit < range.end;
               codeUnit += 1) {
@@ -291,30 +229,146 @@ void testMain() {
           testedFonts,
           unorderedEquals(<String>{
             'Noto Sans',
-            'Noto Sans Malayalam UI',
+            'Noto Emoji',
+            'Noto Sans Symbols',
+            'Noto Sans Symbols 2',
+            'Noto Sans Adlam',
+            'Noto Sans Anatolian Hieroglyphs',
+            'Noto Sans Arabic',
             'Noto Sans Armenian',
-            'Noto Sans Georgian',
-            'Noto Sans Hebrew',
-            'Noto Naskh Arabic UI',
-            'Noto Sans Devanagari UI',
-            'Noto Sans Telugu UI',
-            'Noto Sans Tamil UI',
-            'Noto Sans Kannada UI',
-            'Noto Sans Sinhala',
-            'Noto Sans Gurmukhi UI',
-            'Noto Sans Gujarati UI',
-            'Noto Sans Bengali UI',
-            'Noto Sans Thai UI',
-            'Noto Sans Lao UI',
-            'Noto Sans Myanmar UI',
-            'Noto Sans Ethiopic',
-            'Noto Sans Khmer UI',
-            'Noto Sans SC',
-            'Noto Sans JP',
-            'Noto Sans TC',
-            'Noto Sans HK',
-            'Noto Sans KR',
+            'Noto Sans Avestan',
+            'Noto Sans Balinese',
+            'Noto Sans Bamum',
+            'Noto Sans Bassa Vah',
+            'Noto Sans Batak',
+            'Noto Sans Bengali',
+            'Noto Sans Bhaiksuki',
+            'Noto Sans Brahmi',
+            'Noto Sans Buginese',
+            'Noto Sans Buhid',
+            'Noto Sans Canadian Aboriginal',
+            'Noto Sans Carian',
+            'Noto Sans Caucasian Albanian',
+            'Noto Sans Chakma',
+            'Noto Sans Cham',
+            'Noto Sans Cherokee',
+            'Noto Sans Coptic',
+            'Noto Sans Cuneiform',
+            'Noto Sans Cypriot',
+            'Noto Sans Deseret',
+            'Noto Sans Devanagari',
+            'Noto Sans Duployan',
             'Noto Sans Egyptian Hieroglyphs',
+            'Noto Sans Elbasan',
+            'Noto Sans Elymaic',
+            'Noto Sans Georgian',
+            'Noto Sans Glagolitic',
+            'Noto Sans Gothic',
+            'Noto Sans Grantha',
+            'Noto Sans Gujarati',
+            'Noto Sans Gunjala Gondi',
+            'Noto Sans Gurmukhi',
+            'Noto Sans HK',
+            'Noto Sans Hanunoo',
+            'Noto Sans Hatran',
+            'Noto Sans Hebrew',
+            'Noto Sans Imperial Aramaic',
+            'Noto Sans Indic Siyaq Numbers',
+            'Noto Sans Inscriptional Pahlavi',
+            'Noto Sans Inscriptional Parthian',
+            'Noto Sans JP',
+            'Noto Sans Javanese',
+            'Noto Sans KR',
+            'Noto Sans Kaithi',
+            'Noto Sans Kannada',
+            'Noto Sans Kayah Li',
+            'Noto Sans Kharoshthi',
+            'Noto Sans Khmer',
+            'Noto Sans Khojki',
+            'Noto Sans Khudawadi',
+            'Noto Sans Lao',
+            'Noto Sans Lepcha',
+            'Noto Sans Limbu',
+            'Noto Sans Linear A',
+            'Noto Sans Linear B',
+            'Noto Sans Lisu',
+            'Noto Sans Lycian',
+            'Noto Sans Lydian',
+            'Noto Sans Mahajani',
+            'Noto Sans Malayalam',
+            'Noto Sans Mandaic',
+            'Noto Sans Manichaean',
+            'Noto Sans Marchen',
+            'Noto Sans Masaram Gondi',
+            'Noto Sans Math',
+            'Noto Sans Mayan Numerals',
+            'Noto Sans Medefaidrin',
+            'Noto Sans Meetei Mayek',
+            'Noto Sans Meroitic',
+            'Noto Sans Miao',
+            'Noto Sans Modi',
+            'Noto Sans Mongolian',
+            'Noto Sans Mro',
+            'Noto Sans Multani',
+            'Noto Sans Myanmar',
+            'Noto Sans N Ko',
+            'Noto Sans Nabataean',
+            'Noto Sans New Tai Lue',
+            'Noto Sans Newa',
+            'Noto Sans Nushu',
+            'Noto Sans Ogham',
+            'Noto Sans Ol Chiki',
+            'Noto Sans Old Hungarian',
+            'Noto Sans Old Italic',
+            'Noto Sans Old North Arabian',
+            'Noto Sans Old Permic',
+            'Noto Sans Old Persian',
+            'Noto Sans Old Sogdian',
+            'Noto Sans Old South Arabian',
+            'Noto Sans Old Turkic',
+            'Noto Sans Oriya',
+            'Noto Sans Osage',
+            'Noto Sans Osmanya',
+            'Noto Sans Pahawh Hmong',
+            'Noto Sans Palmyrene',
+            'Noto Sans Pau Cin Hau',
+            'Noto Sans Phags Pa',
+            'Noto Sans Phoenician',
+            'Noto Sans Psalter Pahlavi',
+            'Noto Sans Rejang',
+            'Noto Sans Runic',
+            'Noto Sans SC',
+            'Noto Sans Saurashtra',
+            'Noto Sans Sharada',
+            'Noto Sans Shavian',
+            'Noto Sans Siddham',
+            'Noto Sans Sinhala',
+            'Noto Sans Sogdian',
+            'Noto Sans Sora Sompeng',
+            'Noto Sans Soyombo',
+            'Noto Sans Sundanese',
+            'Noto Sans Syloti Nagri',
+            'Noto Sans Syriac',
+            'Noto Sans TC',
+            'Noto Sans Tagalog',
+            'Noto Sans Tagbanwa',
+            'Noto Sans Tai Le',
+            'Noto Sans Tai Tham',
+            'Noto Sans Tai Viet',
+            'Noto Sans Takri',
+            'Noto Sans Tamil',
+            'Noto Sans Tamil Supplement',
+            'Noto Sans Telugu',
+            'Noto Sans Thaana',
+            'Noto Sans Thai',
+            'Noto Sans Tifinagh',
+            'Noto Sans Tirhuta',
+            'Noto Sans Ugaritic',
+            'Noto Sans Vai',
+            'Noto Sans Wancho',
+            'Noto Sans Warang Citi',
+            'Noto Sans Yi',
+            'Noto Sans Zanabazar Square',
           }));
 
       // Construct random paragraphs out of supported code units.
@@ -358,14 +412,32 @@ void testMain() {
 }
 
 class TestDownloader extends NotoDownloader {
+  // Where to redirect downloads to.
   static final Map<String, String> mockDownloads = <String, String>{};
   @override
   Future<String> downloadAsString(String url,
       {String? debugDescription}) async {
     if (mockDownloads.containsKey(url)) {
-      return mockDownloads[url]!;
+      url = mockDownloads[url]!;
+      final Uri uri = Uri.parse(url);
+      expect(uri.isScheme('http'), isFalse);
+      expect(uri.isScheme('https'), isFalse);
+      return super.downloadAsString(url);
     } else {
       return '';
+    }
+  }
+
+  @override
+  Future<ByteBuffer> downloadAsBytes(String url, {String? debugDescription}) {
+    if (mockDownloads.containsKey(url)) {
+      url = mockDownloads[url]!;
+      final Uri uri = Uri.parse(url);
+      expect(uri.isScheme('http'), isFalse);
+      expect(uri.isScheme('https'), isFalse);
+      return super.downloadAsBytes(url);
+    } else {
+      return Future<ByteBuffer>.value(Uint8List(0).buffer);
     }
   }
 }
