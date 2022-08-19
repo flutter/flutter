@@ -456,7 +456,7 @@ class SelectableText extends StatefulWidget {
         ),
       );
     }
-    return AdaptiveTextSelectionToolbar.adaptiveButtons(
+    return AdaptiveTextSelectionToolbar.editableText(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,

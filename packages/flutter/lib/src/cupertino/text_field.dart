@@ -800,7 +800,7 @@ class CupertinoTextField extends StatefulWidget {
         ),
       );
     }
-    return CupertinoAdaptiveTextSelectionToolbar.adaptiveButtons(
+    return CupertinoAdaptiveTextSelectionToolbar.editableText(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,

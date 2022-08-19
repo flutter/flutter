@@ -811,7 +811,7 @@ class TextField extends StatefulWidget {
         ),
       );
     }
-    return AdaptiveTextSelectionToolbar.adaptiveButtons(
+    return AdaptiveTextSelectionToolbar.editableText(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,

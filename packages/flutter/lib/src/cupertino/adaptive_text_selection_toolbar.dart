@@ -17,9 +17,9 @@ import 'text_selection_toolbar_buttons_builder.dart';
 /// platforms, not just MacOS. For a widget that builds the native-looking
 /// context menu for all platforms, see [AdaptiveTextSelectionToolbar].
 ///
-/// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.adaptiveButtons}
-/// To adaptively generate the default buttons for the current platform, use
-/// [CupertinoAdaptiveTextSelectionToolbar.adaptiveButtons].
+/// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.editableText}
+/// To adaptively generate the default buttons for [EditableText] for the
+/// current platform, use [CupertinoAdaptiveTextSelectionToolbar.editableText].
 /// {@endtemplate}
 ///
 /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.buttonItems}
@@ -56,11 +56,11 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
   /// To specify the [children] widgets directly, use the main constructor
-  /// [CupertinoAdaptiveTextSelectionToolbar.CupertinoAdaptiveTextSelectionToolbar].
+  /// [CupertinoAdaptiveTextSelectionToolbar.new].
   /// {@endtemplate}
   ///
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.buttonItems}
-  const CupertinoAdaptiveTextSelectionToolbar.adaptiveButtons({
+  const CupertinoAdaptiveTextSelectionToolbar.editableText({
     super.key,
     required this.editableTextState,
     required this.primaryAnchor,
@@ -76,7 +76,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
   ///
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.adaptiveButtons}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.editableText}
   const CupertinoAdaptiveTextSelectionToolbar.buttonItems({
     super.key,
     required this.buttonItems,
@@ -97,7 +97,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
   ///
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.adaptiveButtons}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor.editableText}
   final List<ContextMenuButtonItem>? buttonItems;
 
   /// Used to generate the default buttons for the platform in the case that
