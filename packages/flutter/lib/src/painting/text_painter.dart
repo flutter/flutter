@@ -289,7 +289,7 @@ class TextPainter {
   }
 
   /// Returns a plain text version of the text to paint.
-  /// 
+  ///
   /// This uses [InlineSpan.toPlainText] to get the full contents of all nodes in the tree.
   String get plainText {
     _cachedPlainText ??= _text!.toPlainText(includeSemanticsLabels: false);
