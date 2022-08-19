@@ -1,4 +1,4 @@
-Signature: e2dd8ad3815a2a9165a27e69b685fea3
+Signature: 54b226856cfe153ff14686940324e1fe
 
 UNUSED LICENSES:
 
@@ -1318,8 +1318,6 @@ FILE: ../../../third_party/skia/src/opts/BUILD.bazel
 FILE: ../../../third_party/skia/src/pathops/BUILD.bazel
 FILE: ../../../third_party/skia/src/pdf/BUILD.bazel
 FILE: ../../../third_party/skia/src/ports/BUILD.bazel
-FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
-FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
 FILE: ../../../third_party/skia/src/sfnt/BUILD.bazel
 FILE: ../../../third_party/skia/src/shaders/BUILD.bazel
 FILE: ../../../third_party/skia/src/shaders/gradients/BUILD.bazel
