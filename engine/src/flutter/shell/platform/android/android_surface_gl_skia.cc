@@ -167,6 +167,8 @@ GLFBOInfo AndroidSurfaceGLSkia::GLContextFBO(GLFrameInfo frame_info) const {
   // The default window bound framebuffer on Android.
   return GLFBOInfo{
       .fbo_id = 0,
+      .partial_repaint_enabled = onscreen_surface_->SupportsPartialRepaint(),
+      .existing_damage = onscreen_surface_->InitialDamage(),
   };
 }
 
