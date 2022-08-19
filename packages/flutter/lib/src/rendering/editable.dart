@@ -658,7 +658,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextRange line = _textPainter.getLineBoundary(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+      return TextSelection(baseOffset: 0, extentOffset: plainText.length);
     }
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
@@ -727,12 +727,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {
-      // The nextSelection is calculated based on _plainText, which can be out
+      // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
       // This is due to the render editable and editable text handle pointer
       // event separately. If the editable text changes the text during the
       // event handler, the render editable will use the outdated text stored in
-      // the _plainText when handling the pointer event.
+      // the plainText when handling the pointer event.
       //
       // If this happens, we need to make sure the new selection is still valid.
       final int textLength = textSelectionDelegate.textEditingValue.text.length;
@@ -774,15 +774,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textLayoutLastMinWidth = null;
   }
 
-  String? _cachedPlainText;
-  // Returns a plain text version of the text in the painter.
-  //
-  // Returns the obscured text when [obscureText] is true. See
-  // [obscureText] and [obscuringCharacter].
-  String get _plainText {
-    _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
-    return _cachedPlainText!;
-  }
+  /// Returns a plain text version of the text in the painter.
+  String get plainText => _textPainter.plainText;
 
   /// The text to display.
   InlineSpan? get text => _textPainter.text;
@@ -794,7 +787,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.text = value;
-    _cachedPlainText = null;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
     _extractPlaceholderSpans(value);
@@ -1293,7 +1285,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (_cachedAttributedValue == null) {
       if (obscureText) {
-        _cachedAttributedValue = AttributedString(obscuringCharacter * _plainText.length);
+        _cachedAttributedValue = AttributedString(obscuringCharacter * plainText.length);
       } else {
         final StringBuffer buffer = StringBuffer();
         int offset = 0;
@@ -1813,7 +1805,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     // Set the height based on the content.
     if (width == double.infinity) {
-      final String text = _plainText;
+      final String text = plainText;
       int lines = 1;
       for (int index = 0; index < text.length; index += 1) {
         // Count explicit line breaks.
@@ -2077,7 +2069,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+      return TextSelection(baseOffset: 0, extentOffset: plainText.length);
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
     // there is neither a previous word nor a next word.
@@ -2085,7 +2077,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
+    } else if (TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
