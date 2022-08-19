@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "flutter/common/graphics/texture.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache.h"
@@ -41,7 +42,10 @@ class LayerTree {
   void Paint(CompositorContext::ScopedFrame& frame,
              bool ignore_raster_cache = false) const;
 
-  sk_sp<DisplayList> Flatten(const SkRect& bounds);
+  sk_sp<DisplayList> Flatten(
+      const SkRect& bounds,
+      std::shared_ptr<TextureRegistry> texture_registry = nullptr,
+      GrDirectContext* gr_context = nullptr);
 
   Layer* root_layer() const { return root_layer_.get(); }
 
