@@ -125,6 +125,44 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itSetsAccessibleNavigation() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    when(mockManager.isTouchExplorationEnabled()).thenReturn(false);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+    ArgumentCaptor<AccessibilityManager.TouchExplorationStateChangeListener> listenerCaptor =
+        ArgumentCaptor.forClass(AccessibilityManager.TouchExplorationStateChangeListener.class);
+    verify(mockManager).addTouchExplorationStateChangeListener(listenerCaptor.capture());
+
+    assertEquals(accessibilityBridge.getAccessibleNavigation(), false);
+    verify(mockChannel).setAccessibilityFeatures(0);
+    reset(mockChannel);
+
+    // Simulate assistive technology accessing accessibility tree.
+    accessibilityBridge.createAccessibilityNodeInfo(0);
+    verify(mockChannel).setAccessibilityFeatures(1);
+    assertEquals(accessibilityBridge.getAccessibleNavigation(), true);
+
+    // Simulate turning off TalkBack.
+    reset(mockChannel);
+    listenerCaptor.getValue().onTouchExplorationStateChanged(false);
+    verify(mockChannel).setAccessibilityFeatures(0);
+    assertEquals(accessibilityBridge.getAccessibleNavigation(), false);
+  }
+
+  @Test
   public void itDoesNotContainADescriptionIfScopesRoute() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
