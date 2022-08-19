@@ -1,4 +1,4 @@
-Signature: 1848a5ce55d69934a9554b0e9dc098e3
+Signature: 2f94bdf454754437e7d871aa49d74179
 
 UNUSED LICENSES:
 
@@ -10674,8 +10674,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPa
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_win.expect
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/docs/lib/scenario-default.svg
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/docs/lib/scenario-full.svg
 FILE: ../../../third_party/dart/sdk/lib/_internal/allowed_experiments.json
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common.dart
@@ -10981,30 +10979,6 @@ FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/types.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/collections/closable_iterator.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/database.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/dylib_utils.dart
-FILE: ../../../third_party/dart/samples_2/ffi/coordinate.dart
-FILE: ../../../third_party/dart/samples_2/ffi/dylib_utils.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_isolate_shutdown_sample.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_sample.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/arena_zoned_sample.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/resource_management_test.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/unmanaged_sample.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_bitfield.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_data.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_dynamic_library.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_functions.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_functions_callbacks.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_functions_structs.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_structs.dart
-FILE: ../../../third_party/dart/samples_2/ffi/samples_test.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/example/main.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/sqlite.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/bindings/bindings.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/bindings/constants.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/bindings/signatures.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/bindings/types.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/collections/closable_iterator.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/database.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/rti.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/synced/recipe_syntax.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_dynamic_library_patch.dart
@@ -11128,7 +11102,6 @@ FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_android_arm.S
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
 FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_runtime_metrics.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/late_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
@@ -11304,10 +11277,6 @@ FILE: ../../../third_party/dart/samples/ffi/async/async_test.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_async_callback.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_native_port_call.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_callbacks_closures.dart
-FILE: ../../../third_party/dart/samples_2/ffi/async/async_test.dart
-FILE: ../../../third_party/dart/samples_2/ffi/async/sample_async_callback.dart
-FILE: ../../../third_party/dart/samples_2/ffi/async/sample_native_port_call.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sample_ffi_functions_callbacks_closures.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/embedder_config.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
@@ -11777,7 +11746,6 @@ FILE: ../../../third_party/dart/runtime/vm/zone.cc
 FILE: ../../../third_party/dart/runtime/vm/zone.h
 FILE: ../../../third_party/dart/runtime/vm/zone_test.cc
 FILE: ../../../third_party/dart/samples/samples.status
-FILE: ../../../third_party/dart/samples_2/samples_2.status
 FILE: ../../../third_party/dart/sdk/lib/_http/crypto.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/http_date.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart
