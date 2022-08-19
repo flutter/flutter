@@ -2,7 +2,7 @@
 <!-- WILL AUTOMATICALLY FIND ALL .java FILES AND INCLUDE THEM HERE       -->
 <project>
   <sdk dir="../../../third_party/android_tools/sdk" />
-  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-S">
+  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-T">
   <manifest file="../../../flutter/shell/platform/android/AndroidManifest.xml" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/util/KeyCodes.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/util/FakeKeyEvent.java" />
