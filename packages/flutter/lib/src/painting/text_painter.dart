@@ -259,10 +259,7 @@ class TextPainter {
   /// This and [textDirection] must be non-null before you call [layout].
   ///
   /// The [InlineSpan] this provides is in the form of a tree that may contain
-  /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plain text
-  /// representation of the contents of this [TextPainter], use [InlineSpan.toPlainText]
-  /// to get the full contents of all nodes in the tree. [TextSpan.text] will
-  /// only provide the contents of the first node in the tree.
+  /// multiple instances of [TextSpan]s and [WidgetSpan]s.
   InlineSpan? get text => _text;
   InlineSpan? _text;
   set text(InlineSpan? value) {
@@ -279,6 +276,7 @@ class TextPainter {
       : _text?.compareTo(value) ?? RenderComparison.layout;
 
     _text = value;
+    _cachedPlainText = null;
 
     if (comparison.index >= RenderComparison.layout.index) {
       markNeedsLayout();
@@ -289,6 +287,15 @@ class TextPainter {
     }
     // Neither relayout or repaint is needed.
   }
+
+  /// Returns a plain text version of the text to paint.
+  /// 
+  /// This uses [InlineSpan.toPlainText] to get the full contents of all nodes in the tree.
+  String get plainText {
+    _cachedPlainText ??= _text!.toPlainText(includeSemanticsLabels: false);
+    return _cachedPlainText!;
+  }
+  String? _cachedPlainText;
 
   /// How the text should be aligned horizontally.
   ///
@@ -802,11 +809,11 @@ class TextPainter {
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
   Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
-    final int? prevCodeUnit = _text!.codeUnitAt(max(0, offset - 1));
-    if (prevCodeUnit == null) {
+    final int plainTextLength = plainText.length;
+    if (plainTextLength == 0) {
       return null;
     }
+    final int prevCodeUnit = plainText.codeUnitAt(max(0, offset - 1));
 
     // If the upstream character is a newline, cursor is at start of next line
     const int NEWLINE_CODE_UNIT = 10;
@@ -854,12 +861,13 @@ class TextPainter {
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character downstream from the given string offset.
   Rect? _getRectFromDownstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
-    // We cap the offset at the final index of the _text.
-    final int? nextCodeUnit = _text!.codeUnitAt(min(offset, flattenedText.length - 1));
-    if (nextCodeUnit == null) {
+    final int plainTextLength = plainText.length;
+    if (plainTextLength == 0) {
       return null;
     }
+    // We cap the offset at the final index of the _text.
+    final int nextCodeUnit = plainText.codeUnitAt(min(offset, plainTextLength - 1));
+
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
     final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
@@ -876,7 +884,7 @@ class TextPainter {
         if (!needsSearch) {
           break; // Only perform one iteration if no search is required.
         }
-        if (nextRuneOffset >= flattenedText.length << 1) {
+        if (nextRuneOffset >= plainTextLength << 1) {
           break; // Stop iterating when beyond the max length of the text.
         }
         // Multiply by two to log(n) time cover the entire text span. This allows
