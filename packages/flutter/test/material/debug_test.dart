@@ -149,7 +149,6 @@ void main() {
       '     AnimatedBuilder\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
       '     Semantics\n'
-      '     Builder\n'
       '     _RenderTheatreMarker\n'
       '     _EffectiveTickerMode\n'
       '     TickerMode\n'

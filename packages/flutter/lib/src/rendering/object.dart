@@ -3861,7 +3861,6 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       final ParentDataType childParentData = child.parentData! as ParentDataType;
       child = childParentData.nextSibling;
     }
-
   }
 
   @override

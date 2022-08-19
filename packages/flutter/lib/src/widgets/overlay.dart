@@ -944,7 +944,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       child: _RenderTheatreMarker(
         theatre: theatre,
         overlayEntryWidgetState: this,
-        child: Builder(builder: widget.entry.builder),
+        child: widget.entry.builder(context),
       ),
     );
   }
@@ -1436,7 +1436,6 @@ mixin _RenderTheatreMixin on RenderBox {
     return false;
   }
 
-  // `theatre` must override this method to handle clipping.
   @override
   void paint(PaintingContext context, Offset offset) {
     RenderBox? child = _firstOnstageChild;
