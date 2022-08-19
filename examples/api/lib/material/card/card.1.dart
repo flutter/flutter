@@ -34,7 +34,7 @@ class MyStatelessWidget extends StatelessWidget {
       child: Card(
         // clipBehavior is necessary because, without it, the InkWell's animation
         // will extend beyond the rounded edges of the [Card] (see https://github.com/flutter/flutter/issues/109776)
-        // This introduces a small performance cost, and you should not set [clipBehavior]
+        // This comes with a small performance cost, and you should not set [clipBehavior]
         // unless you need it.
         clipBehavior: Clip.hardEdge,
         child: InkWell(
