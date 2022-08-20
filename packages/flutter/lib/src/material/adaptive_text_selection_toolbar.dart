@@ -93,7 +93,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar}
   ///
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.editableText}
   ///
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.constructor.buttonItems}
   ///
