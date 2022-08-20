@@ -1037,6 +1037,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
         .checkMockMessageHandler(
             SystemChannels.accessibility.name, _announcementHandler)) {
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
       _announcementHandler = null;
     }
     _announcements = null;

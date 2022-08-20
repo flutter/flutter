@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
@@ -819,6 +820,81 @@ void main() {
       expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
       expect(binding.inTest, true);
       binding.postTest();
+    });
+  });
+
+  group('Accessibility announcements testing API', () {
+    testWidgets('Returns last announcement', (WidgetTester tester) async {
+      await SemanticsService.announce('announcement 1', TextDirection.ltr);
+      await SemanticsService.announce('announcement 2', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+
+      final CapturedAccessibilityAnnouncement last = tester.getLastAnnouncement()!;
+      expect('announcement 2', equals(last.message));
+      expect(TextDirection.rtl, equals(last.textDirection));
+      expect(Assertiveness.assertive, equals(last.assertiveness));
+    });
+
+    testWidgets('Returns the list of announcements', (WidgetTester tester) async {
+      await SemanticsService.announce('announcement 1', TextDirection.ltr);
+      await SemanticsService.announce('announcement 2', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      await SemanticsService.announce('announcement 3', TextDirection.rtl);
+
+      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements()!;
+      expect(3, equals(list.length));
+      final CapturedAccessibilityAnnouncement first = list[0];
+      expect('announcement 1', equals(first.message));
+      expect(TextDirection.ltr, equals(first.textDirection));
+
+      final CapturedAccessibilityAnnouncement second = list[1];
+      expect('announcement 2', equals(second.message));
+      expect(TextDirection.rtl, equals(second.textDirection));
+      expect(Assertiveness.assertive, equals(second.assertiveness));
+
+      final CapturedAccessibilityAnnouncement third = list[2];
+      expect('announcement 3', equals(third.message));
+      expect(TextDirection.rtl, equals(third.textDirection));
+      expect(Assertiveness.polite, equals(third.assertiveness));
+
+      final List<CapturedAccessibilityAnnouncement>? emptyList = tester.takeAnnouncements();
+      expect(emptyList, isNull);
+    });
+
+    test('New test API is not breaking existing tests', () async {
+      final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
+
+      Future<dynamic> handleMessage(dynamic mockMessage) async {
+        final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+        log.add(message);
+      }
+
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, handleMessage);
+
+      await SemanticsService.announce('announcement 1', TextDirection.ltr);
+      await SemanticsService.announce('announcement 2', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      expect(
+          log,
+          equals(<Map<String, dynamic>>[
+            <String, dynamic>{
+              'type': 'announce',
+              'data': <String, dynamic>{
+                'message': 'announcement 1',
+                'textDirection': 1
+              }
+            },
+            <String, dynamic>{
+              'type': 'announce',
+              'data': <String, dynamic>{
+                'message': 'announcement 2',
+                'textDirection': 0,
+                'assertiveness': 1
+              }
+            },
+      ]));
     });
   });
 }
