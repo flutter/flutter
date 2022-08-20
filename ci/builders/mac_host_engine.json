@@ -36,7 +36,7 @@
             "ninja": {
                 "config": "host_debug",
                 "targets": [
-                    "flutter/build/archives:macos_flutter_framework",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/build/archives:flutter_web_sdk",
@@ -78,7 +78,7 @@
             "ninja": {
                 "config": "host_profile",
                 "targets": [
-                    "flutter/build/archives:macos_flutter_framework",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
                     "flutter:unittests"
@@ -133,7 +133,7 @@
             "ninja": {
                 "config": "host_release",
                 "targets": [
-                    "flutter/build/archives:macos_flutter_framework",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
                     "flutter/tools/font-subset"
