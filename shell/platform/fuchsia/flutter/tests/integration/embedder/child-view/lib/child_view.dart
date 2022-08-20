@@ -4,10 +4,10 @@
 
 import 'dart:ui';
 
-TestApp app;
-
 void main(List<String> args) {
-  app = TestApp();
+  print('child-view: starting');
+
+  TestApp app = TestApp();
   app.run();
 }
 
@@ -19,11 +19,15 @@ class TestApp {
 
   void run() {
     window.onPointerDataPacket = (PointerDataPacket packet) {
-      app.pointerDataPacket(packet);
+      this.pointerDataPacket(packet);
+    };
+    window.onMetricsChanged = () {
+      window.scheduleFrame();
     };
     window.onBeginFrame = (Duration duration) {
-      app.beginFrame(duration);
+      this.beginFrame(duration);
     };
+
     window.scheduleFrame();
   }
 
@@ -46,7 +50,7 @@ class TestApp {
 
   void pointerDataPacket(PointerDataPacket packet) {
     for (final data in packet.data) {
-      if (data.change == PointerChange.up) {
+      if (data.change == PointerChange.down) {
         this._backgroundColor = _yellow;
       }
     }
