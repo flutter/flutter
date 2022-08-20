@@ -6,16 +6,16 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// screen.
+// The minimum padding from all edges of the selection toolbar to all edges of
+// the screen.
 const double _kToolbarScreenPadding = 8.0;
 
-// These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
+// These values were measured from a screenshot of TextEdit on macOS 10.15.7 on
 // a Macbook Pro.
 const double _kToolbarWidth = 222.0;
 const Radius _kToolbarBorderRadius = Radius.circular(4.0);
 
-// These values were measured from a screenshot of TextEdit on MacOS 10.16 on a
+// These values were measured from a screenshot of TextEdit on macOS 10.16 on a
 // Macbook Pro.
 const CupertinoDynamicColor _kToolbarBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFBBBBBB),
@@ -26,24 +26,24 @@ const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.wit
   darkColor: Color(0xff302928),
 );
 
-/// A MacOS-style text selection toolbar.
+/// A macOS-style text selection toolbar.
 ///
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
 /// text.
 ///
 /// Tries to position itself as closely as possible to [anchor] while remaining
-/// fully on-screen.
+/// fully inside the viewport.
 ///
 /// See also:
 ///
 ///  * [CupertinoAdaptiveTextSelectionToolbar], where this is used to build the
 ///    toolbar for desktop platforms.
 ///  * [AdaptiveTextSelectionToolbar], where this is used to build the toolbar on
-///    MacOS.
+///    macOS.
 ///  * [DesktopTextSelectionToolbar], which is similar but builds a
 ///    Material-style desktop toolbar.
 class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
-  /// Creates an instance of CupertinoTextSelectionToolbar.
+  /// Creates a const instance of CupertinoTextSelectionToolbar.
   const CupertinoDesktopTextSelectionToolbar({
     super.key,
     required this.anchor,
@@ -57,7 +57,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   ///
   /// See also:
   ///   * [CupertinoDesktopTextSelectionToolbarButton], which builds a default
-  ///     MacOS-style text selection toolbar text button.
+  ///     macOS-style text selection toolbar text button.
   final List<Widget> children;
 
   // Builds a toolbar just like the default Mac toolbar, with the right color
@@ -74,7 +74,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          // This value was measured from a screenshot of TextEdit on MacOS
+          // This value was measured from a screenshot of TextEdit on macOS
           // 10.15.7 on a Macbook Pro.
           vertical: 3.0,
         ),

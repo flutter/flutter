@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'material.dart';
 import 'text_selection_toolbar.dart';
 
+// These values were measured from a screenshot of TextEdit on macOS 10.15.7 on
+// a Macbook Pro.
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarWidth = 222.0;
 
@@ -16,7 +18,7 @@ const double _kToolbarWidth = 222.0;
 /// text.
 ///
 /// Tries to position itself as closely as possible to [anchor] while remaining
-/// fully on-screen.
+/// fully inside the viewport.
 ///
 /// See also:
 ///
@@ -25,7 +27,7 @@ const double _kToolbarWidth = 222.0;
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.
 class DesktopTextSelectionToolbar extends StatelessWidget {
-  /// Creates an instance of _DesktopTextSelectionToolbar.
+  /// Creates a const instance of DesktopTextSelectionToolbar.
   const DesktopTextSelectionToolbar({
     super.key,
     required this.anchor,
@@ -33,8 +35,8 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
   }) : assert(children.length > 0);
 
   /// {@template flutter.material.DesktopTextSelectionToolbar.anchor}
-  /// The point at which the toolbar will attempt to position itself as closely
-  /// as possible.
+  /// The point where the toolbar will attempt to position itself as closely as
+  /// possible.
   /// {@endtemplate}
   final Offset anchor;
 

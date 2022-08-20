@@ -67,7 +67,8 @@ class SelectionArea extends StatefulWidget {
 
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   ///
-  /// If not provided, will build a default menu based on the platform.
+  /// If not provided, will build a default menu based on the ambient
+  /// [ThemeData.platform].
   ///
   /// {@tool dartpad}
   /// This example shows how to build a custom context menu for any selected

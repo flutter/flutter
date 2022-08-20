@@ -5,6 +5,11 @@
 import 'framework.dart';
 
 /// The buttons that can appear in a context menu by default.
+///
+/// See also:
+///
+///  * [ContextMenuButtonItem], which uses this enum to describe a button in a
+///    context menu.
 enum ContextMenuButtonType {
   /// A button that cuts the current text selection.
   cut,
@@ -31,7 +36,7 @@ enum ContextMenuButtonType {
 ///    the indicated buttons.
 @immutable
 class ContextMenuButtonItem {
-  /// Creates an instance of [ContextMenuButtonItem].
+  /// Creates a const instance of [ContextMenuButtonItem].
   const ContextMenuButtonItem({
     required this.onPressed,
     this.type = ContextMenuButtonType.custom,
