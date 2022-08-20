@@ -302,6 +302,53 @@ TEST(GeometryTest, MatrixMakePerspective) {
   }
 }
 
+TEST(GeometryTest, MatrixGetBasisVectors) {
+  {
+    auto m = Matrix();
+    Vector3 x = m.GetBasisX();
+    Vector3 y = m.GetBasisY();
+    Vector3 z = m.GetBasisZ();
+    ASSERT_VECTOR3_NEAR(x, Vector3(1, 0, 0));
+    ASSERT_VECTOR3_NEAR(y, Vector3(0, 1, 0));
+    ASSERT_VECTOR3_NEAR(z, Vector3(0, 0, 1));
+  }
+
+  {
+    auto m = Matrix::MakeRotationZ(Radians{kPiOver2}) *
+             Matrix::MakeRotationX(Radians{kPiOver2}) *
+             Matrix::MakeScale(Vector3(2, 3, 4));
+    Vector3 x = m.GetBasisX();
+    Vector3 y = m.GetBasisY();
+    Vector3 z = m.GetBasisZ();
+    ASSERT_VECTOR3_NEAR(x, Vector3(0, 2, 0));
+    ASSERT_VECTOR3_NEAR(y, Vector3(0, 0, 3));
+    ASSERT_VECTOR3_NEAR(z, Vector3(4, 0, 0));
+  }
+}
+
+TEST(GeometryTest, MatrixGetDirectionScale) {
+  {
+    auto m = Matrix();
+    Scalar result = m.GetDirectionScale(Vector3{1, 0, 0});
+    ASSERT_FLOAT_EQ(result, 1);
+  }
+
+  {
+    auto m = Matrix::MakeRotationX(Degrees{10}) *
+             Matrix::MakeRotationY(Degrees{83}) *
+             Matrix::MakeRotationZ(Degrees{172});
+    Scalar result = m.GetDirectionScale(Vector3{0, 1, 0});
+    ASSERT_FLOAT_EQ(result, 1);
+  }
+
+  {
+    auto m = Matrix::MakeRotationZ(Radians{kPiOver2}) *
+             Matrix::MakeScale(Vector3(3, 4, 5));
+    Scalar result = m.GetDirectionScale(Vector3{2, 0, 0});
+    ASSERT_FLOAT_EQ(result, 8);
+  }
+}
+
 TEST(GeometryTest, QuaternionLerp) {
   auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
   auto q2 = Quaternion{{0.0, 0.0, 1.0}, kPiOver4};
