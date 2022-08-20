@@ -63,7 +63,7 @@ class ContextMenuController {
   // at one time.
   static OverlayEntry? _menuOverlayEntry;
 
-  /// True if the menu is currently being displayed.
+  /// True if and only if the menu is currently being displayed.
   static bool get isShown => _menuOverlayEntry != null && _menuOverlayEntry!.mounted;
 
   /// Shows the given context menu at the location.
