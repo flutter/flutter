@@ -234,11 +234,11 @@ abstract class Route<T> {
   @mustCallSuper
   void didAdd() {
     if (navigator?.widget.requestFocus ?? false) {
-      // This TickerFuture serves two purposes. First, we want to make sure
-      // that animations triggered by other operations will finish before focusing the
-      // navigator. Second, navigator.focusScopeNode might acquire more focused
-      // children in Route.install asynchronously. This TickerFuture will wait for
-      // it to finish first.
+      // This TickerFuture serves two purposes. First, we want to make sure that
+      // animations triggered by other operations will finish before focusing
+      // the navigator. Second, navigator.focusNode might acquire more focused
+      // children in Route.install asynchronously. This TickerFuture will wait
+      // for it to finish first.
       //
       // The later case can be found when subclasses manage their own focus scopes.
       // For example, ModalRoute creates a focus scope in its overlay entries. The
