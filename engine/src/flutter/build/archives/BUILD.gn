@@ -246,12 +246,6 @@ if (is_mac) {
     deps = [ "//flutter/lib/snapshot:create_macos_gen_snapshots" ]
   }
 
-  group("macos_flutter_framework") {
-    deps = [
-      "//flutter/shell/platform/darwin/macos:macos_flutter_framework_archive",
-    ]
-  }
-
   zip_bundle("archive_gen_snapshot") {
     deps = [
       ":snapshot_entitlement_config",
