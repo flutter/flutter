@@ -11,6 +11,7 @@
 #include <sstream>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/path_utils.h"
@@ -224,8 +225,9 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
+  std::string executable_name = GetExecutableName();
+  std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
-  std::vector<const char*> argv = {"placeholder"};
   std::transform(
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
@@ -532,10 +534,9 @@ void FlutterWindowsEngine::SendSystemLocales() {
   // Convert the locale list to the locale pointer list that must be provided.
   std::vector<const FlutterLocale*> flutter_locale_list;
   flutter_locale_list.reserve(flutter_locales.size());
-  std::transform(
-      flutter_locales.begin(), flutter_locales.end(),
-      std::back_inserter(flutter_locale_list),
-      [](const auto& arg) -> const auto* { return &arg; });
+  std::transform(flutter_locales.begin(), flutter_locales.end(),
+                 std::back_inserter(flutter_locale_list),
+                 [](const auto& arg) -> const auto* { return &arg; });
   embedder_api_.UpdateLocales(engine_, flutter_locale_list.data(),
                               flutter_locale_list.size());
 }
@@ -590,6 +591,20 @@ gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeAccessibleFromId(
     return nullptr;
   }
   return node_delegate->GetNativeViewAccessible();
+}
+
+std::string FlutterWindowsEngine::GetExecutableName() const {
+  std::pair<bool, std::string> result = fml::paths::GetExecutablePath();
+  if (result.first) {
+    const std::string& executable_path = result.second;
+    size_t last_separator = executable_path.find_last_of("/\\");
+    if (last_separator == std::string::npos ||
+        last_separator == executable_path.size() - 1) {
+      return executable_path;
+    }
+    return executable_path.substr(last_separator + 1);
+  }
+  return "Flutter";
 }
 
 }  // namespace flutter

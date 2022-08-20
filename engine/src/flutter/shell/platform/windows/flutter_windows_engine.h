@@ -220,6 +220,9 @@ class FlutterWindowsEngine {
     root_isolate_create_callback_ = callback;
   }
 
+  // Returns the executable name for this process or "Flutter" if unknown.
+  std::string GetExecutableName() const;
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;

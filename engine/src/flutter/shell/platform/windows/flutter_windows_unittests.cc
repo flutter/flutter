@@ -118,6 +118,30 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithParameters) {
   EXPECT_TRUE(bool_value);
 }
 
+// Verify that Platform.executable returns the executable name.
+TEST_F(WindowsTest, PlatformExecutable) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("readPlatformExecutable");
+
+  std::string executable_name;
+  fml::AutoResetWaitableEvent latch;
+  auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+    auto handle = Dart_GetNativeArgument(args, 0);
+    ASSERT_FALSE(Dart_IsError(handle));
+    executable_name = tonic::DartConverter<std::string>::FromDart(handle);
+    latch.Signal();
+  });
+  context.AddNativeFunction("SignalStringValue", native_entry);
+
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  // Wait until signalStringValue has been called.
+  latch.Wait();
+  EXPECT_EQ(executable_name, "flutter_windows_unittests.exe");
+}
+
 // Verify that native functions that return values can be registered and
 // resolved.
 TEST_F(WindowsTest, VerifyNativeFunctionWithReturn) {

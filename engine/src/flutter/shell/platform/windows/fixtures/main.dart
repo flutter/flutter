@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
 import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
@@ -9,6 +10,9 @@ void signal() native 'Signal';
 
 // Signals a waiting latch in the native test, passing a boolean value.
 void signalBoolValue(bool value) native 'SignalBoolValue';
+
+// Signals a waiting latch in the native test, passing a string value.
+void signalStringValue(String value) native 'SignalStringValue';
 
 // Signals a waiting latch in the native test, which returns a value to the fixture.
 bool signalBoolReturn() native 'SignalBoolReturn';
@@ -37,6 +41,11 @@ void verifyNativeFunctionWithParameters() {
 void verifyNativeFunctionWithReturn() {
   bool value = signalBoolReturn();
   signalBoolValue(value);
+}
+
+@pragma('vm:entry-point')
+void readPlatformExecutable() {
+  signalStringValue(io.Platform.executable);
 }
 
 @pragma('vm:entry-point')

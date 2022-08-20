@@ -404,5 +404,10 @@ TEST(FlutterWindowsEngine, SetNextFrameCallback) {
   EXPECT_TRUE(called);
 }
 
+TEST(FlutterWindowsEngine, GetExecutableName) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EXPECT_EQ(engine->GetExecutableName(), "flutter_windows_unittests.exe");
+}
+
 }  // namespace testing
 }  // namespace flutter
