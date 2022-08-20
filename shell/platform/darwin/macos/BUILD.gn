@@ -325,8 +325,15 @@ if (build_glfw_shell) {
 }
 
 zip_bundle("zip_macos_flutter_framework") {
-  deps = [ ":_generate_symlinks" ]
-  output = "tmp/FlutterMacOS.framework.zip"
+  deps = [
+    ":_generate_symlinks",
+    ":macos_framework_without_entitlement_config",
+  ]
+  prefix = "$full_platform_name-$flutter_runtime_mode/"
+  if (flutter_runtime_mode == "debug") {
+    prefix = "$full_platform_name/"
+  }
+  output = "${prefix}FlutterMacOS.framework.zip"
   visibility = [ ":*" ]
   files = [
     {
@@ -342,26 +349,4 @@ generated_file("macos_framework_without_entitlement_config") {
   data_keys = [ "macos_framework_without_entitlement" ]
 
   deps = [ ":_generate_symlinks" ]
-}
-
-zip_bundle("macos_flutter_framework_archive") {
-  deps = [
-    ":macos_framework_without_entitlement_config",
-    ":zip_macos_flutter_framework",
-  ]
-  prefix = "$full_platform_name-$flutter_runtime_mode/"
-  if (flutter_runtime_mode == "debug") {
-    prefix = "$full_platform_name/"
-  }
-  output = "${prefix}FlutterMacOS.framework.zip"
-  files = [
-    {
-      source = "$root_out_dir/zip_archives/tmp/FlutterMacOS.framework.zip"
-      destination = "FlutterMacOS.framework.zip"
-    },
-    {
-      source = "$target_gen_dir/framework_without_entitlements.txt"
-      destination = "without_entitlements.txt"
-    },
-  ]
 }
