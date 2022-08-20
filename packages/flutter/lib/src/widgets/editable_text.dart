@@ -292,6 +292,9 @@ class ToolbarOptions {
        assert(paste != null),
        assert(selectAll != null);
 
+  /// An instance of [ToolbarOptions] with no options enabled.
+  static const ToolbarOptions empty = ToolbarOptions();
+
   /// Whether to show copy option in toolbar.
   ///
   /// Defaults to false. Must not be null.
@@ -2808,18 +2811,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: widget.contextMenuBuilder == null ? null : (
-        BuildContext context,
-        Offset primaryAnchor,
-        [Offset? secondaryAnchor]
-      ) {
-        return widget.contextMenuBuilder!(
-          context,
-          this,
-          primaryAnchor,
-          secondaryAnchor,
-        );
-      },
+      contextMenuBuilder: widget.contextMenuBuilder == null
+        ? null
+        : (
+          BuildContext context,
+          Offset primaryAnchor,
+          [Offset? secondaryAnchor]
+        ) {
+          return widget.contextMenuBuilder!(
+            context,
+            this,
+            primaryAnchor,
+            secondaryAnchor,
+          );
+        },
       magnifierConfiguration: widget.magnifierConfiguration,
     );
   }

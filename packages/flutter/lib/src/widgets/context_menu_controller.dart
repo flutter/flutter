@@ -10,15 +10,15 @@ import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 
-/// Builds a context menu at [primaryAnchor] if possible, otherwise at
-/// [secondaryAnchor].
+/// Signature for a method that builds a context menu at [primaryAnchor] if
+/// possible, otherwise at [secondaryAnchor].
 typedef ContextMenuBuilder = Widget Function(
   BuildContext context,
   Offset primaryAnchor,
   [Offset? secondaryAnchor]
 );
 
-/// A builder function that builds a context menu given a list of
+/// Signature for a builder function that builds a context menu given a list of
 /// [ContextMenuButtonItem]s representing its children.
 ///
 /// See also:
@@ -30,8 +30,8 @@ typedef ToolbarButtonWidgetBuilder = Widget Function(
   List<ContextMenuButtonItem> buttonItems,
 );
 
-/// A function that builds a widget to use as the text selection toolbar for
-/// [EditableText].
+/// Signature for a function that builds a widget to use as the text selection
+/// toolbar for [EditableText].
 ///
 /// See also:
 ///
@@ -40,15 +40,16 @@ typedef ToolbarButtonWidgetBuilder = Widget Function(
 ///  * [SelectableRegionToolbarBuilder], which is the builder for
 ///    [SelectableRegion].
 typedef EditableTextToolbarBuilder = Widget Function(
-  BuildContext,
-  EditableTextState,
-  Offset,
-  [Offset?]
+  BuildContext context,
+  EditableTextState editableTextState,
+  Offset primaryA,
+  [Offset? secondaryAnchor]
 );
 
 /// Builds and manages a context menu at a given location.
 ///
-/// There can only ever be one context menu shown at a given time.
+/// There can only ever be one context menu shown at a given time in the entire
+/// app.
 ///
 /// {@tool dartpad}
 /// This example shows how to use a GestureDetector to show a context menu
@@ -66,7 +67,7 @@ class ContextMenuController {
   /// True if and only if the menu is currently being displayed.
   static bool get isShown => _menuOverlayEntry != null && _menuOverlayEntry!.mounted;
 
-  /// Shows the given context menu at the location.
+  /// Shows the given context menu.
   static void show({
     required BuildContext context,
     required WidgetBuilder contextMenuBuilder,

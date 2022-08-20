@@ -33,8 +33,7 @@ class MyApp extends StatelessWidget {
         body: _ContextMenuRegion(
           contextMenuBuilder: (BuildContext context, Offset primaryAnchor, [Offset? secondaryAnchor]) {
             // The custom context menu will look like the default context menu
-            // on the current platform, but it will have only a single 'Print'
-            // button.
+            // on the current platform with a single 'Print' button.
             return AdaptiveTextSelectionToolbar.buttonItems(
               primaryAnchor: primaryAnchor,
               secondaryAnchor: secondaryAnchor,
@@ -49,8 +48,8 @@ class MyApp extends StatelessWidget {
               ],
             );
           },
-          // In this case we're wrapping a big open space in a GestureDetector
-          // in order to show the context menu, but we could also wrap a single
+          // In this case this wraps a big open space in a GestureDetector in
+          // order to show the context menu, but it could also wrap a single
           // wiget like an Image to give it a context menu.
           child: ListView(
             children: <Widget>[

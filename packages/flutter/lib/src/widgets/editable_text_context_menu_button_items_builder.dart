@@ -105,7 +105,7 @@ class EditableTextContextMenuButtonItemsBuilder extends StatefulWidget {
   )
   static List<ContextMenuButtonItem>? buttonItemsForToolbarOptions(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
     final ToolbarOptions toolbarOptions = editableTextState.widget.toolbarOptions;
-    if (toolbarOptions == const ToolbarOptions()) {
+    if (toolbarOptions == ToolbarOptions.empty) {
       return null;
     }
     return <ContextMenuButtonItem>[
