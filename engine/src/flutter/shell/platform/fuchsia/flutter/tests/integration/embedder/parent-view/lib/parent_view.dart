@@ -4,42 +4,49 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:io';
 import 'dart:ui';
-import 'package:vector_math/vector_math_64.dart' as vector_math_64;
+
 import 'package:args/args.dart';
-import 'package:fidl_fuchsia_sys/fidl_async.dart';
 import 'package:fidl_fuchsia_ui_app/fidl_async.dart';
 import 'package:fidl_fuchsia_ui_views/fidl_async.dart';
 import 'package:fuchsia_services/services.dart';
+import 'package:vector_math/vector_math_64.dart' as vector_math_64;
 import 'package:zircon/zircon.dart';
 
-// TODO(richkadel): To run the test serving the runner and test packages from
-// the flutter/engine package server (via
-// `//flutter/tools/fuchsia/devshell/serve.sh`), change `fuchsia.com` to
-// `engine`.
-const _kChildAppUrl =
-    'fuchsia-pkg://fuchsia.com/child-view2#meta/child-view2.cmx';
-
-TestApp app;
+final _argsCsvFilePath = '/config/data/args.csv';
 
 void main(List<String> args) {
+  print('parent-view: starting');
+
+  args = args + _GetArgsFromConfigFile();
   final parser = ArgParser()
     ..addFlag('showOverlay', defaultsTo: false)
     ..addFlag('hitTestable', defaultsTo: true)
-    ..addFlag('focusable', defaultsTo: true);
+    ..addFlag('focusable', defaultsTo: true)
+    ..addFlag('useFlatland', defaultsTo: false);
   final arguments = parser.parse(args);
   for (final option in arguments.options) {
-    print('parent-view2: $option: ${arguments[option]}');
+    print('parent-view: $option: ${arguments[option]}');
   }
 
-  final childViewToken = _launchApp(_kChildAppUrl);
-
-  app = TestApp(
-    ChildView(childViewToken),
-    showOverlay: arguments['showOverlay'],
-    hitTestable: arguments['hitTestable'],
-    focusable: arguments['focusable'],
-  );
+  TestApp app;
+  final useFlatland = arguments['useFlatland'];
+  if (useFlatland) {
+    app = TestApp(
+      ChildView(_launchFlatlandChildView()),
+      showOverlay: arguments['showOverlay'],
+      hitTestable: arguments['hitTestable'],
+      focusable: arguments['focusable'],
+    );
+  } else {
+    app = TestApp(
+      ChildView.gfx(_launchGfxChildView()),
+      showOverlay: arguments['showOverlay'],
+      hitTestable: arguments['hitTestable'],
+      focusable: arguments['focusable'],
+    );
+  }
 
   app.run();
 }
@@ -64,19 +71,24 @@ class TestApp {
 
   void run() {
     childView.create(hitTestable, focusable, (ByteData reply) {
-        // The child-view2 should be attached to Scenic now.
-        // Ready to build the scene.
+        // Set up window allbacks.
         window.onPointerDataPacket = (PointerDataPacket packet) {
           for (final data in packet.data) {
-            if (data.change == PointerChange.up) {
+            if (data.change == PointerChange.down) {
               this._backgroundColor = _black;
             }
           }
           window.scheduleFrame();
         };
-        window.onBeginFrame = (Duration duration) {
-          app.beginFrame(duration);
+        window.onMetricsChanged = () {
+          window.scheduleFrame();
         };
+        window.onBeginFrame = (Duration duration) {
+          this.beginFrame(duration);
+        };
+
+        // The child view should be attached to Scenic now.
+        // Ready to build the scene.
         window.scheduleFrame();
       });
   }
@@ -149,45 +161,16 @@ class TestApp {
   }
 }
 
-ViewHolderToken _launchApp(String componentUrl) {
-  final incoming = Incoming();
-  final componentController = ComponentControllerProxy();
-
-  final launcher = LauncherProxy();
-  Incoming.fromSvcPath()
-    ..connectToService(launcher)
-    ..close();
-  launcher.createComponent(
-    LaunchInfo(
-      url: componentUrl,
-      directoryRequest: incoming.request().passChannel(),
-    ),
-    componentController.ctrl.request(),
-  );
-  launcher.ctrl.close();
-
-  ViewProviderProxy viewProvider = ViewProviderProxy();
-  incoming
-    ..connectToService(viewProvider)
-    ..close();
-
-  final viewTokens = EventPairPair();
-  assert(viewTokens.status == ZX.OK);
-  final viewHolderToken = ViewHolderToken(value: viewTokens.first);
-  final viewToken = ViewToken(value: viewTokens.second);
-
-  viewProvider.createView(viewToken.value, null, null);
-  viewProvider.ctrl.close();
-
-  return viewHolderToken;
-}
-
 class ChildView {
-
-  final ViewHolderToken viewToken;
+  final ViewHolderToken viewHolderToken;
+  final ViewportCreationToken viewportCreationToken;
   final int viewId;
 
-  ChildView(this.viewToken) : viewId = viewToken.value.handle.handle {
+  ChildView(this.viewportCreationToken) : viewHolderToken = null, viewId = viewportCreationToken.value.handle.handle {
+    assert(viewId != null);
+  }
+
+  ChildView.gfx(this.viewHolderToken) : viewportCreationToken = null, viewId = viewHolderToken.value.handle.handle {
     assert(viewId != null);
   }
 
@@ -226,4 +209,50 @@ class ChildView {
       createViewMessage,
       callback);
   }
+}
+
+ViewportCreationToken _launchFlatlandChildView() {
+  ViewProviderProxy viewProvider = ViewProviderProxy();
+  Incoming.fromSvcPath()
+    ..connectToService(viewProvider)
+    ..close();
+
+  final viewTokens = ChannelPair();
+  assert(viewTokens.status == ZX.OK);
+  final viewportCreationToken = ViewportCreationToken(value: viewTokens.first);
+  final viewCreationToken = ViewCreationToken(value: viewTokens.second);
+
+  final createViewArgs = CreateView2Args(viewCreationToken: viewCreationToken);
+  viewProvider.createView2(createViewArgs);
+  viewProvider.ctrl.close();
+
+  return viewportCreationToken;
+}
+
+ViewHolderToken _launchGfxChildView() {
+  ViewProviderProxy viewProvider = ViewProviderProxy();
+  Incoming.fromSvcPath()
+    ..connectToService(viewProvider)
+    ..close();
+
+  final viewTokens = EventPairPair();
+  assert(viewTokens.status == ZX.OK);
+  final viewHolderToken = ViewHolderToken(value: viewTokens.first);
+  final viewToken = ViewToken(value: viewTokens.second);
+
+  viewProvider.createView(viewToken.value, null, null);
+  viewProvider.ctrl.close();
+
+  return viewHolderToken;
+}
+
+List<String> _GetArgsFromConfigFile() {
+  List<String> args;
+  final f = File(_argsCsvFilePath);
+  if (!f.existsSync()) {
+    return List.empty();
+  }
+  final fileContentCsv = f.readAsStringSync();
+  args = fileContentCsv.split('\n');
+  return args;
 }

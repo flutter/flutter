@@ -457,6 +457,34 @@ jit_runner("flutter_jit_product_runner") {
   product = true
 }
 
+# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
+# in the base fuchsia image.
+# TODO(fxbug.dev/106575): Fix this with subpackages.
+aot_runner("oot_flutter_aot_runner") {
+  product = false
+}
+
+# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
+# in the base fuchsia image.
+# TODO(fxbug.dev/106575): Fix this with subpackages.
+aot_runner("oot_flutter_aot_product_runner") {
+  product = true
+}
+
+# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
+# in the base fuchsia image.
+# TODO(fxbug.dev/106575): Fix this with subpackages.
+jit_runner("oot_flutter_jit_runner") {
+  product = false
+}
+
+# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
+# in the base fuchsia image.
+# TODO(fxbug.dev/106575): Fix this with subpackages.
+jit_runner("oot_flutter_jit_product_runner") {
+  product = true
+}
+
 test_fixtures("flutter_runner_fixtures") {
   fixtures = []
 }
@@ -885,7 +913,7 @@ if (enable_unittests) {
       ":testing_tests",
       ":txt_tests",
       ":ui_tests",
-      "integration_flutter_tests",
+      "tests/integration",
     ]
   }
 }

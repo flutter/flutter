@@ -36,6 +36,8 @@ template("_compile_cml") {
       "--output",
       rebase_path(invoker.output, root_build_dir),
       "--includepath",
+      rebase_path("$fuchsia_sdk/pkg/", root_build_dir),
+      "--includepath",
       get_path_info(invoker.manifest, "dir"),
       "--includepath",
       rebase_path("//"),
@@ -258,42 +260,66 @@ template("fuchsia_archive") {
 # cmx_file (optional):
 #   A path to the .cmx file for the test archive.
 #   If not defined, a generated .cml file for the test archive will be used instead.
+# cml_file (optional):
+#   The path to the V2 component manifest (.cml file) for the test archive's component.
+#   Should include the file extension.
+#   If not defined, a generated .cml file for the test archive will be used instead.
 # libraries (optional):
 #   Paths to .so libraries that should be dynamically linked to the binary.
 # resources (optional):
 #   Files that should be placed into the `data/` directory of the archive.
 template("fuchsia_test_archive") {
   assert(defined(invoker.deps), "package must define deps")
-
-  # Interpolate test_suite.cml template with the test suite's name.
-  test_suite = target_name
-  interpolate_cml_target = "${test_suite}_interpolate_cml"
-  generated_cml_file = "$root_out_dir/$test_suite.cml"
-  action(interpolate_cml_target) {
-    testonly = true
-    script = "//flutter/tools/fuchsia/interpolate_test_suite.py"
-    sources = [ "//flutter/testing/fuchsia/meta/test_suite.cml" ]
-    args = [
-      "--input",
-      rebase_path("//flutter/testing/fuchsia/meta/test_suite.cml"),
-      "--test-suite",
-      test_suite,
-      "--output",
-      rebase_path(generated_cml_file),
-    ]
-    outputs = [ generated_cml_file ]
+  _deps = []
+  if (defined(invoker.deps)) {
+    _deps += invoker.deps
   }
 
-  far_base_dir = "$root_out_dir/${target_name}_far"
+  if (defined(invoker.cml_file)) {
+    _far_base_dir = "$root_out_dir/${target_name}_far"
+    _cml_file_name = get_path_info(invoker.cml_file, "name")
+    _compile_cml_target = "${target_name}_${_cml_file_name}_compile_cml"
 
-  # Compile the resulting interpolated test suite's cml.
-  compile_test_suite_cml_target = "${test_suite}_test_suite_compile_cml"
-  _compile_cml(compile_test_suite_cml_target) {
-    testonly = true
-    deps = [ ":$interpolate_cml_target" ]
+    _compile_cml(_compile_cml_target) {
+      forward_variables_from(invoker, [ "testonly" ])
 
-    manifest = generated_cml_file
-    output = "$far_base_dir/meta/${test_suite}.cm"
+      manifest = invoker.cml_file
+      output = "$_far_base_dir/meta/${_cml_file_name}.cm"
+    }
+    _deps += [ ":$_compile_cml_target" ]
+  } else {
+    # Interpolate test_suite.cml template with the test suite's name.
+    test_suite = target_name
+    interpolate_cml_target = "${test_suite}_interpolate_cml"
+    generated_cml_file = "$root_out_dir/$test_suite.cml"
+    action(interpolate_cml_target) {
+      testonly = true
+      script = "//flutter/tools/fuchsia/interpolate_test_suite.py"
+      sources = [ "//flutter/testing/fuchsia/meta/test_suite.cml" ]
+      args = [
+        "--input",
+        rebase_path("//flutter/testing/fuchsia/meta/test_suite.cml"),
+        "--test-suite",
+        test_suite,
+        "--output",
+        rebase_path(generated_cml_file),
+      ]
+      outputs = [ generated_cml_file ]
+    }
+
+    far_base_dir = "$root_out_dir/${target_name}_far"
+
+    # Compile the resulting interpolated test suite's cml.
+    compile_test_suite_cml_target = "${test_suite}_test_suite_compile_cml"
+    _compile_cml(compile_test_suite_cml_target) {
+      testonly = true
+      deps = [ ":$interpolate_cml_target" ]
+
+      manifest = generated_cml_file
+      output = "$far_base_dir/meta/${test_suite}.cm"
+    }
+
+    _deps += [ ":$compile_test_suite_cml_target" ]
   }
 
   _fuchsia_archive(target_name) {
@@ -309,15 +335,6 @@ template("fuchsia_test_archive") {
       libraries += invoker.libraries
     }
 
-    # TODO(fxbug.dev/79873): Only cfv2 components should be allowed after
-    # FakeScenic is available.
-    if (defined(invoker.cmx_file)) {
-      cmx_file = invoker.cmx_file
-
-      # Don't include cml files.
-      deps = invoker.deps
-    } else {
-      deps = invoker.deps + [ ":$compile_test_suite_cml_target" ]
-    }
+    deps = _deps
   }
 }

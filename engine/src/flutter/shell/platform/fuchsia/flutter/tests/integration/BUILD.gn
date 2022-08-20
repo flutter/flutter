@@ -2,7 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-group("integration_flutter_tests") {
+assert(is_fuchsia)
+
+import("//build/fuchsia/sdk.gni")
+
+group("integration") {
   testonly = true
   deps = [ "embedder:tests" ]
 }

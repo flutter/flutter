@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "color.h"
+
 #include <zircon/status.h>
 
 #include "flutter/fml/logging.h"
-#include "src/ui/testing/views/color.h"
 
 namespace scenic {
 

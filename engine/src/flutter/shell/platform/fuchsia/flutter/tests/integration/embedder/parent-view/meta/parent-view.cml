@@ -1,0 +1,33 @@
+{
+    include: [ "syslog/client.shard.cml" ],
+    program: {
+        data: "data/parent-view",
+
+        // Always use the jit runner for now.
+        // TODO(fxbug.dev/106577): Implement manifest merging build rules for V2 components.
+        runner: "flutter_jit_runner",
+    },
+    capabilities: [
+        {
+            protocol: [ "fuchsia.ui.app.ViewProvider" ],
+        },
+    ],
+    use: [
+        {
+            protocol: [
+                "fuchsia.ui.app.ViewProvider",
+            ],
+        },
+        {
+            directory: "config-data",
+            rights: [ "r*" ],
+            path: "/config/data",
+        },
+    ],
+    expose: [
+        {
+            protocol: [ "fuchsia.ui.app.ViewProvider" ],
+            from: "self",
+        },
+    ],
+}
