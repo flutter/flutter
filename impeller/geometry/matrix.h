@@ -236,10 +236,20 @@ struct Matrix {
 
   Scalar GetMaxBasisLength() const;
 
+  constexpr Vector3 GetBasisX() const { return Vector3(m[0], m[1], m[2]); }
+
+  constexpr Vector3 GetBasisY() const { return Vector3(m[4], m[5], m[6]); }
+
+  constexpr Vector3 GetBasisZ() const { return Vector3(m[8], m[9], m[10]); }
+
   constexpr Vector3 GetScale() const {
-    return Vector3(Vector3(m[0], m[1], m[2]).Length(),
-                   Vector3(m[4], m[5], m[6]).Length(),
-                   Vector3(m[8], m[9], m[10]).Length());
+    return Vector3(GetBasisX().Length(), GetBasisY().Length(),
+                   GetBasisZ().Length());
+  }
+
+  constexpr Scalar GetDirectionScale(Vector3 direction) const {
+    return 1.0 / (this->Invert() * direction.Normalize()).Length() *
+           direction.Length();
   }
 
   constexpr bool IsAffine() const {
