@@ -126,12 +126,16 @@ class RoundedRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Paint paint = Paint()
-          ..color = side.color;
         final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-        final RRect inner = borderRect.deflate(side.strokeInset);
-        final RRect outer = borderRect.inflate(side.strokeOutset);
-        canvas.drawDRRect(outer, inner, paint);
+        if (side.hasMultipleWidth) {
+          side.drawMultipleWidth(canvas, borderRect);
+        } else {
+          final Paint paint = Paint()
+            ..color = side.color;
+          final RRect inner = borderRect.deflate(side.strokeInset);
+          final RRect outer = borderRect.inflate(side.strokeOutset);
+          canvas.drawDRRect(outer, inner, paint);
+        }
     }
   }
 
@@ -330,7 +334,11 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
       case BorderStyle.solid:
         final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect, textDirection)!;
         final RRect borderRect = adjustedBorderRadius.toRRect(_adjustRect(rect));
-        canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
+        if (side.hasMultipleWidth) {
+          side.drawMultipleWidth(canvas, borderRect);
+        } else {
+          canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
+        }
     }
   }
 

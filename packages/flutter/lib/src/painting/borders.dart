@@ -21,6 +21,38 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
+/// Temporary until we can land this on Flutter Engine.
+/// Expand inflate;
+extension RRectInflation on EdgeInsets {
+  /// Similar to [RRect.inflate] but receives a [Rect].
+  RRect inflateRRect(RRect rect) {
+    return RRect.fromLTRBAndCorners(
+      rect.left - left,
+      rect.top - top,
+      rect.right + right,
+      rect.bottom + bottom,
+      topLeft: rect.tlRadius + Radius.elliptical(left, top),
+      topRight: rect.trRadius + Radius.elliptical(right, top),
+      bottomRight: rect.brRadius + Radius.elliptical(right, bottom),
+      bottomLeft: rect.blRadius + Radius.elliptical(left, bottom),
+    );
+  }
+
+  /// Similar to [RRect.deflate] but receives a [Rect].
+  RRect deflateRRect(RRect rect) {
+    return RRect.fromLTRBAndCorners(
+      rect.left + left,
+      rect.top + top,
+      rect.right - right,
+      rect.bottom - bottom,
+      topLeft: rect.tlRadius - Radius.elliptical(left, top),
+      topRight: rect.trRadius - Radius.elliptical(right, top),
+      bottomRight: rect.brRadius - Radius.elliptical(right, bottom),
+      bottomLeft: rect.blRadius - Radius.elliptical(left, bottom),
+    );
+  }
+}
+
 /// A side of a border of a box.
 ///
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
@@ -64,14 +96,64 @@ class BorderSide with Diagnosticable {
   /// By default, the border is 1.0 logical pixels wide and solid black.
   const BorderSide({
     this.color = const Color(0xFF000000),
-    this.width = 1.0,
+    double width = 1.0,
     this.style = BorderStyle.solid,
-    this.strokeAlign = strokeAlignInside,
-  }) : assert(color != null),
+    this.strokeAlign = BorderSide.strokeAlignInside,
+  }) : leftWidth = width, topWidth = width, rightWidth = width, bottomWidth = width,
+       hasMultipleWidth = false,
+       assert(color != null),
        assert(width != null),
        assert(width >= 0.0),
        assert(style != null),
        assert(strokeAlign != null);
+
+  /// Creates the side of a border with symmetrical vertical and horizontal sides.
+  ///
+  /// The `vertical` argument applies to the [left] and [right] sides, and the
+  /// `horizontal` argument applies to the [top] and [bottom] sides.
+  const BorderSide.symmetric({
+    this.color = const Color(0xFF000000),
+    double horizontalWidth = 0.0,
+    double verticalWidth = 0.0,
+    this.style = BorderStyle.solid,
+    this.strokeAlign = BorderSide.strokeAlignInside,
+  }) : leftWidth = horizontalWidth, topWidth = verticalWidth, rightWidth = horizontalWidth, bottomWidth = verticalWidth,
+       hasMultipleWidth = horizontalWidth != verticalWidth,
+       assert(color != null),
+       assert(horizontalWidth != null),
+       assert(horizontalWidth >= 0.0),
+       assert(verticalWidth != null),
+       assert(verticalWidth >= 0.0),
+       assert(style != null),
+       assert(strokeAlign != null);
+
+  /// Creates the side of a border individual width on the sides.
+  const BorderSide.only({
+    this.color = const Color(0xFF000000),
+    this.leftWidth = 0.0,
+    this.topWidth = 0.0,
+    this.rightWidth = 0.0,
+    this.bottomWidth = 0.0,
+    this.style = BorderStyle.solid,
+    this.strokeAlign = BorderSide.strokeAlignInside,
+  }) : hasMultipleWidth = leftWidth != topWidth || topWidth != rightWidth || rightWidth != bottomWidth,
+       assert(color != null),
+       assert(leftWidth != null),
+       assert(rightWidth != null),
+       assert(topWidth != null),
+       assert(bottomWidth != null),
+       assert(leftWidth >= 0.0),
+       assert(rightWidth >= 0.0),
+       assert(topWidth >= 0.0),
+       assert(bottomWidth >= 0.0),
+       assert(style != null),
+       assert(strokeAlign != null);
+
+  final bool hasMultipleWidth;
+  final double leftWidth;
+  final double topWidth;
+  final double rightWidth;
+  final double bottomWidth;
 
   /// Creates a [BorderSide] that represents the addition of the two given
   /// [BorderSide]s.
@@ -101,6 +183,17 @@ class BorderSide with Diagnosticable {
     }
     assert(a.color == b.color);
     assert(a.style == b.style);
+    if (a.hasMultipleWidth || b.hasMultipleWidth) {
+      return BorderSide.only(
+        color: a.color, // == b.color
+        leftWidth:   a.leftWidth   + b.leftWidth,
+        topWidth:    a.topWidth    + b.topWidth,
+        rightWidth:  a.rightWidth  + b.rightWidth,
+        bottomWidth: a.bottomWidth + b.bottomWidth,
+        strokeAlign: math.max(a.strokeAlign, b.strokeAlign),
+        style: a.style, // == b.style
+      );
+    }
     return BorderSide(
       color: a.color, // == b.color
       width: a.width + b.width,
@@ -121,7 +214,7 @@ class BorderSide with Diagnosticable {
   /// double-hit pixels, giving it a slightly darker/lighter result.
   ///
   /// To omit the border entirely, set the [style] to [BorderStyle.none].
-  final double width;
+  double get width => !hasMultipleWidth ? leftWidth : (leftWidth + topWidth + rightWidth + bottomWidth) / 4;
 
   /// The style of this side of the border.
   ///
@@ -168,15 +261,35 @@ class BorderSide with Diagnosticable {
   BorderSide copyWith({
     Color? color,
     double? width,
+    double? leftWidth,
+    double? topWidth,
+    double? rightWidth,
+    double? bottomWidth,
     BorderStyle? style,
     double? strokeAlign,
   }) {
-    return BorderSide(
-      color: color ?? this.color,
-      width: width ?? this.width,
-      style: style ?? this.style,
-      strokeAlign: strokeAlign ?? this.strokeAlign,
-    );
+    if (width != null) {
+      assert(leftWidth == null && topWidth == null && rightWidth == null && bottomWidth == null, 'Cannot copy width and leftWidth, topWidth, rightWidth, or bottomWidth.');
+    }
+
+    if (hasMultipleWidth) {
+      return BorderSide.only(
+        color: color ?? this.color,
+        leftWidth: leftWidth ?? this.leftWidth,
+        topWidth: topWidth ?? this.topWidth,
+        rightWidth: rightWidth ?? this.rightWidth,
+        bottomWidth: bottomWidth ?? this.bottomWidth,
+        style: style ?? this.style,
+        strokeAlign: strokeAlign ?? this.strokeAlign,
+      );
+    } else {
+      return BorderSide(
+        color: color ?? this.color,
+        width: width ?? this.width,
+        style: style ?? this.style,
+        strokeAlign: strokeAlign ?? this.strokeAlign,
+      );
+    }
   }
 
   /// Creates a copy of this border side description but with the width scaled
@@ -197,11 +310,24 @@ class BorderSide with Diagnosticable {
   /// an [AnimationController].
   BorderSide scale(double t) {
     assert(t != null);
-    return BorderSide(
-      color: color,
-      width: math.max(0.0, width * t),
-      style: t <= 0.0 ? BorderStyle.none : style,
-    );
+    if (hasMultipleWidth) {
+      return BorderSide.only(
+        color: color,
+        leftWidth:   t * leftWidth,
+        topWidth:    t * topWidth,
+        rightWidth:  t * rightWidth,
+        bottomWidth: t * bottomWidth,
+        style: t <= 0.0 ? BorderStyle.none : style,
+        strokeAlign: strokeAlign,
+      );
+    } else {
+      return BorderSide(
+        color: color,
+        width: t * width,
+        style: t <= 0.0 ? BorderStyle.none : style,
+        strokeAlign: strokeAlign,
+      );
+    }
   }
 
   /// Create a [Paint] object that, if used to stroke a line, will draw the line
@@ -262,14 +388,6 @@ class BorderSide with Diagnosticable {
     if (width < 0.0) {
       return BorderSide.none;
     }
-    if (a.style == b.style && a.strokeAlign == b.strokeAlign) {
-      return BorderSide(
-        color: Color.lerp(a.color, b.color, t)!,
-        width: width,
-        style: a.style, // == b.style
-        strokeAlign: a.strokeAlign, // == b.strokeAlign
-      );
-    }
     final Color colorA, colorB;
     switch (a.style) {
       case BorderStyle.solid:
@@ -287,18 +405,64 @@ class BorderSide with Diagnosticable {
         colorB = b.color.withAlpha(0x00);
         break;
     }
+    final Color lerpedColor = (colorA != colorB) ? Color.lerp(colorA, colorB, t)! : colorA;
+    if (a.hasMultipleWidth || b.hasMultipleWidth) {
+      return BorderSide.only(
+        color: lerpedColor,
+        strokeAlign: ui.lerpDouble(a.strokeAlign, b.strokeAlign, t)!,
+        leftWidth:   math.max(ui.lerpDouble(a.leftWidth  , b.leftWidth  , t)!, 0),
+        topWidth:    math.max(ui.lerpDouble(a.topWidth   , b.topWidth   , t)!, 0),
+        rightWidth:  math.max(ui.lerpDouble(a.rightWidth , b.rightWidth , t)!, 0),
+        bottomWidth: math.max(ui.lerpDouble(a.bottomWidth, b.bottomWidth, t)!, 0),
+      );
+    }
+    if (a.style == b.style && a.strokeAlign == b.strokeAlign) {
+      return BorderSide(
+        color: lerpedColor,
+        width: width,
+        style: a.style, // == b.style
+        strokeAlign: a.strokeAlign, // == b.strokeAlign
+      );
+    }
     if (a.strokeAlign != b.strokeAlign) {
       return BorderSide(
-        color: Color.lerp(colorA, colorB, t)!,
+        color: lerpedColor,
         width: width,
-        strokeAlign: ui.lerpDouble(a.strokeAlign, b.strokeAlign, t)!,
+        strokeAlign: math.max(ui.lerpDouble(a.strokeAlign, b.strokeAlign, t)!, 0),
       );
     }
     return BorderSide(
-      color: Color.lerp(colorA, colorB, t)!,
+      color: lerpedColor,
       width: width,
       strokeAlign: a.strokeAlign, // == b.strokeAlign
     );
+  }
+
+  /// Draws a RRect in the canvas by modifying its size and
+  /// calling [Canvas.drawDRRect] which gets the difference
+  /// between two rectangles.
+  ///
+  /// The process is similar to [strokeInset] and [strokeOutset].
+  void drawMultipleWidth(Canvas canvas, RRect borderRect) {
+    final Paint paint = Paint()
+      ..color = color;
+
+    // Similar process to strokeInset calculation.
+    final RRect inner = EdgeInsets.fromLTRB(
+        leftWidth   * (1 - (1 + strokeAlign) / 2),
+        topWidth    * (1 - (1 + strokeAlign) / 2),
+        rightWidth  * (1 - (1 + strokeAlign) / 2),
+        bottomWidth * (1 - (1 + strokeAlign) / 2),
+      ).deflateRRect(borderRect);
+
+    // Similar process to strokeOutset calculation.
+    final RRect outer = EdgeInsets.fromLTRB(
+        leftWidth   * (1 + strokeAlign) / 2,
+        topWidth    * (1 + strokeAlign) / 2,
+        rightWidth  * (1 + strokeAlign) / 2,
+        bottomWidth * (1 + strokeAlign) / 2,
+      ).inflateRRect(borderRect);
+    canvas.drawDRRect(outer, inner, paint);
   }
 
   /// Get the amount of the stroke width that lies inside of the [BorderSide].
@@ -331,13 +495,17 @@ class BorderSide with Diagnosticable {
     }
     return other is BorderSide
         && other.color == color
-        && other.width == width
         && other.style == style
-        && other.strokeAlign == strokeAlign;
+        && other.strokeAlign == strokeAlign
+        && other.hasMultipleWidth == hasMultipleWidth
+        && other.leftWidth == leftWidth
+        && other.topWidth == topWidth
+        && other.rightWidth == rightWidth
+        && other.bottomWidth == bottomWidth;
   }
 
   @override
-  int get hashCode => Object.hash(color, width, style, strokeAlign);
+  int get hashCode => Object.hash(color, leftWidth, topWidth, rightWidth, bottomWidth, hasMultipleWidth, style, strokeAlign);
 
   @override
   String toStringShort() => 'BorderSide';
@@ -346,8 +514,15 @@ class BorderSide with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: const Color(0xFF000000)));
-    properties.add(DoubleProperty('width', width, defaultValue: 1.0));
-    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: strokeAlignInside));
+    if (hasMultipleWidth) {
+      properties.add(DoubleProperty('leftWidth',   leftWidth,   defaultValue: 0));
+      properties.add(DoubleProperty('topWidth',    topWidth,    defaultValue: 0));
+      properties.add(DoubleProperty('rightWidth',  rightWidth,  defaultValue: 0));
+      properties.add(DoubleProperty('bottomWidth', bottomWidth, defaultValue: 0));
+    } else {
+      properties.add(DoubleProperty('width', width, defaultValue: 1.0));
+    }
+    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: BorderSide.strokeAlignInside));
     properties.add(EnumProperty<BorderStyle>('style', style, defaultValue: BorderStyle.solid));
   }
 }
@@ -661,7 +836,18 @@ abstract class OutlinedBorder extends ShapeBorder {
   const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
 
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.all(math.max(side.strokeInset, 0));
+  EdgeInsetsGeometry get dimensions {
+    if (side.hasMultipleWidth) {
+      return EdgeInsets.only(
+        left:   math.max(side.leftWidth   * (1 - (1 + side.strokeAlign) / 2), 0),
+        top:    math.max(side.topWidth    * (1 - (1 + side.strokeAlign) / 2), 0),
+        right:  math.max(side.rightWidth  * (1 - (1 + side.strokeAlign) / 2), 0),
+        bottom: math.max(side.bottomWidth * (1 - (1 + side.strokeAlign) / 2), 0),
+      );
+    } else {
+      return EdgeInsets.all(math.max(side.strokeInset, 0));
+    }
+  }
 
   /// The border outline's color and weight.
   ///

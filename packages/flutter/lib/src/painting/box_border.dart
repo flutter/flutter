@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -330,7 +331,7 @@ class Border extends BoxBorder {
   /// Creates a border whose sides are all the same.
   ///
   /// The `side` argument must not be null.
-  const Border.fromBorderSide(BorderSide side)
+  Border.fromBorderSide(BorderSide side)
       : assert(side != null),
         top = side,
         right = side,
@@ -343,16 +344,19 @@ class Border extends BoxBorder {
   /// `horizontal` argument applies to the [top] and [bottom] sides.
   ///
   /// All arguments default to [BorderSide.none] and must not be null.
-  const Border.symmetric({
+  static BorderProposal symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
-  }) : assert(vertical != null),
-       assert(horizontal != null),
-       left = vertical,
-       top = horizontal,
-       right = vertical,
-       bottom = horizontal;
-
+    BorderRadius borderRadius = BorderRadius.zero,
+  }) {
+    return BorderProposal.symmetric(
+      verticalWidth: vertical.width,
+      horizontalWidth: horizontal.width,
+      color: vertical.color,
+      strokeAlign: vertical.strokeAlign,
+      borderRadius: borderRadius,
+    );
+  }
   /// A uniform border with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.
@@ -544,7 +548,19 @@ class Border extends BoxBorder {
           return;
       }
     }
-
+    assert(() {
+      if (right.hasMultipleWidth || left.hasMultipleWidth || top.hasMultipleWidth || bottom.hasMultipleWidth) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A Border does not support a BorderSide with multiple widths. Try to use Border(left: ...) instead.'),
+          ErrorDescription('The following is not uniform:'),
+          if (left.hasMultipleWidth) ErrorDescription('Border.left'),
+          if (top.hasMultipleWidth) ErrorDescription('Border.top'),
+          if (right.hasMultipleWidth) ErrorDescription('Border.right'),
+          if (bottom.hasMultipleWidth) ErrorDescription('Border.bottom'),
+        ]);
+      }
+      return true;
+    }());
     assert(() {
       if (borderRadius != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -613,6 +629,288 @@ class Border extends BoxBorder {
       if (left != BorderSide.none) 'left: $left',
     ];
     return '${objectRuntimeType(this, 'Border')}(${arguments.join(", ")})';
+  }
+}
+
+class BorderProposal extends ShapeBorder {
+  /// Creates a border.
+  ///
+  /// All the sides of the border default to [BorderSide.none].
+  ///
+  /// The arguments must not be null.
+  const BorderProposal({
+    this.leftWidth = 0.0,
+    this.topWidth = 0.0,
+    this.rightWidth = 0.0,
+    this.bottomWidth = 0.0,
+    this.color = const Color(0x00000000),
+    this.strokeAlign = BorderSide.strokeAlignInside,
+    this.borderRadius = BorderRadius.zero,
+  }) : hasUniformWidth = leftWidth == topWidth && rightWidth == bottomWidth && leftWidth == rightWidth;
+
+  /// Creates a border whose sides are all the same.
+  ///
+  /// The `side` argument must not be null.
+  BorderProposal.fromBorderSide(BorderSide side)
+      : assert(side != null),
+        hasUniformWidth = true,
+        topWidth = side.width,
+        rightWidth = side.width,
+        bottomWidth = side.width,
+        leftWidth = side.width,
+        color = side.color,
+        strokeAlign = side.strokeAlign,
+        borderRadius = BorderRadius.zero;
+
+  /// Creates a border with symmetrical vertical and horizontal sides.
+  ///
+  /// The `vertical` argument applies to the [left] and [right] sides, and the
+  /// `horizontal` argument applies to the [top] and [bottom] sides.
+  ///
+  /// All arguments default to [BorderSide.none] and must not be null.
+  const BorderProposal.symmetric({
+    double verticalWidth = 0.0,
+    double horizontalWidth = 0.0,
+    this.color = const Color(0x00000000),
+    this.strokeAlign = BorderSide.strokeAlignInside,
+    this.borderRadius = BorderRadius.zero,
+  }) : hasUniformWidth = verticalWidth == horizontalWidth,
+       topWidth = verticalWidth,
+       rightWidth = horizontalWidth,
+       bottomWidth = verticalWidth,
+       leftWidth = horizontalWidth;
+
+  /// A uniform border with all sides the same color and width.
+  ///
+  /// The sides default to black solid borders, one logical pixel wide.
+  factory BorderProposal.all({
+    Color color = const Color(0xFF000000),
+    double width = 1.0,
+    BorderStyle style = BorderStyle.solid,
+    double strokeAlign = BorderSide.strokeAlignInside,
+  }) {
+    final BorderSide side = BorderSide(color: color, width: width, style: style, strokeAlign: strokeAlign);
+    return BorderProposal.fromBorderSide(side);
+  }
+
+  final bool hasUniformWidth;
+  final double leftWidth;
+  final double topWidth;
+  final double rightWidth;
+  final double bottomWidth;
+  final Color color;
+  final double strokeAlign;
+  final BorderRadius borderRadius;
+
+  /// Creates a [Border] that represents the addition of the two given
+  /// [Border]s.
+  ///
+  /// It is only valid to call this if [BorderSide.canMerge] returns true for
+  /// the pairwise combination of each side on both [Border]s.
+  ///
+  /// The arguments must not be null.
+  static Border merge(Border a, Border b) {
+    assert(a != null);
+    assert(b != null);
+    assert(BorderSide.canMerge(a.top, b.top));
+    assert(BorderSide.canMerge(a.right, b.right));
+    assert(BorderSide.canMerge(a.bottom, b.bottom));
+    assert(BorderSide.canMerge(a.left, b.left));
+    return Border(
+      top: BorderSide.merge(a.top, b.top),
+      right: BorderSide.merge(a.right, b.right),
+      bottom: BorderSide.merge(a.bottom, b.bottom),
+      left: BorderSide.merge(a.left, b.left),
+    );
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions {
+    if (!hasUniformWidth) {
+      return EdgeInsets.fromLTRB(
+        leftWidth   * (1 - (1 + strokeAlign) / 2),
+        topWidth    * (1 - (1 + strokeAlign) / 2),
+        rightWidth  * (1 - (1 + strokeAlign) / 2),
+        bottomWidth * (1 - (1 + strokeAlign) / 2),
+      );
+    }
+    return EdgeInsets.all(leftWidth * (1 - strokeAlign));
+  }
+
+  // @override
+  // BorderProposal? add(ShapeBorder other, { bool reversed = false }) {
+  //   if (other is Border &&
+  //       BorderProposal.canMerge(top, other.top) &&
+  //       BorderProposal.canMerge(right, other.right) &&
+  //       BorderProposal.canMerge(bottom, other.bottom) &&
+  //       BorderProposal.canMerge(left, other.left)) {
+  //     return Border.merge(this, other);
+  //   }
+  //   return null;
+  // }
+
+  @override
+  BorderProposal scale(double t) {
+    return BorderProposal(
+      topWidth: topWidth * t,
+      rightWidth: rightWidth * t,
+      bottomWidth: bottomWidth * t,
+      leftWidth: leftWidth * t,
+    );
+  }
+
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+    if (a is BorderProposal) {
+      return BorderProposal.lerp(a, this, t);
+    }
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    if (b is BorderProposal) {
+      return BorderProposal.lerp(this, b, t);
+    }
+    return super.lerpTo(b, t);
+  }
+
+  /// Linearly interpolate between two borders.
+  ///
+  /// If a border is null, it is treated as having four [BorderSide.none]
+  /// borders.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static BorderProposal? lerp(BorderProposal? a, BorderProposal? b, double t) {
+    assert(t != null);
+    if (a == null && b == null) {
+      return null;
+    }
+    if (a == null) {
+      return b!.scale(t);
+    }
+    if (b == null) {
+      return a.scale(1.0 - t);
+    }
+    return BorderProposal(
+      topWidth:    lerpDouble(a.topWidth, b.topWidth, t)!,
+      rightWidth:  lerpDouble(a.rightWidth, b.rightWidth, t)!,
+      bottomWidth: lerpDouble(a.bottomWidth, b.bottomWidth, t)!,
+      leftWidth:   lerpDouble(a.leftWidth, b.leftWidth, t)!,
+    );
+  }
+
+  /// Paints the border within the given [Rect] on the given [Canvas].
+  ///
+  /// Uniform borders are more efficient to paint than more complex borders.
+  ///
+  /// You can provide a [BoxShape] to draw the border on. If the `shape` in
+  /// [BoxShape.circle], there is the requirement that the border [isUniform].
+  ///
+  /// If you specify a rectangular box shape ([BoxShape.rectangle]), then you
+  /// may specify a [BorderRadius]. If a `borderRadius` is specified, there is
+  /// the requirement that the border [isUniform].
+  ///
+  /// The [getInnerPath] and [getOuterPath] methods do not know about the
+  /// `shape` and `borderRadius` arguments.
+  ///
+  /// The `textDirection` argument is not used by this paint method.
+  ///
+  /// See also:
+  ///
+  ///  * [paintBorder], which is used if the border is not uniform.
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    TextDirection? textDirection,
+    BoxShape shape = BoxShape.rectangle,
+    BorderRadius? borderRadius,
+  }) {
+    final RRect borderRect = (borderRadius ?? this.borderRadius).resolve(textDirection).toRRect(rect);
+    if (!hasUniformWidth) {
+      drawMultipleWidth(canvas, borderRect);
+    } else {
+      final Paint paint = Paint()
+        ..color = color;
+      final RRect inner = borderRect.deflate(leftWidth   * (1 - (1 + strokeAlign) / 2));
+      final RRect outer = borderRect.inflate(leftWidth   * (1 + strokeAlign) / 2);
+      canvas.drawDRRect(outer, inner, paint);
+    }
+  }
+
+  /// Draws a RRect in the canvas by modifying its size and
+  /// calling [Canvas.drawDRRect] which gets the difference
+  /// between two rectangles.
+  ///
+  /// The process is similar to [strokeInset] and [strokeOutset].
+  void drawMultipleWidth(Canvas canvas, RRect borderRect) {
+    final Paint paint = Paint()
+      ..color = color;
+
+    // Similar process to strokeInset calculation.
+    final RRect inner = EdgeInsets.fromLTRB(
+        leftWidth   * (1 - (1 + strokeAlign) / 2),
+        topWidth    * (1 - (1 + strokeAlign) / 2),
+        rightWidth  * (1 - (1 + strokeAlign) / 2),
+        bottomWidth * (1 - (1 + strokeAlign) / 2),
+      ).deflateRRect(borderRect);
+
+    // Similar process to strokeOutset calculation.
+    final RRect outer = EdgeInsets.fromLTRB(
+        leftWidth   * (1 + strokeAlign) / 2,
+        topWidth    * (1 + strokeAlign) / 2,
+        rightWidth  * (1 + strokeAlign) / 2,
+        bottomWidth * (1 + strokeAlign) / 2,
+      ).inflateRRect(borderRect);
+    canvas.drawDRRect(outer, inner, paint);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is BorderProposal
+        && other.topWidth == topWidth
+        && other.rightWidth == rightWidth
+        && other.bottomWidth == bottomWidth
+        && other.leftWidth == leftWidth;
+  }
+
+  @override
+  int get hashCode => Object.hash(topWidth, rightWidth, bottomWidth, leftWidth);
+
+  @override
+  String toString() {
+    if (hasUniformWidth) {
+      return '${objectRuntimeType(this, 'Border')}.all($topWidth)';
+    }
+    return '${objectRuntimeType(this, 'Border')}.all($topWidth)';
+    // final List<String> arguments = <String>[
+    //   if (top != BorderSide.none) 'top: $top',
+    //   if (right != BorderSide.none) 'right: $right',
+    //   if (bottom != BorderSide.none) 'bottom: $bottom',
+    //   if (left != BorderSide.none) 'left: $left',
+    // ];
+    // return '${objectRuntimeType(this, 'Border')}(${arguments.join(", ")})';
+  }
+  
+  @override
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+    final RRect adjustedRect = borderRect.deflate(leftWidth);
+    return Path()
+      ..addRRect(adjustedRect);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+    return Path()
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 }
 
@@ -898,7 +1196,20 @@ class BorderDirectional extends BoxBorder {
 
     assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
     assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
-    assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than strokeAlignInside on uniform borders.');
+    assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than BorderSide.strokeAlignInside on uniform borders.');
+    assert(() {
+      if (start.hasMultipleWidth || end.hasMultipleWidth || top.hasMultipleWidth || bottom.hasMultipleWidth) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A BorderDirectional does not support a BorderSide with multiple widths. Try to use BorderDirectional(left: ...) instead.'),
+          ErrorDescription('The following is not uniform:'),
+          if (start.hasMultipleWidth) ErrorDescription('BorderDirectional.start'),
+          if (top.hasMultipleWidth) ErrorDescription('BorderDirectional.top'),
+          if (end.hasMultipleWidth) ErrorDescription('BorderDirectional.end'),
+          if (bottom.hasMultipleWidth) ErrorDescription('BorderDirectional.bottom'),
+        ]);
+      }
+      return true;
+    }());
 
     final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');

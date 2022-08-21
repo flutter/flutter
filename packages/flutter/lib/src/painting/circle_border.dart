@@ -102,12 +102,28 @@ class CircleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        if (eccentricity == 0.0) {
-          canvas.drawCircle(rect.center, (rect.shortestSide + side.strokeOffset) / 2, side.toPaint());
+        if (side.hasMultipleWidth) {
+          final RRect borderRect = RRect.fromRectAndRadius(_adjustRect(rect), _adjustRadius(rect));
+          side.drawMultipleWidth(canvas, borderRect);
         } else {
-          final Rect borderRect = _adjustRect(rect);
-          canvas.drawOval(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
+          if (eccentricity == 0.0) {
+            canvas.drawCircle(rect.center, (rect.shortestSide + side.strokeOffset) / 2, side.toPaint());
+          } else {
+            final Rect borderRect = _adjustRect(rect);
+            canvas.drawOval(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
+          }
         }
+    }
+  }
+
+  Radius _adjustRadius(Rect rect) {
+    if (eccentricity == 0.0) {
+      return Radius.circular(rect.width);
+    }
+    if (rect.width < rect.height) {
+      return Radius.elliptical(rect.width / 2, (0.5 + eccentricity / 2) * rect.height / 2);
+    } else {
+      return Radius.elliptical((0.5 + eccentricity / 2) * rect.width / 2, rect.height / 2);
     }
   }
 
