@@ -4,6 +4,7 @@
 
 #include "impeller/blobcat/blob_writer.h"
 
+#include <array>
 #include <filesystem>
 #include <optional>
 
