@@ -4,6 +4,7 @@
 
 #include "impeller/blobcat/blob_library.h"
 
+#include <array>
 #include <string>
 
 #include "impeller/base/validation.h"
