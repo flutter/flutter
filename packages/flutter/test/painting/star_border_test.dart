@@ -105,9 +105,9 @@ void main() {
     await testBorder(tester, 'side_1', const StarBorder(side: BorderSide(color: Color(0xffff0000))));
     await testBorder(tester, 'side_10', const StarBorder(side: BorderSide(color: Color(0xffff0000), width: 10)));
     await testBorder(tester, 'side_align_center',
-        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
+        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.center)));
     await testBorder(tester, 'side_align_outside',
-        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
+        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.outside)));
   });
 
   testWidgets('StarBorder.polygon parameters', (WidgetTester tester) async {
@@ -127,9 +127,9 @@ void main() {
     await testBorder(
         tester, 'poly_side_10', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), width: 10)));
     await testBorder(tester, 'poly_side_align_center',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
+        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.center)));
     await testBorder(tester, 'poly_side_align_outside',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
+        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.outside)));
   });
 
   testWidgets('StarBorder lerped with StarBorder', (WidgetTester tester) async {
