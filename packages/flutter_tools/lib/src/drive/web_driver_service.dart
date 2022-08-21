@@ -139,18 +139,25 @@ class WebDriverService extends DriverService {
     List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
     String? profileMemory,
+    Map<String, dynamic>? allBrowsersDesiredCapabilities,
   }) async {
     late async_io.WebDriver webDriver;
     final Browser browser = _browserNameToEnum(browserName);
     try {
-      webDriver = await async_io.createDriver(
-        uri: Uri.parse('http://localhost:$driverPort/'),
-        desired: getDesiredCapabilities(
+      Map<String, dynamic>? desiredCapabilities;
+      if (allBrowsersDesiredCapabilities!=null) {
+        desiredCapabilities = allBrowsersDesiredCapabilities[browser] as Map<String, dynamic>;
+      } else {
+        desiredCapabilities = getDesiredCapabilities(
           browser,
           headless,
           webBrowserFlags: webBrowserFlags,
           chromeBinary: chromeBinary,
-        ),
+        );
+      }
+      webDriver = await async_io.createDriver(
+        uri: Uri.parse('http://localhost:$driverPort/'),
+        desired: desiredCapabilities,
       );
     } on SocketException catch (error) {
       _logger.printTrace('$error');

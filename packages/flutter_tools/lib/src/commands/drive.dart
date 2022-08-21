@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
@@ -146,10 +147,13 @@ class DriveCommand extends RunCommandBase {
           'Dart VM running The test script.')
       ..addOption('profile-memory', help: 'Launch devtools and profile application memory, writing '
           'The output data to the file path provided to this argument as JSON.',
-          valueHelp: 'profile_memory.json');
+          valueHelp: 'profile_memory.json')
+      ..addOption('web-desired-capabilities-from-file',
+        help: 'The path of a json format file which define desired capabilities of browsers used in WebDriver.',
+          valueHelp: 'desired_capabilities.json');
   }
 
-  // `pub` must always be run due to the test script running from source,
+  // `pubget` must always be run due to the test script running from source,
   // even if an application binary is used. Default to true unless the user explicitly
   // specified not to.
   @override
@@ -270,6 +274,14 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
+      // Extract desiredCapabilities from file if specifying --web-desired-capablities-from-file
+      final String? desiredCapabilitiesJsonFilePath =
+          stringArg('web-desired-capabilities-from-file');
+      Map<String, dynamic>? desiredCapabilitiesJsonMap;
+      if (desiredCapabilitiesJsonFilePath!=null && globals.fs.isFileSync(desiredCapabilitiesJsonFilePath)) {
+        final String desiredCapabilitiesJsonRaw = globals.fs.file(desiredCapabilitiesJsonFilePath).readAsStringSync();
+        desiredCapabilitiesJsonMap = json.decode(desiredCapabilitiesJsonRaw) as Map<String, dynamic>;
+      }
       final int testResult = await driverService.startTest(
         testFile,
         stringsArg('test-arguments'),
@@ -285,6 +297,7 @@ class DriveCommand extends RunCommandBase {
           : null,
         androidEmulator: boolArgDeprecated('android-emulator'),
         profileMemory: stringArgDeprecated('profile-memory'),
+        allBrowsersDesiredCapabilities: desiredCapabilitiesJsonMap,
       );
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
