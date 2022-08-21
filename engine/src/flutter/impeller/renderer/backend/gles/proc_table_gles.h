@@ -157,6 +157,7 @@ struct GLProc {
   PROC(Uniform1fv);                          \
   PROC(Uniform1i);                           \
   PROC(Uniform2fv);                          \
+  PROC(Uniform3fv);                          \
   PROC(Uniform4fv);                          \
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \

@@ -234,6 +234,13 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
                               buffer_ptr + member.offset)  // data
             );
             continue;
+          case sizeof(Vector3):
+            gl.Uniform3fv(location->second,  // location
+                          1u,                // count
+                          reinterpret_cast<const GLfloat*>(
+                              buffer_ptr + member.offset)  // data
+            );
+            continue;
           case sizeof(Vector2):
             gl.Uniform2fv(location->second,  // location
                           1u,                // count
