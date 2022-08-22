@@ -17,7 +17,6 @@ import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
-import 'tool_subsharding.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -340,7 +339,6 @@ Future<void> _runTestHarnessTests() async {
 final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
 Future<void> _runGeneralToolTests() async {
-  final String pathOutput = path.join(flutterRoot, 'dev', 'bots', 'output.json');
   await _dartRunTest(
     _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
@@ -351,14 +349,6 @@ Future<void> _runGeneralToolTests() async {
     // See the README.md and dart_test.yaml files in the flutter_tools package.
     perTestTimeout: const Duration(seconds: 2),
   );
-}
-
-List<String> _createPathsGeneralShard(List<dynamic> shardsDynamic) {
-  final List<String> allShards = <String>[];
-  for (final dynamic shard in shardsDynamic) {
-    allShards.add(path.join('test', 'general.shard', shard.toString()));
-  }
-  return allShards;
 }
 
 Future<void> _runCommandsToolTests() async {
