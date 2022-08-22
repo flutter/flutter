@@ -1,4 +1,4 @@
-Signature: d47b3da7922c2e807ea6d8e9e4fdd2d5
+Signature: 0e240be838d32639b8bb4dc3fe2c4cce
 
 UNUSED LICENSES:
 
@@ -10735,6 +10735,8 @@ FILE: ../../../third_party/dart/runtime/bin/thread_absl.cc
 FILE: ../../../third_party/dart/runtime/bin/thread_absl.h
 FILE: ../../../third_party/dart/runtime/platform/mach_o.h
 FILE: ../../../third_party/dart/runtime/platform/pe.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.h
 FILE: ../../../third_party/dart/runtime/vm/heap/gc_shared.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/gc_shared.h
 FILE: ../../../third_party/dart/runtime/vm/instructions.cc
