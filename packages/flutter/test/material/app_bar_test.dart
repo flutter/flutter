@@ -694,9 +694,11 @@ void main() {
   });
 
   testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
+    final bool material3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: themeData,
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -706,9 +708,9 @@ void main() {
       ),
     );
 
-    final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), const Offset(4.0, 4.0));
-    expect(tester.getSize(hamburger), const Size(48.0, 48.0));
+    final Finder hamburger = find.byType(IconButton);
+    expect(tester.getTopLeft(hamburger), material3 ? const Offset(4.0, 4.0) : Offset.zero);
+    expect(tester.getSize(hamburger), material3 ? const Size(48.0, 48.0) : const Size(56.0, 56.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
