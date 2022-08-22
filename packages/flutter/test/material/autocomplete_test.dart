@@ -306,7 +306,7 @@ void main() {
     /// expected desired Height =150.0
     expect(resultingHeight, equals(desiredHeight));
   });
-  
+
   testWidgets('the options width restricts to max desired width', (WidgetTester tester) async {
     const double desiredWidth = 200.0;
     await tester.pumpWidget(MaterialApp(
