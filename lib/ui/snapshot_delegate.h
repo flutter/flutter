@@ -13,7 +13,6 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPromiseImageTexture.h"
 #include "third_party/skia/include/gpu/GrContextThreadSafeProxy.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -52,8 +51,6 @@ class SnapshotDelegate {
   /// @return     A pointer to the external texture registry.
   ///
   virtual std::shared_ptr<TextureRegistry> GetTextureRegistry() = 0;
-
-  virtual GrDirectContext* GetGrContext() = 0;
 
   virtual std::unique_ptr<GpuImageResult> MakeGpuImage(
       sk_sp<DisplayList> display_list,

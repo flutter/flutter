@@ -171,10 +171,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   }
 }
 
-sk_sp<DisplayList> LayerTree::Flatten(
-    const SkRect& bounds,
-    std::shared_ptr<TextureRegistry> texture_registry,
-    GrDirectContext* gr_context) {
+sk_sp<DisplayList> LayerTree::Flatten(const SkRect& bounds) {
   TRACE_EVENT0("flutter", "LayerTree::Flatten");
 
   DisplayListCanvasRecorder builder(bounds);
@@ -182,14 +179,13 @@ sk_sp<DisplayList> LayerTree::Flatten(
   MutatorsStack unused_stack;
   const FixedRefreshRateStopwatch unused_stopwatch;
   SkMatrix root_surface_transformation;
-
   // No root surface transformation. So assume identity.
   root_surface_transformation.reset();
 
   PrerollContext preroll_context{
       // clang-format off
       .raster_cache                  = nullptr,
-      .gr_context                    = gr_context,
+      .gr_context                    = nullptr,
       .view_embedder                 = nullptr,
       .mutators_stack                = unused_stack,
       .dst_color_space               = nullptr,
@@ -197,7 +193,7 @@ sk_sp<DisplayList> LayerTree::Flatten(
       .surface_needs_readback        = false,
       .raster_time                   = unused_stopwatch,
       .ui_time                       = unused_stopwatch,
-      .texture_registry              = texture_registry,
+      .texture_registry              = nullptr,
       .checkerboard_offscreen_layers = false,
       .frame_device_pixel_ratio      = device_pixel_ratio_
       // clang-format on
@@ -213,12 +209,12 @@ sk_sp<DisplayList> LayerTree::Flatten(
       // clang-format off
       .internal_nodes_canvas         = &internal_nodes_canvas,
       .leaf_nodes_canvas             = &builder,
-      .gr_context                    = gr_context,
+      .gr_context                    = nullptr,
       .dst_color_space               = nullptr,
       .view_embedder                 = nullptr,
       .raster_time                   = unused_stopwatch,
       .ui_time                       = unused_stopwatch,
-      .texture_registry              = texture_registry,
+      .texture_registry              = nullptr,
       .raster_cache                  = nullptr,
       .checkerboard_offscreen_layers = false,
       .frame_device_pixel_ratio      = device_pixel_ratio_,

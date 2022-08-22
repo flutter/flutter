@@ -38,7 +38,6 @@ class Scene extends NativeFieldWrapperClass1 {
   external String? _toImageSync(int width, int height, _Image outImage);
 
   /// Creates a raster image representation of the current state of the scene.
-  ///
   /// This is a slow operation that is performed on a background thread.
   ///
   /// Callers must dispose the [Image] when they are done with it. If the result
