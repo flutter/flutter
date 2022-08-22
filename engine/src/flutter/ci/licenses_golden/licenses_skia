@@ -1,4 +1,4 @@
-Signature: 5473182ef27e9b08a337cf49ad51fbac
+Signature: 8c4256b87ac673917115a3339cde0873
 
 UNUSED LICENSES:
 
@@ -825,6 +825,7 @@ FILE: ../../../third_party/skia/include/private/BUILD.bazel
 FILE: ../../../third_party/skia/include/private/chromium/BUILD.bazel
 FILE: ../../../third_party/skia/include/private/gpu/BUILD.bazel
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/BUILD.bazel
+FILE: ../../../third_party/skia/include/private/gpu/vk/BUILD.bazel
 FILE: ../../../third_party/skia/include/sksl/BUILD.bazel
 FILE: ../../../third_party/skia/include/svg/BUILD.bazel
 FILE: ../../../third_party/skia/include/utils/BUILD.bazel
@@ -3483,12 +3484,12 @@ FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrBackendDrawableInfo.h
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
-FILE: ../../../third_party/skia/include/gpu/vk/GrVkVulkan.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_fuchsia.h
 FILE: ../../../third_party/skia/include/private/SkMacros.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/include/private/SkTo.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrVkTypesPriv.h
+FILE: ../../../third_party/skia/include/private/gpu/vk/SkiaVulkan.h
 FILE: ../../../third_party/skia/include/utils/SkAnimCodecPlayer.h
 FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
 FILE: ../../../third_party/skia/modules/skcms/skcms.cc
@@ -5574,6 +5575,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/ImageUtils.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Log.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.h
+FILE: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h
