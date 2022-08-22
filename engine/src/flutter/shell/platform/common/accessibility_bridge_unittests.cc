@@ -337,5 +337,36 @@ TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
   EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kSlider);
 }
 
+// Ensure that checkboxes have their checked status set apropriately
+// Previously, only Radios could have this flag updated
+// Resulted in the issue seen at
+// https://github.com/flutter/flutter/issues/96218
+// As this fix involved code run on all platforms, it is included here.
+TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
+  std::shared_ptr<AccessibilityBridge> bridge =
+      std::make_shared<AccessibilityBridge>(
+          std::make_unique<TestAccessibilityBridgeDelegate>());
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 0;
+  root.custom_accessibility_actions_count = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kCheckBox);
+  EXPECT_EQ(root_node->GetData().GetCheckedState(),
+            ax::mojom::CheckedState::kTrue);
+}
+
 }  // namespace testing
 }  // namespace flutter

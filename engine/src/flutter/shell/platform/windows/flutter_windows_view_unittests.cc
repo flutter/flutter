@@ -597,5 +597,95 @@ TEST(FlutterWindowsViewTest, WindowRepaintTests) {
   EXPECT_TRUE(schedule_frame_called);
 }
 
+// Ensure that checkboxes have their checked status set apropriately
+// Previously, only Radios could have this flag updated
+// Resulted in the issue seen at
+// https://github.com/flutter/flutter/issues/96218
+// This test ensures that the native state of Checkboxes on Windows,
+// specifically, is updated as desired.
+TEST(FlutterWindowsViewTest, CheckboxNativeState) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  // Enable semantics to instantiate accessibility bridge.
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  ASSERT_TRUE(bridge);
+
+  FlutterSemanticsNode root{sizeof(FlutterSemanticsNode), 0};
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 0;
+  root.custom_accessibility_actions_count = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  bridge->CommitUpdates();
+
+  auto root_node = bridge
+                       ->GetFlutterPlatformNodeDelegateFromID(
+                           AccessibilityBridge::kRootNodeId)
+                       .lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kCheckBox);
+  EXPECT_EQ(root_node->GetData().GetCheckedState(),
+            ax::mojom::CheckedState::kTrue);
+
+  // Get the IAccessible for the root node.
+  IAccessible* native_view = root_node->GetNativeViewAccessible();
+  ASSERT_TRUE(native_view != nullptr);
+
+  // Look up against the node itself (not one of its children)
+  VARIANT varchild = {};
+  varchild.vt = VT_I4;
+
+  // Verify the checkbox is checked.
+  varchild.lVal = CHILDID_SELF;
+  VARIANT native_state = {};
+  ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
+  EXPECT_TRUE(native_state.lVal & STATE_SYSTEM_CHECKED);
+
+  // Test unchecked too
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState);
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->CommitUpdates();
+  root_node = bridge
+                  ->GetFlutterPlatformNodeDelegateFromID(
+                      AccessibilityBridge::kRootNodeId)
+                  .lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kCheckBox);
+  EXPECT_EQ(root_node->GetData().GetCheckedState(),
+            ax::mojom::CheckedState::kFalse);
+
+  // Get the IAccessible for the root node.
+  native_view = root_node->GetNativeViewAccessible();
+
+  // Look up against the node itself (not one of its children)
+  varchild = {};
+  varchild.vt = VT_I4;
+
+  // Verify the checkbox is checked.
+  varchild.lVal = CHILDID_SELF;
+  native_state = {};
+  ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
+  EXPECT_FALSE(native_state.lVal & STATE_SYSTEM_CHECKED);
+}
+
 }  // namespace testing
 }  // namespace flutter
