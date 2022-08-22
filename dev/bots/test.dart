@@ -1764,7 +1764,7 @@ Future<void> _runDartTest(String workingDirectory, {
       for (final String testPath in testPaths)
         testPath,
     if (flag)
-      '--reporter=json',
+      '--file-reporter=json:my_file.json',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
