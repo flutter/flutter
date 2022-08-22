@@ -324,9 +324,9 @@ class MiniIconWithText extends StatelessWidget {
           child: Container(
             width: 16.0,
             height: 16.0,
-            decoration: BoxDecoration(
+            decoration: ShapeDecoration(
               color: Theme.of(context).primaryColor,
-              shape: BoxShape.circle,
+              shape: const CircleBorder(),
             ),
             child: Icon(icon, color: Colors.white, size: 12.0),
           ),

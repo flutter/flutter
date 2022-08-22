@@ -826,6 +826,8 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ZzQ_PWrFihg}
+///
 /// See also:
 ///
 ///  * [DropdownButtonFormField], which integrates with the [Form] widget.
@@ -1422,7 +1424,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // display the hint or nothing at all.
     final Widget innerItemsWidget;
     if (items.isEmpty) {
-      innerItemsWidget = Container();
+      innerItemsWidget = const SizedBox.shrink();
     } else {
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,

@@ -385,7 +385,9 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       onTapCancel: () => setState(() { _tapped = false; }),
       onTap: () async {
         await widget.onTap!();
-        setState(() { _tapped = false; });
+        if (mounted) {
+          setState(() { _tapped = false; });
+        }
       },
       behavior: HitTestBehavior.opaque,
       child: child,

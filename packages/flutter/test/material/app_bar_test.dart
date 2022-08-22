@@ -54,6 +54,13 @@ ScrollController primaryScrollController(WidgetTester tester) {
   return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
 }
 
+TextStyle? iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
 double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
 double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
@@ -394,7 +401,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -449,7 +456,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopRight(title).dx, 620 + 48 + 48);
+    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -544,6 +551,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar drawer icon has default color', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final bool useMaterial3 = themeData.useMaterial3;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    final Color iconColorM2 = themeData.colorScheme.onPrimary;
+    final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
+    expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
+  });
+
   testWidgets('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -560,6 +589,28 @@ void main() {
       tester.getSize(find.byIcon(Icons.menu)),
       equals(const Size(30, 30)),
     );
+  });
+
+  testWidgets('AppBar drawer icon is colored by iconTheme', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    const Color color = Color(0xFF2196F3);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+
+    expect(iconColor(), color);
   });
 
   testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
@@ -580,6 +631,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar endDrawer icon has default color', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final bool useMaterial3 = themeData.useMaterial3;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    final Color iconColorM2 = themeData.colorScheme.onPrimary;
+    final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
+    expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
+  });
+
   testWidgets('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -598,6 +671,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar endDrawer icon is colored by iconTheme', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    const Color color = Color(0xFF2196F3);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+
+    expect(iconColor(), color);
+  });
+
   testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -612,8 +707,8 @@ void main() {
     );
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), Offset.zero);
-    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
+    expect(tester.getTopLeft(hamburger), const Offset(4.0, 4.0));
+    expect(tester.getSize(hamburger), const Size(48.0, 48.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
@@ -642,12 +737,12 @@ void main() {
       ),
     );
 
-    final Finder addButton = find.byTooltip('Add');
+    final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
     expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
-    final Finder shareButton = find.byTooltip('Share');
+    final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
     expect(tester.getSize(shareButton), const Size(48.0, 56.0));
   });
@@ -2744,7 +2839,7 @@ void main() {
             backgroundColor: backgroundColor,
             leading: Icon(Icons.add_circle, key: leadingIconKey),
             title: const Text('title'),
-            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
           ),
         ),
       ),
@@ -2772,8 +2867,123 @@ void main() {
       find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
     ).data;
     expect(actionIconTheme.color, foregroundColor);
+
+    // Test icon color
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(leadingIconColor(), foregroundColor);
+    expect(actionIconColor(), foregroundColor);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/107305
+  group('Icons are colored correctly by IconTheme and ActionIconTheme in M3', () {
+    testWidgets('Icons and IconButtons are colored by IconTheme in M3', (WidgetTester tester) async {
+      const Color iconColor = Color(0xff00ff00);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+              colorScheme: const ColorScheme.light(), useMaterial3: true),
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: iconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {},)
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), iconColor);
+      expect(actionIconColor(), iconColor);
+      expect(actionIconButtonColor(), iconColor);
+    });
+
+    testWidgets('Action icons and IconButtons are colored by ActionIconTheme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
+
+      const Color actionsIconColor = Color(0xff0000ff);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              actionsIconTheme: const IconThemeData(color: actionsIconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), themeData.colorScheme.onSurface);
+      expect(actionIconColor(), actionsIconColor);
+      expect(actionIconButtonColor(), actionsIconColor);
+    });
+
+    testWidgets('The actionIconTheme property overrides iconTheme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
+
+      const Color overallIconColor = Color(0xff00ff00);
+      const Color actionsIconColor = Color(0xff0000ff);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: overallIconColor),
+              actionsIconTheme: const IconThemeData(color: actionsIconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), overallIconColor);
+      expect(actionIconColor(), actionsIconColor);
+      expect(actionIconButtonColor(), actionsIconColor);
+    });
+  });
 
   testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xff00ff00);
@@ -2793,7 +3003,7 @@ void main() {
             foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
             leading: Icon(Icons.add_circle, key: leadingIconKey),
             title: const Text('title'),
-            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
           ),
         ),
       ),
@@ -2813,6 +3023,13 @@ void main() {
       find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
     ).data;
     expect(actionIconTheme.color, foregroundColor);
+
+    // Test icon color
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(leadingIconColor(), foregroundColor);
+    expect(actionIconColor(), foregroundColor);
   });
 
   group('MaterialStateColor scrolledUnder', () {
@@ -3357,5 +3574,35 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
+  });
+
+  testWidgets('AppBar title with actions should have the same position regardless of centerTitle', (WidgetTester tester) async {
+    final Key titleKey = UniqueKey();
+    bool centerTitle = false;
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            centerTitle: centerTitle,
+            title: Container(
+              key: titleKey,
+              constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)),
+            ),
+            actions: const <Widget>[
+              SizedBox(width: 48.0),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Finder title = find.byKey(titleKey);
+    expect(tester.getTopLeft(title).dx, 16.0);
+
+    centerTitle = true;
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(title).dx, 16.0);
   });
 }
