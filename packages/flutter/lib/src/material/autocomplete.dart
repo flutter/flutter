@@ -75,7 +75,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   ///
   /// The default value is set to 200.
   final double optionsMaxHeight;
-  
+
   /// The maximum width used for the default Material options list widget.
   ///
   /// When [optionsViewBuilder] is `null`, this property sets the maximum width
