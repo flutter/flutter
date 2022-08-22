@@ -9,57 +9,6 @@ class WindowsVersionValidator extends DoctorValidator {
   const WindowsVersionValidator() : super('Windows Version');
   @override
   Future<ValidationResult> validate() async {
-//     const String x = r'''
-// Host Name:                 WINDOWS-EY1
-// OS Name:                   Microsoft Windows 10 Enterprise
-// OS Version:                10.0.19044 N/A Build 19044
-// OS Manufacturer:           Microsoft Corporation
-// OS Configuration:          Member Workstation
-// OS Build Type:             Multiprocessor Free
-// Registered Owner:          N/A
-// Registered Organization:   N/A
-// Product ID:                00329-00000-00003-AA898
-// Original Install Date:     8/4/2022, 2:51:28 PM
-// System Boot Time:          8/10/2022, 1:03:10 PM
-// System Manufacturer:       Google
-// System Model:              Google Compute Engine
-// System Type:               x64-based PC
-// Processor(s):              1 Processor(s) Installed.
-//                            [01]: AMD64 Family 23 Model 49 Stepping 0 AuthenticAMD ~2250 Mhz
-// BIOS Version:              Google Google, 6/29/2022
-// Windows Directory:         C:\\Windows
-// System Directory:          C:\\Windows\\system32
-// Boot Device:               \\Device\\HarddiskVolume2
-// System Locale:             en-us;English (United States)
-// Input Locale:              en-us;English (United States)
-// Time Zone:                 (UTC-08:00) Pacific Time (US & Canada)
-// Total Physical Memory:     32,764 MB
-// Available Physical Memory: 17,852 MB
-// Virtual Memory: Max Size:  33,788 MB
-// Virtual Memory: Available: 18,063 MB
-// Virtual Memory: In Use:    15,725 MB
-// Page File Location(s):     C:\\pagefile.sys
-// Domain:                    ad.corp.google.com
-// Logon Server:              \\CBF-DC-8
-// Hotfix(s):                 7 Hotfix(s) Installed.
-//                            [01]: KB5013624
-//                            [02]: KB5003791
-//                            [03]: KB5012170
-//                            [04]: KB5016616
-//                            [05]: KB5014032
-//                            [06]: KB5014671
-//                            [07]: KB5015895
-// Network Card(s):           1 NIC(s) Installed.
-//                            [01]: Google VirtIO Ethernet Adapter
-//                                  Connection Name: Ethernet
-//                                  DHCP Enabled:    Yes
-//                                  DHCP Server:     169.254.169.254
-//                                  IP address(es)
-//                                  [01]: 192.168.27.102
-//                                  [02]: fe80::c16e:110a:e337:d32d
-// Hyper-V Requirements:      A hypervisor has been detected. Features required for Hyper-V will not be displayed.
-//   ''';
-
     final ProcessResult result = await Process.run('systeminfo', <String>[]);
     final String resultStdout = result.stdout as String;
 
@@ -69,7 +18,7 @@ class WindowsVersionValidator extends DoctorValidator {
       '8',
     ];
 
-    final List<String> elements = resultStdout.split('\n');
+    final List<String> systemInfoElements = resultStdout.split('\n');
 
     // Regular expression pattern for identifying
     // semantic versioned strings
@@ -88,8 +37,8 @@ class WindowsVersionValidator extends DoctorValidator {
     bool versionText = false;
     bool versionSemver = false;
     String? version;
-    for (int i = 0; i < elements.length; i++) {
-      final String curLine = elements.elementAt(i);
+    for (int i = 0; i < systemInfoElements.length; i++) {
+      final String curLine = systemInfoElements.elementAt(i);
       final List<String> lineElems = curLine.split(' ');
 
       for (int j = 0; j < lineElems.length; j++) {
