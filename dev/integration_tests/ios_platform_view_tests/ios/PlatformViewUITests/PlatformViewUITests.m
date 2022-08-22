@@ -23,7 +23,7 @@ static const CGFloat kStandardTimeOut = 60.0;
 @implementation PlatformViewUITests
 
 - (void)setUp {
-  [super setup];
+  [super setUp];
   self.continueAfterFailure = NO;
 
   self.app = [[XCUIApplication alloc] init];
