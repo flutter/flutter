@@ -89,6 +89,10 @@ abstract class SceneBuilder {
     ShaderMaskEngineLayer? oldLayer,
     FilterQuality filterQuality = FilterQuality.low,
   });
+  @Deprecated(
+    'Use a clip and canvas operations directly (See RenderPhysicalModel). '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   PhysicalShapeEngineLayer pushPhysicalShape({
     required Path path,
     required double elevation,
