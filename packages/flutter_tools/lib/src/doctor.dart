@@ -119,7 +119,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
     _validators = <DoctorValidator>[
-      if (platform.isWindows) const WindowsVersionValidator(),
+      if (platform.isWindows) WindowsVersionValidator(
+        processManager: globals.processManager,
+      ),
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,

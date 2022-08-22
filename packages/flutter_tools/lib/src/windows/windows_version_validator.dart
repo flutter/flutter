@@ -1,15 +1,21 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:io';
+import 'package:process/process.dart';
 
+import '../base/io.dart';
 import '../doctor_validator.dart';
 
 class WindowsVersionValidator extends DoctorValidator {
-  const WindowsVersionValidator() : super('Windows Version');
+  const WindowsVersionValidator({required ProcessManager processManager})
+      : _processManager = processManager,
+        super('Windows Version');
+
+  final ProcessManager _processManager;
+
   @override
   Future<ValidationResult> validate() async {
-    final ProcessResult result = await Process.run('systeminfo', <String>[]);
+    final ProcessResult result = _processManager.runSync(<String>['systeminfo']);
     final String resultStdout = result.stdout as String;
 
     // Define the major versions that are not supported
@@ -76,7 +82,8 @@ class WindowsVersionValidator extends DoctorValidator {
       windowsVersionStatus = ValidationType.installed;
       statusInfo = 'Installed version of Windows is version 10 or higher';
     } else {
-      statusInfo = 'Unable to confirm if installed Windows version is 10 or greater';
+      statusInfo =
+          'Unable to confirm if installed Windows version is 10 or greater';
     }
 
     return ValidationResult(
