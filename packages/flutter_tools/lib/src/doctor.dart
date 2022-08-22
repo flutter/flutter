@@ -42,6 +42,7 @@ import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
+import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
 
 abstract class DoctorValidatorsProvider {
@@ -118,6 +119,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
     _validators = <DoctorValidator>[
+      if (platform.isWindows) const WindowsVersionValidator(),
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
