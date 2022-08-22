@@ -916,6 +916,28 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [PageView]
 ///   * [NestedScrollView]
 ///   * [DropdownButton]
+///
+/// Default Scrollbars can be disabled for the whole app by setting a
+/// [ScrollBehavior] with `scrollbars` set to false.
+///
+/// {@tool snippet}
+/// ```dart
+/// MaterialApp(
+///   scrollBehavior: const MaterialScrollBehavior()
+///     .copyWith(scrollbars: false),
+///   home: Scaffold(
+///     appBar: AppBar(title: const Text('Home')),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows how to disable the default Scrollbar for a [Scrollable]
+/// widget to avoid duplicate Scrollbars when runnung on desktop platforms.
+///
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
+/// {@end-tool}
 /// {@endtemplate}
 ///
 /// {@tool dartpad}

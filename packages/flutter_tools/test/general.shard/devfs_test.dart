@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -30,6 +29,7 @@ import '../src/context.dart';
 import '../src/fake_http_client.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+import '../src/logging_logger.dart';
 
 final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
   method: '_createDevFS',
@@ -713,27 +713,6 @@ class FakeDevFSWriter implements DevFSWriter {
   @override
   Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent) async {
     written = true;
-  }
-}
-
-class LoggingLogger extends BufferLogger {
-  LoggingLogger() : super.test();
-
-  List<String> messages = <String>[];
-
-  @override
-  void printError(String message, {StackTrace? stackTrace, bool? emphasis, TerminalColor? color, int? indent, int? hangingIndent, bool? wrap}) {
-    messages.add(message);
-  }
-
-  @override
-  void printStatus(String message, {bool? emphasis, TerminalColor? color, bool? newline, int? indent, int? hangingIndent, bool? wrap}) {
-    messages.add(message);
-  }
-
-  @override
-  void printTrace(String message) {
-    messages.add(message);
   }
 }
 

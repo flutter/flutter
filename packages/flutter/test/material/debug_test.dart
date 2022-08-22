@@ -329,6 +329,7 @@ void main() {
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
+      '     KeyedSubtree-[GlobalKey#00000]\n'
       '     FractionalTranslation\n'
       '     SlideTransition\n'
       '     Listener\n'

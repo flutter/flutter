@@ -521,7 +521,7 @@ class ResidentWebRunner extends ResidentRunner {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
       final ChromeTab chromeTab = await (chrome.chromeConnection.getTab((ChromeTab chromeTab) {
         return !chromeTab.url.startsWith('chrome-extension');
-      }) as FutureOr<ChromeTab>);
+      }, retryFor: const Duration(seconds: 5)) as FutureOr<ChromeTab>);
       if (chromeTab == null) {
         throwToolExit('Failed to connect to Chrome instance.');
       }

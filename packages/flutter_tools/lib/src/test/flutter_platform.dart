@@ -29,6 +29,7 @@ import 'integration_test_device.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 import 'test_device.dart';
+import 'test_time_recorder.dart';
 import 'watcher.dart';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
@@ -63,6 +64,7 @@ FlutterPlatform installHook({
   PlatformPluginRegistration? platformPluginRegistration,
   Device? integrationTestDevice,
   String? integrationTestUserIdentifier,
+  TestTimeRecorder? testTimeRecorder,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
@@ -92,6 +94,7 @@ FlutterPlatform installHook({
     icudtlPath: icudtlPath,
     integrationTestDevice: integrationTestDevice,
     integrationTestUserIdentifier: integrationTestUserIdentifier,
+    testTimeRecorder: testTimeRecorder,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -286,6 +289,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.icudtlPath,
     this.integrationTestDevice,
     this.integrationTestUserIdentifier,
+    this.testTimeRecorder,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -301,6 +305,7 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri? projectRootDirectory;
   final FlutterProject? flutterProject;
   final String? icudtlPath;
+  final TestTimeRecorder? testTimeRecorder;
 
   /// The device to run the test on for Integration Tests.
   ///
@@ -454,7 +459,7 @@ class FlutterPlatform extends PlatformPlugin {
         // running this with a debugger attached. Initialize the resident
         // compiler in this case.
         if (debuggingOptions.startPaused) {
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
+          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath, testTimeRecorder: testTimeRecorder);
           final Uri testUri = globals.fs.file(testPath).uri;
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler!.compile(testUri));
@@ -467,7 +472,7 @@ class FlutterPlatform extends PlatformPlugin {
         // Integration test device takes care of the compilation.
         if (integrationTestDevice == null) {
           // Lazily instantiate compiler so it is built only if it is actually used.
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject);
+          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, testTimeRecorder: testTimeRecorder);
           mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 
           if (mainDart == null) {
@@ -479,6 +484,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
+      final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
       final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart!);
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
@@ -512,7 +518,10 @@ class FlutterPlatform extends PlatformPlugin {
           );
 
           globals.printTrace('test $ourTestCount: finished');
+          testTimeRecorder?.stop(TestTimePhases.Run, testTimeRecorderStopwatch!);
+          final Stopwatch? watchTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.WatcherFinishedTest);
           await watcher?.handleFinishedTest(testDevice);
+          testTimeRecorder?.stop(TestTimePhases.WatcherFinishedTest, watchTestTimeRecorderStopwatch!);
         }()
       ]);
     } on Exception catch (error, stackTrace) {
