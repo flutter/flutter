@@ -126,6 +126,9 @@ class RoundedRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
+        if (side.width == 0.0) {
+          break;
+        }
         final Paint paint = Paint()
           ..color = side.color;
         final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);

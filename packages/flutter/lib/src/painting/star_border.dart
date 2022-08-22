@@ -404,6 +404,9 @@ class StarBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
+        if (side.width == 0.0) {
+          break;
+        }
         final Rect adjustedRect = rect.inflate(side.strokeOffset / 2);
         final Path path = _StarGenerator(
           points: points,

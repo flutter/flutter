@@ -148,10 +148,12 @@ class ContinuousRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
+        if (side.width == 0.0) {
+          break;
+        }
         final Path path = getOuterPath(rect, textDirection: textDirection);
         final Paint paint = side.toPaint()..strokeJoin = StrokeJoin.round;
         canvas.drawPath(path, paint);
-        break;
     }
   }
 

@@ -114,6 +114,9 @@ class StadiumBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
+        if (side.width == 0.0) {
+          break;
+        }
         final Radius radius = Radius.circular(rect.shortestSide / 2);
         final RRect borderRect = RRect.fromRectAndRadius(rect, radius);
         canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
