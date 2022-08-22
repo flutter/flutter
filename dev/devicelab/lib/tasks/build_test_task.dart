@@ -85,10 +85,10 @@ abstract class BuildTestTask {
   List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) => throw UnimplementedError('getTestArgs is not implemented');
 
   /// Copy artifacts to [applicationBinaryPath] if specified.
-  /// 
+  ///
   /// This is needed when running from CI, so that LUCI recipes know where to locate and upload artifacts to GCS.
   void copyArtifacts() => throw UnimplementedError('copyArtifacts is not implemented');
-  
+
   /// Logic to construct [TaskResult] from this test's results.
   Future<TaskResult> parseTaskResult() => throw UnimplementedError('parseTaskResult is not implemented');
 
