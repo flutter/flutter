@@ -15,7 +15,26 @@ class WindowsVersionValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final ProcessResult result = _processManager.runSync(<String>['systeminfo']);
+    final ProcessResult result;
+    try {
+      result = _processManager.runSync(<String>['systeminfo']);
+    } on ProcessException {
+      return const ValidationResult(
+        ValidationType.missing,
+        <ValidationMessage>[],
+        statusInfo:
+            'Unable to run Windows version check using built-in `systeminfo`',
+      );
+    }
+
+    if (result.exitCode != 0) {
+      return const ValidationResult(
+        ValidationType.missing,
+        <ValidationMessage>[],
+        statusInfo: 'Exit status from running `systeminfo` was unsuccessful',
+      );
+    }
+
     final String resultStdout = result.stdout as String;
 
     // Define the major versions that are not supported
@@ -43,13 +62,11 @@ class WindowsVersionValidator extends DoctorValidator {
     bool versionText = false;
     bool versionSemver = false;
     String? version;
-    for (int i = 0; i < systemInfoElements.length; i++) {
-      final String curLine = systemInfoElements.elementAt(i);
+    for (final String curLine in systemInfoElements) {
       final List<String> lineElems = curLine.split(' ');
 
-      for (int j = 0; j < lineElems.length; j++) {
-        final String elem = lineElems.elementAt(j);
-        final bool match = regex.hasMatch(lineElems.elementAt(j));
+      for (final String elem in lineElems){
+        final bool match = regex.hasMatch(elem);
 
         if (match) {
           versionSemver = true;
@@ -74,7 +91,7 @@ class WindowsVersionValidator extends DoctorValidator {
       version = null;
     }
 
-    ValidationType windowsVersionStatus = ValidationType.missing;
+    final ValidationType windowsVersionStatus;
     String statusInfo;
     if (versionList.length == 1 &&
         !unsupportedVersions
@@ -82,6 +99,7 @@ class WindowsVersionValidator extends DoctorValidator {
       windowsVersionStatus = ValidationType.installed;
       statusInfo = 'Installed version of Windows is version 10 or higher';
     } else {
+      windowsVersionStatus = ValidationType.missing;
       statusInfo =
           'Unable to confirm if installed Windows version is 10 or greater';
     }
