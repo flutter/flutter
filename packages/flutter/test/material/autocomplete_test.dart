@@ -306,6 +306,35 @@ void main() {
     /// expected desired Height =150.0
     expect(resultingHeight, equals(desiredHeight));
   });
+  
+  testWidgets('the options width restricts to max desired width', (WidgetTester tester) async {
+    const double desiredWidth = 200.0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+      body: Autocomplete<String>(
+        optionsMaxWidth: desiredWidth,
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          return kOptions.where((String option) {
+            return option.contains(textEditingValue.text.toLowerCase());
+          });
+        },
+      ),
+    )));
+
+    /// entering "a" returns at least one item (9 here).
+    /// this display the default ListView which should
+    /// be limited to `desiredWidth=200`,
+    final Finder listFinder = find.byType(ListView);
+    final Finder inputFinder = find.byType(TextFormField);
+    await tester.tap(inputFinder);
+    await tester.enterText(inputFinder, 'a');
+    await tester.pump();
+    final Size baseSize = tester.getSize(listFinder);
+    final double resultingWidth = baseSize.width;
+
+    /// expected desired Width = 200.0
+    expect(resultingWidth, equals(desiredWidth));
+  });
 
   testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
     // Returns a Future with the height of the default [Autocomplete] options widget
