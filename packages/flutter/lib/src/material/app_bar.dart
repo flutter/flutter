@@ -998,11 +998,16 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      leading = Container(
-        alignment: Alignment.center,
-        constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
-        child: leading,
-      );
+      leading = theme.useMaterial3
+        ? Container(
+          alignment: Alignment.center,
+          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
+          child: leading,
+        )
+        : ConstrainedBox(
+          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
+          child: leading,
+        );
     }
 
     Widget? title = widget.title;
