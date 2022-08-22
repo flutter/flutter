@@ -244,6 +244,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void _checkTapDown(PointerDownEvent event) {
     _initialButtons = event.buttons;
     _state = _DragState.possible;
+
+    if (dragStartBehavior == DragStartBehavior.down) {
+      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+    }
+
     TapDownDetails details = TapDownDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
@@ -295,7 +300,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   void _checkStart(PointerMoveEvent event) {
     _state = _DragState.accepted;
-    _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+    
+    if (dragStartBehavior == DragStartBehavior.start) {
+      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+    }
     DragStartDetails details = DragStartDetails(
       sourceTimeStamp: event.timeStamp,
       globalPosition: event.position,
