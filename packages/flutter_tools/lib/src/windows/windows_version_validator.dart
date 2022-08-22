@@ -69,16 +69,20 @@ class WindowsVersionValidator extends DoctorValidator {
     }
 
     ValidationType windowsVersionStatus = ValidationType.missing;
+    String statusInfo;
     if (versionList.length == 1 &&
         !unsupportedVersions
             .contains(versionList.elementAt(0).split('.').elementAt(0))) {
       windowsVersionStatus = ValidationType.installed;
+      statusInfo = 'Installed version of Windows is version 10 or higher';
+    } else {
+      statusInfo = 'Unable to confirm if installed Windows version is 10 or greater';
     }
 
     return ValidationResult(
       windowsVersionStatus,
       const <ValidationMessage>[],
-      statusInfo: 'Installed version of Windows is version 10 or higher',
+      statusInfo: statusInfo,
     );
   }
 }
