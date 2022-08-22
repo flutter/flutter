@@ -10,7 +10,7 @@ import 'typography.dart';
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in Material Design
-/// (e.g., button, caption). Rather than creating a [TextTheme] directly,
+/// (e.g., labelLarge, bodySmall). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
@@ -336,14 +336,14 @@ class TextTheme with Diagnosticable {
   )
   TextStyle? get subtitle1 => titleMedium;
 
-  /// For medium emphasis text that's a little smaller than [subtitle1].
+  /// For medium emphasis text that's a little smaller than [titleMedium].
   @Deprecated(
     'Use titleSmall instead. '
     'This feature was deprecated after v3.1.0-0.0.pre.',
   )
   TextStyle? get subtitle2 => titleSmall;
 
-  /// Used for emphasizing text that would otherwise be [bodyText2].
+  /// Used for emphasizing text that would otherwise be [bodyMedium].
   @Deprecated(
     'Use bodyLarge instead. '
     'This feature was deprecated after v3.1.0-0.0.pre.',

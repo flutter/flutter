@@ -199,7 +199,7 @@ enum MaterialTapTargetSize {
 /// its default background color and the [FloatingActionButton] widget
 /// uses the color scheme's [ColorScheme.secondary] for its default
 /// background. By default, the [Text] widget uses
-/// [TextTheme.bodyText2], and the color of that [TextStyle] has been
+/// [TextTheme.bodyMedium], and the color of that [TextStyle] has been
 /// changed to purple.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
