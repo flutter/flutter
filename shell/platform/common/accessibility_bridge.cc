@@ -375,7 +375,8 @@ void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
   node_data.AddIntAttribute(ax::mojom::IntAttribute::kTextSelStart, sel_start);
   node_data.AddIntAttribute(ax::mojom::IntAttribute::kTextSelEnd, sel_end);
 
-  if (node_data.role == ax::mojom::Role::kRadioButton) {
+  if (node_data.role == ax::mojom::Role::kRadioButton ||
+      node_data.role == ax::mojom::Role::kCheckBox) {
     node_data.AddIntAttribute(
         ax::mojom::IntAttribute::kCheckedState,
         static_cast<int32_t>(
