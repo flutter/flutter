@@ -613,32 +613,39 @@ class FloatingActionButton extends StatelessWidget {
       highlightElevation: highlightElevation,
     );
 
-    Widget result = ElevatedButton(
-      style: ButtonStyle(
-        textStyle: MaterialStateProperty.all<TextStyle?>(extendedTextStyle),
-        backgroundColor: MaterialStateProperty.all<Color?>(backgroundColor),
-        foregroundColor: MaterialStateProperty.all<Color?>(foregroundColor),
-        overlayColor: _EffectiveOverlay(
-          hoverColor: hoverColor,
-          focusColor: focusColor,
-          splashColor: splashColor,
+    Widget result = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: ShapeDecoration(shape: shape),
+      child: ElevatedButton(
+        style: ButtonStyle(
+          textStyle: MaterialStateProperty.all<TextStyle?>(extendedTextStyle),
+          backgroundColor: MaterialStateProperty.all<Color?>(backgroundColor),
+          foregroundColor: MaterialStateProperty.all<Color?>(foregroundColor),
+          overlayColor: _EffectiveOverlay(
+            hoverColor: hoverColor,
+            focusColor: focusColor,
+            splashColor: splashColor,
+          ),
+          elevation: elevationValue,
+          padding: MaterialStateProperty.all<EdgeInsetsGeometry?>(EdgeInsets.zero),
+          minimumSize: MaterialStateProperty.all<Size?>(Size(sizeConstraints.minWidth, sizeConstraints.minHeight)),
+          maximumSize: MaterialStateProperty.all<Size?>(Size(sizeConstraints.maxWidth, sizeConstraints.maxHeight)),
+          shape: MaterialStateProperty.all<OutlinedBorder?>(shape is! OutlinedBorder
+            ? const RoundedRectangleBorder()
+            : shape as OutlinedBorder?,
+          ),
+          mouseCursor: _EffectiveMouseCursor(mouseCursor, floatingActionButtonTheme.mouseCursor),
+          visualDensity: VisualDensity.standard,
+          tapTargetSize: materialTapTargetSize,
+          animationDuration: kThemeChangeDuration,
+          enableFeedback: enableFeedback,
         ),
-        elevation: elevationValue,
-        padding: MaterialStateProperty.all<EdgeInsetsGeometry?>(EdgeInsets.zero),
-        minimumSize: MaterialStateProperty.all<Size?>(Size(sizeConstraints.minWidth, sizeConstraints.minHeight)),
-        maximumSize: MaterialStateProperty.all<Size?>(Size(sizeConstraints.maxWidth, sizeConstraints.maxHeight)),
-        shape: MaterialStateProperty.all<OutlinedBorder?>(shape as OutlinedBorder),
-        mouseCursor: _EffectiveMouseCursor(mouseCursor, floatingActionButtonTheme.mouseCursor),
-        visualDensity: VisualDensity.standard,
-        tapTargetSize: materialTapTargetSize,
-        animationDuration: kThemeChangeDuration,
-        enableFeedback: enableFeedback,
+        onPressed: onPressed,
+        clipBehavior: clipBehavior,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        child: resolvedChild,
       ),
-      onPressed: onPressed,
-      clipBehavior: clipBehavior,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      child: resolvedChild,
     );
 
     if (tooltip != null) {

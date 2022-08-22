@@ -1068,6 +1068,63 @@ void main() {
     expect(material.textStyle, style.copyWith(color: const Color(0xffffffff)));
   });
 
+  testWidgets(
+    'FloatingActionButton defaults to rectangular shape when Border is provided to the shape parameter',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              shape: const Border(),
+              child: const Icon(Icons.add),
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+
+      final Material material = tester.widget(find.descendant(
+        of: find.byType(ElevatedButton),
+        matching: find.byType(Material),
+      ));
+
+      expect(material.shape, const RoundedRectangleBorder());
+  });
+
+  testWidgets('FloatingActionButton can customize with Border', (WidgetTester tester) async {
+    const BorderSide borderSide = BorderSide(width: 2.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            shape: const Border(
+              left: borderSide,
+              top: borderSide,
+              right: borderSide,
+              bottom: borderSide,
+            ),
+            child: const Icon(Icons.add),
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
+
+    final ShapeDecoration decoration = decoratedBox.decoration as ShapeDecoration;
+    expect(
+      decoration.shape,
+      const Border(
+        left: borderSide,
+        top: borderSide,
+        right: borderSide,
+        bottom: borderSide,
+      ),
+    );
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
