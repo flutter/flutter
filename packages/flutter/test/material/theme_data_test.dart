@@ -94,8 +94,8 @@ void main() {
     final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.textTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.textTheme.headline6!.color, typography.white.headline6!.color);
+    expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
+    expect(darkTheme.textTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
@@ -103,8 +103,8 @@ void main() {
     final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
+    expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);
+    expect(darkTheme.primaryTextTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('Default icon theme contrasts with brightness', () {
@@ -112,8 +112,8 @@ void main() {
     final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.textTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.textTheme.headline6!.color, typography.white.headline6!.color);
+    expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
+    expect(darkTheme.textTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
@@ -121,8 +121,8 @@ void main() {
     final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
+    expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);
+    expect(darkTheme.primaryTextTheme.titleLarge!.color, typography.white.titleLarge!.color);
   });
 
   test('light, dark and fallback constructors support useMaterial3', () {
@@ -159,15 +159,15 @@ void main() {
     final ThemeData themeData = ThemeData(
       fontFamily: 'Ahem',
       textTheme: const TextTheme(
-        headline6: TextStyle(fontFamily: 'Roboto'),
+        titleLarge: TextStyle(fontFamily: 'Roboto'),
       ),
     );
 
-    expect(themeData.textTheme.bodyText1!.fontFamily, equals('Ahem'));
-    expect(themeData.primaryTextTheme.headline3!.fontFamily, equals('Ahem'));
+    expect(themeData.textTheme.bodyLarge!.fontFamily, equals('Ahem'));
+    expect(themeData.primaryTextTheme.displaySmall!.fontFamily, equals('Ahem'));
 
     // Shouldn't override the specified style's family
-    expect(themeData.textTheme.headline6!.fontFamily, equals('Roboto'));
+    expect(themeData.textTheme.titleLarge!.fontFamily, equals('Roboto'));
   });
 
   test('Can estimate brightness - directly', () {

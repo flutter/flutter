@@ -1761,7 +1761,7 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, `baseStyle` defaults to the `subtitle1` style from the
+  /// If null, `baseStyle` defaults to the `titleMedium` style from the
   /// current [Theme], see [ThemeData.textTheme].
   ///
   /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
@@ -2029,7 +2029,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
       .merge(style)
@@ -2044,7 +2044,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
       .merge(style);
@@ -2060,7 +2060,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .copyWith(height: 1)
       .merge(defaultTextStyle)
@@ -4357,19 +4357,19 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.caption!.copyWith(color: Colors.transparent);
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
 
-    return themeData.textTheme.caption!.copyWith(color: themeData.hintColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.hintColor);
   });
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.caption!.copyWith(color: Colors.transparent);
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
-    return themeData.textTheme.caption!.copyWith(color: themeData.errorColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.errorColor);
   });
 
   @override

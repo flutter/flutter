@@ -80,55 +80,56 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var TextTheme textTheme = TextTheme(
-    headline1: displayStyle4,
-    headline2: displayStyle3,
-    headline3: displayStyle2,
-    headline4: displayStyle1,
-    headline5: headlineStyle,
-    headline6: titleStyle,
-    subtitle1: subheadStyle,
-    bodyText1: body2Style,
-    bodyText2: body1Style,
-    caption: captionStyle,
-    button: buttonStyle,
-    subtitle2: subtitleStyle,
-    overline: overlineStyle,
+    displayLarge: displayStyle4,
+    displayMedium: displayStyle3,
+    displaySmall: displayStyle2,
+    headlineMedium: displayStyle1,
+    headlineSmall: headlineStyle,
+    titleLarge: titleStyle,
+    titleMedium: subheadStyle,
+    bodyLarge: body2Style,
+    bodyMedium: body1Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    titleSmall: subtitleStyle,
+    labelSmall: overlineStyle,
   );
   var TextTheme textTheme = TextTheme(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var TextTheme copiedTextTheme = TextTheme.copyWith(
-    headline1: displayStyle4,
-    headline2: displayStyle3,
-    headline3: displayStyle2,
-    headline4: displayStyle1,
-    headline5: headlineStyle,
-    headline6: titleStyle,
-    subtitle1: subheadStyle,
-    bodyText1: body2Style,
-    bodyText2: body1Style,
-    caption: captionStyle,
-    button: buttonStyle,
-    subtitle2: subtitleStyle,
-    overline: overlineStyle,
+    displayLarge: displayStyle4,
+    displayMedium: displayStyle3,
+    displaySmall: displayStyle2,
+    headlineMedium: displayStyle1,
+    headlineSmall: headlineStyle,
+    titleLarge: titleStyle,
+    titleMedium: subheadStyle,
+    bodyLarge: body2Style,
+    bodyMedium: body1Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    titleSmall: subtitleStyle,
+    labelSmall: overlineStyle,
   );
   var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var style;
-  style = textTheme.headline1;
-  style = textTheme.headline2;
-  style = textTheme.headline3;
-  style = textTheme.headline4;
-  style = textTheme.headline5;
-  style = textTheme.headline6;
-  style = textTheme.subtitle1;
-  style = textTheme.bodyText1;
-  style = textTheme.bodyText2;
-  style = textTheme.caption;
-  style = textTheme.button;
-  style = textTheme.subtitle2;
-  style = textTheme.overline;
+  style = textTheme.displayLarge;
+  style = textTheme.displayMedium;
+  style = textTheme.displaySmall;
+  style = textTheme.headlineMedium;
+  style = textTheme.headlineSmall;
+  style = textTheme.titleLarge;
+  style = textTheme.titleMedium;
+  style = textTheme.bodyLarge;
+  style = textTheme.bodyMedium;
+  style = textTheme.bodySmall;
+  style = textTheme.labelLarge;
+  style = textTheme.titleSmall;
+  style = textTheme.labelSmall;
+
 
   // Changes made in https://github.com/flutter/flutter/pull/68736
   MediaQuery.maybeOf(context);
@@ -441,18 +442,18 @@ void main() {
 
   TextTheme myTextTheme = TextTheme();
   AppBar appBar = AppBar();
-  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
-  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
 
   SliverAppBar sliverAppBar = SliverAppBar();
-  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
-  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
 
   AppBarTheme appBarTheme = AppBarTheme();
-  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
-  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
-  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
-  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyText2, titleTextStyle: myTextTheme.headline6);
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
 
   AppBar appBar = AppBar();
   appBar = AppBar();
@@ -795,4 +796,56 @@ void main() {
   themeData = ThemeData.raw();
   themeData = themeData.copyWith();
   themeData.selectedRowColor; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+    var TextTheme textTheme = TextTheme(
+      displayLarge: headline1Style,
+      displayMedium: headline2Style,
+      displaySmall: headline3Style,
+      headlineMedium: headline4Style,
+      headlineSmall: headline5Style,
+      titleLarge: headline6Style,
+      titleMedium: subtitle1Style,
+      titleSmall: subtitle2Style,
+      bodyLarge: bodyText1Style,
+      bodyMedium: bodyText2Style,
+      bodySmall: captionStyle,
+      labelLarge: buttonStyle,
+      labelSmall: overlineStyle,
+    );
+    var TextTheme textTheme = TextTheme(error: '');
+
+    // Changes made in https://github.com/flutter/flutter/pull/109817
+    var TextTheme copiedTextTheme = TextTheme.copyWith(
+      displayLarge: headline1Style,
+      displayMedium: headline2Style,
+      displaySmall: headline3Style,
+      headlineMedium: headline4Style,
+      headlineSmall: headline5Style,
+      titleLarge: headline6Style,
+      titleMedium: subtitle1Style,
+      titleSmall: subtitle2Style,
+      bodyLarge: bodyText1Style,
+      bodyMedium: bodyText2Style,
+      bodySmall: captionStyle,
+      labelLarge: buttonStyle,
+      labelSmall: overlineStyle,
+    );
+    var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+
+    // Changes made in https://github.com/flutter/flutter/pull/109817
+    var style;
+    style = textTheme.displayLarge;
+    style = textTheme.displayMedium;
+    style = textTheme.displaySmall;
+    style = textTheme.headlineMedium;
+    style = textTheme.headlineSmall;
+    style = textTheme.titleLarge;
+    style = textTheme.titleMedium;
+    style = textTheme.titleSmall;
+    style = textTheme.bodyLarge;
+    style = textTheme.bodyMedium;
+    style = textTheme.bodySmall;
+    style = textTheme.labelLarge;
+    style = textTheme.labelSmall;
 }
