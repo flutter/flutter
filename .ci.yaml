@@ -1515,15 +1515,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: cubic_bezier_perf__e2e_summary
 
-  - name: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
-
   - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1966,24 +1957,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_with_semantics
-
-  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: flutter_gallery_sksl_warmup__transition_perf
-
-  - name: Linux_android flutter_gallery_sksl_warmup__transition_perf_e2e
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: flutter_gallery_sksl_warmup__transition_perf_e2e
 
   - name: Linux_samsung_s10 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -3093,15 +3066,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
-
-  - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: cubic_bezier_perf_ios_sksl_warmup__timeline_summary
 
   - name: Mac_ios external_ui_integration_test_ios
     bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
