@@ -7,6 +7,9 @@ import '../base/io.dart';
 import '../doctor_validator.dart';
 
 class WindowsVersionValidator extends DoctorValidator {
+  /// Validator to be run with `flutter doctor` to check
+  /// Windows host machines if they are running supported versions,
+  /// current unsupported versions = 7, 8
   const WindowsVersionValidator({required ProcessManager processManager})
       : _processManager = processManager,
         super('Windows Version');
