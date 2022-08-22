@@ -108,7 +108,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
           onSelected: onSelected,
           options: options,
           maxOptionsHeight: optionsMaxHeight,
-          maxOptionsWidht: optionsMaxWidth,
+          maxOptionsWidth: optionsMaxWidth,
         );
       },
       onSelected: onSelected,
@@ -150,7 +150,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.onSelected,
     required this.options,
     required this.maxOptionsHeight,
-    required this.maxOptionsWidht,
+    required this.maxOptionsWidth,
   });
 
   final AutocompleteOptionToString<T> displayStringForOption;
