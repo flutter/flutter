@@ -174,16 +174,16 @@ void main() {
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
     expect(singleTapUpCount, 0);
-    expect(tapCount, 0);
-    expect(singleTapCancelCount, 0);
+    expect(tapCount, 1);//changed
+    expect(singleTapCancelCount, 1);//changed
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
 
     await gesture.up();
     // Nothing else happens on up.
     expect(singleTapUpCount, 0);
-    expect(tapCount, 0);
-    expect(singleTapCancelCount, 0);
+    expect(tapCount, 1);//changed
+    expect(singleTapCancelCount, 1);//changed
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
@@ -756,12 +756,18 @@ void main() {
     final Offset position = textOffsetToPosition(tester, 4);
 
     await tester.tapAt(position);
-    await tester.pump();
+    // Don't do a double tap drag.
+    await tester.pump(Duration(milliseconds: 500));
 
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
 
     final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+
+    // Checking that double-tap was not registered.
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
     addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(textOffsetToPosition(tester, 7));
