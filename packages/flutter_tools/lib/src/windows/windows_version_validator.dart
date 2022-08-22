@@ -70,9 +70,8 @@ class WindowsVersionValidator extends DoctorValidator {
 
     ValidationType windowsVersionStatus = ValidationType.missing;
     if (versionList.length == 1 &&
-        unsupportedVersions
+        !unsupportedVersions
             .contains(versionList.elementAt(0).split('.').elementAt(0))) {
-    } else if (versionList.length == 1) {
       windowsVersionStatus = ValidationType.installed;
     }
 
