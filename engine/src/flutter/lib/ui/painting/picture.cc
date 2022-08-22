@@ -95,21 +95,11 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<DisplayList> display_list,
                                       Dart_Handle raw_image_callback) {
   return RasterizeToImage(
       [display_list](SkCanvas* canvas) { display_list->RenderTo(canvas); },
-      nullptr, width, height, raw_image_callback);
-}
-
-Dart_Handle Picture::RasterizeLayerTreeToImage(
-    std::shared_ptr<LayerTree> layer_tree,
-    uint32_t width,
-    uint32_t height,
-    Dart_Handle raw_image_callback) {
-  return RasterizeToImage(nullptr, std::move(layer_tree), width, height,
-                          raw_image_callback);
+      width, height, raw_image_callback);
 }
 
 Dart_Handle Picture::RasterizeToImage(
     std::function<void(SkCanvas*)> draw_callback,
-    std::shared_ptr<LayerTree> layer_tree,
     uint32_t width,
     uint32_t height,
     Dart_Handle raw_image_callback) {
@@ -168,25 +158,10 @@ Dart_Handle Picture::RasterizeToImage(
 
   // Kick things off on the raster rask runner.
   fml::TaskRunner::RunNowOrPostTask(
-      raster_task_runner,
-      [ui_task_runner, snapshot_delegate, draw_callback, picture_bounds,
-       ui_task, layer_tree = std::move(layer_tree)] {
-        sk_sp<SkImage> raster_image;
-        if (layer_tree) {
-          auto display_list = layer_tree->Flatten(
-              SkRect::MakeWH(picture_bounds.width(), picture_bounds.height()),
-              snapshot_delegate.get()->GetTextureRegistry(),
-              snapshot_delegate.get()->GetGrContext());
-
-          raster_image = snapshot_delegate->MakeRasterSnapshot(
-              [display_list](SkCanvas* canvas) {
-                display_list->RenderTo(canvas);
-              },
-              picture_bounds);
-        } else {
-          raster_image = snapshot_delegate->MakeRasterSnapshot(draw_callback,
-                                                               picture_bounds);
-        }
+      raster_task_runner, [ui_task_runner, snapshot_delegate, draw_callback,
+                           picture_bounds, ui_task] {
+        sk_sp<SkImage> raster_image = snapshot_delegate->MakeRasterSnapshot(
+            draw_callback, picture_bounds);
 
         fml::TaskRunner::RunNowOrPostTask(
             ui_task_runner,

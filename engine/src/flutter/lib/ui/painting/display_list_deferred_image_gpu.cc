@@ -22,19 +22,6 @@ sk_sp<DlDeferredImageGPU> DlDeferredImageGPU::Make(
       raster_task_runner));
 }
 
-sk_sp<DlDeferredImageGPU> DlDeferredImageGPU::MakeFromLayerTree(
-    const SkImageInfo& image_info,
-    std::shared_ptr<LayerTree> layer_tree,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    fml::RefPtr<fml::TaskRunner> raster_task_runner,
-    fml::RefPtr<SkiaUnrefQueue> unref_queue) {
-  return sk_sp<DlDeferredImageGPU>(new DlDeferredImageGPU(
-      ImageWrapper::MakeFromLayerTree(
-          image_info, std::move(layer_tree), std::move(snapshot_delegate),
-          raster_task_runner, std::move(unref_queue)),
-      raster_task_runner));
-}
-
 DlDeferredImageGPU::DlDeferredImageGPU(
     std::shared_ptr<ImageWrapper> image_wrapper,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
@@ -105,20 +92,6 @@ DlDeferredImageGPU::ImageWrapper::Make(
   return wrapper;
 }
 
-std::shared_ptr<DlDeferredImageGPU::ImageWrapper>
-DlDeferredImageGPU::ImageWrapper::MakeFromLayerTree(
-    const SkImageInfo& image_info,
-    std::shared_ptr<LayerTree> layer_tree,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    fml::RefPtr<fml::TaskRunner> raster_task_runner,
-    fml::RefPtr<SkiaUnrefQueue> unref_queue) {
-  auto wrapper = std::shared_ptr<ImageWrapper>(
-      new ImageWrapper(image_info, nullptr, std::move(snapshot_delegate),
-                       std::move(raster_task_runner), std::move(unref_queue)));
-  wrapper->SnapshotDisplayList(std::move(layer_tree));
-  return wrapper;
-}
-
 DlDeferredImageGPU::ImageWrapper::ImageWrapper(
     const SkImageInfo& image_info,
     sk_sp<DisplayList> display_list,
@@ -158,11 +131,9 @@ bool DlDeferredImageGPU::ImageWrapper::isTextureBacked() const {
   return texture_.isValid();
 }
 
-void DlDeferredImageGPU::ImageWrapper::SnapshotDisplayList(
-    std::shared_ptr<LayerTree> layer_tree) {
+void DlDeferredImageGPU::ImageWrapper::SnapshotDisplayList() {
   fml::TaskRunner::RunNowOrPostTask(
-      raster_task_runner_,
-      [weak_this = weak_from_this(), layer_tree = std::move(layer_tree)]() {
+      raster_task_runner_, [weak_this = weak_from_this()]() {
         auto wrapper = weak_this.lock();
         if (!wrapper) {
           return;
@@ -170,14 +141,6 @@ void DlDeferredImageGPU::ImageWrapper::SnapshotDisplayList(
         auto snapshot_delegate = wrapper->snapshot_delegate_;
         if (!snapshot_delegate) {
           return;
-        }
-        if (layer_tree) {
-          auto display_list =
-              layer_tree->Flatten(SkRect::MakeWH(wrapper->image_info_.width(),
-                                                 wrapper->image_info_.height()),
-                                  snapshot_delegate.get()->GetTextureRegistry(),
-                                  snapshot_delegate.get()->GetGrContext());
-          wrapper->display_list_ = std::move(display_list);
         }
         auto result = snapshot_delegate->MakeGpuImage(wrapper->display_list_,
                                                       wrapper->image_info_);
