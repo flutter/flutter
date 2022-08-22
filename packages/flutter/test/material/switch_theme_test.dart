@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -23,6 +25,7 @@ void main() {
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.overlayColor, null);
     expect(themeData.splashRadius, null);
+    expect(themeData.thumbImage, null);
 
     const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
     expect(theme.data.thumbColor, null);
@@ -31,6 +34,7 @@ void main() {
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.overlayColor, null);
     expect(theme.data.splashRadius, null);
+    expect(theme.data.thumbImage, null);
   });
 
   testWidgets('Default SwitchThemeData debugFillProperties', (WidgetTester tester) async {
@@ -46,14 +50,16 @@ void main() {
   });
 
   testWidgets('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final Uint8List thumbImageBytes = Uint8List.fromList(kBlueRectPng);
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const SwitchThemeData(
-      thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
-      trackColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
-      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+    SwitchThemeData(
+      thumbColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
+      trackColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
+      overlayColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
+      thumbImage: MaterialStatePropertyAll<ImageProvider>(MemoryImage(thumbImageBytes)),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -67,9 +73,12 @@ void main() {
     expect(description[3], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
     expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
     expect(description[5], 'splashRadius: 1.0');
+    expect(description[6], 'thumbImage: MaterialStatePropertyAll(MemoryImage(Uint8List#${shortHash(thumbImageBytes)}, scale: 1.0))');
   });
 
   testWidgets('Switch is themeable', (WidgetTester tester) async {
+    final Uint8List thumbImageBytes = Uint8List.fromList(kBlueRectPng);
+    final Uint8List selectedThumbImageBytes = Uint8List.fromList(kBlueSquarePng);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color defaultThumbColor = Color(0xfffffff0);
@@ -81,37 +90,47 @@ void main() {
     const Color focusOverlayColor = Color(0xfffffff4);
     const Color hoverOverlayColor = Color(0xfffffff5);
     const double splashRadius = 1.0;
+    final ImageProvider thumbImage = MemoryImage(thumbImageBytes);
+    final ImageProvider selectedThumbImage = MemoryImage(selectedThumbImageBytes);
 
+    final ThemeData themeData = ThemeData(
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return selectedThumbColor;
+          }
+          return defaultThumbColor;
+        }),
+        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return selectedTrackColor;
+          }
+          return defaultTrackColor;
+        }),
+        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
+        materialTapTargetSize: materialTapTargetSize,
+        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused)) {
+            return focusOverlayColor;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return hoverOverlayColor;
+          }
+          return null;
+        }),
+        splashRadius: splashRadius,
+        thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return selectedThumbImage;
+          }
+          return thumbImage;
+        }),
+      ),
+    );
+    final bool material3 = themeData.useMaterial3;
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
-        theme: ThemeData(
-          switchTheme: SwitchThemeData(
-            thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return selectedThumbColor;
-              }
-              return defaultThumbColor;
-            }),
-            trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return selectedTrackColor;
-              }
-              return defaultTrackColor;
-            }),
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
-            materialTapTargetSize: materialTapTargetSize,
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
-                return focusOverlayColor;
-              }
-              if (states.contains(MaterialState.hovered)) {
-                return hoverOverlayColor;
-              }
-              return null;
-            }),
-            splashRadius: splashRadius,
-          ),
-        ),
+        theme: themeData,
         home: Scaffold(
           body: Switch(
             dragStartBehavior: DragStartBehavior.down,
@@ -128,27 +147,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       _getSwitchMaterial(tester),
-      paints
+      material3
+      ? (paints
+        ..rrect(color: defaultTrackColor)
+        ..rrect(color: themeData.colorScheme.outline)
+        ..circle(color: defaultThumbColor))
+      : (paints
         ..rrect(color: defaultTrackColor)
         ..circle()
         ..circle()
         ..circle()
-        ..circle(color: defaultThumbColor),
+        ..circle(color: defaultThumbColor))
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
-    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+    expect(tester.getSize(find.byType(Switch)), material3 ? const Size(60.0, 40.0) : const Size(59.0, 40.0));
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
     await tester.pumpAndSettle();
     expect(
       _getSwitchMaterial(tester),
-      paints
+      material3
+      ? (paints
+        ..rrect(color: selectedTrackColor)
+        ..circle(color: selectedThumbColor))
+      : (paints
         ..rrect(color: selectedTrackColor)
         ..circle()
         ..circle()
         ..circle()
-        ..circle(color: selectedThumbColor),
+        ..circle(color: selectedThumbColor))
     );
 
     // Switch with hover.
@@ -176,6 +204,8 @@ void main() {
     const Color themeFocusOverlayColor = Color(0xfffffff4);
     const Color themeHoverOverlayColor = Color(0xfffffff5);
     const double themeSplashRadius = 1.0;
+    final ImageProvider themeDefaultThumbImage = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    final ImageProvider themeSelectedThumbImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
 
     const Color defaultThumbColor = Color(0xffffff0f);
     const Color selectedThumbColor = Color(0xffffff1f);
@@ -186,37 +216,49 @@ void main() {
     const Color focusColor = Color(0xffffff4f);
     const Color hoverColor = Color(0xffffff5f);
     const double splashRadius = 2.0;
+    final ImageProvider defaultThumbImage = MemoryImage(Uint8List.fromList(kTransparentImage));
+    final ImageProvider selectedThumbImage = MemoryImage(Uint8List.fromList(kAnimatedGif));
+
+    final ThemeData themeData = ThemeData(
+      useMaterial3: false,
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return themeSelectedThumbColor;
+          }
+          return themeDefaultThumbColor;
+        }),
+        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return themeSelectedTrackColor;
+          }
+          return themeDefaultTrackColor;
+        }),
+        mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
+        materialTapTargetSize: themeMaterialTapTargetSize,
+        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused)) {
+            return themeFocusOverlayColor;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return themeHoverOverlayColor;
+          }
+          return null;
+        }),
+        splashRadius: themeSplashRadius,
+        thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return themeSelectedThumbImage;
+          }
+          return themeDefaultThumbImage;
+        }),
+      ),
+    );
+    final bool material3 = themeData.useMaterial3;
 
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
-        theme: ThemeData(
-          switchTheme: SwitchThemeData(
-            thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return themeSelectedThumbColor;
-              }
-              return themeDefaultThumbColor;
-            }),
-            trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return themeSelectedTrackColor;
-              }
-              return themeDefaultTrackColor;
-            }),
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
-            materialTapTargetSize: themeMaterialTapTargetSize,
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
-                return themeFocusOverlayColor;
-              }
-              if (states.contains(MaterialState.hovered)) {
-                return themeHoverOverlayColor;
-              }
-              return null;
-            }),
-            splashRadius: themeSplashRadius,
-          ),
-        ),
+        theme: themeData,
         home: Scaffold(
           body: Switch(
             value: selected,
@@ -239,6 +281,12 @@ void main() {
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
+            thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return selectedThumbImage;
+              }
+              return defaultThumbImage;
+            }),
           ),
         ),
       );
@@ -249,27 +297,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       _getSwitchMaterial(tester),
-      paints
+      material3
+      ? (paints
+        ..rrect(color: defaultTrackColor)
+        ..rrect(color: themeData.colorScheme.outline)
+        ..circle(color: defaultThumbColor))
+      : (paints
         ..rrect(color: defaultTrackColor)
         ..circle()
         ..circle()
         ..circle()
-        ..circle(color: defaultThumbColor),
+        ..circle(color: defaultThumbColor))
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
-    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+    expect(tester.getSize(find.byType(Switch)), material3 ? const Size(60.0, 40.0) : const Size(59.0, 40.0));
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
     await tester.pumpAndSettle();
     expect(
       _getSwitchMaterial(tester),
-      paints
+      material3
+      ? (paints
+        ..rrect(color: selectedTrackColor)
+        ..circle(color: selectedThumbColor))
+      : (paints
         ..rrect(color: selectedTrackColor)
         ..circle()
         ..circle()
         ..circle()
-        ..circle(color: selectedThumbColor),
+        ..circle(color: selectedThumbColor))
     );
 
     // Switch with hover.
@@ -298,24 +355,27 @@ void main() {
     const Color defaultTrackColor = Color(0xffffff2f);
     const Color selectedTrackColor = Color(0xffffff3f);
 
+    final ThemeData themeData = ThemeData(
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return themeSelectedThumbColor;
+          }
+          return themeDefaultThumbColor;
+        }),
+        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return themeSelectedTrackColor;
+          }
+          return themeDefaultTrackColor;
+        }),
+      ),
+    );
+    final bool material3 = themeData.useMaterial3;
+
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
-        theme: ThemeData(
-          switchTheme: SwitchThemeData(
-            thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return themeSelectedThumbColor;
-              }
-              return themeDefaultThumbColor;
-            }),
-            trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return themeSelectedTrackColor;
-              }
-              return themeDefaultTrackColor;
-            }),
-          ),
-        ),
+        theme: themeData,
         home: Scaffold(
           body: Switch(
             value: selected,
@@ -335,12 +395,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       _getSwitchMaterial(tester),
-      paints
-        ..rrect(color: defaultTrackColor)
-        ..circle()
-        ..circle()
-        ..circle()
-        ..circle(color: defaultThumbColor),
+        material3
+        ? (paints
+          ..rrect(color: defaultTrackColor)
+          ..rrect(color: themeData.colorScheme.outline)
+          ..circle(color: defaultThumbColor))
+        : (paints
+          ..rrect(color: defaultTrackColor)
+          ..circle()
+          ..circle()
+          ..circle()
+          ..circle(color: defaultThumbColor))
     );
 
     // Selected switch.
@@ -348,12 +413,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       _getSwitchMaterial(tester),
-      paints
+      material3
+      ? (paints
+        ..rrect(color: selectedTrackColor)
+        ..circle(color: selectedThumbColor))
+      : (paints
         ..rrect(color: selectedTrackColor)
         ..circle()
         ..circle()
         ..circle()
-        ..circle(color: selectedThumbColor),
+        ..circle(color: selectedThumbColor))
     );
   });
 
@@ -371,15 +440,17 @@ void main() {
       return null;
     }
     const double splashRadius = 24.0;
+    final ThemeData themeData = ThemeData(
+      switchTheme: SwitchThemeData(
+        overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+        splashRadius: splashRadius,
+      ),
+    );
+    final bool material3 = themeData.useMaterial3;
 
     Widget buildSwitch({required bool active}) {
       return MaterialApp(
-        theme: ThemeData(
-          switchTheme: SwitchThemeData(
-            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
-            splashRadius: splashRadius,
-          ),
-        ),
+        theme: themeData,
         home: Scaffold(
           body: Switch(
             value: active,
@@ -395,12 +466,20 @@ void main() {
 
     expect(
       _getSwitchMaterial(tester),
-      paints
+      material3
+      ? ((paints
+        ..rrect()
+        ..rrect())
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+      ))
+      : (paints
         ..rrect()
         ..circle(
           color: inactivePressedOverlayColor,
           radius: splashRadius,
-        ),
+      )),
       reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
     );
 
@@ -426,14 +505,16 @@ void main() {
     const Color localThemeThumbColor = Color(0xffff0000);
     const Color localThemeTrackColor = Color(0xffff0000);
 
+    final ThemeData themeData = ThemeData(
+      switchTheme: const SwitchThemeData(
+        thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
+        trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),
+      ),
+    );
+    final bool material3 = themeData.useMaterial3;
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
-        theme: ThemeData(
-          switchTheme: const SwitchThemeData(
-            thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
-            trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),
-          ),
-        ),
+        theme: themeData,
         home: Scaffold(
           body: SwitchTheme(
             data: const SwitchThemeData(
@@ -454,12 +535,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       _getSwitchMaterial(tester),
-      paints
+      material3
+      ? (paints
+        ..rrect(color: localThemeTrackColor)
+        ..circle(color: localThemeThumbColor))
+      : (paints
         ..rrect(color: localThemeTrackColor)
         ..circle()
         ..circle()
         ..circle()
-        ..circle(color: localThemeThumbColor),
+        ..circle(color: localThemeThumbColor))
     );
   });
 }
