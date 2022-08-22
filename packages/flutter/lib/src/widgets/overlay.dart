@@ -29,931 +29,6 @@ BoxHitTest _toBoxHitTest(bool Function(BoxHitTestResult result, { required Offse
   return (BoxHitTestResult result, Offset transform) => hitTest(result, position: transform);
 }
 
-/// A place in an [Overlay] that can contain a widget.
-///
-/// Overlay entries are inserted into an [Overlay] using the
-/// [OverlayState.insert] or [OverlayState.insertAll] functions. To find the
-/// closest enclosing overlay for a given [BuildContext], use the [Overlay.of]
-/// function.
-///
-/// An overlay entry can be in at most one overlay at a time. To remove an entry
-/// from its overlay, call the [remove] function on the overlay entry.
-///
-/// Because an [Overlay] uses a [Stack] layout, overlay entries can use
-/// [Positioned] and [AnimatedPositioned] to position themselves within the
-/// overlay.
-///
-/// For example, [Draggable] uses an [OverlayEntry] to show the drag avatar that
-/// follows the user's finger across the screen after the drag begins. Using the
-/// overlay to display the drag avatar lets the avatar float over the other
-/// widgets in the app. As the user's finger moves, draggable calls
-/// [markNeedsBuild] on the overlay entry to cause it to rebuild. In its build,
-/// the entry includes a [Positioned] with its top and left property set to
-/// position the drag avatar near the user's finger. When the drag is over,
-/// [Draggable] removes the entry from the overlay to remove the drag avatar
-/// from view.
-///
-/// By default, if there is an entirely [opaque] entry over this one, then this
-/// one will not be included in the widget tree (in particular, stateful widgets
-/// within the overlay entry will not be instantiated). To ensure that your
-/// overlay entry is still built even if it is not visible, set [maintainState]
-/// to true. This is more expensive, so should be done with care. In particular,
-/// if widgets in an overlay entry with [maintainState] set to true repeatedly
-/// call [State.setState], the user's battery will be drained unnecessarily.
-///
-/// [OverlayEntry] is a [Listenable] that notifies when the widget built by
-/// [builder] is mounted or unmounted, whose exact state can be queried by
-/// [mounted]. After the owner of the [OverlayEntry] calls [remove] and then
-/// [dispose], the widget may not be immediately removed from the widget tree.
-/// As a result listeners of the [OverlayEntry] can get notified for one last
-/// time after the [dispose] call, when the widget is eventually unmounted.
-///
-/// See also:
-///
-///  * [Overlay]
-///  * [OverlayState]
-///  * [WidgetsApp]
-///  * [MaterialApp]
-class OverlayEntry implements Listenable {
-  /// Creates an overlay entry.
-  ///
-  /// To insert the entry into an [Overlay], first find the overlay using
-  /// [Overlay.of] and then call [OverlayState.insert]. To remove the entry,
-  /// call [remove] on the overlay entry itself.
-  OverlayEntry({
-    required this.builder,
-    bool opaque = false,
-    bool maintainState = false,
-  }) : assert(builder != null),
-       assert(opaque != null),
-       assert(maintainState != null),
-       _opaque = opaque,
-       _maintainState = maintainState;
-
-  /// This entry will include the widget built by this builder in the overlay at
-  /// the entry's position.
-  ///
-  /// To cause this builder to be called again, call [markNeedsBuild] on this
-  /// overlay entry.
-  final WidgetBuilder builder;
-
-  /// Whether this entry occludes the entire overlay.
-  ///
-  /// If an entry claims to be opaque, then, for efficiency, the overlay will
-  /// skip building entries below that entry unless they have [maintainState]
-  /// set.
-  bool get opaque => _opaque;
-  bool _opaque;
-  set opaque(bool value) {
-    assert(!_disposedByOwner);
-    if (_opaque == value) {
-      return;
-    }
-    _opaque = value;
-    _overlay?._didChangeEntryOpacity();
-  }
-
-  /// Whether this entry must be included in the tree even if there is a fully
-  /// [opaque] entry above it.
-  ///
-  /// By default, if there is an entirely [opaque] entry over this one, then this
-  /// one will not be included in the widget tree (in particular, stateful widgets
-  /// within the overlay entry will not be instantiated). To ensure that your
-  /// overlay entry is still built even if it is not visible, set [maintainState]
-  /// to true. This is more expensive, so should be done with care. In particular,
-  /// if widgets in an overlay entry with [maintainState] set to true repeatedly
-  /// call [State.setState], the user's battery will be drained unnecessarily.
-  ///
-  /// This is used by the [Navigator] and [Route] objects to ensure that routes
-  /// are kept around even when in the background, so that [Future]s promised
-  /// from subsequent routes will be handled properly when they complete.
-  bool get maintainState => _maintainState;
-  bool _maintainState;
-  set maintainState(bool value) {
-    assert(!_disposedByOwner);
-    assert(_maintainState != null);
-    if (_maintainState == value) {
-      return;
-    }
-    _maintainState = value;
-    assert(_overlay != null);
-    _overlay!._didChangeEntryOpacity();
-  }
-
-  /// Whether the [OverlayEntry] is currently mounted in the widget tree.
-  ///
-  /// The [OverlayEntry] notifies its listeners when this value changes.
-  bool get mounted => _overlayStateMounted.value != null;
-
-  /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
-  final ValueNotifier<_OverlayEntryWidgetState?> _overlayStateMounted = ValueNotifier<_OverlayEntryWidgetState?>(null);
-
-  @override
-  void addListener(VoidCallback listener) {
-    assert(!_disposedByOwner);
-    _overlayStateMounted.addListener(listener);
-  }
-
-  @override
-  void removeListener(VoidCallback listener) {
-    _overlayStateMounted.removeListener(listener);
-  }
-
-  OverlayState? _overlay;
-  final GlobalKey<_OverlayEntryWidgetState> _key = GlobalKey<_OverlayEntryWidgetState>();
-
-  /// Remove this entry from the overlay.
-  ///
-  /// This should only be called once.
-  ///
-  /// This method removes this overlay entry from the overlay immediately. The
-  /// UI will be updated in the same frame if this method is called before the
-  /// overlay rebuild in this frame; otherwise, the UI will be updated in the
-  /// next frame. This means that it is safe to call during builds, but also
-  /// that if you do call this after the overlay rebuild, the UI will not update
-  /// until the next frame (i.e. many milliseconds later).
-  void remove() {
-    assert(_overlay != null);
-    assert(!_disposedByOwner);
-    final OverlayState overlay = _overlay!;
-    _overlay = null;
-    if (!overlay.mounted) {
-      return;
-    }
-
-    overlay._entries.remove(this);
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        overlay._markDirty();
-      });
-    } else {
-      overlay._markDirty();
-    }
-  }
-
-  /// Cause this entry to rebuild during the next pipeline flush.
-  ///
-  /// You need to call this function if the output of [builder] has changed.
-  void markNeedsBuild() {
-    assert(!_disposedByOwner);
-    _key.currentState?._markNeedsBuild();
-  }
-
-  void _didUnmount() {
-    assert(!mounted);
-    if (_disposedByOwner) {
-      _overlayStateMounted.dispose();
-    }
-  }
-
-  bool _disposedByOwner = false;
-
-  /// Discards any resources used by this [OverlayEntry].
-  ///
-  /// This method must be called after [remove] if the [OverlayEntry] is
-  /// inserted into an [Overlay].
-  ///
-  /// After this is called, the object is not in a usable state and should be
-  /// discarded (calls to [addListener] will throw after the object is disposed).
-  /// However, the listeners registered may not be immediately released until
-  /// the widget built using this [OverlayEntry] is unmounted from the widget
-  /// tree.
-  ///
-  /// This method should only be called by the object's owner.
-  void dispose() {
-    assert(!_disposedByOwner);
-    assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
-    _disposedByOwner = true;
-    if (!mounted) {
-      _overlayStateMounted.dispose();
-    }
-  }
-
-  @override
-  String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
-}
-
-class _RenderTheatreMarker extends InheritedWidget {
-  const _RenderTheatreMarker({
-    required this.theatre,
-    required this.overlayEntryWidgetState,
-    required super.child,
-  });
-
-  final _RenderTheatre theatre;
-  final _OverlayEntryWidgetState overlayEntryWidgetState;
-
-  @override
-  bool updateShouldNotify(_RenderTheatreMarker oldWidget) {
-    return oldWidget.theatre != theatre
-        || oldWidget.overlayEntryWidgetState != overlayEntryWidgetState;
-  }
-
-  @override
-  InheritedElement createElement() => _RenderTheatreMarkerElement(this);
-
-  static _RenderTheatreMarker? of(BuildContext context, { required bool targetRootOverlay }) {
-    final _RenderTheatreMarkerElement? element = context.getElementForInheritedWidgetOfExactType<_RenderTheatreMarker>() as _RenderTheatreMarkerElement?;
-    if (element == null) {
-      return null;
-    }
-    final _RenderTheatreMarkerElement dependency = targetRootOverlay ? element._topRenderTheatre : element;
-    return context.dependOnInheritedElement(dependency) as _RenderTheatreMarker;
-  }
-}
-
-class _RenderTheatreMarkerElement extends InheritedElement {
-  _RenderTheatreMarkerElement(super.widget);
-
-  _RenderTheatreMarkerElement get _topRenderTheatre {
-    _RenderTheatreMarkerElement? ancestor;
-    visitAncestorElements((Element element) {
-      assert(ancestor == null);
-      ancestor = element.getElementForInheritedWidgetOfExactType<_RenderTheatreMarker>() as _RenderTheatreMarkerElement?;
-      return false;
-    });
-    return ancestor?._topRenderTheatre ?? this;
-  }
-}
-
-/// A class to show, hide and bring to top an [OverlayPortal]'s overlay child
-/// in the target [Overlay].
-///
-/// A [OverlayPortalController] can only be given to at most one [OverlayPortal]
-/// at a time. When an [OverlayPortalController] is moved from one
-/// [OverlayPortal] to another, its [isShowing] state does not carry over.
-///
-/// The [show] and [hide] methods typically should not be called when the widget
-/// tree is being rebuilt. However it's allowed to call [show] or [hide] when
-/// the associated [OverlayPortal] widget is yet to be inflated into the widget
-/// tree.
-class OverlayPortalController {
-  /// Creates an [OverlayPortalController].
-  OverlayPortalController({ String? debugLabel }) : _debugLabel = debugLabel;
-
-  _OverlayPortalState? _attachTarget;
-  int? _showTimestamp;
-  final String? _debugLabel;
-
-  /// Show the overlay child of the [OverlayPortal] this controller is attached
-  /// to, at the top of the target [Overlay].
-  ///
-  /// When there are more than one [OverlayPortal]s that target the same
-  /// [Overlay], the overlay child of the last [OverlayPortal] to have called
-  /// [show] appears at the top level, unobstructed.
-  ///
-  /// If [isShowing] is already true, calling this method brings the overlay
-  /// child it controls to the top.
-  ///
-  /// This method should typically not be called when the widget tree is being
-  /// rebuilt.
-  void show() {
-    final _OverlayPortalState? state = _attachTarget;
-    if (state != null) {
-      state.show();
-    } else {
-      _showTimestamp = _OverlayPortalState.wallTime += 1;
-    }
-  }
-
-  /// Hide the [OverlayPortal]'s overlay child.
-  ///
-  /// Once hidden, the overlay child will be removed from the widget tree the
-  /// next time the widget tree rebuilds, and stateful widgets in the overlay
-  /// child may lose states as a result.
-  ///
-  /// This method should typically not be called when the widget tree is being
-  /// rebuilt.
-  void hide() {
-    final _OverlayPortalState? state = _attachTarget;
-    if (state != null) {
-      state.hide();
-    } else {
-      assert(_showTimestamp != null);
-      _showTimestamp = null;
-    }
-  }
-
-  /// Whether the associated [OverlayPortal] should build and show its overlay
-  /// child, using its `overlayChildBuilder`.
-  bool get isShowing {
-    final _OverlayPortalState? state = _attachTarget;
-    return state != null
-      ? state._showTimestamp != null
-      : _showTimestamp != null;
-  }
-
-  /// Conventience method for toggling the current [isShowing] status.
-  ///
-  /// This method should typically not be called when the widget tree is being
-  /// rebuilt.
-  void toggle() => isShowing ? hide() : show();
-
-  @override
-  String toString() {
-    final String? debugLabel = _debugLabel;
-    final String label = debugLabel == null ? '' : '($debugLabel)';
-    final String isDetached = _attachTarget != null ? '' : ' DETACHED';
-    return '${objectRuntimeType(this, 'OverlayPortalController')}$label$isDetached';
-  }
-}
-
-/// A widget that renders its overlay child on the closest [Overlay].
-///
-/// The overlay child is initially hidden until [OverlayPortalController.show]
-/// is called on the associated [controller]. The [OverlayPortal] uses
-/// [overlayChildBuilder] to build its overlay child and renders it on the
-/// closest [Overlay] as if it was inserted using an [OverlayEntry], while it
-/// can depend on the same set of [InheritedWidget]s (such as [Theme]) that this
-/// widget can depend on.
-///
-/// This widget requires an [Overlay] ancestor in the widget tree when its
-/// overlay child is showing. The overlay child will be painted in front of the
-/// [OverlayEntry] closest to this widget in the widget tree (which is usually
-/// the enclosing [Route]). When there are more than one [OverlayPortal]s target
-/// the same [OverlayEntry], the overlay child of the last [OverlayPortal] to
-/// have called `show` appears in the front.
-///
-/// When [OverlayPortalController.hide] is called, the widget built using
-/// [overlayChildBuilder] will be removed from the widget tree the next time the
-/// widget rebuilds. Stateful descendants in the overlay child subtree may lose
-/// states as a result.
-///
-/// {@tool dartpad}
-/// This example uses an [OverlayPortal] to build a tooltip that becomes visible
-/// when the user taps on the [child] widget. There's a [DefaultTextStyle] above
-/// the [OverlayPortal] controlling the [TextStyle] of both the [child] widget
-/// and the widget [overlayChildBuilder] builds, which isn't otherwise doable if
-/// the tooltip was added as an [OverlayEntry].
-///
-/// ** See code in examples/api/lib/widgets/overlay/overlay_portal.0.dart **
-/// {@end-tool}
-///
-/// ### Differences between [OverlayPortal] and [OverlayEntry]
-///
-/// The main difference between [OverlayEntry] and [OverlayPortal] is that
-/// [OverlayEntry] builds its widget subtree as a child of the target [Overlay],
-/// while [OverlayPortal] uses [overlayChildBuilder] to build a child widget of
-/// itself. This allows [OverlayPortal]'s overlay child to depend on the same
-/// set of [InheritedWidget]s as [OverlayPortal], and it's also guaranteed that
-/// the overlay child will not outlive its [OverlayPortal].
-///
-/// On the other hand, [OverlayPortal]'s implementation is more complex. For
-/// instance, it does a bit more work than a regular widget during global key
-/// reparenting. If the content to be shown on the [Overlay] doesn't benefit
-/// from being a part of [OverlayPortal]'s subtree, consider using an
-/// [OverlayEntry] instead.
-///
-/// See also:
-///
-///  * [OverlayEntry], an alternative API for inserting widgets into an
-///    [Overlay].
-///  * [Positioned], which can be used to size and position the overlay child in
-///    relation to the target [Overlay]'s boundaries.
-///  * [CompositedTransformFollower], which can be used to position the overlay
-///    child in relation to the linked [CompositedTransformTarget] widget.
-class OverlayPortal extends StatefulWidget {
-  /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
-  /// builds on the closest [Overlay] when [OverlayPortalController.show] is
-  /// called.
-  const OverlayPortal({
-    super.key,
-    required this.controller,
-    required this.overlayChildBuilder,
-    required this.child,
-  });
-
-  /// The controller to show, hide and bring to top the overlay child.
-  final OverlayPortalController controller;
-
-  _OverlayEntryWidgetState _resolveLocation(BuildContext context) {
-    final _OverlayEntryWidgetState? entry = _RenderTheatreMarker.of(context, targetRootOverlay: false)?.overlayEntryWidgetState;
-    if (entry == null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No Overlay widget found.'),
-        ErrorDescription(
-          '$runtimeType widgets require an Overlay widget ancestor.\n'
-          'An overlay lets widgets float on top of other widget children.',
-        ),
-        ErrorHint(
-          'To introduce an Overlay widget, you can either directly '
-          'include one, or use a widget that contains an Overlay itself, '
-          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
-        ),
-        ...context.describeMissingAncestor(expectedAncestorType: Overlay),
-      ]);
-    }
-    return entry;
-  }
-
-  /// A [WidgetBuilder] used to build a widget below this widget in the tree,
-  /// that renders on the closest [Overlay].
-  ///
-  /// The said widget will only be built and shown in the closest [Overlay] once
-  /// [OverlayPortalController.show] is called on the associated [controller].
-  /// It will be painted in front of the [OverlayEntry] closest to this widget
-  /// in the widget tree (which is usually the enclosing [Route]).
-  ///
-  /// The built overlay child widget, is inserted below this widget in the
-  /// widget tree, allowing it to depend on [InheritedWidget]s above it, and
-  /// be notified when the [InheritedWidget]s change.
-  ///
-  /// Unlike [child], the built overlay child can visually extend outside the
-  /// bounds of this widget without being clipped, and receive hit-test events
-  /// outside of this widget's bounds, as long as it does not extend outside of
-  /// the [Overlay] on which it is rendered.
-  final WidgetBuilder overlayChildBuilder;
-
-  /// A widget below this widget in the tree.
-  final Widget? child;
-
-  @override
-  State<OverlayPortal> createState() => _OverlayPortalState();
-}
-
-class _TopmostLocation extends _OverlayLocation with LinkedListEntry<_TopmostLocation> {
-  _TopmostLocation(this._showTimestamp, this._theatreChildModel) : super._();
-
-  final int _showTimestamp;
-  final _EventOrderChildModel _theatreChildModel;
-  _RenderDeferredLayoutBox? _overlayChildRenderBox;
-
-  @override
-  _RenderTheatre get _theatre => _theatreChildModel._theatre;
-
-  @override
-  void _addToChildModel(_RenderDeferredLayoutBox child) {
-    assert(_overlayChildRenderBox == null, 'Failed to add $child. $_overlayChildRenderBox is attached to $this');
-    assert(_showTimestamp != null);
-    _overlayChildRenderBox = child;
-    _theatreChildModel._add(this);
-  }
-
-  @override
-  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
-    assert(child == _overlayChildRenderBox);
-    _overlayChildRenderBox = null;
-    assert(_theatreChildModel._sortedChildren.contains(this));
-    _theatreChildModel._remove(this);
-  }
-
-  @override
-  void _activate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
-    super._activate(child);
-    _overlayChildRenderBox = child;
-  }
-
-  @override
-  void _deactivate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    super._deactivate(child);
-    _overlayChildRenderBox = null;
-  }
-
-  @override
-  String toString() => '$_showTimestamp';
-}
-
-class _OverlayPortalState extends State<OverlayPortal> {
-  // The developer must call `show` to reveal the overlay so we can get the
-  // timestamp of the user interaction for sorting.
-  _TopmostLocation? _location;
-  int? _showTimestamp;
-  // See https://github.com/dart-lang/sdk/issues/41717.
-  static int wallTime = kIsWeb
-    ? -9007199254740992 // -2^53
-    : -1 << 63;
-
-  @override
-  void initState() {
-    super.initState();
-    _setupController(widget.controller);
-  }
-
-  void _setupController(OverlayPortalController controller) {
-    assert(
-      controller._attachTarget == null || controller._attachTarget == this,
-      'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}'
-    );
-    final int? controllerTimeStamp = controller._showTimestamp;
-    final int? timeStamp = _showTimestamp;
-    if (timeStamp == null || (controllerTimeStamp != null && controllerTimeStamp > timeStamp)) {
-      _showTimestamp = controllerTimeStamp;
-    }
-    controller._showTimestamp = null;
-    controller._attachTarget = this;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _location?._dispose();
-    _location = null;
-  }
-
-  @override
-  void didUpdateWidget(OverlayPortal oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._attachTarget = null;
-      _setupController(widget.controller);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller._attachTarget = null;
-    super.dispose();
-  }
-
-  void show() {
-    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
-    final int now = wallTime += 1;
-    assert(_showTimestamp == null || _showTimestamp! < now);
-    setState(() { _showTimestamp = now; });
-    _location?._dispose();
-    _location = null;
-  }
-
-  void toggle() => _showTimestamp == null ? show() : hide();
-
-  void hide() {
-    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
-    setState(() { _showTimestamp = null; });
-    _location = null;
-    _location?._dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final int? timestamp = _showTimestamp;
-    if (timestamp == null) {
-      return _OverlayPortal(
-        overlayLocation: null,
-        overlayChild: null,
-        child: widget.child,
-      );
-    }
-    return _OverlayPortal(
-      overlayLocation: _location ??= _TopmostLocation(timestamp, widget._resolveLocation(context)._overlayEntryTopChildModel),
-      overlayChild: _DeferredLayout(child: widget.overlayChildBuilder(context)),
-      child: widget.child,
-    );
-  }
-}
-
-// An interface for storing render children of a _RenderTheatre that should be
-// painted together.
-abstract class _RenderTheatreChildModel {
-  // Returns an iterator that traverse the children in the child model in paint
-  // order (from farthest to the user to the closest to the user).
-  //
-  // The returned iterator must be used immediately, before any changes can be
-  // made to the child model. Also the iterator should be safe to use even when
-  // the child model is being mutated. The reason for that is it's allowed to
-  // add/remove/move deferred children to a _RenderTheatre during performLayout,
-  // but the affected children don't have to be laid out in the same
-  // performLayout call.
-  _ChildIterator? _paintOrderIterator();
-
-  // Returns an iterator that traverse the children in the child model in
-  // hit-test order (from closest to the user to the farthest to the user).
-  _ChildIterator? _hitTestOrderIterator();
-
-  void visitChildren(RenderObjectVisitor visitor) {
-    final _ChildIterator? iterator = _paintOrderIterator();
-    if (iterator == null) {
-      return;
-    }
-    RenderBox? child = iterator();
-    while (child != null) {
-      visitor(child);
-      child = iterator();
-    }
-  }
-
-  bool hitTestChildren(BoxHitTestResult result, Offset position) {
-    final _ChildIterator? iterator = _hitTestOrderIterator();
-    if (iterator == null) {
-      return false;
-    }
-    RenderBox? child = iterator();
-    while (child != null) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset,
-        position: position,
-        hitTest: _toBoxHitTest(child.hitTest)
-      );
-      if (isHit) {
-        return true;
-      }
-      child = iterator();
-    }
-    return false;
-  }
-
-  void paintChildren(PaintingContext context, Offset offset) {
-    final _ChildIterator? iterator = _paintOrderIterator();
-    if (iterator == null) {
-      return;
-    }
-    RenderBox? child = iterator();
-    while(child != null) {
-      final StackParentData parentData = child.parentData! as StackParentData;
-      context.paintChild(child, parentData.offset + offset);
-      child = iterator();
-    }
-  }
-}
-
-// The data structure for managing the stack of theatre children that are sorted
-// by their _showTimestamp.
-//
-// The children with more recent timestamps (i.e. those called `show` recently)
-// will be painted last.
-class _EventOrderChildModel extends _RenderTheatreChildModel {
-  _EventOrderChildModel(this._theatre);
-
-  final _RenderTheatre _theatre;
-  final LinkedList<_TopmostLocation> _sortedChildren = LinkedList<_TopmostLocation>();
-
-  // Worst-case O(N), N being the number of children added to the top spot in
-  // the same frame. This can be a bit expensive when there's a lot of global
-  // key reparenting in the same frame but N is usually a small number.
-  void _add(_TopmostLocation child) {
-    assert(_debugNotDisposed());
-    assert(!_sortedChildren.contains(child));
-    _TopmostLocation? insertPosition = _sortedChildren.isEmpty ? null : _sortedChildren.last;
-    while (insertPosition != null && insertPosition._showTimestamp > child._showTimestamp) {
-      insertPosition = insertPosition.previous;
-    }
-    if (insertPosition == null) {
-      _sortedChildren.addFirst(child);
-    } else {
-      insertPosition.insertAfter(child);
-    }
-    assert(_sortedChildren.contains(child));
-
-    if (child._overlayChildRenderBox != null) {
-      _theatre.markNeedsPaint();
-      _theatre.markNeedsCompositingBitsUpdate();
-      _theatre.markNeedsSemanticsUpdate();
-    }
-  }
-
-  void _remove(_TopmostLocation child) {
-    final bool wasInCollection = _sortedChildren.remove(child);
-    assert(wasInCollection);
-    if (child._overlayChildRenderBox != null) {
-      _theatre.markNeedsPaint();
-      _theatre.markNeedsCompositingBitsUpdate();
-      _theatre.markNeedsSemanticsUpdate();
-    }
-  }
-
-  _TopmostLocation? _childAfter(_TopmostLocation? child) {
-    if (_sortedChildren.isEmpty) {
-      return null;
-    }
-    final _TopmostLocation? candidate = child == null ? _sortedChildren.first : child.next;
-    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childAfter(candidate) : null;
-  }
-
-  _TopmostLocation? _childBefore(_TopmostLocation? child) {
-    if (_sortedChildren.isEmpty) {
-      return null;
-    }
-    final _TopmostLocation? candidate = child == null ? _sortedChildren.last : child.previous;
-    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childBefore(candidate) : null;
-  }
-
-  static _ChildIterator? _mapIterator(_Iterator<_TopmostLocation>? fromIterator) {
-    if (fromIterator == null) {
-      return null;
-    }
-
-    _RenderDeferredLayoutBox? iter() {
-      final _TopmostLocation? location = fromIterator();
-      if (location == null) {
-        return null;
-      }
-      return location._overlayChildRenderBox ?? iter();
-    }
-
-    return iter;
-  }
-
-  _Iterator<_TopmostLocation>? _forwardIterator() {
-    _TopmostLocation? child = _childAfter(null);
-    if (child == null) {
-      return null;
-    }
-    bool isInitial = true;
-    return () {
-      if (isInitial) {
-        assert(child != null);
-        isInitial = false;
-        return child;
-      }
-      return child == null ? null : child = _childAfter(child);
-    };
-  }
-
-  _Iterator<_TopmostLocation>? _backwardIterator() {
-    _TopmostLocation? child = _childBefore(null);
-    if (child == null) {
-      return null;
-    }
-    bool isInitial = true;
-    return () {
-      if (isInitial) {
-        assert(child != null);
-        isInitial = false;
-        return child;
-      }
-      return child == null ? null : child = _childBefore(child);
-    };
-  }
-
-  @override
-  _ChildIterator? _paintOrderIterator() => _mapIterator(_forwardIterator());
-  @override
-  _ChildIterator? _hitTestOrderIterator() => _mapIterator(_backwardIterator());
-
-  bool _debugNotDisposed() {
-    if (!_debugDisposed) {
-      return true;
-    }
-    throw StateError('$this is already disposed');
-  }
-  bool _debugDisposed = false;
-  @mustCallSuper
-  void _dispose() {
-    assert(_debugNotDisposed());
-    assert(() {
-      _debugDisposed = true;
-      return true;
-    }());
-  }
-}
-
-/// A location in an [Overlay].
-///
-/// An [_OverlayLocation] dictates the [Overlay] an [OverlayPortal] should put
-/// its overlay child onto, as well as the overlay child's paint order in
-/// relation to other contents painted on the [Overlay].
-// An _OverlayLocation is a cursor pointing to a location in a particular
-// Overlay's child model, and provides methods to insert/remove/move a
-// _RenderDeferredLayoutBox to/from its target _theatre.
-//
-// Additionally, `_activate` and `_deactivate` will be called when the overlay
-// child's `_OverlayPortalElement` activates/deactivates.
-// `_OverlayPortalElement` removes its overlay child's render object from the
-// target `_RenderTheatre` when it deactivates and puts it back on `activated`.
-// These 2 methods can be used to "hide" a child in the child model without
-// removing it, when the child is expensive/difficult to re-insert on
-// `activated`.
-//
-// An `_OverlayLocation` will be used as an Element's slot. Since it won't be
-// able to implement operator== (since it's mutable), the same
-// `_OverlayLocation` instance must not be used to represent more than one
-// locations.
-abstract class _OverlayLocation {
-  _OverlayLocation._();
-
-  _RenderTheatre get _theatre;
-
-  @protected
-  void _addToChildModel(_RenderDeferredLayoutBox child);
-  @protected
-  void _removeFromChildModel(_RenderDeferredLayoutBox child);
-
-  void _addChild(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _addToChildModel(child);
-    _theatre._addDeferredChild(child);
-    assert(child.parent == _theatre);
-  }
-
-  void _removeChild(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _removeFromChildModel(child);
-    _theatre._removeDeferredChild(child);
-    assert(child.parent == null);
-  }
-
-  void _moveChild(_RenderDeferredLayoutBox child, _OverlayLocation fromLocation) {
-    assert(fromLocation != this);
-    assert(_debugNotDisposed());
-    final _RenderTheatre fromTheatre = fromLocation._theatre;
-    if (fromTheatre != _theatre) {
-      fromTheatre._removeDeferredChild(child);
-      _theatre._addDeferredChild(child);
-    }
-    fromLocation._removeFromChildModel(child);
-    _addToChildModel(child);
-  }
-
-  void _activate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _theatre.adoptChild(child);
-  }
-  void _deactivate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _theatre.dropChild(child);
-  }
-
-  bool _debugNotDisposed() {
-    if (!_debugDisposed) {
-      return true;
-    }
-    throw StateError('$this is already disposed');
-  }
-  bool _debugDisposed = false;
-  @mustCallSuper
-  void _dispose() {
-    assert(!_debugDisposed);
-    assert(() {
-      _debugDisposed = true;
-      return true;
-    }());
-  }
-}
-
-class _OverlayEntryWidget extends StatefulWidget {
-  const _OverlayEntryWidget({
-    required Key key,
-    required this.entry,
-    required this.overlayState,
-    this.tickerEnabled = true,
-  }) : assert(key != null),
-       assert(entry != null),
-       assert(tickerEnabled != null),
-       super(key: key);
-
-  final OverlayEntry entry;
-  final OverlayState overlayState;
-  final bool tickerEnabled;
-
-  @override
-  _OverlayEntryWidgetState createState() => _OverlayEntryWidgetState();
-}
-
-class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
-  late _RenderTheatre theatre;
-  _EventOrderChildModel? _cachedOverlayEntryTopChildModel;
-  _EventOrderChildModel get _overlayEntryTopChildModel => _cachedOverlayEntryTopChildModel ??= _EventOrderChildModel(theatre);
-
-  @override
-  void initState() {
-    super.initState();
-    widget.entry._overlayStateMounted.value = this;
-    theatre = context.findAncestorRenderObjectOfType<_RenderTheatre>()!;
-    _cachedOverlayEntryTopChildModel?._dispose();
-    _cachedOverlayEntryTopChildModel = null;
-  }
-
-  @override
-  void didUpdateWidget(_OverlayEntryWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // OverlayState's build method always returns a RenderObjectWidget _Theatre,
-    // so it's safe to assume that state equality implies render object equality.
-    if (oldWidget.overlayState != widget.overlayState) {
-      assert(oldWidget.entry == widget.entry);
-      theatre = context.findAncestorRenderObjectOfType<_RenderTheatre>()!;
-      _cachedOverlayEntryTopChildModel?._dispose();
-      _cachedOverlayEntryTopChildModel = null;
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.entry._overlayStateMounted.value = null;
-    widget.entry._didUnmount();
-    _cachedOverlayEntryTopChildModel?._dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TickerMode(
-      enabled: widget.tickerEnabled,
-      child: _RenderTheatreMarker(
-        theatre: theatre,
-        overlayEntryWidgetState: this,
-        child: widget.entry.builder(context),
-      ),
-    );
-  }
-
-  void _markNeedsBuild() {
-    setState(() { /* the state that changed is in the builder */ });
-  }
-}
-
 /// A stack of entries that can be managed independently.
 ///
 /// Overlays let independent child widgets "float" visual elements on top of
@@ -1846,6 +921,960 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
           style: DiagnosticsTreeStyle.offstage,
         ),
     ];
+  }
+}
+
+// * OverlayEntry Implementation
+
+/// A place in an [Overlay] that can contain a widget.
+///
+/// Overlay entries are inserted into an [Overlay] using the
+/// [OverlayState.insert] or [OverlayState.insertAll] functions. To find the
+/// closest enclosing overlay for a given [BuildContext], use the [Overlay.of]
+/// function.
+///
+/// An overlay entry can be in at most one overlay at a time. To remove an entry
+/// from its overlay, call the [remove] function on the overlay entry.
+///
+/// Because an [Overlay] uses a [Stack] layout, overlay entries can use
+/// [Positioned] and [AnimatedPositioned] to position themselves within the
+/// overlay.
+///
+/// For example, [Draggable] uses an [OverlayEntry] to show the drag avatar that
+/// follows the user's finger across the screen after the drag begins. Using the
+/// overlay to display the drag avatar lets the avatar float over the other
+/// widgets in the app. As the user's finger moves, draggable calls
+/// [markNeedsBuild] on the overlay entry to cause it to rebuild. In its build,
+/// the entry includes a [Positioned] with its top and left property set to
+/// position the drag avatar near the user's finger. When the drag is over,
+/// [Draggable] removes the entry from the overlay to remove the drag avatar
+/// from view.
+///
+/// By default, if there is an entirely [opaque] entry over this one, then this
+/// one will not be included in the widget tree (in particular, stateful widgets
+/// within the overlay entry will not be instantiated). To ensure that your
+/// overlay entry is still built even if it is not visible, set [maintainState]
+/// to true. This is more expensive, so should be done with care. In particular,
+/// if widgets in an overlay entry with [maintainState] set to true repeatedly
+/// call [State.setState], the user's battery will be drained unnecessarily.
+///
+/// [OverlayEntry] is a [Listenable] that notifies when the widget built by
+/// [builder] is mounted or unmounted, whose exact state can be queried by
+/// [mounted]. After the owner of the [OverlayEntry] calls [remove] and then
+/// [dispose], the widget may not be immediately removed from the widget tree.
+/// As a result listeners of the [OverlayEntry] can get notified for one last
+/// time after the [dispose] call, when the widget is eventually unmounted.
+///
+/// See also:
+///
+///  * [Overlay]
+///  * [OverlayState]
+///  * [WidgetsApp]
+///  * [MaterialApp]
+class OverlayEntry implements Listenable {
+  /// Creates an overlay entry.
+  ///
+  /// To insert the entry into an [Overlay], first find the overlay using
+  /// [Overlay.of] and then call [OverlayState.insert]. To remove the entry,
+  /// call [remove] on the overlay entry itself.
+  OverlayEntry({
+    required this.builder,
+    bool opaque = false,
+    bool maintainState = false,
+  }) : assert(builder != null),
+       assert(opaque != null),
+       assert(maintainState != null),
+       _opaque = opaque,
+       _maintainState = maintainState;
+
+  /// This entry will include the widget built by this builder in the overlay at
+  /// the entry's position.
+  ///
+  /// To cause this builder to be called again, call [markNeedsBuild] on this
+  /// overlay entry.
+  final WidgetBuilder builder;
+
+  /// Whether this entry occludes the entire overlay.
+  ///
+  /// If an entry claims to be opaque, then, for efficiency, the overlay will
+  /// skip building entries below that entry unless they have [maintainState]
+  /// set.
+  bool get opaque => _opaque;
+  bool _opaque;
+  set opaque(bool value) {
+    assert(!_disposedByOwner);
+    if (_opaque == value) {
+      return;
+    }
+    _opaque = value;
+    _overlay?._didChangeEntryOpacity();
+  }
+
+  /// Whether this entry must be included in the tree even if there is a fully
+  /// [opaque] entry above it.
+  ///
+  /// By default, if there is an entirely [opaque] entry over this one, then this
+  /// one will not be included in the widget tree (in particular, stateful widgets
+  /// within the overlay entry will not be instantiated). To ensure that your
+  /// overlay entry is still built even if it is not visible, set [maintainState]
+  /// to true. This is more expensive, so should be done with care. In particular,
+  /// if widgets in an overlay entry with [maintainState] set to true repeatedly
+  /// call [State.setState], the user's battery will be drained unnecessarily.
+  ///
+  /// This is used by the [Navigator] and [Route] objects to ensure that routes
+  /// are kept around even when in the background, so that [Future]s promised
+  /// from subsequent routes will be handled properly when they complete.
+  bool get maintainState => _maintainState;
+  bool _maintainState;
+  set maintainState(bool value) {
+    assert(!_disposedByOwner);
+    assert(_maintainState != null);
+    if (_maintainState == value) {
+      return;
+    }
+    _maintainState = value;
+    assert(_overlay != null);
+    _overlay!._didChangeEntryOpacity();
+  }
+
+  /// Whether the [OverlayEntry] is currently mounted in the widget tree.
+  ///
+  /// The [OverlayEntry] notifies its listeners when this value changes.
+  bool get mounted => _overlayStateMounted.value != null;
+
+  /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
+  final ValueNotifier<_OverlayEntryWidgetState?> _overlayStateMounted = ValueNotifier<_OverlayEntryWidgetState?>(null);
+
+  @override
+  void addListener(VoidCallback listener) {
+    assert(!_disposedByOwner);
+    _overlayStateMounted.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _overlayStateMounted.removeListener(listener);
+  }
+
+  OverlayState? _overlay;
+  final GlobalKey<_OverlayEntryWidgetState> _key = GlobalKey<_OverlayEntryWidgetState>();
+
+  /// Remove this entry from the overlay.
+  ///
+  /// This should only be called once.
+  ///
+  /// This method removes this overlay entry from the overlay immediately. The
+  /// UI will be updated in the same frame if this method is called before the
+  /// overlay rebuild in this frame; otherwise, the UI will be updated in the
+  /// next frame. This means that it is safe to call during builds, but also
+  /// that if you do call this after the overlay rebuild, the UI will not update
+  /// until the next frame (i.e. many milliseconds later).
+  void remove() {
+    assert(_overlay != null);
+    assert(!_disposedByOwner);
+    final OverlayState overlay = _overlay!;
+    _overlay = null;
+    if (!overlay.mounted) {
+      return;
+    }
+
+    overlay._entries.remove(this);
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        overlay._markDirty();
+      });
+    } else {
+      overlay._markDirty();
+    }
+  }
+
+  /// Cause this entry to rebuild during the next pipeline flush.
+  ///
+  /// You need to call this function if the output of [builder] has changed.
+  void markNeedsBuild() {
+    assert(!_disposedByOwner);
+    _key.currentState?._markNeedsBuild();
+  }
+
+  void _didUnmount() {
+    assert(!mounted);
+    if (_disposedByOwner) {
+      _overlayStateMounted.dispose();
+    }
+  }
+
+  bool _disposedByOwner = false;
+
+  /// Discards any resources used by this [OverlayEntry].
+  ///
+  /// This method must be called after [remove] if the [OverlayEntry] is
+  /// inserted into an [Overlay].
+  ///
+  /// After this is called, the object is not in a usable state and should be
+  /// discarded (calls to [addListener] will throw after the object is disposed).
+  /// However, the listeners registered may not be immediately released until
+  /// the widget built using this [OverlayEntry] is unmounted from the widget
+  /// tree.
+  ///
+  /// This method should only be called by the object's owner.
+  void dispose() {
+    assert(!_disposedByOwner);
+    assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
+    _disposedByOwner = true;
+    if (!mounted) {
+      _overlayStateMounted.dispose();
+    }
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
+}
+
+class _OverlayEntryWidget extends StatefulWidget {
+  const _OverlayEntryWidget({
+    required Key key,
+    required this.entry,
+    required this.overlayState,
+    this.tickerEnabled = true,
+  }) : assert(key != null),
+       assert(entry != null),
+       assert(tickerEnabled != null),
+       super(key: key);
+
+  final OverlayEntry entry;
+  final OverlayState overlayState;
+  final bool tickerEnabled;
+
+  @override
+  _OverlayEntryWidgetState createState() => _OverlayEntryWidgetState();
+}
+
+class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
+  late _RenderTheatre theatre;
+  _EventOrderChildModel? _cachedOverlayEntryTopChildModel;
+  _EventOrderChildModel get _overlayEntryTopChildModel => _cachedOverlayEntryTopChildModel ??= _EventOrderChildModel(theatre);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.entry._overlayStateMounted.value = this;
+    theatre = context.findAncestorRenderObjectOfType<_RenderTheatre>()!;
+    _cachedOverlayEntryTopChildModel?._dispose();
+    _cachedOverlayEntryTopChildModel = null;
+  }
+
+  @override
+  void didUpdateWidget(_OverlayEntryWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // OverlayState's build method always returns a RenderObjectWidget _Theatre,
+    // so it's safe to assume that state equality implies render object equality.
+    if (oldWidget.overlayState != widget.overlayState) {
+      assert(oldWidget.entry == widget.entry);
+      theatre = context.findAncestorRenderObjectOfType<_RenderTheatre>()!;
+      _cachedOverlayEntryTopChildModel?._dispose();
+      _cachedOverlayEntryTopChildModel = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.entry._overlayStateMounted.value = null;
+    widget.entry._didUnmount();
+    _cachedOverlayEntryTopChildModel?._dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TickerMode(
+      enabled: widget.tickerEnabled,
+      child: _RenderTheatreMarker(
+        theatre: theatre,
+        overlayEntryWidgetState: this,
+        child: widget.entry.builder(context),
+      ),
+    );
+  }
+
+  void _markNeedsBuild() {
+    setState(() { /* the state that changed is in the builder */ });
+  }
+}
+
+
+// * OverlayPortal Implementation
+//  OverlayPortal is inspired by the
+//  [flutter_portal](https://pub.dev/packages/flutter_portal) package.
+//
+// ** RenderObject hierarchy
+// The widget works by inserting its overlay child's render subtree directly
+// under [Overlay]'s render object (_RenderTheatre).
+// https://user-images.githubusercontent.com/31859944/171971838-62ed3975-4b5d-4733-a9c9-f79e263b8fcc.jpg
+//
+// To ensure the overlay child render subtree does not do layout twice, the
+// subtree must only perform layout after both its _RenderTheatre and the
+// [OverlayPortal]'s render object (_RenderLayoutSurrogateProxyBox) have
+// finished layout. This is handled by _RenderDeferredLayoutBox.
+//
+// ** Z-Index of an overlay child
+// [_OverlayLocation] is a (currently private) interface that allows an
+// [OverlayPortal] to insert its overlay child into a specific [Overlay], as
+// well as specifying the paint order between the overlay child and other
+// children of the _RenderTheatre.
+//
+// Since [OverlayPortal] is only allowed to target ancestor [Overlay]s
+// (_RenderTheatre must finish doing layout before _RenderDeferredLayoutBox),
+// the _RenderTheatre should typically be acquired using an [InheritedWidget]
+// (currently, _RenderTheatreMarker) in case the [OverlayPortal] gets
+// reparented.
+
+/// A class to show, hide and bring to top an [OverlayPortal]'s overlay child
+/// in the target [Overlay].
+///
+/// A [OverlayPortalController] can only be given to at most one [OverlayPortal]
+/// at a time. When an [OverlayPortalController] is moved from one
+/// [OverlayPortal] to another, its [isShowing] state does not carry over.
+///
+/// The [show] and [hide] methods typically should not be called when the widget
+/// tree is being rebuilt. However it's allowed to call [show] or [hide] when
+/// the associated [OverlayPortal] widget is yet to be inflated into the widget
+/// tree.
+class OverlayPortalController {
+  /// Creates an [OverlayPortalController].
+  OverlayPortalController({ String? debugLabel }) : _debugLabel = debugLabel;
+
+  _OverlayPortalState? _attachTarget;
+  int? _showTimestamp;
+  final String? _debugLabel;
+
+  /// Show the overlay child of the [OverlayPortal] this controller is attached
+  /// to, at the top of the target [Overlay].
+  ///
+  /// When there are more than one [OverlayPortal]s that target the same
+  /// [Overlay], the overlay child of the last [OverlayPortal] to have called
+  /// [show] appears at the top level, unobstructed.
+  ///
+  /// If [isShowing] is already true, calling this method brings the overlay
+  /// child it controls to the top.
+  ///
+  /// This method should typically not be called when the widget tree is being
+  /// rebuilt.
+  void show() {
+    final _OverlayPortalState? state = _attachTarget;
+    if (state != null) {
+      state.show();
+    } else {
+      _showTimestamp = _OverlayPortalState.wallTime += 1;
+    }
+  }
+
+  /// Hide the [OverlayPortal]'s overlay child.
+  ///
+  /// Once hidden, the overlay child will be removed from the widget tree the
+  /// next time the widget tree rebuilds, and stateful widgets in the overlay
+  /// child may lose states as a result.
+  ///
+  /// This method should typically not be called when the widget tree is being
+  /// rebuilt.
+  void hide() {
+    final _OverlayPortalState? state = _attachTarget;
+    if (state != null) {
+      state.hide();
+    } else {
+      assert(_showTimestamp != null);
+      _showTimestamp = null;
+    }
+  }
+
+  /// Whether the associated [OverlayPortal] should build and show its overlay
+  /// child, using its `overlayChildBuilder`.
+  bool get isShowing {
+    final _OverlayPortalState? state = _attachTarget;
+    return state != null
+      ? state._showTimestamp != null
+      : _showTimestamp != null;
+  }
+
+  /// Conventience method for toggling the current [isShowing] status.
+  ///
+  /// This method should typically not be called when the widget tree is being
+  /// rebuilt.
+  void toggle() => isShowing ? hide() : show();
+
+  @override
+  String toString() {
+    final String? debugLabel = _debugLabel;
+    final String label = debugLabel == null ? '' : '($debugLabel)';
+    final String isDetached = _attachTarget != null ? '' : ' DETACHED';
+    return '${objectRuntimeType(this, 'OverlayPortalController')}$label$isDetached';
+  }
+}
+
+/// A widget that renders its overlay child on the closest [Overlay].
+///
+/// The overlay child is initially hidden until [OverlayPortalController.show]
+/// is called on the associated [controller]. The [OverlayPortal] uses
+/// [overlayChildBuilder] to build its overlay child and renders it on the
+/// closest [Overlay] as if it was inserted using an [OverlayEntry], while it
+/// can depend on the same set of [InheritedWidget]s (such as [Theme]) that this
+/// widget can depend on.
+///
+/// This widget requires an [Overlay] ancestor in the widget tree when its
+/// overlay child is showing. The overlay child will be painted in front of the
+/// [OverlayEntry] closest to this widget in the widget tree (which is usually
+/// the enclosing [Route]). When there are more than one [OverlayPortal]s target
+/// the same [OverlayEntry], the overlay child of the last [OverlayPortal] to
+/// have called `show` appears in the front.
+///
+/// When [OverlayPortalController.hide] is called, the widget built using
+/// [overlayChildBuilder] will be removed from the widget tree the next time the
+/// widget rebuilds. Stateful descendants in the overlay child subtree may lose
+/// states as a result.
+///
+/// {@tool dartpad}
+/// This example uses an [OverlayPortal] to build a tooltip that becomes visible
+/// when the user taps on the [child] widget. There's a [DefaultTextStyle] above
+/// the [OverlayPortal] controlling the [TextStyle] of both the [child] widget
+/// and the widget [overlayChildBuilder] builds, which isn't otherwise doable if
+/// the tooltip was added as an [OverlayEntry].
+///
+/// ** See code in examples/api/lib/widgets/overlay/overlay_portal.0.dart **
+/// {@end-tool}
+///
+/// ### Differences between [OverlayPortal] and [OverlayEntry]
+///
+/// The main difference between [OverlayEntry] and [OverlayPortal] is that
+/// [OverlayEntry] builds its widget subtree as a child of the target [Overlay],
+/// while [OverlayPortal] uses [overlayChildBuilder] to build a child widget of
+/// itself. This allows [OverlayPortal]'s overlay child to depend on the same
+/// set of [InheritedWidget]s as [OverlayPortal], and it's also guaranteed that
+/// the overlay child will not outlive its [OverlayPortal].
+///
+/// On the other hand, [OverlayPortal]'s implementation is more complex. For
+/// instance, it does a bit more work than a regular widget during global key
+/// reparenting. If the content to be shown on the [Overlay] doesn't benefit
+/// from being a part of [OverlayPortal]'s subtree, consider using an
+/// [OverlayEntry] instead.
+///
+/// See also:
+///
+///  * [OverlayEntry], an alternative API for inserting widgets into an
+///    [Overlay].
+///  * [Positioned], which can be used to size and position the overlay child in
+///    relation to the target [Overlay]'s boundaries.
+///  * [CompositedTransformFollower], which can be used to position the overlay
+///    child in relation to the linked [CompositedTransformTarget] widget.
+class OverlayPortal extends StatefulWidget {
+  /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
+  /// builds on the closest [Overlay] when [OverlayPortalController.show] is
+  /// called.
+  const OverlayPortal({
+    super.key,
+    required this.controller,
+    required this.overlayChildBuilder,
+    required this.child,
+  });
+
+  /// The controller to show, hide and bring to top the overlay child.
+  final OverlayPortalController controller;
+
+  _OverlayEntryWidgetState _resolveLocation(BuildContext context) {
+    final _OverlayEntryWidgetState? entry = _RenderTheatreMarker.of(context, targetRootOverlay: false)?.overlayEntryWidgetState;
+    if (entry == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No Overlay widget found.'),
+        ErrorDescription(
+          '$runtimeType widgets require an Overlay widget ancestor.\n'
+          'An overlay lets widgets float on top of other widget children.',
+        ),
+        ErrorHint(
+          'To introduce an Overlay widget, you can either directly '
+          'include one, or use a widget that contains an Overlay itself, '
+          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: Overlay),
+      ]);
+    }
+    return entry;
+  }
+
+  /// A [WidgetBuilder] used to build a widget below this widget in the tree,
+  /// that renders on the closest [Overlay].
+  ///
+  /// The said widget will only be built and shown in the closest [Overlay] once
+  /// [OverlayPortalController.show] is called on the associated [controller].
+  /// It will be painted in front of the [OverlayEntry] closest to this widget
+  /// in the widget tree (which is usually the enclosing [Route]).
+  ///
+  /// The built overlay child widget, is inserted below this widget in the
+  /// widget tree, allowing it to depend on [InheritedWidget]s above it, and
+  /// be notified when the [InheritedWidget]s change.
+  ///
+  /// Unlike [child], the built overlay child can visually extend outside the
+  /// bounds of this widget without being clipped, and receive hit-test events
+  /// outside of this widget's bounds, as long as it does not extend outside of
+  /// the [Overlay] on which it is rendered.
+  final WidgetBuilder overlayChildBuilder;
+
+  /// A widget below this widget in the tree.
+  final Widget? child;
+
+  @override
+  State<OverlayPortal> createState() => _OverlayPortalState();
+}
+
+class _TopmostLocation extends _OverlayLocation with LinkedListEntry<_TopmostLocation> {
+  _TopmostLocation(this._showTimestamp, this._theatreChildModel) : super._();
+
+  final int _showTimestamp;
+  final _EventOrderChildModel _theatreChildModel;
+  _RenderDeferredLayoutBox? _overlayChildRenderBox;
+
+  @override
+  _RenderTheatre get _theatre => _theatreChildModel._theatre;
+
+  @override
+  void _addToChildModel(_RenderDeferredLayoutBox child) {
+    assert(_overlayChildRenderBox == null, 'Failed to add $child. $_overlayChildRenderBox is attached to $this');
+    assert(_showTimestamp != null);
+    _overlayChildRenderBox = child;
+    _theatreChildModel._add(this);
+  }
+
+  @override
+  void _removeFromChildModel(_RenderDeferredLayoutBox child) {
+    assert(child == _overlayChildRenderBox);
+    _overlayChildRenderBox = null;
+    assert(_theatreChildModel._sortedChildren.contains(this));
+    _theatreChildModel._remove(this);
+  }
+
+  @override
+  void _activate(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
+    assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
+    super._activate(child);
+    _overlayChildRenderBox = child;
+  }
+
+  @override
+  void _deactivate(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
+    super._deactivate(child);
+    _overlayChildRenderBox = null;
+  }
+
+  @override
+  String toString() => '$_showTimestamp';
+}
+
+class _RenderTheatreMarker extends InheritedWidget {
+  const _RenderTheatreMarker({
+    required this.theatre,
+    required this.overlayEntryWidgetState,
+    required super.child,
+  });
+
+  final _RenderTheatre theatre;
+  final _OverlayEntryWidgetState overlayEntryWidgetState;
+
+  @override
+  bool updateShouldNotify(_RenderTheatreMarker oldWidget) {
+    return oldWidget.theatre != theatre
+        || oldWidget.overlayEntryWidgetState != overlayEntryWidgetState;
+  }
+
+  @override
+  InheritedElement createElement() => _RenderTheatreMarkerElement(this);
+
+  static _RenderTheatreMarker? of(BuildContext context, { required bool targetRootOverlay }) {
+    final _RenderTheatreMarkerElement? element = context.getElementForInheritedWidgetOfExactType<_RenderTheatreMarker>() as _RenderTheatreMarkerElement?;
+    if (element == null) {
+      return null;
+    }
+    final _RenderTheatreMarkerElement dependency = targetRootOverlay ? element._topRenderTheatre : element;
+    return context.dependOnInheritedElement(dependency) as _RenderTheatreMarker;
+  }
+}
+
+class _RenderTheatreMarkerElement extends InheritedElement {
+  _RenderTheatreMarkerElement(super.widget);
+
+  _RenderTheatreMarkerElement get _topRenderTheatre {
+    _RenderTheatreMarkerElement? ancestor;
+    visitAncestorElements((Element element) {
+      assert(ancestor == null);
+      ancestor = element.getElementForInheritedWidgetOfExactType<_RenderTheatreMarker>() as _RenderTheatreMarkerElement?;
+      return false;
+    });
+    return ancestor?._topRenderTheatre ?? this;
+  }
+}
+
+class _OverlayPortalState extends State<OverlayPortal> {
+  // The developer must call `show` to reveal the overlay so we can get the
+  // timestamp of the user interaction for sorting.
+  _TopmostLocation? _location;
+  int? _showTimestamp;
+  // See https://github.com/dart-lang/sdk/issues/41717.
+  static int wallTime = kIsWeb
+    ? -9007199254740992 // -2^53
+    : -1 << 63;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupController(widget.controller);
+  }
+
+  void _setupController(OverlayPortalController controller) {
+    assert(
+      controller._attachTarget == null || controller._attachTarget == this,
+      'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}'
+    );
+    final int? controllerTimeStamp = controller._showTimestamp;
+    final int? timeStamp = _showTimestamp;
+    if (timeStamp == null || (controllerTimeStamp != null && controllerTimeStamp > timeStamp)) {
+      _showTimestamp = controllerTimeStamp;
+    }
+    controller._showTimestamp = null;
+    controller._attachTarget = this;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _location?._dispose();
+    _location = null;
+  }
+
+  @override
+  void didUpdateWidget(OverlayPortal oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller._attachTarget = null;
+      _setupController(widget.controller);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller._attachTarget = null;
+    super.dispose();
+  }
+
+  void show() {
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    final int now = wallTime += 1;
+    assert(_showTimestamp == null || _showTimestamp! < now);
+    setState(() { _showTimestamp = now; });
+    _location?._dispose();
+    _location = null;
+  }
+
+  void toggle() => _showTimestamp == null ? show() : hide();
+
+  void hide() {
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    setState(() { _showTimestamp = null; });
+    _location = null;
+    _location?._dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int? timestamp = _showTimestamp;
+    if (timestamp == null) {
+      return _OverlayPortal(
+        overlayLocation: null,
+        overlayChild: null,
+        child: widget.child,
+      );
+    }
+    return _OverlayPortal(
+      overlayLocation: _location ??= _TopmostLocation(timestamp, widget._resolveLocation(context)._overlayEntryTopChildModel),
+      overlayChild: _DeferredLayout(child: widget.overlayChildBuilder(context)),
+      child: widget.child,
+    );
+  }
+}
+
+// An interface for storing render children of a _RenderTheatre that should be
+// painted together.
+abstract class _RenderTheatreChildModel {
+  // Returns an iterator that traverse the children in the child model in paint
+  // order (from farthest to the user to the closest to the user).
+  //
+  // The returned iterator must be used immediately, before any changes can be
+  // made to the child model. Also the iterator should be safe to use even when
+  // the child model is being mutated. The reason for that is it's allowed to
+  // add/remove/move deferred children to a _RenderTheatre during performLayout,
+  // but the affected children don't have to be laid out in the same
+  // performLayout call.
+  _ChildIterator? _paintOrderIterator();
+
+  // Returns an iterator that traverse the children in the child model in
+  // hit-test order (from closest to the user to the farthest to the user).
+  _ChildIterator? _hitTestOrderIterator();
+
+  void visitChildren(RenderObjectVisitor visitor) {
+    final _ChildIterator? iterator = _paintOrderIterator();
+    if (iterator == null) {
+      return;
+    }
+    RenderBox? child = iterator();
+    while (child != null) {
+      visitor(child);
+      child = iterator();
+    }
+  }
+
+  bool hitTestChildren(BoxHitTestResult result, Offset position) {
+    final _ChildIterator? iterator = _hitTestOrderIterator();
+    if (iterator == null) {
+      return false;
+    }
+    RenderBox? child = iterator();
+    while (child != null) {
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: _toBoxHitTest(child.hitTest)
+      );
+      if (isHit) {
+        return true;
+      }
+      child = iterator();
+    }
+    return false;
+  }
+
+  void paintChildren(PaintingContext context, Offset offset) {
+    final _ChildIterator? iterator = _paintOrderIterator();
+    if (iterator == null) {
+      return;
+    }
+    RenderBox? child = iterator();
+    while(child != null) {
+      final StackParentData parentData = child.parentData! as StackParentData;
+      context.paintChild(child, parentData.offset + offset);
+      child = iterator();
+    }
+  }
+}
+
+// The data structure for managing the stack of theatre children that are sorted
+// by their _showTimestamp.
+//
+// The children with more recent timestamps (i.e. those called `show` recently)
+// will be painted last.
+class _EventOrderChildModel extends _RenderTheatreChildModel {
+  _EventOrderChildModel(this._theatre);
+
+  final _RenderTheatre _theatre;
+  final LinkedList<_TopmostLocation> _sortedChildren = LinkedList<_TopmostLocation>();
+
+  // Worst-case O(N), N being the number of children added to the top spot in
+  // the same frame. This can be a bit expensive when there's a lot of global
+  // key reparenting in the same frame but N is usually a small number.
+  void _add(_TopmostLocation child) {
+    assert(_debugNotDisposed());
+    assert(!_sortedChildren.contains(child));
+    _TopmostLocation? insertPosition = _sortedChildren.isEmpty ? null : _sortedChildren.last;
+    while (insertPosition != null && insertPosition._showTimestamp > child._showTimestamp) {
+      insertPosition = insertPosition.previous;
+    }
+    if (insertPosition == null) {
+      _sortedChildren.addFirst(child);
+    } else {
+      insertPosition.insertAfter(child);
+    }
+    assert(_sortedChildren.contains(child));
+
+    if (child._overlayChildRenderBox != null) {
+      _theatre.markNeedsPaint();
+      _theatre.markNeedsCompositingBitsUpdate();
+      _theatre.markNeedsSemanticsUpdate();
+    }
+  }
+
+  void _remove(_TopmostLocation child) {
+    final bool wasInCollection = _sortedChildren.remove(child);
+    assert(wasInCollection);
+    if (child._overlayChildRenderBox != null) {
+      _theatre.markNeedsPaint();
+      _theatre.markNeedsCompositingBitsUpdate();
+      _theatre.markNeedsSemanticsUpdate();
+    }
+  }
+
+  _TopmostLocation? _childAfter(_TopmostLocation? child) {
+    if (_sortedChildren.isEmpty) {
+      return null;
+    }
+    final _TopmostLocation? candidate = child == null ? _sortedChildren.first : child.next;
+    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childAfter(candidate) : null;
+  }
+
+  _TopmostLocation? _childBefore(_TopmostLocation? child) {
+    if (_sortedChildren.isEmpty) {
+      return null;
+    }
+    final _TopmostLocation? candidate = child == null ? _sortedChildren.last : child.previous;
+    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childBefore(candidate) : null;
+  }
+
+  static _ChildIterator? _mapIterator(_Iterator<_TopmostLocation>? fromIterator) {
+    if (fromIterator == null) {
+      return null;
+    }
+
+    _RenderDeferredLayoutBox? iter() {
+      final _TopmostLocation? location = fromIterator();
+      if (location == null) {
+        return null;
+      }
+      return location._overlayChildRenderBox ?? iter();
+    }
+
+    return iter;
+  }
+
+  _Iterator<_TopmostLocation>? _forwardIterator() {
+    _TopmostLocation? child = _childAfter(null);
+    if (child == null) {
+      return null;
+    }
+    bool isInitial = true;
+    return () {
+      if (isInitial) {
+        assert(child != null);
+        isInitial = false;
+        return child;
+      }
+      return child == null ? null : child = _childAfter(child);
+    };
+  }
+
+  _Iterator<_TopmostLocation>? _backwardIterator() {
+    _TopmostLocation? child = _childBefore(null);
+    if (child == null) {
+      return null;
+    }
+    bool isInitial = true;
+    return () {
+      if (isInitial) {
+        assert(child != null);
+        isInitial = false;
+        return child;
+      }
+      return child == null ? null : child = _childBefore(child);
+    };
+  }
+
+  @override
+  _ChildIterator? _paintOrderIterator() => _mapIterator(_forwardIterator());
+  @override
+  _ChildIterator? _hitTestOrderIterator() => _mapIterator(_backwardIterator());
+
+  bool _debugNotDisposed() {
+    if (!_debugDisposed) {
+      return true;
+    }
+    throw StateError('$this is already disposed');
+  }
+  bool _debugDisposed = false;
+  @mustCallSuper
+  void _dispose() {
+    assert(_debugNotDisposed());
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
+  }
+}
+
+/// A location in an [Overlay].
+///
+/// An [_OverlayLocation] dictates the [Overlay] an [OverlayPortal] should put
+/// its overlay child onto, as well as the overlay child's paint order in
+/// relation to other contents painted on the [Overlay].
+// An _OverlayLocation is a cursor pointing to a location in a particular
+// Overlay's child model, and provides methods to insert/remove/move a
+// _RenderDeferredLayoutBox to/from its target _theatre.
+//
+// Additionally, `_activate` and `_deactivate` will be called when the overlay
+// child's `_OverlayPortalElement` activates/deactivates.
+// `_OverlayPortalElement` removes its overlay child's render object from the
+// target `_RenderTheatre` when it deactivates and puts it back on `activated`.
+// These 2 methods can be used to "hide" a child in the child model without
+// removing it, when the child is expensive/difficult to re-insert on
+// `activated`.
+//
+// An `_OverlayLocation` will be used as an Element's slot. Since it won't be
+// able to implement operator== (since it's mutable), the same
+// `_OverlayLocation` instance must not be used to represent more than one
+// locations.
+abstract class _OverlayLocation {
+  _OverlayLocation._();
+
+  _RenderTheatre get _theatre;
+
+  @protected
+  void _addToChildModel(_RenderDeferredLayoutBox child);
+  @protected
+  void _removeFromChildModel(_RenderDeferredLayoutBox child);
+
+  void _addChild(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
+    _addToChildModel(child);
+    _theatre._addDeferredChild(child);
+    assert(child.parent == _theatre);
+  }
+
+  void _removeChild(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
+    _removeFromChildModel(child);
+    _theatre._removeDeferredChild(child);
+    assert(child.parent == null);
+  }
+
+  void _moveChild(_RenderDeferredLayoutBox child, _OverlayLocation fromLocation) {
+    assert(fromLocation != this);
+    assert(_debugNotDisposed());
+    final _RenderTheatre fromTheatre = fromLocation._theatre;
+    if (fromTheatre != _theatre) {
+      fromTheatre._removeDeferredChild(child);
+      _theatre._addDeferredChild(child);
+    }
+    fromLocation._removeFromChildModel(child);
+    _addToChildModel(child);
+  }
+
+  void _activate(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
+    _theatre.adoptChild(child);
+  }
+  void _deactivate(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
+    _theatre.dropChild(child);
+  }
+
+  bool _debugNotDisposed() {
+    if (!_debugDisposed) {
+      return true;
+    }
+    throw StateError('$this is already disposed');
+  }
+  bool _debugDisposed = false;
+  @mustCallSuper
+  void _dispose() {
+    assert(!_debugDisposed);
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
   }
 }
 
