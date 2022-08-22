@@ -787,5 +787,67 @@ TEST_F(RasterCacheTest, RasterCacheKeyID_LayerChildrenIds) {
   ASSERT_EQ(ids, expected_ids);
 }
 
+TEST_F(RasterCacheTest, RasterCacheBleedingNoClipNeeded) {
+  SkImageInfo info =
+      SkImageInfo::MakeN32(40, 40, SkAlphaType::kOpaque_SkAlphaType);
+
+  auto image = SkImage::MakeRasterData(
+      info, SkData::MakeUninitialized(40 * 40 * 4), 40 * 4);
+  auto canvas = MockCanvas();
+  canvas.setMatrix(SkMatrix::Scale(2, 2));
+  // Drawing cached image does not exceeds physical pixels of the original
+  // bounds and does not need to be clipped.
+  auto cache_result =
+      RasterCacheResult(image, SkRect::MakeXYWH(100.3, 100.3, 20, 20), "");
+  auto paint = SkPaint();
+  cache_result.draw(canvas, &paint);
+
+  EXPECT_EQ(canvas.draw_calls(),
+            std::vector({
+                MockCanvas::DrawCall{
+                    0, MockCanvas::SetMatrixData{SkM44::Scale(2, 2)}},
+                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44()}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::DrawImageData{image, 200.6, 200.6,
+                                                 SkSamplingOptions(), paint}},
+                MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
+            }));
+}
+
+TEST_F(RasterCacheTest, RasterCacheBleedingClipNeeded) {
+  SkImageInfo info =
+      SkImageInfo::MakeN32(40, 40, SkAlphaType::kOpaque_SkAlphaType);
+
+  auto image = SkImage::MakeRasterData(
+      info, SkData::MakeUninitialized(40 * 40 * 4), 40 * 4);
+  auto canvas = MockCanvas();
+  canvas.setMatrix(SkMatrix::Scale(2, 2));
+
+  auto cache_result =
+      RasterCacheResult(image, SkRect::MakeXYWH(100.3, 100.3, 19.6, 19.6), "");
+  auto paint = SkPaint();
+  cache_result.draw(canvas, &paint);
+
+  EXPECT_EQ(
+      canvas.draw_calls(),
+      std::vector({
+          MockCanvas::DrawCall{0,
+                               MockCanvas::SetMatrixData{SkM44::Scale(2, 2)}},
+          MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+          MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44()}},
+          MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
+          MockCanvas::DrawCall{
+              2, MockCanvas::ClipRectData{SkRect::MakeLTRB(200, 200, 240, 240),
+                                          SkClipOp::kIntersect,
+                                          MockCanvas::kHard_ClipEdgeStyle}},
+          MockCanvas::DrawCall{
+              2, MockCanvas::DrawImageData{image, 200.6, 200.6,
+                                           SkSamplingOptions(), paint}},
+          MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+          MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
+      }));
+}
+
 }  // namespace testing
 }  // namespace flutter
