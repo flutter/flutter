@@ -6,8 +6,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:path/path.dart' as path;
-
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
