@@ -471,8 +471,8 @@ class Switch extends StatelessWidget {
     final _SwitchDefaults defaults = _SwitchDefaults(context);
 
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
-        ?? switchTheme.materialTapTargetSize
-        ?? theme.materialTapTargetSize;
+      ?? switchTheme.materialTapTargetSize
+      ?? theme.materialTapTargetSize;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         return Size(defaults.switchWidth, defaults.switchHeight);
