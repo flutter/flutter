@@ -646,6 +646,70 @@ if (target_cpu != "x86") {
   }
 }
 
+if (target_cpu == "x64" || target_cpu == "arm64") {
+  zip_bundle("analyze_snapshot") {
+    deps =
+        [ "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
+
+    analyze_snapshot_bin = "analyze_snapshot"
+    analyze_snapshot_out_dir =
+        get_label_info(
+            "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)",
+            "root_out_dir")
+    analyze_snapshot_path =
+        rebase_path("$analyze_snapshot_out_dir/$analyze_snapshot_bin")
+
+    if (host_os == "linux") {
+      output = "$android_zip_archive_dir/analyze-snapshot-linux-x64.zip"
+    } else if (host_os == "mac") {
+      output = "$android_zip_archive_dir/analyze-snapshot-darwin-x64.zip"
+    } else if (host_os == "win") {
+      output = "$android_zip_archive_dir/analyze-snapshot-windows-x64.zip"
+      analyze_snapshot_bin = "analyze-snapshot.exe"
+      analyze_snapshot_path = rebase_path("$root_out_dir/$analyze_snapshot_bin")
+    }
+
+    files = [
+      {
+        source = analyze_snapshot_path
+        destination = analyze_snapshot_bin
+      },
+    ]
+  }
+
+  # TODO(godofredoc): Remove analyze_snapshot and rename new_analyze_snapshot when v2 migration is complete.
+  # BUG: https://github.com/flutter/flutter/issues/105351
+  zip_bundle("new_analyze_snapshot") {
+    deps =
+        [ "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
+
+    analyze_snapshot_bin = "analyze_snapshot"
+    analyze_snapshot_out_dir =
+        get_label_info(
+            "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)",
+            "root_out_dir")
+    analyze_snapshot_path =
+        rebase_path("$analyze_snapshot_out_dir/$analyze_snapshot_bin")
+
+    if (host_os == "linux") {
+      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/analyze-snapshot-linux-x64.zip"
+    } else if (host_os == "mac") {
+      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/analyze-snapshot-darwin-x64.zip"
+    } else if (host_os == "win") {
+      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/analyze-snapshot-windows-x64.zip"
+      analyze_snapshot_bin = "analyze-snapshot.exe"
+      analyze_snapshot_path = rebase_path("$root_out_dir/$analyze_snapshot_bin")
+    }
+
+    files = [
+      {
+        source = analyze_snapshot_path
+        destination = analyze_snapshot_bin
+      },
+    ]
+  }
+}
+
 group("android") {
   deps = [
     ":android_javadoc",

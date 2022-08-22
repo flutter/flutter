@@ -20,6 +20,10 @@ group("generate_snapshot_bins") {
   if (host_os == "mac" && target_os == "mac") {
     deps += [ ":create_macos_gen_snapshots" ]
   }
+  if (target_cpu == "x64" || target_cpu == "arm64") {
+    deps +=
+        [ "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
+  }
 }
 
 compiled_action("generate_snapshot_bin") {
