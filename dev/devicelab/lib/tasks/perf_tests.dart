@@ -7,6 +7,7 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -1436,7 +1437,39 @@ class CompileTest {
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.macos:
-        throw Exception('Unsupported option for macOS devices');
+        unawaited(stderr.flush());
+        options.insert(0, 'macos');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String buildDirectoryPath = path.join(
+          cwd,
+          'build',
+          'macos',
+          'Build',
+          'Products',
+          'Release',
+        );
+        final String? appBundlePath =
+            _findIosAppInBuildDirectory(buildDirectoryPath);
+        if (appBundlePath == null) {
+          throw 'Failed to find app bundle in $buildDirectoryPath';
+        }
+        final Directory appBundle = Directory(appBundlePath);
+        final Archive archive = Archive();
+        await appBundle
+            .list(recursive: true)
+            .where((FileSystemEntity e) => e.runtimeType == File)
+            .map<ArchiveFile>((FileSystemEntity e) {
+              assert(e.runtimeType == File);
+              final File file = e as File;
+              return ArchiveFile(file.path, file.statSync().size, file.readAsBytesSync());
+            })
+            .forEach((ArchiveFile file) => archive.addFile(file));
+        releaseSizeInBytes = TarEncoder().encode(archive).length;
+        break;
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
