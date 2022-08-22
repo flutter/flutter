@@ -417,6 +417,7 @@ Future<void> _runGeneralToolTests() async {
     // This overrides the 15 minute default for tools tests.
     // See the README.md and dart_test.yaml files in the flutter_tools package.
     perTestTimeout: const Duration(seconds: 2),
+    flag: true,
   );
 }
 
@@ -1726,6 +1727,7 @@ Future<void> _runDartTest(String workingDirectory, {
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
+  bool flag = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1761,6 +1763,8 @@ Future<void> _runDartTest(String workingDirectory, {
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
+    if (flag)
+      '--reporter=json',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
