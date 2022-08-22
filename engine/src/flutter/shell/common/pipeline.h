@@ -222,11 +222,11 @@ class Pipeline {
 };
 
 struct LayerTreeItem {
-  LayerTreeItem(std::shared_ptr<LayerTree> layer_tree,
+  LayerTreeItem(std::unique_ptr<LayerTree> layer_tree,
                 std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder)
       : layer_tree(std::move(layer_tree)),
         frame_timings_recorder(std::move(frame_timings_recorder)) {}
-  std::shared_ptr<LayerTree> layer_tree;
+  std::unique_ptr<LayerTree> layer_tree;
   std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder;
 };
 

@@ -36,28 +36,6 @@ void main() {
     expect(data.buffer.asUint8List()[3], 0xFF);
   });
 
-  test('Scene.toImageSync succeeds with texture layer', () async {
-    final SceneBuilder builder = SceneBuilder();
-    builder.pushOffset(10, 10);
-    builder.addTexture(0, width: 10, height: 10);
-
-    final Scene scene = builder.build();
-    final Image image = scene.toImageSync(10, 10);
-    scene.dispose();
-
-    expect(image.width, 10);
-    expect(image.height, 10);
-
-    final ByteData? data = await image.toByteData();
-
-    expect(data, isNotNull);
-    expect(data!.lengthInBytes, 10 * 10 * 4);
-    expect(data.buffer.asUint8List()[0], 0);
-    expect(data.buffer.asUint8List()[1], 0);
-    expect(data.buffer.asUint8List()[2], 0);
-    expect(data.buffer.asUint8List()[3], 0);
-  });
-
   test('addPicture with disposed picture does not crash', () {
     bool assertsEnabled = false;
     assert(() {

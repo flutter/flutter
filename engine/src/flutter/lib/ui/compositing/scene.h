@@ -26,7 +26,7 @@ class Scene : public RefCountedDartWrappable<Scene> {
                      bool checkerboardRasterCacheImages,
                      bool checkerboardOffscreenLayers);
 
-  std::shared_ptr<flutter::LayerTree> takeLayerTree();
+  std::unique_ptr<flutter::LayerTree> takeLayerTree();
 
   Dart_Handle toImageSync(uint32_t width,
                           uint32_t height,
@@ -34,26 +34,17 @@ class Scene : public RefCountedDartWrappable<Scene> {
 
   Dart_Handle toImage(uint32_t width,
                       uint32_t height,
-                      Dart_Handle raw_image_handle);
+                      Dart_Handle image_callback);
 
   void dispose();
 
  private:
-  Scene(std::shared_ptr<flutter::Layer> rootLayer,
-        uint32_t rasterizerTracingThreshold,
-        bool checkerboardRasterCacheImages,
-        bool checkerboardOffscreenLayers);
+  explicit Scene(std::shared_ptr<flutter::Layer> rootLayer,
+                 uint32_t rasterizerTracingThreshold,
+                 bool checkerboardRasterCacheImages,
+                 bool checkerboardOffscreenLayers);
 
-  void RasterizeToImage(uint32_t width,
-                        uint32_t height,
-                        Dart_Handle raw_image_handle);
-
-  // This is a shared_ptr to support flattening the layer tree from the UI
-  // thread onto the raster thread - allowing access to the texture registry
-  // required to render TextureLayers.
-  //
-  // No longer valid after calling `takeLayerTree`.
-  std::shared_ptr<flutter::LayerTree> layer_tree_;
+  std::unique_ptr<flutter::LayerTree> layer_tree_;
 };
 
 }  // namespace flutter
