@@ -1398,7 +1398,10 @@ class CompileTest {
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
         if (reportPackageContentSizes) {
-          metrics.addAll(await getSizesFromIosApp(appPath));
+          metrics.addAll(await getSizesFromDarwinApp(
+            appPath: appBuildDirectory.path,
+            operatingSystem: DeviceOperatingSystem.ios,
+          ));
         }
         break;
       case DeviceOperatingSystem.android:
@@ -1546,17 +1549,50 @@ class CompileTest {
     };
   }
 
-  static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
-    // Thin the binary to only contain one architecture.
-    final String xcodeBackend = path.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
-    await exec(xcodeBackend, <String>['thin'], environment: <String, String>{
-      'ARCHS': 'arm64',
-      'WRAPPER_NAME': path.basename(appPath),
-      'TARGET_BUILD_DIR': path.dirname(appPath),
-    });
+  static Future<Map<String, dynamic>> getSizesFromDarwinApp({
+    required String appPath,
+    required DeviceOperatingSystem operatingSystem,
+  }) async {
+    late final File flutterFramework;
+    late final String frameworkDirectory;
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+        frameworkDirectory = path.join(
+          appPath,
+          'Frameworks',
+        );
+        flutterFramework = File(path.join(
+          frameworkDirectory,
+          'Flutter.framework',
+          'Flutter',
+        ));
+        break;
+      case DeviceOperatingSystem.macos:
+        frameworkDirectory = path.join(
+          appPath,
+          'Contents',
+          'Frameworks',
+        );
+        flutterFramework = File(path.join(
+          frameworkDirectory,
+          'FlutterMacOS.framework',
+          'FlutterMacOS',
+        )); // https://github.com/flutter/flutter/issues/70413
+        break;
+      case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
+      case DeviceOperatingSystem.androidArm64:
+      case DeviceOperatingSystem.fake:
+      case DeviceOperatingSystem.fuchsia:
+      case DeviceOperatingSystem.windows:
+        throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
+    }
 
-    final File appFramework = File(path.join(appPath, 'Frameworks', 'App.framework', 'App'));
-    final File flutterFramework = File(path.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
+    final File appFramework = File(path.join(
+      frameworkDirectory,
+      'App.framework',
+      'App',
+    ));
 
     return <String, dynamic>{
       'app_framework_uncompressed_bytes': await appFramework.length(),
