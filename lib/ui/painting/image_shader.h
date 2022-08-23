@@ -35,6 +35,8 @@ class ImageShader : public Shader {
   int width();
   int height();
 
+  void dispose();
+
  private:
   ImageShader();
 
