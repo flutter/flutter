@@ -1620,7 +1620,7 @@ class EditableText extends StatefulWidget {
   /// that are able to be handled and inserted from keyboards.
   ///
   /// ```dart
-  ///   ['image/png', 'image/bmp', 'image/jpg', 'image/tiff', 'image/gif', 'image/jpeg', 'image/webp']
+  ///   List<String> defaultMimeTypes = ['image/png', 'image/bmp', 'image/jpg', 'image/tiff', 'image/gif', 'image/jpeg', 'image/webp'];
   /// ```
   /// {@end-tool}
   ///
