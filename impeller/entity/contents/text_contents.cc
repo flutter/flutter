@@ -9,7 +9,9 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/tessellator/tessellator.h"
 #include "impeller/typographer/glyph_atlas.h"
@@ -93,11 +95,16 @@ bool TextContents::Render(const ContentContext& renderer,
   frame_info.text_color = ToVector(color_.Premultiply());
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+
   // Common fragment uniforms for all glyphs.
   FS::BindGlyphAtlasSampler(
-      cmd,                                                        // command
-      atlas->GetTexture(),                                        // texture
-      renderer.GetContext()->GetSamplerLibrary()->GetSampler({})  // sampler
+      cmd,                  // command
+      atlas->GetTexture(),  // texture
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+          sampler_desc)  // sampler
   );
 
   // Common vertex information for all glyphs.
