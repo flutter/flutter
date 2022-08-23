@@ -110,6 +110,7 @@ unlinked_spec.ds
 # Windows
 **/windows/flutter/generated_plugins.cmake
 **/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugin_registrant.h
 
 # Coverage
 coverage/
