@@ -1227,5 +1227,31 @@ TEST_P(AiksTest, CanRenderClippedLayers) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  canvas.Translate(Vector2(100, 100));
+
+  auto texture = std::make_shared<Image>(CreateTextureForFixture("boston.jpg"));
+  auto draw_image_layer = [&canvas, &texture](Paint paint) {
+    canvas.SaveLayer(paint);
+    canvas.DrawImage(texture, {}, Paint{});
+    canvas.Restore();
+  };
+
+  Paint effect_paint;
+  effect_paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+      .style = FilterContents::BlurStyle::kNormal,
+      .sigma = Sigma{6},
+  };
+  draw_image_layer(effect_paint);
+
+  canvas.Translate(Vector2(300, 300));
+  canvas.Scale(Vector2(3, 3));
+  draw_image_layer(effect_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

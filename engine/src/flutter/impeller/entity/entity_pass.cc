@@ -240,7 +240,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       auto texture = pass_context.GetTexture();
       // Render the backdrop texture before any of the pass elements.
       const auto& proc = subpass->backdrop_filter_proc_.value();
-      backdrop_contents = proc(FilterInput::Make(std::move(texture)));
+      backdrop_contents =
+          proc(FilterInput::Make(std::move(texture)), subpass->xformation_);
 
       // The subpass will need to read from the current pass texture when
       // rendering the backdrop, so if there's an active pass, end it prior to
@@ -304,7 +305,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     }
 
     auto offscreen_texture_contents =
-        subpass->delegate_->CreateContentsForSubpassTarget(subpass_texture);
+        subpass->delegate_->CreateContentsForSubpassTarget(
+            subpass_texture, subpass->xformation_);
 
     if (!offscreen_texture_contents) {
       // This is an error because the subpass delegate said the pass couldn't
@@ -329,10 +331,6 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     element_entity.SetContents(std::move(offscreen_texture_contents));
     element_entity.SetStencilDepth(subpass->stencil_depth_);
     element_entity.SetBlendMode(subpass->blend_mode_);
-    // Once we have filters being applied for SaveLayer, some special sauce
-    // may be needed here (or in PaintPassDelegate) to ensure the filter
-    // parameters are transformed by the `xformation_` matrix, while
-    // continuing to apply only the subpass offset to the offscreen texture.
     element_entity.SetTransformation(
         Matrix::MakeTranslation(Vector3(subpass_coverage->origin - position)));
   } else {

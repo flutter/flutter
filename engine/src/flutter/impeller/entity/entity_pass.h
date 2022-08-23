@@ -25,8 +25,9 @@ class ContentContext;
 class EntityPass {
  public:
   using Element = std::variant<Entity, std::unique_ptr<EntityPass>>;
-  using BackdropFilterProc =
-      std::function<std::shared_ptr<FilterContents>(FilterInput::Ref)>;
+  using BackdropFilterProc = std::function<std::shared_ptr<FilterContents>(
+      FilterInput::Ref,
+      const Matrix& effect_transform)>;
 
   EntityPass();
 
