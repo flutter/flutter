@@ -27,6 +27,7 @@ std::optional<Snapshot> ColorMatrixFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
+    const Matrix& effect_transform,
     const Rect& coverage) const {
   using VS = ColorMatrixColorFilterPipeline::VertexShader;
   using FS = ColorMatrixColorFilterPipeline::FragmentShader;

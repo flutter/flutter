@@ -33,6 +33,7 @@ class BlendFilterContents : public FilterContents {
   std::optional<Snapshot> RenderFilter(const FilterInput::Vector& inputs,
                                        const ContentContext& renderer,
                                        const Entity& entity,
+                                       const Matrix& effect_transform,
                                        const Rect& coverage) const override;
 
   Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;

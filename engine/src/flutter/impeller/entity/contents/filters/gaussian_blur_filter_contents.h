@@ -28,8 +28,10 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
   void SetSourceOverride(FilterInput::Ref alpha_mask);
 
   // |FilterContents|
-  std::optional<Rect> GetFilterCoverage(const FilterInput::Vector& inputs,
-                                        const Entity& entity) const override;
+  std::optional<Rect> GetFilterCoverage(
+      const FilterInput::Vector& inputs,
+      const Entity& entity,
+      const Matrix& effect_transform) const override;
 
  private:
   // |FilterContents|
@@ -37,6 +39,7 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
       const FilterInput::Vector& input_textures,
       const ContentContext& renderer,
       const Entity& entity,
+      const Matrix& effect_transform,
       const Rect& coverage) const override;
   Sigma blur_sigma_;
   Vector2 blur_direction_;

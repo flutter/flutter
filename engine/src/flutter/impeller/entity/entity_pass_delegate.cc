@@ -28,7 +28,8 @@ class DefaultEntityPassDelegate final : public EntityPassDelegate {
 
   // |EntityPassDelegate|
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(
-      std::shared_ptr<Texture> target) override {
+      std::shared_ptr<Texture> target,
+      const Matrix& effect_transform) override {
     // Not possible since this pass always collapses into its parent.
     FML_UNREACHABLE();
   }

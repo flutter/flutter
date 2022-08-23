@@ -21,6 +21,7 @@ std::optional<Snapshot> LinearToSrgbFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
+    const Matrix& effect_transform,
     const Rect& coverage) const {
   if (inputs.empty()) {
     return std::nullopt;
