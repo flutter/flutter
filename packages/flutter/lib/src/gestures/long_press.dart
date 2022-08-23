@@ -250,7 +250,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
     Duration? duration,
-    super.postAcceptSlopToleranceOverride = double.maxFinite,
+    super.postAcceptSlopTolerance = null,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',

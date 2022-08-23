@@ -497,11 +497,16 @@ enum GestureRecognizerState {
 /// in the gesture arena, the gesture will be rejected.
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
+  /// Both preAcceptSlopTolerance postAcceptSlopTolerance can be:
+  /// - -1 (default) for letting flutter figuring out
+  /// - 0 or a positive number to specify radius in logical pixels
+  /// - null (passed explicitly) not to enforce slop restriction
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   PrimaryPointerGestureRecognizer({
     this.deadline,
-    this.postAcceptSlopToleranceOverride,
+    double? preAcceptSlopTolerance = -1,
+    double? postAcceptSlopTolerance = -1,
     super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
@@ -510,9 +515,28 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     super.kind,
     super.supportedDevices,
   }) : assert(
-         postAcceptSlopToleranceOverride == null || postAcceptSlopToleranceOverride >= 0,
-         'The postAcceptSlopToleranceOverride must be positive or null',
-  );
+        preAcceptSlopTolerance == null || preAcceptSlopTolerance >= -1,
+        'The preAcceptSlopTolerance must be positive, -1 or null',
+      ),
+      assert(
+        postAcceptSlopTolerance == null || postAcceptSlopTolerance >= -1,
+        'The postAcceptSlopTolerance must be positive, -1 or null',
+      ) {
+    _preAcceptSlopToleranceOverride =
+        _normalizeSlopToleranceParam(preAcceptSlopTolerance);
+    _postAcceptSlopToleranceOverride =
+        _normalizeSlopToleranceParam(postAcceptSlopTolerance);
+  }
+
+  static double? _normalizeSlopToleranceParam(double? oldSlopToleranceParam) {
+    if (oldSlopToleranceParam == -1) {
+      return null;
+    } else if (oldSlopToleranceParam == null) {
+      return double.maxFinite;
+    } else {
+      return oldSlopToleranceParam;
+    }
+  }
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
@@ -526,8 +550,16 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   ///
   /// Drifting past the allowed slop amount causes the gesture to be rejected.
   ///
+  /// The slop tolerance must be calculated dynamically because it might depend
+  /// on gestureSettings, which is assigned after construction.
+  ///
   /// Defaults to 18 logical pixels.
-  double get preAcceptSlopTolerance => gestureSettings?.touchSlop ?? kTouchSlop;
+  double get preAcceptSlopTolerance =>
+      _preAcceptSlopToleranceOverride ??
+      gestureSettings?.touchSlop ??
+      kTouchSlop;
+
+  late final double? _preAcceptSlopToleranceOverride;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
   /// after the gesture has been accepted.
@@ -535,17 +567,15 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Drifting past the allowed slop amount causes the gesture to stop tracking
   /// and signaling subsequent callbacks.
   ///
+  /// The slop tolerance must be calculated dynamically because it might depend
+  /// on gestureSettings, which is assigned after construction.
   /// Defaults to 18 logical pixels.
   double get postAcceptSlopTolerance =>
-      postAcceptSlopToleranceOverride ??
+      _postAcceptSlopToleranceOverride ??
       gestureSettings?.touchSlop ??
       kTouchSlop;
 
-  /// Configurable override for postAcceptSlopTolerance.
-  ///
-  /// Use double.maxFinite to indicate that the gesture can drift for any
-  /// distance.
-  final double? postAcceptSlopToleranceOverride;
+  late final double? _postAcceptSlopToleranceOverride;
 
   /// The current state of the recognizer.
   ///
@@ -603,11 +633,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       final bool isPreAcceptSlopPastTolerance =
           !_gestureAccepted &&
-          preAcceptSlopTolerance != null &&
           _getGlobalDistance(event) > preAcceptSlopTolerance;
       final bool isPostAcceptSlopPastTolerance =
           _gestureAccepted &&
-          postAcceptSlopTolerance != null &&
           _getGlobalDistance(event) > postAcceptSlopTolerance;
 
       if (event is PointerMoveEvent && (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {

@@ -162,7 +162,8 @@ void main() {
       final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       final TestPrimaryPointerGestureRecognizer<PointerUpEvent> accepting = TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
         GestureDisposition.accepted,
-        postAcceptSlopToleranceOverride: 1000,
+        preAcceptSlopTolerance: 15,
+        postAcceptSlopTolerance: 1000,
         onAcceptGesture: () => resolutions.add('accepted'),
         onRejectGesture: () => resolutions.add('rejected'),
       );
@@ -232,7 +233,8 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
     this.resolution, {
     this.onAcceptGesture,
     this.onRejectGesture,
-    super.postAcceptSlopToleranceOverride,
+    super.preAcceptSlopTolerance,
+    super.postAcceptSlopTolerance,
   });
 
   final GestureDisposition resolution;
