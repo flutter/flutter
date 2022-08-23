@@ -62,6 +62,13 @@ enum DeviceOperatingSystem {
   windows,
 }
 
+extension Darwin on DeviceOperatingSystem {
+  bool get isDarwin {
+    return this == DeviceOperatingSystem.ios
+      || this == DeviceOperatingSystem.macos;
+  }
+}
+
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
 
