@@ -670,9 +670,7 @@ class StartupTest {
         case DeviceOperatingSystem.ios:
         case DeviceOperatingSystem.macos:
           await flutter('build', options: <String>[
-            deviceOperatingSystem == DeviceOperatingSystem.ios
-              ? 'ios'
-              : 'macos',
+            if (deviceOperatingSystem == DeviceOperatingSystem.ios) 'ios' else 'macos',
              '-v',
             '--profile',
             '--target=$target',
