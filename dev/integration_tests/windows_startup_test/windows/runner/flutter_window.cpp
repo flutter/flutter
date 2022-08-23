@@ -1,6 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "flutter_window.h"
 
 #include <optional>
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -26,6 +32,21 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+
+  flutter::MethodChannel<> channel(
+      flutter_controller_->engine()->messenger(), "tests.flutter.dev/windows_startup_test",
+      &flutter::StandardMethodCodec::GetInstance());
+
+  channel.SetMethodCallHandler(
+    [](const flutter::MethodCall<>& call,
+       std::unique_ptr<flutter::MethodResult<>> result) {
+      if (call.method_name() == "isWindowVisible") {
+        result->Success(true);
+      } else {
+        result->NotImplemented();
+      }
+    });
+
   return true;
 }
 
