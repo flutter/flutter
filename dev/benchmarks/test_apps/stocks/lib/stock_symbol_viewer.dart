@@ -25,7 +25,7 @@ class _StockSymbolView extends StatelessWidget {
       changeInPrice = '+$changeInPrice';
     }
 
-    final TextStyle headings = Theme.of(context).textTheme.bodyText1!;
+    final TextStyle headings = Theme.of(context).textTheme.bodyLarge!;
     return Container(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -37,7 +37,7 @@ class _StockSymbolView extends StatelessWidget {
               Text(
                 stock.symbol,
                 key: ValueKey<String>('${stock.symbol}_symbol_name'),
-                style: Theme.of(context).textTheme.headline3,
+                style: Theme.of(context).textTheme.displaySmall,
               ),
               arrow,
             ],

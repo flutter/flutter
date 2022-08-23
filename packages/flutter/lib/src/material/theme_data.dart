@@ -199,7 +199,7 @@ enum MaterialTapTargetSize {
 /// its default background color and the [FloatingActionButton] widget
 /// uses the color scheme's [ColorScheme.secondary] for its default
 /// background. By default, the [Text] widget uses
-/// [TextTheme.bodyText2], and the color of that [TextStyle] has been
+/// [TextTheme.bodyMedium], and the color of that [TextStyle] has been
 /// changed to purple.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
@@ -210,7 +210,7 @@ enum MaterialTapTargetSize {
 ///     colorScheme: ColorScheme.fromSwatch().copyWith(
 ///       secondary: Colors.green,
 ///     ),
-///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
+///     textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
@@ -1261,6 +1261,11 @@ class ThemeData with Diagnosticable {
   ///
   /// A larger value translates to a spacing increase (less dense), and a
   /// smaller value translates to a spacing decrease (more dense).
+  ///
+  /// In Material Design 3, the [visualDensity] does not override the value of
+  /// [IconButton.visualDensity] which defaults to [VisualDensity.standard]
+  /// for all platforms. To override the default value of [IconButton.visualDensity],
+  /// use [ThemeData.iconButtonTheme] instead.
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
@@ -1579,7 +1584,7 @@ class ThemeData with Diagnosticable {
   ///
   /// ```dart
   /// final ThemeData theme = Theme.of(context);
-  /// final TextStyle style = theme.textTheme.headline1!.copyWith(
+  /// final TextStyle style = theme.textTheme.displayLarge!.copyWith(
   ///   color: theme.colorScheme.onSecondary,
   /// );
   /// // ...use style...

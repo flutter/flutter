@@ -501,7 +501,7 @@ class FloatingActionButton extends StatelessWidget {
   /// The text style for an extended [FloatingActionButton]'s label.
   ///
   /// If null, [FloatingActionButtonThemeData.extendedTextStyle] is used. If
-  /// that is also null, then [TextTheme.button] with a letter spacing of 1.2
+  /// that is also null, then [TextTheme.labelLarge] with a letter spacing of 1.2
   /// is used.
   final TextStyle? extendedTextStyle;
 
@@ -794,7 +794,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
   @override double? get iconSize => _isLarge ? 36.0 : 24.0;
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
-  @override TextStyle? get extendedTextStyle => _theme.textTheme.button!.copyWith(letterSpacing: 1.2);
+  @override TextStyle? get extendedTextStyle => _theme.textTheme.labelLarge!.copyWith(letterSpacing: 1.2);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - FAB
