@@ -664,18 +664,26 @@ class StartupTest {
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
+        case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+          break;
         case DeviceOperatingSystem.ios:
+        case DeviceOperatingSystem.macos:
+          final String? deviceName = <DeviceOperatingSystem, String>{
+            DeviceOperatingSystem.macos: 'macos',
+            DeviceOperatingSystem.ios: 'ios',
+          }[deviceOperatingSystem];
+          if(deviceName == null) {
+            throw Exception('$deviceOperatingSystem is not a valid Darwin platform.');
+          }
           await flutter('build', options: <String>[
-            'ios',
+            deviceName,
              '-v',
             '--profile',
             '--target=$target',
           ]);
-          applicationBinaryPath = _findDarwinAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
-          break;
-        case DeviceOperatingSystem.fake:
-        case DeviceOperatingSystem.fuchsia:
-        case DeviceOperatingSystem.macos:
+          final String buildRoot = path.join(testDirectory, 'build');
+          applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
           break;
         case DeviceOperatingSystem.windows:
           await flutter('build', options: <String>[
