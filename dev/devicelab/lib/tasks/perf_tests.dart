@@ -696,7 +696,7 @@ class StartupTest {
             '--profile',
             '--target=$target',
           ]);
-          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
+          applicationBinaryPath = _findDarwinAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
@@ -830,7 +830,7 @@ class DevtoolsStartupTest {
              '-v',
             '--profile',
           ]);
-          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
+          applicationBinaryPath = _findDarwinAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
@@ -1480,7 +1480,7 @@ class CompileTest {
           'Release',
         );
         final String? appBundlePath =
-            _findIosAppInBuildDirectory(buildDirectoryPath);
+            _findDarwinAppInBuildDirectory(buildDirectoryPath);
         if (appBundlePath == null) {
           throw 'Failed to find app bundle in $buildDirectoryPath';
         }
@@ -1977,7 +1977,7 @@ Future<File> waitForFile(String path) async {
   throw StateError('Did not find vmservice out file after 1 hour');
 }
 
-String? _findIosAppInBuildDirectory(String searchDirectory) {
+String? _findDarwinAppInBuildDirectory(String searchDirectory) {
   for (final FileSystemEntity entity in Directory(searchDirectory).listSync()) {
     if (entity.path.endsWith('.app')) {
       return entity.path;
