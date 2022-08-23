@@ -7,17 +7,15 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../doctor_validator.dart';
 
-// Define the major versions that are not supported
 const List<String> unsupportedVersions = <String>[
   '6',
   '7',
   '8',
 ];
 
+/// Validator to be run with `flutter doctor` to check
+/// Windows host machines if they are running supported versions.
 class WindowsVersionValidator extends DoctorValidator {
-  /// Validator to be run with `flutter doctor` to check
-  /// Windows host machines if they are running supported versions,
-  /// current unsupported versions = 7, 8
   const WindowsVersionValidator({required ProcessManager processManager})
       : _processManager = processManager,
         super('Windows Version');
@@ -28,7 +26,7 @@ class WindowsVersionValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final ProcessResult result;
     try {
-      result = _processManager.runSync(<String>['systeminfo']);
+      result = await _processManager.run(<String>['systeminfo']);
     } on ProcessException {
       return const ValidationResult(
         ValidationType.missing,
