@@ -406,6 +406,31 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
+    test('TextInputClient commitContent method is called', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send commitContent message with fake GIF data.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[
+          1,
+          'TextInputAction.commitContent',
+          jsonDecode('{"mimeType": "image/gif", "data": "010101000", "uri": "content://com.google.android.inputmethod.latin.fileprovider/test.gif"}'),
+        ],
+        'method': 'TextInputClient.performAction',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+            (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'commitContent');
+    });
+
     test('TextInputClient performSelectors method is called', () async {
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -776,6 +801,11 @@ class FakeTextInputClient with TextInputClient {
   @override
   void performPrivateCommand(String action, Map<String, dynamic> data) {
     latestMethodCall = 'performPrivateCommand';
+  }
+
+  @override
+  void commitContent(Map<String, dynamic> content) {
+    latestMethodCall = 'commitContent';
   }
 
   @override

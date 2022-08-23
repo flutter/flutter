@@ -249,6 +249,7 @@ class CupertinoTextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforcement,
     this.onChanged,
+    this.onContentCommitted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
@@ -269,6 +270,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
+    List<String>? contentCommitMimeTypes,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -314,6 +316,17 @@ class CupertinoTextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       contentCommitMimeTypes = contentCommitMimeTypes ??
+            (onContentCommitted == null
+                ? const <String>[] : const <String>[
+              'image/png',
+              'image/bmp',
+              'image/jpg',
+              'image/tiff',
+              'image/gif',
+              'image/jpeg',
+              'image/webp'
+            ]),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -412,6 +425,7 @@ class CupertinoTextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforcement,
     this.onChanged,
+    this.onContentCommitted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
@@ -432,6 +446,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
+    List<String>? contentCommitMimeTypes,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -478,6 +493,17 @@ class CupertinoTextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       contentCommitMimeTypes = contentCommitMimeTypes ??
+            (onContentCommitted == null
+                ? const <String>[] : const <String>[
+              'image/png',
+              'image/bmp',
+              'image/jpg',
+              'image/tiff',
+              'image/gif',
+              'image/jpeg',
+              'image/webp'
+            ]),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -686,6 +712,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String>? onChanged;
 
+  /// {@macro flutter.widgets.editableText.onContentCommitted}
+  final ValueChanged<CommittedContent>? onContentCommitted;
+
   /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback? onEditingComplete;
 
@@ -787,6 +816,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.editableText.contentCommitMimeTypes}
+  final List<String> contentCommitMimeTypes;
+
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
@@ -866,6 +898,16 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes,
+        defaultValue: onContentCommitted == null ? <String>[] : <String>[
+          'image/png',
+          'image/bmp',
+          'image/jpg',
+          'image/tiff',
+          'image/gif',
+          'image/jpeg',
+          'image/webp'
+        ]));
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
@@ -1352,6 +1394,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
             onChanged: widget.onChanged,
+            onContentCommitted: widget.onContentCommitted,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,

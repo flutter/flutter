@@ -125,6 +125,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
+  void commitContent(Map<String, dynamic> content) {
+    latestMethodCall = 'commitContent';
+  }
+
+  @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }

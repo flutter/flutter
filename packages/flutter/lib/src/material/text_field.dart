@@ -307,6 +307,7 @@ class TextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforcement,
     this.onChanged,
+    this.onContentCommitted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
@@ -330,6 +331,7 @@ class TextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
+    List<String>? contentCommitMimeTypes,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -373,6 +375,17 @@ class TextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       contentCommitMimeTypes = contentCommitMimeTypes ??
+           (onContentCommitted == null
+               ? const <String>[] : const <String>[
+                 'image/png',
+                 'image/bmp',
+                 'image/jpg',
+                 'image/tiff',
+                 'image/gif',
+                 'image/jpeg',
+                 'image/webp'
+               ]),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -593,6 +606,9 @@ class TextField extends StatefulWidget {
   ///    which are more specialized input change notifications.
   final ValueChanged<String>? onChanged;
 
+  /// {@macro flutter.widgets.editableText.onContentCommitted}
+  final ValueChanged<CommittedContent>? onContentCommitted;
+
   /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback? onEditingComplete;
 
@@ -801,6 +817,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
+
+  /// {@macro flutter.widgets.editableText.contentCommitMimeTypes}
+  final List<String> contentCommitMimeTypes;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   ///
@@ -1330,6 +1349,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           selectionColor: focusNode.hasFocus ? selectionColor : null,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
+          onContentCommitted: widget.onContentCommitted,
           onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
