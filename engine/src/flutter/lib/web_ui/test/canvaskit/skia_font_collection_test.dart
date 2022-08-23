@@ -20,7 +20,7 @@ void testMain() {
 
     setUpAll(() async {
       ensureFlutterViewEmbedderInitialized();
-      await initializeCanvasKit();
+      await renderer.initialize();
       oldPrintWarning = printWarning;
       printWarning = (String warning) {
         warnings.add(warning);

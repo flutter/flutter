@@ -20,8 +20,8 @@ Future<void> testMain() async {
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
-    fontCollection.debugRegisterTestFonts();
-    await fontCollection.ensureFontsLoaded();
+    renderer.fontCollection.debugRegisterTestFonts();
+    await renderer.fontCollection.ensureFontsLoaded();
   });
 
   test('Blend circles with difference and color', () async {

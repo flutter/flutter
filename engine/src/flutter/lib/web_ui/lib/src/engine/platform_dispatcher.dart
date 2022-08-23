@@ -6,21 +6,17 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
+import 'package:ui/src/engine/canvaskit/renderer.dart';
+import 'package:ui/src/engine/renderer.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../engine.dart'  show platformViewManager, registerHotRestartListener;
-import 'canvaskit/initialization.dart';
-import 'canvaskit/layer_scene_builder.dart';
-import 'canvaskit/rasterizer.dart';
 import 'clipboard.dart';
 import 'dom.dart';
 import 'embedder.dart';
-import 'html/scene.dart';
 import 'mouse_cursor.dart';
 import 'platform_views/message_handler.dart';
 import 'plugins.dart';
-import 'profiler.dart';
 import 'safe_browser_api.dart';
 import 'semantics.dart';
 import 'services.dart';
@@ -433,15 +429,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final MethodCall decoded = codec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'Skia.setResourceCacheMaxBytes':
-            if (useCanvasKit) {
-              // If we're in CanvasKit mode, we must also have a rasterizer.
-              assert(rasterizer != null);
+            if (renderer is CanvasKitRenderer) {
               assert(
                 decoded.arguments is int,
                 'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${decoded.arguments.runtimeType}',
               );
               final int cacheSizeInBytes = decoded.arguments as int;
-              rasterizer!.setSkiaResourceCacheMaxBytes(cacheSizeInBytes);
+              CanvasKitRenderer.instance.resourceCacheMaxBytes = cacheSizeInBytes;
             }
 
             // Also respond in HTML mode. Otherwise, apps would have to detect
@@ -651,24 +645,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    painting.
   @override
   void render(ui.Scene scene, [ui.FlutterView? view]) {
-    if (useCanvasKit) {
-      // "Build finish" and "raster start" happen back-to-back because we
-      // render on the same thread, so there's no overhead from hopping to
-      // another thread.
-      //
-      // CanvasKit works differently from the HTML renderer in that in HTML
-      // we update the DOM in SceneBuilder.build, which is these function calls
-      // here are CanvasKit-only.
-      frameTimingsOnBuildFinish();
-      frameTimingsOnRasterStart();
-
-      final LayerScene layerScene = scene as LayerScene;
-      rasterizer!.draw(layerScene.layerTree);
-    } else {
-      final SurfaceScene surfaceScene = scene as SurfaceScene;
-      flutterViewEmbedder.addSceneToSceneHost(surfaceScene.webOnlyRootElement);
-    }
-    frameTimingsOnRasterFinish();
+    renderer.renderScene(scene);
   }
 
   /// Additional accessibility features that may be enabled by the platform.
@@ -1143,9 +1120,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// The reason for the lazy initialization is to give enough time for the app
   /// to set [locationStrategy] in `lib/initialization.dart`.
   String? _defaultRouteName;
-
-  @visibleForTesting
-  late Rasterizer? rasterizer = useCanvasKit ? Rasterizer() : null;
 
   /// In Flutter, platform messages are exchanged between threads so the
   /// messages and responses have to be exchanged asynchronously. We simulate

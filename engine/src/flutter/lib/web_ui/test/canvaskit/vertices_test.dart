@@ -59,7 +59,7 @@ void testMain() {
     final LayerSceneBuilder builder = LayerSceneBuilder();
     builder.pushOffset(0, 0);
     builder.addPicture(ui.Offset.zero, verticesPicture);
-    EnginePlatformDispatcher.instance.rasterizer!
+    CanvasKitRenderer.instance.rasterizer
         .draw(builder.build().layerTree);
     await matchGoldenFile('canvaskit_vertices_antialiased.png', region: region);
   }, skip: isSafari);

@@ -11,8 +11,8 @@ import '../safe_browser_api.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'font_fallbacks.dart';
-import 'initialization.dart';
 import 'painting.dart';
+import 'renderer.dart';
 import 'skia_object_cache.dart';
 import 'util.dart';
 
@@ -843,7 +843,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
         _styleStack = <CkTextStyle>[],
         _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontProvider(
           style.skParagraphStyle,
-          skiaFontCollection.fontProvider,
+          CanvasKitRenderer.instance.fontCollection.fontProvider,
         ) {
     _styleStack.add(_style.getTextStyle());
   }

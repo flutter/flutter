@@ -1145,7 +1145,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_wasm_codecs.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_web_codecs.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/interval_tree.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer_scene_builder.dart
@@ -1160,6 +1159,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/picture_recorder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/platform_message.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/raster_cache.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/rasterizer.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/shader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/skia_object_cache.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface.dart
@@ -1175,6 +1175,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/embedder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/engine_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_change_util.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/host_node.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/backdrop_filter.dart
@@ -1203,6 +1204,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/platform_view.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/recording_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/render_vertices.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/scene.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shader_mask.dart
@@ -1237,6 +1239,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/plugins.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_converter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/profiler.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/rrect_renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/safe_browser_api.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics.dart

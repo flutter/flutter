@@ -19,7 +19,7 @@ void testMain() {
     setUpCanvasKitTest();
 
     test('Using CanvasKit', () {
-      expect(useCanvasKit, isTrue);
+      expect(renderer is CanvasKitRenderer, isTrue);
     });
 
     test(CkPathMetrics, () {

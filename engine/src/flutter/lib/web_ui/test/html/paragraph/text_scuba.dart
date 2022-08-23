@@ -134,7 +134,7 @@ CanvasParagraph paragraph(
 void setUpStableTestFonts() {
   setUpAll(() async {
     await ui.webOnlyInitializePlatform();
-    fontCollection.debugRegisterTestFonts();
-    await fontCollection.ensureFontsLoaded();
+    renderer.fontCollection.debugRegisterTestFonts();
+    await renderer.fontCollection.ensureFontsLoaded();
   });
 }

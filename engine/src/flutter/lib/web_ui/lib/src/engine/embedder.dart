@@ -6,9 +6,8 @@ import 'dart:async';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../engine.dart' show buildMode, registerHotRestartListener;
+import '../engine.dart' show buildMode, registerHotRestartListener, renderer;
 import 'browser_detection.dart';
-import 'canvaskit/initialization.dart';
 import 'configuration.dart';
 import 'dom.dart';
 import 'host_node.dart';
@@ -199,7 +198,7 @@ class FlutterViewEmbedder {
 
     bodyElement.setAttribute(
       'flt-renderer',
-      '${useCanvasKit ? 'canvaskit' : 'html'} (${FlutterConfiguration.flutterWebAutoDetect ? 'auto-selected' : 'requested explicitly'})',
+      '${renderer.rendererTag} (${FlutterConfiguration.flutterWebAutoDetect ? 'auto-selected' : 'requested explicitly'})',
     );
     bodyElement.setAttribute('flt-build-mode', buildMode);
 
@@ -287,13 +286,7 @@ class FlutterViewEmbedder {
     _sceneHostElement = domDocument.createElement('flt-scene-host')
       ..style.pointerEvents = 'none';
 
-    /// CanvasKit uses a static scene element that never gets replaced, so it's
-    /// added eagerly during initialization here and never touched, unless the
-    /// system is reset due to hot restart or in a test.
-    if (useCanvasKit) {
-      skiaSceneHost = createDomElement('flt-scene');
-      addSceneToSceneHost(skiaSceneHost);
-    }
+    renderer.reset(this);
 
     final DomElement semanticsHostElement =
         domDocument.createElement('flt-semantics-host');

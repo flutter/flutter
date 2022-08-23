@@ -29,21 +29,11 @@ class Vertices {
     List<Color>? colors,
     List<int>? indices,
   }) {
-    if (engine.useCanvasKit) {
-      return engine.CkVertices(
-        mode,
-        positions,
-        textureCoordinates: textureCoordinates,
-        colors: colors,
-        indices: indices,
-      );
-    }
-    return engine.SurfaceVertices(
-      mode,
+    return engine.renderer.createVertices(mode,
       positions,
+      textureCoordinates: textureCoordinates,
       colors: colors,
-      indices: indices,
-    );
+      indices: indices);
   }
   factory Vertices.raw(
     VertexMode mode,
@@ -52,45 +42,23 @@ class Vertices {
     Int32List? colors,
     Uint16List? indices,
   }) {
-    if (engine.useCanvasKit) {
-      return engine.CkVertices.raw(
-        mode,
-        positions,
-        textureCoordinates: textureCoordinates,
-        colors: colors,
-        indices: indices,
-      );
-    }
-    return engine.SurfaceVertices.raw(
-      mode,
+    return engine.renderer.createVerticesRaw(mode,
       positions,
+      textureCoordinates: textureCoordinates,
       colors: colors,
-      indices: indices,
-    );
+      indices: indices);
   }
 }
 
 abstract class PictureRecorder {
-  factory PictureRecorder() {
-    if (engine.useCanvasKit) {
-      return engine.CkPictureRecorder();
-    } else {
-      return engine.EnginePictureRecorder();
-    }
-  }
+  factory PictureRecorder() => engine.renderer.createPictureRecorder();
   bool get isRecording;
   Picture endRecording();
 }
 
 abstract class Canvas {
-  factory Canvas(PictureRecorder recorder, [Rect? cullRect]) {
-    if (engine.useCanvasKit) {
-      return engine.CanvasKitCanvas(recorder, cullRect);
-    } else {
-      return engine.SurfaceCanvas(
-          recorder as engine.EnginePictureRecorder, cullRect);
-    }
-  }
+  factory Canvas(PictureRecorder recorder, [Rect? cullRect]) =>
+    engine.renderer.createCanvas(recorder, cullRect);
   void save();
   void saveLayer(Rect? bounds, Paint paint);
   void restore();

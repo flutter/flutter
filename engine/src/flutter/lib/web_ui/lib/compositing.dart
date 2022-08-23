@@ -33,13 +33,9 @@ abstract class ShaderMaskEngineLayer implements EngineLayer {}
 abstract class PhysicalShapeEngineLayer implements EngineLayer {}
 
 abstract class SceneBuilder {
-  factory SceneBuilder() {
-    if (engine.useCanvasKit) {
-      return engine.LayerSceneBuilder();
-    } else {
-      return engine.SurfaceSceneBuilder();
-    }
-  }
+  factory SceneBuilder() =>
+    engine.renderer.createSceneBuilder();
+
   OffsetEngineLayer pushOffset(
     double dx,
     double dy, {
