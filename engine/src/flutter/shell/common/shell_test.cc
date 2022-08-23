@@ -197,7 +197,7 @@ void ShellTest::PumpOneFrame(Shell* shell,
   fml::WeakPtr<RuntimeDelegate> runtime_delegate = shell->weak_engine_;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
       [&latch, runtime_delegate, &builder, viewport_metrics]() {
-        auto layer_tree = std::make_unique<LayerTree>(
+        auto layer_tree = std::make_shared<LayerTree>(
             SkISize::Make(viewport_metrics.physical_width,
                           viewport_metrics.physical_height),
             static_cast<float>(viewport_metrics.device_pixel_ratio));
