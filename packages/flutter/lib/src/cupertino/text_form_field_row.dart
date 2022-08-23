@@ -42,7 +42,7 @@ import 'text_field.dart';
 /// resources used by the object.
 ///
 /// For documentation about the various parameters, see the
-/// [CupertinoTextField] class and [new CupertinoTextField.borderless],
+/// [CupertinoTextField] class and [CupertinoTextField.borderless],
 /// the constructor.
 ///
 /// {@tool snippet}
@@ -96,10 +96,10 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// insets are intended, explicitly pass [EdgeInsets.zero] to [padding].
   ///
   /// For documentation about the various parameters, see the
-  /// [CupertinoTextField] class and [new CupertinoTextField.borderless],
+  /// [CupertinoTextField] class and [CupertinoTextField.borderless],
   /// the constructor.
   CupertinoTextFormFieldRow({
-    Key? key,
+    super.key,
     this.prefix,
     this.padding,
     this.controller,
@@ -132,8 +132,8 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     GestureTapCallback? onTap,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
-    FormFieldSetter<String>? onSaved,
-    FormFieldValidator<String>? validator,
+    super.onSaved,
+    super.validator,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     double cursorWidth = 2.0,
@@ -145,7 +145,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextSelectionControls? selectionControls,
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
-    AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
+    AutovalidateMode super.autovalidateMode = AutovalidateMode.disabled,
     String? placeholder,
     TextStyle? placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,
@@ -175,11 +175,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(maxLength == null || maxLength > 0),
         assert(enableInteractiveSelection != null),
         super(
-          key: key,
           initialValue: controller?.text ?? initialValue ?? '',
-          onSaved: onSaved,
-          validator: validator,
-          autovalidateMode: autovalidateMode,
           builder: (FormFieldState<String> field) {
             final _CupertinoTextFormFieldRowState state =
                 field as _CupertinoTextFormFieldRowState;
@@ -274,36 +270,35 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   TextEditingController? _controller;
 
   TextEditingController? get _effectiveController =>
-      widget.controller ?? _controller;
+      _cupertinoTextFormFieldRow.controller ?? _controller;
 
-  @override
-  CupertinoTextFormFieldRow get widget =>
+  CupertinoTextFormFieldRow get _cupertinoTextFormFieldRow =>
       super.widget as CupertinoTextFormFieldRow;
 
   @override
   void initState() {
     super.initState();
-    if (widget.controller == null) {
+    if (_cupertinoTextFormFieldRow.controller == null) {
       _controller = TextEditingController(text: widget.initialValue);
     } else {
-      widget.controller!.addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller!.addListener(_handleControllerChanged);
     }
   }
 
   @override
   void didUpdateWidget(CupertinoTextFormFieldRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
+    if (_cupertinoTextFormFieldRow.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      widget.controller?.addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null && widget.controller == null) {
+      if (oldWidget.controller != null && _cupertinoTextFormFieldRow.controller == null) {
         _controller =
             TextEditingController.fromValue(oldWidget.controller!.value);
       }
 
-      if (widget.controller != null) {
-        setValue(widget.controller!.text);
+      if (_cupertinoTextFormFieldRow.controller != null) {
+        setValue(_cupertinoTextFormFieldRow.controller!.text);
         if (oldWidget.controller == null) {
           _controller = null;
         }
@@ -313,7 +308,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    widget.controller?.removeListener(_handleControllerChanged);
+    _cupertinoTextFormFieldRow.controller?.removeListener(_handleControllerChanged);
     super.dispose();
   }
 

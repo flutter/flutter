@@ -25,12 +25,13 @@ void main() {
   const String remoteUrl = 'https://github.com/org/repo.git';
   const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
   const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
+  const String revision3 = 'ffffffffffffffffffffffffffffffffffffffff';
   const String revision4 = '280e23318a0d8341415c66aa32581352a421d974';
   const String releaseVersion = '1.2.0-3.0.pre';
   const String releaseChannel = 'beta';
   const String stateFile = '/state-file.json';
   final String localPathSeparator = const LocalPlatform().pathSeparator;
-  final String localOperatingSystem = const LocalPlatform().pathSeparator;
+  final String localOperatingSystem = const LocalPlatform().operatingSystem;
 
   group('next command', () {
     late MemoryFileSystem fileSystem;
@@ -191,7 +192,7 @@ void main() {
 
       test('updates lastPhase if user responds yes', () async {
         const String remoteUrl = 'https://github.com/org/repo.git';
-        const String releaseChannel = 'dev';
+        const String releaseChannel = 'beta';
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
@@ -495,13 +496,29 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM /path/to/engine.version',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM bin/internal/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -546,6 +563,7 @@ void main() {
         ]);
 
         expect(processManager, hasNoRemainingExpectations);
+        expect(stdio.stdout, contains('release-candidate-branch.version containing $candidateBranch'));
         expect(stdio.stdout, contains('Updating engine revision from $oldEngineVersion to $revision1'));
         expect(stdio.stdout, contains('Are you ready to push your framework branch'));
       });
@@ -571,13 +589,29 @@ void main() {
           const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/engine.version',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM bin/internal/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -635,13 +669,29 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/.ci.yaml',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM bin/internal/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -1081,7 +1131,7 @@ void main() {
         FakeCommand(
           command: const <String>['git', 'push', '', 'HEAD:refs/heads/'],
           exception: GitException(gitPushErrorMessage, <String>['git', 'push', '--force', '', 'HEAD:refs/heads/']),
-        )
+        ),
       ]);
       final NextContext nextContext = NextContext(
         autoAccept: false,
@@ -1153,16 +1203,9 @@ class _TestRepository extends Repository {
 
 class _TestNextContext extends NextContext {
   const _TestNextContext({
-    bool autoAccept = false,
-    bool force = false,
-    required File stateFile,
-    required Checkouts checkouts,
-  }) : super(
-    autoAccept: autoAccept,
-    force: force,
-    checkouts: checkouts,
-    stateFile: stateFile,
-  );
+    required super.stateFile,
+    required super.checkouts,
+  }) : super(autoAccept: false, force: false);
 
   @override
   Future<bool> prompt(String message) {
@@ -1175,7 +1218,7 @@ void _initializeCiYamlFile(
   File file, {
   List<String>? enabledBranches,
 }) {
-  enabledBranches ??= <String>['master', 'dev', 'beta', 'stable'];
+  enabledBranches ??= <String>['master', 'beta', 'stable'];
   file.createSync(recursive: true);
   final StringBuffer buffer = StringBuffer('enabled_branches:\n');
   for (final String branch in enabledBranches) {

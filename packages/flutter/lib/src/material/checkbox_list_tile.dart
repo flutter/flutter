@@ -5,11 +5,15 @@
 import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
+import 'checkbox_theme.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// late bool? _throwShotAway;
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
@@ -27,7 +31,7 @@ import 'theme_data.dart';
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
 /// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+/// the theme's [CheckboxThemeData.overlayColor] if [activeColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the [value] state; to have the list tile
 /// appear selected when the checkbox is checked, pass the same value to both.
@@ -36,6 +40,35 @@ import 'theme_data.dart';
 /// (i.e. the trailing edge). This can be changed using [controlAffinity]. The
 /// [secondary] widget is placed on the opposite side. This maps to the
 /// [ListTile.leading] and [ListTile.trailing] properties of [ListTile].
+///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [CheckboxListTile] itself but by the [Material] widget ancestor.
+/// In this case, one can wrap a [Material] widget around the [CheckboxListTile],
+/// e.g.:
+///
+/// {@tool snippet}
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: CheckboxListTile(
+///       tileColor: Colors.red,
+///       title: const Text('CheckboxListTile with red background'),
+///       value: true,
+///       onChanged:(bool? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ## Performance considerations when wrapping [CheckboxListTile] with [Material]
+///
+/// Wrapping a large number of [CheckboxListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [CheckboxListTile]s that require it
+/// or include a common [Material] ancestor where possible.
 ///
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
@@ -120,11 +153,12 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The value of [tristate] must not be null.
   const CheckboxListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
     this.checkColor,
+    this.enabled,
     this.tileColor,
     this.title,
     this.subtitle,
@@ -137,6 +171,7 @@ class CheckboxListTile extends StatelessWidget {
     this.contentPadding,
     this.tristate = false,
     this.shape,
+    this.checkboxShape,
     this.selectedTileColor,
     this.side,
     this.visualDensity,
@@ -148,8 +183,7 @@ class CheckboxListTile extends StatelessWidget {
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
        assert(controlAffinity != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   final bool? value;
@@ -162,6 +196,8 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// If null, the checkbox will be displayed as disabled.
   ///
+  /// {@tool snippet}
+  ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
@@ -169,14 +205,15 @@ class CheckboxListTile extends StatelessWidget {
   /// ```dart
   /// CheckboxListTile(
   ///   value: _throwShotAway,
-  ///   onChanged: (bool newValue) {
+  ///   onChanged: (bool? newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: Text('Throw away your shot'),
+  ///   title: const Text('Throw away your shot'),
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<bool?>? onChanged;
 
   /// The color to use when this checkbox is checked.
@@ -256,6 +293,13 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
+  /// {@macro flutter.material.checkbox.shape}
+  ///
+  /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
+  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// with a circular corner radius of 1.0.
+  final OutlinedBorder? checkboxShape;
+
   /// If non-null, defines the background color when [CheckboxListTile.selected] is true.
   final Color? selectedTileColor;
 
@@ -283,6 +327,13 @@ class CheckboxListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// Whether the CheckboxListTile is interactive.
+  ///
+  /// If false, this list tile is styled with the disabled color from the
+  /// current [Theme] and the [ListTile.onTap] callback is
+  /// inoperative.
+  final bool? enabled;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -302,12 +353,13 @@ class CheckboxListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
       value: value,
-      onChanged: onChanged,
+      onChanged: enabled ?? true ? onChanged : null ,
       activeColor: activeColor,
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
       tristate: tristate,
+      shape: checkboxShape,
       side: side,
     );
     Widget? leading, trailing;
@@ -322,28 +374,34 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
+    final ThemeData theme = Theme.of(context);
+    final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
+    final Set<MaterialState> states = <MaterialState>{
+      if (selected) MaterialState.selected,
+    };
+    final Color effectiveActiveColor = activeColor
+      ?? checkboxTheme.fillColor?.resolve(states)
+      ?? theme.colorScheme.secondary;
     return MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? _handleValueChange : null,
-          selected: selected,
-          autofocus: autofocus,
-          contentPadding: contentPadding,
-          shape: shape,
-          selectedTileColor: selectedTileColor,
-          tileColor: tileColor,
-          visualDensity: visualDensity,
-          focusNode: focusNode,
-          enableFeedback: enableFeedback,
-        ),
+      child: ListTile(
+        selectedColor: effectiveActiveColor,
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        enabled: enabled ?? onChanged != null,
+        onTap: onChanged != null ? _handleValueChange : null,
+        selected: selected,
+        autofocus: autofocus,
+        contentPadding: contentPadding,
+        shape: shape,
+        selectedTileColor: selectedTileColor,
+        tileColor: tileColor,
+        visualDensity: visualDensity,
+        focusNode: focusNode,
+        enableFeedback: enableFeedback,
       ),
     );
   }

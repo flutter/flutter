@@ -104,10 +104,12 @@ abstract class BoxBorder extends ShapeBorder {
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
     assert(t != null);
-    if ((a is Border?) && (b is Border?))
+    if ((a is Border?) && (b is Border?)) {
       return Border.lerp(a, b, t);
-    if ((a is BorderDirectional?) && (b is BorderDirectional?))
+    }
+    if ((a is BorderDirectional?) && (b is BorderDirectional?)) {
       return BorderDirectional.lerp(a, b, t);
+    }
     if (b is Border && a is BorderDirectional) {
       final BoxBorder c = b;
       b = a;
@@ -178,6 +180,18 @@ abstract class BoxBorder extends ShapeBorder {
       ..addRect(rect);
   }
 
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    // For `ShapeDecoration(shape: Border.all())`, a rectangle with sharp edges
+    // is always painted. There is no borderRadius parameter for
+    // ShapeDecoration or Border, only for BoxDecoration, which doesn't call
+    // this method.
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
   /// Paints the border within the given [Rect] on the given [Canvas].
   ///
   /// This is an extension of the [ShapeBorder.paint] method. It allows
@@ -210,16 +224,29 @@ abstract class BoxBorder extends ShapeBorder {
     assert(side.style != BorderStyle.none);
     final Paint paint = Paint()
       ..color = side.color;
-    final RRect outer = borderRadius.toRRect(rect);
     final double width = side.width;
     if (width == 0.0) {
       paint
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.0;
-      canvas.drawRRect(outer, paint);
+      canvas.drawRRect(borderRadius.toRRect(rect), paint);
     } else {
-      final RRect inner = outer.deflate(width);
-      canvas.drawDRRect(outer, inner, paint);
+      if (side.strokeAlign == StrokeAlign.inside) {
+        final RRect outer = borderRadius.toRRect(rect);
+        final RRect inner = outer.deflate(width);
+        canvas.drawDRRect(outer, inner, paint);
+      } else {
+        final Rect inner;
+        final Rect outer;
+        if (side.strokeAlign == StrokeAlign.center) {
+          inner = rect.deflate(width / 2);
+          outer = rect.inflate(width / 2);
+        } else {
+          inner = rect;
+          outer = rect.inflate(width);
+        }
+        canvas.drawDRRect(borderRadius.toRRect(outer), borderRadius.toRRect(inner), paint);
+      }
     }
   }
 
@@ -227,7 +254,18 @@ abstract class BoxBorder extends ShapeBorder {
     assert(side.style != BorderStyle.none);
     final double width = side.width;
     final Paint paint = side.toPaint();
-    final double radius = (rect.shortestSide - width) / 2.0;
+    final double radius;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        radius = (rect.shortestSide - width) / 2.0;
+        break;
+      case StrokeAlign.center:
+        radius = rect.shortestSide / 2.0;
+        break;
+      case StrokeAlign.outside:
+        radius = (rect.shortestSide + width) / 2.0;
+        break;
+    }
     canvas.drawCircle(rect.center, radius, paint);
   }
 
@@ -235,7 +273,20 @@ abstract class BoxBorder extends ShapeBorder {
     assert(side.style != BorderStyle.none);
     final double width = side.width;
     final Paint paint = side.toPaint();
-    canvas.drawRect(rect.deflate(width / 2.0), paint);
+    final Rect rectToBeDrawn;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        rectToBeDrawn = rect.deflate(width / 2.0);
+        break;
+      case StrokeAlign.center:
+        rectToBeDrawn = rect;
+        break;
+      case StrokeAlign.outside:
+        rectToBeDrawn = rect.inflate(width / 2.0);
+        break;
+    }
+
+    canvas.drawRect(rectToBeDrawn, paint);
   }
 }
 
@@ -253,7 +304,7 @@ abstract class BoxBorder extends ShapeBorder {
 /// {@end-tool}
 /// {@tool snippet}
 ///
-/// The border for a material design divider:
+/// The border for a Material Design divider:
 ///
 /// ```dart
 /// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
@@ -267,20 +318,20 @@ abstract class BoxBorder extends ShapeBorder {
 /// Container(
 ///   decoration: const BoxDecoration(
 ///     border: Border(
-///       top: BorderSide(width: 1.0, color: Color(0xFFFFFFFF)),
-///       left: BorderSide(width: 1.0, color: Color(0xFFFFFFFF)),
-///       right: BorderSide(width: 1.0, color: Color(0xFF000000)),
-///       bottom: BorderSide(width: 1.0, color: Color(0xFF000000)),
+///       top: BorderSide(color: Color(0xFFFFFFFF)),
+///       left: BorderSide(color: Color(0xFFFFFFFF)),
+///       right: BorderSide(),
+///       bottom: BorderSide(),
 ///     ),
 ///   ),
 ///   child: Container(
 ///     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
 ///     decoration: const BoxDecoration(
 ///       border: Border(
-///         top: BorderSide(width: 1.0, color: Color(0xFFDFDFDF)),
-///         left: BorderSide(width: 1.0, color: Color(0xFFDFDFDF)),
-///         right: BorderSide(width: 1.0, color: Color(0xFF7F7F7F)),
-///         bottom: BorderSide(width: 1.0, color: Color(0xFF7F7F7F)),
+///         top: BorderSide(color: Color(0xFFDFDFDF)),
+///         left: BorderSide(color: Color(0xFFDFDFDF)),
+///         right: BorderSide(color: Color(0xFF7F7F7F)),
+///         bottom: BorderSide(color: Color(0xFF7F7F7F)),
 ///       ),
 ///       color: Color(0xFFBFBFBF),
 ///     ),
@@ -299,7 +350,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///  * [BoxDecoration], which uses this class to describe its edge decoration.
 ///  * [BorderSide], which is used to describe each side of the box.
 ///  * [Theme], from the material layer, which can be queried to obtain appropriate colors
-///    to use for borders in a material app, as shown in the "divider" sample above.
+///    to use for borders in a [MaterialApp], as shown in the "divider" sample above.
 class Border extends BoxBorder {
   /// Creates a border.
   ///
@@ -349,8 +400,9 @@ class Border extends BoxBorder {
     Color color = const Color(0xFF000000),
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
+    StrokeAlign strokeAlign = StrokeAlign.inside,
   }) {
-    final BorderSide side = BorderSide(color: color, width: width, style: style);
+    final BorderSide side = BorderSide(color: color, width: width, style: style, strokeAlign: strokeAlign);
     return Border.fromBorderSide(side);
   }
 
@@ -390,11 +442,21 @@ class Border extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
+    if (isUniform) {
+      switch (top.strokeAlign) {
+        case StrokeAlign.inside:
+          return EdgeInsets.all(top.width);
+        case StrokeAlign.center:
+          return EdgeInsets.all(top.width / 2);
+        case StrokeAlign.outside:
+          return EdgeInsets.zero;
+      }
+    }
     return EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
   @override
-  bool get isUniform => _colorIsUniform && _widthIsUniform && _styleIsUniform;
+  bool get isUniform => _colorIsUniform && _widthIsUniform && _styleIsUniform && _strokeAlignIsUniform;
 
   bool get _colorIsUniform {
     final Color topColor = top.color;
@@ -409,6 +471,13 @@ class Border extends BoxBorder {
   bool get _styleIsUniform {
     final BorderStyle topStyle = top.style;
     return right.style == topStyle && bottom.style == topStyle && left.style == topStyle;
+  }
+
+  bool get _strokeAlignIsUniform {
+    final StrokeAlign topStrokeAlign = top.strokeAlign;
+    return right.strokeAlign == topStrokeAlign
+        && bottom.strokeAlign == topStrokeAlign
+        && left.strokeAlign == topStrokeAlign;
   }
 
   @override
@@ -435,15 +504,17 @@ class Border extends BoxBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is Border)
+    if (a is Border) {
       return Border.lerp(a, this, t);
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b is Border)
+    if (b is Border) {
       return Border.lerp(this, b, t);
+    }
     return super.lerpTo(b, t);
   }
 
@@ -455,12 +526,15 @@ class Border extends BoxBorder {
   /// {@macro dart.ui.shadow.lerp}
   static Border? lerp(Border? a, Border? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     return Border(
       top: BorderSide.lerp(a.top, b.top, t),
       right: BorderSide.lerp(a.right, b.right, t),
@@ -526,6 +600,7 @@ class Border extends BoxBorder {
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
           if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
           if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+          if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
         ]);
       }
       return true;
@@ -533,11 +608,20 @@ class Border extends BoxBorder {
     assert(() {
       if (shape != BoxShape.rectangle) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only be drawn as a circle if it is uniform'),
+          ErrorSummary('A Border can only be drawn as a circle if it is uniform.'),
           ErrorDescription('The following is not uniform:'),
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
           if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
           if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+          if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
+        ]);
+      }
+      return true;
+    }());
+    assert(() {
+      if (!_strokeAlignIsUniform || top.strokeAlign != StrokeAlign.inside) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.'),
         ]);
       }
       return true;
@@ -548,10 +632,12 @@ class Border extends BoxBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Border
         && other.top == top
         && other.right == right
@@ -560,12 +646,13 @@ class Border extends BoxBorder {
   }
 
   @override
-  int get hashCode => hashValues(top, right, bottom, left);
+  int get hashCode => Object.hash(top, right, bottom, left);
 
   @override
   String toString() {
-    if (isUniform)
+    if (isUniform) {
       return '${objectRuntimeType(this, 'Border')}.all($top)';
+    }
     final List<String> arguments = <String>[
       if (top != BorderSide.none) 'top: $top',
       if (right != BorderSide.none) 'right: $right',
@@ -594,7 +681,7 @@ class Border extends BoxBorder {
 ///  * [BoxDecoration], which uses this class to describe its edge decoration.
 ///  * [BorderSide], which is used to describe each side of the box.
 ///  * [Theme], from the material layer, which can be queried to obtain appropriate colors
-///    to use for borders in a material app, as shown in the "divider" sample above.
+///    to use for borders in a [MaterialApp], as shown in the "divider" sample above.
 class BorderDirectional extends BoxBorder {
   /// Creates a border.
   ///
@@ -665,6 +752,16 @@ class BorderDirectional extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
+    if (isUniform) {
+      switch (top.strokeAlign) {
+        case StrokeAlign.inside:
+          return EdgeInsetsDirectional.all(top.width);
+        case StrokeAlign.center:
+          return EdgeInsetsDirectional.all(top.width / 2);
+        case StrokeAlign.outside:
+          return EdgeInsetsDirectional.zero;
+      }
+    }
     return EdgeInsetsDirectional.fromSTEB(start.width, top.width, end.width, bottom.width);
   }
 
@@ -673,22 +770,36 @@ class BorderDirectional extends BoxBorder {
     final Color topColor = top.color;
     if (start.color != topColor ||
         end.color != topColor ||
-        bottom.color != topColor)
+        bottom.color != topColor) {
       return false;
+    }
 
     final double topWidth = top.width;
     if (start.width != topWidth ||
         end.width != topWidth ||
-        bottom.width != topWidth)
+        bottom.width != topWidth) {
       return false;
+    }
 
     final BorderStyle topStyle = top.style;
     if (start.style != topStyle ||
         end.style != topStyle ||
-        bottom.style != topStyle)
+        bottom.style != topStyle) {
       return false;
+    }
+
+    if (_strokeAlignIsUniform == false) {
+      return false;
+    }
 
     return true;
+  }
+
+  bool get _strokeAlignIsUniform {
+    final StrokeAlign topStrokeAlign = top.strokeAlign;
+    return start.strokeAlign == topStrokeAlign
+        && bottom.strokeAlign == topStrokeAlign
+        && end.strokeAlign == topStrokeAlign;
   }
 
   @override
@@ -706,13 +817,15 @@ class BorderDirectional extends BoxBorder {
     if (other is Border) {
       final Border typedOther = other;
       if (!BorderSide.canMerge(typedOther.top, top) ||
-          !BorderSide.canMerge(typedOther.bottom, bottom))
+          !BorderSide.canMerge(typedOther.bottom, bottom)) {
         return null;
+      }
       if (start != BorderSide.none ||
           end != BorderSide.none) {
         if (typedOther.left != BorderSide.none ||
-            typedOther.right != BorderSide.none)
+            typedOther.right != BorderSide.none) {
           return null;
+        }
         assert(typedOther.left == BorderSide.none);
         assert(typedOther.right == BorderSide.none);
         return BorderDirectional(
@@ -746,15 +859,17 @@ class BorderDirectional extends BoxBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is BorderDirectional)
+    if (a is BorderDirectional) {
       return BorderDirectional.lerp(a, this, t);
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b is BorderDirectional)
+    if (b is BorderDirectional) {
       return BorderDirectional.lerp(this, b, t);
+    }
     return super.lerpTo(b, t);
   }
 
@@ -766,12 +881,15 @@ class BorderDirectional extends BoxBorder {
   /// {@macro dart.ui.shadow.lerp}
   static BorderDirectional? lerp(BorderDirectional? a, BorderDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     return BorderDirectional(
       top: BorderSide.lerp(a.top, b.top, t),
       end: BorderSide.lerp(a.end, b.end, t),
@@ -834,8 +952,9 @@ class BorderDirectional extends BoxBorder {
 
     assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
     assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
+    assert(_strokeAlignIsUniform && top.strokeAlign == StrokeAlign.inside, 'A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.');
 
-    BorderSide left, right;
+    final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
     switch (textDirection!) {
       case TextDirection.rtl:
@@ -852,10 +971,12 @@ class BorderDirectional extends BoxBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BorderDirectional
         && other.top == top
         && other.start == start
@@ -864,7 +985,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  int get hashCode => hashValues(top, start, end, bottom);
+  int get hashCode => Object.hash(top, start, end, bottom);
 
   @override
   String toString() {

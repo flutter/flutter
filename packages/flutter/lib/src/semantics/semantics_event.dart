@@ -6,6 +6,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+export 'dart:ui' show TextDirection;
+
+/// Determines the assertiveness level of the accessibility announcement.
+///
+/// It is used by [AnnounceSemanticsEvent] to determine the priority with which
+/// assistive technology should treat announcements.
+enum Assertiveness {
+  /// The assistive technology will speak changes whenever the user is idle.
+  polite,
+
+  /// The assistive technology will interrupt any announcement that it is
+  /// currently making to notify the user about the change.
+  ///
+  /// It should only be used for time-sensitive/critical notifications.
+  assertive,
+}
+
 /// An event sent by the application to notify interested listeners that
 /// something happened to the user interface (e.g. a view scrolled).
 ///
@@ -34,8 +51,9 @@ abstract class SemanticsEvent {
       'type': type,
       'data': getDataMap(),
     };
-    if (nodeId != null)
+    if (nodeId != null) {
       event['nodeId'] = nodeId;
+    }
 
     return event;
   }
@@ -48,8 +66,9 @@ abstract class SemanticsEvent {
     final List<String> pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (final String key in sortedKeys)
+    for (final String key in sortedKeys) {
       pairs.add('$key: ${dataMap[key]}');
+    }
     return '${objectRuntimeType(this, 'SemanticsEvent')}(${pairs.join(', ')})';
   }
 }
@@ -67,7 +86,7 @@ abstract class SemanticsEvent {
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection)
+  const AnnounceSemanticsEvent(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite})
     : assert(message != null),
       assert(textDirection != null),
       super('announce');
@@ -82,11 +101,21 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   /// This property must not be null.
   final TextDirection textDirection;
 
+  /// Determines whether the announcement should interrupt any existing announcement,
+  /// or queue after it.
+  ///
+  /// On the web this option uses the aria-live level to set the assertiveness
+  /// of the announcement. On iOS, Android, Windows, Linux, macOS, and Fuchsia
+  /// this option currently has no effect.
+  final Assertiveness assertiveness;
+
   @override
   Map<String, dynamic> getDataMap() {
-    return <String, dynamic>{
+    return <String, dynamic> {
       'message': message,
       'textDirection': textDirection.index,
+      if (assertiveness != Assertiveness.polite)
+        'assertiveness': assertiveness.index,
     };
   }
 }
@@ -128,36 +157,6 @@ class LongPressSemanticsEvent extends SemanticsEvent {
 class TapSemanticEvent extends SemanticsEvent {
   /// Constructs an event that triggers a long-press semantic feedback by the platform.
   const TapSemanticEvent() : super('tap');
-
-  @override
-  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
-}
-
-/// An event which triggers a polite announcement of a live region.
-///
-/// This requires that the semantics node has already been marked as a live
-/// region. On Android, TalkBack will make a verbal announcement, as long as
-/// the label of the semantics node has changed since the last live region
-/// update. iOS does not currently support this event.
-///
-/// Deprecated. This message was never implemented, and references to it should
-/// be removed.
-///
-/// See also:
-///
-///  * [SemanticsFlag.isLiveRegion], for a description of live regions.
-///
-@Deprecated(
-  'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
-  'This feature was deprecated after v1.26.0-18.0.pre.',
-)
-class UpdateLiveRegionEvent extends SemanticsEvent {
-  /// Creates a new [UpdateLiveRegionEvent].
-  @Deprecated(
-    'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
-    'This feature was deprecated after v1.26.0-18.0.pre.',
-  )
-  const UpdateLiveRegionEvent() : super('updateLiveRegion');
 
   @override
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};

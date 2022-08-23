@@ -9,12 +9,11 @@ import '../../gallery/demo.dart';
 
 class _InputDropdown extends StatelessWidget {
   const _InputDropdown({
-    Key? key,
     this.labelText,
     this.valueText,
     this.valueStyle,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final String? labelText;
   final String? valueText;
@@ -47,13 +46,12 @@ class _InputDropdown extends StatelessWidget {
 
 class _DateTimePicker extends StatelessWidget {
   const _DateTimePicker({
-    Key? key,
     this.labelText,
     this.selectedDate,
     this.selectedTime,
     this.selectDate,
     this.selectTime,
-  }) : super(key: key);
+  });
 
   final String? labelText;
   final DateTime? selectedDate;
@@ -68,8 +66,9 @@ class _DateTimePicker extends StatelessWidget {
       firstDate: DateTime(2015, 8),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       selectDate!(picked);
+    }
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -77,13 +76,14 @@ class _DateTimePicker extends StatelessWidget {
       context: context,
       initialTime: selectedTime!,
     );
-    if (picked != null && picked != selectedTime)
+    if (picked != null && picked != selectedTime) {
       selectTime!(picked);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle? valueStyle = Theme.of(context).textTheme.headline6;
+    final TextStyle? valueStyle = Theme.of(context).textTheme.titleLarge;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
@@ -111,7 +111,7 @@ class _DateTimePicker extends StatelessWidget {
 }
 
 class DateAndTimePickerDemo extends StatefulWidget {
-  const DateAndTimePickerDemo({Key? key}) : super(key: key);
+  const DateAndTimePickerDemo({super.key});
 
   static const String routeName = '/material/date-and-time-pickers';
 
@@ -147,13 +147,13 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                   labelText: 'Event name',
                   border: OutlineInputBorder(),
                 ),
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
               TextField(
                 decoration: const InputDecoration(
                   labelText: 'Location',
                 ),
-                style: Theme.of(context).textTheme.headline4!.copyWith(fontSize: 20.0),
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontSize: 20.0),
               ),
               _DateTimePicker(
                 labelText: 'From',

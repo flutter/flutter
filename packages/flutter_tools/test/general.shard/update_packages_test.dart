@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -19,7 +17,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=2.2.2 <3.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -79,9 +77,9 @@ dependencies:
 ''';
 
 void main() {
-  FileSystem fileSystem;
-  Directory flutterSdk;
-  Directory flutter;
+  late FileSystem fileSystem;
+  late Directory flutterSdk;
+  late Directory flutter;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -190,7 +188,7 @@ void main() {
           'sky_engine: ',
           'gallery: ',
           'flutter_test: ',
-          'flutter_goldens: '
+          'flutter_goldens: ',
         }));
     expect(
         pubspecYaml.dependencies
@@ -202,7 +200,7 @@ void main() {
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
-          'gallery: '
+          'gallery: ',
         }));
   });
 }

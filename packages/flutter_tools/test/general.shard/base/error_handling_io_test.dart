@@ -48,6 +48,11 @@ void main() {
      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
+  testWithoutContext('create accepts exclusive argument', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    expect(fileSystem.file('file').create(exclusive: true), isNotNull);
+  });
+
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
     final File file = FakeExistsFile()
       ..error = const FileSystemException('', '', OSError('', 2));
@@ -1240,7 +1245,7 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 }
 
 class FakeExistsFile extends Fake implements File {
-  late Object error;
+  late Exception error;
   int existsCount = 0;
 
 

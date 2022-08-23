@@ -32,6 +32,7 @@ class PluginTest {
     this.pluginCreateEnvironment,
     this.appCreateEnvironment,
     this.dartOnlyPlugin = false,
+    this.template = 'plugin',
   });
 
   final String buildTarget;
@@ -39,20 +40,27 @@ class PluginTest {
   final Map<String, String>? pluginCreateEnvironment;
   final Map<String, String>? appCreateEnvironment;
   final bool dartOnlyPlugin;
+  final String template;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
         Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
+    // FFI plugins do not have support for `flutter test`.
+    // `flutter test` does not do a native build.
+    // Supporting `flutter test` would require invoking a native build.
+    final bool runFlutterTest = template != 'plugin_ffi';
     try {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
           tempDir, options, buildTarget,
-          name: 'plugintest', template: 'plugin', environment: pluginCreateEnvironment);
+          name: 'plugintest', template: template, environment: pluginCreateEnvironment);
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
       }
       section('Test plugin');
-      await plugin.test();
+      if (runFlutterTest) {
+        await plugin.test();
+      }
       section('Create Flutter app');
       final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
           name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
@@ -63,8 +71,10 @@ class PluginTest {
         await app.addPlugin('path_provider');
         section('Build app');
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
-        section('Test app');
-        await app.test();
+        if (runFlutterTest) {
+          section('Test app');
+          await app.test();
+        }
       } finally {
         await plugin.delete();
         await app.delete();
@@ -194,7 +204,7 @@ class $dartPluginClass {
     podspecContent = podspecContent.replaceFirst(
       versionString,
       target == 'ios'
-          ? "s.platform = :ios, '7.0'"
+          ? "s.platform = :ios, '10.0'"
           : "s.platform = :osx, '10.8'"
     );
     podspec.writeAsStringSync(podspecContent, flush: true);
@@ -230,8 +240,8 @@ class $dartPluginClass {
           if (target == 'ios') {
             // Plugins with versions lower than the app version should not have IPHONEOS_DEPLOYMENT_TARGET set.
             // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
-            // in _reduceDarwinPluginMinimumVersion to 7, which is below the target version of 9.
-            if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 7')) {
+            // in _reduceDarwinPluginMinimumVersion to 10, which is below the target version of 11.
+            if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 10')) {
               throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
             }
             if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {

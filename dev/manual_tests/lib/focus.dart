@@ -13,7 +13,7 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key? key, required this.name, this.canRequestFocus = true, this.autofocus = false}) : super(key: key);
+  const DemoButton({super.key, required this.name, this.canRequestFocus = true, this.autofocus = false});
 
   final String name;
   final bool canRequestFocus;
@@ -54,10 +54,12 @@ class _DemoButtonState extends State<DemoButton> {
       autofocus: widget.autofocus,
       style: ButtonStyle(
         overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused))
+          if (states.contains(MaterialState.focused)) {
             return Colors.red.withOpacity(0.25);
-          if (states.contains(MaterialState.hovered))
+          }
+          if (states.contains(MaterialState.hovered)) {
             return Colors.blue.withOpacity(0.25);
+          }
           return Colors.transparent;
         }),
       ),
@@ -68,7 +70,7 @@ class _DemoButtonState extends State<DemoButton> {
 }
 
 class FocusDemo extends StatefulWidget {
-  const FocusDemo({Key? key}) : super(key: key);
+  const FocusDemo({super.key});
 
   @override
   State<FocusDemo> createState() => _FocusDemoState();
@@ -136,7 +138,7 @@ class _FocusDemoState extends State<FocusDemo> {
         onKey: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
-          style: textTheme.headline4!,
+          style: textTheme.headlineMedium!,
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Focus Demo'),

@@ -20,8 +20,9 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
     assert(containedInkWell);
     return rectCallback;
   }
-  if (containedInkWell)
+  if (containedInkWell) {
     return () => Offset.zero & referenceBox.size;
+  }
   return null;
 }
 
@@ -114,7 +115,7 @@ class InkSplash extends InteractiveInkFeature {
   /// When the splash is removed, `onRemoved` will be called.
   InkSplash({
     required MaterialInkController controller,
-    required RenderBox referenceBox,
+    required super.referenceBox,
     required TextDirection textDirection,
     Offset? position,
     required Color color,
@@ -123,7 +124,7 @@ class InkSplash extends InteractiveInkFeature {
     BorderRadius? borderRadius,
     ShapeBorder? customBorder,
     double? radius,
-    VoidCallback? onRemoved,
+    super.onRemoved,
   }) : assert(textDirection != null),
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
@@ -132,7 +133,7 @@ class InkSplash extends InteractiveInkFeature {
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
        _textDirection = textDirection,
-       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+       super(controller: controller, color: color) {
     assert(_borderRadius != null);
     _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
@@ -185,8 +186,9 @@ class InkSplash extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
+    if (status == AnimationStatus.completed) {
       dispose();
+    }
   }
 
   @override
@@ -201,8 +203,9 @@ class InkSplash extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset? center = _position;
-    if (_repositionToReferenceBox)
+    if (_repositionToReferenceBox) {
       center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
+    }
     paintInkCircle(
       canvas: canvas,
       transform: transform,

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -53,6 +52,13 @@ Widget buildSliverAppBarApp({
 
 ScrollController primaryScrollController(WidgetTester tester) {
   return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
+}
+
+TextStyle? iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
@@ -395,7 +401,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -450,7 +456,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopRight(title).dx, 620 + 48 + 48);
+    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -545,6 +551,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar drawer icon has default color', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final bool useMaterial3 = themeData.useMaterial3;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    final Color iconColorM2 = themeData.colorScheme.onPrimary;
+    final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
+    expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
+  });
+
   testWidgets('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -561,6 +589,28 @@ void main() {
       tester.getSize(find.byIcon(Icons.menu)),
       equals(const Size(30, 30)),
     );
+  });
+
+  testWidgets('AppBar drawer icon is colored by iconTheme', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    const Color color = Color(0xFF2196F3);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+
+    expect(iconColor(), color);
   });
 
   testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
@@ -581,6 +631,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar endDrawer icon has default color', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final bool useMaterial3 = themeData.useMaterial3;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    final Color iconColorM2 = themeData.colorScheme.onPrimary;
+    final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
+    expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
+  });
+
   testWidgets('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -599,6 +671,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar endDrawer icon is colored by iconTheme', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    const Color color = Color(0xFF2196F3);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+
+    expect(iconColor(), color);
+  });
+
   testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -613,8 +707,8 @@ void main() {
     );
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), Offset.zero);
-    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
+    expect(tester.getTopLeft(hamburger), const Offset(4.0, 4.0));
+    expect(tester.getSize(hamburger), const Size(48.0, 48.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
@@ -643,12 +737,12 @@ void main() {
       ),
     );
 
-    final Finder addButton = find.byTooltip('Add');
+    final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
     expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
-    final Finder shareButton = find.byTooltip('Share');
+    final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
     expect(tester.getSize(shareButton), const Size(48.0, 56.0));
   });
@@ -954,7 +1048,155 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
+  testWidgets('SliverAppBar.medium defaults', (WidgetTester tester) async {
+    const double collapsedAppBarHeight = 64;
+    const double expandedAppBarHeight = 112;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar.medium(
+              title: const Text('AppBar Title'),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    // There are two widgets for the title. The first is the title on the main
+    // row with the icons. It is transparent when the app bar is expanded, and
+    // opaque when it is collapsed. The second title is a larger version that is
+    // shown at the bottom when the app bar is expanded. It scrolls under the
+    // main row until it is completely hidden and then the first title is faded
+    // in.
+    final Finder collapsedTitle = find.text('AppBar Title').first;
+    final Finder collapsedTitleOpacity = find.ancestor(
+      of: collapsedTitle,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitleClip = find.ancestor(
+      of: expandedTitle,
+      matching: find.byType(ClipRect),
+    );
+
+    // Default, fully expanded app bar.
+    expect(controller.offset, 0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+    // Scroll the expanded app bar partially out of view.
+    controller.jumpTo(45);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight - 45);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+    // Scroll so that it is completely collapsed.
+    controller.jumpTo(600);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), collapsedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+    expect(tester.getSize(expandedTitleClip).height, 0);
+
+    // Scroll back to fully expanded.
+    controller.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+  });
+
+  testWidgets('SliverAppBar.large defaults', (WidgetTester tester) async {
+    const double collapsedAppBarHeight = 64;
+    const double expandedAppBarHeight = 152;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar.large(
+              title: const Text('AppBar Title'),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    // There are two widgets for the title. The first is the title on the main
+    // row with the icons. It is transparent when the app bar is expanded, and
+    // opaque when it is collapsed. The second title is a larger version that is
+    // shown at the bottom when the app bar is expanded. It scrolls under the
+    // main row until it is completely hidden and then the first title is faded
+    // in.
+    final Finder collapsedTitle = find.text('AppBar Title').first;
+    final Finder collapsedTitleOpacity = find.ancestor(
+      of: collapsedTitle,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitleClip = find.ancestor(
+      of: expandedTitle,
+      matching: find.byType(ClipRect),
+    );
+
+    // Default, fully expanded app bar.
+    expect(controller.offset, 0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+    // Scroll the expanded app bar partially out of view.
+    controller.jumpTo(45);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight - 45);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+    // Scroll so that it is completely collapsed.
+    controller.jumpTo(600);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), collapsedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+    expect(tester.getSize(expandedTitleClip).height, 0);
+
+    // Scroll back to fully expanded.
+    controller.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+  });
+
   testWidgets('AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
+    final bool useMaterial3 = ThemeData().useMaterial3;
+
     Widget buildAppBar([double? elevation]) {
       return MaterialApp(
         home: Scaffold(
@@ -968,13 +1210,93 @@ void main() {
       matching: find.byType(Material),
     ));
 
-    // Default elevation should be _AppBarState._defaultElevation = 4.0
+    // Default elevation should be used for the material.
     await tester.pumpWidget(buildAppBar());
-    expect(getMaterial().elevation, 4.0);
+    expect(getMaterial().elevation, useMaterial3 ? 0 : 4);
 
     // AppBar should use the specified elevation.
     await tester.pumpWidget(buildAppBar(8.0));
     expect(getMaterial().elevation, 8.0);
+  });
+
+  testWidgets('scrolledUnderElevation', (WidgetTester tester) async {
+    Widget buildAppBar({double? elevation, double? scrolledUnderElevation}) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Title'),
+            elevation: elevation,
+            scrolledUnderElevation: scrolledUnderElevation,
+          ),
+          body: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) => ListTile(title: Text('Item $index')),
+          ),
+        ),
+      );
+    }
+
+    Material getMaterial() => tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+
+    await tester.pumpWidget(buildAppBar(elevation: 2, scrolledUnderElevation: 10));
+    // Starts with the base elevation.
+    expect(getMaterial().elevation, 2);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    // After scrolling it should be the scrolledUnderElevation.
+    expect(getMaterial().elevation, 10);
+  });
+
+  testWidgets('scrolledUnderElevation with nested scroll view', (WidgetTester tester) async {
+    Widget buildAppBar({double? scrolledUnderElevation}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Title'),
+            scrolledUnderElevation: scrolledUnderElevation,
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 1;
+            },
+          ),
+          body: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 600.0,
+                width: 800.0,
+                child: ListView.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) =>
+                    ListTile(title: Text('Item $index')),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Material getMaterial() => tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+
+    await tester.pumpWidget(buildAppBar(scrolledUnderElevation: 10));
+    // Starts with the base elevation.
+    expect(getMaterial().elevation, 0.0);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    // After scrolling it should be the scrolledUnderElevation.
+    expect(getMaterial().elevation, 10);
   });
 
   group('SliverAppBar elevation', () {
@@ -997,15 +1319,16 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/59158.
       AppBar getAppBar() => tester.widget<AppBar>(find.byType(AppBar));
       Material getMaterial() => tester.widget<Material>(find.byType(Material));
+      final bool useMaterial3 = ThemeData().useMaterial3;
 
       // When forceElevated is off, SliverAppBar should not be elevated.
       await tester.pumpWidget(buildSliverAppBar(false));
       expect(getMaterial().elevation, 0.0);
 
-      // Default elevation should be _AppBarState._defaultElevation = 4.0, and
+      // Default elevation should be used by the material, but
       // the AppBar's elevation should not be specified by SliverAppBar.
       await tester.pumpWidget(buildSliverAppBar(true));
-      expect(getMaterial().elevation, 4.0);
+      expect(getMaterial().elevation, useMaterial3 ? 0.0 : 4.0);
       expect(getAppBar().elevation, null);
 
       // SliverAppBar should use the specified elevation.
@@ -1313,6 +1636,8 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
+        // Test was designed against InkSplash so need to make sure that is used.
+        theme: ThemeData(splashFactory: InkSplash.splashFactory),
         home: Center(
           child: AppBar(
             title: const Text('Abc'),
@@ -2006,44 +2331,55 @@ void main() {
     ));
   });
 
-  testWidgets('AppBar draws a light system bar for a light theme with a dark background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.deepOrange);
-    await tester.pumpWidget(MaterialApp(
-      theme: lightTheme,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('test'),
-        ),
-      ),
-    ));
-
-    expect(lightTheme.primaryColorBrightness, Brightness.dark);
-    expect(lightTheme.colorScheme.brightness, Brightness.light);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.light,
-    ));
-  });
-
-  testWidgets('AppBar draws a dark system bar for a dark theme with a light background', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, cardColor: Colors.white);
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: darkTheme,
+  testWidgets('Default system bar brightness based on AppBar background color brightness.', (WidgetTester tester) async {
+    Widget buildAppBar(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
         home: Scaffold(
-          appBar: AppBar(
-            title: const Text('test'),
-          ),
+          appBar: AppBar(title: const Text('Title')),
         ),
-      ),
-    );
+      );
+    }
 
-    expect(darkTheme.primaryColorBrightness, Brightness.dark);
-    expect(darkTheme.colorScheme.brightness, Brightness.dark);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    // Using a light theme.
+    {
+      await tester.pumpWidget(buildAppBar(ThemeData.from(colorScheme: const ColorScheme.light())));
+      final Material appBarMaterial = tester.widget<Material>(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(Material),
+        ),
+      );
+      final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
+      final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+        ? Brightness.dark
+        : Brightness.light;
+
+      expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
+        statusBarBrightness: appBarBrightness,
+        statusBarIconBrightness: onAppBarBrightness,
+      ));
+    }
+
+    // Using a dark theme.
+    {
+      await tester.pumpWidget(buildAppBar(ThemeData.from(colorScheme: const ColorScheme.dark())));
+      final Material appBarMaterial = tester.widget<Material>(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(Material),
+        ),
+      );
+      final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
+      final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+          ? Brightness.dark
+          : Brightness.light;
+
+      expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
+        statusBarBrightness: appBarBrightness,
+        statusBarIconBrightness: onAppBarBrightness,
+      ));
+    }
   });
 
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
@@ -2208,6 +2544,8 @@ void main() {
 
     Widget buildFrame() {
       return MaterialApp(
+        // Test designed against 2014 font sizes.
+        theme: ThemeData(textTheme: Typography.englishLike2014),
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
@@ -2246,6 +2584,8 @@ void main() {
 
     Widget buildFrame() {
       return MaterialApp(
+        // Test designed against 2014 font sizes.
+        theme: ThemeData(textTheme: Typography.englishLike2014),
         home: Builder(
           builder: (BuildContext context) {
             return Directionality(
@@ -2329,8 +2669,9 @@ void main() {
         .delegate;
 
       // Ensure we have a non-null vsync when it's needed.
-      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null)) {
         expect(delegate.vsync, isNotNull);
+      }
 
       expect(delegate.showOnScreenConfiguration != null, snap && floating);
     }
@@ -2498,7 +2839,7 @@ void main() {
             backgroundColor: backgroundColor,
             leading: Icon(Icons.add_circle, key: leadingIconKey),
             title: const Text('title'),
-            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
           ),
         ),
       ),
@@ -2526,8 +2867,123 @@ void main() {
       find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
     ).data;
     expect(actionIconTheme.color, foregroundColor);
+
+    // Test icon color
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(leadingIconColor(), foregroundColor);
+    expect(actionIconColor(), foregroundColor);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/107305
+  group('Icons are colored correctly by IconTheme and ActionIconTheme in M3', () {
+    testWidgets('Icons and IconButtons are colored by IconTheme in M3', (WidgetTester tester) async {
+      const Color iconColor = Color(0xff00ff00);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+              colorScheme: const ColorScheme.light(), useMaterial3: true),
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: iconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {},)
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), iconColor);
+      expect(actionIconColor(), iconColor);
+      expect(actionIconButtonColor(), iconColor);
+    });
+
+    testWidgets('Action icons and IconButtons are colored by ActionIconTheme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
+
+      const Color actionsIconColor = Color(0xff0000ff);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              actionsIconTheme: const IconThemeData(color: actionsIconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), themeData.colorScheme.onSurface);
+      expect(actionIconColor(), actionsIconColor);
+      expect(actionIconButtonColor(), actionsIconColor);
+    });
+
+    testWidgets('The actionIconTheme property overrides iconTheme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
+
+      const Color overallIconColor = Color(0xff00ff00);
+      const Color actionsIconColor = Color(0xff0000ff);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: overallIconColor),
+              actionsIconTheme: const IconThemeData(color: actionsIconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), overallIconColor);
+      expect(actionIconColor(), actionsIconColor);
+      expect(actionIconButtonColor(), actionsIconColor);
+    });
+  });
 
   testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xff00ff00);
@@ -2537,6 +2993,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light().copyWith(
+          useMaterial3: false,
           appBarTheme: const AppBarTheme(
             backwardsCompatibility: false,
           ),
@@ -2546,7 +3003,7 @@ void main() {
             foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
             leading: Icon(Icons.add_circle, key: leadingIconKey),
             title: const Text('title'),
-            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
           ),
         ),
       ),
@@ -2566,313 +3023,504 @@ void main() {
       find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
     ).data;
     expect(actionIconTheme.color, foregroundColor);
+
+    // Test icon color
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(leadingIconColor(), foregroundColor);
+    expect(actionIconColor(), foregroundColor);
   });
 
-  testWidgets('SliverAppBar.backgroundColor MaterialStateColor scrolledUnder', (WidgetTester tester) async {
+  group('MaterialStateColor scrolledUnder', () {
     const double collapsedHeight = kToolbarHeight;
     const double expandedHeight = 200.0;
     const Color scrolledColor = Color(0xff00ff00);
     const Color defaultColor = Color(0xff0000ff);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                elevation: 0,
-                backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
-                }),
-                expandedHeight: expandedHeight,
-                pinned: true,
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(height: 1200.0, color: Colors.teal),
-                    ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
     Finder findAppBarMaterial() {
-      return find.descendant(of: find.byType(AppBar), matching: find.byType(Material));
-    }
-
-    Color? getAppBarBackgroundColor() {
-      return tester.widget<Material>(findAppBarMaterial()).color;
-    }
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
-
-    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(0.0, -expandedHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), scrolledColor);
-    expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
-
-    gesture = await tester.startGesture(const Offset(50.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, expandedHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
-  });
-
-  testWidgets('SliverAppBar.backgroundColor with FlexibleSpace MaterialStateColor scrolledUnder', (WidgetTester tester) async {
-    const double collapsedHeight = kToolbarHeight;
-    const double expandedHeight = 200.0;
-    const Color scrolledColor = Color(0xff00ff00);
-    const Color defaultColor = Color(0xff0000ff);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                elevation: 0,
-                backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
-                }),
-                expandedHeight: expandedHeight,
-                pinned: true,
-                flexibleSpace: const FlexibleSpaceBar(
-                  title: Text('SliverAppBar'),
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                    <Widget>[
-                      Container(height: 1200.0, color: Colors.teal),
-                    ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    Finder findAppBarMaterial() {
-      // There are 2 Material widgets below AppBar. The second is only added if
-      // flexibleSpace is non-null.
       return find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first;
     }
 
-    Color? getAppBarBackgroundColor() {
+    Color? getAppBarBackgroundColor(WidgetTester tester) {
       return tester.widget<Material>(findAppBarMaterial()).color;
     }
 
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
-
-    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(0.0, -expandedHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), scrolledColor);
-    expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
-
-    gesture = await tester.startGesture(const Offset(50.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, expandedHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
-  });
-
-  testWidgets('AppBar.backgroundColor MaterialStateColor scrolledUnder', (WidgetTester tester) async {
-    const Color scrolledColor = Color(0xff00ff00);
-    const Color defaultColor = Color(0xff0000ff);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
-            }),
-            title: const Text('AppBar'),
-          ),
-          body: ListView(
-            children: <Widget>[
-              Container(height: 1200.0, color: Colors.teal),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    Finder findAppBarMaterial() {
-      return find.descendant(of: find.byType(AppBar), matching: find.byType(Material));
-    }
-
-    Color? getAppBarBackgroundColor() {
-      return tester.widget<Material>(findAppBarMaterial()).color;
-    }
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
-
-    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), scrolledColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
-
-    gesture = await tester.startGesture(const Offset(50.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, kToolbarHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
-  });
-
-  testWidgets('AppBar.backgroundColor with FlexibleSpace MaterialStateColor scrolledUnder', (WidgetTester tester) async {
-    const Color scrolledColor = Color(0xff00ff00);
-    const Color defaultColor = Color(0xff0000ff);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
-            }),
-            title: const Text('AppBar'),
-            flexibleSpace: const FlexibleSpaceBar(
-              title: Text('FlexibleSpace'),
-            ),
-          ),
-          body: ListView(
-            children: <Widget>[
-              Container(height: 1200.0, color: Colors.teal),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    Finder findAppBarMaterial() {
-      // There are 2 Material widgets below AppBar. The second is only added if
-      // flexibleSpace is non-null.
-      return find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first;
-    }
-
-    Color? getAppBarBackgroundColor() {
-      return tester.widget<Material>(findAppBarMaterial()).color;
-    }
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
-
-    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), scrolledColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
-
-    gesture = await tester.startGesture(const Offset(50.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, kToolbarHeight));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-    expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
-  });
-
-  testWidgets('AppBar._handleScrollNotification safely calls setState()', (WidgetTester tester) async {
-    // Regression test for failures found in Google internal issue b/185192049.
-    final ScrollController controller = ScrollController(initialScrollOffset: 400);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('AppBar'),
-          ),
-          body: Scrollbar(
-            isAlwaysShown: true,
-            controller: controller,
-            child: ListView(
-              controller: controller,
-              children: <Widget>[
-                Container(height: 1200.0, color: Colors.teal),
+    group('SliverAppBar', () {
+      Widget buildSliverApp({
+        required double contentHeight,
+        bool reverse = false,
+        bool includeFlexibleSpace = false,
+      }) {
+        return MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              reverse: reverse,
+              slivers: <Widget>[
+                SliverAppBar(
+                  elevation: 0,
+                  backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                    return states.contains(MaterialState.scrolledUnder)
+                      ? scrolledColor
+                      : defaultColor;
+                  }),
+                  expandedHeight: expandedHeight,
+                  pinned: true,
+                  flexibleSpace: includeFlexibleSpace
+                      ? const FlexibleSpaceBar(title: Text('SliverAppBar'))
+                      : null,
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    <Widget>[
+                      Container(height: contentHeight, color: Colors.teal),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ),
-      ),
-    );
+        );
+      }
 
-    expect(tester.takeException(), isNull);
+      testWidgets('backgroundColor', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildSliverApp(contentHeight: 1200.0)
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, -expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+      });
+
+      testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildSliverApp(contentHeight: 1200.0, includeFlexibleSpace: true)
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, -expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+      });
+
+      testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildSliverApp(contentHeight: 1200.0, reverse: true)
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, -expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+      });
+
+      testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildSliverApp(
+            contentHeight: 1200.0,
+            reverse: true,
+            includeFlexibleSpace: true,
+          )
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, collapsedHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, -expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+      });
+
+      testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildSliverApp(contentHeight: 200, reverse: true)
+        );
+
+        // In reverse, the content here is not long enough to scroll under the app
+        // bar.
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+
+        final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+      });
+
+      testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildSliverApp(
+            contentHeight: 200,
+            reverse: true,
+            includeFlexibleSpace: true,
+          )
+        );
+
+        // In reverse, the content here is not long enough to scroll under the app
+        // bar.
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+
+        final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, expandedHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, expandedHeight);
+      });
+    });
+
+    group('AppBar', () {
+      Widget buildAppBar({
+        required double contentHeight,
+        bool reverse = false,
+        bool includeFlexibleSpace = false
+      }) {
+        return MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                return states.contains(MaterialState.scrolledUnder)
+                  ? scrolledColor
+                  : defaultColor;
+              }),
+              title: const Text('AppBar'),
+              flexibleSpace: includeFlexibleSpace
+                ? const FlexibleSpaceBar(title: Text('FlexibleSpace'))
+                : null,
+            ),
+            body: ListView(
+              reverse: reverse,
+              children: <Widget>[
+                Container(height: contentHeight, color: Colors.teal),
+              ],
+            ),
+          ),
+        );
+      }
+
+      testWidgets('backgroundColor', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildAppBar(contentHeight: 1200.0)
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      });
+
+      testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      });
+
+      testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildAppBar(contentHeight: 1200.0, reverse: true)
+        );
+        await tester.pump();
+
+        // In this test case, the content always extends under the AppBar, so it
+        // should always be the scrolledColor.
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      });
+
+      testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildAppBar(
+            contentHeight: 1200.0,
+            reverse: true,
+            includeFlexibleSpace: true,
+          )
+        );
+        await tester.pump();
+
+        // In this test case, the content always extends under the AppBar, so it
+        // should always be the scrolledColor.
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      });
+
+      testWidgets('_handleScrollNotification safely calls setState()', (WidgetTester tester) async {
+        // Regression test for failures found in Google internal issue b/185192049.
+        final ScrollController controller = ScrollController(initialScrollOffset: 400);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(
+                title: const Text('AppBar'),
+              ),
+              body: Scrollbar(
+                isAlwaysShown: true,
+                controller: controller,
+                child: ListView(
+                  controller: controller,
+                  children: <Widget>[
+                    Container(height: 1200.0, color: Colors.teal),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('does not trigger on horizontal scroll', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                  return states.contains(MaterialState.scrolledUnder)
+                    ? scrolledColor
+                    : defaultColor;
+                }),
+                title: const Text('AppBar'),
+              ),
+              body: ListView(
+                scrollDirection: Axis.horizontal,
+                children: <Widget>[
+                  Container(height: 600.0, width: 1200.0, color: Colors.teal),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(-100.0, 0.0));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+
+        gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(100.0, 0.0));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+      });
+
+      testWidgets('backgroundColor - not triggered in reverse for short content', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildAppBar(
+            contentHeight: 200.0,
+            reverse: true,
+          )
+        );
+        await tester.pump();
+
+        // In reverse, the content here is not long enough to scroll under the app
+        // bar.
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      });
+
+      testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildAppBar(
+            contentHeight: 200.0,
+            reverse: true,
+            includeFlexibleSpace: true,
+          )
+        );
+        await tester.pump();
+
+        // In reverse, the content here is not long enough to scroll under the app
+        // bar.
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      });
+    });
   });
 
-  testWidgets('AppBar scrolledUnder does not trigger on horizontal scroll', (WidgetTester tester) async {
-    const Color scrolledColor = Color(0xff00ff00);
-    const Color defaultColor = Color(0xff0000ff);
-
+  // Regression test for https://github.com/flutter/flutter/issues/80256
+  testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+        key: const ValueKey<String>('1'),
+        child: Scaffold(
+          key: const ValueKey<String>('1'),
+          appBar: AppBar(),
+          endDrawer: const Drawer(),
+        )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+          endDrawer: const Drawer(),
+        )
+    );
+    final List<Page<void>> pages = <Page<void>>[ page1, page2 ];
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
-            }),
-            title: const Text('AppBar'),
-          ),
-          body: ListView(
-            scrollDirection: Axis.horizontal,
-            children: <Widget>[
-              Container(height: 600.0, width: 1200.0, color: Colors.teal),
-            ],
-          ),
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<Object?> route, Object? result) => false,
         ),
       ),
     );
 
-    Finder findAppBarMaterial() {
-      return find.descendant(of: find.byType(AppBar), matching: find.byType(Material));
-    }
-
-    Color? getAppBarBackgroundColor() {
-      return tester.widget<Material>(findAppBarMaterial()).color;
-    }
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-
-    TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(-100.0, 0.0));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), defaultColor);
-
-    gesture = await tester.startGesture(const Offset(50.0, 400.0));
-    await gesture.moveBy(const Offset(100.0, 0.0));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(getAppBarBackgroundColor(), defaultColor);
+    // The page2 should have a back button.
+    expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('2')),
+          matching: find.byType(BackButton),
+        ),
+        findsOneWidget
+    );
   });
 
   testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {
@@ -2926,5 +3574,35 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
+  });
+
+  testWidgets('AppBar title with actions should have the same position regardless of centerTitle', (WidgetTester tester) async {
+    final Key titleKey = UniqueKey();
+    bool centerTitle = false;
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            centerTitle: centerTitle,
+            title: Container(
+              key: titleKey,
+              constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)),
+            ),
+            actions: const <Widget>[
+              SizedBox(width: 48.0),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Finder title = find.byKey(titleKey);
+    expect(tester.getTopLeft(title).dx, 16.0);
+
+    centerTitle = true;
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(title).dx, 16.0);
   });
 }

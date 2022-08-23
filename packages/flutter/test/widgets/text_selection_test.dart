@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_utils.dart';
 
 void main() {
   late int tapCount;
@@ -24,16 +25,16 @@ void main() {
   late int dragEndCount;
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  void _handleTapDown(TapDownDetails details) { tapCount++; }
-  void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
-  void _handleSingleTapCancel() { singleTapCancelCount++; }
-  void _handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
-  void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
-  void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
-  void _handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void _handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
-  void _handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
-  void _handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
+  void handleTapDown(TapDownDetails details) { tapCount++; }
+  void handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
+  void handleSingleTapCancel() { singleTapCancelCount++; }
+  void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
+  void handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
+  void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
+  void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
+  void handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
+  void handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
+  void handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
@@ -52,16 +53,16 @@ void main() {
     await tester.pumpWidget(
       TextSelectionGestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: _handleTapDown,
-        onSingleTapUp: _handleSingleTapUp,
-        onSingleTapCancel: _handleSingleTapCancel,
-        onSingleLongTapStart: _handleSingleLongTapStart,
-        onDoubleTapDown: _handleDoubleTapDown,
-        onForcePressStart: _handleForcePressStart,
-        onForcePressEnd: _handleForcePressEnd,
-        onDragSelectionStart: _handleDragSelectionStart,
-        onDragSelectionUpdate: _handleDragSelectionUpdate,
-        onDragSelectionEnd: _handleDragSelectionEnd,
+        onTapDown: handleTapDown,
+        onSingleTapUp: handleSingleTapUp,
+        onSingleTapCancel: handleSingleTapCancel,
+        onSingleLongTapStart: handleSingleLongTapStart,
+        onDoubleTapDown: handleDoubleTapDown,
+        onForcePressStart: handleForcePressStart,
+        onForcePressEnd: handleForcePressEnd,
+        onDragSelectionStart: handleDragSelectionStart,
+        onDragSelectionUpdate: handleDragSelectionUpdate,
+        onDragSelectionEnd: handleDragSelectionEnd,
         child: Container(),
       ),
     );
@@ -90,6 +91,10 @@ void main() {
       ),
     );
   }
+
+  test('TextSelectionOverlay.fadeDuration exist', () async {
+    expect(TextSelectionOverlay.fadeDuration, SelectionOverlay.fadeDuration);
+  });
 
   testWidgets('a series of taps all call onTaps', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
@@ -163,7 +168,6 @@ void main() {
   testWidgets('a very quick swipe is ignored', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 20));
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
@@ -185,7 +189,6 @@ void main() {
   testWidgets('a slower swipe has a tap down and a canceled tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 120));
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
@@ -339,7 +342,6 @@ void main() {
       const Offset(200.0, 200.0),
       pointer: pointerValue,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -358,7 +360,6 @@ void main() {
       pointer: pointerValue,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -376,7 +377,6 @@ void main() {
       const Offset(200.0, 200.0),
       pointer: pointerValue,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
     await tester.pump();
@@ -399,7 +399,6 @@ void main() {
       pointer: pointerValue,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
     await tester.pump();
@@ -422,7 +421,6 @@ void main() {
       pointer: pointerValue,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveBy(const Offset(210.0, 200.0));
     await tester.pump();
@@ -440,7 +438,6 @@ void main() {
       const Offset(200.0, 200.0),
       pointer: 0,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -451,7 +448,7 @@ void main() {
     expect(renderEditable.selectPositionAtCalled, isTrue);
   });
 
-  testWidgets('TextSelectionGestureDetectorBuilder right click', (WidgetTester tester) async {
+  testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80119
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
@@ -464,7 +461,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryButton,
     );
-    addTearDown(gesture.removePointer);
 
     // Get the location of the 10th character
     final Offset charLocation = renderEditable
@@ -492,7 +488,59 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(renderEditable.selectWordCalled, isFalse);
-  });
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
+  testWidgets('TextSelectionGestureDetectorBuilder right click non-Apple platforms', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/80119
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    renderEditable.text = const TextSpan(text: 'one two three four five six seven');
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(
+      pointer: 0,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryButton,
+    );
+
+    // Get the location of the 10th character
+    final Offset charLocation = renderEditable
+        .getLocalRectForCaret(const TextPosition(offset: 10)).center;
+    final Offset globalCharLocation = charLocation + tester.getTopLeft(find.byType(FakeEditable));
+
+    // Right clicking on an unfocused field should place the cursor, not select
+    // the word.
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectPositionCalled, isTrue);
+
+    // Right clicking on a focused field with selection shouldn't change the
+    // selection.
+    renderEditable.selectPositionCalled = false;
+    renderEditable.selection = const TextSelection(baseOffset: 3, extentOffset: 20);
+    renderEditable.hasFocus = true;
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectPositionCalled, isFalse);
+
+    // Right clicking on a focused field with a reverse (right to left)
+    // selection shouldn't change the selection.
+    renderEditable.selection = const TextSelection(baseOffset: 20, extentOffset: 3);
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectPositionCalled, isFalse);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
+  );
 
   testWidgets('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
@@ -500,7 +548,6 @@ void main() {
       const Offset(200.0, 200.0),
       pointer: 0,
     );
-    addTearDown(gesture.removePointer);
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -510,9 +557,41 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
         break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(renderEditable.selectPositionAtCalled, isTrue);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('test TextSelectionGestureDetectorBuilder toggles toolbar on single tap on previous selection iOS', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isFalse);
+    renderEditable.selection = const TextSelection(baseOffset: 2, extentOffset: 6);
+    renderEditable.hasFocus = true;
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        expect(renderEditable.selectWordEdgeCalled, isFalse);
+        expect(state.toggleToolbarCalled, isTrue);
+        break;
+      case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -528,7 +607,6 @@ void main() {
       const Offset(200.0, 200.0),
       pointer: 0,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
     await gesture.down(const Offset(200.0, 200.0));
@@ -545,7 +623,6 @@ void main() {
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.createGesture();
-    addTearDown(gesture.removePointer);
     await gesture.downWithCustomEvent(
       const Offset(200.0, 200.0),
       const PointerDownEvent(
@@ -571,7 +648,7 @@ void main() {
   });
 
   testWidgets('Mouse drag does not show handles nor toolbar', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/69001
+    // Regression test for https://github.com/flutter/flutter/issues/69001
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -583,7 +660,6 @@ void main() {
     final Offset textFieldStart = tester.getTopLeft(find.byType(SelectableText));
 
     final TestGesture gesture = await tester.startGesture(textFieldStart, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(textFieldStart + const Offset(50.0, 0));
     await tester.pump();
@@ -593,6 +669,231 @@ void main() {
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+  });
+
+  testWidgets('Mouse drag selects and cannot drag cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102928
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!',
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: FocusNode(),
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 10));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 10);
+  });
+
+  testWidgets('Touch drag moves the cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102928
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!',
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: FocusNode(),
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    final TestGesture gesture = await tester.startGesture(position);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 10));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 10);
+  });
+
+  testWidgets('Stylus drag moves the cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102928
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!',
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: FocusNode(),
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.stylus);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 10));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 10);
+  });
+
+  testWidgets('Drag of unknown type moves the cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102928
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!',
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(delegate: delegate);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: provider.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: FocusNode(),
+            backgroundCursorColor: Colors.white,
+            cursorColor: Colors.white,
+            style: const TextStyle(),
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.unknown);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, 10));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 10);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder drag with RenderEditable viewport offset change', (WidgetTester tester) async {
@@ -609,7 +910,6 @@ void main() {
       const Offset(200.0, 200.0),
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(renderEditable.selectPositionAtCalled, isFalse);
 
@@ -639,7 +939,6 @@ void main() {
       const Offset(200.0, 200.0),
       pointer: 0,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -656,7 +955,6 @@ void main() {
       Offset.zero,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(const Offset(50.0, 0));
     await tester.pump();
@@ -670,7 +968,6 @@ void main() {
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, forcePressEnabled: false);
     final TestGesture gesture = await tester.createGesture();
-    addTearDown(gesture.removePointer);
     await gesture.downWithCustomEvent(
       const Offset(200.0, 200.0),
       const PointerDownEvent(
@@ -707,10 +1004,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder gestureDetector = find.descendant(
-      of: find.byType(Visibility),
+      of: find.byType(CompositedTransformFollower),
       matching: find.descendant(
         of: find.byType(FadeTransition),
-        matching: find.byType(GestureDetector),
+        matching: find.byType(RawGestureDetector),
       ),
     );
 
@@ -722,6 +1019,267 @@ void main() {
     expect(hitRect.size.width, lessThan(textFieldRect.size.width));
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  group('SelectionOverlay', () {
+    Future<SelectionOverlay> pumpApp(WidgetTester tester, {
+      ValueChanged<DragStartDetails>? onStartDragStart,
+      ValueChanged<DragUpdateDetails>? onStartDragUpdate,
+      ValueChanged<DragEndDetails>? onStartDragEnd,
+      ValueChanged<DragStartDetails>? onEndDragStart,
+      ValueChanged<DragUpdateDetails>? onEndDragUpdate,
+      ValueChanged<DragEndDetails>? onEndDragEnd,
+      VoidCallback? onSelectionHandleTapped,
+      TextSelectionControls? selectionControls,
+    }) async {
+      final UniqueKey column = UniqueKey();
+      final LayerLink startHandleLayerLink = LayerLink();
+      final LayerLink endHandleLayerLink = LayerLink();
+      final LayerLink toolbarLayerLink = LayerLink();
+      await tester.pumpWidget(MaterialApp(
+        home: Column(
+          key: column,
+          children: <Widget>[
+            CompositedTransformTarget(
+              link: startHandleLayerLink,
+              child: const Text('start handle'),
+            ),
+            CompositedTransformTarget(
+              link: endHandleLayerLink,
+              child: const Text('end handle'),
+            ),
+            CompositedTransformTarget(
+              link: toolbarLayerLink,
+              child: const Text('toolbar'),
+            ),
+          ],
+        ),
+      ));
+
+      return SelectionOverlay(
+        context: tester.element(find.byKey(column)),
+        onSelectionHandleTapped: onSelectionHandleTapped,
+        startHandleType: TextSelectionHandleType.collapsed,
+        startHandleLayerLink: startHandleLayerLink,
+        lineHeightAtStart: 0.0,
+        onStartHandleDragStart: onStartDragStart,
+        onStartHandleDragUpdate: onStartDragUpdate,
+        onStartHandleDragEnd: onStartDragEnd,
+        endHandleType: TextSelectionHandleType.collapsed,
+        endHandleLayerLink: endHandleLayerLink,
+        lineHeightAtEnd: 0.0,
+        onEndHandleDragStart: onEndDragStart,
+        onEndHandleDragUpdate: onEndDragUpdate,
+        onEndHandleDragEnd: onEndDragEnd,
+        clipboardStatus: FakeClipboardStatusNotifier(),
+        selectionDelegate: FakeTextSelectionDelegate(),
+        selectionControls: selectionControls,
+        selectionEndpoints: const <TextSelectionPoint>[],
+        toolbarLayerLink: toolbarLayerLink,
+      );
+    }
+
+    testWidgets('can show and hide handles', (WidgetTester tester) async {
+      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: spy,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..endHandleType = TextSelectionHandleType.right
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
+      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
+
+      selectionOverlay.hideHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsNothing);
+      expect(find.byKey(spy.rightHandleKey), findsNothing);
+
+      selectionOverlay.showToolbar();
+      await tester.pump();
+      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+
+      selectionOverlay.hideToolbar();
+      await tester.pump();
+      expect(find.byKey(spy.toolBarKey), findsNothing);
+
+      selectionOverlay.showHandles();
+      selectionOverlay.showToolbar();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
+      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
+      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+
+      selectionOverlay.hide();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsNothing);
+      expect(find.byKey(spy.rightHandleKey), findsNothing);
+      expect(find.byKey(spy.toolBarKey), findsNothing);
+    });
+
+    testWidgets('only paints one collapsed handle', (WidgetTester tester) async {
+      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: spy,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.collapsed
+        ..endHandleType = TextSelectionHandleType.collapsed
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsNothing);
+      expect(find.byKey(spy.rightHandleKey), findsNothing);
+      expect(find.byKey(spy.collapsedHandleKey), findsOneWidget);
+    });
+
+    testWidgets('can change handle parameter', (WidgetTester tester) async {
+      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: spy,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..lineHeightAtStart = 10.0
+        ..endHandleType = TextSelectionHandleType.right
+        ..lineHeightAtEnd = 11.0
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      Text leftHandle = tester.widget(find.byKey(spy.leftHandleKey)) as Text;
+      Text rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
+      expect(leftHandle.data, 'height 10');
+      expect(rightHandle.data, 'height 11');
+
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.right
+        ..lineHeightAtStart = 12.0
+        ..endHandleType = TextSelectionHandleType.left
+        ..lineHeightAtEnd = 13.0;
+      await tester.pump();
+      leftHandle = tester.widget(find.byKey(spy.leftHandleKey)) as Text;
+      rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
+      expect(leftHandle.data, 'height 13');
+      expect(rightHandle.data, 'height 12');
+    });
+
+    testWidgets('can trigger selection handle onTap', (WidgetTester tester) async {
+      bool selectionHandleTapped = false;
+      void handleTapped() => selectionHandleTapped = true;
+      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        onSelectionHandleTapped: handleTapped,
+        selectionControls: spy,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..lineHeightAtStart = 10.0
+        ..endHandleType = TextSelectionHandleType.right
+        ..lineHeightAtEnd = 11.0
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
+      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
+      expect(selectionHandleTapped, isFalse);
+
+      await tester.tap(find.byKey(spy.leftHandleKey));
+      expect(selectionHandleTapped, isTrue);
+
+      selectionHandleTapped = false;
+      await tester.tap(find.byKey(spy.rightHandleKey));
+      expect(selectionHandleTapped, isTrue);
+    });
+
+    testWidgets('can trigger selection handle drag', (WidgetTester tester) async {
+      DragStartDetails? startDragStartDetails;
+      DragUpdateDetails? startDragUpdateDetails;
+      DragEndDetails? startDragEndDetails;
+      DragStartDetails? endDragStartDetails;
+      DragUpdateDetails? endDragUpdateDetails;
+      DragEndDetails? endDragEndDetails;
+      void startDragStart(DragStartDetails details) => startDragStartDetails = details;
+      void startDragUpdate(DragUpdateDetails details) => startDragUpdateDetails = details;
+      void startDragEnd(DragEndDetails details) => startDragEndDetails = details;
+      void endDragStart(DragStartDetails details) => endDragStartDetails = details;
+      void endDragUpdate(DragUpdateDetails details) => endDragUpdateDetails = details;
+      void endDragEnd(DragEndDetails details) => endDragEndDetails = details;
+      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        onStartDragStart: startDragStart,
+        onStartDragUpdate: startDragUpdate,
+        onStartDragEnd: startDragEnd,
+        onEndDragStart: endDragStart,
+        onEndDragUpdate: endDragUpdate,
+        onEndDragEnd: endDragEnd,
+        selectionControls: spy,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..lineHeightAtStart = 10.0
+        ..endHandleType = TextSelectionHandleType.right
+        ..lineHeightAtEnd = 11.0
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
+      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
+      expect(startDragStartDetails, isNull);
+      expect(startDragUpdateDetails, isNull);
+      expect(startDragEndDetails, isNull);
+      expect(endDragStartDetails, isNull);
+      expect(endDragUpdateDetails, isNull);
+      expect(endDragEndDetails, isNull);
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(spy.leftHandleKey)));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(startDragStartDetails!.globalPosition, tester.getCenter(find.byKey(spy.leftHandleKey)));
+
+      const Offset newLocation = Offset(20, 20);
+      await gesture.moveTo(newLocation);
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(startDragUpdateDetails!.globalPosition, newLocation);
+
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(startDragEndDetails, isNotNull);
+
+      final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(spy.rightHandleKey)));
+      addTearDown(gesture2.removePointer);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(endDragStartDetails!.globalPosition, tester.getCenter(find.byKey(spy.rightHandleKey)));
+
+      await gesture2.moveTo(newLocation);
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(endDragUpdateDetails!.globalPosition, newLocation);
+
+      await gesture2.up();
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(endDragEndDetails, isNotNull);
+    });
+  });
 
   group('ClipboardStatusNotifier', () {
     group('when Clipboard fails', () {
@@ -772,28 +1330,6 @@ void main() {
       });
     });
   });
-
-  group('TextSelectionControls', () {
-    test('ClipboardStatusNotifier is updated on handleCut', () async {
-      final FakeClipboardStatusNotifier clipboardStatus = FakeClipboardStatusNotifier();
-      final FakeTextSelectionDelegate delegate = FakeTextSelectionDelegate();
-      final CustomTextSelectionControls textSelectionControls = CustomTextSelectionControls();
-
-      expect(clipboardStatus.updateCalled, false);
-      textSelectionControls.handleCut(delegate, clipboardStatus);
-      expect(clipboardStatus.updateCalled, true);
-    });
-
-    test('ClipboardStatusNotifier is updated on handleCopy', () async {
-      final FakeClipboardStatusNotifier clipboardStatus = FakeClipboardStatusNotifier();
-      final FakeTextSelectionDelegate delegate = FakeTextSelectionDelegate();
-      final CustomTextSelectionControls textSelectionControls = CustomTextSelectionControls();
-
-      expect(clipboardStatus.updateCalled, false);
-      textSelectionControls.handleCopy(delegate, clipboardStatus);
-      expect(clipboardStatus.updateCalled, true);
-    });
-  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
@@ -814,8 +1350,7 @@ class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGe
 }
 
 class FakeEditableText extends EditableText {
-  FakeEditableText({Key? key}): super(
-    key: key,
+  FakeEditableText({super.key}): super(
     controller: TextEditingController(),
     focusNode: FocusNode(),
     backgroundCursorColor: Colors.white,
@@ -830,6 +1365,7 @@ class FakeEditableText extends EditableText {
 class FakeEditableTextState extends EditableTextState {
   final GlobalKey _editableKey = GlobalKey();
   bool showToolbarCalled = false;
+  bool toggleToolbarCalled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -838,6 +1374,12 @@ class FakeEditableTextState extends EditableTextState {
   bool showToolbar() {
     showToolbarCalled = true;
     return true;
+  }
+
+  @override
+  void toggleToolbar([bool hideHandles = true]) {
+    toggleToolbarCalled = true;
+    return;
   }
 
   @override
@@ -850,8 +1392,8 @@ class FakeEditableTextState extends EditableTextState {
 class FakeEditable extends LeafRenderObjectWidget {
   const FakeEditable(
     this.delegate, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final EditableTextState delegate;
 
   @override
@@ -883,12 +1425,14 @@ class FakeRenderEditable extends RenderEditable {
   @override
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     selectWordsInRangeCalled = true;
+    hasFocus = true;
   }
 
   bool selectWordEdgeCalled = false;
   @override
   void selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
+    hasFocus = true;
   }
 
   bool selectPositionAtCalled = false;
@@ -899,19 +1443,43 @@ class FakeRenderEditable extends RenderEditable {
     selectPositionAtCalled = true;
     selectPositionAtFrom = from;
     selectPositionAtTo = to;
+    hasFocus = true;
+  }
+
+  bool selectPositionCalled = false;
+  @override
+  void selectPosition({ required SelectionChangedCause cause }) {
+    selectPositionCalled = true;
+    return super.selectPosition(cause: cause);
   }
 
   bool selectWordCalled = false;
   @override
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
+    hasFocus = true;
   }
+
+  @override
+  bool hasFocus = false;
 }
 
-class CustomTextSelectionControls extends TextSelectionControls {
+class TextSelectionControlsSpy extends TextSelectionControls {
+  UniqueKey leftHandleKey = UniqueKey();
+  UniqueKey rightHandleKey = UniqueKey();
+  UniqueKey collapsedHandleKey = UniqueKey();
+  UniqueKey toolBarKey = UniqueKey();
+
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
-    throw UnimplementedError();
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+    switch (type) {
+      case TextSelectionHandleType.left:
+        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: leftHandleKey));
+      case TextSelectionHandleType.right:
+        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: rightHandleKey));
+      case TextSelectionHandleType.collapsed:
+        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: collapsedHandleKey));
+    }
   }
 
   @override
@@ -922,28 +1490,25 @@ class CustomTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    throw UnimplementedError();
+    return Text('dummy', key: toolBarKey);
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
-    throw UnimplementedError();
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
   }
 
   @override
   Size getHandleSize(double textLineHeight) {
-    throw UnimplementedError();
+    return Size(textLineHeight, textLineHeight);
   }
 }
 
 class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {
   FakeClipboardStatusNotifier() : super(value: ClipboardStatus.unknown);
-
-  @override
-  bool get disposed => false;
 
   bool updateCalled = false;
   @override

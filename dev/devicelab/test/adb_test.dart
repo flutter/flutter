@@ -40,6 +40,12 @@ void main() {
         expect(await device.isAsleep(), isFalse);
       });
 
+      test('reads Awake - samsung devices', () async {
+        FakeDevice.pretendAwakeSamsung();
+        expect(await device.isAwake(), isTrue);
+        expect(await device.isAsleep(), isFalse);
+      });
+
       test('reads Asleep', () async {
         FakeDevice.pretendAsleep();
         expect(await device.isAwake(), isFalse);
@@ -139,8 +145,6 @@ CommandArgs cmd({
   );
 }
 
-typedef ExitErrorFactory = dynamic Function();
-
 @immutable
 class CommandArgs {
   const CommandArgs({ required this.command, this.arguments, this.environment });
@@ -154,8 +158,9 @@ class CommandArgs {
 
   @override
   bool operator==(Object other) {
-    if (other.runtimeType != CommandArgs)
+    if (other.runtimeType != CommandArgs) {
       return false;
+    }
     return other is CommandArgs
         && other.command == command
         && const ListEquality<String>().equals(other.arguments, arguments)
@@ -174,7 +179,7 @@ class CommandArgs {
 }
 
 class FakeDevice extends AndroidDevice {
-  FakeDevice({required String deviceId}) : super(deviceId: deviceId);
+  FakeDevice({required super.deviceId});
 
   static String output = '';
 
@@ -187,6 +192,12 @@ class FakeDevice extends AndroidDevice {
   static void pretendAwake() {
     output = '''
       mWakefulness=Awake
+    ''';
+  }
+
+  static void pretendAwakeSamsung() {
+    output = '''
+      getWakefulnessLocked()=Awake
     ''';
   }
 

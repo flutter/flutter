@@ -16,11 +16,24 @@ class UserMessages {
   // Messages used in FlutterValidator
   String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
       'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
-  String flutterVersion(String version, String flutterRoot) =>
-      'Flutter version $version at $flutterRoot';
+  String flutterVersion(String version, String channel, String flutterRoot) =>
+      'Flutter version $version on channel $channel at $flutterRoot';
+  String get flutterUnknownChannel =>
+    'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
+    "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.";
+  String get flutterUnknownVersion =>
+    'Cannot resolve current version, possibly due to local changes.\n'
+    'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.';
   String flutterRevision(String revision, String age, String date) =>
-      'Framework revision $revision ($age), $date';
+    'Framework revision $revision ($age), $date';
   String flutterUpstreamRepositoryUrl(String url) => 'Upstream repository $url';
+  String get flutterUpstreamRepositoryUnknown =>
+    'Unknown upstream repository.\n'
+    'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.';
+  String flutterUpstreamRepositoryUrlEnvMismatch(String url) => 'Upstream repository $url is not the same as FLUTTER_GIT_URL';
+  String flutterUpstreamRepositoryUrlNonStandard(String url) =>
+    'Upstream repository $url is not a standard remote.\n'
+    'Set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
@@ -34,6 +47,9 @@ class UserMessages {
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
       'On Arch: pacman -S lib32-gcc-libs';
+  String get flutterValidatorErrorIntentional =>
+      'If those were intentional, you can disregard the above warnings; however it is '
+      'recommended to use "git" directly to perform update checks and upgrades.';
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
@@ -147,7 +163,7 @@ class UserMessages {
   String xcodeLocation(String location) => 'Xcode at $location';
 
   String xcodeOutdated(String requiredVersion) =>
-      'Flutter requires a minimum Xcode version of $requiredVersion.\n'
+      'Flutter requires Xcode $requiredVersion or higher.\n'
       'Download the latest version or update via the Mac App Store.';
 
   String xcodeRecommended(String recommendedVersion) =>
@@ -247,8 +263,8 @@ class UserMessages {
   String get flutterNoDevelopmentDevice =>
       "Unable to locate a development device; please run 'flutter doctor' "
       'for information about installing additional components.';
-  String flutterNoMatchingDevice(String deviceId) => 'No devices found with name or id '
-      "matching '$deviceId'";
+  String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
+      "matching '$deviceId'.";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>

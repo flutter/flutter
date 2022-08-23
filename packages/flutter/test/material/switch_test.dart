@@ -373,13 +373,13 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: Colors.blue[600]!.withAlpha(0x80),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.blue[600]),
+        ..circle(color: const Color(0xff2196f3)),
       reason: 'Active enabled switch should match these colors',
     );
   });
@@ -806,14 +806,14 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check the false value.
@@ -910,19 +910,18 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
 
     await tester.pumpWidget(buildApp());
@@ -931,14 +930,14 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: Colors.orange[500])
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check what happens when disabled.
@@ -1022,11 +1021,10 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Switch)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test Switch() constructor
     await tester.pumpWidget(
@@ -1050,7 +1048,7 @@ void main() {
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1072,7 +1070,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1094,7 +1092,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await tester.pumpAndSettle();
   });
@@ -1299,7 +1297,7 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x1f000000))
@@ -1313,7 +1311,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 
@@ -1321,7 +1318,7 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(
-            color: const Color(0x801e88e5),
+            color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x1f000000))
@@ -1482,7 +1479,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 
@@ -1556,7 +1552,8 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color thumbColor = Color(0xFF000000);
+    const Color activeThumbColor = Color(0xFF000000);
+    const Color inactiveThumbColor = Color(0xFF000010);
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
     const Color hoverOverlayColor = Color(0xFF000003);
@@ -1589,7 +1586,12 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) { },
-            thumbColor: MaterialStateProperty.all(thumbColor),
+            thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return activeThumbColor;
+              }
+              return inactiveThumbColor;
+            }),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
@@ -1599,6 +1601,7 @@ void main() {
       );
     }
 
+    // test inactive Switch, and overlayColor is set to null.
     await tester.pumpWidget(buildSwitch(useOverlay: false));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
@@ -1608,12 +1611,13 @@ void main() {
       paints
         ..rrect()
         ..circle(
-          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          color: inactiveThumbColor.withAlpha(kRadialReactionAlpha),
           radius: splashRadius,
         ),
       reason: 'Default inactive pressed Switch should have overlay color from thumbColor',
     );
 
+    // test active Switch, and overlayColor is set to null.
     await tester.pumpWidget(buildSwitch(active: true, useOverlay: false));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
@@ -1623,12 +1627,13 @@ void main() {
       paints
         ..rrect()
         ..circle(
-          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          color: activeThumbColor.withAlpha(kRadialReactionAlpha),
           radius: splashRadius,
         ),
       reason: 'Default active pressed Switch should have overlay color from thumbColor',
     );
 
+    // test inactive Switch with an overlayColor
     await tester.pumpWidget(buildSwitch());
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
@@ -1644,6 +1649,7 @@ void main() {
       reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
     );
 
+    // test active Switch with an overlayColor
     await tester.pumpWidget(buildSwitch(active: true));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
@@ -1677,7 +1683,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 

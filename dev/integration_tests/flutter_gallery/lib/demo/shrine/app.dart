@@ -13,7 +13,7 @@ import 'login.dart';
 import 'supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
-  const ShrineApp({Key? key}) : super(key: key);
+  const ShrineApp({super.key});
 
   @override
   State<ShrineApp> createState() => _ShrineAppState();
@@ -97,11 +97,11 @@ ThemeData _buildShrineTheme() {
 
 TextTheme _buildShrineTextTheme(TextTheme base) {
   return base.copyWith(
-    headline5: base.headline5!.copyWith(fontWeight: FontWeight.w500),
-    headline6: base.headline6!.copyWith(fontSize: 18.0),
-    caption: base.caption!.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
-    bodyText1: base.bodyText1!.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
-    button: base.button!.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
+    headlineSmall: base.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
+    titleLarge: base.titleLarge!.copyWith(fontSize: 18.0),
+    bodySmall: base.bodySmall!.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
+    bodyLarge: base.bodyLarge!.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+    labelLarge: base.labelLarge!.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
   ).apply(
     fontFamily: 'Raleway',
     displayColor: kShrineBrown900,

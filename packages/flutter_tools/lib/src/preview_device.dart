@@ -164,7 +164,7 @@ class PreviewDevice extends Device {
 
   @override
   Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
-    return _process?.kill() == true;
+    return _process?.kill() ?? false;
   }
 
   @override
@@ -181,7 +181,7 @@ class PreviewDevice extends Device {
   }
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 }

@@ -753,8 +753,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Use [nearestScope] to start at this node instead of above it.
   FocusScopeNode? get enclosingScope {
     for (final FocusNode node in ancestors) {
-      if (node is FocusScopeNode)
+      if (node is FocusScopeNode) {
         return node;
+      }
     }
     return null;
   }
@@ -1207,20 +1208,15 @@ class FocusScopeNode extends FocusNode {
   ///
   /// All parameters are optional.
   FocusScopeNode({
-    String? debugLabel,
-    FocusOnKeyEventCallback? onKeyEvent,
-    FocusOnKeyCallback? onKey,
-    bool skipTraversal = false,
-    bool canRequestFocus = true,
+    super.debugLabel,
+    super.onKeyEvent,
+    super.onKey,
+    super.skipTraversal,
+    super.canRequestFocus,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
         super(
-          debugLabel: debugLabel,
-          onKeyEvent: onKeyEvent,
-          onKey: onKey,
-          canRequestFocus: canRequestFocus,
           descendantsAreFocusable: true,
-          skipTraversal: skipTraversal,
         );
 
   @override
@@ -1324,8 +1320,9 @@ class FocusScopeNode extends FocusNode {
     assert(findFirstFocus != null);
 
     // It is possible that a previously focused child is no longer focusable.
-    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus)
+    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus) {
       _focusedChildren.removeLast();
+    }
 
     final FocusNode? focusedChild = this.focusedChild;
     // If findFirstFocus is false, then the request is to make this scope the
@@ -1461,23 +1458,22 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// When this focus manager is no longer needed, calling [dispose] on it will
   /// unregister these handlers.
   void registerGlobalHandlers() {
-    assert(ServicesBinding.instance!.keyEventManager.keyMessageHandler == null);
-    ServicesBinding.instance!.keyEventManager.keyMessageHandler = _handleKeyMessage;
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    assert(ServicesBinding.instance.keyEventManager.keyMessageHandler == null);
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = _handleKeyMessage;
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   @override
   void dispose() {
-    if (ServicesBinding.instance!.keyEventManager.keyMessageHandler == _handleKeyMessage) {
-      ServicesBinding.instance!.keyEventManager.keyMessageHandler = null;
-      GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    if (ServicesBinding.instance.keyEventManager.keyMessageHandler == _handleKeyMessage) {
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     }
     super.dispose();
   }
 
   /// Provides convenient access to the current [FocusManager] singleton from
   /// the [WidgetsBinding] instance.
-  static FocusManager get instance => WidgetsBinding.instance!.focusManager;
+  static FocusManager get instance => WidgetsBinding.instance.focusManager;
 
   /// Sets the strategy by which [highlightMode] is determined.
   ///
@@ -1520,7 +1516,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        if (WidgetsBinding.instance!.mouseTracker.mouseIsConnected) {
+        if (WidgetsBinding.instance.mouseTracker.mouseIsConnected) {
           return FocusHighlightMode.traditional;
         }
         return FocusHighlightMode.touch;
@@ -1648,6 +1644,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         expectedMode = FocusHighlightMode.touch;
         break;
       case PointerDeviceKind.mouse:
+      case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
         _lastInteractionWasTouch = false;
         expectedMode = FocusHighlightMode.traditional;
@@ -1747,7 +1744,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  // The list of autofocus requests made since the last _appyFocusChange call.
+  // The list of autofocus requests made since the last _applyFocusChange call.
   final List<_Autofocus> _pendingAutofocuses = <_Autofocus>[];
 
   // True indicates that there is an update pending.
@@ -1802,10 +1799,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         _dirtyNodes.add(_primaryFocus!);
       }
     }
-    assert(_focusDebug('Notifying ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
     for (final FocusNode node in _dirtyNodes) {
       node._notify();
     }
+    assert(_focusDebug('Notified ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
     _dirtyNodes.clear();
     if (previousFocus != _primaryFocus) {
       notifyListeners();
@@ -1839,7 +1836,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
 /// Provides convenient access to the current [FocusManager.primaryFocus] from the
 /// [WidgetsBinding] instance.
-FocusNode? get primaryFocus => WidgetsBinding.instance!.focusManager.primaryFocus;
+FocusNode? get primaryFocus => WidgetsBinding.instance.focusManager.primaryFocus;
 
 /// Returns a text representation of the current focus tree, along with the
 /// current attributes on each node.

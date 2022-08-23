@@ -71,8 +71,8 @@ class IOSSimulatorUtils {
       return <IOSSimulator>[];
     }
 
-    final List<SimDevice> connected = await _simControl.getConnectedDevices();
-    return connected.map<IOSSimulator?>((SimDevice device) {
+    final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
+    return connected.map<IOSSimulator?>((BootedSimDevice device) {
       final String? udid = device.udid;
       final String? name = device.name;
       if (udid == null) {
@@ -109,30 +109,45 @@ class SimControl {
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
-  Future<Map<String, Object?>> _list(SimControlListSection section) async {
-    // Sample output from `simctl list --json`:
+  Future<Map<String, Object?>> _listBootedDevices() async {
+    // Sample output from `simctl list available booted --json`:
     //
     // {
-    //   "devicetypes": { ... },
-    //   "runtimes": { ... },
     //   "devices" : {
-    //     "com.apple.CoreSimulator.SimRuntime.iOS-8-2" : [
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-14-0" : [
     //       {
-    //         "state" : "Shutdown",
-    //         "availability" : " (unavailable, runtime profile not found)",
-    //         "name" : "iPhone 4s",
-    //         "udid" : "1913014C-6DCB-485D-AC6B-7CD76D322F5B"
-    //       },
-    //       ...
-    //   },
-    //   "pairs": { ... },
+    //         "lastBootedAt" : "2022-07-26T01:46:23Z",
+    //         "dataPath" : "\/Users\/magder\/Library\/Developer\/CoreSimulator\/Devices\/9EC90A99-6924-472D-8CDD-4D8234AB4779\/data",
+    //         "dataPathSize" : 1620578304,
+    //         "logPath" : "\/Users\/magder\/Library\/Logs\/CoreSimulator\/9EC90A99-6924-472D-8CDD-4D8234AB4779",
+    //         "udid" : "9EC90A99-6924-472D-8CDD-4D8234AB4779",
+    //         "isAvailable" : true,
+    //         "logPathSize" : 9740288,
+    //         "deviceTypeIdentifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-11",
+    //         "state" : "Booted",
+    //         "name" : "iPhone 11"
+    //       }
+    //     ],
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-13-0" : [
+    //
+    //     ],
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-12-4" : [
+    //
+    //     ],
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-16-0" : [
+    //
+    //     ]
+    //   }
+    // }
 
     final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'simctl',
       'list',
+      'devices',
+      'booted',
+      'iOS',
       '--json',
-      section.name,
     ];
     _logger.printTrace(command.join(' '));
     final RunResult results = await _processUtils.run(command);
@@ -141,7 +156,7 @@ class SimControl {
       return <String, Map<String, Object?>>{};
     }
     try {
-      final Object? decodeResult = (json.decode(results.stdout) as Map<String, Object?>)[section.name];
+      final Object? decodeResult = (json.decode(results.stdout) as Map<String, Object?>)['devices'];
       if (decodeResult is Map<String, Object?>) {
         return decodeResult;
       }
@@ -156,28 +171,22 @@ class SimControl {
     }
   }
 
-  /// Returns a list of all available devices, both potential and connected.
-  Future<List<SimDevice>> getDevices() async {
-    final List<SimDevice> devices = <SimDevice>[];
+  /// Returns all the connected simulator devices.
+  Future<List<BootedSimDevice>> getConnectedDevices() async {
+    final List<BootedSimDevice> devices = <BootedSimDevice>[];
 
-    final Map<String, Object?> devicesSection = await _list(SimControlListSection.devices);
+    final Map<String, Object?> devicesSection = await _listBootedDevices();
 
     for (final String deviceCategory in devicesSection.keys) {
       final Object? devicesData = devicesSection[deviceCategory];
       if (devicesData != null && devicesData is List<Object?>) {
         for (final Map<String, Object?> data in devicesData.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>()) {
-          devices.add(SimDevice(deviceCategory, data));
+          devices.add(BootedSimDevice(deviceCategory, data));
         }
       }
     }
 
     return devices;
-  }
-
-  /// Returns all the connected simulator devices.
-  Future<List<SimDevice>> getConnectedDevices() async {
-    final List<SimDevice> simDevices = await getDevices();
-    return simDevices.where((SimDevice device) => device.isBooted).toList();
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
@@ -267,65 +276,25 @@ class SimControl {
   }
 }
 
-/// Enumerates all data sections of `xcrun simctl list --json` command.
-class SimControlListSection {
-  const SimControlListSection._(this.name);
 
-  final String name;
-
-  static const SimControlListSection devices = SimControlListSection._('devices');
-  static const SimControlListSection devicetypes = SimControlListSection._('devicetypes');
-  static const SimControlListSection runtimes = SimControlListSection._('runtimes');
-  static const SimControlListSection pairs = SimControlListSection._('pairs');
-}
-
-/// A simulated device type.
-///
-/// Simulated device types can be listed using the command
-/// `xcrun simctl list devicetypes`.
-class SimDeviceType {
-  SimDeviceType(this.name, this.identifier);
-
-  /// The name of the device type.
-  ///
-  /// Examples:
-  ///
-  ///     "iPhone 6s"
-  ///     "iPhone 6 Plus"
-  final String name;
-
-  /// The identifier of the device type.
-  ///
-  /// Examples:
-  ///
-  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6s"
-  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6-Plus"
-  final String identifier;
-}
-
-class SimDevice {
-  SimDevice(this.category, this.data);
+class BootedSimDevice {
+  BootedSimDevice(this.category, this.data);
 
   final String category;
   final Map<String, Object?> data;
 
-  String? get state => data['state']?.toString();
-  String? get availability => data['availability']?.toString();
   String? get name => data['name']?.toString();
   String? get udid => data['udid']?.toString();
-
-  bool get isBooted => state == 'Booted';
 }
 
 class IOSSimulator extends Device {
   IOSSimulator(
-    String id, {
+    super.id, {
       required this.name,
       required this.simulatorCategory,
       required SimControl simControl,
     }) : _simControl = simControl,
          super(
-           id,
            category: Category.mobile,
            platformType: PlatformType.ios,
            ephemeral: true,
@@ -339,7 +308,7 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: globals.fs);
   }
 
@@ -473,7 +442,8 @@ class IOSSimulator extends Device {
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
         if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
-        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}'
+        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
+        if (route != null) '--route=$route',
       ],
     ];
 
@@ -757,8 +727,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   // Match the log prefix (in order to shorten it):
-  // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+  // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
+  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
   static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---

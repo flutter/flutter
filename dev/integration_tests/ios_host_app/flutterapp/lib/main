@@ -166,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: const TextStyle(fontSize: 17.0),
                   ),
                 ),
-                const FlatButton(
+                const TextButton(
                   child: Text('POP'),
                   onPressed: SystemNavigator.pop,
                 ),

@@ -10,6 +10,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
+import 'package:flutter_driver/src/common/text_input_action.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
@@ -108,7 +109,7 @@ void main() {
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       expect(log, <String>[
         'VMServiceFlutterDriver: >>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}'
+        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}',
       ]);
     });
 
@@ -351,6 +352,16 @@ void main() {
       });
     });
 
+    group('sendTextInputAction', () {
+      test('sends the SendTextInputAction command with action done', () async {
+        fakeClient.responses['send_text_input_action'] = makeFakeResponse(<String, dynamic>{});
+        await driver.sendTextInputAction(TextInputAction.done, timeout: _kTestTimeout);
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: send_text_input_action, timeout: $_kSerializedTestTimeout, action: done}',
+        ]);
+      });
+    });
+
     group('getLayerTree', () {
       test('sends the getLayerTree command', () async {
         fakeClient.responses['get_layer_tree'] = makeFakeResponse(<String, String>{
@@ -587,7 +598,7 @@ void main() {
           'setVMTimelineFlags [Dart, GC, Compiler]',
           'getFlagList',
           'setVMTimelineFlags []',
-          'getVMTimeline null null'
+          'getVMTimeline null null',
         ]);
 
         expect(timeline.events!.single.name, 'test event');
@@ -679,7 +690,7 @@ void main() {
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: set_frame_sync, enabled: false}',
           'ext.flutter.driver {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-          'ext.flutter.driver {command: set_frame_sync, enabled: true}'
+          'ext.flutter.driver {command: set_frame_sync, enabled: true}',
         ]);
       });
     });
@@ -1220,16 +1231,5 @@ class FakeVM extends Fake implements vms.VM {
 vms.Isolate createFakeIsolate() => vms.Isolate(
   id: '123',
   number: '123',
-  name: null,
-  isSystemIsolate: null,
-  isolateFlags: null,
-  startTime: null,
-  runnable: null,
-  livePorts: null,
-  pauseOnExit: null,
-  pauseEvent: null,
-  libraries: null,
-  breakpoints: null,
-  exceptionPauseMode: null,
   extensionRPCs: <String>[],
 );

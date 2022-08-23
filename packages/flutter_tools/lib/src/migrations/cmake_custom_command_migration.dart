@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../cmake_project.dart';
 
@@ -11,9 +10,8 @@ import '../cmake_project.dart';
 // and special characters correctly.
 // See https://github.com/flutter/flutter/issues/67270.
 class CmakeCustomCommandMigration extends ProjectMigrator {
-  CmakeCustomCommandMigration(CmakeBasedProject project, Logger logger)
-    : _cmakeFile = project.managedCmakeFile,
-      super(logger);
+  CmakeCustomCommandMigration(CmakeBasedProject project, super.logger)
+    : _cmakeFile = project.managedCmakeFile;
 
   final File _cmakeFile;
 
@@ -62,7 +60,7 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
       //   Manually-specified variables were not used by the project:
       //    FLUTTER_TARGET_PLATFORM
       // ------------------------------
-      if (addCustomCommandOriginal?.contains('linux-x64') == true) {
+      if (addCustomCommandOriginal?.contains('linux-x64') ?? false) {
         newProjectContents = newProjectContents.replaceAll('linux-x64', r'${FLUTTER_TARGET_PLATFORM}');
       }
     }

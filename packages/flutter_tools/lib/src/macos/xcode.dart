@@ -18,11 +18,11 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 
-Version get xcodeRequiredVersion => Version(12, 3, null, text: '12.3');
+Version get xcodeRequiredVersion => Version(13, null, null);
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
-Version get xcodeRecommendedVersion => Version(13, null, null, text: '13');
+Version get xcodeRecommendedVersion => xcodeRequiredVersion;
 
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
@@ -101,6 +101,8 @@ class Xcode {
 
   Version? get currentVersion => _xcodeProjectInterpreter.version;
 
+  String? get buildVersion => _xcodeProjectInterpreter.build;
+
   String? get versionText => _xcodeProjectInterpreter.versionText;
 
   bool? _eulaSigned;
@@ -134,7 +136,7 @@ class Xcode {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
         final RunResult result = _processUtils.runSync(
-          <String>[...xcrunCommand(), 'simctl', 'list'],
+          <String>[...xcrunCommand(), 'simctl', 'list', 'devices', 'booted'],
         );
         _isSimctlInstalled = result.exitCode == 0;
       } on ProcessException {

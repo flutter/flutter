@@ -305,6 +305,34 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/foo_barDebug/app-foo_bar-debug.aab');
   });
 
+  testWithoutContext(
+      'Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 4.1', () {
+    final FlutterProject project = generateFakeAppBundle('foo_BarRelease', 'app-foo_Bar-release.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(BuildMode.release, 'Foo_Bar', treeShakeIcons: false),
+      BufferLogger.test(),
+      TestUsage(),
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_BarRelease/app-foo_Bar-release.aab');
+  });
+
+  testWithoutContext(
+      'Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 4.1', () {
+    final FlutterProject project = generateFakeAppBundle('foo_BarDebug', 'app-foo_Bar-debug.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(BuildMode.debug, 'Foo_Bar', treeShakeIcons: false),
+      BufferLogger.test(),
+      TestUsage(),
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_BarDebug/app-foo_Bar-debug.aab');
+  });
+
   testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final TestUsage testUsage = TestUsage();
@@ -329,7 +357,7 @@ void main() {
         'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
+          'cd37': 'androidGradlePluginVersion: 7.5, fileExtension: .aab',
         }),
       ),
     ));

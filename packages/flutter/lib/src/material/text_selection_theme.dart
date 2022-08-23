@@ -7,6 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties needed for text selection in [TextField] and
 /// [SelectableText] widgets.
 ///
@@ -70,8 +73,9 @@ class TextSelectionThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TextSelectionThemeData? lerp(TextSelectionThemeData? a, TextSelectionThemeData? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     assert(t != null);
     return TextSelectionThemeData(
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),
@@ -81,20 +85,20 @@ class TextSelectionThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      cursorColor,
-      selectionColor,
-      selectionHandleColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    cursorColor,
+    selectionColor,
+    selectionHandleColor,
+  );
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextSelectionThemeData
       && other.cursorColor == cursorColor
       && other.selectionColor == selectionColor
@@ -131,19 +135,39 @@ class TextSelectionThemeData with Diagnosticable {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// This widget also creates a [DefaultSelectionStyle] for its subtree with
+/// [data].
 class TextSelectionTheme extends InheritedTheme {
   /// Creates a text selection theme widget that specifies the text
   /// selection properties for all widgets below it in the widget tree.
   ///
   /// The data argument must not be null.
   const TextSelectionTheme({
-    Key? key,
+    super.key,
     required this.data,
     required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+  }) : assert(data != null),
+       _child = child,
+       // See `get child` override below.
+       super(child: const _NullWidget());
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;
+
+  // Overriding the getter to insert `DefaultSelectionStyle` into the subtree
+  // without breaking API. In general, this approach should be avoided
+  // because it relies on an implementation detail of ProxyWidget. This
+  // workaround is necessary because TextSelectionTheme is const.
+  @override
+  Widget get child {
+    return DefaultSelectionStyle(
+      selectionColor: data.selectionColor,
+      cursorColor: data.cursorColor,
+      child: _child,
+    );
+  }
+  final Widget _child;
 
   /// Returns the [data] from the closest [TextSelectionTheme] ancestor. If
   /// there is no ancestor, it returns [ThemeData.textSelectionTheme].
@@ -166,4 +190,11 @@ class TextSelectionTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TextSelectionTheme oldWidget) => data != oldWidget.data;
+}
+
+class _NullWidget extends Widget {
+  const _NullWidget();
+
+  @override
+  Element createElement() => throw UnimplementedError();
 }

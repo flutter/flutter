@@ -7,6 +7,46 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('SliverAnimatedList.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverAnimatedList(
+                  initialItemCount: itemCount,
+                  itemBuilder: (BuildContext context, int index, Animation<double> animation) => Container(
+                    key: Key('$index'),
+                    height: 2000.0,
+                  ),
+                  findChildIndexCallback: (Key key) {
+                    finderCalled = true;
+                    return null;
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   testWidgets('AnimatedList', (WidgetTester tester) async {
     Widget builder(BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
@@ -317,6 +357,67 @@ void main() {
       expect(find.text('removing'), findsNothing);
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
     });
+
+    testWidgets('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
+      final List<int> items = <int>[0, 1, 2, 3];
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                key: listKey,
+                initialItemCount: items.length,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return _StatefulListItem(
+                    key: ValueKey<int>(items[index]),
+                    index: index,
+                  );
+                },
+                findChildIndexCallback: (Key key) {
+                  final int index = items.indexOf((key as ValueKey<int>).value);
+                  return index == -1 ? null : index;
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // get all list entries in order
+      final List<Text> listEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+
+      // check that the list is rendered in the correct order
+      expect(listEntries[0].data, equals('item 0'));
+      expect(listEntries[1].data, equals('item 1'));
+      expect(listEntries[2].data, equals('item 2'));
+      expect(listEntries[3].data, equals('item 3'));
+
+
+      // delete one item
+      listKey.currentState?.removeItem(0, (BuildContext context, Animation<double> animation) {
+        return Container();
+      });
+
+      // delete from list
+      items.removeAt(0);
+
+      // reorder list
+      items.insert(0, items.removeLast());
+
+      // render with new list order
+      await tester.pumpAndSettle();
+
+      // get all list entries in order
+      final List<Text> reorderedListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+
+      // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
+      expect(reorderedListEntries[0].data, equals('item 3'));
+      expect(reorderedListEntries[1].data, equals('item 1'));
+      expect(reorderedListEntries[2].data, equals('item 2'));
+    });
   });
 
   testWidgets(
@@ -387,4 +488,26 @@ void main() {
 
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
+}
+
+
+class _StatefulListItem extends StatefulWidget {
+  const _StatefulListItem({
+    super.key,
+    required this.index,
+  });
+
+  final int index;
+
+  @override
+  _StatefulListItemState createState() => _StatefulListItemState();
+}
+
+class _StatefulListItemState extends State<_StatefulListItem> {
+  late final int number = widget.index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('item $number');
+  }
 }

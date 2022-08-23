@@ -88,10 +88,9 @@ const Map<String, Set<String>> _materialActions = <String, Set<String>>{
 
 class _ChipsTile extends StatelessWidget {
   const _ChipsTile({
-    Key? key,
     this.label,
     this.children,
-  }) : super(key: key);
+  });
 
   final String? label;
   final List<Widget>? children;
@@ -125,7 +124,7 @@ class _ChipsTile extends StatelessWidget {
                 alignment: Alignment.center,
                 constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
                 padding: const EdgeInsets.all(8.0),
-                child: Text('None', style: Theme.of(context).textTheme.caption!.copyWith(fontStyle: FontStyle.italic)),
+                child: Text('None', style: Theme.of(context).textTheme.bodySmall!.copyWith(fontStyle: FontStyle.italic)),
               ),
             ),
         ],
@@ -135,7 +134,7 @@ class _ChipsTile extends StatelessWidget {
 }
 
 class ChipDemo extends StatefulWidget {
-  const ChipDemo({Key? key}) : super(key: key);
+  const ChipDemo({super.key});
 
   static const String routeName = '/material/chip';
 
@@ -319,7 +318,7 @@ class _ChipDemoState extends State<ChipDemo> {
         child: Center(
           child: Text(
             _createResult(),
-            style: theme.textTheme.headline6,
+            style: theme.textTheme.titleLarge,
           ),
         ),
       ),
@@ -348,7 +347,12 @@ class _ChipDemoState extends State<ChipDemo> {
                 borderRadius: BorderRadius.circular(10.0),
               ))
             : theme.chipTheme,
-        child: Scrollbar(child: ListView(children: tiles)),
+        child: Scrollbar(
+          child: ListView(
+            primary: true,
+            children: tiles,
+          )
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(_reset),

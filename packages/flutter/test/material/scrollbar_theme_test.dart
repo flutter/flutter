@@ -81,7 +81,6 @@ void main() {
     // Hover scrollbar behavior
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
@@ -173,7 +172,6 @@ void main() {
     // Hover scrollbar behavior
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 15.0));
     await tester.pumpAndSettle();
 
@@ -181,12 +179,12 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(770.0, 10.0, 800.0, 590.0),
+          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 600.0),
           color: const Color(0xff000000),
         )
         ..line(
-          p1: const Offset(770.0, 10.0),
-          p2: const Offset(770.0, 590.0),
+          p1: const Offset(770.0, 00.0),
+          p2: const Offset(770.0, 600.0),
           strokeWidth: 1.0,
           color: const Color(0xffffeb3b),
         )
@@ -320,7 +318,7 @@ void main() {
           child: Scrollbar(
             thickness: thickness,
             hoverThickness: hoverThickness,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             showTrackOnHover: showTrackOnHover,
             radius: radius,
             controller: scrollController,
@@ -371,7 +369,6 @@ void main() {
     // Hover scrollbar behavior
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
@@ -576,14 +573,14 @@ void main() {
 
   testWidgets('ScrollbarThemeData.trackVisibility test', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    bool? _getTrackVisibility(Set<MaterialState> states) {
+    bool? getTrackVisibility(Set<MaterialState> states) {
       return true;
     }
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData().copyWith(
           scrollbarTheme: _scrollbarTheme(
-            trackVisibility: MaterialStateProperty.resolveWith(_getTrackVisibility),
+            trackVisibility: MaterialStateProperty.resolveWith(getTrackVisibility),
           ),
         ),
         home: ScrollConfiguration(
@@ -637,7 +634,7 @@ void main() {
     ScrollbarThemeData(
       thickness: MaterialStateProperty.resolveWith(_getThickness),
       showTrackOnHover: true,
-      isAlwaysShown: true,
+      thumbVisibility: MaterialStateProperty.resolveWith(_getThumbVisibility),
       radius: const Radius.circular(3.0),
       thumbColor: MaterialStateProperty.resolveWith(_getThumbColor),
       trackColor: MaterialStateProperty.resolveWith(_getTrackColor),
@@ -653,9 +650,9 @@ void main() {
       .toList();
 
     expect(description, <String>[
+      "thumbVisibility: Instance of '_MaterialStatePropertyWith<bool?>'",
       "thickness: Instance of '_MaterialStatePropertyWith<double?>'",
       'showTrackOnHover: true',
-      'isAlwaysShown: true',
       'radius: Radius.circular(3.0)',
       "thumbColor: Instance of '_MaterialStatePropertyWith<Color?>'",
       "trackColor: Instance of '_MaterialStatePropertyWith<Color?>'",
@@ -684,7 +681,7 @@ ScrollbarThemeData _scrollbarTheme({
   MaterialStateProperty<double?>? thickness,
   MaterialStateProperty<bool?>? trackVisibility,
   bool showTrackOnHover = true,
-  bool isAlwaysShown = true,
+  MaterialStateProperty<bool?>? thumbVisibility,
   Radius radius = const Radius.circular(6.0),
   MaterialStateProperty<Color?>? thumbColor,
   MaterialStateProperty<Color?>? trackColor,
@@ -697,7 +694,7 @@ ScrollbarThemeData _scrollbarTheme({
     thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
     trackVisibility: trackVisibility,
     showTrackOnHover: showTrackOnHover,
-    isAlwaysShown: isAlwaysShown,
+    thumbVisibility: thumbVisibility,
     radius: radius,
     thumbColor: thumbColor ?? MaterialStateProperty.resolveWith(_getThumbColor),
     trackColor: trackColor ?? MaterialStateProperty.resolveWith(_getTrackColor),
@@ -709,27 +706,34 @@ ScrollbarThemeData _scrollbarTheme({
 }
 
 double? _getThickness(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return 20.0;
+  }
   return 10.0;
 }
 
+bool? _getThumbVisibility(Set<MaterialState> states) => true;
+
 Color? _getThumbColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.dragged))
+  if (states.contains(MaterialState.dragged)) {
     return Colors.red;
-  if (states.contains(MaterialState.hovered))
+  }
+  if (states.contains(MaterialState.hovered)) {
     return Colors.blue;
+  }
   return Colors.green;
 }
 
 Color? _getTrackColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return Colors.black;
+  }
   return null;
 }
 
 Color? _getTrackBorderColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered))
+  if (states.contains(MaterialState.hovered)) {
     return Colors.yellow;
+  }
   return null;
 }

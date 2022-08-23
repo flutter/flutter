@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -58,6 +59,15 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 /// arguments can be used to override the segmented control's colors from
 /// [CupertinoTheme] defaults.
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoSegmentedControl] with an enum type.
+///
+/// The callback provided to [onValueChanged] should update the state of
+/// the parent [StatefulWidget] using the [State.setState] method, so that
+/// the parent gets rebuilt; for example:
+///
+/// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_segmented_control.0.dart **
+/// {@end-tool}
 /// See also:
 ///
 ///  * [CupertinoSegmentedControl], a segmented control widget in the style used
@@ -80,7 +90,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   /// appear as selected. The [groupValue] must be either null or one of the keys
   /// in the [children] map.
   CupertinoSegmentedControl({
-    Key? key,
+    super.key,
     required this.children,
     required this.onValueChanged,
     this.groupValue,
@@ -95,8 +105,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
        assert(
          groupValue == null || children.keys.any((T child) => child == groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
-       ),
-       super(key: key);
+       );
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -118,44 +127,6 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   /// The segmented control passes the newly selected widget's associated key
   /// to the callback but does not actually change state until the parent
   /// widget rebuilds the segmented control with the new [groupValue].
-  ///
-  /// The callback provided to [onValueChanged] should update the state of
-  /// the parent [StatefulWidget] using the [State.setState] method, so that
-  /// the parent gets rebuilt; for example:
-  ///
-  /// {@tool snippet}
-  ///
-  /// ```dart
-  /// class SegmentedControlExample extends StatefulWidget {
-  ///   const SegmentedControlExample({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///   State createState() => SegmentedControlExampleState();
-  /// }
-  ///
-  /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
-  ///   final Map<int, Widget> children = const <int, Widget>{
-  ///     0: Text('Child 1'),
-  ///     1: Text('Child 2'),
-  ///   };
-  ///
-  ///   late int currentValue;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return CupertinoSegmentedControl<int>(
-  ///       children: children,
-  ///       onValueChanged: (int newValue) {
-  ///         setState(() {
-  ///           currentValue = newValue;
-  ///         });
-  ///       },
-  ///       groupValue: currentValue,
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
   final ValueChanged<T> onValueChanged;
 
   /// The color used to fill the backgrounds of unselected widgets and as the
@@ -332,8 +303,9 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   }
 
   void _onTap(T currentKey) {
-    if (currentKey != _pressedKey)
+    if (currentKey != _pressedKey) {
       return;
+    }
     if (currentKey != widget.groupValue) {
       widget.onValueChanged(currentKey);
     }
@@ -341,27 +313,32 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   }
 
   Color? getTextColor(int index, T currentKey) {
-    if (_selectionControllers[index].isAnimating)
+    if (_selectionControllers[index].isAnimating) {
       return _textColorTween.evaluate(_selectionControllers[index]);
-    if (widget.groupValue == currentKey)
+    }
+    if (widget.groupValue == currentKey) {
       return _unselectedColor;
+    }
     return _selectedColor;
   }
 
   Color? getBackgroundColor(int index, T currentKey) {
-    if (_selectionControllers[index].isAnimating)
+    if (_selectionControllers[index].isAnimating) {
       return _childTweens[index].evaluate(_selectionControllers[index]);
-    if (widget.groupValue == currentKey)
+    }
+    if (widget.groupValue == currentKey) {
       return _selectedColor;
-    if (_pressedKey == currentKey)
+    }
+    if (_pressedKey == currentKey) {
       return _pressedColor;
+    }
     return _unselectedColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _gestureChildren = <Widget>[];
-    final List<Color> _backgroundColors = <Color>[];
+    final List<Widget> gestureChildren = <Widget>[];
+    final List<Color> backgroundColors = <Color>[];
     int index = 0;
     int? selectedIndex;
     int? pressedIndex;
@@ -380,40 +357,43 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
         child: widget.children[currentKey],
       );
 
-      child = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (TapDownDetails event) {
-          _onTapDown(currentKey);
-        },
-        onTapCancel: _onTapCancel,
-        onTap: () {
-          _onTap(currentKey);
-        },
-        child: IconTheme(
-          data: iconTheme,
-          child: DefaultTextStyle(
-            style: textStyle,
-            child: Semantics(
-              button: true,
-              inMutuallyExclusiveGroup: true,
-              selected: widget.groupValue == currentKey,
-              child: child,
+      child = MouseRegion(
+        cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (TapDownDetails event) {
+            _onTapDown(currentKey);
+          },
+          onTapCancel: _onTapCancel,
+          onTap: () {
+            _onTap(currentKey);
+          },
+          child: IconTheme(
+            data: iconTheme,
+            child: DefaultTextStyle(
+              style: textStyle,
+              child: Semantics(
+                button: true,
+                inMutuallyExclusiveGroup: true,
+                selected: widget.groupValue == currentKey,
+                child: child,
+              ),
             ),
           ),
         ),
       );
 
-      _backgroundColors.add(getBackgroundColor(index, currentKey)!);
-      _gestureChildren.add(child);
+      backgroundColors.add(getBackgroundColor(index, currentKey)!);
+      gestureChildren.add(child);
       index += 1;
     }
 
     final Widget box = _SegmentedControlRenderWidget<T>(
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
-      backgroundColors: _backgroundColors,
+      backgroundColors: backgroundColors,
       borderColor: _borderColor!,
-      children: _gestureChildren,
+      children: gestureChildren,
     );
 
     return Padding(
@@ -428,16 +408,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 
 class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   _SegmentedControlRenderWidget({
-    Key? key,
-    List<Widget> children = const <Widget>[],
+    super.key,
+    super.children,
     required this.selectedIndex,
     required this.pressedIndex,
     required this.backgroundColors,
     required this.borderColor,
-  }) : super(
-          key: key,
-          children: children,
-        );
+  });
 
   final int? selectedIndex;
   final int? pressedIndex;

@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Linux.
 ///
@@ -30,6 +32,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     this.keyCode = 0,
     this.modifiers = 0,
     required this.isDown,
+    this.specifiedLogicalKey,
   }) : assert(scanCode != null),
        assert(unicodeScalarValues != null),
        assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0),
@@ -70,6 +73,15 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// Whether or not this key event is a key down (true) or key up (false).
   final bool isDown;
 
+  /// A logical key specified by the embedding that should be used instead of
+  /// deriving from raw data.
+  ///
+  /// The GTK embedding detects the keyboard layout and maps some keys to
+  /// logical keys in a way that can not be derived from per-key information.
+  ///
+  /// This is not part of the native GTK key event.
+  final int? specifiedLogicalKey;
+
   @override
   String get keyLabel => unicodeScalarValues == 0 ? '' : String.fromCharCode(unicodeScalarValues);
 
@@ -78,6 +90,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
+    if (specifiedLogicalKey != null) {
+      final int key = specifiedLogicalKey!;
+      return LogicalKeyboardKey.findKeyByKeyId(key) ?? LogicalKeyboardKey(key);
+    }
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
@@ -126,14 +142,17 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
     properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
     properties.add(DiagnosticsProperty<bool>('isDown', isDown));
+    properties.add(DiagnosticsProperty<int?>('specifiedLogicalKey', specifiedLogicalKey, defaultValue: null));
   }
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataLinux
         && other.keyHelper.runtimeType == keyHelper.runtimeType
         && other.unicodeScalarValues == unicodeScalarValues
@@ -144,7 +163,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     keyHelper.runtimeType,
     unicodeScalarValues,
     scanCode,

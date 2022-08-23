@@ -11,7 +11,6 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import '../common.dart';
 import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
@@ -127,14 +126,15 @@ void copy(File sourceFile, Directory targetDirectory, {String? name}) {
 }
 
 void recursiveCopy(Directory source, Directory target) {
-  if (!target.existsSync())
+  if (!target.existsSync()) {
     target.createSync();
+  }
 
   for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
-    if (entity is Directory && !entity.path.contains('.dart_tool'))
+    if (entity is Directory && !entity.path.contains('.dart_tool')) {
       recursiveCopy(entity, Directory(path.join(target.path, name)));
-    else if (entity is File) {
+    } else if (entity is File) {
       final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
       // Preserve executable bit
@@ -195,8 +195,9 @@ void section(String title) {
     title = '╡ ••• $title ••• ╞';
     final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
     output = '$line$title$line';
-    if (output.length == 79)
+    if (output.length == 79) {
       output += '═';
+    }
   }
   print('\n\n$output\n');
 }
@@ -210,10 +211,12 @@ Future<String> getDartVersion() async {
   //   Dart VM version: 1.17.0-dev.2.0 (Tue May  3 12:14:52 2016) on "macos_x64"
   // to:
   //   1.17.0-dev.2.0
-  if (version.contains('('))
+  if (version.contains('(')) {
     version = version.substring(0, version.indexOf('(')).trim();
-  if (version.contains(':'))
+  }
+  if (version.contains(':')) {
     version = version.substring(version.indexOf(':') + 1).trim();
+  }
 
   return version.replaceAll('"', "'");
 }
@@ -296,8 +299,9 @@ Future<Process> startProcess(
 }
 
 Future<void> forceQuitRunningProcesses() async {
-  if (_runningProcesses.isEmpty)
+  if (_runningProcesses.isEmpty) {
     return;
+  }
 
   // Give normally quitting processes a chance to report their exit code.
   await Future<void>.delayed(const Duration(seconds: 1));
@@ -355,8 +359,9 @@ Future<int> _execute(
   );
   final int exitCode = await process.exitCode;
 
-  if (exitCode != 0 && !canFail)
+  if (exitCode != 0 && !canFail) {
     fail('Executable "$executable" failed with exit code $exitCode.');
+  }
 
   return exitCode;
 }
@@ -471,15 +476,40 @@ Future<int> flutter(String command, {
     canFail: canFail, environment: environment);
 }
 
+/// Starts a Flutter subprocess.
+///
+/// The first argument is the flutter command to run.
+///
+/// The second argument is the list of arguments to provide on the command line.
+/// This argument can be null, indicating no arguments (same as the empty list).
+///
+/// The `environment` argument can be provided to configure environment variables
+/// that will be made available to the subprocess. The `BOT` environment variable
+/// is always set and overrides any value provided in the `environment` argument.
+/// The `isBot` argument controls the value of the `BOT` variable. It will either
+/// be "true", if `isBot` is true (the default), or "false" if it is false.
+///
+/// The `isBot` argument controls whether the `BOT` environment variable is set
+/// to `true` or `false` and is used by the `flutter` tool to determine how
+/// verbose to be and whether to enable analytics by default.
+///
+/// Information regarding the execution of the subprocess is printed to the
+/// console.
+///
+/// The actual process executes asynchronously. A handle to the subprocess is
+/// returned in the form of a [Future] that completes to a [Process] object.
 Future<Process> startFlutter(String command, {
   List<String> options = const <String>[],
   Map<String, String> environment = const <String, String>{},
+  bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
 }) {
+  assert(isBot != null);
   final List<String> args = flutterCommandArgs(command, options);
   return startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     args,
     environment: environment,
+    isBot: isBot,
   );
 }
 
@@ -521,8 +551,9 @@ Future<String?> findJavaHome() async {
       'Java binary at: ',
       from: await evalFlutter('doctor', options: <String>['-v']),
     );
-    if (hits.isEmpty)
+    if (hits.isEmpty) {
       return null;
+    }
     final String javaBinary = hits.first
         .split(': ')
         .last;
@@ -555,24 +586,29 @@ void cd(dynamic directory) {
     throw FileSystemException('Unsupported directory type ${directory.runtimeType}', directory.toString());
   }
 
-  if (!d.existsSync())
+  if (!d.existsSync()) {
     throw FileSystemException('Cannot cd into directory that does not exist', d.toString());
+  }
 }
 
 Directory get flutterDirectory => Directory.current.parent.parent;
 
+Directory get openpayDirectory => Directory(requireEnvVar('OPENPAY_CHECKOUT_PATH'));
+
 String requireEnvVar(String name) {
   final String? value = Platform.environment[name];
 
-  if (value == null)
+  if (value == null) {
     fail('$name environment variable is missing. Quitting.');
+  }
 
   return value!;
 }
 
 T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
-  if (!map.containsKey(propertyName))
+  if (!map.containsKey(propertyName)) {
     fail('Configuration property not found: $propertyName');
+  }
   final T result = map[propertyName] as T;
   return result;
 }
@@ -608,26 +644,36 @@ void checkNotNull(Object o1,
     Object o8 = 1,
     Object o9 = 1,
     Object o10 = 1]) {
-  if (o1 == null)
+  if (o1 == null) {
     throw 'o1 is null';
-  if (o2 == null)
+  }
+  if (o2 == null) {
     throw 'o2 is null';
-  if (o3 == null)
+  }
+  if (o3 == null) {
     throw 'o3 is null';
-  if (o4 == null)
+  }
+  if (o4 == null) {
     throw 'o4 is null';
-  if (o5 == null)
+  }
+  if (o5 == null) {
     throw 'o5 is null';
-  if (o6 == null)
+  }
+  if (o6 == null) {
     throw 'o6 is null';
-  if (o7 == null)
+  }
+  if (o7 == null) {
     throw 'o7 is null';
-  if (o8 == null)
+  }
+  if (o8 == null) {
     throw 'o8 is null';
-  if (o9 == null)
+  }
+  if (o9 == null) {
     throw 'o9 is null';
-  if (o10 == null)
+  }
+  if (o10 == null) {
     throw 'o10 is null';
+  }
 }
 
 /// Splits [from] into lines and selects those that contain [pattern].
@@ -729,11 +775,18 @@ void checkDirectoryNotExists(String directory) {
   }
 }
 
+/// Checks that the symlink exists, otherwise throws a [FileSystemException].
+void checkSymlinkExists(String file) {
+  if (!exists(Link(file))) {
+    throw FileSystemException('Expected symlink to exist.', file);
+  }
+}
+
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (final T value in values) {
     if (!collection.contains(value)) {
-      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
+      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
     }
   }
 }

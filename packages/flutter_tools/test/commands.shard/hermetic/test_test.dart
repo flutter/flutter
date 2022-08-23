@@ -11,6 +11,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
@@ -18,6 +19,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/runner.dart';
+import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 import 'package:meta/meta.dart';
@@ -25,6 +27,7 @@ import 'package:meta/meta.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/logging_logger.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String _pubspecContents = '''
@@ -40,23 +43,24 @@ final String _packageConfigContents = json.encode(<String, Object>{
       'name': 'test_api',
       'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
       'packageUri': 'lib/',
-      'languageVersion': '2.12'
+      'languageVersion': '2.12',
     },
     <String, String>{
       'name': 'integration_test',
       'rootUri': 'file:///path/to/flutter/packages/integration_test',
       'packageUri': 'lib/',
-      'languageVersion': '2.12'
+      'languageVersion': '2.12',
     },
   ],
   'generated': '2021-02-24T07:55:20.084834Z',
   'generator': 'pub',
-  'generatorVersion': '2.13.0-68.0.dev'
+  'generatorVersion': '2.13.0-68.0.dev',
 });
 
 void main() {
   Cache.disableLocking();
   MemoryFileSystem fs;
+  LoggingLogger logger;
 
   setUp(() {
     fs = MemoryFileSystem.test();
@@ -70,6 +74,8 @@ void main() {
     fs.directory('/package/integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
 
     fs.currentDirectory = '/package';
+
+    logger = LoggingLogger();
   });
 
   testUsingContext('Missing dependencies in pubspec',
@@ -90,6 +96,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => logger,
   });
 
   testUsingContext('Missing dependencies in pubspec for integration tests',
@@ -108,12 +115,12 @@ dev_dependencies:
           'name': 'test_api',
           'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
           'packageUri': 'lib/',
-          'languageVersion': '2.12'
+          'languageVersion': '2.12',
         },
       ],
       'generated': '2021-02-24T07:55:20.084834Z',
       'generator': 'pub',
-      'generatorVersion': '2.13.0-68.0.dev'
+      'generatorVersion': '2.13.0-68.0.dev',
     }));
     final FakePackageTest fakePackageTest = FakePackageTest();
     final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -122,7 +129,7 @@ dev_dependencies:
     expect(() => commandRunner.run(const <String>[
       'test',
       '--no-pub',
-      'integration_test'
+      'integration_test',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
@@ -315,6 +322,58 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Verbose prints phase timings', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner, verbose: true);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--',
+      'test/fake_test.dart',
+    ]);
+
+    // Expect one message for each phase.
+    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
+
+    // As we force the `runTests` command to take at least 1 ms expect at least
+    // one phase to take a non-zero amount of time.
+    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+    expect(logPhaseMessagesNonZero, isNotEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    Logger: () => logger,
+  });
+
+  testUsingContext('Non-verbose does not prints phase timings', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--',
+      'test/fake_test.dart',
+    ]);
+
+    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    expect(logPhaseMessages, isEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    Logger: () => logger,
   });
 
   testUsingContext('Pipes different args when running Integration Tests', () async {
@@ -510,7 +569,7 @@ dev_dependencies:
       await commandRunner.run(const <String>[
         'test',
         '--no-pub',
-        '--platform=chrome'
+        '--platform=chrome',
       ]);
 
       expect(await testCommand.requiredArtifacts, <DevelopmentArtifact>[DevelopmentArtifact.web]);
@@ -728,9 +787,10 @@ dev_dependencies:
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
-  FakeFlutterTestRunner(this.exitCode);
+  FakeFlutterTestRunner(this.exitCode, [this.leastRunTime]);
 
   int exitCode;
+  Duration leastRunTime;
   bool lastEnableObservatoryValue;
   DebuggingOptions lastDebuggingOptionsValue;
 
@@ -754,7 +814,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool updateGoldens = false,
     TestWatcher watcher,
     int concurrency,
-    bool buildTestAssets = false,
+    String testAssetDirectory,
     FlutterProject flutterProject,
     String icudtlPath,
     Directory coverageDirectory,
@@ -768,9 +828,15 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     int totalShards,
     Device integrationTestDevice,
     String integrationTestUserIdentifier,
+    TestTimeRecorder testTimeRecorder,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
+
+    if (leastRunTime != null) {
+      await Future<void>.delayed(leastRunTime);
+    }
+
     return exitCode;
   }
 }

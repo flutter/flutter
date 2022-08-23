@@ -2,10 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show TextRange;
+
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
 import 'text_input.dart' show TextEditingValue;
+
+export 'dart:ui' show TextRange;
+
+export 'text_editing.dart' show TextSelection;
+export 'text_input.dart' show TextEditingValue;
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
@@ -17,13 +24,21 @@ TextAffinity? _toTextAffinity(String? affinity) {
   return null;
 }
 
-/// Replaces a range of text in the original string with the text given in the
-/// replacement string.
-String _replace(String originalText, String replacementText, int start, int end) {
-  final String textStart = originalText.substring(0, start);
-  final String textEnd = originalText.substring(end, originalText.length);
-  final String newText = textStart + replacementText + textEnd;
-  return newText;
+// Replaces a range of text in the original string with the text given in the
+// replacement string.
+String _replace(String originalText, String replacementText, TextRange replacementRange) {
+  assert(replacementRange.isValid);
+  return originalText.replaceRange(replacementRange.start, replacementRange.end, replacementText);
+}
+
+// Verify that the given range is within the text.
+bool _debugTextRangeIsValid(TextRange range, String text) {
+  if (!range.isValid) {
+    return true;
+  }
+
+  return (range.start >= 0 && range.start <= text.length)
+                            && (range.end >= 0 && range.end <= text.length);
 }
 
 /// A structure representing a granular change that has occurred to the editing
@@ -119,6 +134,9 @@ abstract class TextEditingDelta {
     );
 
     if (isNonTextUpdate) {
+      assert(_debugTextRangeIsValid(newSelection, oldText), 'The selection range: $newSelection is not within the bounds of text: $oldText of length: ${oldText.length}');
+      assert(_debugTextRangeIsValid(newComposing, oldText), 'The composing range: $newComposing is not within the bounds of text: $oldText of length: ${oldText.length}');
+
       return TextEditingDeltaNonTextUpdate(
         oldText: oldText,
         selection: newSelection,
@@ -126,7 +144,13 @@ abstract class TextEditingDelta {
       );
     }
 
-    final String newText = _replace(oldText, replacementSource, replacementDestinationStart, replacementDestinationEnd);
+    assert(_debugTextRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText), 'The delta range: ${TextRange(start: replacementSourceStart, end: replacementSourceEnd)} is not within the bounds of text: $oldText of length: ${oldText.length}');
+
+    final String newText = _replace(oldText, replacementSource, TextRange(start: replacementDestinationStart, end: replacementDestinationEnd));
+
+    assert(_debugTextRangeIsValid(newSelection, newText), 'The selection range: $newSelection is not within the bounds of text: $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(newComposing, newText), 'The composing range: $newComposing is not within the bounds of text: $newText of length: ${newText.length}');
+
     final bool isEqual = oldText == newText;
 
     final bool isDeletionGreaterThanOne = (replacementDestinationEnd - replacementDestinationStart) - (replacementSourceEnd - replacementSourceStart) > 1;
@@ -239,16 +263,12 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   ///    to true.
   /// {@endtemplate}
   const TextEditingDeltaInsertion({
-    required String oldText,
+    required super.oldText,
     required this.textInserted,
     required this.insertionOffset,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-      oldText: oldText,
-      selection: selection,
-      composing: composing,
-  );
+    required super.selection,
+    required super.composing,
+  });
 
   /// The text that is being inserted into [oldText].
   final String textInserted;
@@ -262,7 +282,10 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, textInserted, insertionOffset, insertionOffset);
+    assert(_debugTextRangeIsValid(TextRange.collapsed(insertionOffset), newText), 'Applying TextEditingDeltaInsertion failed, the insertionOffset: $insertionOffset is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, textInserted, TextRange.collapsed(insertionOffset));
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaInsertion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaInsertion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -277,15 +300,11 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaDeletion({
-    required String oldText,
+    required super.oldText,
     required this.deletedRange,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-    oldText: oldText,
-    selection: selection,
-    composing: composing,
-  );
+    required super.selection,
+    required super.composing,
+  });
 
   /// The range in [oldText] that is being deleted.
   final TextRange deletedRange;
@@ -299,7 +318,10 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, '', deletedRange.start, deletedRange.end);
+    assert(_debugTextRangeIsValid(deletedRange, newText), 'Applying TextEditingDeltaDeletion failed, the deletedRange: $deletedRange is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, '', deletedRange);
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaDeletion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaDeletion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -320,16 +342,12 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaReplacement({
-    required String oldText,
+    required super.oldText,
     required this.replacementText,
     required this.replacedRange,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-    oldText: oldText,
-    selection: selection,
-    composing: composing,
-  );
+    required super.selection,
+    required super.composing,
+  });
 
   /// The new text that is replacing [replacedRange] in [oldText].
   final String replacementText;
@@ -346,7 +364,10 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, replacementText, replacedRange.start, replacedRange.end);
+    assert(_debugTextRangeIsValid(replacedRange, newText), 'Applying TextEditingDeltaReplacement failed, the replacedRange: $replacedRange is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, replacementText, replacedRange);
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaReplacement failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaReplacement failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
 }
@@ -367,20 +388,18 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaNonTextUpdate({
-    required String oldText,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-    oldText: oldText,
-    selection: selection,
-    composing: composing,
-  );
+    required super.oldText,
+    required super.selection,
+    required super.composing,
+  });
 
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
+    assert(_debugTextRangeIsValid(selection, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the selection range: $selection is not within the bounds of $oldText of length: ${oldText.length}');
+    assert(_debugTextRangeIsValid(composing, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the composing region: $composing is not within the bounds of $oldText of length: ${oldText.length}');
     return TextEditingValue(text: oldText, selection: selection, composing: composing);
   }
 }

@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the color and border properties of [ToggleButtons] widgets.
 ///
 /// Used by [ToggleButtonsTheme] to control the color and border properties
@@ -148,8 +151,9 @@ class ToggleButtonsThemeData with Diagnosticable {
   /// Linearly interpolate between two toggle buttons themes.
   static ToggleButtonsThemeData? lerp(ToggleButtonsThemeData? a, ToggleButtonsThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ToggleButtonsThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
@@ -170,32 +174,32 @@ class ToggleButtonsThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      textStyle,
-      constraints,
-      color,
-      selectedColor,
-      disabledColor,
-      fillColor,
-      focusColor,
-      highlightColor,
-      hoverColor,
-      splashColor,
-      borderColor,
-      selectedBorderColor,
-      disabledBorderColor,
-      borderRadius,
-      borderWidth,
-    );
-  }
+  int get hashCode => Object.hash(
+    textStyle,
+    constraints,
+    color,
+    selectedColor,
+    disabledColor,
+    fillColor,
+    focusColor,
+    highlightColor,
+    hoverColor,
+    splashColor,
+    borderColor,
+    selectedBorderColor,
+    disabledBorderColor,
+    borderRadius,
+    borderWidth,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ToggleButtonsThemeData
         && other.textStyle == textStyle
         && other.constraints == constraints
@@ -246,10 +250,10 @@ class ToggleButtonsTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const ToggleButtonsTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;
@@ -262,7 +266,7 @@ class ToggleButtonsTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ToggleButtonsTheme theme = ToggleButtonsTheme.of(context);
+  /// ToggleButtonsThemeData theme = ToggleButtonsTheme.of(context);
   /// ```
   static ToggleButtonsThemeData of(BuildContext context) {
     final ToggleButtonsTheme? toggleButtonsTheme = context.dependOnInheritedWidgetOfExactType<ToggleButtonsTheme>();

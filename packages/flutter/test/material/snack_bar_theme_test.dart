@@ -91,7 +91,7 @@ void main() {
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
-    expect(content.text.style, Typography.material2018().white.subtitle1);
+    expect(content.text.style, Typography.material2018().white.titleMedium);
     expect(material.color, const Color(0xFF333333));
     expect(material.elevation, 6.0);
     expect(material.shape, null);
@@ -272,7 +272,7 @@ void main() {
     expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
   });
 
-  Widget _buildApp({
+  Widget buildApp({
     required SnackBarBehavior themedBehavior,
     EdgeInsetsGeometry? margin,
     double? width,
@@ -309,7 +309,7 @@ void main() {
   testWidgets('SnackBar theme behavior will assert properly for margin use', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
     // SnackBarBehavior.floating set in theme does not assert with margin
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(buildApp(
       themedBehavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.all(8.0),
     ));
@@ -320,7 +320,7 @@ void main() {
     expect(exception, isNull);
 
     // SnackBarBehavior.fixed set in theme will still assert with margin
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(buildApp(
       themedBehavior: SnackBarBehavior.fixed,
       margin: const EdgeInsets.all(8.0),
     ));
@@ -337,7 +337,7 @@ void main() {
 
   testWidgets('SnackBar theme behavior will assert properly for width use', (WidgetTester tester) async {
     // SnackBarBehavior.floating set in theme does not assert with width
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(buildApp(
       themedBehavior: SnackBarBehavior.floating,
       width: 5.0,
     ));
@@ -348,7 +348,7 @@ void main() {
     expect(exception, isNull);
 
     // SnackBarBehavior.fixed set in theme will still assert with width
-    await tester.pumpWidget(_buildApp(
+    await tester.pumpWidget(buildApp(
       themedBehavior: SnackBarBehavior.fixed,
       width: 5.0,
     ));

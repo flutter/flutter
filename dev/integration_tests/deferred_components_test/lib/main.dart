@@ -15,7 +15,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   MyHomePageState createState() => MyHomePageState();
@@ -62,8 +62,6 @@ class MyHomePageState extends State<MyHomePage> {
           // the placeholder text.
           Future<void>.delayed(const Duration(milliseconds: 750), () {
             setState(() {
-              // See https://github.com/dart-lang/sdk/issues/46894
-              // ignore: prefer_const_constructors
               postLoadDisplayWidget = component1.LogoScreen();
             });
           });

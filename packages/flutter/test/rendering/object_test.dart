@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -10,10 +12,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
-    renderer;
-
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
     final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
@@ -155,15 +157,15 @@ void main() {
 
   test('Leader layer can switch to a different render object within one frame', () {
     List<FlutterErrorDetails?>? caughtErrors;
-    renderer.onErrors = () {
-      caughtErrors = renderer.takeAllFlutterErrorDetails().toList();
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
     };
 
     final LayerLink layerLink = LayerLink();
     // renderObject1 paints the leader layer first.
     final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
     renderObject1.layerLink = layerLink;
-    renderObject1.attach(renderer.pipelineOwner);
+    renderObject1.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
     final OffsetLayer rootLayer1 = OffsetLayer();
     rootLayer1.attach(renderObject1);
     renderObject1.scheduleInitialPaint(rootLayer1);
@@ -172,39 +174,39 @@ void main() {
     final LeaderLayerRenderObject renderObject2 = LeaderLayerRenderObject();
     final OffsetLayer rootLayer2 = OffsetLayer();
     rootLayer2.attach(renderObject2);
-    renderObject2.attach(renderer.pipelineOwner);
+    renderObject2.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
     renderObject2.scheduleInitialPaint(rootLayer2);
     renderObject2.layout(const BoxConstraints.tightForFinite());
-    renderer.pumpCompleteFrame();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
 
     // Swap the layer link to renderObject2 in the same frame
     renderObject1.layerLink = null;
     renderObject1.markNeedsPaint();
     renderObject2.layerLink = layerLink;
     renderObject2.markNeedsPaint();
-    renderer.pumpCompleteFrame();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
 
     // Swap the layer link to renderObject1 in the same frame
     renderObject1.layerLink = layerLink;
     renderObject1.markNeedsPaint();
     renderObject2.layerLink = null;
     renderObject2.markNeedsPaint();
-    renderer.pumpCompleteFrame();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
 
-    renderer.onErrors = null;
+    TestRenderingFlutterBinding.instance.onErrors = null;
     expect(caughtErrors, isNull);
   });
 
   test('Leader layer append to two render objects does crash', () {
     List<FlutterErrorDetails?>? caughtErrors;
-    renderer.onErrors = () {
-      caughtErrors = renderer.takeAllFlutterErrorDetails().toList();
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
     };
     final LayerLink layerLink = LayerLink();
     // renderObject1 paints the leader layer first.
     final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
     renderObject1.layerLink = layerLink;
-    renderObject1.attach(renderer.pipelineOwner);
+    renderObject1.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
     final OffsetLayer rootLayer1 = OffsetLayer();
     rootLayer1.attach(renderObject1);
     renderObject1.scheduleInitialPaint(rootLayer1);
@@ -214,12 +216,12 @@ void main() {
     renderObject2.layerLink = layerLink;
     final OffsetLayer rootLayer2 = OffsetLayer();
     rootLayer2.attach(renderObject2);
-    renderObject2.attach(renderer.pipelineOwner);
+    renderObject2.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
     renderObject2.scheduleInitialPaint(rootLayer2);
     renderObject2.layout(const BoxConstraints.tightForFinite());
-    renderer.pumpCompleteFrame();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
 
-    renderer.onErrors = null;
+    TestRenderingFlutterBinding.instance.onErrors = null;
     expect(caughtErrors!.isNotEmpty, isTrue);
   });
 
@@ -246,8 +248,39 @@ void main() {
     renderObject.dispose();
     expect(renderObject.debugLayer, null);
   });
+
+  test('Add composition callback works', () {
+    final ContainerLayer root = ContainerLayer();
+    final PaintingContext context = PaintingContext(root, Rect.zero);
+    bool calledBack = false;
+    final TestObservingRenderObject object = TestObservingRenderObject((Layer layer) {
+      expect(layer, root);
+      calledBack = true;
+    });
+
+    expect(calledBack, false);
+    object.paint(context, Offset.zero);
+    expect(calledBack, false);
+
+    root.buildScene(ui.SceneBuilder()).dispose();
+    expect(calledBack, true);
+  });
 }
 
+
+class TestObservingRenderObject extends RenderBox {
+  TestObservingRenderObject(this.callback);
+
+  final CompositionCallback callback;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.addCompositionCallback(callback);
+  }
+}
 // Tests the create-update cycle by pumping two frames. The first frame has no
 // prior layer and forces the painting context to create a new one. The second
 // frame reuses the layer painted on the first frame.

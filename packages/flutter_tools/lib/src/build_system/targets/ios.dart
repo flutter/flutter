@@ -13,12 +13,14 @@ import '../../build_info.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
+import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -335,7 +337,7 @@ abstract class UnpackIOS extends Target {
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
-      ...archList
+      ...archList,
     ]);
 
     if (verifyResult.exitCode != 0) {
@@ -439,12 +441,13 @@ abstract class IosAssetBundle extends Target {
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
+    ...ShaderCompiler.inputs,
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/App.framework/App'),
-    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist')
+    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist'),
   ];
 
   @override
@@ -491,6 +494,7 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -567,6 +571,30 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
   List<Target> get dependencies => const <Target>[
     AotAssemblyRelease(),
   ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    bool buildSuccess = true;
+    try {
+      await super.build(environment);
+    } catch (_) {  // ignore: avoid_catches_without_on_clauses
+      buildSuccess = false;
+      rethrow;
+    } finally {
+      // Send a usage event when the app is being archived.
+      // Since assemble is run during a `flutter build`/`run` as well as an out-of-band
+      // archive command from Xcode, this is a more accurate count than `flutter build ipa` alone.
+      if (environment.defines[kXcodeAction]?.toLowerCase() == 'install') {
+        environment.logger.printTrace('Sending archive event if usage enabled.');
+        UsageEvent(
+          'assemble',
+          'ios-archive',
+          label: buildSuccess ? 'success' : 'fail',
+          flutterUsage: environment.usage,
+        ).send();
+      }
+    }
+  }
 }
 
 /// Create an App.framework for debug iOS targets.
@@ -602,9 +630,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=9.0'
+        '-miphoneos-version-min=11.0'
       else
-        '-miphonesimulator-version-min=9.0',
+        '-miphonesimulator-version-min=11.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',

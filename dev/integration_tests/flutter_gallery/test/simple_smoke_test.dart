@@ -7,9 +7,10 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-  if (binding is LiveTestWidgetsFlutterBinding)
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is LiveTestWidgetsFlutterBinding) {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  }
 
   testWidgets('Flutter Gallery app simple smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(

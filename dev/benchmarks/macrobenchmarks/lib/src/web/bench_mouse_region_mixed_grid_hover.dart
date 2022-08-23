@@ -85,7 +85,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
   void frameDidDraw() {
     if (!started) {
       started = true;
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) async {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
         _tester.start();
         registerDidStop(_tester.stop);
       });
@@ -146,7 +146,7 @@ class _UntilNextFrame {
   static Future<void> wait() {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         _UntilNextFrame._completer!.complete(null);
         _UntilNextFrame._completer = null;
       });
@@ -167,7 +167,7 @@ class _Tester {
   TestGesture get gesture {
     return _gesture ??= TestGesture(
       dispatcher: (PointerEvent event) async {
-        RendererBinding.instance!.handlePointerEvent(event);
+        RendererBinding.instance.handlePointerEvent(event);
       },
       kind: PointerDeviceKind.mouse,
     );
@@ -181,8 +181,9 @@ class _Tester {
     final Stopwatch stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
     stopwatch.stop();
-    if (onDataPoint != null)
+    if (onDataPoint != null) {
       onDataPoint(stopwatch.elapsed);
+    }
     await _UntilNextFrame.wait();
   }
 

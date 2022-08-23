@@ -12,9 +12,14 @@ import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
 import 'shadows.dart';
+import 'switch_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
+
+// Examples can assume:
+// bool _giveVerse = true;
+// late StateSetter setState;
 
 const double _kTrackHeight = 14.0;
 const double _kTrackWidth = 33.0;
@@ -27,7 +32,7 @@ const double _kSwitchHeightCollapsed = _kSwitchMinSize;
 
 enum _SwitchType { material, adaptive }
 
-/// A material design switch.
+/// A Material Design switch.
 ///
 /// Used to toggle the on/off state of a single setting.
 ///
@@ -43,6 +48,20 @@ enum _SwitchType { material, adaptive }
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [Switch]. When the thumb slides to the other
+/// side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/material/switch/switch.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to customize [Switch] using [MaterialStateProperty]
+/// switch properties.
+///
+/// ** See code in examples/api/lib/material/switch/switch.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -50,9 +69,11 @@ enum _SwitchType { material, adaptive }
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
+///  * [MaterialStateProperty], an interface for objects that "resolve" to
+///    different values depending on a widget's material state.
 ///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatelessWidget {
-  /// Creates a material design switch.
+  /// Creates a Material Design switch.
   ///
   /// The switch itself does not maintain any state. Instead, when the state of
   /// the switch changes, the widget calls the [onChanged] callback. Most widgets
@@ -64,7 +85,7 @@ class Switch extends StatelessWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const Switch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -89,8 +110,7 @@ class Switch extends StatelessWidget {
   })  : _switchType = _SwitchType.material,
         assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -108,7 +128,7 @@ class Switch extends StatelessWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -133,8 +153,7 @@ class Switch extends StatelessWidget {
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        _switchType = _SwitchType.adaptive,
-        super(key: key);
+        _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
   ///
@@ -167,7 +186,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [thumbColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -175,7 +194,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
@@ -239,7 +258,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -258,7 +277,7 @@ class Switch extends StatelessWidget {
   /// | State    | Light theme                       | Dark theme                        |
   /// |----------|-----------------------------------|-----------------------------------|
   /// | Default  | `Colors.grey.shade50`             | `Colors.grey.shade400`            |
-  /// | Selected | [ThemeData.toggleableActiveColor] | [ThemeData.toggleableActiveColor] |
+  /// | Selected | [ColorScheme.secondary] | [ColorScheme.secondary] |
   /// | Disabled | `Colors.grey.shade400`            | `Colors.grey.shade800`            |
   final MaterialStateProperty<Color?>? thumbColor;
 
@@ -280,7 +299,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -378,7 +397,7 @@ class Switch extends StatelessWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [SwitchThemeData.overlayColor] is used. If that is
-  /// also null, then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
@@ -397,9 +416,12 @@ class Switch extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  Size _getSwitchSize(ThemeData theme) {
+  Size _getSwitchSize(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final SwitchThemeData switchTheme = SwitchTheme.of(context);
+
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
-      ?? theme.switchTheme.materialTapTargetSize
+      ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -410,7 +432,7 @@ class Switch extends StatelessWidget {
   }
 
   Widget _buildCupertinoSwitch(BuildContext context) {
-    final Size size = _getSwitchSize(Theme.of(context));
+    final Size size = _getSwitchSize(context);
     return Focus(
       focusNode: focusNode,
       autofocus: autofocus,
@@ -433,7 +455,7 @@ class Switch extends StatelessWidget {
     return _MaterialSwitch(
       value: value,
       onChanged: onChanged,
-      size: _getSwitchSize(Theme.of(context)),
+      size: _getSwitchSize(context),
       activeColor: activeColor,
       activeTrackColor: activeTrackColor,
       inactiveThumbColor: inactiveThumbColor,
@@ -489,7 +511,6 @@ class Switch extends StatelessWidget {
 
 class _MaterialSwitch extends StatefulWidget {
   const _MaterialSwitch({
-    Key? key,
     required this.value,
     required this.onChanged,
     required this.size,
@@ -514,8 +535,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.autofocus = false,
   })  : assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -598,7 +618,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         return isDark ? Colors.grey.shade800 : Colors.grey.shade400;
       }
       if (states.contains(MaterialState.selected)) {
-        return theme.toggleableActiveColor;
+        return theme.colorScheme.secondary;
       }
       return isDark ? Colors.grey.shade400 : Colors.grey.shade50;
     });
@@ -637,8 +657,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
   double get _trackInnerLength => widget.size.width - _kSwitchMinSize;
 
   void _handleDragStart(DragStartDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       reactionController.forward();
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -691,6 +712,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     }
 
     final ThemeData theme = Theme.of(context);
+    final SwitchThemeData switchTheme = SwitchTheme.of(context);
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
@@ -698,46 +720,46 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
     final Color effectiveActiveThumbColor = widget.thumbColor?.resolve(activeStates)
       ?? _widgetThumbColor.resolve(activeStates)
-      ?? theme.switchTheme.thumbColor?.resolve(activeStates)
+      ?? switchTheme.thumbColor?.resolve(activeStates)
       ?? _defaultThumbColor.resolve(activeStates);
     final Color effectiveInactiveThumbColor = widget.thumbColor?.resolve(inactiveStates)
       ?? _widgetThumbColor.resolve(inactiveStates)
-      ?? theme.switchTheme.thumbColor?.resolve(inactiveStates)
+      ?? switchTheme.thumbColor?.resolve(inactiveStates)
       ?? _defaultThumbColor.resolve(inactiveStates);
     final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
       ?? _widgetTrackColor.resolve(activeStates)
-      ?? theme.switchTheme.trackColor?.resolve(activeStates)
+      ?? switchTheme.trackColor?.resolve(activeStates)
       ?? _defaultTrackColor.resolve(activeStates);
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
       ?? _widgetTrackColor.resolve(inactiveStates)
-      ?? theme.switchTheme.trackColor?.resolve(inactiveStates)
+      ?? switchTheme.trackColor?.resolve(inactiveStates)
       ?? _defaultTrackColor.resolve(inactiveStates);
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
-      ?? theme.switchTheme.overlayColor?.resolve(focusedStates)
+      ?? switchTheme.overlayColor?.resolve(focusedStates)
       ?? theme.focusColor;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
         ?? widget.hoverColor
-        ?? theme.switchTheme.overlayColor?.resolve(hoveredStates)
+        ?? switchTheme.overlayColor?.resolve(hoveredStates)
         ?? theme.hoverColor;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? theme.switchTheme.overlayColor?.resolve(activePressedStates)
+        ?? switchTheme.overlayColor?.resolve(activePressedStates)
         ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? theme.switchTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+        ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
+        ?? effectiveInactiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? theme.switchTheme.mouseCursor?.resolve(states)
+        ?? switchTheme.mouseCursor?.resolve(states)
         ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
     });
 
@@ -763,7 +785,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..reactionColor = effectiveActivePressedOverlayColor
             ..hoverColor = effectiveHoverOverlayColor
             ..focusColor = effectiveFocusOverlayColor
-            ..splashRadius = widget.splashRadius ?? theme.switchTheme.splashRadius ?? kRadialReactionRadius
+            ..splashRadius = widget.splashRadius ?? switchTheme.splashRadius ?? kRadialReactionRadius
             ..downPosition = downPosition
             ..isFocused = states.contains(MaterialState.focused)
             ..isHovered = states.contains(MaterialState.hovered)
@@ -790,8 +812,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get activeThumbImage => _activeThumbImage;
   ImageProvider? _activeThumbImage;
   set activeThumbImage(ImageProvider? value) {
-    if (value == _activeThumbImage)
+    if (value == _activeThumbImage) {
       return;
+    }
     _activeThumbImage = value;
     notifyListeners();
   }
@@ -809,8 +832,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get inactiveThumbImage => _inactiveThumbImage;
   ImageProvider? _inactiveThumbImage;
   set inactiveThumbImage(ImageProvider? value) {
-    if (value == _inactiveThumbImage)
+    if (value == _inactiveThumbImage) {
       return;
+    }
     _inactiveThumbImage = value;
     notifyListeners();
   }
@@ -829,8 +853,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _activeTrackColor;
   set activeTrackColor(Color value) {
     assert(value != null);
-    if (value == _activeTrackColor)
+    if (value == _activeTrackColor) {
       return;
+    }
     _activeTrackColor = value;
     notifyListeners();
   }
@@ -839,8 +864,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _inactiveTrackColor;
   set inactiveTrackColor(Color value) {
     assert(value != null);
-    if (value == _inactiveTrackColor)
+    if (value == _inactiveTrackColor) {
       return;
+    }
     _inactiveTrackColor = value;
     notifyListeners();
   }
@@ -849,8 +875,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageConfiguration? _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     notifyListeners();
   }
@@ -859,8 +886,9 @@ class _SwitchPainter extends ToggleablePainter {
   TextDirection? _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     notifyListeners();
   }
@@ -869,8 +897,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _surfaceColor;
   set surfaceColor(Color value) {
     assert(value != null);
-    if (value == _surfaceColor)
+    if (value == _surfaceColor) {
       return;
+    }
     _surfaceColor = value;
     notifyListeners();
   }
@@ -916,8 +945,9 @@ class _SwitchPainter extends ToggleablePainter {
     // during paint. There's no reason to mark ourselves as needing paint if we
     // are already in the middle of painting. (In fact, doing so would trigger
     // an assert).
-    if (!_isPainting)
+    if (!_isPainting) {
       notifyListeners();
+    }
   }
 
   @override

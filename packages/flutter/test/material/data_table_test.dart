@@ -467,7 +467,11 @@ void main() {
       home: Material(child: buildTable()),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    final Finder iconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
+    );
+    Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
       equals(Matrix3.identity()),
@@ -479,7 +483,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
       equals(Matrix3.rotationZ(math.pi)),
@@ -515,7 +519,10 @@ void main() {
       home: Material(child: buildTable()),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    final Finder iconFinder = find.widgetWithIcon(Transform, Icons.arrow_upward);
+    final Finder iconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
+    );
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -565,7 +572,10 @@ void main() {
       home: Material(child: buildTable()),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    final Finder iconFinder = find.widgetWithIcon(Transform, Icons.arrow_upward);
+    final Finder iconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
+    );
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -725,10 +735,10 @@ void main() {
   });
 
   testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
-    const double _defaultHorizontalMargin = 24.0;
-    const double _defaultColumnSpacing = 56.0;
-    const double _customHorizontalMargin = 10.0;
-    const double _customColumnSpacing = 15.0;
+    const double defaultHorizontalMargin = 24.0;
+    const double defaultColumnSpacing = 56.0;
+    const double customHorizontalMargin = 10.0;
+    const double customColumnSpacing = 15.0;
     Finder cellContent;
     Finder checkbox;
     Finder padding;
@@ -793,11 +803,11 @@ void main() {
     padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
-      _defaultHorizontalMargin,
+      defaultHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _defaultHorizontalMargin / 2,
+      defaultHorizontalMargin / 2,
     );
 
     // default first column padding
@@ -805,11 +815,11 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultHorizontalMargin / 2,
+      defaultHorizontalMargin / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
 
     // default middle column padding
@@ -817,11 +827,11 @@ void main() {
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
 
     // default last column padding
@@ -829,11 +839,11 @@ void main() {
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultHorizontalMargin,
+      defaultHorizontalMargin,
     );
 
     Widget buildCustomTable({
@@ -893,8 +903,8 @@ void main() {
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(
-        horizontalMargin: _customHorizontalMargin,
-        columnSpacing: _customColumnSpacing,
+        horizontalMargin: customHorizontalMargin,
+        columnSpacing: customColumnSpacing,
       )),
     ));
 
@@ -903,11 +913,11 @@ void main() {
     padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
-      _customHorizontalMargin,
+      customHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _customHorizontalMargin / 2,
+      customHorizontalMargin / 2,
     );
 
     // custom first column padding
@@ -915,11 +925,11 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customHorizontalMargin / 2,
+      customHorizontalMargin / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
 
     // custom middle column padding
@@ -927,11 +937,11 @@ void main() {
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
 
     // custom last column padding
@@ -939,19 +949,19 @@ void main() {
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customHorizontalMargin,
+      customHorizontalMargin,
     );
   });
 
   testWidgets('DataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
-    const double _defaultHorizontalMargin = 24.0;
-    const double _defaultColumnSpacing = 56.0;
-    const double _customHorizontalMargin = 10.0;
-    const double _customColumnSpacing = 15.0;
+    const double defaultHorizontalMargin = 24.0;
+    const double defaultColumnSpacing = 56.0;
+    const double customHorizontalMargin = 10.0;
+    const double customColumnSpacing = 15.0;
     Finder cellContent;
     Finder padding;
 
@@ -1013,11 +1023,11 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultHorizontalMargin,
+      defaultHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
 
     // default middle column padding
@@ -1025,11 +1035,11 @@ void main() {
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
 
     // default last column padding
@@ -1037,11 +1047,11 @@ void main() {
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultColumnSpacing / 2,
+      defaultColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultHorizontalMargin,
+      defaultHorizontalMargin,
     );
 
     Widget buildCustomTable({
@@ -1099,8 +1109,8 @@ void main() {
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(
-        horizontalMargin: _customHorizontalMargin,
-        columnSpacing: _customColumnSpacing,
+        horizontalMargin: customHorizontalMargin,
+        columnSpacing: customColumnSpacing,
       )),
     ));
 
@@ -1109,11 +1119,11 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customHorizontalMargin,
+      customHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
 
     // custom middle column padding
@@ -1121,11 +1131,11 @@ void main() {
     cellContent = find.widgetWithText(Align, '159');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
 
     // custom last column padding
@@ -1133,11 +1143,11 @@ void main() {
     cellContent = find.widgetWithText(Align, '6.0');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customColumnSpacing / 2,
+      customColumnSpacing / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customHorizontalMargin,
+      customHorizontalMargin,
     );
   });
 
@@ -1344,7 +1354,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpAndSettle();
     expect(tester.renderObject(find.text('column1')).attached, true);
@@ -1356,10 +1365,10 @@ void main() {
   });
 
   testWidgets('DataRow renders default selected row colors', (WidgetTester tester) async {
-    final ThemeData _themeData = ThemeData.light();
+    final ThemeData themeData = ThemeData.light();
     Widget buildTable({bool selected = false}) {
       return MaterialApp(
-        theme: _themeData,
+        theme: themeData,
         home: Material(
           child: DataTable(
             columns: const <DataColumn>[
@@ -1393,7 +1402,7 @@ void main() {
     await tester.pumpWidget(buildTable(selected: true));
     expect(
       lastTableRowBoxDecoration().color,
-      _themeData.colorScheme.primary.withOpacity(0.08),
+      themeData.colorScheme.primary.withOpacity(0.08),
     );
   });
 
@@ -1401,15 +1410,15 @@ void main() {
     const Color fillColor = Color(0xFF00FF00);
     const Color checkColor = Color(0xFF0000FF);
 
-    final ThemeData _themeData = ThemeData(
-      checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.all(fillColor),
-        checkColor: MaterialStateProperty.all(checkColor),
+    final ThemeData themeData = ThemeData(
+      checkboxTheme: const CheckboxThemeData(
+        fillColor: MaterialStatePropertyAll<Color?>(fillColor),
+        checkColor: MaterialStatePropertyAll<Color?>(checkColor),
       ),
     );
     Widget buildTable() {
       return MaterialApp(
-        theme: _themeData,
+        theme: themeData,
         home: Material(
           child: DataTable(
             columns: const <DataColumn>[
@@ -1459,8 +1468,9 @@ void main() {
               selected: selected,
               color: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected))
+                  if (states.contains(MaterialState.selected)) {
                     return selectedColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1512,8 +1522,9 @@ void main() {
             DataRow(
               color: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled))
+                  if (states.contains(MaterialState.disabled)) {
                     return disabledColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1557,8 +1568,9 @@ void main() {
           DataRow(
             color: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed))
+                if (states.contains(MaterialState.pressed)) {
                   return pressedColor;
+                }
                 return Colors.transparent;
               },
             ),
@@ -1658,8 +1670,8 @@ void main() {
   });
 
   testWidgets('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
-    const double _customCheckboxHorizontalMargin = 15.0;
-    const double _customHorizontalMargin = 10.0;
+    const double customCheckboxHorizontalMargin = 15.0;
+    const double customHorizontalMargin = 10.0;
     Finder cellContent;
     Finder checkbox;
     Finder padding;
@@ -1720,8 +1732,8 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(
-        checkboxHorizontalMargin: _customCheckboxHorizontalMargin,
-        horizontalMargin: _customHorizontalMargin,
+        checkboxHorizontalMargin: customCheckboxHorizontalMargin,
+        horizontalMargin: customHorizontalMargin,
       )),
     ));
 
@@ -1730,11 +1742,11 @@ void main() {
     padding = find.ancestor(of: checkbox, matching: find.byType(Padding));
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
-      _customCheckboxHorizontalMargin,
+      customCheckboxHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _customCheckboxHorizontalMargin,
+      customCheckboxHorizontalMargin,
     );
 
     // First column padding.
@@ -1742,7 +1754,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget.
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customHorizontalMargin,
+      customHorizontalMargin,
     );
   });
 
@@ -1844,5 +1856,43 @@ void main() {
     tableBorder = table.border;
     expect(tableBorder?.bottom.width, null);
     expect(tableBorder?.top.color, null);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/100952
+  testWidgets('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 117.0,
+              child: DataTable(
+                border: TableBorder.all(width: 2, color: Colors.red),
+                columns: columns,
+                rows: rows,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Go without crashes.
+
   });
 }

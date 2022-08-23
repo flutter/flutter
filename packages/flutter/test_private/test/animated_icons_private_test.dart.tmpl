@@ -12,9 +12,10 @@
 library material_animated_icons;
 
 import 'dart:math' as math show pi;
-import 'dart:ui' show lerpDouble, Offset;
-import 'dart:ui' as ui show Paint, Path, Canvas;
+import 'dart:ui' show Offset, lerpDouble;
+import 'dart:ui' as ui show Canvas, Paint, Path;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -187,9 +188,9 @@ void main() {
       );
       painter.paint(mockCanvas, size);
       mockCanvas.verifyCallsInOrder(<MockCall>[
-        MockCall('scale', <dynamic>[1.0, 1.0]),
         MockCall('rotate', <dynamic>[math.pi]),
         MockCall('translate', <dynamic>[-48.0, -48.0]),
+        MockCall('scale', <dynamic>[1.0, 1.0]),
         MockCall.any('drawPath'),
       ]);
     });

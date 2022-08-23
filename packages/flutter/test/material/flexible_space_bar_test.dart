@@ -102,7 +102,12 @@ void main() {
     );
 
     final RenderBox clipRect = tester.renderObject(find.byType(ClipRect).first);
-    final Transform transform = tester.firstWidget(find.byType(Transform));
+    final Transform transform = tester.firstWidget(
+      find.descendant(
+        of: find.byType(FlexibleSpaceBar),
+        matching: find.byType(Transform),
+      ),
+    );
 
     // The current (200) is half way between the min (100) and max (300) and the
     // lerp values used to calculate the scale are 1 and 1.5, so we check for 1.25.
@@ -468,8 +473,8 @@ void main() {
       Rect.fromLTRB(
         0,
         height - titleFontSize - 10,
-        (width / 1.5).floorToDouble(),
-        height - 10,
+        (width / 1.5).floorToDouble() * 1.5,
+        height,
       ),
     );
   });
@@ -540,8 +545,8 @@ void main() {
       Rect.fromLTRB(
         0,
         height - titleFontSize - bottomMargin,
-        (collapsedWidth / 3).floorToDouble(),
-        height - bottomMargin,
+        (collapsedWidth / 3).floorToDouble() * 3,
+        height,
       ),
     );
   });

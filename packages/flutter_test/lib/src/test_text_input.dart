@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'binding.dart';
 import 'deprecated.dart';
 import 'test_async_utils.dart';
+import 'test_text_input_key_handler.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
@@ -106,6 +107,9 @@ class TestTextInput {
   }
   bool _isVisible = false;
 
+  // Platform specific key handler that can process unhandled keyboard events.
+  TestTextInputKeyHandler? _keyHandler;
+
   /// Resets any internal state of this object.
   ///
   /// This method is invoked by the testing framework between tests. It should
@@ -132,6 +136,7 @@ class TestTextInput {
       case 'TextInput.clearClient':
         _client = null;
         _isVisible = false;
+        _keyHandler = null;
         onCleared?.call();
         break;
       case 'TextInput.setEditingState':
@@ -139,9 +144,13 @@ class TestTextInput {
         break;
       case 'TextInput.show':
         _isVisible = true;
+        if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+          _keyHandler ??= MacOSTestTextInputKeyHandler(_client ?? -1);
+        }
         break;
       case 'TextInput.hide':
         _isVisible = false;
+        _keyHandler = null;
         break;
     }
   }
@@ -270,5 +279,95 @@ class TestTextInput {
       ),
       (ByteData? data) { /* response from framework is discarded */ },
     );
+  }
+
+  /// Simulates a scribble interaction starting.
+  Future<void> startScribbleInteraction() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.scribbleInteractionBegan',
+           <dynamic>[_client ?? -1,]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates a Scribble focus.
+  Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.focusElement',
+           <dynamic>[elementIdentifier, offset.dx, offset.dy]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates iOS asking for the list of Scribble elements during UIIndirectScribbleInteraction.
+  Future<List<List<dynamic>>> scribbleRequestElementsInRect(Rect rect) async {
+    assert(isRegistered);
+    List<List<dynamic>> response = <List<dynamic>>[];
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.requestElementsInRect',
+           <dynamic>[rect.left, rect.top, rect.width, rect.height]
+        ),
+      ),
+      (ByteData? data) {
+        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>).map((dynamic element) => element as List<dynamic>).toList();
+      },
+    );
+
+    return response;
+  }
+
+  /// Simulates iOS inserting a UITextPlaceholder during a long press with the pencil.
+  Future<void> scribbleInsertPlaceholder() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.insertTextPlaceholder',
+           <dynamic>[_client ?? -1, 0.0, 0.0]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates iOS removing a UITextPlaceholder after a long press with the pencil is released.
+  Future<void> scribbleRemovePlaceholder() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.removeTextPlaceholder',
+           <dynamic>[_client ?? -1]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Gives text input chance to respond to unhandled key down event.
+  Future<void> handleKeyDownEvent(LogicalKeyboardKey key) async {
+    await _keyHandler?.handleKeyDownEvent(key);
+  }
+
+  /// Gives text input chance to respond to unhandled key up event.
+  Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
+    await _keyHandler?.handleKeyUpEvent(key);
   }
 }

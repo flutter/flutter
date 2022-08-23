@@ -30,7 +30,7 @@ void main() {
   element.rootAncestorStateOfType(TypeMatcher<targetType>());
   element.ancestorRenderObjectOfType(TypeMatcher<targetType>());
 
-  // Changes made in https://github.com/flutter/flutter/pull/45941
+  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrameReport();
   binding.allowFirstFrameReport();
@@ -521,6 +521,129 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/96115
   Icon icon = Icons.pie_chart_outlined;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  Scrollbar scrollbar = Scrollbar(isAlwaysShown: true);
+  bool nowShowing = scrollbar.isAlwaysShown;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(isAlwaysShown: nowShowing);
+  scrollbarTheme.copyWith(isAlwaysShown: nowShowing);
+  scrollbarTheme.isAlwaysShown;
+  RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
+  nowShowing = rawScrollbar.isAlwaysShown;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  Chip chip = Chip();
+  chip = Chip(useDeleteButtonTooltip: false);
+  chip = Chip(useDeleteButtonTooltip: true);
+  chip = Chip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  chip.useDeleteButtonTooltip;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(useDeleteButtonTooltip: false);
+  inputChip = InputChip(useDeleteButtonTooltip: true);
+  inputChip = InputChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  inputChip.useDeleteButtonTooltip;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(useDeleteButtonTooltip: false);
+  rawChip = RawChip(useDeleteButtonTooltip: true);
+  rawChip = RawChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  rawChip.useDeleteButtonTooltip;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  TextSelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/105291
+  ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
+    primary: Colors.blue,
+    onPrimary: Colors.white,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle textButtonStyle = TextButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/97972
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(toggleableActiveColor: Colors.black);
+  themeData = ThemeData(
+    toggleableActiveColor: Colors.black,
+  );
+  themeData = ThemeData.raw(toggleableActiveColor: Colors.black);
+  themeData = ThemeData.raw(
+    toggleableActiveColor: Colors.black,
+  );
+  themeData = themeData.copyWith(toggleableActiveColor: Colors.black);
+  themeData = themeData.copyWith(
+    toggleableActiveColor: Colors.black,
+  );
+  themeData.toggleableActiveColor; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/109070
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(selectedRowColor: Brightness.dark);
+  themeData = ThemeData.raw(selectedRowColor: Brightness.dark);
+  themeData = themeData.copyWith(selectedRowColor: Brightness.dark);
+  themeData.selectedRowColor; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var TextTheme textTheme = TextTheme(
+    headline1: headline1Style,
+    headline2: headline2Style,
+    headline3: headline3Style,
+    headline4: headline4Style,
+    headline5: headline5Style,
+    headline6: headline6Style,
+    subtitle1: subtitle1Style,
+    subtitle2: subtitle2Style,
+    bodyText1: bodyText1Style,
+    bodyText2: bodyText2Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    overline: overlineStyle,
+  );
+  var TextTheme textTheme = TextTheme(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var TextTheme copiedTextTheme = TextTheme.copyWith(
+    headline1: headline1Style,
+    headline2: headline2Style,
+    headline3: headline3Style,
+    headline4: headline4Style,
+    headline5: headline5Style,
+    headline6: headline6Style,
+    subtitle1: subtitle1Style,
+    subtitle2: subtitle2Style,
+    bodyText1: bodyText1Style,
+    bodyText2: bodyText2Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    overline: overlineStyle,
+  );
+  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var style;
+  style = textTheme.headline1;
+  style = textTheme.headline2;
+  style = textTheme.headline3;
+  style = textTheme.headline4;
+  style = textTheme.headline5;
+  style = textTheme.headline6;
+  style = textTheme.subtitle1;
+  style = textTheme.subtitle2;
+  style = textTheme.bodyText1;
+  style = textTheme.bodyText2;
+  style = textTheme.caption;
+  style = textTheme.button;
+  style = textTheme.overline;
 
   // Changes mades in https://github.com/flutter/flutter/pull/94156
   ThemeData themeData = ThemeData();

@@ -5,9 +5,16 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+
 import 'binding.dart';
-import 'keyboard_key.dart';
 import 'raw_keyboard.dart';
+
+export 'dart:ui' show KeyData;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
 ///
@@ -205,18 +212,12 @@ abstract class KeyEvent with Diagnosticable {
 class KeyDownEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyDownEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has released a key on the keyboard.
@@ -231,16 +232,11 @@ class KeyDownEvent extends KeyEvent {
 class KeyUpEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyUpEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has been holding a key on the keyboard
@@ -256,16 +252,11 @@ class KeyUpEvent extends KeyEvent {
 class KeyRepeatEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyRepeatEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+  });
 }
 
 /// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether
@@ -387,7 +378,7 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 class HardwareKeyboard {
   /// Provides convenient access to the current [HardwareKeyboard] singleton from
   /// the [ServicesBinding] instance.
-  static HardwareKeyboard get instance => ServicesBinding.instance!.keyboard;
+  static HardwareKeyboard get instance => ServicesBinding.instance.keyboard;
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
@@ -627,25 +618,50 @@ enum KeyDataTransitMode {
   keyDataThenRawKeyData,
 }
 
-/// The assumbled information corresponding to a native key message.
+/// The assembled information converted from a native key message.
 ///
-/// While Flutter's [KeyEvent]s are created from key messages from the native
-/// platform, every native message might result in multiple [KeyEvent]s. For
-/// example, this might happen in order to synthesize missed modifier key
-/// presses or releases.
+/// Native key messages, produced by physically pressing or releasing
+/// keyboard keys, are translated into two different event streams in Flutter:
 ///
-/// A [KeyMessage] bundles all information related to a native key message
-/// together for the convenience of propagation on the [FocusNode] tree.
+///  * The [KeyEvent] stream, represented by [KeyMessage.events] (recommended).
+///  * The [RawKeyEvent] stream, represented by [KeyMessage.rawEvent] (legacy,
+///    to be deprecated).
 ///
-/// When dispatched to handlers or listeners, or propagated through the
-/// [FocusNode] tree, all handlers or listeners belonging to a node are
-/// executed regardless of their [KeyEventResult], and all results are combined
-/// into the result of the node using [combineKeyEventResults]. Empty [events]
-/// or [rawEvent] should be considered as a result of [KeyEventResult.ignored].
+/// Either the [KeyEvent] stream or the [RawKeyEvent] stream alone provides a
+/// complete description of the keyboard messages, but in different event
+/// models. Flutter is still transitioning from the legacy model to the new
+/// model, therefore it dispatches both streams simultaneously until the
+/// transition is completed. [KeyMessage] is used to bundle the
+/// stream segments of both models from a native key message together for the
+/// convenience of propagation.
 ///
-/// In very rare cases, a native key message might not result in a [KeyMessage].
-/// For example, key messages for Fn key are ignored on macOS for the
-/// convenience of cross-platform code.
+/// Typically, an application either processes [KeyMessage.events]
+/// or [KeyMessage.rawEvent], not both. For example, handling a
+/// [KeyMessage], means handling each event in [KeyMessage.events].
+///
+/// In advanced cases, a widget needs to process both streams at the same time.
+/// For example, [FocusNode] has an `onKey` that dispatches [RawKeyEvent]s and
+/// an `onKeyEvent` that dispatches [KeyEvent]s. To processes a [KeyMessage],
+/// it first calls `onKeyEvent` with each [KeyEvent] of [events], and then
+/// `onKey` with [rawEvent]. All callbacks are invoked regardless of their
+/// [KeyEventResult]. Their results are combined into the result of the node
+/// using [combineKeyEventResults].
+///
+/// ```dart
+/// void handleMessage(FocusNode node, KeyMessage message) {
+///   final List<KeyEventResult> results = <KeyEventResult>[];
+///   if (node.onKeyEvent != null) {
+///     for (final KeyEvent event in message.events) {
+///       results.add(node.onKeyEvent!(node, event));
+///     }
+///   }
+///   if (node.onKey != null && message.rawEvent != null) {
+///     results.add(node.onKey!(node, message.rawEvent!));
+///   }
+///   final KeyEventResult result = combineKeyEventResults(results);
+///   // Progress based on `result`...
+/// }
+/// ```
 @immutable
 class KeyMessage {
   /// Create a [KeyMessage] by providing all information.
@@ -719,39 +735,87 @@ class KeyEventManager {
   /// This is typically only called by [ServicesBinding].
   KeyEventManager(this._hardwareKeyboard, this._rawKeyboard);
 
-  /// The global handler for all hardware key messages of Flutter.
+  /// The global entrance which handles all key events sent to Flutter.
   ///
-  /// Key messages received from the platform are first sent to [RawKeyboard]'s
-  /// listeners and [HardwareKeyboard]'s handlers, then sent to
-  /// [keyMessageHandler], regardless of the results of [HardwareKeyboard]'s
-  /// handlers. The event results from the handlers and [keyMessageHandler] are
-  /// combined and returned to the platform. The event result is explained
-  /// below.
+  /// Typical applications use [WidgetsBinding], where this field is
+  /// set by the focus system (see `FocusManger`) on startup to a function that
+  /// dispatches incoming events to the focus system, including
+  /// `FocusNode.onKey`, `FocusNode.onKeyEvent`, and `Shortcuts`. In this case,
+  /// the application does not need to read, assign, or invoke this value.
   ///
-  /// For most common applications, which use [WidgetsBinding], this field
-  /// is set by the focus system (see `FocusManger`) on startup and should not
-  /// be change explicitly.
+  /// For advanced uses, the application can "patch" this callback. See below
+  /// for details.
+  ///
+  /// ## Handlers and event results
+  ///
+  /// Roughly speaking, Flutter processes each native key event with the
+  /// following phases:
+  ///
+  /// 1. Platform-side pre-filtering, sometimes used for IME.
+  /// 2. The key event system.
+  /// 3. The text input system.
+  /// 4. Other native components (possibly non-Flutter).
+  ///
+  /// Each phase will conclude with a boolean called an "event result". If the
+  /// result is true, this phase _handles_ the event and prevents the event
+  /// from being propagated to the next phase. This mechanism allows shortcuts
+  /// such as "Ctrl-C" to not generate a text "C" in the text field, or
+  /// shortcuts that are not handled by any components to trigger special alerts
+  /// (such as the "bonk" noise on macOS).
+  ///
+  /// In the second phase, known as "the key event system", the event is dispatched
+  /// to several destinations: [RawKeyboard]'s listeners,
+  /// [HardwareKeyboard]'s handlers, and [keyMessageHandler].
+  /// All destinations will always receive the event regardless of the handlers'
+  /// results. If any handler's result is true, then the overall result of the
+  /// second phase is true, and event propagation is stopped.
+  ///
+  /// See also:
+  ///
+  ///  * [RawKeyboard.addListener], which adds a raw keyboard listener.
+  ///  * [RawKeyboardListener], which is also implemented by adding a raw
+  ///    keyboard listener.
+  ///  * [HardwareKeyboard.addHandler], which adds a hardware keyboard handler.
+  ///
+  /// ## Advanced usages: Manual assignment or patching
   ///
   /// If you are not using the focus system to manage focus, set this
   /// attribute to a [KeyMessageHandler] that returns true if the propagation
   /// on the platform should not be continued. If this field is null, key events
-  /// will be assumed to not have been handled by Flutter.
+  /// will be assumed to not have been handled by Flutter, a result of "false".
   ///
-  /// ## Event result
+  /// Even if you are using the focus system, you might also want to do more
+  /// than the focus system allows. In these cases, you can _patch_
+  /// [keyMessageHandler] by setting it to a callback that performs your tasks
+  /// and calls the original callback in between (or not at all.)
   ///
-  /// Key messages on the platform are given to Flutter to be handled by the
-  /// engine. If they are not handled, then the platform will continue to
-  /// distribute the keys (i.e. propagate them) to other (possibly non-Flutter)
-  /// components in the application. The return value from this handler tells
-  /// the platform to either stop propagation (by returning true: "event
-  /// handled"), or pass the event on to other controls (false: "event not
-  /// handled"). Some platforms might trigger special alerts if the event
-  /// is not handled by other controls either (such as the "bonk" noise on
-  /// macOS).
+  /// Patching [keyMessageHandler] can not be reverted. You should always assume
+  /// that another component might haved patched it before you and after you.
+  /// This means that you might want to write your own global notification
+  /// manager, to which callbacks can be added and removed.
   ///
-  /// The result from [keyMessageHandler] and [HardwareKeyboard]'s handlers
-  /// are combined. If any of the handlers claim to handle the event,
-  /// the overall result will be "event handled".
+  /// You should not patch [keyMessageHandler] until the `FocusManager` has assigned
+  /// its callback. This is assured during any time within the widget lifecycle
+  /// (such as `initState`), or after calling `WidgetManager.instance`.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to process key events that are not handled by any
+  /// focus handler (such as `Shortcuts`) by patching [keyMessageHandler].
+  ///
+  /// The app prints out any key events that are not handled by the app body.
+  /// Try typing something in the first text field. These key presses are not
+  /// handled by `Shorcuts` and will be sent to the fallback handler and printed
+  /// out. Now try some text shortcuts, such as Ctrl+A. The KeyA press is
+  /// handled as a shortcut, and is not sent to the fallback handler and so is
+  /// not printed out.
+  ///
+  /// The key widget is `FallbackKeyEventRegistrar`, a necessity class to allow
+  /// reversible patching. `FallbackFocus` and `FallbackFocusNode` are also
+  /// useful to recognize the widget tree's structure. `FallbackDemo` is an
+  /// example of using them in an app.
+  ///
+  /// ** See code in examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -781,6 +845,11 @@ class KeyEventManager {
   // events are only dispatched along with the next [KeyMessage] when a
   // dispatchable [RawKeyEvent] is available.
   final List<KeyEvent> _keyEventsSinceLastMessage = <KeyEvent>[];
+
+  // When a RawKeyDownEvent is skipped ([RawKeyEventData.shouldDispatchEvent]
+  // is false), its physical key will be recorded here, so that its up event
+  // can also be properly skipped.
+  final Set<PhysicalKeyboardKey> _skippedRawKeysPressed = <PhysicalKeyboardKey>{};
 
   /// Dispatch a key data to global and leaf listeners.
   ///
@@ -859,21 +928,40 @@ class KeyEventManager {
       _rawKeyboard.addListener(_convertRawEventAndStore);
     }
     final RawKeyEvent rawEvent = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
-    // The following `handleRawKeyEvent` will call `_convertRawEventAndStore`
-    // unless the event is not dispatched.
-    bool handled = _rawKeyboard.handleRawKeyEvent(rawEvent);
 
-    for (final KeyEvent event in _keyEventsSinceLastMessage) {
-      handled = _hardwareKeyboard.handleKeyEvent(event) || handled;
-    }
-    if (_transitMode == KeyDataTransitMode.rawKeyData) {
-      assert(setEquals(_rawKeyboard.physicalKeysPressed, _hardwareKeyboard.physicalKeysPressed),
-        'RawKeyboard reported ${_rawKeyboard.physicalKeysPressed}, '
-        'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
+    bool shouldDispatch = true;
+    if (rawEvent is RawKeyDownEvent) {
+      if (!rawEvent.data.shouldDispatchEvent()) {
+        shouldDispatch = false;
+        _skippedRawKeysPressed.add(rawEvent.physicalKey);
+      } else {
+        _skippedRawKeysPressed.remove(rawEvent.physicalKey);
+      }
+    } else if (rawEvent is RawKeyUpEvent) {
+      if (_skippedRawKeysPressed.contains(rawEvent.physicalKey)) {
+        _skippedRawKeysPressed.remove(rawEvent.physicalKey);
+        shouldDispatch = false;
+      }
     }
 
-    handled = _dispatchKeyMessage(_keyEventsSinceLastMessage, rawEvent) || handled;
-    _keyEventsSinceLastMessage.clear();
+    bool handled = true;
+    if (shouldDispatch) {
+      // The following `handleRawKeyEvent` will call `_convertRawEventAndStore`
+      // unless the event is not dispatched.
+      handled = _rawKeyboard.handleRawKeyEvent(rawEvent);
+
+      for (final KeyEvent event in _keyEventsSinceLastMessage) {
+        handled = _hardwareKeyboard.handleKeyEvent(event) || handled;
+      }
+      if (_transitMode == KeyDataTransitMode.rawKeyData) {
+        assert(setEquals(_rawKeyboard.physicalKeysPressed, _hardwareKeyboard.physicalKeysPressed),
+          'RawKeyboard reported ${_rawKeyboard.physicalKeysPressed}, '
+          'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
+      }
+
+      handled = _dispatchKeyMessage(_keyEventsSinceLastMessage, rawEvent) || handled;
+      _keyEventsSinceLastMessage.clear();
+    }
 
     return <String, dynamic>{ 'handled': handled };
   }
@@ -887,9 +975,10 @@ class KeyEventManager {
     final PhysicalKeyboardKey physicalKey = rawEvent.physicalKey;
     final LogicalKeyboardKey logicalKey = rawEvent.logicalKey;
     final Set<PhysicalKeyboardKey> physicalKeysPressed = _hardwareKeyboard.physicalKeysPressed;
+    final List<KeyEvent> eventAfterwards = <KeyEvent>[];
     final KeyEvent? mainEvent;
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
-    final Duration timeStamp = ServicesBinding.instance!.currentSystemFrameTimeStamp;
+    final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
     final String? character = rawEvent.character == '' ? null : rawEvent.character;
     if (rawEvent is RawKeyDownEvent) {
       if (recordedLogicalMain == null) {
@@ -923,12 +1012,24 @@ class KeyEventManager {
       }
     }
     for (final PhysicalKeyboardKey key in physicalKeysPressed.difference(_rawKeyboard.physicalKeysPressed)) {
-      _keyEventsSinceLastMessage.add(KeyUpEvent(
-        physicalKey: key,
-        logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
-        timeStamp: timeStamp,
-        synthesized: true,
-      ));
+      if (key == physicalKey) {
+        // Somehow, a down event is dispatched but the key is absent from
+        // keysPressed. Synthesize a up event for the key, but this event must
+        // be added after the main key down event.
+        eventAfterwards.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: logicalKey,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      } else {
+        _keyEventsSinceLastMessage.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      }
     }
     for (final PhysicalKeyboardKey key in _rawKeyboard.physicalKeysPressed.difference(physicalKeysPressed)) {
       _keyEventsSinceLastMessage.add(KeyDownEvent(
@@ -938,8 +1039,10 @@ class KeyEventManager {
         synthesized: true,
       ));
     }
-    if (mainEvent != null)
+    if (mainEvent != null) {
       _keyEventsSinceLastMessage.add(mainEvent);
+    }
+    _keyEventsSinceLastMessage.addAll(eventAfterwards);
   }
 
   /// Reset the inferred platform transit mode and related states.

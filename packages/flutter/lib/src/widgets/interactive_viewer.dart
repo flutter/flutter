@@ -4,15 +4,22 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
+
+// Examples can assume:
+// late BuildContext context;
+// late Offset? _childWasTappedAt;
+// late TransformationController _transformationController;
+// Widget child = const Placeholder();
 
 /// A signature for widget builders that take a [Quad] of the current viewport.
 ///
@@ -37,15 +44,15 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 /// don't set [clipBehavior] or be sure that the InteractiveViewer widget is the
 /// size of the area that should be interactive.
 ///
-/// See [flutter-go](https://github.com/justinmc/flutter-go) for an example of
-/// robust positioning of an InteractiveViewer child that works for all screen
-/// sizes and child sizes.
-///
 /// The [child] must not be null.
 ///
 /// See also:
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
+///   * The [flutter-go demo](https://github.com/justinmc/flutter-go), which includes robust positioning of an InteractiveViewer child
+///     that works for all screen sizes and child sizes.
+///   * The [Lazy Flutter Performance Session](https://www.youtube.com/watch?v=qax_nOpgz7E), which includes the use of an InteractiveViewer to
+///     performantly view subsets of a large set of widgets using the builder constructor.
 ///
 /// {@tool dartpad}
 /// This example shows a simple Container that can be panned and zoomed.
@@ -58,7 +65,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// The [child] parameter must not be null.
   InteractiveViewer({
-    Key? key,
+    super.key,
     this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
@@ -95,8 +102,7 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite),
        ),
-       builder = null,
-       super(key: key);
+       builder = null;
 
   /// Creates an InteractiveViewer for a child that is created on demand.
   ///
@@ -106,7 +112,7 @@ class InteractiveViewer extends StatefulWidget {
   /// The [builder] parameter must not be null. See its docs for an example of
   /// using it to optimize a large child.
   InteractiveViewer.builder({
-    Key? key,
+    super.key,
     this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
@@ -143,8 +149,7 @@ class InteractiveViewer extends StatefulWidget {
                  boundaryMargin.left.isFinite),
        ),
        constrained = false,
-       child = null,
-       super(key: key);
+       child = null;
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
   /// but it will not receive gestures in these areas.
@@ -388,7 +393,7 @@ class InteractiveViewer extends StatefulWidget {
     // the point.
     final Vector3 l1P = point - l1;
     final Vector3 l1L2 = l2 - l1;
-    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0);
+    final double fraction = clampDouble(l1P.dot(l1L2) / lengthSquared, 0.0, 1.0);
     return l1 + l1L2 * fraction;
   }
 
@@ -661,7 +666,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _viewport.height / _boundaryRect.height,
       ),
     );
-    final double clampedTotalScale = totalScale.clamp(
+    final double clampedTotalScale = clampDouble(totalScale,
       widget.minScale,
       widget.maxScale,
     );
@@ -1068,13 +1073,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 // InteractiveViewer's depending on if it's using a builder or a child.
 class _InteractiveViewerBuilt extends StatelessWidget {
   const _InteractiveViewerBuilt({
-    Key? key,
     required this.child,
     required this.childKey,
     required this.clipBehavior,
     required this.constrained,
     required this.matrix,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final GlobalKey childKey;
@@ -1103,14 +1107,10 @@ class _InteractiveViewerBuilt extends StatelessWidget {
       );
     }
 
-    if (clipBehavior != Clip.none) {
-      child = ClipRect(
-        clipBehavior: clipBehavior,
-        child: child,
-      );
-    }
-
-    return child;
+    return ClipRect(
+      clipBehavior: clipBehavior,
+      child: child,
+    );
   }
 }
 
@@ -1147,7 +1147,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///
   /// ```dart
   /// @override
-  /// void build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   ///   return GestureDetector(
   ///     onTapUp: (TapUpDetails details) {
   ///       _childWasTappedAt = _transformationController.toScene(

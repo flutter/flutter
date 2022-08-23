@@ -52,7 +52,7 @@ const double _monthNavButtonsWidth = 108.0;
 ///  * [showDatePicker], which creates a Dialog that contains a
 ///    [CalendarDatePicker] and provides an optional compact view where the
 ///    user can enter a date as a line of text.
-///  * [showTimePicker], which shows a dialog that contains a material design
+///  * [showTimePicker], which shows a dialog that contains a Material Design
 ///    time picker.
 ///
 class CalendarDatePicker extends StatefulWidget {
@@ -84,7 +84,7 @@ class CalendarDatePicker extends StatefulWidget {
   /// If [selectableDayPredicate] is non-null, it must return `true` for the
   /// [initialDate].
   CalendarDatePicker({
-    Key? key,
+    super.key,
     required DateTime initialDate,
     required DateTime firstDate,
     required DateTime lastDate,
@@ -101,8 +101,7 @@ class CalendarDatePicker extends StatefulWidget {
        lastDate = DateUtils.dateOnly(lastDate),
        currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
        assert(onDateChanged != null),
-       assert(initialCalendarMode != null),
-       super(key: key) {
+       assert(initialCalendarMode != null) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -395,7 +394,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                           child: Text(
                             widget.title,
                             overflow: TextOverflow.ellipsis,
-                            style: textTheme.subtitle2?.copyWith(
+                            style: textTheme.titleSmall?.copyWith(
                               color: controlColor,
                             ),
                           ),
@@ -432,7 +431,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
 class _MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   _MonthPicker({
-    Key? key,
+    super.key,
     required this.initialMonth,
     required this.currentDate,
     required this.firstDate,
@@ -448,8 +447,7 @@ class _MonthPicker extends StatefulWidget {
        assert(lastDate != null),
        assert(!firstDate.isAfter(lastDate)),
        assert(!selectedDate.isBefore(firstDate)),
-       assert(!selectedDate.isAfter(lastDate)),
-       super(key: key);
+       assert(!selectedDate.isAfter(lastDate));
 
   /// The initial month to display.
   final DateTime initialMonth;
@@ -529,7 +527,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     super.didUpdateWidget(oldWidget);
     if (widget.initialMonth != oldWidget.initialMonth && widget.initialMonth != _currentMonth) {
       // We can't interrupt this widget build with a scroll, so do it next frame
-      WidgetsBinding.instance!.addPostFrameCallback(
+      WidgetsBinding.instance.addPostFrameCallback(
         (Duration timeStamp) => _showMonth(widget.initialMonth, jump: true),
       );
     }
@@ -578,15 +576,17 @@ class _MonthPickerState extends State<_MonthPicker> {
     // Can we use the preferred day in this month?
     if (preferredDay <= daysInMonth) {
       final DateTime newFocus = DateTime(month.year, month.month, preferredDay);
-      if (_isSelectable(newFocus))
+      if (_isSelectable(newFocus)) {
         return newFocus;
+      }
     }
 
     // Start at the 1st and take the first selectable date.
     for (int day = 1; day <= daysInMonth; day++) {
       final DateTime newFocus = DateTime(month.year, month.month, day);
-      if (_isSelectable(newFocus))
+      if (_isSelectable(newFocus)) {
         return newFocus;
+      }
     }
     return null;
   }
@@ -698,10 +698,11 @@ class _MonthPickerState extends State<_MonthPicker> {
   int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
     if (textDirection == TextDirection.rtl) {
-      if (traversalDirection == TraversalDirection.left)
+      if (traversalDirection == TraversalDirection.left) {
         traversalDirection = TraversalDirection.right;
-      else if (traversalDirection == TraversalDirection.right)
+      } else if (traversalDirection == TraversalDirection.right) {
         traversalDirection = TraversalDirection.left;
+      }
     }
     return _directionOffset[traversalDirection]!;
   }
@@ -794,10 +795,9 @@ class _MonthPickerState extends State<_MonthPicker> {
 /// what the currently focused date (if any) should be.
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
-    Key? key,
-    required Widget child,
+    required super.child,
     this.date,
-  }) : super(key: key, child: child);
+  });
 
   final DateTime? date;
 
@@ -819,7 +819,7 @@ class _FocusedDate extends InheritedWidget {
 class _DayPicker extends StatefulWidget {
   /// Creates a day picker.
   _DayPicker({
-    Key? key,
+    super.key,
     required this.currentDate,
     required this.displayedMonth,
     required this.firstDate,
@@ -835,8 +835,7 @@ class _DayPicker extends StatefulWidget {
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
        assert(!selectedDate.isBefore(firstDate)),
-       assert(!selectedDate.isAfter(lastDate)),
-       super(key: key);
+       assert(!selectedDate.isAfter(lastDate));
 
   /// The currently selected date.
   ///
@@ -907,19 +906,18 @@ class _DayPickerState extends State<_DayPicker> {
   ///
   /// Examples:
   ///
-  /// ```
-  /// ┌ Sunday is the first day of week in the US (en_US)
-  /// |
-  /// S M T W T F S  <-- the returned list contains these widgets
-  /// _ _ _ _ _ 1 2
-  /// 3 4 5 6 7 8 9
+  ///     ┌ Sunday is the first day of week in the US (en_US)
+  ///     |
+  ///     S M T W T F S  ← the returned list contains these widgets
+  ///     _ _ _ _ _ 1 2
+  ///     3 4 5 6 7 8 9
   ///
-  /// ┌ But it's Monday in the UK (en_GB)
-  /// |
-  /// M T W T F S S  <-- the returned list contains these widgets
-  /// _ _ _ _ 1 2 3
-  /// 4 5 6 7 8 9 10
-  /// ```
+  ///     ┌ But it's Monday in the UK (en_GB)
+  ///     |
+  ///     M T W T F S S  ← the returned list contains these widgets
+  ///     _ _ _ _ 1 2 3
+  ///     4 5 6 7 8 9 10
+  ///
   List<Widget> _dayHeaders(TextStyle? headerStyle, MaterialLocalizations localizations) {
     final List<Widget> result = <Widget>[];
     for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
@@ -927,8 +925,9 @@ class _DayPickerState extends State<_DayPicker> {
       result.add(ExcludeSemantics(
         child: Center(child: Text(weekday, style: headerStyle)),
       ));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
+      if (i == (localizations.firstDayOfWeekIndex - 1) % 7) {
         break;
+      }
     }
     return result;
   }
@@ -938,10 +937,10 @@ class _DayPickerState extends State<_DayPicker> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final TextStyle? headerStyle = textTheme.caption?.apply(
+    final TextStyle? headerStyle = textTheme.bodySmall?.apply(
       color: colorScheme.onSurface.withOpacity(0.60),
     );
-    final TextStyle dayStyle = textTheme.caption!;
+    final TextStyle dayStyle = textTheme.bodySmall!;
     final Color enabledDayColor = colorScheme.onSurface.withOpacity(0.87);
     final Color disabledDayColor = colorScheme.onSurface.withOpacity(0.38);
     final Color selectedDayColor = colorScheme.onPrimary;
@@ -1090,7 +1089,7 @@ class YearPicker extends StatefulWidget {
   /// The [firstDate], [lastDate], [selectedDate], and [onChanged]
   /// arguments must be non-null. The [lastDate] must be after the [firstDate].
   YearPicker({
-    Key? key,
+    super.key,
     DateTime? currentDate,
     required this.firstDate,
     required this.lastDate,
@@ -1104,8 +1103,7 @@ class YearPicker extends StatefulWidget {
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
        currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
-       initialDate = DateUtils.dateOnly(initialDate ?? selectedDate),
-       super(key: key);
+       initialDate = DateUtils.dateOnly(initialDate ?? selectedDate);
 
   /// The current date.
   ///
@@ -1187,7 +1185,7 @@ class _YearPickerState extends State<YearPicker> {
     } else {
       textColor = colorScheme.onSurface.withOpacity(0.87);
     }
-    final TextStyle? itemStyle = textTheme.bodyText1?.apply(color: textColor);
+    final TextStyle? itemStyle = textTheme.bodyLarge?.apply(color: textColor);
 
     BoxDecoration? decoration;
     if (isSelected) {

@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -21,6 +20,9 @@ const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// Android Material styled text selection controls.
+///
+/// The [materialTextSelectionControls] global variable has a
+/// suitable instance of this class.
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
@@ -35,7 +37,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
@@ -45,8 +47,8 @@ class MaterialTextSelectionControls extends TextSelectionControls {
       endpoints: endpoints,
       delegate: delegate,
       clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
     );
@@ -54,7 +56,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight, [VoidCallback? onTap]) {
     final ThemeData theme = Theme.of(context);
     final Color handleColor = TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
     final Widget handle = SizedBox(
@@ -94,7 +96,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     switch (type) {
       case TextSelectionHandleType.left:
         return const Offset(_kHandleSize, 0);
@@ -130,7 +132,6 @@ class _TextSelectionToolbarItemData {
 // The highest level toolbar widget, built directly by buildToolbar.
 class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.delegate,
     required this.endpoints,
@@ -141,9 +142,9 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-  }) : super(key: key);
+  });
 
-  final ClipboardStatusNotifier clipboardStatus;
+  final ClipboardStatusNotifier? clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
@@ -168,28 +169,22 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
   @override
   void initState() {
     super.initState();
-    widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-    widget.clipboardStatus.update();
+    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(_TextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-      widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-      oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
+      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
     }
-    widget.clipboardStatus.update();
   }
 
   @override
   void dispose() {
     super.dispose();
-    // When used in an Overlay, it can happen that this is disposed after its
-    // creator has already disposed _clipboardStatus.
-    if (!widget.clipboardStatus.disposed) {
-      widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    }
+    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
   }
 
   @override
@@ -202,7 +197,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     // If the paste button is desired, don't render anything until the state of
     // the clipboard is known, since it's used to determine if paste is shown.
     if (widget.handlePaste != null
-        && widget.clipboardStatus.value == ClipboardStatus.unknown) {
+        && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
     }
 
@@ -212,9 +207,12 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
       ? widget.endpoints[1]
       : widget.endpoints[0];
+    final double topAmountInEditableRegion = startTextSelectionPoint.point.dy - widget.textLineHeight;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top - _kToolbarContentDistance;
+
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
+      anchorTop,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
@@ -238,7 +236,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
           onPressed: widget.handleCopy!,
         ),
       if (widget.handlePaste != null
-          && widget.clipboardStatus.value == ClipboardStatus.pasteable)
+          && widget.clipboardStatus?.value == ClipboardStatus.pasteable)
         _TextSelectionToolbarItemData(
           label: localizations.pasteButtonLabel,
           onPressed: widget.handlePaste!,
@@ -252,7 +250,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
     // If there is no option available, build an empty widget.
     if (itemDatas.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return TextSelectionToolbar(

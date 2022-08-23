@@ -9,14 +9,19 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('The Ink widget renders a Container by default', (WidgetTester tester) async {
+  testWidgets('The Ink widget renders a SizedBox by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: Ink(),
       ),
     );
-    expect(tester.getSize(find.byType(Container)).height, 600.0);
-    expect(tester.getSize(find.byType(Container)).width, 800.0);
+    Finder sizedBox = find.descendant(
+      of: find.byType(Ink),
+      matching: find.byType(SizedBox),
+    );
+    expect(sizedBox, findsOneWidget);
+    expect(tester.getSize(sizedBox).height, 600.0);
+    expect(tester.getSize(sizedBox).width, 800.0);
 
     const double height = 150.0;
     const double width = 200.0;
@@ -31,8 +36,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(Container)).height, height);
-    expect(tester.getSize(find.byType(Container)).width, width);
+    sizedBox = find.descendant(
+      of: find.byType(Ink),
+      matching: find.byType(SizedBox),
+    );
+    expect(sizedBox, findsNWidgets(2));
+    expect(tester.getSize(sizedBox.at(0)).height, height);
+    expect(tester.getSize(sizedBox.at(0)).width, width);
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
@@ -127,13 +137,15 @@ void main() {
         ..translate(x: 0.0, y: 0.0)
         ..translate(x: tapDownOffset.dx, y: tapDownOffset.dy)
         ..something((Symbol method, List<dynamic> arguments) {
-          if (method != #drawCircle)
+          if (method != #drawCircle) {
             return false;
+          }
           final Offset center = arguments[0] as Offset;
           final double radius = arguments[1] as double;
           final Paint paint = arguments[2] as Paint;
-          if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha)
+          if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha) {
             return true;
+          }
           throw '''
             Expected: center == $expectedCenter, radius == $expectedRadius, alpha == $expectedAlpha
             Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
@@ -423,11 +435,13 @@ void main() {
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
+      if (method != #drawCircle) {
         return true;
+      }
       final Paint paint = arguments[2] as Paint;
-      if (paint.color.alpha == 0)
+      if (paint.color.alpha == 0) {
         return true;
+      }
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
     }));
   });

@@ -11,6 +11,9 @@ import 'package:flutter/widgets.dart';
 import 'navigation_rail.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [NavigationRail]
 /// widgets.
 ///
@@ -46,6 +49,8 @@ class NavigationRailThemeData with Diagnosticable {
     this.labelType,
     this.useIndicator,
     this.indicatorColor,
+    this.minWidth,
+    this.minExtendedWidth,
   });
 
   /// Color to be used for the [NavigationRail]'s background.
@@ -86,6 +91,14 @@ class NavigationRailThemeData with Diagnosticable {
   /// when [useIndicator] is true.
   final Color? indicatorColor;
 
+  /// Overrides the default value of [NavigationRail]'s minimum width when it
+  /// is not extended.
+  final double? minWidth;
+
+  /// Overrides the default value of [NavigationRail]'s minimum width when it
+  /// is extended.
+  final double? minExtendedWidth;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationRailThemeData copyWith({
@@ -99,6 +112,8 @@ class NavigationRailThemeData with Diagnosticable {
     NavigationRailLabelType? labelType,
     bool? useIndicator,
     Color? indicatorColor,
+    double? minWidth,
+    double? minExtendedWidth,
   }) {
     return NavigationRailThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -111,6 +126,8 @@ class NavigationRailThemeData with Diagnosticable {
       labelType: labelType ?? this.labelType,
       useIndicator: useIndicator ?? this.useIndicator,
       indicatorColor: indicatorColor ?? this.indicatorColor,
+      minWidth: minWidth ?? this.minWidth,
+      minExtendedWidth: minExtendedWidth ?? this.minExtendedWidth,
     );
   }
 
@@ -121,8 +138,9 @@ class NavigationRailThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static NavigationRailThemeData? lerp(NavigationRailThemeData? a, NavigationRailThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return NavigationRailThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -134,31 +152,36 @@ class NavigationRailThemeData with Diagnosticable {
       labelType: t < 0.5 ? a?.labelType : b?.labelType,
       useIndicator: t < 0.5 ? a?.useIndicator : b?.useIndicator,
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
+      minWidth: lerpDouble(a?.minWidth, b?.minWidth, t),
+      minExtendedWidth: lerpDouble(a?.minExtendedWidth, b?.minExtendedWidth, t),
+
     );
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      elevation,
-      unselectedLabelTextStyle,
-      selectedLabelTextStyle,
-      unselectedIconTheme,
-      selectedIconTheme,
-      groupAlignment,
-      labelType,
-      useIndicator,
-      indicatorColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    elevation,
+    unselectedLabelTextStyle,
+    selectedLabelTextStyle,
+    unselectedIconTheme,
+    selectedIconTheme,
+    groupAlignment,
+    labelType,
+    useIndicator,
+    indicatorColor,
+    minWidth,
+    minExtendedWidth,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is NavigationRailThemeData
         && other.backgroundColor == backgroundColor
         && other.elevation == elevation
@@ -169,7 +192,9 @@ class NavigationRailThemeData with Diagnosticable {
         && other.groupAlignment == groupAlignment
         && other.labelType == labelType
         && other.useIndicator == useIndicator
-        && other.indicatorColor == indicatorColor;
+        && other.indicatorColor == indicatorColor
+        && other.minWidth == minWidth
+        && other.minExtendedWidth == minExtendedWidth;
   }
 
   @override
@@ -187,6 +212,8 @@ class NavigationRailThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<NavigationRailLabelType>('labelType', labelType, defaultValue: defaultData.labelType));
     properties.add(DiagnosticsProperty<bool>('useIndicator', useIndicator, defaultValue: defaultData.useIndicator));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
+    properties.add(DoubleProperty('minWidth', minWidth, defaultValue: defaultData.minWidth));
+    properties.add(DoubleProperty('minExtendedWidth', minExtendedWidth, defaultValue: defaultData.minExtendedWidth));
   }
 }
 
@@ -201,10 +228,10 @@ class NavigationRailTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const NavigationRailTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the background color, elevation, label text style, icon theme,
   /// group alignment, and label type and border values for descendant
@@ -219,7 +246,7 @@ class NavigationRailTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// NavigationRailTheme theme = NavigationRailTheme.of(context);
+  /// NavigationRailThemeData theme = NavigationRailTheme.of(context);
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
     final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();

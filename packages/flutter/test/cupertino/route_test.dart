@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -979,20 +981,24 @@ void main() {
     testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsShadowRect({required double dx, required Color color}) {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
-          if (methodName != #drawRect)
+          if (methodName != #drawRect) {
             return true;
+          }
           final Rect rect = arguments[0] as Rect;
           final Color paintColor = (arguments[1] as Paint).color;
-          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600)
-            // _CupertinoEdgeShadowDecoration draws the shadows with a series of
-            // differently colored 1px-wide rects. Skip rects that aren't being
-            // drawn by the _CupertinoEdgeShadowDecoration.
+          // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+          // differently colored 1px-wide rects. Skip rects that aren't being
+          // drawn by the _CupertinoEdgeShadowDecoration.
+          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600) {
             return true;
-          if ((rect.left - dx).abs() >= 1)
-            // Skip calls for rects until the one with the given position offset
+          }
+          // Skip calls for rects until the one with the given position offset
+          if ((rect.left - dx).abs() >= 1) {
             return true;
-          if (paintColor.value == color.value)
+          }
+          if (paintColor.value == color.value) {
             return true;
+          }
           throw '''
   For a rect with an expected left-side position: $dx (drawn at ${rect.left}):
               Expected a rect with color: $color,
@@ -1065,14 +1071,16 @@ void main() {
     testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsNoShadows() {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
-          if (methodName != #drawRect)
+          if (methodName != #drawRect) {
             return true;
+          }
           final Rect rect = arguments[0] as Rect;
           // _CupertinoEdgeShadowDecoration draws the shadows with a series of
           // differently colored 1px rects. Skip all rects not drawn by a
           // _CupertinoEdgeShadowDecoration.
-          if (rect.width != 1.0)
+          if (rect.width != 1.0) {
             return true;
+          }
           throw '''
     Expected: no rects with a width of 1px.
           Found: $rect.
@@ -1543,7 +1551,7 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
-    const Color _kTransparentColor = Color(0x00000000);
+    const Color kTransparentColor = Color(0x00000000);
 
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
@@ -1553,7 +1561,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: _kTransparentColor,
+                barrierColor: kTransparentColor,
               );
             },
             child: const Text('tap'),
@@ -1633,7 +1641,6 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const Text('Visible'),
-                barrierDismissible: true,
               );
             },
             child: const Text('tap'),
@@ -1783,7 +1790,7 @@ void main() {
   });
 
   testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
-    await tester.pumpWidget(_TestPostRouteCancel());
+    await tester.pumpWidget(const _TestPostRouteCancel());
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.down(tester.getCenter(find.text('PointerCancelEvents: 0')));
@@ -1854,7 +1861,7 @@ void main() {
 
   testWidgets('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         restorationScopeId: 'app',
         home: _RestorableModalTestWidget(),
       ),
@@ -1881,6 +1888,240 @@ void main() {
     await tester.restoreFrom(restorationData);
     expect(find.byType(CupertinoActionSheet), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  group('showCupertinoDialog avoids overlapping display features', () {
+    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+      final BuildContext context = tester.element(find.text('Test'));
+
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning with Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+      final BuildContext context = tester.element(find.text('Test'));
+
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // Since this is RTL, it should place the dialog on the right screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning by default', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+      final BuildContext context = tester.element(find.text('Test'));
+
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
+    });
+  });
+
+  group('showCupertinoModalPopup avoids overlapping display features', () {
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
+    });
+
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // This is RTL, so it should place the dialog on the right screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
+    });
+
+    testWidgets('default positioning', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
+    });
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
@@ -1974,7 +2215,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2008,6 +2249,8 @@ Widget buildNavigator({
 // Holding the 'Hold' button at the moment of popping will force the navigator to
 // cancel the down event, increasing the Home counter by 1.
 class _TestPostRouteCancel extends StatefulWidget {
+  const _TestPostRouteCancel();
+
   @override
   State<StatefulWidget> createState() => _TestPostRouteCancelState();
 }
@@ -2067,6 +2310,8 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 }
 
 class _RestorableModalTestWidget extends StatelessWidget {
+  const _RestorableModalTestWidget();
+
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {

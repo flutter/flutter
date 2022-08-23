@@ -33,10 +33,27 @@ Future<String> dataHandler(String message) async {
       });
       completer.complete(json.encode(result));
     }
-    if (SchedulerBinding.instance.hasScheduledFrame)
+    if (SchedulerBinding.instance.hasScheduledFrame) {
       SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
-    else
+    } else {
       completeSemantics();
+    }
+    return completer.future;
+  }
+  if (message.contains('setClipboard')) {
+    final Completer<String> completer = Completer<String>();
+    final String str = message.split('#')[1];
+    Future<void> completeSetClipboard([Object _]) async {
+      await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
+        'message': str,
+      });
+      completer.complete('');
+    }
+    if (SchedulerBinding.instance.hasScheduledFrame) {
+      SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
+    } else {
+      completeSetClipboard();
+    }
     return completer.future;
   }
   throw UnimplementedError();

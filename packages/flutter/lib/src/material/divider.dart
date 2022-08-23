@@ -12,7 +12,7 @@ import 'theme.dart';
 
 /// A thin horizontal line, with padding on either side.
 ///
-/// In the material design language, this represents a divider. Dividers can be
+/// In the Material Design language, this represents a divider. Dividers can be
 /// used in lists, [Drawer]s, and elsewhere to separate content.
 ///
 /// To create a divider between [ListTile] items, consider using
@@ -41,12 +41,12 @@ import 'theme.dart';
 ///  * [VerticalDivider], which is the vertical analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class Divider extends StatelessWidget {
-  /// Creates a material design divider.
+  /// Creates a Material Design divider.
   ///
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const Divider({
-    Key? key,
+    super.key,
     this.height,
     this.thickness,
     this.indent,
@@ -55,8 +55,7 @@ class Divider extends StatelessWidget {
   }) : assert(height == null || height >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
+       assert(endIndent == null || endIndent >= 0.0);
 
 
   /// The divider's height extent.
@@ -180,7 +179,7 @@ class Divider extends StatelessWidget {
 
 /// A thin vertical line, with padding on either side.
 ///
-/// In the material design language, this represents a divider. Vertical
+/// In the Material Design language, this represents a divider. Vertical
 /// dividers can be used in horizontally scrolling lists, such as a
 /// [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
@@ -202,12 +201,12 @@ class Divider extends StatelessWidget {
 ///  * [Divider], which is the horizontal analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class VerticalDivider extends StatelessWidget {
-  /// Creates a material design vertical divider.
+  /// Creates a Material Design vertical divider.
   ///
   /// The [width], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const VerticalDivider({
-    Key? key,
+    super.key,
     this.width,
     this.thickness,
     this.indent,
@@ -216,8 +215,7 @@ class VerticalDivider extends StatelessWidget {
   }) : assert(width == null || width >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
+       assert(endIndent == null || endIndent >= 0.0);
 
   /// The divider's width.
   ///

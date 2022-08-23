@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 import 'material_localizations.dart';
@@ -49,10 +47,11 @@ class DateUtils {
   /// Determines the number of months between two [DateTime] objects.
   ///
   /// For example:
-  /// ```
-  /// DateTime date1 = DateTime(year: 2019, month: 6, day: 15);
-  /// DateTime date2 = DateTime(year: 2020, month: 1, day: 15);
-  /// int delta = monthDelta(date1, date2);
+  ///
+  /// ```dart
+  /// DateTime date1 = DateTime(2019, 6, 15);
+  /// DateTime date2 = DateTime(2020, 1, 15);
+  /// int delta = DateUtils.monthDelta(date1, date2);
   /// ```
   ///
   /// The value for `delta` would be `7`.
@@ -64,8 +63,9 @@ class DateUtils {
   /// of months and the day set to 1 and time set to midnight.
   ///
   /// For example:
-  /// ```
-  /// DateTime date = DateTime(year: 2019, month: 1, day: 15);
+  ///
+  /// ```dart
+  /// DateTime date = DateTime(2019, 1, 15);
   /// DateTime futureDate = DateUtils.addMonthsToMonthDate(date, 3);
   /// ```
   ///
@@ -87,10 +87,8 @@ class DateUtils {
   /// For example, September 1, 2017 falls on a Friday, which in the calendar
   /// localized for United States English appears as:
   ///
-  /// ```
-  /// S M T W T F S
-  /// _ _ _ _ _ 1 2
-  /// ```
+  ///     S M T W T F S
+  ///     _ _ _ _ _ 1 2
   ///
   /// The offset for the first day of the months is the number of leading blanks
   /// in the calendar, i.e. 5.
@@ -98,10 +96,8 @@ class DateUtils {
   /// The same date localized for the Russian calendar has a different offset,
   /// because the first day of week is Monday rather than Sunday:
   ///
-  /// ```
-  /// M T W T F S S
-  /// _ _ _ _ 1 2 3
-  /// ```
+  ///     M T W T F S S
+  ///     _ _ _ _ 1 2 3
   ///
   /// So the offset is 4, rather than 5.
   ///
@@ -184,9 +180,9 @@ enum DatePickerEntryMode {
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a dialog that contains a material design
+///  * [showDatePicker], which shows a dialog that contains a Material Design
 ///    date picker.
-///  * [CalendarDatePicker], widget which implements the material design date picker.
+///  * [CalendarDatePicker], widget which implements the Material Design date picker.
 enum DatePickerMode {
   /// Choosing a month and day.
   day,
@@ -233,15 +229,16 @@ class DateTimeRange {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DateTimeRange
       && other.start == start
       && other.end == end;
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() => '$start - $end';

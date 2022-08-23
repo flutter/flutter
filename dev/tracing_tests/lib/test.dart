@@ -10,8 +10,8 @@ import 'package:flutter/widgets.dart';
 
 class TestWidget extends LeafRenderObjectWidget {
   const TestWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) => RenderTest();

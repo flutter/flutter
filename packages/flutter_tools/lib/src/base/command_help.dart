@@ -118,6 +118,11 @@ class CommandHelp {
     'WidgetsApp.showWidgetInspectorOverride',
   );
 
+  late final CommandHelpOption j = _makeOption(
+    'j',
+    'Dump frame raster stats for the current frame. (Unsupported for web)',
+  );
+
   late final CommandHelpOption k = _makeOption(
     'k',
     'Toggle CanvasKit rendering.',

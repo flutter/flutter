@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
+import 'dart:ui' as ui show PointerChange, PointerData, PointerSignalKind;
 
 import 'events.dart';
+
+export 'dart:ui' show PointerData;
+
+export 'events.dart' show PointerEvent;
 
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
 //
@@ -15,6 +19,7 @@ import 'events.dart';
 int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+    case PointerDeviceKind.trackpad:
       return buttons;
     case PointerDeviceKind.touch:
     case PointerDeviceKind.stylus:
@@ -207,6 +212,41 @@ class PointerEventConverter {
                     radiusMax: radiusMax,
                     embedderId: datum.embedderId,
                   );
+                case ui.PointerChange.panZoomStart:
+                  return PointerPanZoomStartEvent(
+                    timeStamp: timeStamp,
+                    pointer: datum.pointerIdentifier,
+                    device: datum.device,
+                    position: position,
+                    embedderId: datum.embedderId,
+                    synthesized: datum.synthesized,
+                  );
+                case ui.PointerChange.panZoomUpdate:
+                  final Offset pan =
+                      Offset(datum.panX, datum.panY) / devicePixelRatio;
+                  final Offset panDelta =
+                      Offset(datum.panDeltaX, datum.panDeltaY) / devicePixelRatio;
+                  return PointerPanZoomUpdateEvent(
+                    timeStamp: timeStamp,
+                    pointer: datum.pointerIdentifier,
+                    device: datum.device,
+                    position: position,
+                    pan: pan,
+                    panDelta: panDelta,
+                    scale: datum.scale,
+                    rotation: datum.rotation,
+                    embedderId: datum.embedderId,
+                    synthesized: datum.synthesized,
+                  );
+                case ui.PointerChange.panZoomEnd:
+                  return PointerPanZoomEndEvent(
+                    timeStamp: timeStamp,
+                    pointer: datum.pointerIdentifier,
+                    device: datum.device,
+                    position: position,
+                    embedderId: datum.embedderId,
+                    synthesized: datum.synthesized,
+                  );
               }
             case ui.PointerSignalKind.scroll:
               final Offset scrollDelta =
@@ -217,6 +257,14 @@ class PointerEventConverter {
                 device: datum.device,
                 position: position,
                 scrollDelta: scrollDelta,
+                embedderId: datum.embedderId,
+              );
+            case ui.PointerSignalKind.scrollInertiaCancel:
+              return PointerScrollInertiaCancelEvent(
+                timeStamp: timeStamp,
+                kind: kind,
+                device: datum.device,
+                position: position,
                 embedderId: datum.embedderId,
               );
             case ui.PointerSignalKind.unknown:

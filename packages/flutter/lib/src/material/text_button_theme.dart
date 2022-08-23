@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [TextButton]s when it's used with [TextButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.textButtonTheme].
@@ -47,24 +50,25 @@ class TextButtonThemeData with Diagnosticable {
   /// Linearly interpolate between two text button themes.
   static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return TextButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
   }
 
   @override
-  int get hashCode {
-    return style.hashCode;
-  }
+  int get hashCode => style.hashCode;
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextButtonThemeData && other.style == style;
   }
 
@@ -91,10 +95,10 @@ class TextButtonTheme extends InheritedTheme {
   ///
   /// The [data] parameter must not be null.
   const TextButtonTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The configuration of this theme.
   final TextButtonThemeData data;
@@ -107,7 +111,7 @@ class TextButtonTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TextButtonTheme theme = TextButtonTheme.of(context);
+  /// TextButtonThemeData theme = TextButtonTheme.of(context);
   /// ```
   static TextButtonThemeData of(BuildContext context) {
     final TextButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();

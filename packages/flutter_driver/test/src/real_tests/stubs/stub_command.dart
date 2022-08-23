@@ -5,13 +5,12 @@
 import 'package:flutter_driver/flutter_driver.dart';
 
 class StubNestedCommand extends CommandWithTarget {
-  StubNestedCommand(SerializableFinder finder, this.times, {Duration? timeout})
-      : super(finder, timeout: timeout);
+  StubNestedCommand(super.finder, this.times, {super.timeout});
 
   StubNestedCommand.deserialize(
-      Map<String, String> json, DeserializeFinderFactory finderFactory)
+      super.json, super.finderFactory)
       : times = int.parse(json['times']!),
-        super.deserialize(json, finderFactory);
+        super.deserialize();
 
   @override
   Map<String, String> serialize() {
@@ -25,12 +24,11 @@ class StubNestedCommand extends CommandWithTarget {
 }
 
 class StubProberCommand extends CommandWithTarget {
-  StubProberCommand(SerializableFinder finder, this.times, {Duration? timeout})
-      : super(finder, timeout: timeout);
+  StubProberCommand(super.finder, this.times, {super.timeout});
 
-  StubProberCommand.deserialize(Map<String, String> json, DeserializeFinderFactory finderFactory)
+  StubProberCommand.deserialize(super.json, super.finderFactory)
       : times = int.parse(json['times']!),
-        super.deserialize(json, finderFactory);
+        super.deserialize();
 
   @override
   Map<String, String> serialize() {

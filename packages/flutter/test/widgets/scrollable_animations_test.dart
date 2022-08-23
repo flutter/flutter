@@ -69,10 +69,10 @@ void main() {
     final double targetPosition = controller.position.pixels + doubleTolerance;
     controller.position.animateTo(targetPosition, duration: const Duration(seconds: 10), curve: Curves.linear);
 
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1), reason: 'Expected an animation.');
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1), reason: 'Expected an animation.');
   });
 }
 
 void expectNoAnimation() {
-  expect(SchedulerBinding.instance!.transientCallbackCount, equals(0), reason: 'Expected no animation.');
+  expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
 }

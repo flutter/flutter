@@ -45,6 +45,38 @@ void main() {
     Cache.enableLocking();
   });
 
+  testUsingContext('warns if screenshot is not supported but continues test', () async {
+    final DriveCommand command = DriveCommand(fileSystem: fileSystem, logger: logger, platform: platform);
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.directory('drive_screenshots').createSync();
+
+    final Device screenshotDevice = ThrowingScreenshotDevice()
+      ..supportsScreenshot = false;
+    fakeDeviceManager.devices = <Device>[screenshotDevice];
+
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
+        'drive',
+        '--no-pub',
+        '-d',
+        screenshotDevice.id,
+        '--screenshot',
+        'drive_screenshots',
+      ]),
+      throwsToolExit(message: 'cannot start app'),
+    );
+
+    expect(logger.errorText, contains('Screenshot not supported for FakeDevice'));
+    expect(logger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Pub: () => FakePub(),
+    DeviceManager: () => fakeDeviceManager,
+  });
+
   testUsingContext('takes screenshot and rethrows on drive exception', () async {
     final DriveCommand command = DriveCommand(fileSystem: fileSystem, logger: logger, platform: platform);
     fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -107,7 +139,9 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png'));
+    // Takes the screenshot before the application would be killed (if --keep-app-running not passed).
+    expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png\n'
+        'Leaving the application running.'));
     expect(logger.statusText, isNot(contains('drive_02.png')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -173,11 +207,50 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Pub: () => FakePub(),
   });
+
+  testUsingContext('flags propagate to debugging options', () async {
+    final DriveCommand command = DriveCommand(fileSystem: fileSystem, logger: logger, platform: platform);
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'drive',
+      '--start-paused',
+      '--disable-service-auth-codes',
+      '--trace-skia',
+      '--trace-systrace',
+      '--verbose-system-logs',
+      '--null-assertions',
+      '--native-null-assertions',
+      '--enable-impeller',
+      '--trace-systrace',
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.startPaused, true);
+    expect(options.disableServiceAuthCodes, true);
+    expect(options.traceSkia, true);
+    expect(options.traceSystrace, true);
+    expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
+    expect(options.nativeNullAssertions, true);
+    expect(options.enableImpeller, true);
+    expect(options.traceSystrace, true);
+    expect(options.enableSoftwareRendering, true);
+    expect(options.skiaDeterministicRendering, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class ThrowingScreenshotDevice extends ScreenshotDevice {
   @override
   Future<LaunchResult> startApp(
@@ -212,7 +285,7 @@ class ScreenshotDevice extends Fake implements Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
 
   @override
-  final bool supportsScreenshot = true;
+  bool supportsScreenshot = true;
 
   @override
   Future<LaunchResult> startApp(
@@ -280,6 +353,7 @@ class FailingFakeDriverService extends Fake implements DriverService {
       String browserName,
       bool androidEmulator,
       int driverPort,
+      List<String> webBrowserFlags,
       List<String> browserDimension,
       String profileMemory,
     }) async => 1;

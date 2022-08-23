@@ -47,10 +47,10 @@ void main() {
 
   testWidgets('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RadioThemeData(
-      mouseCursor: MaterialStateProperty.all(SystemMouseCursors.click),
-      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      overlayColor: MaterialStateProperty.all(const Color(0xfffffff1)),
+    const RadioThemeData(
+      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+      fillColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
+      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
       splashRadius: 1.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
@@ -61,12 +61,17 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(click))');
-    expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
-    expect(description[2], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff1))');
-    expect(description[3], 'splashRadius: 1.0');
-    expect(description[4], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[5], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
+    expect(
+      description,
+      equalsIgnoringHashCodes(<String>[
+        'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))',
+        'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))',
+        'overlayColor: MaterialStatePropertyAll(Color(0xfffffff1))',
+        'splashRadius: 1.0',
+        'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
+        'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
+      ]),
+    );
   });
 
   testWidgets('Radio is themeable', (WidgetTester tester) async {
@@ -85,7 +90,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: MaterialStateProperty.all(mouseCursor),
+            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
@@ -134,7 +139,7 @@ void main() {
     await _pointGestureToRadio(tester);
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: hoverOverlayColor));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Radio with focus.
     await tester.pumpWidget(buildRadio(autofocus: true));
@@ -167,7 +172,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: MaterialStateProperty.all(themeMouseCursor),
+            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return themeSelectedFillColor;
@@ -228,7 +233,7 @@ void main() {
     await _pointGestureToRadio(tester);
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: hoverColor));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Radio with focus.
     await tester.pumpWidget(buildRadio(autofocus: true));
@@ -337,6 +342,37 @@ void main() {
         ),
       reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
     );
+  });
+
+  testWidgets('Local RadioTheme can override global RadioTheme', (WidgetTester tester) async {
+    const Color globalThemeFillColor = Color(0xfffffff1);
+    const Color localThemeFillColor = Color(0xffff0000);
+
+    Widget buildRadio({required bool active}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: const RadioThemeData(
+            fillColor: MaterialStatePropertyAll<Color>(globalThemeFillColor),
+          ),
+        ),
+        home: Scaffold(
+          body: RadioTheme(
+            data: const RadioThemeData(
+              fillColor: MaterialStatePropertyAll<Color>(localThemeFillColor),
+            ),
+            child: Radio<int>(
+              value: active ? 1 : 0,
+              groupValue: 1,
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRadio(active: true));
+    await tester.pumpAndSettle();
+    expect(_getRadioMaterial(tester), paints..circle(color: localThemeFillColor));
   });
 }
 

@@ -35,9 +35,9 @@ typedef BottomSheetDragEndHandler = void Function(
   required bool isClosing,
 });
 
-/// A material design bottom sheet.
+/// A Material Design bottom sheet.
 ///
-/// There are two kinds of bottom sheets in material design:
+/// There are two kinds of bottom sheets in Material Design:
 ///
 ///  * _Persistent_. A persistent bottom sheet shows information that
 ///    supplements the primary content of the app. A persistent bottom sheet
@@ -61,6 +61,8 @@ typedef BottomSheetDragEndHandler = void Function(
 ///    non-modal "persistent" bottom sheets.
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
+///  * [BottomSheetThemeData], which can be used to customize the default
+///    bottom sheet property values.
 ///  * <https://material.io/design/components/sheets-bottom.html>
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.
@@ -69,7 +71,7 @@ class BottomSheet extends StatefulWidget {
   /// [ScaffoldState.showBottomSheet], for persistent bottom sheets, or by
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
-    Key? key,
+    super.key,
     this.animationController,
     this.enableDrag = true,
     this.onDragStart,
@@ -84,8 +86,7 @@ class BottomSheet extends StatefulWidget {
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
-       assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+       assert(elevation == null || elevation >= 0.0);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -220,8 +221,9 @@ class _BottomSheetState extends State<BottomSheet> {
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
-    if (_dismissUnderway)
+    if (_dismissUnderway) {
       return;
+    }
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
@@ -231,8 +233,9 @@ class _BottomSheetState extends State<BottomSheet> {
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
-    if (_dismissUnderway)
+    if (_dismissUnderway) {
       return;
+    }
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
@@ -243,8 +246,9 @@ class _BottomSheetState extends State<BottomSheet> {
         isClosing = true;
       }
     } else if (widget.animationController!.value < _closeProgressThreshold) {
-      if (widget.animationController!.value > 0.0)
+      if (widget.animationController!.value > 0.0) {
         widget.animationController!.fling(velocity: -1.0);
+      }
       isClosing = true;
     } else {
       widget.animationController!.forward();
@@ -345,7 +349,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
-    Key? key,
+    super.key,
     this.route,
     this.backgroundColor,
     this.elevation,
@@ -355,8 +359,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.isScrollControlled = false,
     this.enableDrag = true,
   }) : assert(isScrollControlled != null),
-       assert(enableDrag != null),
-       super(key: key);
+       assert(enableDrag != null);
 
   final _ModalBottomSheetRoute<T>? route;
   final bool isScrollControlled;
@@ -464,12 +467,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.isDismissible = true,
     this.enableDrag = true,
     required this.isScrollControlled,
-    RouteSettings? settings,
+    super.settings,
     this.transitionAnimationController,
+    this.anchorPoint,
+    this.useSafeArea = false,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
-       assert(enableDrag != null),
-       super(settings: settings);
+       assert(enableDrag != null);
 
   final WidgetBuilder? builder;
   final CapturedThemes capturedThemes;
@@ -483,6 +487,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final bool isDismissible;
   final bool enableDrag;
   final AnimationController? transitionAnimationController;
+  final Offset? anchorPoint;
+  final bool useSafeArea;
 
   @override
   Duration get transitionDuration => _bottomSheetEnterDuration;
@@ -515,11 +521,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    // By definition, the bottom sheet is aligned to the bottom of the page
-    // and isn't exposed to the top padding of the MediaQuery.
-    final Widget bottomSheet = MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
+    final Widget content = DisplayFeatureSubScreen(
+      anchorPoint: anchorPoint,
       child: Builder(
         builder: (BuildContext context) {
           final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
@@ -536,6 +539,18 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         },
       ),
     );
+
+    // If useSafeArea is true, a SafeArea is inserted.
+    // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
+    // and isn't exposed to the top padding of the MediaQuery.
+    final Widget bottomSheet = useSafeArea
+      ? SafeArea(child: content)
+      : MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: content,
+        );
+
     return capturedThemes.wrap(bottomSheet);
   }
 }
@@ -598,7 +613,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   }
 }
 
-/// Shows a modal material design bottom sheet.
+/// Shows a modal Material Design bottom sheet.
 ///
 /// A modal bottom sheet is an alternative to a menu or a dialog and prevents
 /// the user from interacting with the rest of the app.
@@ -631,6 +646,9 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
+/// The [useSafeArea] parameter specifies whether a SafeArea is inserted. Defaults to false.
+/// If false, no SafeArea is added and the top padding is consumed using MediaQuery.removePadding.
+///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
 /// [constraints] and [transitionAnimationController]
 /// parameters can be passed in to customize the appearance and behavior of
@@ -644,6 +662,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
+///
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
@@ -665,6 +685,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    non-modal bottom sheets.
 ///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
 ///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
@@ -679,8 +701,10 @@ Future<T?> showModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
+  bool useSafeArea = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
+  Offset? anchorPoint,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -707,10 +731,12 @@ Future<T?> showModalBottomSheet<T>({
     enableDrag: enableDrag,
     settings: routeSettings,
     transitionAnimationController: transitionAnimationController,
+    anchorPoint: anchorPoint,
+    useSafeArea: useSafeArea,
   ));
 }
 
-/// Shows a material design bottom sheet in the nearest [Scaffold] ancestor. If
+/// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. If
 /// you wish to show a persistent bottom sheet, use [Scaffold.bottomSheet].
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the

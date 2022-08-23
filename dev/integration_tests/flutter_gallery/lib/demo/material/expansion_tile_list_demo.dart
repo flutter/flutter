@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ExpansionTileListDemo extends StatelessWidget {
-  const ExpansionTileListDemo({Key? key}) : super(key: key);
+  const ExpansionTileListDemo({super.key});
 
   static const String routeName = '/material/expansion-tile-list';
 
@@ -20,6 +20,7 @@ class ExpansionTileListDemo extends StatelessWidget {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           children: <Widget>[
             const ListTile(title: Text('Top')),
             ExpansionTile(

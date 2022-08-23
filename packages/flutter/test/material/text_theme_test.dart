@@ -50,9 +50,9 @@ void main() {
 
 
   test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = TextTheme(headline6: TextStyle(color: Color(0xcafefeed)));
+    const TextTheme partialTheme = TextTheme(titleLarge: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
-    expect(fullTheme.headline6!.color, equals(partialTheme.headline6!.color));
+    expect(fullTheme.titleLarge!.color, equals(partialTheme.titleLarge!.color));
 
     const TextTheme onlyHeadlineSmallAndTitleLarge = TextTheme(
       headlineSmall: TextStyle(color: Color(0xcafefeed)),
@@ -219,5 +219,22 @@ void main() {
     expect(lerped.labelLarge, null);
     expect(lerped.labelMedium, null);
     expect(lerped.labelSmall, null);
+  });
+
+  test('VisualDensity.lerp', () {
+    const VisualDensity a = VisualDensity(horizontal: 1.0, vertical: .5);
+    const VisualDensity b = VisualDensity(horizontal: 2.0, vertical: 1.0);
+
+    final VisualDensity noLerp = VisualDensity.lerp(a, b, 0.0);
+    expect(noLerp.horizontal, 1.0);
+    expect(noLerp.vertical, .5);
+
+    final VisualDensity quarterLerp = VisualDensity.lerp(a, b, .25);
+    expect(quarterLerp.horizontal, 1.25);
+    expect(quarterLerp.vertical, .625);
+
+    final VisualDensity fullLerp = VisualDensity.lerp(a, b, 1.0);
+    expect(fullLerp.horizontal, 2.0);
+    expect(fullLerp.vertical, 1.0);
   });
 }

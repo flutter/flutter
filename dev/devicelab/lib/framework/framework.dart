@@ -46,8 +46,9 @@ bool _isTaskRegistered = false;
 /// If no `processManager` is provided, a default [LocalProcessManager] is created
 /// for the task.
 Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) async {
-  if (_isTaskRegistered)
+  if (_isTaskRegistered) {
     throw StateError('A task is already registered');
+  }
   _isTaskRegistered = true;
 
   processManager ??= const LocalProcessManager();
@@ -136,14 +137,12 @@ class _TaskRunner {
       }
 
       if (runFlutterConfig) {
-        print('Enabling configs for macOS, Linux, Windows, and Web...');
+        print('Enabling configs for macOS and Linux...');
         final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
           'config',
           '-v',
           '--enable-macos-desktop',
-          '--enable-windows-desktop',
           '--enable-linux-desktop',
-          '--enable-web',
           if (localEngine != null) ...<String>['--local-engine', localEngine],
         ], canFail: true);
         if (configResult != 0) {
@@ -165,8 +164,9 @@ class _TaskRunner {
         }
 
         Future<TaskResult> futureResult = _performTask();
-        if (taskTimeout != null)
+        if (taskTimeout != null) {
           futureResult = futureResult.timeout(taskTimeout);
+        }
 
         result = await futureResult;
       } finally {
@@ -243,8 +243,9 @@ class _TaskRunner {
   /// Causes the Dart VM to stay alive until a request to run the task is
   /// received via the VM service protocol.
   void keepVmAliveUntilTaskRunRequested() {
-    if (_taskStarted)
+    if (_taskStarted) {
       throw StateError('Task already started.');
+    }
 
     // Merely creating this port object will cause the VM to stay alive and keep
     // the VM service server running until the port is disposed of.
@@ -282,8 +283,9 @@ class _TaskRunner {
       // are catching errors coming from arbitrary (and untrustworthy) task
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
-      if (!completer.isCompleted)
+      if (!completer.isCompleted) {
         completer.complete(TaskResult.failure(message));
+      }
     });
     return completer.future;
   }

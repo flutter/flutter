@@ -37,6 +37,24 @@ void main() {
     expect(caretOffset.dx, painter.width);
   });
 
+  test('TextPainter caret test with WidgetSpan', () {
+    // Regression test for https://github.com/flutter/flutter/issues/98458.
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'after'),
+    ]);
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+    final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
   test('TextPainter null text test', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -996,6 +1014,136 @@ void main() {
         ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
+
+  test('TextPainter line metrics update after layout', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'word1 word2 word3';
+    painter.text = const TextSpan(
+      text: text,
+    );
+
+    painter.layout(maxWidth: 80);
+
+    List<ui.LineMetrics> lines = painter.computeLineMetrics();
+    expect(lines.length, 3);
+
+    painter.layout(maxWidth: 1000);
+
+    lines = painter.computeLineMetrics();
+    expect(lines.length, 1);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/62819
+
+  test('TextPainter throws with stack trace when accessing text layout', () {
+    final TextPainter painter = TextPainter()
+      ..text = const TextSpan(text: 'TEXT')
+      ..textDirection = TextDirection.ltr;
+
+    FlutterError? exception;
+    try {
+      painter.getPositionForOffset(Offset.zero);
+    } on FlutterError catch (e) {
+      exception = e;
+    }
+    expect(exception?.message, contains('The TextPainter has never been laid out.'));
+    exception = null;
+
+    try {
+      painter.layout();
+      painter.getPositionForOffset(Offset.zero);
+    } on FlutterError catch (e) {
+      exception = e;
+    }
+
+    expect(exception, isNull);
+    exception = null;
+
+    try {
+      painter.markNeedsLayout();
+      painter.getPositionForOffset(Offset.zero);
+    } on FlutterError catch (e) {
+      exception = e;
+    }
+
+    expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
+    exception = null;
+  });
+
+  test('TextPainter requires layout after providing different placeholder dimensions', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before'),
+      WidgetSpan(child: Text('widget1')),
+      WidgetSpan(child: Text('widget2')),
+      WidgetSpan(child: Text('widget3')),
+      TextSpan(text: 'after'),
+    ]);
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 20), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+
+    Object? e;
+    try {
+      painter.paint(MockCanvas(), Offset.zero);
+    } catch (exception) {
+      e = exception;
+    }
+    expect(
+      e.toString(),
+      contains('TextPainter.paint called when text geometry was not yet calculated'),
+    );
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter does not require layout after providing identical placeholder dimensions', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before'),
+      WidgetSpan(child: Text('widget1')),
+      WidgetSpan(child: Text('widget2')),
+      WidgetSpan(child: Text('widget3')),
+      TextSpan(text: 'after'),
+    ]);
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+
+    Object? e;
+    try {
+      painter.paint(MockCanvas(), Offset.zero);
+    } catch (exception) {
+      e = exception;
+    }
+    // In tests, paint() will throw an UnimplementedError due to missing drawParagraph method.
+    expect(
+      e.toString(),
+      isNot(contains('TextPainter.paint called when text geometry was not yet calculated')),
+    );
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 }
 
 class MockCanvas extends Fake implements Canvas {

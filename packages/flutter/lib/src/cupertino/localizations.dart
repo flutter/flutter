@@ -7,6 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
 enum DatePickerDateTimeOrder {
@@ -351,8 +354,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String datePickerMinuteSemanticsLabel(int minute) {
-    if (minute == 1)
+    if (minute == 1) {
       return '1 minute';
+    }
     return '$minute minutes';
   }
 

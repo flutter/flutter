@@ -67,7 +67,7 @@ void main() {
 
   group('TickerProviderStateMixin assertion control test', () {
     testWidgets('SingleTickerProviderStateMixin create multiple tickers', (WidgetTester tester) async {
-      final Widget widget = _SingleTickerCreateMultipleTicker();
+      const Widget widget = _SingleTickerCreateMultipleTicker();
       await tester.pumpWidget(widget);
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
@@ -228,7 +228,7 @@ void main() {
 }
 
 class BoringTickerTest extends StatefulWidget {
-  const BoringTickerTest({ Key? key }) : super(key: key);
+  const BoringTickerTest({ super.key });
   @override
   State<BoringTickerTest> createState() => _BoringTickerTestState();
 }
@@ -239,7 +239,7 @@ class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerPr
 }
 
 class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key? key}) : super(key: key);
+  const _SingleTickerTest({super.key});
 
   @override
   _SingleTickerTestState createState() => _SingleTickerTestState();
@@ -272,7 +272,7 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 }
 
 class _MultipleTickerTest extends StatefulWidget {
-  const _MultipleTickerTest({Key? key}) : super(key: key);
+  const _MultipleTickerTest({super.key});
 
   @override
   _MultipleTickerTestState createState() => _MultipleTickerTestState();
@@ -304,6 +304,8 @@ class _MultipleTickerTestState extends State<_MultipleTickerTest> with TickerPro
 }
 
 class _SingleTickerCreateMultipleTicker extends StatefulWidget {
+  const _SingleTickerCreateMultipleTicker();
+
   @override
   _SingleTickerCreateMultipleTickerState createState() => _SingleTickerCreateMultipleTickerState();
 }

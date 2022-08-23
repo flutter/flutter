@@ -1,8 +1,5 @@
 # Specify analysis options.
 #
-# Until there are meta linter rules, each desired lint must be explicitly enabled.
-# See: https://github.com/dart-lang/linter/issues/288
-#
 # For a list of lints, see: http://dart-lang.github.io/linter/lints/
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/main/pkg/analyzer#configuring-the-analyzer
@@ -15,27 +12,17 @@
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #
-# This file contains the analysis options used by Flutter tools, such as IntelliJ,
-# Android Studio, and the `flutter analyze` command.
+# This file contains the analysis options used for code in the flutter/flutter
+# repository.
 
 analyzer:
   language:
+    strict-casts: true
     strict-raw-types: true
-  strong-mode:
-    implicit-casts: false
   errors:
-    # treat missing required parameters as a warning (not a hint)
-    missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
-    # allow having TODO comments in the code
-    todo: ignore
     # allow self-reference to deprecated members (we do this because otherwise we have
     # to annotate every member in every test, assert, etc, when we deprecate something)
     deprecated_member_use_from_same_package: ignore
-    # TODO(ianh): https://github.com/flutter/flutter/issues/74381
-    # Clean up existing unnecessary imports, and remove line to ignore.
-    unnecessary_import: ignore
     # Turned off until null-safe rollout is complete.
     unnecessary_null_comparison: ignore
   exclude:
@@ -45,8 +32,7 @@ analyzer:
 
 linter:
   rules:
-    # these rules are documented on and in the same order as
-    # the Dart Lint rules page to make maintenance easier
+    # This list is derived from the list of all available lints located at
     # https://github.com/dart-lang/linter/blob/master/example/all.yaml
     - always_declare_return_types
     - always_put_control_body_on_new_line
@@ -80,7 +66,7 @@ linter:
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
-    # - avoid_returning_null # still violated by some pre-nnbd code that we haven't yet migrated
+    - avoid_returning_null
     - avoid_returning_null_for_future
     - avoid_returning_null_for_void
     # - avoid_returning_this # there are enough valid reasons to return `this` that this lint ends up with too many false positives
@@ -102,15 +88,17 @@ linter:
     # - cascade_invocations # doesn't match the typical style of this repo
     - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
+    - combinators_ordering
     # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
-    # - conditional_uri_does_not_exist # not yet tested
+    - conditional_uri_does_not_exist
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
-    # - curly_braces_in_flow_control_structures # not required by flutter style
+    - curly_braces_in_flow_control_structures
     - depend_on_referenced_packages
     - deprecated_consistency
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
     - directives_ordering
+    # - discarded_futures # not yet tested
     # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
     - empty_catches
     - empty_constructor_bodies
@@ -121,7 +109,6 @@ linter:
     - flutter_style_todos
     - hash_and_equals
     - implementation_imports
-    # - invariant_booleans # too many false positives: https://github.com/dart-lang/linter/issues/811
     - iterable_contains_unrelated_type
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
@@ -136,7 +123,7 @@ linter:
     - no_default_cases
     - no_duplicate_case_values
     - no_leading_underscores_for_library_prefixes
-    # - no_leading_underscores_for_local_identifiers # not yet tested
+    - no_leading_underscores_for_local_identifiers
     - no_logic_in_create_state
     # - no_runtimeType_toString # ok in tests; we enable this only in packages/
     - non_constant_identifier_names
@@ -219,6 +206,7 @@ linter:
     - unnecessary_late
     - unnecessary_new
     - unnecessary_null_aware_assignments
+    - unnecessary_null_aware_operator_on_extension_on_nullable
     - unnecessary_null_checks
     - unnecessary_null_in_if_null_operators
     - unnecessary_nullable_for_final_variable_declarations
@@ -229,13 +217,16 @@ linter:
     - unnecessary_string_escapes
     - unnecessary_string_interpolations
     - unnecessary_this
+    - unnecessary_to_list_in_spreads
     - unrelated_type_equality_checks
     - unsafe_html
     - use_build_context_synchronously
+    # - use_colored_box # not yet tested
     # - use_decorated_box # not yet tested
+    # - use_enums # not yet tested
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
-    # - use_if_null_to_convert_nulls_to_bools # blocked on https://github.com/dart-lang/sdk/issues/47436
+    - use_if_null_to_convert_nulls_to_bools
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables
@@ -244,6 +235,7 @@ linter:
     - use_rethrow_when_possible
     - use_setters_to_change_properties
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182
+    - use_super_parameters
     - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps

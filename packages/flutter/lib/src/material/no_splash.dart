@@ -38,23 +38,24 @@ class _NoSplashFactory extends InteractiveInkFeatureFactory {
 /// Use [NoSplash.splashFactory] to defeat the default ink splash drawn by
 /// an [InkWell] or [ButtonStyle]. For example, to create an [ElevatedButton]
 /// that does not draw the default "ripple" ink splash when it's tapped:
+///
 /// ```dart
 /// ElevatedButton(
 ///   style: ElevatedButton.styleFrom(
 ///     splashFactory: NoSplash.splashFactory,
 ///   ),
 ///   onPressed: () { },
-///   child: Text('No Splash'),
+///   child: const Text('No Splash'),
 /// )
 /// ```
 class NoSplash extends InteractiveInkFeature {
   /// Create an [InteractiveInkFeature] that doesn't paint a splash.
   NoSplash({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Color color,
-    VoidCallback? onRemoved,
-  }) : super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved);
+    required super.controller,
+    required super.referenceBox,
+    required super.color,
+    super.onRemoved,
+  });
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
   /// material [Theme], or [ButtonStyle].

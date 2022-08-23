@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'input_decorator.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of the widget displayed with [showTimePicker].
 ///
 /// Descendant widgets obtain the current [TimePickerThemeData] object using
@@ -133,7 +136,8 @@ class TimePickerThemeData with Diagnosticable {
   /// The color of the entry mode [IconButton].
   ///
   /// If this is null, the time picker defaults to:
-  /// ```
+  ///
+  /// ```dart
   /// Theme.of(context).colorScheme.onSurface.withOpacity(
   ///   Theme.of(context).colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
   /// )
@@ -149,13 +153,13 @@ class TimePickerThemeData with Diagnosticable {
   /// Used to configure the [TextStyle]s for the day period control.
   ///
   /// If this is null, the time picker defaults to the overall theme's
-  /// [TextTheme.subtitle1].
+  /// [TextTheme.titleMedium].
   final TextStyle? dayPeriodTextStyle;
 
   /// Used to configure the [TextStyle]s for the helper text in the header.
   ///
   /// If this is null, the time picker defaults to the overall theme's
-  /// [TextTheme.overline].
+  /// [TextTheme.labelSmall].
   final TextStyle? helpTextStyle;
 
   /// The shape of the [Dialog] that the time picker is presented in.
@@ -173,8 +177,9 @@ class TimePickerThemeData with Diagnosticable {
   /// The shape of the day period that the time picker uses.
   ///
   /// If this is null, the time picker defaults to:
-  /// ```
-  /// RoundedRectangleBorder(
+  ///
+  /// ```dart
+  /// const RoundedRectangleBorder(
   ///   borderRadius: BorderRadius.all(Radius.circular(4.0)),
   ///   side: BorderSide(),
   /// )
@@ -184,10 +189,14 @@ class TimePickerThemeData with Diagnosticable {
   /// The color and weight of the day period's outline.
   ///
   /// If this is null, the time picker defaults to:
-  /// ```
+  ///
+  /// ```dart
   /// BorderSide(
-  ///   color: Color.alphaBlend(colorScheme.onBackground.withOpacity(0.38), colorScheme.surface),
-  /// )
+  ///   color: Color.alphaBlend(
+  ///     Theme.of(context).colorScheme.onBackground.withOpacity(0.38),
+  ///     Theme.of(context).colorScheme.surface,
+  ///   ),
+  /// ),
   /// ```
   final BorderSide? dayPeriodBorderSide;
 
@@ -279,34 +288,34 @@ class TimePickerThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      hourMinuteTextColor,
-      hourMinuteColor,
-      dayPeriodTextColor,
-      dayPeriodColor,
-      dialHandColor,
-      dialBackgroundColor,
-      dialTextColor,
-      entryModeIconColor,
-      hourMinuteTextStyle,
-      dayPeriodTextStyle,
-      helpTextStyle,
-      shape,
-      hourMinuteShape,
-      dayPeriodShape,
-      dayPeriodBorderSide,
-      inputDecorationTheme,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    hourMinuteTextColor,
+    hourMinuteColor,
+    dayPeriodTextColor,
+    dayPeriodColor,
+    dialHandColor,
+    dialBackgroundColor,
+    dialTextColor,
+    entryModeIconColor,
+    hourMinuteTextStyle,
+    dayPeriodTextStyle,
+    helpTextStyle,
+    shape,
+    hourMinuteShape,
+    dayPeriodShape,
+    dayPeriodBorderSide,
+    inputDecorationTheme,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TimePickerThemeData
         && other.backgroundColor == backgroundColor
         && other.hourMinuteTextColor == hourMinuteTextColor
@@ -359,11 +368,10 @@ class TimePickerTheme extends InheritedTheme {
   /// Creates a time picker theme that controls the configurations for
   /// time pickers displayed in its widget subtree.
   const TimePickerTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant time picker widgets.
   final TimePickerThemeData data;

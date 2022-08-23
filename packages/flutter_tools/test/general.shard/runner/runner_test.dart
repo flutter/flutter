@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
@@ -44,7 +43,7 @@ void main() {
         // TODO(jamesderlin): Ideally only the first call to exit() would be
         // honored and subsequent calls would be no-ops, but existing tests
         // rely on all calls to throw.
-        throw 'test exit';
+        throw Exception('test exit');
       });
 
       Cache.disableLocking();
@@ -75,7 +74,7 @@ void main() {
         onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
-          expect(error, 'test exit');
+          expect(error.toString(), 'Exception: test exit');
           completer.complete();
         },
       ));
@@ -88,7 +87,7 @@ void main() {
       // *original* crash, and not the crash from the first crash report
       // attempt.
       final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
-      expect(crashingUsage.sentException, 'an exception % --');
+      expect(crashingUsage.sentException.toString(), 'Exception: an exception % --');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -98,7 +97,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
-      HttpClientFactory: () => () => FakeHttpClient.any()
+      HttpClientFactory: () => () => FakeHttpClient.any(),
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand
@@ -127,7 +126,7 @@ void main() {
         onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
-          expect(error, 'test exit');
+          expect(error.toString(), 'Exception: test exit');
           completer.complete();
         },
       ));
@@ -141,7 +140,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
       Artifacts: () => Artifacts.test(),
-      HttpClientFactory: () => () => FakeHttpClient.any()
+      HttpClientFactory: () => () => FakeHttpClient.any(),
     });
 
     testUsingContext('create local report', () async {
@@ -174,7 +173,7 @@ void main() {
         onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
-          expect(error, 'test exit');
+          expect(error.toString(), 'Exception: test exit');
           completer.complete();
         },
       ));
@@ -183,22 +182,22 @@ void main() {
       final String errorText = testLogger.errorText;
       expect(
         errorText,
-        containsIgnoringWhitespace('Oops; flutter has exited unexpectedly: "an exception % --".\n'),
+        containsIgnoringWhitespace('Oops; flutter has exited unexpectedly: "Exception: an exception % --".\n'),
       );
 
       final File log = globals.fs.file('/flutter_01.log');
       final String logContents = log.readAsStringSync();
       expect(logContents, contains(kCustomBugInstructions));
       expect(logContents, contains('flutter crash'));
-      expect(logContents, contains('String: an exception % --'));
+      expect(logContents, contains('Exception: an exception % --'));
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
-      expect(logContents, contains('[✓] Flutter'));
+      expect(logContents, contains('[!] Flutter'));
 
       final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
-      expect(sentDetails.error, 'an exception % --');
+      expect(sentDetails.error.toString(), 'Exception: an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-      expect(await sentDetails.doctorText.text, contains('[✓] Flutter'));
+      expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         environment: <String, String>{
@@ -211,7 +210,7 @@ void main() {
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
       CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-      HttpClientFactory: () => () => FakeHttpClient.any()
+      HttpClientFactory: () => () => FakeHttpClient.any(),
     });
   });
 }
@@ -234,7 +233,7 @@ class CrashingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    const String error = 'an exception % --'; // Test URL encoding.
+    final Exception error = Exception('an exception % --'); // Test URL encoding.
     if (!_asyncCrash) {
       throw error;
     }
@@ -270,7 +269,7 @@ class CrashingUsage implements Usage {
   void sendException(dynamic exception) {
     if (_firstAttempt) {
       _firstAttempt = false;
-      throw 'CrashingUsage.sendException';
+      throw Exception('CrashingUsage.sendException');
     }
     _sentException = exception;
   }

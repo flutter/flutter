@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -105,6 +107,9 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   }
   return <String>['app$flavorString-$buildType.apk'];
 }
+
+// The maximum time to wait before the tool retries a Gradle build.
+const Duration kMaxRetryTime = Duration(seconds: 10);
 
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
@@ -212,7 +217,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   /// * [target] is the target dart entry point. Typically, `lib/main.dart`.
   /// * If [isBuildingBundle] is `true`, then the output artifact is an `*.aab`,
   ///   otherwise the output artifact is an `*.apk`.
-  /// * [retries] is the max number of build retries in case one of the [GradleHandledError] handler
+  /// * [maxRetries] If not `null`, this is the max number of build retries in case a retry is triggered.
   Future<void> buildGradleApp({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -221,7 +226,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required List<GradleHandledError> localGradleErrors,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
-    int retries = 1,
+    int retry = 0,
+    @visibleForTesting int? maxRetries,
   }) async {
     assert(project != null);
     assert(androidBuildInfo != null);
@@ -262,6 +268,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       _gradleUtils.getExecutable(project),
     ];
     if (_logger.isVerbose) {
+      command.add('--full-stacktrace');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -401,38 +409,44 @@ class AndroidGradleBuilder implements AndroidBuilder {
           'Gradle task $assembleTask failed with exit code $exitCode',
           exitCode: exitCode,
         );
-      } else {
-        final GradleBuildStatus status = await detectedGradleError!.handler(
-          line: detectedGradleErrorLine!,
-          project: project,
-          usesAndroidX: usesAndroidX,
-          multidexEnabled: androidBuildInfo.multidexEnabled,
-        );
-
-        if (retries >= 1) {
-          final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
-          switch (status) {
-            case GradleBuildStatus.retry:
-              await buildGradleApp(
-                project: project,
-                androidBuildInfo: androidBuildInfo,
-                target: target,
-                isBuildingBundle: isBuildingBundle,
-                localGradleErrors: localGradleErrors,
-                retries: retries - 1,
-              );
-              BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
-              return;
-            case GradleBuildStatus.exit:
-            // noop.
-          }
-        }
-        BuildEvent('gradle-${detectedGradleError?.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
-        throwToolExit(
-          'Gradle task $assembleTask failed with exit code $exitCode',
-          exitCode: exitCode,
-        );
       }
+      final GradleBuildStatus status = await detectedGradleError!.handler(
+        line: detectedGradleErrorLine!,
+        project: project,
+        usesAndroidX: usesAndroidX,
+        multidexEnabled: androidBuildInfo.multidexEnabled,
+      );
+
+      if (maxRetries == null || retry < maxRetries) {
+        switch (status) {
+          case GradleBuildStatus.retry:
+            // Use binary exponential backoff before retriggering the build.
+            // The expected wait times are: 100ms, 200ms, 400ms, and so on...
+            final int waitTime = min(pow(2, retry).toInt() * 100, kMaxRetryTime.inMicroseconds);
+            retry += 1;
+            _logger.printStatus('Retrying Gradle Build: #$retry, wait time: ${waitTime}ms');
+            await Future<void>.delayed(Duration(milliseconds: waitTime));
+            await buildGradleApp(
+              project: project,
+              androidBuildInfo: androidBuildInfo,
+              target: target,
+              isBuildingBundle: isBuildingBundle,
+              localGradleErrors: localGradleErrors,
+              retry: retry,
+              maxRetries: maxRetries,
+            );
+            final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
+            BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
+            return;
+          case GradleBuildStatus.exit:
+            // Continue and throw tool exit.
+        }
+      }
+      BuildEvent('gradle-${detectedGradleError?.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
+      throwToolExit(
+        'Gradle task $assembleTask failed with exit code $exitCode',
+        exitCode: exitCode,
+      );
     }
 
     if (isBuildingBundle) {
@@ -575,9 +589,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       '-Pflutter-root=$flutterRoot',
       '-Poutput-dir=${outputDirectory.path}',
       '-Pis-plugin=${manifest.isPlugin}',
-      '-PbuildNumber=$buildNumber'
+      '-PbuildNumber=$buildNumber',
     ];
     if (_logger.isVerbose) {
+      command.add('--full-stacktrace');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -710,7 +726,7 @@ void printHowToConsumeAar({
 
   for (final String buildMode in buildModes) {
     logger.printStatus("""
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber'""");
+      ${buildMode}Implementation '$androidPackage:flutter:$buildNumber:$buildMode'""");
   }
 
   logger.printStatus('''
@@ -835,15 +851,15 @@ Iterable<String> listApkPaths(
         <String>[
           'app',
           getNameForAndroidArch(androidArch),
-          ...apkPartialName
-        ].join('-')
+          ...apkPartialName,
+        ].join('-'),
     ];
   }
   return <String>[
     <String>[
       'app',
       ...apkPartialName,
-    ].join('-')
+    ].join('-'),
   ];
 }
 
@@ -873,6 +889,11 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger, 
       getBundleDirectory(project)
         .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_${buildInfo.modeName}')}')
         .childFile('app-${buildInfo.lowerCasedFlavor}-${buildInfo.modeName}.aab'));
+
+    // The Android Gradle plugin 4.1.0 does only lowercase the first character of flavor name.
+    fileCandidates.add(getBundleDirectory(project)
+        .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
+        .childFile('app-${buildInfo.uncapitalizedFlavor}-${buildInfo.modeName}.aab'));
   }
   for (final File bundleFile in fileCandidates) {
     if (bundleFile.existsSync()) {
@@ -937,7 +958,7 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
   XmlDocument document;
   try {
     document = XmlDocument.parse(pomFile.readAsStringSync());
-  } on XmlParserException {
+  } on XmlException {
     throwToolExit(
       'Error parsing $pomPath. Please ensure that this is a valid XML document.'
     );

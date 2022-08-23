@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 class TextStyleItem extends StatelessWidget {
   const TextStyleItem({
-    Key? key,
+    super.key,
     required this.name,
     required this.style,
     required this.text,
-  }) : super(key: key);
+  });
 
   final String name;
   final TextStyle style;
@@ -19,7 +19,7 @@ class TextStyleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle nameStyle = theme.textTheme.caption!.copyWith(color: theme.textTheme.caption!.color);
+    final TextStyle nameStyle = theme.textTheme.bodySmall!.copyWith(color: theme.textTheme.bodySmall!.color);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
       child: Row(
@@ -39,7 +39,7 @@ class TextStyleItem extends StatelessWidget {
 }
 
 class TypographyDemo extends StatelessWidget {
-  const TypographyDemo({Key? key}) : super(key: key);
+  const TypographyDemo({super.key});
 
   static const String routeName = '/typography';
 
@@ -47,18 +47,21 @@ class TypographyDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[
-      if (MediaQuery.of(context).size.width > 500.0)
-        TextStyleItem(name: 'Headline 1', style: textTheme.headline1!, text: 'Light 112sp'),
-      TextStyleItem(name: 'Headline 2', style: textTheme.headline2!, text: 'Regular 56sp'),
-      TextStyleItem(name: 'Headline 3', style: textTheme.headline3!, text: 'Regular 45sp'),
-      TextStyleItem(name: 'Headline 4', style: textTheme.headline4!, text: 'Regular 34sp'),
-      TextStyleItem(name: 'Headline 5', style: textTheme.headline5!, text: 'Regular 24sp'),
-      TextStyleItem(name: 'Headline 6', style: textTheme.headline6!, text: 'Medium 20sp'),
-      TextStyleItem(name: 'Subtitle 1', style: textTheme.subtitle1!, text: 'Regular 16sp'),
-      TextStyleItem(name: 'Body 1', style: textTheme.bodyText1!, text: 'Medium 14sp'),
-      TextStyleItem(name: 'Body 2', style: textTheme.bodyText2!, text: 'Regular 14sp'),
-      TextStyleItem(name: 'Caption', style: textTheme.caption!, text: 'Regular 12sp'),
-      TextStyleItem(name: 'Button', style: textTheme.button!, text: 'MEDIUM (ALL CAPS) 14sp'),
+      TextStyleItem(name: 'Display Large', style: textTheme.displayLarge!, text: 'Regular 57/64 +0'),
+      TextStyleItem(name: 'Display Medium', style: textTheme.displayMedium!, text: 'Regular 45/52 +0'),
+      TextStyleItem(name: 'Display Small', style: textTheme.displaySmall!, text: 'Regular 36/44 +0'),
+      TextStyleItem(name: 'Headline Large', style: textTheme.headlineLarge!, text: 'Regular 32/40 +0'),
+      TextStyleItem(name: 'Headline Medium', style: textTheme.headlineMedium!, text: 'Regular 28/36 +0'),
+      TextStyleItem(name: 'Headline Small', style: textTheme.headlineSmall!, text: 'Regular 24/32 +0'),
+      TextStyleItem(name: 'Title Large', style: textTheme.titleLarge!, text: 'Medium 22/28 +0'),
+      TextStyleItem(name: 'Title Medium', style: textTheme.titleMedium!, text: 'Medium 16/24 +0.15'),
+      TextStyleItem(name: 'Title Small', style: textTheme.titleSmall!, text: 'Medium 14/20 +0.1'),
+      TextStyleItem(name: 'Body Large', style: textTheme.bodyLarge!, text: 'Regular 16/24 +0.5'),
+      TextStyleItem(name: 'Body Medium', style: textTheme.bodyMedium!, text: 'Regular 14/20 +0.25'),
+      TextStyleItem(name: 'Body Small', style: textTheme.bodySmall!, text: 'Regular 12/16 +0.4'),
+      TextStyleItem(name: 'Label Large', style: textTheme.labelLarge!, text: 'Medium 14/20 +0.1'),
+      TextStyleItem(name: 'Label Medium', style: textTheme.labelMedium!, text: 'Medium 12/16 +0.5'),
+      TextStyleItem(name: 'Label Small', style: textTheme.labelSmall!, text: 'Medium 11/16 +0.5'),
     ];
 
     return Scaffold(
@@ -66,7 +69,12 @@ class TypographyDemo extends StatelessWidget {
       body: SafeArea(
         top: false,
         bottom: false,
-        child: Scrollbar(child: ListView(children: styleItems)),
+        child: Scrollbar(
+          child: ListView(
+            primary: true,
+            children: styleItems,
+          ),
+        ),
       ),
     );
   }

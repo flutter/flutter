@@ -64,8 +64,7 @@ const List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  const TravelDestinationItem({ Key? key, required this.destination, this.shape })
-    : super(key: key);
+  const TravelDestinationItem({ super.key, required this.destination, this.shape });
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 338.0;
@@ -99,8 +98,7 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class TappableTravelDestinationItem extends StatelessWidget {
-  const TappableTravelDestinationItem({ Key? key, required this.destination, this.shape })
-    : super(key: key);
+  const TappableTravelDestinationItem({ super.key, required this.destination, this.shape });
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
@@ -143,8 +141,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
 }
 
 class SelectableTravelDestinationItem extends StatefulWidget {
-  const SelectableTravelDestinationItem({ Key? key, required this.destination, this.shape })
-    : super(key: key);
+  const SelectableTravelDestinationItem({ super.key, required this.destination, this.shape });
 
   final TravelDestination destination;
   final ShapeBorder? shape;
@@ -222,9 +219,9 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle({
-    Key? key,
+    super.key,
     this.title,
-  }) : super(key: key);
+  });
 
   final String? title;
 
@@ -234,24 +231,23 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(title!, style: Theme.of(context).textTheme.subtitle1),
+        child: Text(title!, style: Theme.of(context).textTheme.titleMedium),
       ),
     );
   }
 }
 
 class TravelDestinationContent extends StatelessWidget {
-  const TravelDestinationContent({ Key? key, required this.destination })
-    : super(key: key);
+  const TravelDestinationContent({ super.key, required this.destination });
 
   final TravelDestination destination;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle titleStyle = theme.textTheme.headline5!.copyWith(color: Colors.white);
-    final TextStyle descriptionStyle = theme.textTheme.subtitle1!;
-    final ButtonStyle textButtonStyle = TextButton.styleFrom(primary: Colors.amber.shade500);
+    final TextStyle titleStyle = theme.textTheme.headlineSmall!.copyWith(color: Colors.white);
+    final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
+    final ButtonStyle textButtonStyle = TextButton.styleFrom(foregroundColor: Colors.amber.shade500);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,7 +335,7 @@ class TravelDestinationContent extends StatelessWidget {
 }
 
 class CardsDemo extends StatefulWidget {
-  const CardsDemo({Key? key}) : super(key: key);
+  const CardsDemo({super.key});
 
   static const String routeName = '/material/cards';
 
@@ -379,6 +375,7 @@ class _CardsDemoState extends State<CardsDemo> {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
           children: destinations.map<Widget>((TravelDestination destination) {
             Widget? child;

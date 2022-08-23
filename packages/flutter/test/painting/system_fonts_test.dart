@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,16 +18,49 @@ void main() {
         home: Text('text widget'),
       ),
     );
+    final RenderObject renderObject = tester.renderObject(find.text('text widget'));
+
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
       (ByteData? data) { },
     );
-    final RenderObject renderObject = tester.renderObject(find.text('text widget'));
-    expect(renderObject.debugNeedsLayout, isTrue);
+
+    final Completer<bool> animation = Completer<bool>();
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      animation.complete(renderObject.debugNeedsLayout);
+    });
+    expect(renderObject.debugNeedsLayout, isFalse);
+    await tester.pump();
+    expect(await animation.future, isTrue);
+  });
+
+  testWidgets('Safe to query RenderParagraph for text layout after system fonts changes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Text('text widget'),
+      ),
+    );
+    const Map<String, dynamic> data = <String, dynamic>{
+      'type': 'fontsChange',
+    };
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/system',
+      SystemChannels.system.codec.encodeMessage(data),
+      (ByteData? data) { },
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text('text widget'));
+    Object? exception;
+    try {
+      paragraph.getPositionForOffset(Offset.zero);
+      paragraph.hitTest(BoxHitTestResult(), position: Offset.zero);
+    } catch (e) {
+      exception = e;
+    }
+    expect(exception, isNull);
   });
 
   testWidgets('RenderEditable relayout upon system fonts changes', (WidgetTester tester) async {
@@ -36,7 +72,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -57,7 +93,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -81,7 +117,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -109,7 +145,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -139,7 +175,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -169,7 +205,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -195,7 +231,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -239,7 +275,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },

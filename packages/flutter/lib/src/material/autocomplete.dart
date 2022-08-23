@@ -26,6 +26,8 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/autocomplete/autocomplete.1.dart **
 /// {@end-tool}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
+///
 /// See also:
 ///
 ///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
@@ -33,7 +35,7 @@ import 'theme.dart';
 class Autocomplete<T extends Object> extends StatelessWidget {
   /// Creates an instance of [Autocomplete].
   const Autocomplete({
-    Key? key,
+    super.key,
     required this.optionsBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
@@ -42,8 +44,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsViewBuilder,
     this.initialValue,
   }) : assert(displayStringForOption != null),
-       assert(optionsBuilder != null),
-       super(key: key);
+       assert(optionsBuilder != null);
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -108,11 +109,10 @@ class Autocomplete<T extends Object> extends StatelessWidget {
 // The default Material-style Autocomplete text field.
 class _AutocompleteField extends StatelessWidget {
   const _AutocompleteField({
-    Key? key,
     required this.focusNode,
     required this.textEditingController,
     required this.onFieldSubmitted,
-  }) : super(key: key);
+  });
 
   final FocusNode focusNode;
 
@@ -135,12 +135,12 @@ class _AutocompleteField extends StatelessWidget {
 // The default Material-style Autocomplete options.
 class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   const _AutocompleteOptions({
-    Key? key,
+    super.key,
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
     required this.maxOptionsHeight,
-  }) : super(key: key);
+  });
 
   final AutocompleteOptionToString<T> displayStringForOption;
 
@@ -171,7 +171,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                   builder: (BuildContext context) {
                     final bool highlight = AutocompleteHighlightedOption.of(context) == index;
                     if (highlight) {
-                      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+                      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
                         Scrollable.ensureVisible(context, alignment: 0.5);
                       });
                     }

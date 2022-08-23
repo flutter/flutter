@@ -52,8 +52,10 @@ void main() {
       backgroundColor: Color(0xff123456),
       elevation: 8.0,
       alignment: Alignment.bottomLeft,
+      iconColor: Color(0xff654321),
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),
+      actionsPadding: EdgeInsets.all(8.0),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -62,8 +64,10 @@ void main() {
       'backgroundColor: Color(0xff123456)',
       'elevation: 8.0',
       'alignment: Alignment.bottomLeft',
+      'iconColor: Color(0xff654321)',
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
+      'actionsPadding: EdgeInsets.all(8.0)',
     ]);
   });
 
@@ -180,6 +184,80 @@ void main() {
     );
   });
 
+  testWidgets('Custom Icon Color - Constructor Param - highest preference', (WidgetTester tester) async {
+    const Color iconColor = Colors.pink, dialogThemeColor = Colors.green, iconThemeColor = Colors.yellow;
+    final ThemeData theme = ThemeData(
+      iconTheme: const IconThemeData(color: iconThemeColor),
+      dialogTheme: const DialogTheme(iconColor: dialogThemeColor),
+    );
+    const AlertDialog dialog = AlertDialog(
+      icon: Icon(Icons.ac_unit),
+      iconColor: iconColor,
+      actions: <Widget>[ ],
+    );
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // first is Text('X')
+    final RichText text = tester.widget(find.byType(RichText).last);
+    expect(text.text.style!.color, iconColor);
+  });
+
+  testWidgets('Custom Icon Color - Dialog Theme - preference over Theme', (WidgetTester tester) async {
+    const Color dialogThemeColor = Colors.green, iconThemeColor = Colors.yellow;
+    final ThemeData theme = ThemeData(
+      iconTheme: const IconThemeData(color: iconThemeColor),
+      dialogTheme: const DialogTheme(iconColor: dialogThemeColor),
+    );
+    const AlertDialog dialog = AlertDialog(
+      icon: Icon(Icons.ac_unit),
+      actions: <Widget>[ ],
+    );
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // first is Text('X')
+    final RichText text = tester.widget(find.byType(RichText).last);
+    expect(text.text.style!.color, dialogThemeColor);
+  });
+
+  testWidgets('Custom Icon Color - Theme - lowest preference', (WidgetTester tester) async {
+    const Color iconThemeColor = Colors.yellow;
+    final ThemeData theme = ThemeData(iconTheme: const IconThemeData(color: iconThemeColor));
+    const AlertDialog dialog = AlertDialog(
+      icon: Icon(Icons.ac_unit),
+      actions: <Widget>[ ],
+    );
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // first is Text('X')
+    final RichText text = tester.widget(find.byType(RichText).last);
+    expect(text.text.style!.color, iconThemeColor);
+  });
+
+  testWidgets('Custom Icon Color - Theme - lowest preference for M3', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const AlertDialog dialog = AlertDialog(
+      icon: Icon(Icons.ac_unit),
+      actions: <Widget>[ ],
+    );
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // first is Text('X')
+    final RichText text = tester.widget(find.byType(RichText).last);
+    expect(text.text.style!.color, ThemeData().colorScheme.secondary);
+  });
+
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
     const String titleText = 'Title';
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
@@ -221,7 +299,7 @@ void main() {
       title: Text(titleText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleLarge: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -269,7 +347,7 @@ void main() {
     const SimpleDialog dialog = SimpleDialog(
       title: Text(titleText),
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleLarge: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -320,7 +398,7 @@ void main() {
       content: Text(contentText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(subtitle1: contentTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleMedium: contentTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));

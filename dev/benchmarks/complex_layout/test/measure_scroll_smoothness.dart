@@ -120,9 +120,9 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 }
 
 Future<void> main() async {
-  final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  assert(_binding is IntegrationTestWidgetsFlutterBinding);
-  final IntegrationTestWidgetsFlutterBinding binding = _binding as IntegrationTestWidgetsFlutterBinding;
+  final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
+  final IntegrationTestWidgetsFlutterBinding binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final ResampleFlagVariant variant = ResampleFlagVariant(binding);
@@ -136,7 +136,7 @@ Future<void> main() async {
     final List<double> scrollOffset = <double>[];
     final List<Duration> delays = <Duration>[];
     binding.addPersistentFrameCallback((Duration timeStamp) {
-      if (controller?.hasClients == true) {
+      if (controller?.hasClients ?? false) {
         // This if is necessary because by the end of the test the widget tree
         // is destroyed.
         frameTimestamp.add(timeStamp.inMicroseconds);
@@ -239,8 +239,9 @@ Map<String, dynamic> scrollSummary(
     //
     final double absJerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
     absJerkAvg += absJerk;
-    if (absJerk > 0.5)
+    if (absJerk > 0.5) {
       jankyCount += 1;
+    }
   }
   // expect(lostFrame < 0.1 * frameTimestamp.length, true);
   absJerkAvg /= frameTimestamp.length - lostFrame;

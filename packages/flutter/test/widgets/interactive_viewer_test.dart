@@ -6,8 +6,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
 import 'gesture_utils.dart';
 
@@ -38,7 +39,6 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childInterior);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
@@ -91,7 +91,6 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childInterior);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
@@ -148,7 +147,6 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childOffset);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
@@ -225,8 +223,7 @@ void main() {
         childOffset.dy + 20.0,
       );
       final TestGesture gesture = await tester.startGesture(childOffset);
-      addTearDown(gesture.removePointer);
-      await tester.pump();
+        await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
       await gesture.up();
@@ -262,7 +259,6 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childInterior);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
@@ -318,7 +314,6 @@ void main() {
         childOffset.dy + 20.0,
       );
       final TestGesture gesture = await tester.startGesture(childInterior);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
@@ -358,7 +353,6 @@ void main() {
         childOffset.dy + 10.0,
       );
       final TestGesture gesture = await tester.startGesture(childInterior);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
@@ -828,7 +822,6 @@ void main() {
 
       // Attempting to pan doesn't work because it's disabled, but the
       // interaction methods are still called.
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
@@ -901,7 +894,6 @@ void main() {
 
       // Attempting to pan doesn't work because it's disabled, but the
       // interaction methods are still called.
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
@@ -950,7 +942,6 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childInterior);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
@@ -1114,7 +1105,6 @@ void main() {
       Offset scaleEnd2 = Offset(childInterior.dx + 20.0, childInterior.dy);
       TestGesture gesture = await tester.createGesture();
       TestGesture gesture2 = await tester.createGesture();
-      addTearDown(gesture.removePointer);
       addTearDown(gesture2.removePointer);
       await gesture.down(scaleStart1);
       await gesture2.down(scaleStart2);
@@ -1135,7 +1125,6 @@ void main() {
       scaleEnd2 = Offset(childInterior.dx + 48.0, childInterior.dy);
       gesture = await tester.createGesture();
       gesture2 = await tester.createGesture();
-      addTearDown(gesture.removePointer);
       addTearDown(gesture2.removePointer);
       await gesture.down(scaleStart1);
       await gesture2.down(scaleStart2);
@@ -1168,10 +1157,8 @@ void main() {
         ),
       );
 
-      expect(
-        find.byType(ClipRect),
-        findsNothing,
-      );
+      final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      expect(renderClip.clipBehavior, equals(Clip.none));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1254,7 +1241,6 @@ void main() {
         childOffset.dy + translationY,
       );
       final TestGesture gesture = await tester.startGesture(childInterior);
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();

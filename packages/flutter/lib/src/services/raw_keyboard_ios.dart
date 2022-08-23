@@ -2,40 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
 
-/// Maps iOS specific string values of nonvisible keys to logical keys
-///
-/// See: https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
-const Map<String, LogicalKeyboardKey> _kIosToLogicalMap = <String, LogicalKeyboardKey>{
-  'UIKeyInputEscape': LogicalKeyboardKey.escape,
-  'UIKeyInputF1': LogicalKeyboardKey.f1,
-  'UIKeyInputF2': LogicalKeyboardKey.f2,
-  'UIKeyInputF3': LogicalKeyboardKey.f3,
-  'UIKeyInputF4': LogicalKeyboardKey.f4,
-  'UIKeyInputF5': LogicalKeyboardKey.f5,
-  'UIKeyInputF6': LogicalKeyboardKey.f6,
-  'UIKeyInputF7': LogicalKeyboardKey.f7,
-  'UIKeyInputF8': LogicalKeyboardKey.f8,
-  'UIKeyInputF9': LogicalKeyboardKey.f9,
-  'UIKeyInputF10': LogicalKeyboardKey.f10,
-  'UIKeyInputF11': LogicalKeyboardKey.f11,
-  'UIKeyInputF12': LogicalKeyboardKey.f12,
-  'UIKeyInputUpArrow': LogicalKeyboardKey.arrowUp,
-  'UIKeyInputDownArrow': LogicalKeyboardKey.arrowDown,
-  'UIKeyInputLeftArrow': LogicalKeyboardKey.arrowLeft,
-  'UIKeyInputRightArrow': LogicalKeyboardKey.arrowRight,
-  'UIKeyInputHome': LogicalKeyboardKey.home,
-  'UIKeyInputEnd': LogicalKeyboardKey.enter,
-  'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
-  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown,
-};
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
+
 /// Platform-specific key event data for iOS.
 ///
 /// This object contains information about key events obtained from iOS'
@@ -105,9 +81,9 @@ class RawKeyEventDataIos extends RawKeyEventData {
     }
 
     // Look to see if the [keyLabel] is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = _kIosToLogicalMap[keyLabel];
-    if (newKey != null) {
-      return newKey;
+    final LogicalKeyboardKey? specialKey = kIosSpecialLogicalMap[keyLabel];
+    if (specialKey != null) {
+      return specialKey;
     }
 
     // Keys that can't be derived with characterIgnoringModifiers will be
@@ -266,10 +242,12 @@ class RawKeyEventDataIos extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataIos
         && other.characters == characters
         && other.charactersIgnoringModifiers == charactersIgnoringModifiers
@@ -278,7 +256,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     characters,
     charactersIgnoringModifiers,
     keyCode,

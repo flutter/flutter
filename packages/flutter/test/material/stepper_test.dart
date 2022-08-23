@@ -462,8 +462,9 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     Widget builder(BuildContext context, ControlsDetails details) {
       // For the purposes of testing, only render something for the active
       // step.
-      if (!details.isActive)
+      if (!details.isActive) {
         return Container();
+      }
 
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
@@ -824,10 +825,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       );
     }
 
-    // The checks that follow verify that the layout and appearance of
-    // the default enabled Stepper buttons have not changed even
-    // though the FlatButtons have been replaced by TextButtons.
-
     const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
     const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
     const Rect cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
@@ -881,10 +878,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
     }
-
-    // The checks that follow verify that the appearance of the
-    // default disabled Stepper buttons have not changed even though
-    // the FlatButtons have been replaced by TextButtons.
 
     await tester.pumpWidget(buildFrame(ThemeData.light()));
 
@@ -1151,10 +1144,94 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
      expect(material.margin, equals(margin));
    });
+
+  testWidgets('Stepper with Alternative Label', (WidgetTester tester) async {
+    int index = 0;
+    late TextStyle bodyLargeStyle;
+    late TextStyle bodyMediumStyle;
+    late TextStyle bodySmallStyle;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            bodyLargeStyle = Theme.of(context).textTheme.bodyText1!;
+            bodyMediumStyle = Theme.of(context).textTheme.bodyText2!;
+            bodySmallStyle = Theme.of(context).textTheme.caption!;
+            return Stepper(
+              type: StepperType.horizontal,
+              currentStep: index,
+              onStepTapped: (int i) {
+                setState(() {
+                  index = i;
+                });
+              },
+              steps: <Step>[
+                Step(
+                  title: const Text('Title 1'),
+                  content: const Text('Content 1'),
+                  label: Text('Label 1', style: Theme.of(context).textTheme.bodySmall),
+                ),
+                Step(
+                  title: const Text('Title 2'),
+                  content: const Text('Content 2'),
+                  label: Text('Label 2', style: Theme.of(context).textTheme.bodyLarge),
+                ),
+                Step(
+                  title: const Text('Title 3'),
+                  content: const Text('Content 3'),
+                  label: Text('Label 3', style: Theme.of(context).textTheme.bodyMedium),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+
+    // Check Styles of Label Text Widgets before tapping steps
+    final Text label1TextWidget =
+        tester.widget<Text>(find.text('Label 1'));
+    final Text label3TextWidget =
+        tester.widget<Text>(find.text('Label 3'));
+
+    expect(bodySmallStyle, label1TextWidget.style);
+    expect(bodyMediumStyle, label3TextWidget.style);
+
+    late Text selectedLabelTextWidget;
+    late Text nextLabelTextWidget;
+
+    // Tap to Step1 Label then, `index` become 0
+    await tester.tap(find.text('Label 1'));
+    expect(index, 0);
+
+    // Check Styles of Selected Label Text Widgets and Another Label Text Widget
+    selectedLabelTextWidget =
+        tester.widget<Text>(find.text('Label ${index + 1}'));
+    expect(bodySmallStyle, selectedLabelTextWidget.style);
+    nextLabelTextWidget =
+        tester.widget<Text>(find.text('Label ${index + 2}'));
+    expect(bodyLargeStyle, nextLabelTextWidget.style);
+
+
+    // Tap to Step2 Label then, `index` become 1
+    await tester.tap(find.text('Label 2'));
+    expect(index, 1);
+
+    // Check Styles of Selected Label Text Widgets and Another Label Text Widget
+    selectedLabelTextWidget =
+        tester.widget<Text>(find.text('Label ${index + 1}'));
+    expect(bodyLargeStyle, selectedLabelTextWidget.style);
+
+    nextLabelTextWidget =
+        tester.widget<Text>(find.text('Label ${index + 2}'));
+    expect(bodyMediumStyle, nextLabelTextWidget.style);
+  });
 }
 
 class _TappableColorWidget extends StatefulWidget {
-  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, Key? key,}) : super(key: key);
+  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, super.key,});
 
   final Color tappedColor;
   final Color untappedColor;

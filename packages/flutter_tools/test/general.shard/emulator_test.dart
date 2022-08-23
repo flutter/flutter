@@ -17,6 +17,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
@@ -170,7 +171,7 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -207,7 +208,7 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -245,8 +246,8 @@ void main() {
             ],
             exitCode: 1,
             stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
-              'Use --force if you want to replace it.'
-          )
+              'Use --force if you want to replace it.',
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -288,7 +289,7 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -323,13 +324,13 @@ void main() {
             'open',
             '-a',
             '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
-          ])
+          ]),
         ],
       );
 
       const Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       Xcode: () => xcode,

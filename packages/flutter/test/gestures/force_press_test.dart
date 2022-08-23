@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('A force press can be recognized', (GestureTester tester) {
 

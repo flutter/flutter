@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -229,13 +228,16 @@ class ShapeDecoration extends Decoration {
   ///    [ShapeDecoration]s or a [ShapeDecoration] to or from null.
   static ShapeDecoration? lerp(ShapeDecoration? a, ShapeDecoration? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     if (a != null && b != null) {
-      if (t == 0.0)
+      if (t == 0.0) {
         return a;
-      if (t == 1.0)
+      }
+      if (t == 1.0) {
         return b;
+      }
     }
     return ShapeDecoration(
       color: Color.lerp(a?.color, b?.color, t),
@@ -248,10 +250,12 @@ class ShapeDecoration extends Decoration {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ShapeDecoration
         && other.color == color
         && other.gradient == gradient
@@ -261,15 +265,13 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      gradient,
-      image,
-      shape,
-      hashList(shadows),
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    gradient,
+    image,
+    shape,
+    shadows == null ? null : Object.hashAll(shadows!),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -308,6 +310,7 @@ class _ShapeDecorationPainter extends BoxPainter {
   Path? _innerPath;
   Paint? _interiorPaint;
   int? _shadowCount;
+  late List<Rect> _shadowBounds;
   late List<Path> _shadowPaths;
   late List<Paint> _shadowPaints;
 
@@ -316,8 +319,9 @@ class _ShapeDecorationPainter extends BoxPainter {
 
   void _precache(Rect rect, TextDirection? textDirection) {
     assert(rect != null);
-    if (rect == _lastRect && textDirection == _lastTextDirection)
+    if (rect == _lastRect && textDirection == _lastTextDirection) {
       return;
+    }
 
     // We reach here in two cases:
     //  - the very first time we paint, in which case everything except _decoration is null
@@ -325,11 +329,13 @@ class _ShapeDecorationPainter extends BoxPainter {
     //    the features that depend on the actual rect.
     if (_interiorPaint == null && (_decoration.color != null || _decoration.gradient != null)) {
       _interiorPaint = Paint();
-      if (_decoration.color != null)
+      if (_decoration.color != null) {
         _interiorPaint!.color = _decoration.color!;
+      }
     }
-    if (_decoration.gradient != null)
+    if (_decoration.gradient != null) {
       _interiorPaint!.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
+    }
     if (_decoration.shadows != null) {
       if (_shadowCount == null) {
         _shadowCount = _decoration.shadows!.length;
@@ -337,37 +343,60 @@ class _ShapeDecorationPainter extends BoxPainter {
           ..._decoration.shadows!.map((BoxShadow shadow) => shadow.toPaint()),
         ];
       }
-      _shadowPaths = <Path>[
-        ..._decoration.shadows!.map((BoxShadow shadow) {
-          return _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
-        }),
-      ];
+      if (_decoration.shape.preferPaintInterior) {
+        _shadowBounds = <Rect>[
+          ..._decoration.shadows!.map((BoxShadow shadow) {
+            return rect.shift(shadow.offset).inflate(shadow.spreadRadius);
+          }),
+        ];
+      } else {
+        _shadowPaths = <Path>[
+          ..._decoration.shadows!.map((BoxShadow shadow) {
+            return _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
+          }),
+        ];
+      }
     }
-    if (_interiorPaint != null || _shadowCount != null)
+    if (!_decoration.shape.preferPaintInterior && (_interiorPaint != null || _shadowCount != null)) {
       _outerPath = _decoration.shape.getOuterPath(rect, textDirection: textDirection);
-    if (_decoration.image != null)
+    }
+    if (_decoration.image != null) {
       _innerPath = _decoration.shape.getInnerPath(rect, textDirection: textDirection);
+    }
 
     _lastRect = rect;
     _lastTextDirection = textDirection;
   }
 
-  void _paintShadows(Canvas canvas) {
+  void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_shadowCount != null) {
-      for (int index = 0; index < _shadowCount!; index += 1)
-        canvas.drawPath(_shadowPaths[index], _shadowPaints[index]);
+      if (_decoration.shape.preferPaintInterior) {
+        for (int index = 0; index < _shadowCount!; index += 1) {
+          _decoration.shape.paintInterior(canvas, _shadowBounds[index], _shadowPaints[index], textDirection: textDirection);
+        }
+      } else {
+        for (int index = 0; index < _shadowCount!; index += 1) {
+          canvas.drawPath(_shadowPaths[index], _shadowPaints[index]);
+        }
+      }
     }
   }
 
-  void _paintInterior(Canvas canvas) {
-    if (_interiorPaint != null)
-      canvas.drawPath(_outerPath, _interiorPaint!);
+  void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {
+    if (_interiorPaint != null) {
+      if (_decoration.shape.preferPaintInterior) {
+        _decoration.shape.paintInterior(canvas, rect, _interiorPaint!, textDirection: textDirection);
+      } else {
+        canvas.drawPath(_outerPath, _interiorPaint!);
+      }
+    }
   }
 
   DecorationImagePainter? _imagePainter;
   void _paintImage(Canvas canvas, ImageConfiguration configuration) {
-    if (_decoration.image == null)
+    if (_decoration.image == null) {
       return;
+    }
     _imagePainter ??= _decoration.image!.createPainter(onChanged);
     _imagePainter!.paint(canvas, _lastRect!, _innerPath, configuration);
   }
@@ -385,8 +414,8 @@ class _ShapeDecorationPainter extends BoxPainter {
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;
     _precache(rect, textDirection);
-    _paintShadows(canvas);
-    _paintInterior(canvas);
+    _paintShadows(canvas, rect, textDirection);
+    _paintInterior(canvas, rect, textDirection);
     _paintImage(canvas, configuration);
     _decoration.shape.paint(canvas, rect, textDirection: textDirection);
   }

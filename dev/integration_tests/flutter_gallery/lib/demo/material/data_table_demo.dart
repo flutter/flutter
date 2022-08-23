@@ -97,8 +97,9 @@ class DessertDataSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     assert(index >= 0);
-    if (index >= _desserts.length)
+    if (index >= _desserts.length) {
       return null;
+    }
     final Dessert dessert = _desserts[index];
     return DataRow.byIndex(
       index: index,
@@ -134,15 +135,16 @@ class DessertDataSource extends DataTableSource {
   int get selectedRowCount => _selectedCount;
 
   void _selectAll(bool? checked) {
-    for (final Dessert dessert in _desserts)
+    for (final Dessert dessert in _desserts) {
       dessert.selected = checked;
+    }
     _selectedCount = checked! ? _desserts.length : 0;
     notifyListeners();
   }
 }
 
 class DataTableDemo extends StatefulWidget {
-  const DataTableDemo({Key? key}) : super(key: key);
+  const DataTableDemo({super.key});
 
   static const String routeName = '/material/data-table';
 
@@ -175,6 +177,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           padding: const EdgeInsets.all(20.0),
           children: <Widget>[
             PaginatedDataTable(

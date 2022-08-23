@@ -40,8 +40,9 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
 void verifyToStringOutput(String name, String route, String testString) {
   int lineNumber = 0;
   final List<String> lines = testString.split('\n');
-  if (!testString.endsWith('\n'))
+  if (!testString.endsWith('\n')) {
     reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
+  }
   for (final String line in lines) {
     lineNumber += 1;
     if (line == '' && lineNumber != lines.length) {
@@ -77,9 +78,9 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 
   // Verify that the dumps are pretty.
   final String routeName = demo.routeName;
-  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance!.renderViewElement!.toStringDeep());
-  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView.toStringDeep() ?? '');
-  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? '');
+  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement!.toStringDeep());
+  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance.renderView.toStringDeep());
+  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? '');
 
   // Scroll the demo around a bit more.
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
@@ -183,8 +184,8 @@ void main() {
   );
 
   testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
-    RendererBinding.instance!.setSemanticsEnabled(true);
+    RendererBinding.instance.setSemanticsEnabled(true);
     await smokeGallery(tester);
-    RendererBinding.instance!.setSemanticsEnabled(false);
+    RendererBinding.instance.setSemanticsEnabled(false);
   });
 }

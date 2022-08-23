@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
@@ -156,7 +157,7 @@ Map<String, List<String>> _parseSection(String section) {
     }
     final int colon = line.indexOf(':');
     if (colon <= 0) {
-      throw 'not sure how to deal with "$line"';
+      throw Exception('not sure how to deal with "$line"');
     }
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);
@@ -215,8 +216,15 @@ void precacheLanguageAndRegionTags() {
 String describeLocale(String tag) {
   final List<String> subtags = tag.split('_');
   assert(subtags.isNotEmpty);
-  assert(_languages.containsKey(subtags[0]));
-  final String language = _languages[subtags[0]]!;
+  final String languageCode = subtags[0];
+  if (!_languages.containsKey(languageCode)) {
+    throw L10nException(
+      '"$languageCode" is not a supported language code.\n'
+      'See https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry '
+      'for the supported list.',
+    );
+  }
+  final String language = _languages[languageCode]!;
   String output = language;
   String? region;
   String? script;
@@ -303,6 +311,7 @@ class LocalizationOptions {
     this.useSyntheticPackage = true,
     this.areResourceAttributesRequired = false,
     this.usesNullableGetter = true,
+    this.format = false,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
@@ -369,6 +378,11 @@ class LocalizationOptions {
   ///
   /// Whether or not the localizations class getter is nullable.
   final bool usesNullableGetter;
+
+  /// The `format` argument.
+  ///
+  /// Whether or not to format the generated files.
+  final bool format;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -403,6 +417,7 @@ LocalizationOptions parseLocalizationsOptions({
     useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
     usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
+    format: _tryReadBool(yamlNode, 'format', logger) ?? true,
   );
 }
 
