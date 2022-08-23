@@ -21,7 +21,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  final ThemeData theme = ThemeData(useMaterial3: true, brightness: Brightness.light);
+  final ThemeData theme = ThemeData(brightness: Brightness.light);
 
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
@@ -2616,22 +2616,24 @@ void main() {
     });
 
     testWidgets('Switch can set icon - M3', (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
-      final ColorScheme colors = themeData.colorScheme;
+      final ThemeData themeData = ThemeData(useMaterial3: true,
+        colorSchemeSeed: const Color(0xff6750a4),
+        brightness: Brightness.light);
 
-      Widget buildSwitch({required bool enabled, required bool active}) {
+      Widget buildSwitch({required bool enabled, required bool active, IconData? activeIcon, IconData? inactiveIcon}) {
         return Theme(
           data: themeData,
           child: Directionality(
-            textDirection: TextDirection.rtl,
+            textDirection: TextDirection.ltr,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Material(
                   child: Center(
                     child: Switch(
-                      activeIcon: Icons.add,
+                      inactiveIcon: inactiveIcon,
+                      activeIcon: activeIcon,
                       value: active,
-                      onChanged: enabled ? (_) { } : null,
+                      onChanged: enabled ? (_) {} : null,
                     ),
                   ),
                 );
@@ -2641,11 +2643,52 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildSwitch(enabled: true, active: true));
-      final TextStyle? color = tester.widget<RichText>(
-          find.descendant(of: find.byIcon(Icons.add), matching: find.byType(RichText)),
-        ).text.style;
-      expect(find.byType(Icon), findsOneWidget);
+      // active icon shows when switch is on.
+      await tester.pumpWidget(buildSwitch(enabled: true, active: true, activeIcon: Icons.close));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect()..circle()
+          ..paragraph(offset: const Offset(32.0, 16.0)),
+      );
+
+      // inactive icon shows when switch is off.
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false, inactiveIcon: Icons.close));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect()..rrect()
+          ..circle()
+          ..paragraph(offset: const Offset(12.0, 16.0)),
+      );
+
+      // active icon doesn't show when switch is off.
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false, activeIcon: Icons.check));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect()..rrect()..circle()
+      );
+
+      // inactive icon doesn't show when switch is on.
+      await tester.pumpWidget(buildSwitch(enabled: true, active: true, inactiveIcon: Icons.check));
+      await tester.pumpAndSettle();
+      expect(
+          Material.of(tester.element(find.byType(Switch))),
+          paints
+            ..rrect()..circle()..restore(),
+      );
+
+      // without icon
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false));
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect()..rrect()..circle()..restore(),
+      );
     });
   });
 }

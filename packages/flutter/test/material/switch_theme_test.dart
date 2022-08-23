@@ -220,7 +220,6 @@ void main() {
     final ImageProvider selectedThumbImage = MemoryImage(Uint8List.fromList(kAnimatedGif));
 
     final ThemeData themeData = ThemeData(
-      useMaterial3: false,
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
