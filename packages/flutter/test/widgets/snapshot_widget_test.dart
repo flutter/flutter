@@ -50,6 +50,7 @@ void main() {
 
     // Now invoke clear and the raster is re-generated.
     controller.clear();
+    await tester.pump();
 
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.red.png'));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
