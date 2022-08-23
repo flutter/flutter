@@ -1460,13 +1460,10 @@ abstract class ProxyWidget extends Widget {
 /// ```
 /// {@end-tool}
 ///
-/// By default, [RenderObjectElement.debugIsValidChildParentDataConfiguration]
-/// throws in debug mode when more than one [ParentDataWidget]s are applied on
-/// any of its child [RenderObjectWidget]s. Overriding the said method to allow
-/// multiple [ParentDataWidget]s to be applied on the same [RenderObjectWidget]
-/// child. Since the framework does not guarantee the order in which the
-/// [ParentDataWidget] applied, their [applyParentData] implementations must be
-/// commutative.
+/// By default, the framework throws an exception in debug mode when more than
+/// one [ParentDataWidget]s that target exactly the same [ParentData] type (in
+/// other words, they have the same type parameter [T]) are applied on a child
+/// [RenderObjectWidget].
 ///
 /// See also:
 ///
@@ -1555,6 +1552,11 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// object. The render object's parent is guaranteed to have been created by a
   /// widget of type `T`, which usually means that this function can assume that
   /// the render object's parent data object inherits from a particular class.
+  ///
+  /// Multiple [ParentDataWidget]s can be applied to the same [RenderObject], so
+  /// long as their [T] type parameters are not the same. The framework does
+  /// not guarantee the order in which these [ParentDataWidget] will be applied,
+  /// so [applyParentData] implementations should typically be commutative.
   ///
   /// If this function modifies data that can change the parent's layout or
   /// painting, this function is responsible for calling
@@ -5271,6 +5273,8 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
     visitChildren(applyParentDataToChild);
   }
 
+  late final Type _parentDataType = T;
+
   /// Calls [ParentDataWidget.applyParentData] on the given widget, passing it
   /// the [RenderObject] whose parent data this element is ultimately
   /// responsible for.
@@ -5989,13 +5993,33 @@ abstract class RenderObjectElement extends Element {
     _renderObject = null;
   }
 
-  /// Whether the given list of [ParentDataElement] is a valid combination for
-  /// a child [RenderObject]
+  /// Whether the given list of [ParentDataElement] is a valid combination to
+  /// be applied to the given child [RenderObject].
+  ///
+  /// The default implementation throws when the given list contains more than
+  /// one [ParentDataElement]s.
+  ///
+  /// This method is called by the framework in [attachRenderObject] in debug
+  /// mode.
   @protected
-  bool debugIsValidChildParentDataConfiguration(List<ParentDataElement<ParentData>> parentDataElements, RenderObjectElement child) {
+  bool _debugIsValidChildParentDataConfiguration(List<ParentDataElement<ParentData>> parentDataElements, RenderObjectElement child) {
     if (parentDataElements.length < 2) {
       return true;
     }
+    final Set<Type> parentDataTypes = <Type>{};
+    bool targetsSameParentDataType = false;
+    for (final ParentDataElement<ParentData> parentDataElement in parentDataElements) {
+      final Type type = parentDataElement._parentDataType;
+      if (parentDataTypes.contains(type)) {
+        targetsSameParentDataType = true;
+        break;
+      }
+      parentDataTypes.add(type);
+    }
+    if (!targetsSameParentDataType) {
+      return true;
+    }
+
     try {
       // We explicitly throw here (even though we immediately redirect the
       // exception elsewhere) so that debuggers will notice it when they
@@ -6004,9 +6028,9 @@ abstract class RenderObjectElement extends Element {
         ErrorSummary('Incorrect use of ParentDataWidget.'),
         ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
         for (final ParentDataElement<ParentData> ancestor in parentDataElements)
-          ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
+          ErrorDescription('- ${ancestor.widget} (for ${ancestor._parentDataType}, typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
         ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
-        ErrorHint('Consider overriding RenderObjectElement.debugIsValidChildParentDataConfigurationi if you are the author of this RenderObjectWidget and this ParentData combination is allowed.'),
+        ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
         ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${child.debugGetCreatorChain(10)}'),
       ]);
     } on FlutterError catch (e) {
@@ -6070,7 +6094,7 @@ abstract class RenderObjectElement extends Element {
 
     if (parentDataElements != null) {
       assert(ancestor != null);
-      assert(ancestor!.debugIsValidChildParentDataConfiguration(parentDataElements, this));
+      assert(ancestor!._debugIsValidChildParentDataConfiguration(parentDataElements, this));
       for (final ParentDataElement<ParentData> element in parentDataElements) {
         _updateParentData(element.widget as ParentDataWidget<ParentData>);
       }

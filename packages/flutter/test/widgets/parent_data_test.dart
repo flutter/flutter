@@ -277,8 +277,8 @@ void main() {
       equalsIgnoringHashCodes(
         'Incorrect use of ParentDataWidget.\n'
         'The following ParentDataWidgets are providing parent data to the same RenderObject:\n'
-        '- Positioned(left: 7.0, top: 6.0) (typically placed directly inside a Stack widget)\n'
-        '- Positioned(top: 5.0, bottom: 8.0) (typically placed directly inside a Stack widget)\n'
+        '- Positioned(left: 7.0, top: 6.0) (for StackParentData, typically placed directly inside a Stack widget)\n'
+        '- Positioned(top: 5.0, bottom: 8.0) (for StackParentData, typically placed directly inside a Stack widget)\n'
         'However, a RenderObject can only receive parent data from at most one ParentDataWidget.\n'
         'Usually, this indicates that at least one of the offending ParentDataWidgets listed '
         'above is not placed directly inside a compatible ancestor widget.\n'
@@ -333,14 +333,14 @@ void main() {
 
   testWidgets('multiple ParentDataWidget allowed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: OneAncestorWidgetWithMultipleParentData(
-          child: TestParentDataWidget(
-            string: 'outer',
+        child: OneAncestorWidget(
+          child: BaseTestParentDataWidget(
+            baseString: 'baseString',
             child: TestParentDataWidget(
-              string: 'inner',
-              child: OneAncestorWidgetWithMultipleParentData(),
+              string: 'Foo',
+              child: Container(),
             ),
           ),
         ),
@@ -348,6 +348,9 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+    final DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+    expect(parentData.string, 'Foo');
+    expect(parentData.baseString, 'baseString');
   });
 
   testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
@@ -476,6 +479,26 @@ void main() {
   });
 }
 
+class BaseTestParentDataWidget extends ParentDataWidget<BaseDummyParentData> {
+  const BaseTestParentDataWidget({
+    super.key,
+    required this.baseString,
+    required super.child,
+  });
+
+  final String baseString;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is BaseDummyParentData);
+    final BaseDummyParentData parentData = renderObject.parentData! as BaseDummyParentData;
+    parentData.baseString = baseString;
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => OneAncestorWidget;
+}
+
 class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   const TestParentDataWidget({
     super.key,
@@ -496,7 +519,11 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   Type get debugTypicalAncestorWidgetClass => OneAncestorWidget;
 }
 
-class DummyParentData extends ParentData {
+class BaseDummyParentData extends ParentData {
+  String? baseString;
+}
+
+class DummyParentData extends BaseDummyParentData {
   String? string;
 }
 
@@ -545,21 +572,4 @@ class DummyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => child;
-}
-
-class _DummyRenderOneElement extends SingleChildRenderObjectElement {
-  _DummyRenderOneElement(super.widget);
-  @override
-  bool debugIsValidChildParentDataConfiguration(List<ParentDataElement<ParentData>> parentDataElements, RenderObjectElement child) => true;
-}
-
-class OneAncestorWidgetWithMultipleParentData extends SingleChildRenderObjectWidget {
-  const OneAncestorWidgetWithMultipleParentData({
-    super.key,
-    super.child,
-  });
-  @override
-  SingleChildRenderObjectElement createElement() => _DummyRenderOneElement(this);
-  @override
-  RenderOne createRenderObject(BuildContext context) => RenderOne();
 }
