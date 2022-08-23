@@ -1,4 +1,4 @@
-Signature: c6ce2be70f2ba6df923a785964de3bdf
+Signature: cb52130fe81571ba4985819c5a8983f7
 
 UNUSED LICENSES:
 
@@ -2513,7 +2513,6 @@ FILE: ../../../third_party/skia/include/gpu/graphite/Context.h
 FILE: ../../../third_party/skia/include/gpu/graphite/GraphiteTypes.h
 FILE: ../../../third_party/skia/include/gpu/graphite/Recorder.h
 FILE: ../../../third_party/skia/include/gpu/graphite/Recording.h
-FILE: ../../../third_party/skia/include/gpu/graphite/SkStuff.h
 FILE: ../../../third_party/skia/include/gpu/graphite/TextureInfo.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlTypes.h
@@ -2609,7 +2608,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/ResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ResourceTypes.h
 FILE: ../../../third_party/skia/src/gpu/graphite/SharedContext.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/SharedContext.h
-FILE: ../../../third_party/skia/src/gpu/graphite/SkStuff.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Surface_Graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Task.cpp
