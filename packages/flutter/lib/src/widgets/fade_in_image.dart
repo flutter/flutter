@@ -309,7 +309,7 @@ class FadeInImage extends StatefulWidget {
   ///
   /// If not value set, it will fallback to [fit].
   final BoxFit? placeholderFit;
-  
+
   /// The rendering quality of the image.
   ///
   /// If the image is of a high quality and its pixels are perfectly aligned
@@ -327,7 +327,7 @@ class FadeInImage extends StatefulWidget {
   ///  * [FilterQuality], the enum containing all possible filter quality
   ///    options.
   final FilterQuality? filterQuality;
-  
+
   /// The rendering quality of the placeholder image.
   ///
   /// If the placeholder image is of a high quality and its pixels are perfectly aligned
