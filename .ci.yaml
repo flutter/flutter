@@ -67,6 +67,14 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 13f17a
+  mac_arm64:
+    properties:
+      dependencies: >-
+        []
+      os: Mac-12
+      device_type: none
+      cpu: arm64
+      xcode: 13f17a
   mac_android:
     properties:
       dependencies: >-
