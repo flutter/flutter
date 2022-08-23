@@ -521,5 +521,39 @@ TEST_P(DisplayListTest, CanDrawShadow) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, CanDrawZeroWidthLine) {
+  flutter::DisplayListBuilder builder;
+  std::vector<flutter::DlStrokeCap> caps = {
+      flutter::DlStrokeCap::kButt,
+      flutter::DlStrokeCap::kRound,
+      flutter::DlStrokeCap::kSquare,
+  };
+  flutter::DlPaint paint =                              //
+      flutter::DlPaint()                                //
+          .setColor(flutter::DlColor::kWhite())         //
+          .setDrawStyle(flutter::DlDrawStyle::kStroke)  //
+          .setStrokeWidth(0);
+  flutter::DlPaint outline_paint =                      //
+      flutter::DlPaint()                                //
+          .setColor(flutter::DlColor::kYellow())        //
+          .setDrawStyle(flutter::DlDrawStyle::kStroke)  //
+          .setStrokeCap(flutter::DlStrokeCap::kSquare)  //
+          .setStrokeWidth(1);
+  SkPath path = SkPath().addPoly({{150, 50}, {160, 50}}, false);
+  for (auto cap : caps) {
+    paint.setStrokeCap(cap);
+    builder.drawLine({50, 50}, {60, 50}, paint);
+    builder.drawRect({45, 45, 65, 55}, outline_paint);
+    builder.drawLine({100, 50}, {100, 50}, paint);
+    if (cap != flutter::DlStrokeCap::kButt) {
+      builder.drawRect({95, 45, 105, 55}, outline_paint);
+    }
+    builder.drawPath(path, paint);
+    builder.drawRect(path.getBounds().makeOutset(5, 5), outline_paint);
+    builder.translate(0, 150);
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

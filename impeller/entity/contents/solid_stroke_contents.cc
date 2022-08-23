@@ -52,8 +52,13 @@ std::optional<Rect> SolidStrokeContents::GetCoverage(
   if (join_ == Join::kMiter) {
     max_radius = std::max(max_radius, miter_limit_ * 0.5f);
   }
+  Scalar determinant = entity.GetTransformation().GetDeterminant();
+  if (determinant == 0) {
+    return std::nullopt;
+  }
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
   Vector2 max_radius_xy = entity.GetTransformation().TransformDirection(
-      Vector2(max_radius, max_radius) * stroke_size_);
+      Vector2(max_radius, max_radius) * std::max(stroke_size_, min_size));
 
   return Rect(path_coverage.origin - max_radius_xy,
               Size(path_coverage.size.width + max_radius_xy.x * 2,
@@ -182,7 +187,7 @@ static VertexBuffer CreateSolidStrokeVertices(
 bool SolidStrokeContents::Render(const ContentContext& renderer,
                                  const Entity& entity,
                                  RenderPass& pass) const {
-  if (stroke_size_ <= 0.0) {
+  if (stroke_size_ < 0.0) {
     return true;
   }
 
@@ -192,7 +197,12 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   VS::VertInfo vert_info;
   vert_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                   entity.GetTransformation();
-  vert_info.size = stroke_size_;
+  Scalar determinant = entity.GetTransformation().GetDeterminant();
+  if (determinant == 0) {
+    return true;
+  }
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  vert_info.size = std::max(stroke_size_, min_size);
 
   FS::FragInfo frag_info;
   frag_info.color = color_.Premultiply();
