@@ -44,10 +44,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('Here\'s a text field that supports inserting gif content:'),
+          const Text("Here's a text field that supports inserting gif content:"),
           TextField(
             controller: _controller,
-            contentCommitMimeTypes: const ['image/gif', 'image/png'],
+            contentCommitMimeTypes: const <String>['image/gif', 'image/png'],
             onContentCommitted: (CommittedContent data) async {
               // Handle committed content here
             },

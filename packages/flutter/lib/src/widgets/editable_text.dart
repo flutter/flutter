@@ -1208,7 +1208,6 @@ class EditableText extends StatefulWidget {
   /// `TextField`.
   ///
   /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_committed.0.dart **
-  /// ```
   /// {@end-tool}
   ///
   /// See also:
