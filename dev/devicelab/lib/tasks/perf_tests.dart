@@ -7,7 +7,6 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -1377,31 +1376,41 @@ class CompileTest {
 
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
-        options.insert(0, 'ios');
+      case DeviceOperatingSystem.macos:
+        unawaited(stderr.flush());
+        late final String deviceId;
+        if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+          deviceId = 'ios';
+        } else if (deviceOperatingSystem == DeviceOperatingSystem.macos) {
+          deviceId = 'macos';
+        } else {
+          throw Exception('Attempted to run darwin compile workflow with $deviceOperatingSystem');
+        }
+
+        options.insert(0, deviceId);
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
-        final Directory? appBundle = appBuildDirectory
-            .listSync()
-            .whereType<Directory?>()
-            .singleWhere((Directory? directory) =>
-              directory != null && path.extension(directory.path) == '.app',
-              orElse: () => null);
-        if (appBundle == null) {
-          throw 'Failed to find app bundle in ${appBuildDirectory.path}';
+        final Directory buildDirectory = dir(path.join(
+          cwd,
+          'build',
+        ));
+        final String? appBundlePath =
+            _findDarwinAppInBuildDirectory(buildDirectory.path);
+        if (appBundlePath == null) {
+          throw 'Failed to find app bundle in ${buildDirectory.path}';
         }
-        final String appPath =  appBundle.path;
         // IPAs are created manually, https://flutter.dev/ios-release/
-        await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
+        await exec('tar', <String>['-zcf', 'build/app.ipa', appBundlePath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
         if (reportPackageContentSizes) {
-          metrics.addAll(await getSizesFromDarwinApp(
-            appPath: appBuildDirectory.path,
-            operatingSystem: DeviceOperatingSystem.ios,
-          ));
+          final Map<String, Object> sizeMetrics = await getSizesFromDarwinApp(
+              appPath: appBundlePath,
+              operatingSystem: deviceOperatingSystem,
+          );
+          metrics.addAll(sizeMetrics);
         }
         break;
       case DeviceOperatingSystem.android:
@@ -1439,40 +1448,6 @@ class CompileTest {
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
-      case DeviceOperatingSystem.macos:
-        unawaited(stderr.flush());
-        options.insert(0, 'macos');
-        options.add('--tree-shake-icons');
-        options.add('--split-debug-info=infos/');
-        watch.start();
-        await flutter('build', options: options);
-        watch.stop();
-        final String buildDirectoryPath = path.join(
-          cwd,
-          'build',
-          'macos',
-          'Build',
-          'Products',
-          'Release',
-        );
-        final String? appBundlePath =
-            _findDarwinAppInBuildDirectory(buildDirectoryPath);
-        if (appBundlePath == null) {
-          throw 'Failed to find app bundle in $buildDirectoryPath';
-        }
-        final Directory appBundle = Directory(appBundlePath);
-        final Archive archive = Archive();
-        await appBundle
-            .list(recursive: true)
-            .where((FileSystemEntity e) => e.runtimeType == File)
-            .map<ArchiveFile>((FileSystemEntity e) {
-              assert(e.runtimeType == File);
-              final File file = e as File;
-              return ArchiveFile(file.path, file.statSync().size, file.readAsBytesSync());
-            })
-            .forEach((ArchiveFile file) => archive.addFile(file));
-        releaseSizeInBytes = TarEncoder().encode(archive).length;
-        break;
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
