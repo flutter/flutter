@@ -664,18 +664,21 @@ class StartupTest {
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
+        case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+          break;
         case DeviceOperatingSystem.ios:
+        case DeviceOperatingSystem.macos:
           await flutter('build', options: <String>[
-            'ios',
+            deviceOperatingSystem == DeviceOperatingSystem.ios
+              ? 'ios'
+              : 'macos',
              '-v',
             '--profile',
             '--target=$target',
           ]);
-          applicationBinaryPath = _findDarwinAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
-          break;
-        case DeviceOperatingSystem.fake:
-        case DeviceOperatingSystem.fuchsia:
-        case DeviceOperatingSystem.macos:
+          final String buildRoot = path.join(testDirectory, 'build');
+          applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
           break;
         case DeviceOperatingSystem.windows:
           await flutter('build', options: <String>[
