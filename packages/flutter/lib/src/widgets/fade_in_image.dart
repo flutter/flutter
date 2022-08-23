@@ -68,6 +68,9 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder] and [image] may be have their own BoxFit settings via [fit]
   /// and [placeholderFit].
   ///
+  /// The [placeholder] and [image] may be have their own FilterQuality settings via [filterQuality]
+  /// and [placeholderFilterQuality].
+  ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
   /// [matchTextDirection] arguments must not be null.
@@ -89,6 +92,8 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
+    this.filterQuality,
+    this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -148,6 +153,8 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
+    this.filterQuality,
+    this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -219,6 +226,8 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
+    this.filterQuality,
+    this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -300,6 +309,44 @@ class FadeInImage extends StatefulWidget {
   ///
   /// If not value set, it will fallback to [fit].
   final BoxFit? placeholderFit;
+  
+  /// The rendering quality of the image.
+  ///
+  /// If the image is of a high quality and its pixels are perfectly aligned
+  /// with the physical screen pixels, extra quality enhancement may not be
+  /// necessary. If so, then [FilterQuality.none] would be the most efficient.
+  ///
+  /// If the pixels are not perfectly aligned with the screen pixels, or if the
+  /// image itself is of a low quality, [FilterQuality.none] may produce
+  /// undesirable artifacts. Consider using other [FilterQuality] values to
+  /// improve the rendered image quality in this case. Pixels may be misaligned
+  /// with the screen pixels as a result of transforms or scaling.
+  ///
+  /// See also:
+  ///
+  ///  * [FilterQuality], the enum containing all possible filter quality
+  ///    options.
+  final FilterQuality? filterQuality;
+  
+  /// The rendering quality of the placeholder image.
+  ///
+  /// If the placeholder image is of a high quality and its pixels are perfectly aligned
+  /// with the physical screen pixels, extra quality enhancement may not be
+  /// necessary. If so, then [FilterQuality.none] would be the most efficient.
+  ///
+  /// If the pixels are not perfectly aligned with the screen pixels, or if the
+  /// placeholder image itself is of a low quality, [FilterQuality.none] may produce
+  /// undesirable artifacts. Consider using other [FilterQuality] values to
+  /// improve the rendered image quality in this case. Pixels may be misaligned
+  /// with the screen pixels as a result of transforms or scaling.
+  ///
+  /// If not value set, it will fallback to [filterQuality].
+  ///
+  /// See also:
+  ///
+  ///  * [FilterQuality], the enum containing all possible filter quality
+  ///    options.
+  final FilterQuality? placeholderFilterQuality;
 
   /// How to align the image within its bounds.
   ///
@@ -379,6 +426,7 @@ class _FadeInImageState extends State<FadeInImage> {
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
     BoxFit? fit,
+    FilterQuality? filterQuality,
     required Animation<double> opacity,
   }) {
     assert(image != null);
@@ -390,6 +438,7 @@ class _FadeInImageState extends State<FadeInImage> {
       width: widget.width,
       height: widget.height,
       fit: fit,
+      filterQuality: filterQuality,
       alignment: widget.alignment,
       repeat: widget.repeat,
       matchTextDirection: widget.matchTextDirection,
@@ -405,6 +454,7 @@ class _FadeInImageState extends State<FadeInImage> {
       errorBuilder: widget.imageErrorBuilder,
       opacity: _imageAnimation,
       fit: widget.fit,
+      filterQuality: widget.filterQuality,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
           targetLoaded = true;
@@ -417,6 +467,7 @@ class _FadeInImageState extends State<FadeInImage> {
             errorBuilder: widget.placeholderErrorBuilder,
             opacity: _placeholderAnimation,
             fit: widget.placeholderFit ?? widget.fit,
+            filterQuality: widget.placeholderFilterQuality ?? widget.filterQuality,
           ),
           placeholderProxyAnimation: _placeholderAnimation,
           isTargetLoaded: targetLoaded,
