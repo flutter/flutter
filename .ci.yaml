@@ -3444,6 +3444,36 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
 
+  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: flutter_gallery__transition_perf_e2e_ios
+
+  - name: Mac_ios flutter_gallery_ios__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: flutter_gallery_ios__transition_perf
+
+  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
+
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
