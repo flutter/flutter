@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AccessibilityFeatures, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -39,7 +39,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// lifecycle messages. See [didChangeAppLifecycleState].
 ///
 /// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
-/// ```
+///
 /// {@end-tool}
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]

@@ -5,10 +5,9 @@
 import 'template.dart';
 
 class ButtonTemplate extends TokenTemplate {
-  const ButtonTemplate(this.tokenGroup, String fileName, Map<String, dynamic> tokens)
-    : super(fileName, tokens,
-        colorSchemePrefix: '_colors.',
-      );
+  const ButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
 
   final String tokenGroup;
 
@@ -55,9 +54,8 @@ class ButtonTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends ButtonStyle {
+  _${blockName}DefaultsM3(this.context)
    : super(
        animationDuration: kThemeChangeDuration,
        enableFeedback: true,

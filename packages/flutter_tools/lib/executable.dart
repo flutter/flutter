@@ -142,7 +142,8 @@ List<FlutterCommand> generateCommands({
     logger: globals.logger,
     terminal: globals.terminal,
     artifacts: globals.artifacts!,
-    allProjectValidators: <ProjectValidator>[],
+    // new ProjectValidators should be added here for the --suggestions to run
+    allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
@@ -177,6 +178,8 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
     logger: globals.logger,
+    artifacts: globals.artifacts!,
+    processManager: globals.processManager,
   ),
   InstallCommand(),
   LogsCommand(),
@@ -192,7 +195,7 @@ List<FlutterCommand> generateCommands({
   RunCommand(verboseHelp: verboseHelp),
   ScreenshotCommand(),
   ShellCompletionCommand(),
-  TestCommand(verboseHelp: verboseHelp),
+  TestCommand(verboseHelp: verboseHelp, verbose: verbose),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(
     stdio: globals.stdio,

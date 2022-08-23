@@ -144,7 +144,8 @@ class Slider extends StatefulWidget {
        assert(min != null),
        assert(max != null),
        assert(min <= max),
-       assert(value >= min && value <= max),
+       assert(value >= min && value <= max,
+         'Value $value is not between minimum $min and maximum $max'),
        assert(divisions == null || divisions > 0);
 
   /// Creates an adaptive [Slider] based on the target platform, following
@@ -323,7 +324,7 @@ class Slider extends StatefulWidget {
   /// It is used to display the value of a discrete slider, and it is displayed
   /// as part of the value indicator shape.
   ///
-  /// The label is rendered using the active [ThemeData]'s [TextTheme.bodyText1]
+  /// The label is rendered using the active [ThemeData]'s [TextTheme.bodyLarge]
   /// text style, with the theme data's [ColorScheme.onPrimary] color. The
   /// label's text style can be overridden with
   /// [SliderThemeData.valueIndicatorTextStyle].
@@ -723,7 +724,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyLarge!.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
     );
@@ -841,7 +842,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           );
         },
       );
-      Overlay.of(context)!.insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
     }
   }
 }

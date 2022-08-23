@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -112,6 +113,9 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   String get category => FlutterCommandCategory.project;
 
+  @visibleForTesting
+  List<ProjectValidator> allProjectValidators() => _allProjectValidators;
+
   @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
@@ -138,10 +142,14 @@ class AnalyzeCommand extends FlutterCommand {
       }
       if (workingDirectory == null) {
         final Set<String> items = findDirectories(argResults!, _fileSystem);
-        if (items.isEmpty || items.length > 1) {
-          throwToolExit('The suggestions flags needs one directory path');
+        if (items.isEmpty) { // user did not specify any path
+          directoryPath = _fileSystem.currentDirectory.path;
+          _logger.printTrace('Showing suggestions for current directory: $directoryPath');
+        } else if (items.length > 1) { // if the user sends more than one path
+          throwToolExit('The suggestions flag can process only one directory path');
+        } else {
+          directoryPath = items.first;
         }
-        directoryPath = items.first;
       } else {
         directoryPath = workingDirectory!.path;
       }
@@ -150,6 +158,7 @@ class AnalyzeCommand extends FlutterCommand {
         logger: _logger,
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
+        processManager: _processManager,
       ).run();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(

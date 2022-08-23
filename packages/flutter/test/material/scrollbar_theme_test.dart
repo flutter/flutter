@@ -179,12 +179,12 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(770.0, 10.0, 800.0, 590.0),
+          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 600.0),
           color: const Color(0xff000000),
         )
         ..line(
-          p1: const Offset(770.0, 10.0),
-          p2: const Offset(770.0, 590.0),
+          p1: const Offset(770.0, 00.0),
+          p2: const Offset(770.0, 600.0),
           strokeWidth: 1.0,
           color: const Color(0xffffeb3b),
         )

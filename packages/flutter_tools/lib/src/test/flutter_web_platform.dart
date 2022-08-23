@@ -35,6 +35,7 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'flutter_web_goldens.dart';
 import 'test_compiler.dart';
+import 'test_time_recorder.dart';
 
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root, {
@@ -51,6 +52,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Artifacts? artifacts,
     required ProcessManager processManager,
     required Cache cache,
+    TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
@@ -76,7 +78,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
-      () => TestCompiler(buildInfo, flutterProject),
+      () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
       fileSystem: _fileSystem,
       logger: _logger,
       processManager: processManager,
@@ -120,6 +122,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Artifacts? artifacts,
     required ProcessManager processManager,
     required Cache cache,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -149,6 +152,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       nullAssertions: nullAssertions,
       processManager: processManager,
       cache: cache,
+      testTimeRecorder: testTimeRecorder,
     );
   }
 
@@ -683,7 +687,11 @@ class BrowserManager {
 
     unawaited(chrome.onExit.then((int? browserExitCode) {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
-    }).catchError((Object error, StackTrace stackTrace) {
+    })
+    // TODO(srawlins): Fix this static issue,
+    // https://github.com/flutter/flutter/issues/105750.
+    // ignore: body_might_complete_normally_catch_error
+    .catchError((Object error, StackTrace stackTrace) {
       if (!completer.isCompleted) {
         completer.completeError(error, stackTrace);
       }

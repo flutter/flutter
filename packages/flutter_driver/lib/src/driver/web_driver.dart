@@ -294,6 +294,29 @@ class FlutterWebConnection {
 
   /// Sends command via WebDriver to Flutter web application.
   Future<dynamic> sendCommand(String script, Duration? duration) async {
+    // This code should not be reachable before the VM service extension is
+    // initialized. The VM service extension is expected to initialize both
+    // `$flutterDriverResult` and `$flutterDriver` variables before attempting
+    // to send commands. This part checks that `$flutterDriverResult` is present.
+    // `$flutterDriver` is not checked because it is covered by the `script`
+    // that's executed next.
+    try {
+      await _driver.execute(r'return $flutterDriverResult', <String>[]);
+    } catch (error, stackTrace) {
+      throw DriverError(
+        'Driver extension has not been initialized correctly.\n'
+        'If the test uses a custom VM service extension, make sure it conforms '
+        'to the protocol used by package:integration_test and '
+        'package:flutter_driver.\n'
+        'If the test uses VM service extensions provided by the Flutter SDK, '
+        'then this error is likely caused by a bug in Flutter. Please report it '
+        'by filing a bug on GitHub:\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+        error,
+        stackTrace,
+      );
+    }
+
     String phase = 'executing';
     try {
       // Execute the script, which should leave the result in the `$flutterDriverResult` global variable.

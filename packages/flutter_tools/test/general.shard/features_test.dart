@@ -384,5 +384,20 @@ void main() {
       });
     }
 
+    // Custom devices on all channels
+    for (final String channel in <String>['master', 'beta', 'stable']) {
+      testWithoutContext('Custom devices are enabled with flag on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        testConfig.setValue('enable-custom-devices', true);
+        expect(featureFlags.areCustomDevicesEnabled, true);
+      });
+
+      testWithoutContext('Custom devices are enabled with environment variable on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        platform.environment = <String, String>{'FLUTTER_CUSTOM_DEVICES': 'true'};
+        expect(featureFlags.areCustomDevicesEnabled, true);
+      });
+    }
+
   });
 }

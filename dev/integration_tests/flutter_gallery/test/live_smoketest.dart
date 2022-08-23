@@ -51,10 +51,12 @@ Future<void> main() async {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
     final List<String> allDemoTitles = kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
-    if (!Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles))
+    if (!Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles)) {
       fail('Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
-    if (!Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles))
+    }
+    if (!Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles)) {
       fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
+    }
 
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
@@ -66,8 +68,9 @@ Future<void> main() async {
         final Finder demoItem = find.text(demo.title);
         print('Scrolling to "${demo.title}"...');
         await controller.scrollIntoView(demoItem, alignment: 0.5);
-        if (_kSkippedDemoTitles.contains(demo.title))
+        if (_kSkippedDemoTitles.contains(demo.title)) {
           continue;
+        }
         for (int i = 0; i < 2; i += 1) {
           print('Tapping "${demo.title}"...');
           await controller.tap(demoItem); // Launch the demo
@@ -91,10 +94,12 @@ Future<void> main() async {
 final Finder backFinder = find.byElementPredicate(
   (Element element) {
     final Widget widget = element.widget;
-    if (widget is Tooltip)
+    if (widget is Tooltip) {
       return widget.message == 'Back';
-    if (widget is CupertinoNavigationBarBackButton)
+    }
+    if (widget is CupertinoNavigationBarBackButton) {
       return true;
+    }
     return false;
   },
   description: 'Material or Cupertino back button',
@@ -122,11 +127,13 @@ class _LiveWidgetController extends LiveWidgetController {
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> _waitForElement(Finder finder) async {
-    if (frameSync)
+    if (frameSync) {
       await _waitUntilFrame(() => binding.transientCallbackCount == 0);
+    }
     await _waitUntilFrame(() => finder.precache());
-    if (frameSync)
+    if (frameSync) {
       await _waitUntilFrame(() => binding.transientCallbackCount == 0);
+    }
     return finder;
   }
 

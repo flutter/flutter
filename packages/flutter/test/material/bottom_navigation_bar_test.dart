@@ -1209,7 +1209,7 @@ void main() {
 
     expect(find.text('B'), findsOneWidget);
     await tester.longPress(find.text('B'));
-    expect(find.byTooltip('B'), findsOneWidget);
+    expect(find.byTooltip('B'), findsNothing);
 
     expect(find.text('C'), findsOneWidget);
     await tester.longPress(find.text('C'));

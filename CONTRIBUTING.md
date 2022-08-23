@@ -75,7 +75,7 @@ that increase our test coverage, writing tests for issues others have filed, all
 are really valuable contributions to open source projects.
 
 If this interests you, you can jump in and submit bug reports without needing anyone's permission!
-The #qa channel on our [Discord server](https://github.com/flutter/flutter/wiki/Chat)
+The #quality-assurance channel on our [Discord server](https://github.com/flutter/flutter/wiki/Chat)
 is a good place to talk about what you're doing. We're especially eager for QA testing when
 we announce a beta release. See https://github.com/flutter/flutter/wiki/Quality-Assurance for
 more details.

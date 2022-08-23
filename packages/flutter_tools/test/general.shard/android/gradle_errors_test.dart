@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
@@ -670,7 +671,7 @@ assembleFooTest
           '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -709,7 +710,7 @@ assembleProfile
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -907,10 +908,10 @@ A problem occurred evaluating project ':app'.
           '│ To fix this issue, replace the following content:                                │\n'
           '│ /android/build.gradle:                                                           │\n'
           "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-          "│     + classpath 'com.android.tools.build:gradle:7.1.2'                           │\n"
+          "│     + classpath 'com.android.tools.build:gradle:7.2.0'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-7.4-all.zip               │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.5-all.zip               │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );

@@ -686,6 +686,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
   }
 
+  // TODO(Piinks): https://github.com/flutter/flutter/issues/100748
+  @override
+  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
+    return null;
+  }
+
   ScrollActivity createOuterBallisticScrollActivity(double velocity) {
     // This function creates a ballistic scroll for the outer scrollable.
     //
@@ -1344,6 +1350,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
+    coordinator.updateUserScrollDirection(ScrollDirection.idle);
   }
 
   // This is called by activities when they finish their work and want to go
@@ -1358,6 +1365,12 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       simulation,
       mode: _NestedBallisticScrollActivityMode.independent,
     ));
+  }
+
+  // TODO(Piinks): see https://github.com/flutter/flutter/issues/100748
+  @override
+  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
+    return null;
   }
 
   ScrollActivity createBallisticScrollActivity(
@@ -1381,6 +1394,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           metrics,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.inner:
         return _NestedInnerBallisticScrollActivity(
@@ -1388,9 +1402,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           this,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.independent:
-        return BallisticScrollActivity(this, simulation, context.vsync);
+        return BallisticScrollActivity(this, simulation, context.vsync, activity?.shouldIgnorePointer ?? true);
     }
   }
 
@@ -1462,7 +1477,8 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
     _NestedScrollPosition position,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(position, simulation, vsync);
+    bool shouldIgnorePointer,
+  ) : super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
 
@@ -1498,9 +1514,10 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
     this.metrics,
     Simulation simulation,
     TickerProvider vsync,
+    bool shouldIgnorePointer,
   ) : assert(metrics.minRange != metrics.maxRange),
       assert(metrics.maxRange > metrics.minRange),
-      super(position, simulation, vsync);
+      super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;
