@@ -1549,7 +1549,7 @@ class CompileTest {
     };
   }
 
-  static Future<Map<String, dynamic>> getSizesFromDarwinApp({
+  static Future<Map<String, Object>> getSizesFromDarwinApp({
     required String appPath,
     required DeviceOperatingSystem operatingSystem,
   }) async {
@@ -1594,7 +1594,7 @@ class CompileTest {
       'App',
     ));
 
-    return <String, dynamic>{
+    return <String, Object>{
       'app_framework_uncompressed_bytes': await appFramework.length(),
       'flutter_framework_uncompressed_bytes': await flutterFramework.length(),
     };
