@@ -250,19 +250,19 @@ void main() {
 
     TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
     expect(labelStyle.color?.value, 0xde000000);
-    expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyText1?.height);
-    expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
+    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.bodyLarge?.height);
+    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
 
     await tester.pumpWidget(buildFrame(Brightness.dark));
     await tester.pumpAndSettle(); // Theme transition animation
@@ -277,19 +277,19 @@ void main() {
 
     labelStyle = getLabelStyle(tester, 'Chip A').style;
     expect(labelStyle.color?.value, 0xdeffffff);
-    expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyText1?.height);
-    expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
+    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.bodyLarge?.height);
+    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
   });
 
   testWidgets('Chip control test', (WidgetTester tester) async {
@@ -1767,7 +1767,7 @@ void main() {
     final ChipThemeData defaultChipTheme = ChipThemeData.fromDefaults(
       brightness: themeData.brightness,
       secondaryColor: Colors.blue,
-      labelStyle: themeData.textTheme.bodyText1!,
+      labelStyle: themeData.textTheme.bodyLarge!,
     );
     bool value = false;
     Widget buildApp({

@@ -819,7 +819,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     ];
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -828,7 +828,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
     if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -863,7 +863,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
     if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
     setState(fn);
   }
@@ -1213,7 +1213,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   TickerFuture didPush() {
     if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
-      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
+      navigator!.focusNode.enclosingScope?.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     return super.didPush();
   }
@@ -1221,7 +1221,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didAdd() {
     if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
-      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
+      navigator!.focusNode.enclosingScope?.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     super.didAdd();
   }
