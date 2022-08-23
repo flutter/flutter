@@ -426,7 +426,7 @@ class _FadeInImageState extends State<FadeInImage> {
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
     BoxFit? fit,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality? filterQuality = FilterQuality.low,
     required Animation<double> opacity,
   }) {
     assert(image != null);
