@@ -1885,7 +1885,8 @@ Future<File> waitForFile(String path) async {
 }
 
 String? _findDarwinAppInBuildDirectory(String searchDirectory) {
-  for (final FileSystemEntity entity in Directory(searchDirectory).listSync()) {
+  for (final FileSystemEntity entity in Directory(searchDirectory)
+    .listSync(recursive: true)) {
     if (entity.path.endsWith('.app')) {
       return entity.path;
     }
