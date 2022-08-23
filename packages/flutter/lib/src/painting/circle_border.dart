@@ -106,6 +106,18 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    if (eccentricity == 0.0) {
+      canvas.drawCircle(rect.center, rect.shortestSide / 2.0, paint);
+    } else {
+      canvas.drawOval(_adjustRect(rect), paint);
+    }
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
   CircleBorder copyWith({ BorderSide? side, double? eccentricity }) {
     return CircleBorder(side: side ?? this.side, eccentricity: eccentricity ?? this.eccentricity);
   }

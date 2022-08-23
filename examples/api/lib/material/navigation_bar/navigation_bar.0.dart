@@ -33,12 +33,12 @@ class RootPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle headline5 = Theme.of(context).textTheme.headline5!;
+    final TextStyle headlineSmall = Theme.of(context).textTheme.headlineSmall!;
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       backgroundColor: destination.color,
       visualDensity: VisualDensity.comfortable,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      textStyle: headline5,
+      textStyle: headlineSmall,
     );
 
     return Scaffold(
@@ -97,7 +97,7 @@ class RootPage extends StatelessWidget {
                           child: Text(
                             '${destination.title} BottomSheet\n'
                             'Tap the back button to dismiss',
-                            style: headline5,
+                            style: headlineSmall,
                             softWrap: true,
                             textAlign: TextAlign.center,
                           ),
@@ -127,7 +127,7 @@ class ListPage extends StatelessWidget {
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       foregroundColor: destination.color,
       fixedSize: const Size.fromHeight(128),
-      textStyle: Theme.of(context).textTheme.headline5,
+      textStyle: Theme.of(context).textTheme.headlineSmall,
     );
     return Scaffold(
       appBar: AppBar(
@@ -198,7 +198,7 @@ class _TextPageState extends State<TextPage> {
         alignment: Alignment.center,
         child: TextField(
           controller: textController,
-          style: theme.primaryTextTheme.headline4?.copyWith(
+          style: theme.primaryTextTheme.headlineMedium?.copyWith(
             color: widget.destination.color,
           ),
           decoration: InputDecoration(

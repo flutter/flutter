@@ -108,35 +108,11 @@ TaskFunction createCubicBezierPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createCubicBezierPerfSkSlWarmupE2ETest() {
-  return PerfTestWithSkSL.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/cubic_bezier_perf_e2e.dart',
-  ).run;
-}
-
-TaskFunction createCubicBezierPerfSkSLWarmupTest() {
-  return PerfTestWithSkSL(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/run_app.dart',
-    'cubic_bezier_perf',
-    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
-  ).run;
-}
-
 TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     'test_driver/transitions_perf.dart',
     'transitions',
-  ).run;
-}
-
-TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
-  return PerfTestWithSkSL.e2e(
-    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
-    'test_driver/transitions_perf_e2e.dart',
-    testDriver: 'test_driver/transitions_perf_e2e_test.dart',
   ).run;
 }
 
@@ -700,7 +676,23 @@ class StartupTest {
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.macos:
+          break;
         case DeviceOperatingSystem.windows:
+          await flutter('build', options: <String>[
+            'windows',
+            '-v',
+            '--profile',
+            '--target=$target',
+          ]);
+          final String basename = path.basename(testDirectory);
+          applicationBinaryPath = path.join(
+            testDirectory,
+            'build',
+            'windows',
+            'runner',
+            'Profile',
+            '$basename.exe'
+          );
           break;
       }
 

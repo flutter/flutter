@@ -592,4 +592,56 @@ void main() {
   themeData = ThemeData.raw(selectedRowColor: Brightness.dark);
   themeData = themeData.copyWith(selectedRowColor: Brightness.dark);
   themeData.selectedRowColor; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var TextTheme textTheme = TextTheme(
+    headline1: headline1Style,
+    headline2: headline2Style,
+    headline3: headline3Style,
+    headline4: headline4Style,
+    headline5: headline5Style,
+    headline6: headline6Style,
+    subtitle1: subtitle1Style,
+    subtitle2: subtitle2Style,
+    bodyText1: bodyText1Style,
+    bodyText2: bodyText2Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    overline: overlineStyle,
+  );
+  var TextTheme textTheme = TextTheme(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var TextTheme copiedTextTheme = TextTheme.copyWith(
+    headline1: headline1Style,
+    headline2: headline2Style,
+    headline3: headline3Style,
+    headline4: headline4Style,
+    headline5: headline5Style,
+    headline6: headline6Style,
+    subtitle1: subtitle1Style,
+    subtitle2: subtitle2Style,
+    bodyText1: bodyText1Style,
+    bodyText2: bodyText2Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    overline: overlineStyle,
+  );
+  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var style;
+  style = textTheme.headline1;
+  style = textTheme.headline2;
+  style = textTheme.headline3;
+  style = textTheme.headline4;
+  style = textTheme.headline5;
+  style = textTheme.headline6;
+  style = textTheme.subtitle1;
+  style = textTheme.subtitle2;
+  style = textTheme.bodyText1;
+  style = textTheme.bodyText2;
+  style = textTheme.caption;
+  style = textTheme.button;
+  style = textTheme.overline;
 }

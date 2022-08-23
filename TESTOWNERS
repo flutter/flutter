@@ -10,9 +10,9 @@
 
 ## Linux Android DeviceLab tests
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @blasten @flutter/engine
+/dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @stuartmorgan @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/android_lifecycles_test.dart @blasten @flutter/engine
+/dev/devicelab/bin/tasks/android_lifecycles_test.dart @stuartmorgan @flutter/engine
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/android_stack_size_test.dart @zanderso @flutter/tool
@@ -55,7 +55,7 @@
 /dev/devicelab/bin/tasks/frame_policy_delay_test_android.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf__e2e_summary.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @blasten @flutter/tool
+/dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @stuartmorgan @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/image_list_reported_duration.dart @zanderso @flutter/engine
@@ -86,6 +86,7 @@
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf__e2e_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/openpay_benchmarks__scroll_perf.dart @iskakaushik @flutter/engine
+/dev/devicelab/bin/tasks/spell_check_test.dart @camsim99 @flutter/android
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
@@ -218,7 +219,13 @@
 /dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/entrypoint_dart_registrant.dart @aaclarke @flutter/plugin
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/hello_world_windows__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/hello_world_win_desktop__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_gallery_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_view_win_desktop__start_up.dart @schectman @flutter/desktop
+/dev/devicelab/bin/tasks/platform_view_win_desktop__start_up.dart @schectman @flutter/desktop
 
 ## Host only framework tests
 # Linux analyze
@@ -241,9 +248,9 @@
 /dev/integration_tests/deferred_components_test @garyqian @flutter/android
 
 ## Firebase tests
-/dev/integration_tests/abstract_method_smoke_test @blasten @flutter/android
-/dev/integration_tests/android_embedding_v2_smoke_test @blasten @flutter/android
-/dev/integration_tests/release_smoke_test @blasten @flutter/android
+/dev/integration_tests/abstract_method_smoke_test @stuartmorgan @flutter/android
+/dev/integration_tests/android_embedding_v2_smoke_test @stuartmorgan @flutter/android
+/dev/integration_tests/release_smoke_test @stuartmorgan @flutter/android
 
 ## Shards tests
 # TODO(keyonghan): add files/paths for below framework host only testss.
