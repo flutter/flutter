@@ -426,7 +426,7 @@ class _FadeInImageState extends State<FadeInImage> {
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
     BoxFit? fit,
-    FilterQuality? filterQuality = FilterQuality.low,
+    FilterQuality? filterQuality,
     required Animation<double> opacity,
   }) {
     assert(image != null);
@@ -438,7 +438,7 @@ class _FadeInImageState extends State<FadeInImage> {
       width: widget.width,
       height: widget.height,
       fit: fit,
-      filterQuality: filterQuality,
+      filterQuality: filterQuality ?? FilterQuality.low,
       alignment: widget.alignment,
       repeat: widget.repeat,
       matchTextDirection: widget.matchTextDirection,
