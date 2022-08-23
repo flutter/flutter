@@ -2730,6 +2730,26 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac_arm64 tool_host_cross_arch_tests
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "13f17a"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      shard: tool_host_cross_arch_tests
+      tags: >
+        ["framework", "hostonly", "shard", "arm64"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac tool_integration_tests_1_4
     recipe: flutter/flutter_drone
     timeout: 60
