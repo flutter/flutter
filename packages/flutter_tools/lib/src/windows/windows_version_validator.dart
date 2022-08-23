@@ -7,6 +7,13 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../doctor_validator.dart';
 
+// Define the major versions that are not supported
+const List<String> unsupportedVersions = <String>[
+  '6',
+  '7',
+  '8',
+];
+
 class WindowsVersionValidator extends DoctorValidator {
   /// Validator to be run with `flutter doctor` to check
   /// Windows host machines if they are running supported versions,
@@ -41,12 +48,6 @@ class WindowsVersionValidator extends DoctorValidator {
 
     final String resultStdout = result.stdout as String;
 
-    // Define the major versions that are not supported
-    const List<String> unsupportedVersions = <String>[
-      '7',
-      '8',
-    ];
-
     final List<String> systemInfoElements = resultStdout.split('\n');
 
     // Regular expression pattern for identifying
@@ -62,14 +63,14 @@ class WindowsVersionValidator extends DoctorValidator {
     // Use two booleans to identify when you have found
     // the word 'version' and a version number that matches
     // the regex pattern above; only once both are found do
-    // we report back a valid version
+    // we add that version to the [versionList]
     bool versionText = false;
     bool versionSemver = false;
     String? version;
     for (final String curLine in systemInfoElements) {
       final List<String> lineElems = curLine.split(' ');
 
-      for (final String elem in lineElems){
+      for (final String elem in lineElems) {
         final bool match = regex.hasMatch(elem);
 
         if (match) {
