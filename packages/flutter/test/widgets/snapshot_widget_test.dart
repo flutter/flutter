@@ -86,7 +86,7 @@ void main() {
 
     // Not repainted as dpr was not used.
     expect(painter.count, 1);
-  });
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
 
   testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
@@ -124,7 +124,7 @@ void main() {
 
     expect(painter.count, 2);
     expect(raster, isNot(newRaster));
-  });
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget paints its child as a single picture layer', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
