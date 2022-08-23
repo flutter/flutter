@@ -70,6 +70,10 @@ void testMain() {
         Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
       ) as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
+
+      expect(imageShader.debugDisposed, false);
+      imageShader.dispose();
+      expect(imageShader.debugDisposed, true);
     });
   });
 }

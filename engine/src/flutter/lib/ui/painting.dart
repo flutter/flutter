@@ -4050,6 +4050,41 @@ class ImageShader extends Shader {
 
   @FfiNative<Handle Function(Pointer<Void>, Pointer<Void>, Int32, Int32, Int32, Handle)>('ImageShader::initWithImage')
   external String? _initWithImage(_Image image, int tmx, int tmy, int filterQualityIndex, Float64List matrix4);
+
+  bool _debugDisposed = false;
+
+  /// Whether [dispose] has been called.
+  ///
+  /// This must only be used when asserts are enabled. Otherwise, it will throw.
+  bool get debugDisposed {
+    late bool disposed;
+    assert(() {
+      disposed = _debugDisposed;
+      return true;
+    }());
+    return disposed;
+  }
+
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
+  ///
+  /// The underlying memory allocated by this object will be retained beyond
+  /// this call if it is still needed by another object that has not been
+  /// disposed. For example, an [Picture] that has not been disposed that
+  /// refers to this [ImageShader] may keep its underlying resources alive.
+  void dispose() {
+    assert(() {
+      assert(!_debugDisposed);
+      _debugDisposed = true;
+      return true;
+    }());
+    _dispose();
+  }
+
+  /// This can't be a leaf call because the native function calls Dart API
+  /// (Dart_SetNativeInstanceField).
+  @FfiNative<Void Function(Pointer<Void>)>('ImageShader::dispose')
+  external void _dispose();
 }
 
 /// An instance of [FragmentProgram] creates [Shader] objects (as used by [Paint.shader]) that run SPIR-V code.
