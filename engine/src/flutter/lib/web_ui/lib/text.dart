@@ -342,55 +342,29 @@ abstract class TextStyle {
     List<Shadow>? shadows,
     List<FontFeature>? fontFeatures,
     List<FontVariation>? fontVariations,
-  }) {
-    if (engine.useCanvasKit) {
-      return engine.CkTextStyle(
-        color: color,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        decorationThickness: decorationThickness,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        textBaseline: textBaseline,
-        fontFamily: fontFamily,
-        fontFamilyFallback: fontFamilyFallback,
-        fontSize: fontSize,
-        letterSpacing: letterSpacing,
-        wordSpacing: wordSpacing,
-        height: height,
-        leadingDistribution: leadingDistribution,
-        locale: locale,
-        background: background as engine.CkPaint?,
-        foreground: foreground as engine.CkPaint?,
-        shadows: shadows,
-        fontFeatures: fontFeatures,
-      );
-    } else {
-      return engine.EngineTextStyle(
-        color: color,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        decorationThickness: decorationThickness,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        textBaseline: textBaseline,
-        fontFamily: fontFamily,
-        fontFamilyFallback: fontFamilyFallback,
-        fontSize: fontSize,
-        letterSpacing: letterSpacing,
-        wordSpacing: wordSpacing,
-        height: height,
-        locale: locale,
-        background: background,
-        foreground: foreground,
-        shadows: shadows,
-        fontFeatures: fontFeatures,
-        fontVariations: fontVariations,
-      );
-    }
-  }
+  }) => engine.renderer.createTextStyle(
+    color: color,
+    decoration: decoration,
+    decorationColor: decorationColor,
+    decorationStyle: decorationStyle,
+    decorationThickness: decorationThickness,
+    fontWeight: fontWeight,
+    fontStyle: fontStyle,
+    textBaseline: textBaseline,
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontSize: fontSize,
+    letterSpacing: letterSpacing,
+    wordSpacing: wordSpacing,
+    height: height,
+    leadingDistribution: leadingDistribution,
+    locale: locale,
+    background: background,
+    foreground: foreground,
+    shadows: shadows,
+    fontFeatures: fontFeatures,
+    fontVariations: fontVariations,
+  );
 }
 
 abstract class ParagraphStyle {
@@ -408,39 +382,20 @@ abstract class ParagraphStyle {
     StrutStyle? strutStyle,
     String? ellipsis,
     Locale? locale,
-  }) {
-    if (engine.useCanvasKit) {
-      return engine.CkParagraphStyle(
-        textAlign: textAlign,
-        textDirection: textDirection,
-        maxLines: maxLines,
-        fontFamily: fontFamily,
-        fontSize: fontSize,
-        height: height,
-        textHeightBehavior: textHeightBehavior,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        strutStyle: strutStyle,
-        ellipsis: ellipsis,
-        locale: locale,
-      );
-    } else {
-      return engine.EngineParagraphStyle(
-        textAlign: textAlign,
-        textDirection: textDirection,
-        maxLines: maxLines,
-        fontFamily: fontFamily,
-        fontSize: fontSize,
-        height: height,
-        textHeightBehavior: textHeightBehavior,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        strutStyle: strutStyle,
-        ellipsis: ellipsis,
-        locale: locale,
-      );
-    }
-  }
+  }) => engine.renderer.createParagraphStyle(
+    textAlign: textAlign,
+    textDirection: textDirection,
+    maxLines: maxLines,
+    fontFamily: fontFamily,
+    fontSize: fontSize,
+    height: height,
+    textHeightBehavior: textHeightBehavior,
+    fontWeight: fontWeight,
+    fontStyle: fontStyle,
+    strutStyle: strutStyle,
+    ellipsis: ellipsis,
+    locale: locale,
+  );
 }
 
 abstract class StrutStyle {
@@ -489,33 +444,17 @@ abstract class StrutStyle {
     FontWeight? fontWeight,
     FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) {
-    if (engine.useCanvasKit) {
-      return engine.CkStrutStyle(
-        fontFamily: fontFamily,
-        fontFamilyFallback: fontFamilyFallback,
-        fontSize: fontSize,
-        height: height,
-        leadingDistribution: leadingDistribution,
-        leading: leading,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        forceStrutHeight: forceStrutHeight,
-      );
-    } else {
-      return engine.EngineStrutStyle(
-        fontFamily: fontFamily,
-        fontFamilyFallback: fontFamilyFallback,
-        fontSize: fontSize,
-        height: height,
-        leadingDistribution: leadingDistribution,
-        leading: leading,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        forceStrutHeight: forceStrutHeight,
-      );
-    }
-  }
+  }) => engine.renderer.createStrutStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontSize: fontSize,
+    height: height,
+    leadingDistribution: leadingDistribution,
+    leading: leading,
+    fontWeight: fontWeight,
+    fontStyle: fontStyle,
+    forceStrutHeight: forceStrutHeight,
+  );
 }
 
 // The order of this enum must match the order of the values in TextDirection.h's TextDirection.
@@ -734,12 +673,8 @@ abstract class Paragraph {
 }
 
 abstract class ParagraphBuilder {
-  factory ParagraphBuilder(ParagraphStyle style) {
-    if (engine.useCanvasKit) {
-      return engine.CkParagraphBuilder(style);
-    }
-    return engine.CanvasParagraphBuilder(style as engine.EngineParagraphStyle);
-  }
+  factory ParagraphBuilder(ParagraphStyle style) =>
+    engine.renderer.createParagraphBuilder(style);
   void pushStyle(TextStyle style);
   void pop();
   void addText(String text);
@@ -756,14 +691,7 @@ abstract class ParagraphBuilder {
   });
 }
 
-Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
-  if (engine.useCanvasKit) {
-    return engine.skiaFontCollection
-        .loadFontFromList(list, fontFamily: fontFamily)
-        .then((_) => engine.sendFontChangeMessage());
-  } else {
-    return engine.fontCollection
-        .loadFontFromList(list, fontFamily: fontFamily!)
-        .then((_) => engine.sendFontChangeMessage());
-  }
+Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) async {
+  await engine.renderer.fontCollection.loadFontFromList(list, fontFamily: fontFamily);
+  engine.sendFontChangeMessage();
 }

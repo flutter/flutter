@@ -15,14 +15,14 @@ void testMain() {
     expect(windowFlutterCanvasKit, isNull);
 
     // First initialization should make CanvasKit available through `window`.
-    await initializeCanvasKit();
+    await renderer.initialize();
     expect(windowFlutterCanvasKit, isNotNull);
 
     // Remember the initial instance.
     final CanvasKit firstCanvasKitInstance = windowFlutterCanvasKit!;
 
     // Try to load CanvasKit again.
-    await initializeCanvasKit();
+    await renderer.initialize();
 
     // Should find the existing instance and reuse it.
     expect(firstCanvasKitInstance, windowFlutterCanvasKit);

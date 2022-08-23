@@ -15,9 +15,9 @@ import '../vector_math.dart';
 import '../window.dart';
 import 'canvas.dart';
 import 'embedded_views_diff.dart';
-import 'initialization.dart';
 import 'path.dart';
 import 'picture_recorder.dart';
+import 'renderer.dart';
 import 'surface.dart';
 import 'surface_factory.dart';
 
@@ -27,6 +27,8 @@ class HtmlViewEmbedder {
 
   /// The [HtmlViewEmbedder] singleton.
   static HtmlViewEmbedder instance = HtmlViewEmbedder._();
+
+  DomElement get skiaSceneHost => CanvasKitRenderer.instance.sceneHost!;
 
   /// Force the view embedder to disable overlays.
   ///
@@ -270,7 +272,7 @@ class HtmlViewEmbedder {
 
     // If the chain was previously attached, attach it to the same position.
     if (headClipViewWasAttached) {
-      skiaSceneHost!.insertBefore(head, headClipViewNextSibling);
+      skiaSceneHost.insertBefore(head, headClipViewNextSibling);
     }
     return head;
   }
@@ -408,7 +410,7 @@ class HtmlViewEmbedder {
     }
     _svgPathDefs = kSvgResourceHeader.cloneNode(false) as SVGElement;
     _svgPathDefs!.append(createSVGDefsElement()..id = 'sk_path_defs');
-    skiaSceneHost!.append(_svgPathDefs!);
+    skiaSceneHost.append(_svgPathDefs!);
   }
 
   void submitFrame() {
@@ -476,18 +478,18 @@ class HtmlViewEmbedder {
         }
         if (diffResult.addToBeginning) {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
-          skiaSceneHost!.insertBefore(platformViewRoot, elementToInsertBefore);
+          skiaSceneHost.insertBefore(platformViewRoot, elementToInsertBefore);
           final Surface? overlay = _overlays[viewId];
           if (overlay != null) {
-            skiaSceneHost!
+            skiaSceneHost
                 .insertBefore(overlay.htmlElement, elementToInsertBefore);
           }
         } else {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
-          skiaSceneHost!.append(platformViewRoot);
+          skiaSceneHost.append(platformViewRoot);
           final Surface? overlay = _overlays[viewId];
           if (overlay != null) {
-            skiaSceneHost!.append(overlay.htmlElement);
+            skiaSceneHost.append(overlay.htmlElement);
           }
         }
       }
@@ -500,11 +502,11 @@ class HtmlViewEmbedder {
           if (!overlayElement.isConnected!) {
             // This overlay wasn't added to the DOM.
             if (i == _compositionOrder.length - 1) {
-              skiaSceneHost!.append(overlayElement);
+              skiaSceneHost.append(overlayElement);
             } else {
               final int nextView = _compositionOrder[i + 1];
               final DomElement nextElement = _viewClipChains[nextView]!.root;
-              skiaSceneHost!.insertBefore(overlayElement, nextElement);
+              skiaSceneHost.insertBefore(overlayElement, nextElement);
             }
           }
         }
@@ -524,9 +526,9 @@ class HtmlViewEmbedder {
 
         final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
         final Surface? overlay = _overlays[viewId];
-        skiaSceneHost!.append(platformViewRoot);
+        skiaSceneHost.append(platformViewRoot);
         if (overlay != null) {
-          skiaSceneHost!.append(overlay.htmlElement);
+          skiaSceneHost.append(overlay.htmlElement);
         }
         _activeCompositionOrder.add(viewId);
         unusedViews.remove(viewId);

@@ -23,8 +23,8 @@ Future<void> testMain() async {
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
-    engine.fontCollection.debugRegisterTestFonts();
-    await engine.fontCollection.ensureFontsLoaded();
+    engine.renderer.fontCollection.debugRegisterTestFonts();
+    await engine.renderer.fontCollection.ensureFontsLoaded();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/48683
