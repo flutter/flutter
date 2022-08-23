@@ -103,7 +103,7 @@ abstract class SpellCheckService {
 ///
 /// Any widget may use this service to spell check text by calling
 /// `fetchSpellCheckSuggestions(locale, text)` with an instance of this class.
-/// This is currently only supported by Android.
+/// This is currently only supported by Android and iOS.
 ///
 /// See also:
 ///
