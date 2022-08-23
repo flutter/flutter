@@ -16,6 +16,14 @@ import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show ScrollSpringSimulation, Simulation, Tolerance;
 
+/// The rate at which scroll momentum will be decelerated.
+enum ScrollDecelerationRate {
+  /// The standard deceleration expected on touchscreen apps.
+  normal,
+  /// Faster deceleration aligned with desktop software conventions.
+  fast
+}
+
 // Examples can assume:
 // class FooScrollPhysics extends ScrollPhysics {
 //   const FooScrollPhysics({ super.parent });
@@ -608,7 +616,13 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///    of different types to get the desired scroll physics.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
-  const BouncingScrollPhysics({ super.parent });
+  const BouncingScrollPhysics({
+    this.decelerationRate = ScrollDecelerationRate.normal,
+    super.parent,
+  });
+
+  /// Used to determine parameters for friction simulations.
+  final ScrollDecelerationRate decelerationRate;
 
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -623,7 +637,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// This factor starts at 0.52 and progressively becomes harder to overscroll
   /// as more of the area past the edge is dragged in (represented by an increasing
   /// `overscrollFraction` which starts at 0 when there is no overscroll).
-  double frictionFactor(double overscrollFraction) => 0.52 * math.pow(1 - overscrollFraction, 2);
+  double frictionFactor(double overscrollFraction) {
+    if (decelerationRate == ScrollDecelerationRate.fast) {
+      return 0.07 * math.pow(1 - overscrollFraction, 2);
+    }
+    return 0.52 * math.pow(1 - overscrollFraction, 2);
+  }
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
@@ -677,6 +696,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
+        constantDeceleration: decelerationRate == ScrollDecelerationRate.fast ? 1400 : 0
       );
     }
     return null;
@@ -711,79 +731,26 @@ class BouncingScrollPhysics extends ScrollPhysics {
   // from the natural motion of lifting the finger after a scroll.
   @override
   double get dragStartDistanceMotionThreshold => 3.5;
-}
-
-/// Scroll physics for environments that allow the scroll offset to go beyond
-/// the bounds of the content, but then bounce the content back to the edge of
-/// those bounds. Tuned for use with trackpad.
-///
-/// This is the behavior typically seen on macOS.
-///
-/// [BouncingDesktopScrollPhysics] by itself will not create an overscroll effect if
-/// the contents of the scroll view do not extend beyond the size of the
-/// viewport. To create the overscroll and bounce effect regardless of the
-/// length of your scroll view, combine with [AlwaysScrollableScrollPhysics].
-///
-/// {@tool snippet}
-/// ```dart
-/// const BouncingDesktopScrollPhysics(parent: AlwaysScrollableScrollPhysics())
-/// ```
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [ScrollConfiguration], which uses this to provide the default
-///    scroll behavior on macOS.
-///  * [BouncingScrollPhysics], which is the analogous physics for iOS's
-///    behavior.
-///  * [ScrollPhysics], for more examples of combining [ScrollPhysics] objects
-///    of different types to get the desired scroll physics.
-class BouncingDesktopScrollPhysics extends BouncingScrollPhysics {
-  /// Creates scroll physics that bounce back from the edge.
-  const BouncingDesktopScrollPhysics({ super.parent });
 
   @override
-  BouncingDesktopScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return BouncingDesktopScrollPhysics(parent: buildParent(ancestor));
+  double get maxFlingVelocity {
+    if (decelerationRate == ScrollDecelerationRate.fast) {
+      return kMaxFlingVelocity * 8.0;
+    }
+    return super.maxFlingVelocity;
   }
 
-  /// The multiple applied to overscroll to make it appear that scrolling past
-  /// the edge of the scrollable contents is harder than scrolling the list.
-  /// This is done by reducing the ratio of the scroll effect output vs the
-  /// scroll gesture input.
-  ///
-  /// This factor starts at 0.07 and progressively becomes harder to overscroll
-  /// as more of the area past the edge is dragged in (represented by an increasing
-  /// `overscrollFraction` which starts at 0 when there is no overscroll).
   @override
-  double frictionFactor(double overscrollFraction) => 0.07 * math.pow(1 - overscrollFraction, 2);
-
-  @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
-    final Tolerance tolerance = this.tolerance;
-    if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
-      return BouncingScrollSimulation(
-        spring: spring,
-        position: position.pixels,
-        velocity: velocity,
-        leadingExtent: position.minScrollExtent,
-        trailingExtent: position.maxScrollExtent,
-        tolerance: tolerance,
-        constantDeceleration: 1400,
+  SpringDescription get spring {
+    if (decelerationRate == ScrollDecelerationRate.fast) {
+      return SpringDescription.withDampingRatio(
+        mass: 0.3,
+        stiffness: 75.0,
+        ratio: 1.3,
       );
     }
-    return null;
+    return super.spring;
   }
-
-  @override
-  double get maxFlingVelocity => kMaxFlingVelocity * 8.0;
-
-  @override
-  SpringDescription get spring => SpringDescription.withDampingRatio(
-    mass: 0.3,
-    stiffness: 75.0,
-    ratio: 1.3,
-  );
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching

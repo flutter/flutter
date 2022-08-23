@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -397,9 +398,11 @@ void main() {
         warnIfMissed: false, // has an IgnorePointer
       );
 
-      // Should have been flung far enough that even the first item goes off
-      // screen and gets removed.
-      expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.iOS) {
+        // Should have been flung far enough that even the first item goes off
+        // screen and gets removed.
+        expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
+      }
 
       expect(
         selectedItems,
@@ -421,7 +424,7 @@ void main() {
         // Falling back to 0 shouldn't produce more callbacks.
         <int>[8, 6, 4, 2, 0],
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
   testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {

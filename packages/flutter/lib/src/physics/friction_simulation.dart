@@ -83,7 +83,11 @@ class FrictionSimulation extends Simulation {
   final double _x;
   final double _v;
   final double _constantDeceleration;
-  double _finalTime = double.infinity; // will be changed in constructor
+  // The time at which the simulation should be stopped.
+  // This is needed when constantDeceleration is not zero (on Desktop), when
+  // using the pure friction simulation, acceleration naturally reduces to zero
+  // and creates a stopping point.
+  double _finalTime = double.infinity; // needs to be infinity for newtonsMethod call in constructor.
 
   // Return the drag value for a FrictionSimulation whose x() and dx() values pass
   // through the specified start and end position/velocity values.

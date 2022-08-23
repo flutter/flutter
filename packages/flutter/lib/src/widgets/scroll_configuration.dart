@@ -231,7 +231,10 @@ class ScrollBehavior {
   }
 
   static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
-  static const ScrollPhysics _bouncingDesktopPhysics = BouncingDesktopScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _bouncingDesktopPhysics = BouncingScrollPhysics(
+    decelerationRate: ScrollDecelerationRate.fast,
+    parent: RangeMaintainingScrollPhysics()
+  );
   static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 
   /// The scroll physics to use for the platform given by [getPlatform].
