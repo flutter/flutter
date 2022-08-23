@@ -331,6 +331,25 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
+  testWidgets('multiple ParentDataWidget allowed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: OneAncestorWidgetWithMultipleParentData(
+          child: TestParentDataWidget(
+            string: 'outer',
+            child: TestParentDataWidget(
+              string: 'inner',
+              child: OneAncestorWidgetWithMultipleParentData(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
@@ -526,4 +545,21 @@ class DummyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => child;
+}
+
+class _DummyRenderOneElement extends SingleChildRenderObjectElement {
+  _DummyRenderOneElement(super.widget);
+  @override
+  bool debugIsValidChildParentDataConfiguration(List<ParentDataElement<ParentData>> parentDataElements, RenderObjectElement child) => true;
+}
+
+class OneAncestorWidgetWithMultipleParentData extends SingleChildRenderObjectWidget {
+  const OneAncestorWidgetWithMultipleParentData({
+    super.key,
+    super.child,
+  });
+  @override
+  SingleChildRenderObjectElement createElement() => _DummyRenderOneElement(this);
+  @override
+  RenderOne createRenderObject(BuildContext context) => RenderOne();
 }
