@@ -1217,7 +1217,7 @@ class ThemeData with Diagnosticable {
   ///   * Typography: `typography` (see table above)
   ///
   /// ### Components
-  ///   * Common buttons:  [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton]
+  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton]
   ///   * FAB: [FloatingActionButton]
   ///   * Extended FAB: [FloatingActionButton.extended]
   ///   * Cards: [Card]
