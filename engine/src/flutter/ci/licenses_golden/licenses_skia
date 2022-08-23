@@ -1,4 +1,4 @@
-Signature: eae82dadf40480dc7ff289363104a661
+Signature: e280f9c1e16928c270dc463392d72b76
 
 UNUSED LICENSES:
 
@@ -6604,6 +6604,8 @@ FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
 FILE: ../../../third_party/skia/include/core/SkOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/text/Font.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/text/Font.h
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_client.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
