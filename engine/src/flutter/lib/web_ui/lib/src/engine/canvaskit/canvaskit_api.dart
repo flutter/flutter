@@ -2113,7 +2113,7 @@ class TypefaceFontProvider extends SkFontMgr {
   external factory TypefaceFontProvider();
 }
 
-extension TypefaceFontProviderExtension on SkFontMgr {
+extension TypefaceFontProviderExtension on TypefaceFontProvider {
   external void registerFont(Uint8List font, String family);
 }
 
