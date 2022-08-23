@@ -879,7 +879,7 @@ class _LargeTitleNavigationBarSliverDelegate
                                       // Maximum scale lets us prevent the large title
                                       // from getting clipped when it's width is greater than
                                       // the navigation bar's max width constraint.
-                                      maxScale = ((constraints.maxWidth - _kNavBarEdgePadding * 2) / painter.maxIntrinsicWidth).clamp(1.0, 1.15);
+                                      maxScale = ((constraints.maxWidth - _kNavBarEdgePadding) / painter.maxIntrinsicWidth).clamp(1.0, 1.15);
                                     }
 
                                     return Transform.scale(
