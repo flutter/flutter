@@ -24,18 +24,17 @@ void testMain() {
     });
 
     test('embeds interactive platform views', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
 
       // The platform view is now split in two parts. The contents live
       // as a child of the glassPane, and the slot lives in the glassPane
@@ -60,20 +59,19 @@ void testMain() {
     });
 
     test('clips platform views with RRects', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.pushClipRRect(
           ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
 
       expect(
         flutterViewEmbedder.sceneElement!
@@ -100,14 +98,13 @@ void testMain() {
     });
 
     test('correctly transforms platform views', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       final Matrix4 scaleMatrix = Matrix4.identity()
@@ -116,7 +113,7 @@ void testMain() {
       sb.pushTransform(scaleMatrix.toFloat64());
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
 
       // Transformations happen on the slot element.
       final DomElement slotHost = flutterViewEmbedder.sceneElement!
@@ -138,11 +135,9 @@ void testMain() {
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.addPlatformView(0, offset: const ui.Offset(3, 4), width: 5, height: 6);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
 
       final DomElement slotHost = flutterViewEmbedder.sceneElement!
           .querySelector('flt-platform-view-slot')!;
@@ -178,15 +173,13 @@ void testMain() {
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(3, 3);
       sb.pushClipRect(ui.Rect.largest);
       sb.pushOffset(6, 6);
       sb.addPlatformView(0, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
 
       // Transformations happen on the slot element.
       DomElement slotHost = flutterViewEmbedder.sceneElement!
@@ -207,7 +200,7 @@ void testMain() {
       sb.pushClipRect(ui.Rect.largest);
       sb.pushOffset(9, 9);
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
 
       // Transformations happen on the slot element.
       slotHost = flutterViewEmbedder.sceneElement!
@@ -231,14 +224,12 @@ void testMain() {
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(1, 1);
       sb.pushOffset(2, 2);
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
 
       // Transformations happen on the slot element.
       final DomElement slotHost = flutterViewEmbedder.sceneElement!
@@ -258,8 +249,6 @@ void testMain() {
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(3, 3);
       sb.pushClipRect(ui.Rect.largest);
@@ -267,7 +256,7 @@ void testMain() {
       sb.pushClipRect(ui.Rect.largest);
       sb.pushOffset(9, 9);
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
 
       // Transformations happen on the slot element.
       final DomElement slotHost = flutterViewEmbedder.sceneElement!
@@ -302,9 +291,6 @@ void testMain() {
         platformViewIds.add(i);
       }
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       void renderTestScene({required int viewCount}) {
         final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
@@ -312,7 +298,7 @@ void testMain() {
           sb.addPicture(ui.Offset.zero, testPicture);
           sb.addPlatformView(i, width: 10, height: 10);
         }
-        dispatcher.rasterizer!.draw(sb.build().layerTree);
+        CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       }
 
       // Frame 1:
@@ -458,9 +444,6 @@ void testMain() {
         platformViewIds.add(i);
       }
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       void renderTestScene(List<int> views) {
         final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
@@ -468,7 +451,7 @@ void testMain() {
           sb.addPicture(ui.Offset.zero, testPicture);
           sb.addPlatformView(view, width: 10, height: 10);
         }
-        dispatcher.rasterizer!.draw(sb.build().layerTree);
+        CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       }
 
       // Frame 1:
@@ -586,13 +569,10 @@ void testMain() {
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -609,7 +589,7 @@ void testMain() {
 
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
 
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
@@ -623,19 +603,17 @@ void testMain() {
     });
 
     test('removed the DOM node of an unrendered platform view', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -653,7 +631,7 @@ void testMain() {
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(1, width: 10, height: 10);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -669,7 +647,7 @@ void testMain() {
       // the platform view.
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
       ]);
@@ -685,14 +663,12 @@ void testMain() {
     test(
         'removes old SVG clip definitions from the DOM when the view is recomposited',
         () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'test-view',
       );
       await createPlatformView(0, 'test-platform-view');
-
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
 
       void renderTestScene() {
         final LayerSceneBuilder sb = LayerSceneBuilder();
@@ -700,7 +676,7 @@ void testMain() {
         sb.pushClipRRect(
             ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
         sb.addPlatformView(0, width: 10, height: 10);
-        dispatcher.rasterizer!.draw(sb.build().layerTree);
+        rasterizer.draw(sb.build().layerTree);
       }
 
       final DomNode skPathDefs = flutterViewEmbedder.sceneElement!
@@ -722,14 +698,12 @@ void testMain() {
 
     test('does not crash when a prerolled platform view is not composited',
         () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
       await createPlatformView(0, 'test-platform-view');
-
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
 
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
@@ -737,13 +711,14 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       sb.pop();
       // The below line should not throw an error.
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
       ]);
     });
 
     test('does not crash when overlays are disabled', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       HtmlViewEmbedder.debugDisableOverlays = true;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
@@ -751,15 +726,12 @@ void testMain() {
       );
       await createPlatformView(0, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
       sb.pop();
       // The below line should not throw an error.
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -768,6 +740,7 @@ void testMain() {
     });
 
     test('works correctly with max overlays == 2', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       debugSetConfiguration(FlutterConfiguration(
           JsFlutterConfiguration()..canvasKitMaximumSurfaces = 2));
       SurfaceFactory.instance.debugClear();
@@ -782,15 +755,12 @@ void testMain() {
       await createPlatformView(0, 'test-platform-view');
       await createPlatformView(1, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
       sb.pop();
       // The below line should not throw an error.
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
 
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
@@ -804,7 +774,7 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       sb.pop();
       // The below line should not throw an error.
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
 
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
@@ -820,6 +790,7 @@ void testMain() {
     test(
         'correctly renders when overlays are disabled and a subset '
         'of views is used', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       HtmlViewEmbedder.debugDisableOverlays = true;
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
@@ -828,16 +799,13 @@ void testMain() {
       await createPlatformView(0, 'test-platform-view');
       await createPlatformView(1, 'test-platform-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
       // The below line should not throw an error.
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -849,7 +817,7 @@ void testMain() {
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
       // The below line should not throw an error.
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -859,6 +827,7 @@ void testMain() {
     });
 
     test('does not create overlays for invisible platform views', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       ui.platformViewRegistry.registerViewFactory(
           'test-visible-view',
           (int viewId) =>
@@ -877,9 +846,6 @@ void testMain() {
       await createPlatformView(5, 'test-invisible-view');
       await createPlatformView(6, 'test-invisible-view');
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-
       expect(platformViewManager.isInvisible(0), isFalse);
       expect(platformViewManager.isInvisible(1), isTrue);
 
@@ -887,7 +853,7 @@ void testMain() {
       sb.pushOffset(0, 0);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -899,26 +865,10 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
-        _platformView,
-        _overlay,
-      ]);
-
-      sb = LayerSceneBuilder();
-      sb.pushOffset(0, 0);
-      sb.addPlatformView(0, width: 10, height: 10);
-      sb.addPlatformView(1, width: 10, height: 10);
-      sb.addPlatformView(2, width: 10, height: 10);
-      sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
-      _expectSceneMatches(<_EmbeddedViewMarker>[
-        _overlay,
-        _platformView,
-        _platformView,
-        _overlay,
         _platformView,
         _overlay,
       ]);
@@ -928,15 +878,13 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.addPlatformView(2, width: 10, height: 10);
-      sb.addPlatformView(3, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
         _platformView,
         _overlay,
-        _platformView,
         _platformView,
         _overlay,
       ]);
@@ -947,15 +895,13 @@ void testMain() {
       sb.addPlatformView(1, width: 10, height: 10);
       sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(3, width: 10, height: 10);
-      sb.addPlatformView(4, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
         _platformView,
         _overlay,
-        _platformView,
         _platformView,
         _platformView,
         _overlay,
@@ -968,15 +914,13 @@ void testMain() {
       sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
-      sb.addPlatformView(5, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
         _platformView,
         _overlay,
-        _platformView,
         _platformView,
         _platformView,
         _platformView,
@@ -991,9 +935,8 @@ void testMain() {
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
       sb.addPlatformView(5, width: 10, height: 10);
-      sb.addPlatformView(6, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -1003,19 +946,42 @@ void testMain() {
         _platformView,
         _platformView,
         _platformView,
-        _platformView,
         _overlay,
       ]);
 
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
+      sb.addPlatformView(0, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
+      sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
       sb.addPlatformView(5, width: 10, height: 10);
       sb.addPlatformView(6, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
+      ]);
+
+      sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(1, width: 10, height: 10);
+      sb.addPlatformView(3, width: 10, height: 10);
+      sb.addPlatformView(4, width: 10, height: 10);
+      sb.addPlatformView(5, width: 10, height: 10);
+      sb.addPlatformView(6, width: 10, height: 10);
+      sb.pop();
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -1033,7 +999,7 @@ void testMain() {
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -1050,7 +1016,7 @@ void testMain() {
       sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
-      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,

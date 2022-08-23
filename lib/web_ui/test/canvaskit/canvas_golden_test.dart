@@ -219,9 +219,7 @@ void testMain() {
       // Render again, this time with the shadow bounds.
       final LayerTree layerTree = buildTestScene(paintShadowBounds: true);
 
-      final EnginePlatformDispatcher dispatcher =
-          ui.window.platformDispatcher as EnginePlatformDispatcher;
-      dispatcher.rasterizer!.draw(layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(layerTree);
       await matchGoldenFile('canvaskit_shadow_bounds.png', region: region);
     });
 
@@ -802,14 +800,14 @@ void testMain() {
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, picture);
       final LayerTree layerTree = builder.build().layerTree;
-      EnginePlatformDispatcher.instance.rasterizer!.draw(layerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(layerTree);
 
       // Now draw an empty layer tree and confirm that the red rectangle is
       // no longer drawn.
       final LayerSceneBuilder emptySceneBuilder = LayerSceneBuilder();
       emptySceneBuilder.pushOffset(0, 0);
       final LayerTree emptyLayerTree = emptySceneBuilder.build().layerTree;
-      EnginePlatformDispatcher.instance.rasterizer!.draw(emptyLayerTree);
+      CanvasKitRenderer.instance.rasterizer.draw(emptyLayerTree);
 
       await matchGoldenFile('canvaskit_empty_scene.png',
           region: const ui.Rect.fromLTRB(0, 0, 100, 100));
@@ -1340,7 +1338,7 @@ Future<CkPicture> generatePictureWhenFontsStable(
     PictureGenerator generator) async {
   CkPicture picture = generator();
   // Fallback fonts start downloading as a post-frame callback.
-  EnginePlatformDispatcher.instance.rasterizer!.debugRunPostFrameCallbacks();
+  CanvasKitRenderer.instance.rasterizer.debugRunPostFrameCallbacks();
   // Font downloading begins asynchronously so we inject a timer before checking the download queue.
   await Future<void>.delayed(Duration.zero);
   while (notoDownloadQueue.isPending ||
@@ -1348,7 +1346,7 @@ Future<CkPicture> generatePictureWhenFontsStable(
     await notoDownloadQueue.debugWhenIdle();
     await notoDownloadQueue.downloader.debugWhenIdle();
     picture = generator();
-    EnginePlatformDispatcher.instance.rasterizer!.debugRunPostFrameCallbacks();
+    CanvasKitRenderer.instance.rasterizer.debugRunPostFrameCallbacks();
     // Dummy timer for the same reason as above.
     await Future<void>.delayed(Duration.zero);
   }

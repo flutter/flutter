@@ -7,7 +7,6 @@ import 'dart:developer' as developer;
 
 import 'package:ui/src/engine/assets.dart';
 import 'package:ui/src/engine/browser_detection.dart';
-import 'package:ui/src/engine/canvaskit/initialization.dart';
 import 'package:ui/src/engine/embedder.dart';
 import 'package:ui/src/engine/keyboard.dart';
 import 'package:ui/src/engine/mouse_cursor.dart';
@@ -15,9 +14,8 @@ import 'package:ui/src/engine/navigation.dart';
 import 'package:ui/src/engine/platform_dispatcher.dart';
 import 'package:ui/src/engine/platform_views/content_manager.dart';
 import 'package:ui/src/engine/profiler.dart';
+import 'package:ui/src/engine/renderer.dart';
 import 'package:ui/src/engine/safe_browser_api.dart';
-import 'package:ui/src/engine/text/font_collection.dart';
-import 'package:ui/src/engine/text/line_break_properties.dart';
 import 'package:ui/src/engine/window.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -141,15 +139,6 @@ Future<void> initializeEngineServices({
   }
   _initializationState = DebugEngineInitializationState.initializingServices;
 
-  if (!useCanvasKit) {
-    scheduleMicrotask(() {
-      // Access [lineLookup] to force the lazy unpacking of line break data
-      // now. Removing this line won't break anything. It's just an optimization
-      // to make the unpacking happen while we are waiting for network requests.
-      lineLookup;
-    });
-  }
-
   // Setup the hook that allows users to customize URL strategy before running
   // the app.
   _addUrlStrategyListener();
@@ -215,19 +204,11 @@ Future<void> initializeEngineServices({
     }
   };
 
-  // This needs to be after `initializeEngine` because that is where the
-  // canvaskit script is added to the page.
-  if (useCanvasKit) {
-    await initializeCanvasKit();
-  }
+  await renderer.initialize();
 
   assetManager ??= const AssetManager();
   await _setAssetManager(assetManager);
-  if (useCanvasKit) {
-    await skiaFontCollection.ensureFontsLoaded();
-  } else {
-    await _fontCollection!.ensureFontsLoaded();
-  }
+  await renderer.fontCollection.ensureFontsLoaded();
   _initializationState = DebugEngineInitializationState.initializedServices;
 }
 
@@ -262,9 +243,6 @@ Future<void> initializeEngineUi() async {
 AssetManager get assetManager => _assetManager!;
 AssetManager? _assetManager;
 
-FontCollection get fontCollection => _fontCollection!;
-FontCollection? _fontCollection;
-
 Future<void> _setAssetManager(AssetManager assetManager) async {
   assert(assetManager != null, 'Cannot set assetManager to null');
   if (assetManager == _assetManager) {
@@ -273,27 +251,14 @@ Future<void> _setAssetManager(AssetManager assetManager) async {
 
   _assetManager = assetManager;
 
-  if (useCanvasKit) {
-    ensureSkiaFontCollectionInitialized();
-  } else {
-    _fontCollection ??= FontCollection();
-    _fontCollection!.clear();
-  }
+  renderer.fontCollection.clear();
 
   if (_assetManager != null) {
-    if (useCanvasKit) {
-      await skiaFontCollection.registerFonts(_assetManager!);
-    } else {
-      await _fontCollection!.registerFonts(_assetManager!);
-    }
+    await renderer.fontCollection.registerFonts(assetManager);
   }
 
   if (ui.debugEmulateFlutterTesterEnvironment) {
-    if (useCanvasKit) {
-      skiaFontCollection.debugRegisterTestFonts();
-    } else {
-      _fontCollection!.debugRegisterTestFonts();
-    }
+    renderer.fontCollection.debugRegisterTestFonts();
   }
 }
 

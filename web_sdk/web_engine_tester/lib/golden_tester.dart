@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:test/test.dart';
 // ignore: implementation_imports
-import 'package:ui/src/engine.dart' show OperatingSystem, operatingSystem, useCanvasKit;
+import 'package:ui/src/engine.dart' show OperatingSystem, operatingSystem, renderer;
 // ignore: implementation_imports
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/ui.dart';
@@ -64,7 +64,11 @@ Future<void> matchGoldenFile(String filename,
             'height': region.height
           },
     'pixelComparison': pixelComparison.toString(),
-    'isCanvaskitTest': useCanvasKit,
+    // We use the renderer tag here rather than `renderer is CanvasKitRenderer`
+    // because these unit tests operate on the post-transformed (sdk_rewriter)
+    // sdk where the internal classes like `CanvasKitRenderer` are no longer
+    // visible.
+    'isCanvaskitTest': renderer.rendererTag == 'canvaskit',
   };
 
   // Chrome on macOS renders slightly differently from Linux, so allow it an

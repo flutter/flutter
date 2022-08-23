@@ -20,8 +20,8 @@ void main() {
 Future<void> testMain() async {
   setUpAll(() async {
     await webOnlyInitializePlatform();
-    fontCollection.debugRegisterTestFonts();
-    await fontCollection.ensureFontsLoaded();
+    renderer.fontCollection.debugRegisterTestFonts();
+    await renderer.fontCollection.ensureFontsLoaded();
   });
 
   setUp(() async {

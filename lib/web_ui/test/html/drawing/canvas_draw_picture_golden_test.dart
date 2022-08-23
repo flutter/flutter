@@ -21,8 +21,8 @@ Future<void> testMain() async {
   setUpAll(() async {
     debugShowClipLayers = true;
     await webOnlyInitializePlatform();
-    fontCollection.debugRegisterTestFonts();
-    await fontCollection.ensureFontsLoaded();
+    renderer.fontCollection.debugRegisterTestFonts();
+    await renderer.fontCollection.ensureFontsLoaded();
   });
 
   setUp(() async {
