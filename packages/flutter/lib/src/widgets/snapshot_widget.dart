@@ -15,8 +15,10 @@ import 'media_query.dart';
 enum SnapshotMode {
   /// The child is snapshotted, but only if all descendants can be snapshotted.
   ///
-  /// If there is a platform view in the children of a raster widget, the
-  /// snapshot will not be used and the child will be rendered as normal.
+  /// If there is a platform view in the children of a snapshot widget, the
+  /// snapshot will not be used and the child will be rendered using
+  /// [SnapshotPainter.paint]. This uses an un-snapshotted child and by default
+  /// paints it with no additional modification.
   permissive,
 
   /// An error is thrown if the child cannot be snapshotted.
@@ -138,10 +140,9 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   }
 
   @override
-  // ignore: library_private_types_in_public_api
-  void updateRenderObject(BuildContext context, covariant _RenderSnapshotWidget renderObject) {
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
     debugCheckHasMediaQuery(context);
-    renderObject
+    (renderObject as _RenderSnapshotWidget)
       ..controller = controller
       ..mode = mode
       ..devicePixelRatio = MediaQuery.of(context).devicePixelRatio
@@ -171,10 +172,16 @@ class _RenderSnapshotWidget extends RenderProxyBox {
       return;
     }
     _devicePixelRatio = value;
-    markNeedsPaint();
+    if (_childRaster == null) {
+      return;
+    } else {
+      _childRaster?.dispose();
+      _childRaster = null;
+      markNeedsPaint();
+    }
   }
 
- /// The painter used to paint the child snapshot or child widgets.
+  /// The painter used to paint the child snapshot or child widgets.
   SnapshotPainter get painter => _painter;
   SnapshotPainter _painter;
   set painter(SnapshotPainter value) {
@@ -184,7 +191,8 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     final SnapshotPainter oldPainter = painter;
     oldPainter.removeListener(markNeedsPaint);
     _painter = value;
-    if (painter.shouldRepaint(oldPainter)) {
+    if (oldPainter.runtimeType != painter.runtimeType ||
+        painter.shouldRepaint(oldPainter)) {
       markNeedsPaint();
     }
     if (attached) {
@@ -236,6 +244,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
 
   @override
   void detach() {
+    _disableSnapshotAttempt = false;
     controller.removeListener(_onRasterValueChanged);
     painter.removeListener(markNeedsPaint);
     _childRaster?.dispose();
@@ -253,6 +262,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   }
 
   void _onRasterValueChanged() {
+    _disableSnapshotAttempt = false;
     _childRaster?.dispose();
     _childRaster = null;
     markNeedsPaint();
@@ -370,7 +380,7 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// The [offset] and [size] are the location and dimensions of the render object.
   void paint(PaintingContext context, Offset offset, Size size, PaintingContextCallback painter);
 
-  /// Called whenever a new instance of the raster widget delegate class is
+  /// Called whenever a new instance of the snapshot widget delegate class is
   /// provided to the [SnapshotWidget] object, or any time that a new
   /// [SnapshotPainter] object is created with a new instance of the
   /// delegate class (which amounts to the same thing, because the latter is

@@ -30,7 +30,6 @@ void main() {
         ),
       ),
     ));
-    await tester.pump();
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
 
     // Now change the color and assert the old snapshot still matches.
@@ -47,15 +46,84 @@ void main() {
         ),
       ),
     ));
-    await tester.pump();
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
 
     // Now invoke clear and the raster is re-generated.
     controller.clear();
 
-    await tester.pump();
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.red.png'));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('Changing devicePixelRatio does not repaint if snapshotting is not enabled', (WidgetTester tester) async {
+    final SnapshotController controller = SnapshotController();
+    final TestPainter painter = TestPainter();
+    double devicePixelRatio = 1.0;
+    late StateSetter localSetState;
+
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        localSetState = setState;
+        return Center(
+          child: TestDependencies(
+            devicePixelRatio: devicePixelRatio,
+            child: SnapshotWidget(
+              controller: controller,
+              painter: painter,
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        );
+      }),
+    );
+
+    expect(painter.count, 1);
+
+    localSetState(() {
+      devicePixelRatio = 2.0;
+    });
+    await tester.pump();
+
+    // Not repainted as dpr was not used.
+    expect(painter.count, 1);
+  });
+
+
+  testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final TestPainter painter = TestPainter();
+    double devicePixelRatio = 1.0;
+    late StateSetter localSetState;
+
+    await tester.pumpWidget(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        localSetState = setState;
+        return Center(
+          child: TestDependencies(
+            devicePixelRatio: devicePixelRatio,
+            child: SnapshotWidget(
+              controller: controller,
+              painter: painter,
+              child: const SizedBox(width: 100, height: 100),
+            ),
+          ),
+        );
+      }),
+    );
+    final ui.Image? raster = painter.lastImage;
+
+    expect(raster, isNotNull);
+    expect(painter.count, 1);
+
+    localSetState(() {
+      devicePixelRatio = 2.0;
+    });
+    await tester.pump();
+
+    final ui.Image? newRaster = painter.lastImage;
+
+    expect(painter.count, 2);
+    expect(raster, isNot(newRaster));
+  });
 
   testWidgets('SnapshotWidget paints its child as a single picture layer', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
@@ -82,6 +150,36 @@ void main() {
 
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+
+  testWidgets('SnapshotWidget can update the painter type', (WidgetTester tester) async {
+    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    await tester.pumpWidget(
+      Center(
+        child: TestDependencies(
+          child: SnapshotWidget(
+            controller: controller,
+            painter: TestPainter(),
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: TestDependencies(
+          child: SnapshotWidget(
+            controller: controller,
+            painter: TestPainter2(),
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
@@ -231,24 +329,31 @@ class TestPainter extends SnapshotPainter {
 
   @override
   void paint(PaintingContext context, ui.Offset offset, ui.Size size, PaintingContextCallback painter) {
-
+    count += 1;
   }
 
   @override
   bool shouldRepaint(covariant TestPainter oldDelegate) => shouldRepaintValue;
 }
 
+class TestPainter2 extends TestPainter {
+    @override
+  bool shouldRepaint(covariant TestPainter2 oldDelegate) => shouldRepaintValue;
+}
+
 class TestDependencies extends StatelessWidget {
-  const TestDependencies({required this.child, super.key});
+  const TestDependencies({required this.child, super.key, this.devicePixelRatio});
 
   final Widget child;
+  final double? devicePixelRatio;
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window)
+          .copyWith(devicePixelRatio: devicePixelRatio),
         child: child,
       ),
     );

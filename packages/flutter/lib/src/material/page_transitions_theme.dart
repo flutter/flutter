@@ -284,6 +284,9 @@ class _ZoomEnterTransition extends StatefulWidget {
 }
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
+  // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
+  // support this functionality and the canvaskit backend uses a single thread for UI and raster
+  // work which diminishes the impact of this performance improvement.
   @override
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
@@ -392,6 +395,9 @@ class _ZoomExitTransition extends StatefulWidget {
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
   late _ZoomExitTransitionPainter delegate;
 
+  // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
+  // support this functionality and the canvaskit backend uses a single thread for UI and raster
+  // work which diminishes the impact of this performance improvement.
   @override
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
