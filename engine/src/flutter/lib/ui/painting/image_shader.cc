@@ -69,6 +69,11 @@ int ImageShader::height() {
   return image_->height();
 }
 
+void ImageShader::dispose() {
+  image_.reset();
+  ClearDartWrapper();
+}
+
 ImageShader::ImageShader() = default;
 
 ImageShader::~ImageShader() = default;
