@@ -334,7 +334,7 @@ class AlertDialog extends StatelessWidget {
   /// Style for the text in the [title] of this [AlertDialog].
   ///
   /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
-  /// [TextTheme.headline6] of [ThemeData.textTheme].
+  /// [TextTheme.titleLarge] of [ThemeData.textTheme].
   final TextStyle? titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -363,7 +363,7 @@ class AlertDialog extends StatelessWidget {
   /// Style for the text in the [content] of this [AlertDialog].
   ///
   /// If null, [DialogTheme.contentTextStyle] is used. If that's null, defaults
-  /// to [TextTheme.subtitle1] of [ThemeData.textTheme].
+  /// to [TextTheme.titleMedium] of [ThemeData.textTheme].
   final TextStyle? contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
@@ -888,7 +888,7 @@ class SimpleDialog extends StatelessWidget {
   /// Style for the text in the [title] of this [SimpleDialog].
   ///
   /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
-  /// [TextTheme.headline6] of [ThemeData.textTheme].
+  /// [TextTheme.titleLarge] of [ThemeData.textTheme].
   final TextStyle? titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in a
@@ -976,7 +976,7 @@ class SimpleDialog extends StatelessWidget {
           bottom: children == null ? effectiveTitlePadding.bottom * paddingScaleFactor : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
+          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
@@ -1297,10 +1297,10 @@ class _DialogDefaultsM2 extends DialogTheme {
   Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
 
   @override
-  TextStyle? get titleTextStyle => _textTheme.headline6;
+  TextStyle? get titleTextStyle => _textTheme.titleLarge;
 
   @override
-  TextStyle? get contentTextStyle => _textTheme.subtitle1;
+  TextStyle? get contentTextStyle => _textTheme.titleMedium;
 
   @override
   EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;

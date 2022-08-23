@@ -164,7 +164,7 @@ void main() {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSwatch().copyWith(primary: foregroundColor),
           unselectedWidgetColor: unselectedWidgetColor,
-          textTheme: const TextTheme(subtitle1: TextStyle(color: headerColor)),
+          textTheme: const TextTheme(titleMedium: TextStyle(color: headerColor)),
         ),
         home: Material(
           child: SingleChildScrollView(

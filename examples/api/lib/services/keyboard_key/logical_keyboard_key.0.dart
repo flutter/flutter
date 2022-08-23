@@ -70,7 +70,7 @@ class _MyKeyExampleState extends State<MyKeyExample> {
       color: Colors.white,
       alignment: Alignment.center,
       child: DefaultTextStyle(
-        style: textTheme.headline4!,
+        style: textTheme.headlineMedium!,
         child: Focus(
           focusNode: _focusNode,
           onKey: _handleKeyEvent,

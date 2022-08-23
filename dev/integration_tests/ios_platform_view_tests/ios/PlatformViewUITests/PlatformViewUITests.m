@@ -26,16 +26,32 @@ static const CGFloat kStandardTimeOut = 60.0;
   [super setUp];
   self.continueAfterFailure = NO;
 
-  self.app = [[XCUIApplication alloc] init];
-  [self.app launch];
+  // Retry launching the app if it fails to launch.
+  // This is trying to fix a "failed to terminate" failure, which is likely a bug in Xcode.
+  // The solution is based on https://stackoverflow.com/questions/41872848/xctests-failing-to-launch-app-in-simulator-intermittently
+  int remainingLaunchCount = 10;
+  while (true) {
+    self.app = [[XCUIApplication alloc] init];
+    [self.app launch];
+    remainingLaunchCount -= 1;
+    [NSThread sleepForTimeInterval:3];
+    if (self.app.exists) {
+      // success launch
+      break;
+    }
+
+    if (remainingLaunchCount > 0) {
+      NSLog(@"Retry launch with remaining launch count %d", remainingLaunchCount);
+      [self.app terminate];
+      [NSThread sleepForTimeInterval:3];
+      continue;
+    }
+
+    NSLog(@"Failed to launch");
+  }
 }
 
 - (void)tearDown {
-  // This is trying to fix a "failed to terminate" failure, which is likely a bug in Xcode.
-  // In theory the terminate call is not necessary, but many has encountered this similar
-  // issue, and fixed it by terminating the app and relaunching it if needed for each test.
-  // Here we simply try terminating the app in tearDown, but if it does not work,
-  // then alternative solution is to terminate and relaunch the app.
   [self.app terminate];
   [super tearDown];
 }
