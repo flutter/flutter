@@ -27,7 +27,8 @@ class EntityPassDelegate {
   virtual bool CanCollapseIntoParentPass() = 0;
 
   virtual std::shared_ptr<Contents> CreateContentsForSubpassTarget(
-      std::shared_ptr<Texture> target) = 0;
+      std::shared_ptr<Texture> target,
+      const Matrix& effect_transform) = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPassDelegate);

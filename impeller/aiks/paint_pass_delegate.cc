@@ -33,12 +33,14 @@ bool PaintPassDelegate::CanCollapseIntoParentPass() {
 
 // |EntityPassDelgate|
 std::shared_ptr<Contents> PaintPassDelegate::CreateContentsForSubpassTarget(
-    std::shared_ptr<Texture> target) {
+    std::shared_ptr<Texture> target,
+    const Matrix& effect_transform) {
   auto contents = TextureContents::MakeRect(Rect::MakeSize(target->GetSize()));
   contents->SetTexture(target);
   contents->SetSourceRect(Rect::MakeSize(target->GetSize()));
   contents->SetOpacity(paint_.color.alpha);
-  return contents;
+
+  return paint_.WithFilters(std::move(contents), false, effect_transform);
 }
 
 }  // namespace impeller

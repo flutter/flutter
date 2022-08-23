@@ -61,7 +61,8 @@ class TestPassDelegate final : public EntityPassDelegate {
 
   // |EntityPassDelgate|
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(
-      std::shared_ptr<Texture> target) override {
+      std::shared_ptr<Texture> target,
+      const Matrix& transform) override {
     return nullptr;
   }
 

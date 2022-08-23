@@ -7,6 +7,7 @@
 #include <cmath>
 #include <valarray>
 
+#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -79,6 +80,7 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
+    const Matrix& effect_transform,
     const Rect& coverage) const {
   using VS = GaussianBlurPipeline::VertexShader;
   using FS = GaussianBlurPipeline::FragmentShader;
@@ -104,8 +106,9 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
 
   auto radius = Radius{blur_sigma_}.radius;
 
+  auto transform = entity.GetTransformation() * effect_transform;
   auto transformed_blur_radius =
-      entity.GetTransformation().TransformDirection(blur_direction_ * radius);
+      transform.TransformDirection(blur_direction_ * radius);
 
   auto transformed_blur_radius_length = transformed_blur_radius.GetLength();
 
@@ -176,9 +179,9 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     frag_info.alpha_mask_sampler_y_coord_scale =
         source_snapshot->texture->GetYCoordScale();
 
-    auto radius = Radius{transformed_blur_radius_length};
-    frag_info.blur_sigma = Sigma{radius}.sigma;
-    frag_info.blur_radius = radius.radius;
+    auto r = Radius{transformed_blur_radius_length};
+    frag_info.blur_sigma = Sigma{r}.sigma;
+    frag_info.blur_radius = r.radius;
 
     // The blur direction is in input UV space.
     frag_info.blur_direction =
@@ -191,7 +194,8 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     frag_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
 
     Command cmd;
-    cmd.label = "Gaussian Blur Filter";
+    cmd.label = SPrintF("Gaussian Blur Filter (Radius=%.2f)",
+                        transformed_blur_radius_length);
     auto options = OptionsFromPass(pass);
     options.blend_mode = Entity::BlendMode::kSource;
     cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
@@ -236,7 +240,8 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
 
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
     const FilterInput::Vector& inputs,
-    const Entity& entity) const {
+    const Entity& entity,
+    const Matrix& effect_transform) const {
   if (inputs.empty()) {
     return std::nullopt;
   }
@@ -246,10 +251,9 @@ std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
     return std::nullopt;
   }
 
+  auto transform = inputs[0]->GetTransform(entity) * effect_transform;
   auto transformed_blur_vector =
-      inputs[0]
-          ->GetTransform(entity)
-          .TransformDirection(blur_direction_ * Radius{blur_sigma_}.radius)
+      transform.TransformDirection(blur_direction_ * Radius{blur_sigma_}.radius)
           .Abs();
   auto extent = coverage->size + transformed_blur_vector * 2;
   return Rect(coverage->origin - transformed_blur_vector,
