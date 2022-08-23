@@ -518,7 +518,7 @@ Future<void> main() async {
         expect(findFadeInImage(tester).placeholder!.fit, equals(BoxFit.fill));
       });
     });
-    
+
     group("placeholder's FilterQuality", () {
       testWidgets("should be the image's FilterQuality when not set", (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
