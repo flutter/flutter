@@ -2732,6 +2732,7 @@ targets:
 
   - name: Mac_arm64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
+    bringup: true # New target: https://github.com/flutter/flutter/issues/104034
     timeout: 60
     properties:
       add_recipes_cq: "true"
