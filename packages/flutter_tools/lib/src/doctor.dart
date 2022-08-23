@@ -119,9 +119,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
     _validators = <DoctorValidator>[
-      if (platform.isWindows) WindowsVersionValidator(
-        processManager: globals.processManager,
-      ),
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
@@ -132,6 +129,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
+      ),
+      if (platform.isWindows) WindowsVersionValidator(
+        processManager: globals.processManager,
       ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
