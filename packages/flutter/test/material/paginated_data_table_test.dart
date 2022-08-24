@@ -14,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'data_table_test_utils.dart';
-import 'material_state_mixin_test.dart';
 
 class TestDataSource extends DataTableSource {
   TestDataSource({
