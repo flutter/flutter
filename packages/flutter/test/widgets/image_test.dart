@@ -39,37 +39,45 @@ void main() {
     final _TestImageProvider imageProvider1 = _TestImageProvider();
     final _TestImageProvider imageProvider2 = _TestImageProvider();
 
-    final ValueNotifier<int> outerListenable = ValueNotifier<int>(0);
+    final ValueNotifier<_TestImageProvider> imageListenable = ValueNotifier<_TestImageProvider>(imageProvider1);
     final ValueNotifier<int> innerListenable = ValueNotifier<int>(0);
 
-    _TestImageProvider image = imageProvider1;
+    bool imageLoaded = false;
 
-    await tester.pumpWidget(ValueListenableBuilder<int>(
-      valueListenable: outerListenable,
-      builder: (BuildContext context, int value, Widget? child) => Image(
+    await tester.pumpWidget(ValueListenableBuilder<_TestImageProvider>(
+      valueListenable: imageListenable,
+      builder: (BuildContext context, _TestImageProvider image, Widget? child) => Image(
         image: image,
-        frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) => LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) => ValueListenableBuilder<int>(
-            valueListenable: innerListenable,
-            builder: (BuildContext context, int value, Widget? valueListenableChild) => KeyedSubtree(
-              key: UniqueKey(),
-              child: child,
+        frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+          if (frame == 0) {
+            imageLoaded = true;
+          }
+          return LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) => ValueListenableBuilder<int>(
+              valueListenable: innerListenable,
+              builder: (BuildContext context, int value, Widget? valueListenableChild) => KeyedSubtree(
+                key: UniqueKey(),
+                child: child,
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     ));
 
+    imageLoaded = false;
     imageProvider1.complete(image10x10);
     await tester.idle();
     await tester.pump();
+    expect(imageLoaded, true);
 
-    image = imageProvider2;
-    outerListenable.value += 1;
+    imageLoaded = false;
+    imageListenable.value = imageProvider2;
     innerListenable.value += 1;
     imageProvider2.complete(image10x10);
     await tester.idle();
     await tester.pump();
+    expect(imageLoaded, true);
   });
 
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
