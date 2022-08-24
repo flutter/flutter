@@ -62,7 +62,7 @@ void main() {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       overlayColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
-      thumbImage: MaterialStatePropertyAll<ImageProvider>(MemoryImage(thumbImageBytes)),
+      thumbImage: MaterialStatePropertyAll<ImageProvider>(MemoryImage(thumbImageBytes, scale: 1.5)),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -76,7 +76,7 @@ void main() {
     expect(description[3], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
     expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
     expect(description[5], 'splashRadius: 1.0');
-    expect(description[6], 'thumbImage: MaterialStatePropertyAll(MemoryImage(Uint8List#${shortHash(thumbImageBytes)}, scale: 1))');
+    expect(description[6], 'thumbImage: MaterialStatePropertyAll(MemoryImage(Uint8List#${shortHash(thumbImageBytes)}, scale: 1.5))');
   });
 
   testWidgets('Switch is themeable', (WidgetTester tester) async {
