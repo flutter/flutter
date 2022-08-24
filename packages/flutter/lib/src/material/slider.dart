@@ -48,6 +48,13 @@ enum _SliderType { material, adaptive }
 /// ** See code in examples/api/lib/material/slider/slider.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows a [Slider] widget using the [Slider.secondaryTrackValue]
+/// to show a secondary track in the slider.
+///
+/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// {@end-tool}
+///
 /// A slider can be used to select from either a continuous or a discrete set of
 /// values. The default is to use a continuous range of values from [min] to
 /// [max]. To use discrete values, use a non-null value for [divisions], which
@@ -188,8 +195,10 @@ class Slider extends StatefulWidget {
        assert(min != null),
        assert(max != null),
        assert(min <= max),
-       assert(value >= min && value <= max),
-       assert(secondaryTrackValue == null || (secondaryTrackValue >= min && secondaryTrackValue <= max)),
+       assert(value >= min && value <= max,
+         'Value $value is not between minimum $min and maximum $max'),
+       assert(secondaryTrackValue == null || (secondaryTrackValue >= min && secondaryTrackValue <= max),
+         'SecondaryValue $secondaryTrackValue is not between $min and $max'),
        assert(divisions == null || divisions > 0);
 
   /// The currently selected value for this slider.
@@ -197,7 +206,7 @@ class Slider extends StatefulWidget {
   /// The slider's thumb is drawn at a position that corresponds to this value.
   final double value;
 
-  /// The secondary track value for this slider
+  /// The secondary track value for this slider.
   ///
   /// If not null, a secondary track using [Slider.secondaryActiveColor] color
   /// is drawn between the thumb and this value, over the inactive track.
@@ -385,7 +394,7 @@ class Slider extends StatefulWidget {
   final Color? inactiveColor;
 
   /// The color to use for the portion of the slider track between the thumb and
-  /// the [Slider.secondaryTrackValue]
+  /// the [Slider.secondaryTrackValue].
   ///
   /// Defaults to the [SliderThemeData.secondaryActiveTrackColor] of the current
   /// [SliderTheme].
