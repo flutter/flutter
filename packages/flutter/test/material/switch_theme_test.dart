@@ -589,7 +589,6 @@ class _TestImageProvider extends ImageProvider<Object> {
 
   final Completer<ImageInfo> _completer = Completer<ImageInfo>();
   late ImageStreamCompleter _streamCompleter;
-  late ImageConfiguration _lastResolvedConfiguration;
 
   bool get loadCalled => _loadCallCount > 0;
   int get loadCallCount => _loadCallCount;
@@ -602,7 +601,6 @@ class _TestImageProvider extends ImageProvider<Object> {
 
   @override
   void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
-    _lastResolvedConfiguration = configuration;
     super.resolveStreamForKey(configuration, stream, key, handleError);
   }
 
