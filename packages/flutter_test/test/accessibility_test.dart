@@ -58,10 +58,12 @@ void main() {
                   'this is a test',
                   style: TextStyle(fontSize: 14.0, color: Colors.black),
                 ),
+                SizedBox(height: 50),
                 Text(
                   'this is a test',
                   style: TextStyle(fontSize: 14.0, color: Colors.black),
                 ),
+                SizedBox(height: 50),
                 ExcludeSemantics(
                   child: Text(
                     'this is a test',

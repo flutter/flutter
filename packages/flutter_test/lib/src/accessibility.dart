@@ -351,6 +351,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     double? fontSize;
 
     late final Rect paintBounds;
+    late final Rect paintBoundsWithOffset;
 
     final RenderObject? renderBox = element.renderObject;
     if (renderBox is! RenderBox) {
@@ -358,10 +359,26 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     }
 
     const Offset offset = Offset(4.0, 4.0);
-    paintBounds = Rect.fromPoints(
+    paintBoundsWithOffset = Rect.fromPoints(
       renderBox.localToGlobal(renderBox.paintBounds.topLeft - offset),
       renderBox.localToGlobal(renderBox.paintBounds.bottomRight + offset),
     );
+
+    paintBounds = Rect.fromPoints(
+      renderBox.localToGlobal(renderBox.paintBounds.topLeft),
+      renderBox.localToGlobal(renderBox.paintBounds.bottomRight),
+    );
+
+    final Offset? nodeOffset = node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null;
+
+    Rect nodeBounds = node.rect.shift(nodeOffset ?? Offset.zero);
+    Rect intersection = nodeBounds.intersect(paintBounds);
+    if (intersection.width <= 0 || intersection.height <= 0) {
+      // Skip this element since it doesn't correspond to the given semantic
+      // node.
+      return const Evaluation.pass();
+    }
+
     final Widget widget = element.widget;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
     if (widget is Text) {
@@ -378,11 +395,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       throw StateError('Unexpected widget type: ${widget.runtimeType}');
     }
 
-    if (isNodeOffScreen(paintBounds, tester.binding.window)) {
+    if (isNodeOffScreen(paintBoundsWithOffset, tester.binding.window)) {
       return const Evaluation.pass();
     }
 
-    final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
+    final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBoundsWithOffset, image.width, image.height);
 
     // Node was too far off screen.
     if (colorHistogram.isEmpty) {
