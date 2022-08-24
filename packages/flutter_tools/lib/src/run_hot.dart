@@ -454,12 +454,13 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch findInvalidationTimer = _stopwatchFactory.createStopwatch('updateDevFS')..start();
+    final DevFS devFS = flutterDevices[0].devFS!;
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
-      lastCompiled: flutterDevices[0].devFS!.lastCompiled,
-      urisToMonitor: flutterDevices[0].devFS!.sources,
+      lastCompiled: devFS.lastCompiled,
+      urisToMonitor: devFS.sources,
       packagesPath: packagesFilePath,
       asyncScanning: hotRunnerConfig!.asyncScanning,
-      packageConfig: flutterDevices[0].devFS!.lastPackageConfig
+      packageConfig: devFS.lastPackageConfig
           ?? debuggingOptions.buildInfo.packageConfig,
     );
     findInvalidationTimer.stop();
@@ -474,7 +475,7 @@ class HotRunner extends ResidentRunner {
     }
     final UpdateFSReport results = UpdateFSReport(
       success: true,
-      scannedSourcesCount: flutterDevices[0].devFS!.sources.length,
+      scannedSourcesCount: devFS.sources.length,
       findInvalidatedDuration: findInvalidationTimer.elapsed,
     );
     for (final FlutterDevice? device in flutterDevices) {
@@ -497,8 +498,8 @@ class HotRunner extends ResidentRunner {
   }
 
   void _resetDirtyAssets() {
-    for (final FlutterDevice? device in flutterDevices) {
-      final DevFS? devFS = device!.devFS;
+    for (final FlutterDevice device in flutterDevices) {
+      final DevFS? devFS = device.devFS;
       if (devFS == null) {
         // This is sometimes null, however we don't know why and have not been
         // able to reproduce, https://github.com/flutter/flutter/issues/108653
