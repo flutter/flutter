@@ -108,7 +108,7 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
     });
 
   @override
-  VisualDensity? get visualDensity => VisualDensity.standard;
+  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
