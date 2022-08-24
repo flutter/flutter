@@ -186,14 +186,18 @@ class FilledButton extends ButtonStyleButton {
   /// ```dart
   /// FilledButton(
   ///   style: FilledButton.styleFrom(foregroundColor: Colors.green),
-  /// )
+  ///   onPressed: () {},
+  ///   child: const Text('Filled button'),
+  /// );
+  /// ```
   ///
   /// or for a Filled tonal variant:
   /// ```dart
   /// FilledButton.tonal(
   ///   style: FilledButton.styleFrom(foregroundColor: Colors.green),
-  /// )
-  ///
+  ///   onPressed: () {},
+  ///   child: const Text('Filled tonal button'),
+  /// );
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,
