@@ -32,10 +32,10 @@ static const CGFloat kStandardTimeOut = 60.0;
   XCUIApplication *springboard = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
   [springboard activate];
   XCUIElement *appIcon = springboard.icons[@"ios_platform_view_tests"];
-  
+
   if ([appIcon waitForExistenceWithTimeout:kStandardTimeOut]) {
     NSLog(@"Deleting previously installed app.");
-    
+
     // Make icons wiggle
     [appIcon pressForDuration:3];
 
@@ -51,7 +51,7 @@ static const CGFloat kStandardTimeOut = 60.0;
   } else {
     NSLog(@"No previously installed app found.");
   }
-  
+
   self.app = [[XCUIApplication alloc] init];
   [self.app launch];
 }
