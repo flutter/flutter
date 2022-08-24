@@ -514,7 +514,7 @@ class ThemeData with Diagnosticable {
       accentColor: accentColor,
       cardColor: cardColor,
       backgroundColor: isDark ? Colors.grey[700]! : primarySwatch[200]!,
-      errorColor: Colors.red[700]!,
+      errorColor: Colors.red[700],
       brightness: effectiveBrightness,
     );
     selectedRowColor ??= Colors.grey[100]!;
