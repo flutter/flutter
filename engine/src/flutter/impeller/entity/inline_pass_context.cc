@@ -29,8 +29,7 @@ std::shared_ptr<Texture> InlinePassContext::GetTexture() {
   if (!IsValid()) {
     return nullptr;
   }
-  auto color0 = render_target_.GetColorAttachments().find(0)->second;
-  return color0.resolve_texture ? color0.resolve_texture : color0.texture;
+  return render_target_.GetRenderTargetTexture();
 }
 
 bool InlinePassContext::EndPass() {

@@ -283,6 +283,7 @@ constexpr vk::AttachmentStoreOp ToVKAttachmentStoreOp(
     case StoreAction::kDontCare:
       return vk::AttachmentStoreOp::eDontCare;
     case StoreAction::kMultisampleResolve:
+    case StoreAction::kStoreAndMultisampleResolve:
       // TODO (kaushikiska): vulkan doesn't support multisample resolve.
       return vk::AttachmentStoreOp::eDontCare;
   }

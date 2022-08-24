@@ -501,4 +501,8 @@ void ContextVK::SetupSwapchain(vk::UniqueSurfaceKHR surface) {
                  });
 }
 
+bool ContextVK::SupportsOffscreenMSAA() const {
+  return true;
+}
+
 }  // namespace impeller

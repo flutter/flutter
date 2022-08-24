@@ -144,11 +144,18 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
 bool EntityPass::Render(ContentContext& renderer,
                         RenderTarget render_target) const {
   if (reads_from_pass_texture_) {
-    auto offscreen_target = RenderTarget::CreateOffscreen(
-        *renderer.GetContext(), render_target.GetRenderTargetSize(),
-        "EntityPass",  //
-        StorageMode::kDevicePrivate, LoadAction::kClear, StoreAction::kStore,
-        StorageMode::kDevicePrivate, LoadAction::kClear, StoreAction::kStore);
+    auto offscreen_target = RenderTarget::CreateOffscreenMSAA(
+        *renderer.GetContext(),                    // context
+        render_target.GetRenderTargetSize(),       // size
+        "EntityPass",                              // label
+        StorageMode::kDevicePrivate,               // color_storage_mode
+        StorageMode::kDevicePrivate,               // color_resolve_storage_mode
+        LoadAction::kClear,                        // color_load_action
+        StoreAction::kStoreAndMultisampleResolve,  // color_store_action
+        StorageMode::kDevicePrivate,               // stencil_storage_mode
+        LoadAction::kClear,                        // stencil_load_action
+        StoreAction::kStore                        // stencil_store_action
+    );
     if (!OnRender(renderer, offscreen_target.GetRenderTargetSize(),
                   offscreen_target, Point(), Point(), 0)) {
       return false;
@@ -285,17 +292,31 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
     RenderTarget subpass_target;
     if (subpass->reads_from_pass_texture_) {
-      subpass_target = RenderTarget::CreateOffscreen(
-          *renderer.GetContext(), ISize::Ceil(subpass_coverage->size),
-          "EntityPass", StorageMode::kDevicePrivate, LoadAction::kClear,
-          StoreAction::kStore, StorageMode::kDevicePrivate, LoadAction::kClear,
-          StoreAction::kStore);
+      subpass_target = RenderTarget::CreateOffscreenMSAA(
+          *renderer.GetContext(),               // context
+          ISize::Ceil(subpass_coverage->size),  // size
+          "EntityPass",                         // label
+          StorageMode::kDevicePrivate,          // color_storage_mode
+          StorageMode::kDevicePrivate,          // color_resolve_storage_mode
+          LoadAction::kClear,                   // color_load_action
+          StoreAction::kStoreAndMultisampleResolve,  // color_store_action
+          StorageMode::kDevicePrivate,               // stencil_storage_mode
+          LoadAction::kClear,                        // stencil_load_action
+          StoreAction::kStore                        // stencil_store_action
+      );
     } else {
-      subpass_target = RenderTarget::CreateOffscreen(
-          *renderer.GetContext(), ISize::Ceil(subpass_coverage->size),
-          "EntityPass", StorageMode::kDevicePrivate, LoadAction::kClear,
-          StoreAction::kStore, StorageMode::kDeviceTransient,
-          LoadAction::kClear, StoreAction::kDontCare);
+      subpass_target = RenderTarget::CreateOffscreenMSAA(
+          *renderer.GetContext(),               // context
+          ISize::Ceil(subpass_coverage->size),  // size
+          "EntityPass",                         // label
+          StorageMode::kDevicePrivate,          // color_storage_mode
+          StorageMode::kDevicePrivate,          // color_resolve_storage_mode
+          LoadAction::kClear,                   // color_load_action
+          StoreAction::kStoreAndMultisampleResolve,  // color_store_action
+          StorageMode::kDeviceTransient,             // stencil_storage_mode
+          LoadAction::kClear,                        // stencil_load_action
+          StoreAction::kDontCare                     // stencil_store_action
+      );
     }
 
     auto subpass_texture = subpass_target.GetRenderTargetTexture();

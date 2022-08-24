@@ -69,6 +69,9 @@ class ContextGLES final : public Context,
   // |Context|
   bool HasThreadingRestrictions() const override;
 
+  // |Context|
+  bool SupportsOffscreenMSAA() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ContextGLES);
 };
 

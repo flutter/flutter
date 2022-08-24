@@ -132,4 +132,9 @@ bool ContextGLES::HasThreadingRestrictions() const {
   return true;
 }
 
+// |Context|
+bool ContextGLES::SupportsOffscreenMSAA() const {
+  return false;
+}
+
 }  // namespace impeller

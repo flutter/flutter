@@ -109,6 +109,9 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   // |Context|
   std::shared_ptr<WorkQueue> GetWorkQueue() const override;
 
+  // |Context|
+  bool SupportsOffscreenMSAA() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ContextVK);
 };
 
