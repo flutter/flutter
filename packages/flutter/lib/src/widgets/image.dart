@@ -1171,7 +1171,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _replaceImage({required ImageInfo? info}) {
-    _imageInfo?.dispose();
+    ImageInfo? oldImageInfo = _imageInfo;
+    SchedulerBinding.instance.addPostFrameCallback((_) => oldImageInfo?.dispose());
     _imageInfo = info;
   }
 
