@@ -4072,7 +4072,6 @@ targets:
 
   - name: Windows complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
