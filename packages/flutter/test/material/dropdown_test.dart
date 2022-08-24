@@ -1326,53 +1326,49 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.scopesRoute,
+                SemanticsFlag.namesRoute,
+              ],
+              label: 'Popup menu',
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.scopesRoute,
-                    SemanticsFlag.namesRoute,
-                  ],
-                  label: 'Popup menu',
                   children: <TestSemantics>[
                     TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasImplicitScrolling,
+                      ],
                       children: <TestSemantics>[
                         TestSemantics(
+                          label: 'one',
+                          textDirection: TextDirection.ltr,
                           flags: <SemanticsFlag>[
-                            SemanticsFlag.hasImplicitScrolling,
+                            SemanticsFlag.isFocused,
+                            SemanticsFlag.isFocusable,
                           ],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              label: 'one',
-                              textDirection: TextDirection.ltr,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isFocused,
-                                SemanticsFlag.isFocusable,
-                              ],
-                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                            ),
-                            TestSemantics(
-                              label: 'two',
-                              textDirection: TextDirection.ltr,
-                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                            ),
-                            TestSemantics(
-                              label: 'three',
-                              textDirection: TextDirection.ltr,
-                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                            ),
-                            TestSemantics(
-                              label: 'four',
-                              textDirection: TextDirection.ltr,
-                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                            ),
-                          ],
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        TestSemantics(
+                          label: 'two',
+                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        TestSemantics(
+                          label: 'three',
+                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        TestSemantics(
+                          label: 'four',
+                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
                         ),
                       ],
                     ),
@@ -1380,7 +1376,6 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(),
           ],
         ),
       ],

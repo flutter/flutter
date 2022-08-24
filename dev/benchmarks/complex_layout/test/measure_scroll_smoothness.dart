@@ -239,8 +239,9 @@ Map<String, dynamic> scrollSummary(
     //
     final double absJerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
     absJerkAvg += absJerk;
-    if (absJerk > 0.5)
+    if (absJerk > 0.5) {
       jankyCount += 1;
+    }
   }
   // expect(lostFrame < 0.1 * frameTimestamp.length, true);
   absJerkAvg /= frameTimestamp.length - lostFrame;

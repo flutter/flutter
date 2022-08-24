@@ -156,6 +156,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   void removeTextPlaceholder() {
     latestMethodCall = 'removeTextPlaceholder';
   }
+
+  @override
+  void performSelector(String selectorName) {
+    latestMethodCall = 'performSelector';
+  }
 }
 
 class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {

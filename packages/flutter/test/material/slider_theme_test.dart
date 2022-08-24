@@ -148,7 +148,7 @@ void main() {
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
-      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: customColor4),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: customColor4),
     );
 
     expect(sliderTheme.activeTrackColor, equals(customColor1.withAlpha(0xff)));
@@ -176,7 +176,7 @@ void main() {
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
-      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: customColor4),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: customColor4),
     );
 
     expect(sliderTheme.overlayShape, const RoundSliderOverlayShape());
@@ -195,13 +195,13 @@ void main() {
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
-      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: Colors.black),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.black),
     ).copyWith(trackHeight: 2.0);
     final SliderThemeData sliderThemeWhite = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
-      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: Colors.white),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.white),
     ).copyWith(trackHeight: 6.0);
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
     const Color middleGrey = Color(0xff7f7f7f);
