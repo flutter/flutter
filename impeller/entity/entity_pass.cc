@@ -531,7 +531,7 @@ void EntityPass::SetBlendMode(Entity::BlendMode blend_mode) {
 
 void EntityPass::SetBackdropFilter(std::optional<BackdropFilterProc> proc) {
   backdrop_filter_proc_ = proc;
-  if (superpass_) {
+  if (proc.has_value() && superpass_) {
     superpass_->reads_from_pass_texture_ = true;
   }
 }
