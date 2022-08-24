@@ -95,16 +95,17 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
 
     Dart_Handle shader = values[kShaderIndex];
     if (!Dart_IsNull(shader)) {
-      Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader);
-      auto sampling =
-          ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
-      auto color_source = decoded->shader(sampling);
-      // TODO(dnfield): Remove this restriction.
-      // This currently is only used by paragraph code. Once SkParagraph does
-      // not need to take an SkPaint, we won't be restricted in this way because
-      // we will not need to access the shader on the UI task runner.
-      if (color_source->owning_context() != DlImage::OwningContext::kRaster) {
-        paint.setShader(color_source->skia_object());
+      if (Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader)) {
+        auto sampling =
+            ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
+        auto color_source = decoded->shader(sampling);
+        // TODO(dnfield): Remove this restriction.
+        // This currently is only used by paragraph code. Once SkParagraph does
+        // not need to take an SkPaint, we won't be restricted in this way
+        // because we will not need to access the shader on the UI task runner.
+        if (color_source->owning_context() != DlImage::OwningContext::kRaster) {
+          paint.setShader(color_source->skia_object());
+        }
       }
     }
 
@@ -227,10 +228,13 @@ bool Paint::sync_to(DisplayListBuilder* builder,
       if (Dart_IsNull(shader)) {
         builder->setColorSource(nullptr);
       } else {
-        Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader);
-        auto sampling =
-            ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
-        builder->setColorSource(decoded->shader(sampling).get());
+        if (Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader)) {
+          auto sampling =
+              ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
+          builder->setColorSource(decoded->shader(sampling).get());
+        } else {
+          builder->setColorSource(nullptr);
+        }
       }
     }
 

@@ -1398,6 +1398,12 @@ class Paint {
     return _objects?[_kShaderIndex] as Shader?;
   }
   set shader(Shader? value) {
+    assert(() {
+      if (value is ImageShader) {
+        assert(!value.debugDisposed, 'Attempted to set a disposed shader to $this');
+      }
+      return true;
+    }());
     _ensureObjectsInitialized()[_kShaderIndex] = value;
   }
 
@@ -4031,6 +4037,7 @@ class ImageShader extends Shader {
     FilterQuality? filterQuality,
   }) :
     assert(image != null), // image is checked on the engine side
+    assert(!image.debugDisposed),
     assert(tmx != null),
     assert(tmy != null),
     assert(matrix4 != null),
