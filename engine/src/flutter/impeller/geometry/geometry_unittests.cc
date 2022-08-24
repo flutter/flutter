@@ -5,6 +5,7 @@
 #include "impeller/geometry/geometry_unittests.h"
 
 #include <limits>
+#include <sstream>
 
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/constants.h"
@@ -1328,6 +1329,35 @@ TEST(GeometryTest, VerticesConstructorAndGetters) {
   ASSERT_EQ(vertices.GetIndices(), indices);
   ASSERT_EQ(vertices.GetColors(), colors);
   ASSERT_EQ(vertices.GetMode(), VertexMode::kTriangle);
+}
+
+TEST(GeometryTest, MatrixPrinting) {
+  std::stringstream stream;
+
+  Matrix m;
+
+  stream << m;
+
+  ASSERT_EQ(stream.str(), R"((
+       1.000000,       0.000000,       0.000000,       0.000000,
+       0.000000,       1.000000,       0.000000,       0.000000,
+       0.000000,       0.000000,       1.000000,       0.000000,
+       0.000000,       0.000000,       0.000000,       1.000000,
+))");
+
+  stream.str("");
+  stream.clear();
+
+  m = Matrix::MakeTranslation(Vector3(10, 20, 30));
+
+  stream << m;
+
+  ASSERT_EQ(stream.str(), R"((
+       1.000000,       0.000000,       0.000000,      10.000000,
+       0.000000,       1.000000,       0.000000,      20.000000,
+       0.000000,       0.000000,       1.000000,      30.000000,
+       0.000000,       0.000000,       0.000000,       1.000000,
+))");
 }
 
 }  // namespace testing
