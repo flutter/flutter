@@ -65,10 +65,10 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder] and [image] may be composed in a [ResizeImage] to provide
   /// a custom decode/cache size.
   ///
-  /// The [placeholder] and [image] may be have their own BoxFit settings via [fit]
+  /// The [placeholder] and [image] may have their own BoxFit settings via [fit]
   /// and [placeholderFit].
   ///
-  /// The [placeholder] and [image] may be have their own FilterQuality settings via [filterQuality]
+  /// The [placeholder] and [image] may have their own FilterQuality settings via [filterQuality]
   /// and [placeholderFilterQuality].
   ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
@@ -322,11 +322,13 @@ class FadeInImage extends StatefulWidget {
   /// improve the rendered image quality in this case. Pixels may be misaligned
   /// with the screen pixels as a result of transforms or scaling.
   ///
+  /// The default is [FilterQuality.low].
+  ///
   /// See also:
   ///
   ///  * [FilterQuality], the enum containing all possible filter quality
   ///    options.
-  final FilterQuality? filterQuality;
+  final FilterQuality filterQuality = FilterQuality.low;
 
   /// The rendering quality of the placeholder image.
   ///
@@ -426,7 +428,7 @@ class _FadeInImageState extends State<FadeInImage> {
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
     BoxFit? fit,
-    FilterQuality? filterQuality,
+    FilterQuality filterQuality,
     required Animation<double> opacity,
   }) {
     assert(image != null);
@@ -438,7 +440,7 @@ class _FadeInImageState extends State<FadeInImage> {
       width: widget.width,
       height: widget.height,
       fit: fit,
-      filterQuality: filterQuality ?? FilterQuality.low,
+      filterQuality: filterQuality,
       alignment: widget.alignment,
       repeat: widget.repeat,
       matchTextDirection: widget.matchTextDirection,
