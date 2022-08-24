@@ -35,6 +35,55 @@ void main() {
     imageCache.maximumSize = originalCacheSize;
   });
 
+  testWidgets('Verify Image does not use disposed handles', (tester) async {
+    final ValueNotifier<int> outerListenable = ValueNotifier<int>(0);
+    final ValueNotifier<int> innerListenable = ValueNotifier<int>(0);
+
+    bool imageLoaded = false;
+    MemoryImage image = MemoryImage(Uint8List.fromList(kTransparentImage));
+
+    Future<void> runAsyncAndIdle() async {
+      for (var i = 0; i < 20; ++i) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.idle();
+      }
+    }
+
+    await tester.pumpWidget(ValueListenableBuilder(
+      valueListenable: outerListenable,
+      builder: (_, __, ___) => Image(
+        image: image,
+        frameBuilder: (_, child, __, ___) {
+          if (((child as Semantics).child! as RawImage).image != null) imageLoaded = true;
+          return LayoutBuilder(
+            builder: (_, __) => ValueListenableBuilder(
+              valueListenable: innerListenable,
+              builder: (_, __, ___) => KeyedSubtree(
+                key: UniqueKey(),
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
+    ));
+
+    while (!imageLoaded) {
+      await runAsyncAndIdle();
+      await tester.pump();
+    }
+
+    image = MemoryImage(MemoryImage(Uint8List.fromList(kBlueSquarePng));
+    outerListenable.value++;
+
+    imageLoaded = false;
+    while (!imageLoaded) {
+      await runAsyncAndIdle();
+      innerListenable.value++;
+      await tester.pump();
+    }
+  });
+
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final _TestImageProvider imageProvider1 = _TestImageProvider();
