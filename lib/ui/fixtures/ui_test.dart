@@ -229,6 +229,21 @@ void frameCallback(_Image, int) {
 }
 
 @pragma('vm:entry-point')
+void platformMessageResponseTest() {
+  _callPlatformMessageResponseDart((ByteData? result) {
+    if (result is UnmodifiableByteDataView &&
+        result.lengthInBytes == 100) {
+      _finishCallResponse(true);
+    } else {
+      _finishCallResponse(false);
+    }
+  });
+}
+
+void _callPlatformMessageResponseDart(void Function(ByteData? result) callback) native 'CallPlatformMessageResponseDart';
+void _finishCallResponse(bool didPass) native 'FinishCallResponse';
+
+@pragma('vm:entry-point')
 void messageCallback(dynamic data) {}
 
 @pragma('vm:entry-point')
