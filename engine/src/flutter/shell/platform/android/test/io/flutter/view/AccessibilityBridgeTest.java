@@ -25,6 +25,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -1029,6 +1031,34 @@ public class AccessibilityBridgeTest {
     assertFalse(node1Info.isFocusable());
     AccessibilityNodeInfo node2Info = accessibilityBridge.createAccessibilityNodeInfo(2);
     assertTrue(node2Info.isFocusable());
+  }
+
+  @TargetApi(31)
+  @Test
+  public void itSetsBoldTextFlagCorrectly() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    Resources resource = mock(Resources.class);
+    Configuration config = new Configuration();
+    config.fontWeightAdjustment = 300;
+
+    when(mockRootView.getContext()).thenReturn(context);
+    when(mockRootView.getResources()).thenReturn(resource);
+    when(resource.getConfiguration()).thenReturn(config);
+
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+
+    verify(mockChannel).setAccessibilityFeatures(1 << 3);
   }
 
   @Test
