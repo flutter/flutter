@@ -309,13 +309,13 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
           *renderer.GetContext(),               // context
           ISize::Ceil(subpass_coverage->size),  // size
           "EntityPass",                         // label
-          StorageMode::kDevicePrivate,          // color_storage_mode
+          StorageMode::kDeviceTransient,        // color_storage_mode
           StorageMode::kDevicePrivate,          // color_resolve_storage_mode
           LoadAction::kClear,                   // color_load_action
-          StoreAction::kStoreAndMultisampleResolve,  // color_store_action
-          StorageMode::kDeviceTransient,             // stencil_storage_mode
-          LoadAction::kClear,                        // stencil_load_action
-          StoreAction::kDontCare                     // stencil_store_action
+          StoreAction::kMultisampleResolve,     // color_store_action
+          StorageMode::kDeviceTransient,        // stencil_storage_mode
+          LoadAction::kClear,                   // stencil_load_action
+          StoreAction::kDontCare                // stencil_store_action
       );
     }
 
