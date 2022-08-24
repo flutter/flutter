@@ -56,11 +56,14 @@ class CustomMagnifier extends StatelessWidget {
   Widget build(BuildContext context) {
     // Use a value listenable builder because we want to rebuild
     // everytime the text selection info changes.
+    // `CustomMagnifier` could also be a `StatefulWidget` and call `setState`
+    // when `magnifierInfo` updates. This would be useful for more complex
+    // positioning cases.
     return ValueListenableBuilder<MagnifierInfoBearer>(
         valueListenable: magnifierInfo,
         builder: (BuildContext context,
             MagnifierInfoBearer currentMagnifierInfo, _) {
-          // We want to position the magnifier at the global position of the gesture...
+          // We want to position the magnifier at the global position of the gesture.
           Offset magnifierPosition = currentMagnifierInfo.globalGesturePosition;
 
           // You may use the `MagnifierInfoBearer` however you'd like:
@@ -78,7 +81,8 @@ class CustomMagnifier extends StatelessWidget {
             ),
           );
 
-          // Finally, align the magnifier to the bottom center!
+          // Finally, align the magnifier to the bottom center. The inital anchor is
+          // the top left, so subtract bottom center alignment.
           magnifierPosition -= Alignment.bottomCenter.alongSize(magnifierSize);
 
           return Positioned(
