@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cmath>
+#include <iomanip>
 #include <optional>
 #include <ostream>
 #include <utility>
@@ -374,10 +375,10 @@ static_assert(sizeof(struct Matrix) == sizeof(Scalar) * 16,
 
 namespace std {
 inline std::ostream& operator<<(std::ostream& out, const impeller::Matrix& m) {
-  out << "(";
+  out << "(" << std::endl << std::fixed;
   for (size_t i = 0; i < 4u; i++) {
     for (size_t j = 0; j < 4u; j++) {
-      out << m.e[i][j] << ",";
+      out << std::setw(15) << m.e[j][i] << ",";
     }
     out << std::endl;
   }
