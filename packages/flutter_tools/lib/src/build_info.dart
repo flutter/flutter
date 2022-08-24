@@ -594,7 +594,7 @@ String getDartNameForDarwinArch(DarwinArch arch) {
 // Returns Apple's name for the specified target architecture.
 //
 // When invoking Apple tools such as `xcodebuild` or `lipo`, the tool often
-// passes one or more target architectures as paramters. The names returned by
+// passes one or more target architectures as parameters. The names returned by
 // this function reflect Apple's name for the specified architecture.
 //
 // For consistency with developer expectations, Flutter outputs also use these

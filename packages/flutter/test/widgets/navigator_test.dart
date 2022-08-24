@@ -85,7 +85,7 @@ class OnTapPage extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Center(
-          child: Text(id, style: Theme.of(context).textTheme.headline3),
+          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
         ),
       ),
     );
@@ -3865,6 +3865,39 @@ void main() {
         await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
       });
+
+  testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
+    final _MockNavigatorObserver observer = _MockNavigatorObserver();
+    Widget build([Key? key]) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: key,
+          observers: <NavigatorObserver>[observer],
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
+                return Container();
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    await tester.pumpWidget(Container(child: build()));
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #navigator]);
+    await tester.pumpWidget(Container());
+    observer._checkInvocations(<Symbol>[#navigator]);
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(build(key));
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    await tester.pumpWidget(Container(child: build(key)));
+    observer._checkInvocations(<Symbol>[#navigator, #navigator]);
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
@@ -4114,4 +4147,19 @@ class ZeroDurationPageRoute extends PageRoute<void> {
 
   @override
   String? get barrierLabel => null;
+}
+
+class _MockNavigatorObserver implements NavigatorObserver {
+  final List<Symbol> _invocations = <Symbol>[];
+
+  void _checkInvocations(List<Symbol> expected) {
+    expect(_invocations, expected);
+    _invocations.clear();
+  }
+
+  @override
+  Object? noSuchMethod(Invocation invocation) {
+    _invocations.add(invocation.memberName);
+    return null;
+  }
 }
