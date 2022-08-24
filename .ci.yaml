@@ -2521,6 +2521,15 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac hello_world_macos__compile
+    bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: hello_world_macos__compile
+
   - name: Mac module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
     timeout: 60
