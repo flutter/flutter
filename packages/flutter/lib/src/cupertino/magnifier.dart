@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 /// finger may be blocking the point of interest, like a selection handle.
 ///
 /// Delegates styling to [CupertinoMagnifier] with its position depending on
-/// [magnifierOverlayInfoBearer].
+/// [magnifierInfoBearer].
 ///
 /// Specifically, the [CupertinoTextMagnifier] follows the following rules.
 /// [CupertinoTextMagnifier]:
@@ -21,7 +21,7 @@ import 'package:flutter/widgets.dart';
 ///   then has vertical offset [dragResistance] * k.
 class CupertinoTextMagnifier extends StatefulWidget {
   /// Constructs a [RawMagnifier] in the Cupertino style, positioning with respect to
-  /// [magnifierOverlayInfoBearer].
+  /// [magnifierInfoBearer].
   ///
   /// The default constructor parameters and constants were eyeballed on
   /// an iPhone XR iOS v15.5.
@@ -32,7 +32,7 @@ class CupertinoTextMagnifier extends StatefulWidget {
     this.dragResistance = 10.0,
     this.hideBelowThreshold = 48.0,
     this.horizontalScreenEdgePadding = 10.0,
-    required this.magnifierOverlayInfoBearer,
+    required this.magnifierInfoBearer,
   });
 
   /// The curve used for the in / out animations.
@@ -63,9 +63,9 @@ class CupertinoTextMagnifier extends StatefulWidget {
   final double horizontalScreenEdgePadding;
 
   /// [CupertinoTextMagnifier] will determine its own positioning
-  /// based on the [MagnifierOverlayInfoBearer] of this notifier.
-  final ValueNotifier<MagnifierOverlayInfoBearer>
-      magnifierOverlayInfoBearer;
+  /// based on the [MagnifierInfoBearer] of this notifier.
+  final ValueNotifier<MagnifierInfoBearer>
+      magnifierInfoBearer;
 
   /// The duration that the magnifier drags behind its final position.
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
@@ -95,7 +95,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     )..addListener(() => setState(() {}));
 
     widget.controller.animationController = _ioAnimationController;
-    widget.magnifierOverlayInfoBearer
+    widget.magnifierInfoBearer
         .addListener(_determineMagnifierPositionAndFocalPoint);
 
     _ioAnimation = Tween<double>(
@@ -111,16 +111,16 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   void dispose() {
     widget.controller.animationController = null;
     _ioAnimationController.dispose();
-    widget.magnifierOverlayInfoBearer
+    widget.magnifierInfoBearer
         .removeListener(_determineMagnifierPositionAndFocalPoint);
     super.dispose();
   }
 
   @override
   void didUpdateWidget(CupertinoTextMagnifier oldWidget) {
-    if (oldWidget.magnifierOverlayInfoBearer != widget.magnifierOverlayInfoBearer) {
-      oldWidget.magnifierOverlayInfoBearer.removeListener(_determineMagnifierPositionAndFocalPoint);
-      widget.magnifierOverlayInfoBearer.addListener(_determineMagnifierPositionAndFocalPoint);
+    if (oldWidget.magnifierInfoBearer != widget.magnifierInfoBearer) {
+      oldWidget.magnifierInfoBearer.removeListener(_determineMagnifierPositionAndFocalPoint);
+      widget.magnifierInfoBearer.addListener(_determineMagnifierPositionAndFocalPoint);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -132,8 +132,8 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   }
 
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierOverlayInfoBearer textEditingContext =
-        widget.magnifierOverlayInfoBearer.value;
+    final MagnifierInfoBearer textEditingContext =
+        widget.magnifierInfoBearer.value;
 
     // The exact Y of the center of the current line.
     final double verticalCenterOfCurrentLine =
@@ -228,7 +228,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 ///
 /// * [RawMagnifier], the backing implementation.
 /// * [CupertinoTextMagnifier], a widget that positions [CupertinoMagnifier] based on
-/// [MagnifierOverlayInfoBearer].
+/// [MagnifierInfoBearer].
 /// * [MagnifierController], the controller for this magnifier.
 class CupertinoMagnifier extends StatelessWidget {
   /// Creates a [RawMagnifier] in the Cupertino style.
