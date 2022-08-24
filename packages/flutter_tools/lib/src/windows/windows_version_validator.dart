@@ -50,7 +50,7 @@ class WindowsVersionValidator extends DoctorValidator {
     // semantic versioned strings
     // (ie. 10.5.4123)
     final RegExp regex =
-        RegExp(r'\n(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)\n');
+        RegExp(r'\n?(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)\n?');
     final Iterable<RegExpMatch> matches = regex.allMatches(resultStdout);
 
     // Use the string split method to extract the major version
