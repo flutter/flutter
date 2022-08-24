@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -36,7 +36,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   });
 
-  final ValueListenable<ClipboardStatus>? clipboardStatus;
+  final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleCopy;
@@ -82,7 +82,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     assert(debugCheckHasMediaQuery(context));
@@ -147,7 +147,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return CupertinoTextSelectionToolbar(
@@ -213,7 +213,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
@@ -266,7 +266,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         );
       // iOS doesn't draw anything for collapsed selections.
       case TextSelectionHandleType.collapsed:
-        return const SizedBox();
+        return const SizedBox.shrink();
     }
   }
 

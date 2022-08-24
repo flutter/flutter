@@ -10,7 +10,7 @@ import 'typography.dart';
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in Material Design
-/// (e.g., button, caption). Rather than creating a [TextTheme] directly,
+/// (e.g., labelLarge, bodySmall). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
@@ -101,18 +101,70 @@ class TextTheme with Diagnosticable {
     TextStyle? labelLarge,
     this.labelMedium,
     TextStyle? labelSmall,
+    @Deprecated(
+      'Use displayLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline1,
+    @Deprecated(
+      'Use displayMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline2,
+    @Deprecated(
+      'Use displaySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline3,
+    @Deprecated(
+      'Use headlineMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline4,
+    @Deprecated(
+      'Use headlineSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline5,
+    @Deprecated(
+      'Use titleLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline6,
+    @Deprecated(
+      'Use titleMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle1,
+    @Deprecated(
+      'Use titleSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle2,
+    @Deprecated(
+      'Use bodyLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText1,
+    @Deprecated(
+      'Use bodyMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText2,
+    @Deprecated(
+      'Use bodySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? caption,
+    @Deprecated(
+      'Use labelLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? button,
+    @Deprecated(
+      'Use labelSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? overline,
   }) : assert(
          (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
@@ -232,48 +284,100 @@ class TextTheme with Diagnosticable {
   final TextStyle? labelSmall;
 
   /// Extremely large text.
+  @Deprecated(
+    'Use displayLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline1 => displayLarge;
 
   /// Very, very large text.
   ///
   /// Used for the date in the dialog shown by [showDatePicker].
+  @Deprecated(
+    'Use displayMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline2 => displayMedium;
 
   /// Very large text.
+  @Deprecated(
+    'Use displaySmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline3 => displaySmall;
 
   /// Large text.
+  @Deprecated(
+    'Use headlineMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline4 => headlineMedium;
 
   /// Used for large text in dialogs (e.g., the month and year in the dialog
   /// shown by [showDatePicker]).
+  @Deprecated(
+    'Use headlineSmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline5 => headlineSmall;
 
   /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
   /// and [AlertDialog.title]).
+  @Deprecated(
+    'Use titleLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline6 => titleLarge;
 
   /// Used for the primary text in lists (e.g., [ListTile.title]).
+  @Deprecated(
+    'Use titleMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get subtitle1 => titleMedium;
 
-  /// For medium emphasis text that's a little smaller than [subtitle1].
+  /// For medium emphasis text that's a little smaller than [titleMedium].
+  @Deprecated(
+    'Use titleSmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get subtitle2 => titleSmall;
 
-  /// Used for emphasizing text that would otherwise be [bodyText2].
+  /// Used for emphasizing text that would otherwise be [bodyMedium].
+  @Deprecated(
+    'Use bodyLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get bodyText1 => bodyLarge;
 
   /// The default text style for [Material].
+  @Deprecated(
+    'Use bodyMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get bodyText2 => bodyMedium;
 
   /// Used for auxiliary text associated with images.
+  @Deprecated(
+    'Use bodySmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get caption => bodySmall;
 
   /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
+  @Deprecated(
+    'Use labelLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get button => labelLarge;
 
   /// The smallest style.
   ///
   /// Typically used for captions or to introduce a (larger) headline.
+  @Deprecated(
+    'Use labelSmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get overline => labelSmall;
 
   /// Creates a copy of this text theme but with the given fields replaced with
@@ -332,18 +436,70 @@ class TextTheme with Diagnosticable {
     TextStyle? labelLarge,
     TextStyle? labelMedium,
     TextStyle? labelSmall,
+    @Deprecated(
+      'Use displayLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline1,
+    @Deprecated(
+      'Use displayMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline2,
+    @Deprecated(
+      'Use displaySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline3,
+    @Deprecated(
+      'Use headlineMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline4,
+    @Deprecated(
+      'Use headlineSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline5,
+    @Deprecated(
+      'Use titleLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline6,
+    @Deprecated(
+      'Use titleMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle1,
+    @Deprecated(
+      'Use titleSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle2,
+    @Deprecated(
+      'Use bodyLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText1,
+    @Deprecated(
+      'Use bodyMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText2,
+    @Deprecated(
+      'Use bodySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? caption,
+    @Deprecated(
+      'Use labelLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? button,
+    @Deprecated(
+      'Use labelSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? overline,
   }) {
     assert(

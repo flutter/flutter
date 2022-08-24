@@ -1010,6 +1010,7 @@ void main() {
     final PhysicalModelLayer physicalModelLayer = PhysicalModelLayer();
     final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
     final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
+    final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
     expect(offsetLayer.supportsRasterization(), true);
     expect(opacityLayer.supportsRasterization(), true);
     expect(clipRectLayer.supportsRasterization(), true);
@@ -1019,12 +1020,11 @@ void main() {
     expect(physicalModelLayer.supportsRasterization(), true);
     expect(colorFilterLayer.supportsRasterization(), true);
     expect(shaderMaskLayer.supportsRasterization(), true);
+    expect(textureLayer.supportsRasterization(), true);
 
     // Unsupported.
-    final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
     final PlatformViewLayer platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
 
-    expect(textureLayer.supportsRasterization(), false);
     expect(platformViewLayer.supportsRasterization(), false);
   });
 }

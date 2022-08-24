@@ -50,9 +50,9 @@ void main() {
 
 
   test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = TextTheme(headline6: TextStyle(color: Color(0xcafefeed)));
+    const TextTheme partialTheme = TextTheme(titleLarge: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
-    expect(fullTheme.headline6!.color, equals(partialTheme.headline6!.color));
+    expect(fullTheme.titleLarge!.color, equals(partialTheme.titleLarge!.color));
 
     const TextTheme onlyHeadlineSmallAndTitleLarge = TextTheme(
       headlineSmall: TextStyle(color: Color(0xcafefeed)),
