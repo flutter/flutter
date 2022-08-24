@@ -30,6 +30,18 @@ class RenderTarget {
       LoadAction stencil_load_action = LoadAction::kClear,
       StoreAction stencil_store_action = StoreAction::kDontCare);
 
+  static RenderTarget CreateOffscreenMSAA(
+      const Context& context,
+      ISize size,
+      std::string label = "Offscreen MSAA",
+      StorageMode color_storage_mode = StorageMode::kDeviceTransient,
+      StorageMode color_resolve_storage_mode = StorageMode::kDevicePrivate,
+      LoadAction color_load_action = LoadAction::kClear,
+      StoreAction color_store_action = StoreAction::kMultisampleResolve,
+      StorageMode stencil_storage_mode = StorageMode::kDeviceTransient,
+      LoadAction stencil_load_action = LoadAction::kClear,
+      StoreAction stencil_store_action = StoreAction::kDontCare);
+
   RenderTarget();
 
   ~RenderTarget();

@@ -22,17 +22,19 @@ namespace impeller {
 static bool ConfigureResolveTextureAttachment(
     const Attachment& desc,
     MTLRenderPassAttachmentDescriptor* attachment) {
-  if (desc.store_action == StoreAction::kMultisampleResolve &&
-      !desc.resolve_texture) {
+  bool needs_resolve =
+      desc.store_action == StoreAction::kMultisampleResolve ||
+      desc.store_action == StoreAction::kStoreAndMultisampleResolve;
+
+  if (needs_resolve && !desc.resolve_texture) {
     VALIDATION_LOG << "Resolve store action specified on attachment but no "
                       "resolve texture was specified.";
     return false;
   }
 
-  if (desc.resolve_texture &&
-      desc.store_action != StoreAction::kMultisampleResolve) {
-    VALIDATION_LOG << "Resolve store action specified but there was no "
-                      "resolve attachment.";
+  if (desc.resolve_texture && !needs_resolve) {
+    VALIDATION_LOG << "A resolve texture was specified even though the store "
+                      "action doesn't require it.";
     return false;
   }
 

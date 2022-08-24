@@ -245,7 +245,12 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     SubpassCallback subpass_callback) const {
   auto context = GetContext();
 
-  auto subpass_target = RenderTarget::CreateOffscreen(*context, texture_size);
+  RenderTarget subpass_target;
+  if (context->SupportsOffscreenMSAA()) {
+    subpass_target = RenderTarget::CreateOffscreenMSAA(*context, texture_size);
+  } else {
+    subpass_target = RenderTarget::CreateOffscreen(*context, texture_size);
+  }
   auto subpass_texture = subpass_target.GetRenderTargetTexture();
   if (!subpass_texture) {
     return nullptr;
