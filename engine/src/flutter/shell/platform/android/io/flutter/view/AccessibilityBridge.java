@@ -9,6 +9,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -119,6 +120,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // framework generated IDs
   // and the most significant 16 bits are used for engine generated IDs.
   private static final int MIN_ENGINE_GENERATED_NODE_ID = 1 << 16;
+
+  // Font weight adjustment for bold text. FontWeight.Bold - FontWeight.Normal = w700 - w400 = 300.
+  private static final int BOLD_TEXT_WEIGHT_ADJUSTMENT = 300;
 
   /// Value is derived from ACTION_TYPE_MASK in AccessibilityNodeInfo.java
   private static int FIRST_RESOURCE_ID = 267386881;
@@ -476,6 +480,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
     }
 
+    // Tells Flutter whether the text should be bolded or not. If the user changes bold text
+    // setting, the configuration will change and trigger a re-build of the accesibiltyBridge.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      setBoldTextFlag();
+    }
+
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
   }
 
@@ -537,6 +547,26 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o == semanticsNode)
             || !SemanticsNode.nullableHasAncestor(
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
+  }
+
+  @TargetApi(31)
+  @RequiresApi(31)
+  private void setBoldTextFlag() {
+    if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
+      return;
+    }
+    int fontWeightAdjustment =
+        rootAccessibilityView.getResources().getConfiguration().fontWeightAdjustment;
+    boolean shouldBold =
+        fontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED
+            && fontWeightAdjustment >= BOLD_TEXT_WEIGHT_ADJUSTMENT;
+
+    if (shouldBold) {
+      accessibilityFeatureFlags |= AccessibilityFeature.BOLD_TEXT.value;
+    } else {
+      accessibilityFeatureFlags &= AccessibilityFeature.BOLD_TEXT.value;
+    }
+    sendLatestAccessibilityFlagsToFlutter();
   }
 
   @VisibleForTesting
