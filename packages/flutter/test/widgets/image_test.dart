@@ -73,7 +73,7 @@ void main() {
       await tester.pump();
     }
 
-    image = MemoryImage(MemoryImage(Uint8List.fromList(kBlueSquarePng));
+    image = MemoryImage(Uint8List.fromList(kBlueSquarePng));
     outerListenable.value++;
 
     imageLoaded = false;
