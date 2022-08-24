@@ -1,4 +1,4 @@
-Signature: 3155d1b7b337abffe925d5c33bd183ed
+Signature: 82861add9083a3ea845d3eedf9236ef0
 
 UNUSED LICENSES:
 
@@ -2126,7 +2126,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkDescriptorSet.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkDescriptorSet.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkDescriptorSetManager.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkDescriptorSetManager.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkExtensions.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkFramebuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkFramebuffer.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkImageView.cpp
@@ -2150,6 +2149,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkUniformHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkVaryingHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkVaryingHandler.h
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanExtensions.cpp
 FILE: ../../../third_party/skia/src/images/SkImageEncoderPriv.h
 FILE: ../../../third_party/skia/src/opts/SkChecksum_opts.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_avx.cpp
@@ -7153,6 +7153,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h
+FILE: ../../../third_party/skia/include/gpu/vk/VulkanTypes.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h
+FILE: ../../../third_party/skia/src/gpu/piet/PietTypes.h
+FILE: ../../../third_party/skia/src/gpu/piet/Render.cpp
+FILE: ../../../third_party/skia/src/gpu/piet/Render.h
+FILE: ../../../third_party/skia/src/gpu/piet/Scene.cpp
+FILE: ../../../third_party/skia/src/gpu/piet/Scene.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/MidpointContourParser.h
+FILE: ../../../third_party/skia/src/sksl/SkSLPosition.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2022 Google LLC.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/utils/SkEventTracer.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/utils/SkEventTracer.h
@@ -7788,51 +7835,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrDistanceFieldGenFromVector.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrDistanceFieldGenFromVector.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 ARM Ltd.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of the copyright holder nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h
-FILE: ../../../third_party/skia/src/gpu/piet/PietTypes.h
-FILE: ../../../third_party/skia/src/gpu/piet/Render.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/Render.h
-FILE: ../../../third_party/skia/src/gpu/piet/Scene.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/Scene.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/MidpointContourParser.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPosition.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2022 Google LLC.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
