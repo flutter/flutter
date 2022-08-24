@@ -69,6 +69,10 @@ const double _kUnsetGestureSetting = -1.0;
 // See embedder.cc::kFlutterKeyDataChannel for more information.
 const String _kFlutterKeyDataChannel = 'flutter/keydata';
 
+@pragma('vm:entry-point')
+ByteData? _wrapUnmodifiableByteData(ByteData? byteData) =>
+    byteData == null ? null : UnmodifiableByteDataView(byteData);
+
 /// Platform event dispatcher singleton.
 ///
 /// The most basic interface to the host operating system's interface.
