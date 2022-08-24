@@ -79,6 +79,7 @@ std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
     BlurStyle blur_style,
     Entity::TileMode tile_mode,
     FilterInput::Ref source_override,
+    Sigma secondary_sigma,
     const Matrix& effect_transform) {
   auto blur = std::make_shared<DirectionalGaussianBlurFilterContents>();
   blur->SetInputs({input});
@@ -87,6 +88,7 @@ std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
   blur->SetBlurStyle(blur_style);
   blur->SetTileMode(tile_mode);
   blur->SetSourceOverride(source_override);
+  blur->SetSecondarySigma(secondary_sigma);
   blur->SetEffectTransform(effect_transform);
   return blur;
 }
@@ -100,10 +102,10 @@ std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
     const Matrix& effect_transform) {
   auto x_blur = MakeDirectionalGaussianBlur(input, sigma_x, Point(1, 0),
                                             BlurStyle::kNormal, tile_mode,
-                                            nullptr, effect_transform);
+                                            nullptr, {}, effect_transform);
   auto y_blur = MakeDirectionalGaussianBlur(FilterInput::Make(x_blur), sigma_y,
                                             Point(0, 1), blur_style, tile_mode,
-                                            input, effect_transform);
+                                            input, sigma_x, effect_transform);
   return y_blur;
 }
 
