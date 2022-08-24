@@ -70,6 +70,7 @@ int ImageShader::height() {
 }
 
 void ImageShader::dispose() {
+  cached_shader_.reset();
   image_.reset();
   ClearDartWrapper();
 }
