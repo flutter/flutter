@@ -50,7 +50,7 @@ void main() {
       _boilerplate(
         Container(
           width: 200.0,
-          height: 200.0,
+          height: 300.0,
           color: Colors.white,
           child: Column(
             children: const <Widget>[
