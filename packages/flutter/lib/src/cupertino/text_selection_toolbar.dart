@@ -188,7 +188,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     this._anchor,
     this._isAbove,
     super.child,
-  ) ;
+  );
 
 
   @override
