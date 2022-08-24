@@ -310,44 +310,10 @@ class FadeInImage extends StatefulWidget {
   /// If not value set, it will fallback to [fit].
   final BoxFit? placeholderFit;
 
-  /// The rendering quality of the image.
-  ///
-  /// If the image is of a high quality and its pixels are perfectly aligned
-  /// with the physical screen pixels, extra quality enhancement may not be
-  /// necessary. If so, then [FilterQuality.none] would be the most efficient.
-  ///
-  /// If the pixels are not perfectly aligned with the screen pixels, or if the
-  /// image itself is of a low quality, [FilterQuality.none] may produce
-  /// undesirable artifacts. Consider using other [FilterQuality] values to
-  /// improve the rendered image quality in this case. Pixels may be misaligned
-  /// with the screen pixels as a result of transforms or scaling.
-  ///
-  /// The default is [FilterQuality.low].
-  ///
-  /// See also:
-  ///
-  ///  * [FilterQuality], the enum containing all possible filter quality
-  ///    options.
+  /// {@macro flutter.widgets.image.filterQuality}
   final FilterQuality filterQuality;
 
-  /// The rendering quality of the placeholder image.
-  ///
-  /// If the placeholder image is of a high quality and its pixels are perfectly aligned
-  /// with the physical screen pixels, extra quality enhancement may not be
-  /// necessary. If so, then [FilterQuality.none] would be the most efficient.
-  ///
-  /// If the pixels are not perfectly aligned with the screen pixels, or if the
-  /// placeholder image itself is of a low quality, [FilterQuality.none] may produce
-  /// undesirable artifacts. Consider using other [FilterQuality] values to
-  /// improve the rendered image quality in this case. Pixels may be misaligned
-  /// with the screen pixels as a result of transforms or scaling.
-  ///
-  /// If not value set, it will fallback to [filterQuality].
-  ///
-  /// See also:
-  ///
-  ///  * [FilterQuality], the enum containing all possible filter quality
-  ///    options.
+  /// {@macro flutter.widgets.image.filterQuality}
   final FilterQuality? placeholderFilterQuality;
 
   /// How to align the image within its bounds.
