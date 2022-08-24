@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.la
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InputDecorator label uses errorColor', (WidgetTester tester) async {
+  testWidgets('InputDecorator label uses error color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );
