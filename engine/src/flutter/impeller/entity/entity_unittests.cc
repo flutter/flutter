@@ -864,7 +864,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     static Color input_color = Color::Black();
     static int selected_blur_type = 0;
     static int selected_pass_variation = 0;
-    static float blur_amount[2] = {20, 20};
+    static float blur_amount[2] = {10, 10};
     static int selected_blur_style = 0;
     static int selected_tile_mode = 3;
     static Color cover_color(1, 0, 0, 0.2);
@@ -894,7 +894,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
                      pass_variation_names,
                      sizeof(pass_variation_names) / sizeof(char*));
       }
-      ImGui::SliderFloat2("Sigma", blur_amount, 0, 200);
+      ImGui::SliderFloat2("Sigma", blur_amount, 0, 10);
       ImGui::Combo("Blur style", &selected_blur_style, blur_style_names,
                    sizeof(blur_style_names) / sizeof(char*));
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
