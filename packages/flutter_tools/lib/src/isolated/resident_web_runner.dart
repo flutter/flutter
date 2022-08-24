@@ -439,8 +439,9 @@ class ResidentWebRunner extends ResidentRunner {
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
         final String parent = _fileSystem.file(mainUri).parent.path;
-        flutterDevices.first.generator!.addFileSystemRoot(parent);
-        flutterDevices.first.generator!.addFileSystemRoot(_fileSystem.directory('test').absolute.path);
+        flutterDevices.first.generator!
+          ..addFileSystemRoot(parent)
+          ..addFileSystemRoot(_fileSystem.directory('test').absolute.path);
         importedEntrypoint = Uri(
           scheme: 'org-dartlang-app',
           path: '/${mainUri.pathSegments.last}',
