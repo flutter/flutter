@@ -247,6 +247,8 @@ constexpr MTLStoreAction ToMTLStoreAction(StoreAction action) {
       return MTLStoreActionStore;
     case StoreAction::kMultisampleResolve:
       return MTLStoreActionMultisampleResolve;
+    case StoreAction::kStoreAndMultisampleResolve:
+      return MTLStoreActionStoreAndMultisampleResolve;
   }
   return MTLStoreActionDontCare;
 }
@@ -259,6 +261,8 @@ constexpr StoreAction FromMTLStoreAction(MTLStoreAction action) {
       return StoreAction::kStore;
     case MTLStoreActionMultisampleResolve:
       return StoreAction::kMultisampleResolve;
+    case MTLStoreActionStoreAndMultisampleResolve:
+      return StoreAction::kStoreAndMultisampleResolve;
     default:
       break;
   }

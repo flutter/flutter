@@ -68,6 +68,9 @@ class ContextMTL final : public Context,
   // |Context|
   std::shared_ptr<WorkQueue> GetWorkQueue() const override;
 
+  // |Context|
+  bool SupportsOffscreenMSAA() const override;
+
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;
 

@@ -99,6 +99,7 @@ enum class StoreAction {
   kDontCare,
   kStore,
   kMultisampleResolve,
+  kStoreAndMultisampleResolve,
 };
 
 constexpr bool CanClearAttachment(LoadAction action) {
@@ -115,6 +116,7 @@ constexpr bool CanClearAttachment(LoadAction action) {
 constexpr bool CanDiscardAttachmentWhenDone(StoreAction action) {
   switch (action) {
     case StoreAction::kStore:
+    case StoreAction::kStoreAndMultisampleResolve:
       return false;
     case StoreAction::kDontCare:
     case StoreAction::kMultisampleResolve:

@@ -232,4 +232,9 @@ id<MTLDevice> ContextMTL::GetMTLDevice() const {
   return device_;
 }
 
+// |Context|
+bool ContextMTL::SupportsOffscreenMSAA() const {
+  return true;
+}
+
 }  // namespace impeller
