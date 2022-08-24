@@ -87,7 +87,7 @@ abstract class ThemeExtension<T extends ThemeExtension<T>> {
   /// Linearly interpolate with another [ThemeExtension] object.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  ThemeExtension<T> lerp(ThemeExtension<T>? other, double t);
+  ThemeExtension<T> lerp(covariant ThemeExtension<T>? other, double t);
 }
 
 // Deriving these values is black magic. The spec claims that pressed buttons
