@@ -92,7 +92,7 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
-    this.filterQuality,
+    this.filterQuality = FilterQuality.low,
     this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
@@ -153,7 +153,7 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
-    this.filterQuality,
+    this.filterQuality = FilterQuality.low,
     this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
@@ -226,7 +226,7 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
-    this.filterQuality,
+    this.filterQuality = FilterQuality.low,
     this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
@@ -328,7 +328,7 @@ class FadeInImage extends StatefulWidget {
   ///
   ///  * [FilterQuality], the enum containing all possible filter quality
   ///    options.
-  final FilterQuality filterQuality = FilterQuality.low;
+  final FilterQuality filterQuality;
 
   /// The rendering quality of the placeholder image.
   ///
