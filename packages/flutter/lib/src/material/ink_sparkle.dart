@@ -121,7 +121,7 @@ class InkSparkle extends InteractiveInkFeature {
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox) {
     // InkSparkle will not be painted until the async compilation completes.
-    _InkSparkleFactory.compileShaderIfNeccessary();
+    _InkSparkleFactory.compileShaderIfNecessary();
     controller.addInkFeature(this);
 
     // All animation values are derived from Android 12 source code. See:
@@ -270,7 +270,7 @@ class InkSparkle extends InteractiveInkFeature {
     // InkSparkle can only paint if its shader has been compiled.
     if (_InkSparkleFactory._shaderManager == null) {
       // Skipping paintFeature because the shader it relies on is not ready to
-      // be used. InkSparkleFactory.compileShaderIfNeccessary must complete
+      // be used. InkSparkleFactory.compileShaderIfNecessary must complete
       // before InkSparkle can paint.
       return;
     }
@@ -430,7 +430,7 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
 
   const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
 
-  static void compileShaderIfNeccessary() {
+  static void compileShaderIfNecessary() {
     if (!_initCalled) {
       FragmentShaderManager.inkSparkle().then((FragmentShaderManager manager) {
         _shaderManager = manager;
