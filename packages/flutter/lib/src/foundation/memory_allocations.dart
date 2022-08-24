@@ -7,7 +7,13 @@ abstract class ObjectEvent{}
 typedef ObjectEventListener = void Function(ObjectEvent);
 
 class ObjectCreated implements ObjectEvent {
-  ObjectCreated(this.library, this.klass, this.object, this.details);
+  ObjectCreated({
+    required this.library,
+    required this.klass,
+    required this.object,
+    this.details = const [],
+    required this.token
+  });
 
   final String library;
   final String klass;
@@ -58,13 +64,13 @@ class MemoryAllocations {
 
   void removeListener(ObjectEventListener listener) => _listeners?.remove(listener);
 
-  void registerObjectEvent(ObjectEvent ObjectEvent) {
+  void registerObjectEvent(ObjectEvent objectEvent) {
     final List<ObjectEventListener>? listeners = _listeners;
     if (listeners == null || listeners.isEmpty) {
       return;
     }
     for (final ObjectEventListener listener in listeners) {
-      listener(ObjectEvent);
+      listener(objectEvent);
     }
   }
 }
