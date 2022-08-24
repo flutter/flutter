@@ -51,14 +51,16 @@ void main() {
 
     await tester.pumpWidget(ValueListenableBuilder(
       valueListenable: outerListenable,
-      builder: (_, __, ___) => Image(
+      builder: (BuildContext _, Object? __, Widget? ___) => Image(
         image: image,
-        frameBuilder: (_, child, __, ___) {
-          if (((child as Semantics).child! as RawImage).image != null) imageLoaded = true;
+        frameBuilder: (BuildContext _, Widget child, int? __, bool ___) {
+          if (((child as Semantics).child! as RawImage).image != null) {
+            imageLoaded = true;
+          }
           return LayoutBuilder(
-            builder: (_, __) => ValueListenableBuilder(
+            builder: (BuildContext _, BoxConstraints __) => ValueListenableBuilder(
               valueListenable: innerListenable,
-              builder: (_, __, ___) => KeyedSubtree(
+              builder: (BuildContext _, Object? __, Widget? ___) => KeyedSubtree(
                 key: UniqueKey(),
                 child: child,
               ),
