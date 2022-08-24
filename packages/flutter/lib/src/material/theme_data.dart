@@ -87,7 +87,7 @@ abstract class ThemeExtension<T extends ThemeExtension<T>> {
   /// Linearly interpolate with another [ThemeExtension] object.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  ThemeExtension<T> lerp(ThemeExtension<T>? other, double t);
+  ThemeExtension<T> lerp(covariant ThemeExtension<T>? other, double t);
 }
 
 // Deriving these values is black magic. The spec claims that pressed buttons
@@ -1261,11 +1261,6 @@ class ThemeData with Diagnosticable {
   ///
   /// A larger value translates to a spacing increase (less dense), and a
   /// smaller value translates to a spacing decrease (more dense).
-  ///
-  /// In Material Design 3, the [visualDensity] does not override the value of
-  /// [IconButton.visualDensity] which defaults to [VisualDensity.standard]
-  /// for all platforms. To override the default value of [IconButton.visualDensity],
-  /// use [ThemeData.iconButtonTheme] instead.
   /// {@endtemplate}
   final VisualDensity visualDensity;
 

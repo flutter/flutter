@@ -694,11 +694,9 @@ void main() {
   });
 
   testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
-    final bool material3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
-        theme: themeData,
+        theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -708,9 +706,9 @@ void main() {
       ),
     );
 
-    final Finder hamburger = find.byType(IconButton);
-    expect(tester.getTopLeft(hamburger), material3 ? const Offset(4.0, 4.0) : Offset.zero);
-    expect(tester.getSize(hamburger), material3 ? const Size(48.0, 48.0) : const Size(56.0, 56.0));
+    final Finder hamburger = find.byTooltip('Open navigation menu');
+    expect(tester.getTopLeft(hamburger), Offset.zero);
+    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
@@ -739,12 +737,12 @@ void main() {
       ),
     );
 
-    final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
+    final Finder addButton = find.byTooltip('Add');
     expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
-    final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
+    final Finder shareButton = find.byTooltip('Share');
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
     expect(tester.getSize(shareButton), const Size(48.0, 56.0));
   });

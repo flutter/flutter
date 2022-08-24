@@ -25,7 +25,7 @@ class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
   }
 
   @override
-  MyThemeExtensionA lerp(ThemeExtension<MyThemeExtensionA>? other, double t) {
+  MyThemeExtensionA lerp(MyThemeExtensionA? other, double t) {
     if (other is! MyThemeExtensionA) {
       return this;
     }
@@ -52,7 +52,7 @@ class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
   }
 
   @override
-  MyThemeExtensionB lerp(ThemeExtension<MyThemeExtensionB>? other, double t) {
+  MyThemeExtensionB lerp(MyThemeExtensionB? other, double t) {
     if (other is! MyThemeExtensionB) {
       return this;
     }

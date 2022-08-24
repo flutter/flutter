@@ -998,16 +998,10 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      leading = theme.useMaterial3
-        ? Container(
-          alignment: Alignment.center,
-          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
-          child: leading,
-        )
-        : ConstrainedBox(
-          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
-          child: leading,
-        );
+      leading = ConstrainedBox(
+        constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
+        child: leading,
+      );
     }
 
     Widget? title = widget.title;
@@ -1062,7 +1056,7 @@ class _AppBarState extends State<AppBar> {
     if (widget.actions != null && widget.actions!.isNotEmpty) {
       actions = Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: theme.useMaterial3 ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: widget.actions!,
       );
     } else if (hasEndDrawer) {
