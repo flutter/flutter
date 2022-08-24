@@ -88,7 +88,6 @@ void main() {
     expect(painter.count, 1);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-
   testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     final TestPainter painter = TestPainter();
@@ -152,7 +151,6 @@ void main() {
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-
 
   testWidgets('SnapshotWidget can update the painter type', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
@@ -338,7 +336,7 @@ class TestPainter extends SnapshotPainter {
 }
 
 class TestPainter2 extends TestPainter {
-    @override
+  @override
   bool shouldRepaint(covariant TestPainter2 oldDelegate) => shouldRepaintValue;
 }
 
