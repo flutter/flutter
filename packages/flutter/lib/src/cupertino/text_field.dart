@@ -868,14 +868,14 @@ class CupertinoTextField extends StatefulWidget {
     magnifierBuilder: (
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierTextSelectionInfo> magnifierOverlayInfoBearer
+    ValueNotifier<MagnifierInfoBearer> magnifierInfoBearer
   ) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
         return CupertinoTextMagnifier(
         controller: controller,
-        magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
+        magnifierInfoBearer: magnifierInfoBearer,
       );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

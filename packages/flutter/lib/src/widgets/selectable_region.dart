@@ -552,7 +552,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     ));
   }
 
-  MagnifierTextSelectionInfo _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
+  MagnifierInfoBearer _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
       final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
       final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
       final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
@@ -563,7 +563,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         selectionPoint.lineHeight
       );
 
-      return MagnifierTextSelectionInfo(
+      return MagnifierInfoBearer(
         globalGesturePosition: globalGesturePosition,
         caretRect: caretRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,

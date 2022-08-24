@@ -6041,7 +6041,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierTextSelectionInfo> infoBearer;
+    late ValueNotifier<MagnifierInfoBearer> infoBearer;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     group('magnifier builder', () {
@@ -6064,7 +6064,7 @@ void main() {
             defaultCupertinoTextField.magnifierConfiguration!.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty),
               ),
             isA<Widget>().having((Widget widget) => widget.key, 'key', equals(customMagnifier.key)));
       });
@@ -6082,7 +6082,7 @@ void main() {
               editableText.magnifierConfiguration.magnifierBuilder(
                   context,
                   MagnifierController(),
-                  ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                  ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty),
                 ),
               isA<CupertinoTextMagnifier>());
         },
@@ -6102,7 +6102,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty),
               ),
             isNull);
       },
@@ -6123,7 +6123,7 @@ void main() {
                 magnifierConfiguration: TextMagnifierConfiguration(
                     magnifierBuilder: (_,
                         MagnifierController controller,
-                        ValueNotifier<MagnifierTextSelectionInfo>
+                        ValueNotifier<MagnifierInfoBearer>
                             localInfoBearer) {
                   infoBearer = localInfoBearer;
                   return fakeMagnifier;

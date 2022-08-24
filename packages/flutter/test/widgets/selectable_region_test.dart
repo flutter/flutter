@@ -1101,7 +1101,7 @@ void main() {
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
     group('magnifier', () {
-      late ValueNotifier<MagnifierTextSelectionInfo> infoBearer;
+      late ValueNotifier<MagnifierInfoBearer> infoBearer;
       final Widget fakeMagnifier = Container(key: UniqueKey());
 
       testWidgets('Can drag handles to show, unshow, and update magnifier',
@@ -1114,7 +1114,7 @@ void main() {
               magnifierConfiguration: TextMagnifierConfiguration(
                 magnifierBuilder: (_,
                     MagnifierController controller,
-                    ValueNotifier<MagnifierTextSelectionInfo>
+                    ValueNotifier<MagnifierInfoBearer>
                         localInfoBearer) {
                   infoBearer = localInfoBearer;
                   return fakeMagnifier;

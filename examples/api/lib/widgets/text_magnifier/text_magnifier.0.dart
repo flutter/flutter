@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
               magnifierConfiguration: TextMagnifierConfiguration(
                 magnifierBuilder: (BuildContext context,
                         MagnifierController controller,
-                        ValueNotifier<MagnifierTextSelectionInfo>
+                        ValueNotifier<MagnifierInfoBearer>
                             textSelectionData) =>
                     CustomMagnifier(
                   magnifierInfo: textSelectionData,
@@ -50,31 +50,31 @@ class CustomMagnifier extends StatelessWidget {
 
   // This magnifier will consume some text data and position itself
   // based on the info in the magnifier.
-  final ValueNotifier<MagnifierTextSelectionInfo> magnifierInfo;
+  final ValueNotifier<MagnifierInfoBearer> magnifierInfo;
 
   @override
   Widget build(BuildContext context) {
     // Use a value listenable builder because we want to rebuild
     // everytime the text selection info changes.
-    return ValueListenableBuilder<MagnifierTextSelectionInfo>(
+    return ValueListenableBuilder<MagnifierInfoBearer>(
         valueListenable: magnifierInfo,
         builder: (BuildContext context,
-            MagnifierTextSelectionInfo currentMagnifierInfo, _) {
+            MagnifierInfoBearer currentMagnifierInfo, _) {
           // We want to position the magnifier at the global position of the gesture...
           Offset magnifierPosition = currentMagnifierInfo.globalGesturePosition;
 
-          // You may use the `MagnifierTextSelectionInfo` however you'd like:
+          // You may use the `MagnifierInfoBearer` however you'd like:
           // In this case, we make sure the magnifier never goes out of bounds.
           magnifierPosition = Offset(
             clampDouble(
               magnifierPosition.dx,
-              currentMagnifierInfo.currentLineBoundries.left,
-              currentMagnifierInfo.currentLineBoundries.right,
+              currentMagnifierInfo.currentLineBoundaries.left,
+              currentMagnifierInfo.currentLineBoundaries.right,
             ),
             clampDouble(
               magnifierPosition.dy,
-              currentMagnifierInfo.currentLineBoundries.top,
-              currentMagnifierInfo.currentLineBoundries.bottom,
+              currentMagnifierInfo.currentLineBoundaries.top,
+              currentMagnifierInfo.currentLineBoundaries.bottom,
             ),
           );
 
