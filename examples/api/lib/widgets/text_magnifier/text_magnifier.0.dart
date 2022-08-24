@@ -67,7 +67,7 @@ class CustomMagnifier extends StatelessWidget {
           Offset magnifierPosition = currentMagnifierInfo.globalGesturePosition;
 
           // You may use the `MagnifierInfoBearer` however you'd like:
-          // In this case, we make sure the magnifier never goes out of bounds.
+          // In this case, we make sure the magnifier never goes out of the current line bounds.
           magnifierPosition = Offset(
             clampDouble(
               magnifierPosition.dx,
