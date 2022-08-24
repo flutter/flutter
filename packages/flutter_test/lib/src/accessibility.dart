@@ -371,8 +371,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
     final Offset? nodeOffset = node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null;
 
-    Rect nodeBounds = node.rect.shift(nodeOffset ?? Offset.zero);
-    Rect intersection = nodeBounds.intersect(paintBounds);
+    final Rect nodeBounds = node.rect.shift(nodeOffset ?? Offset.zero);
+    final Rect intersection = nodeBounds.intersect(paintBounds);
     if (intersection.width <= 0 || intersection.height <= 0) {
       // Skip this element since it doesn't correspond to the given semantic
       // node.
