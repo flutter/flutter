@@ -868,9 +868,9 @@ class Image extends StatefulWidget {
   ///    from a single opacity value.
   final Animation<double>? opacity;
 
-  /// {@template flutter.widgets.image.filterQuality}
   /// The rendering quality of the image.
   ///
+  /// {@template flutter.widgets.image.filterQuality}
   /// If the image is of a high quality and its pixels are perfectly aligned
   /// with the physical screen pixels, extra quality enhancement may not be
   /// necessary. If so, then [FilterQuality.none] would be the most efficient.
