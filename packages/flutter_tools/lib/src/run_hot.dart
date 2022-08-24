@@ -512,13 +512,13 @@ class HotRunner extends ResidentRunner {
 
   Future<void> _cleanupDevFS() async {
     final List<Future<void>> futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS != null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.devFS != null) {
         // Cleanup the devFS, but don't wait indefinitely.
         // We ignore any errors, because it's not clear what we would do anyway.
         futures.add(device.devFS!.destroy()
           .timeout(const Duration(milliseconds: 250))
-          .catchError((dynamic error) {
+          .catchError((Object? error) {
             globals.printTrace('Ignored error while cleaning up DevFS: $error');
           }));
       }
