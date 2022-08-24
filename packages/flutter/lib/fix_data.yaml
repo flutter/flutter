@@ -43,7 +43,7 @@ transforms:
         name: 'colorScheme'
         style: optional_named
         argumentValue:
-          expression: 'ColorScheme.fromSwatch().copyWith(background: {% backgroundColor %})'
+          expression: 'ColorScheme(background: {% backgroundColor %})'
           requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme ==''"
       - kind: 'removeParameter'
         name: 'backgroundColor'
@@ -114,7 +114,7 @@ transforms:
         name: 'colorScheme'
         style: optional_named
         argumentValue:
-          expression: 'ColorScheme.fromSwatch().copyWith(background: {% backgroundColor %})'
+          expression: 'ColorScheme(background: {% backgroundColor %})'
           requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme ==''"
       - kind: 'removeParameter'
         name: 'backgroundColor'
@@ -185,8 +185,8 @@ transforms:
           name: 'colorScheme'
           style: optional_named
           argumentValue:
-            expression: 'ColorScheme.fromSwatch().copyWith(background: {% backgroundColor %})'
-            requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme ==''"
+            expression: 'ColorScheme(background: {% backgroundColor %})'
+            requiredIf: "backgroundColor != '' && primarySwatch == '' && colorScheme == ''"
         - kind: 'removeParameter'
           name: 'backgroundColor'
     - if: "backgroundColor != '' && primarySwatch != '' && colorScheme == ''"
@@ -267,7 +267,7 @@ transforms:
         name: 'colorScheme'
         style: optional_named
         argumentValue:
-          expression: 'ColorScheme.fromSwatch().copyWith(error: {% errorColor %})'
+          expression: 'ColorScheme(error: {% errorColor %})'
           requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme ==''"
       - kind: 'removeParameter'
         name: 'errorColor'
@@ -338,7 +338,7 @@ transforms:
         name: 'colorScheme'
         style: optional_named
         argumentValue:
-          expression: 'ColorScheme.fromSwatch().copyWith(error: {% errorColor %})'
+          expression: 'ColorScheme(error: {% errorColor %})'
           requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme ==''"
       - kind: 'removeParameter'
         name: 'errorColor'
@@ -409,7 +409,7 @@ transforms:
           name: 'colorScheme'
           style: optional_named
           argumentValue:
-            expression: 'ColorScheme.fromSwatch().copyWith(error: {% errorColor %})'
+            expression: 'ColorScheme(error: {% errorColor %})'
             requiredIf: "errorColor != '' && primarySwatch == '' && colorScheme ==''"
         - kind: 'removeParameter'
           name: 'errorColor'

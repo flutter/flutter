@@ -798,40 +798,40 @@ void main() {
   themeData.selectedRowColor; // Removing field reference not supported.
 
   // Changes made in https://github.com/flutter/flutter/pull/109817
-    var TextTheme textTheme = TextTheme(
-      displayLarge: headline1Style,
-      displayMedium: headline2Style,
-      displaySmall: headline3Style,
-      headlineMedium: headline4Style,
-      headlineSmall: headline5Style,
-      titleLarge: headline6Style,
-      titleMedium: subtitle1Style,
-      titleSmall: subtitle2Style,
-      bodyLarge: bodyText1Style,
-      bodyMedium: bodyText2Style,
-      bodySmall: captionStyle,
-      labelLarge: buttonStyle,
-      labelSmall: overlineStyle,
-    );
-    var TextTheme textTheme = TextTheme(error: '');
+  var TextTheme textTheme = TextTheme(
+    displayLarge: headline1Style,
+    displayMedium: headline2Style,
+    displaySmall: headline3Style,
+    headlineMedium: headline4Style,
+    headlineSmall: headline5Style,
+    titleLarge: headline6Style,
+    titleMedium: subtitle1Style,
+    titleSmall: subtitle2Style,
+    bodyLarge: bodyText1Style,
+    bodyMedium: bodyText2Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    labelSmall: overlineStyle,
+  );
+  var TextTheme textTheme = TextTheme(error: '');
 
-    // Changes made in https://github.com/flutter/flutter/pull/109817
-    var TextTheme copiedTextTheme = TextTheme.copyWith(
-      displayLarge: headline1Style,
-      displayMedium: headline2Style,
-      displaySmall: headline3Style,
-      headlineMedium: headline4Style,
-      headlineSmall: headline5Style,
-      titleLarge: headline6Style,
-      titleMedium: subtitle1Style,
-      titleSmall: subtitle2Style,
-      bodyLarge: bodyText1Style,
-      bodyMedium: bodyText2Style,
-      bodySmall: captionStyle,
-      labelLarge: buttonStyle,
-      labelSmall: overlineStyle,
-    );
-    var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var TextTheme copiedTextTheme = TextTheme.copyWith(
+    displayLarge: headline1Style,
+    displayMedium: headline2Style,
+    displaySmall: headline3Style,
+    headlineMedium: headline4Style,
+    headlineSmall: headline5Style,
+    titleLarge: headline6Style,
+    titleMedium: subtitle1Style,
+    titleSmall: subtitle2Style,
+    bodyLarge: bodyText1Style,
+    bodyMedium: bodyText2Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    labelSmall: overlineStyle,
+  );
+  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/109817
   var style;
@@ -851,18 +851,18 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/94156
   ThemeData themeData = ThemeData();
-  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(error: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme(error: Colors.red));
   themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(error: Colors.red));
   themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(error: Colors.red));
   themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, error: Colors.red));
-  themeData = ThemeData(error: '');
-  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(error: Colors.red));
+  themeData = ThemeData(otherParam: '');
+  themeData = ThemeData.raw(colorScheme: ColorScheme(error: Colors.red));
   themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(error: Colors.red));
   themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(error: Colors.red));
   themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, error: Colors.red));
-  themeData = ThemeData.raw(error: '');
-  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(error: Colors.red));
-  themeData = themeData.copyWith(error: '');
+  themeData = ThemeData.raw(otherParam: '');
+  themeData = themeData.copyWith(colorScheme: ColorScheme(error: Colors.red));
+  themeData = themeData.copyWith(otherParam: '');
   themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(error: Colors.red));
   themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(error: Colors.red));
   themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, error: Colors.red));
@@ -870,18 +870,18 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/94156
   ThemeData themeData = ThemeData();
-  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(background: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme(background: Colors.grey));
   themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(background: Colors.grey));
   themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(background: Colors.grey));
   themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, background: Colors.grey));
-  themeData = ThemeData(error: '');
-  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(background: Colors.grey));
+  themeData = ThemeData(otherParam: '');
+  themeData = ThemeData.raw(colorScheme: ColorScheme(background: Colors.grey));
   themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(background: Colors.grey));
   themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(background: Colors.grey));
   themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, background: Colors.grey));
-  themeData = ThemeData.raw(error: '');
-  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(background: Colors.grey));
-  themeData = themeData.copyWith(error: '');
+  themeData = ThemeData.raw(otherParam: '');
+  themeData = themeData.copyWith(colorScheme: ColorScheme(background: Colors.grey));
+  themeData = themeData.copyWith(otherParam: '');
   themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(background: Colors.grey));
   themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(background: Colors.grey));
   themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, background: Colors.grey));
@@ -889,7 +889,7 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/94156
   ThemeData themeData = ThemeData();
-  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(background: Colors.grey, error: Colors.red));
-  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(background: Colors.grey, error: Colors.red));
-  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(background: Colors.grey, error: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
+  themeData = themeData.copyWith(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
 }
