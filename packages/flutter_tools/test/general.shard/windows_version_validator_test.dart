@@ -52,8 +52,6 @@ Hotfix(s):                 7 Hotfix(s) Installed.
 Hyper-V Requirements:      A hypervisor has been detected. Features required for Hyper-V will not be displayed.
 ''';
 
-// TODO (eliasyishak): replace stdout with valid stdout
-
 /// Example output from `systeminfo` from version != 10
 const String invalidWindowsStdOut = r'''
 Host Name:                 XXXXXXXXXXXX
