@@ -89,9 +89,9 @@ class PaginatedDataTable extends StatefulWidget {
     this.controller,
     this.primary,
   }) : assert(actions == null || (actions != null && header != null)),
-       assert(columns != null),
-       assert(dragStartBehavior != null),
-       assert(columns.isNotEmpty),
+        assert(columns != null),
+        assert(dragStartBehavior != null),
+        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
        assert(dataRowHeight != null),
@@ -112,7 +112,7 @@ class PaginatedDataTable extends StatefulWidget {
        assert(!(controller != null && (primary ?? false)),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
-       );
+        );
 
   /// The table card's optional header.
   ///
@@ -317,37 +317,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     );
   }
 
-  DataRow _getProgressIndicatorRowFor(int index) {
-    bool haveProgressIndicator = false;
-    final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
-      if (!column.numeric) {
-        haveProgressIndicator = true;
-        return const DataCell(CircularProgressIndicator());
-      }
-      return DataCell.empty;
-    }).toList();
-    if (!haveProgressIndicator) {
-      haveProgressIndicator = true;
-      cells[0] = const DataCell(CircularProgressIndicator());
-    }
-    return DataRow.byIndex(
-      index: index,
-      cells: cells,
-    );
-  }
-
   List<DataRow> _getRows(int firstRowIndex, int rowsPerPage) {
     final List<DataRow> result = <DataRow>[];
     final int nextPageFirstRowIndex = firstRowIndex + rowsPerPage;
-    bool haveProgressIndicator = false;
+
     for (int index = firstRowIndex; index < nextPageFirstRowIndex; index += 1) {
       DataRow? row;
       if (index < _rowCount || _rowCountApproximate) {
         row = _rows.putIfAbsent(index, () => widget.source.getRow(index));
-        if (row == null && !haveProgressIndicator) {
-          row ??= _getProgressIndicatorRowFor(index);
-          haveProgressIndicator = true;
-        }
       }
       row ??= _getBlankRowFor(index);
       result.add(row);
@@ -409,11 +386,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
         .where((int value) => value <= _rowCount || value == widget.rowsPerPage)
-        .map<DropdownMenuItem<int>>((int value) {
-          return DropdownMenuItem<int>(
-            value: value,
-            child: Text('$value'),
-          );
+          .map<DropdownMenuItem<int>>((int value) {
+        return DropdownMenuItem<int>(
+          value: value,
+          child: Text('$value'),
+        );
         })
         .toList();
       footerWidgets.addAll(<Widget>[
@@ -478,6 +455,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 14.0),
     ]);
 
+    final List<DataRow> rows = _getRows(_firstRowIndex, widget.rowsPerPage);
+    final bool needProgressIndicator = _needProgressIndicator(rows);
     // CARD
     return Card(
       semanticContainer: false,
@@ -518,26 +497,40 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 primary: widget.primary,
                 controller: widget.controller,
                 dragStartBehavior: widget.dragStartBehavior,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.minWidth),
-                  child: DataTable(
-                    key: _tableKey,
-                    columns: widget.columns,
-                    sortColumnIndex: widget.sortColumnIndex,
-                    sortAscending: widget.sortAscending,
-                    onSelectAll: widget.onSelectAll,
-                    // Make sure no decoration is set on the DataTable
-                    // from the theme, as its already wrapped in a Card.
-                    decoration: const BoxDecoration(),
-                    dataRowHeight: widget.dataRowHeight,
-                    headingRowHeight: widget.headingRowHeight,
-                    horizontalMargin: widget.horizontalMargin,
-                    checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
-                    columnSpacing: widget.columnSpacing,
-                    showCheckboxColumn: widget.showCheckboxColumn,
-                    showBottomBorder: true,
-                    rows: _getRows(_firstRowIndex, widget.rowsPerPage),
-                  ),
+                child: Stack(
+                  children: <Widget>[
+                    ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: constraints.minWidth),
+                      child: DataTable(
+                        key: _tableKey,
+                        columns: widget.columns,
+                        sortColumnIndex: widget.sortColumnIndex,
+                        sortAscending: widget.sortAscending,
+                        onSelectAll: widget.onSelectAll,
+                        // Make sure no decoration is set on the DataTable
+                        // from the theme, as its already wrapped in a Card.
+                        decoration: const BoxDecoration(),
+                        dataRowHeight: widget.dataRowHeight,
+                        headingRowHeight: widget.headingRowHeight,
+                        horizontalMargin: widget.horizontalMargin,
+                        checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
+                        columnSpacing: widget.columnSpacing,
+                        showCheckboxColumn: widget.showCheckboxColumn,
+                        showBottomBorder: true,
+                        rows: needProgressIndicator ? _getRows(_firstRowIndex- widget.rowsPerPage, widget.rowsPerPage): rows,
+                      ),
+                    ),
+                    if (needProgressIndicator)
+                      Positioned(
+                        top: widget.headingRowHeight - 4,
+                        width: constraints.minWidth,
+                        child: const SizedBox(
+                          height: 4,
+                          // width: constraints.minWidth,
+                          child: LinearProgressIndicator(minHeight: 4),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               DefaultTextStyle(
@@ -566,5 +559,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         },
       ),
     );
+  }
+
+  bool _needProgressIndicator(List<DataRow> rows) {
+    return rows[0].cells.every((DataCell cell) => cell == DataCell.empty);
   }
 }
