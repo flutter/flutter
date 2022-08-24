@@ -35,7 +35,7 @@ void main() {
     imageCache.maximumSize = originalCacheSize;
   });
 
-  testWidgets('Verify Image does not use disposed handles', (tester) async {
+  testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
     final ValueNotifier<int> outerListenable = ValueNotifier<int>(0);
     final ValueNotifier<int> innerListenable = ValueNotifier<int>(0);
 
@@ -43,13 +43,13 @@ void main() {
     MemoryImage image = MemoryImage(Uint8List.fromList(kTransparentImage));
 
     Future<void> runAsyncAndIdle() async {
-      for (var i = 0; i < 20; ++i) {
+      for (int i = 0; i < 20; ++i) {
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         await tester.idle();
       }
     }
 
-    await tester.pumpWidget(ValueListenableBuilder(
+    await tester.pumpWidget(ValueListenableBuilder<int>(
       valueListenable: outerListenable,
       builder: (BuildContext _, Object? __, Widget? ___) => Image(
         image: image,
@@ -58,7 +58,7 @@ void main() {
             imageLoaded = true;
           }
           return LayoutBuilder(
-            builder: (BuildContext _, BoxConstraints __) => ValueListenableBuilder(
+            builder: (BuildContext _, BoxConstraints __) => ValueListenableBuilder<int>(
               valueListenable: innerListenable,
               builder: (BuildContext _, Object? __, Widget? ___) => KeyedSubtree(
                 key: UniqueKey(),
