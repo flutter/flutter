@@ -344,7 +344,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///   thumbImage: MaterialStateProperty.resolveWith<ImageProvider>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return MemoryImage(Uint8List.fromList(<int>[1, 2]));
   ///     }

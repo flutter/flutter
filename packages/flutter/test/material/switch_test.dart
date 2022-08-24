@@ -1767,6 +1767,130 @@ void main() {
       image = await createTestImage(width: 100, height: 100);
     });
 
+    testWidgets('thumb image shows up', (WidgetTester tester) async {
+      imageCache.clear();
+      final _TestImageProvider provider1 = _TestImageProvider();
+      final _TestImageProvider provider2 = _TestImageProvider();
+
+      expect(provider1.loadCallCount, 0);
+      expect(provider2.loadCallCount, 0);
+
+      bool value1 = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Switch(
+                  activeThumbImage: provider1,
+                  inactiveThumbImage: provider2,
+                  value: value1,
+                  onChanged: (bool val) {
+                    setState(() {
+                      value1 = val;
+                    });
+                  },
+                ),
+              );
+            }
+          )
+        )
+      );
+
+      expect(provider1.loadCallCount, 1);
+      expect(provider2.loadCallCount, 0);
+      expect(imageCache.liveImageCount, 1);
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(provider1.loadCallCount, 1);
+      expect(provider2.loadCallCount, 1);
+      expect(imageCache.liveImageCount, 2);
+    });
+
+    testWidgets('thumbImage works correctly', (WidgetTester tester) async {
+      imageCache.clear();
+      final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
+      final _TestImageProvider provider1 = _TestImageProvider();
+      final _TestImageProvider provider2 = _TestImageProvider();
+
+      expect(provider1.loadCallCount, 0);
+      expect(provider2.loadCallCount, 0);
+
+      bool value1 = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Switch(
+                  thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return provider1;
+                    }
+                    return provider2;
+                  }),
+                  value: value1,
+                  onChanged: (bool val) {
+                    setState(() {
+                      value1 = val;
+                    });
+                  },
+                ),
+              );
+            }
+          )
+        )
+      );
+
+      expect(provider1.loadCallCount, 1);
+      expect(provider2.loadCallCount, 0);
+      expect(imageCache.liveImageCount, 1);
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(provider1.loadCallCount, 1);
+      expect(provider2.loadCallCount, 1);
+      expect(imageCache.liveImageCount, 2);
+
+      // test thumbImage override activeThumbImage/inactiveThumbImage
+      await tester.pumpWidget(Container());
+      final _TestImageProvider provider3 = _TestImageProvider();
+      final _TestImageProvider provider4 = _TestImageProvider();
+      final _TestImageProvider provider5 = _TestImageProvider();
+      expect(provider3.loadCallCount, 0);
+      expect(provider4.loadCallCount, 0);
+      expect(provider5.loadCallCount, 0);
+
+      const bool value2 = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Switch(
+                  thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return provider3;
+                    }
+                    return provider4;
+                  }),
+                  value: value2,
+                  onChanged: (bool val) { },
+                  activeThumbImage: provider5,
+                ),
+              );
+            }
+          )
+        )
+      );
+      await tester.pumpAndSettle();
+      expect(provider3.loadCallCount, 1);
+      expect(provider4.loadCallCount, 0);
+      expect(provider5.loadCallCount, 0);
+    });
+
     testWidgets('do not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
       final DelayedImageProvider imageProvider = DelayedImageProvider(image);
 
@@ -2712,6 +2836,47 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
 
   Future<void> complete() async {
     _completer.complete(ImageInfo(image: image));
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
+}
+
+class _TestImageProvider extends ImageProvider<Object> {
+  _TestImageProvider({ImageStreamCompleter? streamCompleter}) {
+    _streamCompleter = streamCompleter
+        ?? OneFrameImageStreamCompleter(_completer.future);
+  }
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  late ImageStreamCompleter _streamCompleter;
+
+  bool get loadCalled => _loadCallCount > 0;
+  int get loadCallCount => _loadCallCount;
+  int _loadCallCount = 0;
+
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_TestImageProvider>(this);
+  }
+
+  @override
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
+    super.resolveStreamForKey(configuration, stream, key, handleError);
+  }
+
+  @override
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+    _loadCallCount += 1;
+    return _streamCompleter;
+  }
+
+  void complete(ui.Image image) {
+    _completer.complete(ImageInfo(image: image));
+  }
+
+  void fail(Object exception, StackTrace? stackTrace) {
+    _completer.completeError(exception, stackTrace);
   }
 
   @override
