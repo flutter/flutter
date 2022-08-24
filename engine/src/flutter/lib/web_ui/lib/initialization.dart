@@ -112,6 +112,7 @@ set debugEmulateFlutterTesterEnvironment(bool value) {
     engine.window.webOnlyDebugPhysicalSizeOverride =
         logicalSize * window.devicePixelRatio;
   }
+  engine.debugDisableFontFallbacks = value;
 }
 
 bool _debugEmulateFlutterTesterEnvironment = false;

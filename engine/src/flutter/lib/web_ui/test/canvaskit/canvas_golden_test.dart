@@ -33,6 +33,7 @@ void testMain() {
     setUp(() {
       expect(notoDownloadQueue.downloader.debugActiveDownloadCount, 0);
       expect(notoDownloadQueue.isPending, isFalse);
+      FontFallbackData.debugReset();
     });
 
     tearDown(() {
@@ -563,7 +564,6 @@ void testMain() {
       // some of these symbols. To make sure the test produces predictable
       // results we reset the fallback data forcing the engine to reload
       // fallbacks, which for this test will only load Noto Symbols.
-      FontFallbackData.debugReset();
       await testTextStyle(
         'symbols',
         outerText: '← ↑ → ↓ ',
@@ -819,7 +819,6 @@ void testMain() {
 Future<void> testSampleText(String language, String text,
     {ui.TextDirection textDirection = ui.TextDirection.ltr,
     bool write = false}) async {
-  FontFallbackData.debugReset();
   const double testWidth = 300;
   double paragraphHeight = 0;
   final CkPicture picture = await generatePictureWhenFontsStable(() {
@@ -1328,7 +1327,7 @@ Future<void> testTextStyle(
     write: write,
   );
   expect(notoDownloadQueue.debugIsLoadingFonts, isFalse);
-  expect(notoDownloadQueue.pendingSubsets, isEmpty);
+  expect(notoDownloadQueue.pendingFonts, isEmpty);
   expect(notoDownloadQueue.downloader.debugActiveDownloadCount, 0);
 }
 
