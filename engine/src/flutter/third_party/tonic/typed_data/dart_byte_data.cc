@@ -12,15 +12,15 @@ namespace tonic {
 
 namespace {
 
-// For large objects it is more efficient to use an external typed data object
-// with a buffer allocated outside the Dart heap.
-const int kExternalSizeThreshold = 1000;
-
 void FreeFinalizer(void* isolate_callback_data, void* peer) {
   free(peer);
 }
 
 }  // anonymous namespace
+
+// For large objects it is more efficient to use an external typed data object
+// with a buffer allocated outside the Dart heap.
+const size_t DartByteData::kExternalSizeThreshold = 1000;
 
 Dart_Handle DartByteData::Create(const void* data, size_t length) {
   if (length < kExternalSizeThreshold) {

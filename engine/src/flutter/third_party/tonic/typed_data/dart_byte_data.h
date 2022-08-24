@@ -14,6 +14,7 @@ namespace tonic {
 
 class DartByteData {
  public:
+  static const size_t kExternalSizeThreshold;
   static Dart_Handle Create(const void* data, size_t length);
 
   explicit DartByteData(Dart_Handle list);
