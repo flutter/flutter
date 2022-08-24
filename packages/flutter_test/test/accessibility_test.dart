@@ -58,10 +58,12 @@ void main() {
                   'this is a white text',
                   style: TextStyle(fontSize: 14.0, color: Colors.white),
                 ),
+                SizedBox(height: 50),
                 Text(
                   'this is a black text test1',
                   style: TextStyle(fontSize: 14.0, color: Colors.black),
                 ),
+                SizedBox(height: 50),
                 Text(
                   'this is a black text test2',
                   style: TextStyle(fontSize: 14.0, color: Colors.black),
