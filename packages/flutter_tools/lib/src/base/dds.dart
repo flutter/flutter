@@ -14,7 +14,7 @@ import 'logger.dart';
 
 // TODO(fujino): This should be direct injected, rather than mutable global state.
 @visibleForTesting
-Future<dds.DartDevelopmentService?> Function(
+Future<dds.DartDevelopmentService> Function(
   Uri remoteVmServiceUri, {
   bool enableAuthCodes,
   bool ipv6,

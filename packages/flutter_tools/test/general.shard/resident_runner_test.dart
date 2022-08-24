@@ -2096,7 +2096,7 @@ flutter:
       expect(cachedUserTags, isEmpty);
       expect(uriConverter, isNull);
       done.complete();
-      return null;
+      return FakeDartDevelopmentService();
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
@@ -2137,7 +2137,7 @@ flutter:
       expect(cachedUserTags, isEmpty);
       expect(uriConverter, isNotNull);
       done.complete();
-      return null;
+      return FakeDartDevelopmentService();
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
@@ -2325,6 +2325,16 @@ flutter:
     expect(flutterDevice.devFS!.hasSetAssetDirectory, true);
     expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
+}
+
+// NOTE: implements [dds.DartDevelopmentService] and NOT [DartDevelopmentService]
+// from package:flutter_tools.
+class FakeDartDevelopmentService extends Fake implements dds.DartDevelopmentService {
+  @override
+  Future<void> get done => Future<void>.value();
+
+  @override
+  Uri? get uri => null;
 }
 
 class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceException {
