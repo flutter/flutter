@@ -81,7 +81,7 @@ void main() {
     imageLoaded = false;
     while (!imageLoaded) {
       await runAsyncAndIdle();
-      innerListenable.value++;
+      innerListenable.value += 1;
       await tester.pump();
     }
   });
