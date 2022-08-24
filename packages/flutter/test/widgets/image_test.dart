@@ -76,7 +76,7 @@ void main() {
     }
 
     image = MemoryImage(Uint8List.fromList(kBlueSquarePng));
-    outerListenable.value++;
+    outerListenable.value += 1;
 
     imageLoaded = false;
     while (!imageLoaded) {
