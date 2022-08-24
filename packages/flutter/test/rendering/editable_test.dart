@@ -196,33 +196,62 @@ void main() {
     );
   });
 
-  // Test that clipping will be used even when the text fits within the visible
-  // region if the start position of the text is offset (e.g. during scrolling
-  // animation).
-  test('correct clipping', () {
-    final TextSelectionDelegate delegate = _FakeEditableTextState();
-    final RenderEditable editable = RenderEditable(
-      text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
-        text: 'A',
-      ),
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      textDirection: TextDirection.ltr,
-      locale: const Locale('en', 'US'),
-      offset: ViewportOffset.fixed(10.0),
-      textSelectionDelegate: delegate,
-      selection: const TextSelection.collapsed(
-        offset: 0,
-      ),
-    );
-    layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
-    // Prepare for painting after layout.
-    pumpFrame(phase: EnginePhase.compositingBits);
-    expect(
-      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 500.0, 10.0)),
-    );
+  group('Correct clipping', () {
+    const double fontSize = 10.0;
+
+    RenderEditable createRenderEditable(String text, ViewportOffset offset) {
+      final TextSelectionDelegate delegate = _FakeEditableTextState();
+      return RenderEditable(
+        text: TextSpan(
+          style: const TextStyle(height: 1.0, fontSize: fontSize, fontFamily: 'Ahem'),
+          text: text,
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        locale: const Locale('en', 'US'),
+        offset: offset,
+        textSelectionDelegate: delegate,
+        selection: const TextSelection.collapsed(
+          offset: 0,
+        ),
+      );
+    }
+
+    test('Should clip if the start position of the text is offset', () {
+      // Clipping will be used even when the text fits within the visible region
+      // if the start position of the text is offset (e.g. during scrolling animation).
+      final RenderEditable editable = createRenderEditable('A', ViewportOffset.fixed(fontSize));
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      pumpFrame(phase: EnginePhase.compositingBits);
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 500.0, fontSize)),
+      );
+    });
+
+    test('Should not clip when the text fits within the visible region', () {
+      final RenderEditable editable = createRenderEditable('A', ViewportOffset.zero());
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      pumpFrame(phase: EnginePhase.compositingBits);
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints..everything((Symbol method, List<dynamic> arguments) {
+          return method != #clipRect;
+        })
+      );
+    });
+
+    test('Should clip with a minimum height when the text overflows', () {
+      // Regression test for https://github.com/flutter/flutter/issues/78622
+      final RenderEditable editable = createRenderEditable('0123456789', ViewportOffset.zero());
+      layout(editable, constraints: BoxConstraints.loose(const Size(30.0, 5.0)));
+      pumpFrame(phase: EnginePhase.compositingBits);
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 30.0, fontSize)),
+      );
+    });
   });
 
   test('Can change cursor color, radius, visibility', () {

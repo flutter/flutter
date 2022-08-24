@@ -2570,10 +2570,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void paint(PaintingContext context, Offset offset) {
     _computeTextMetricsIfNeeded();
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
+      final double minClipHeight = math.max(size.height, preferredLineHeight);
       _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
-        Offset.zero & size,
+        Offset.zero & Size(size.width, minClipHeight),
         _paintContents,
         clipBehavior: clipBehavior,
         oldLayer: _clipRectLayer.layer,
