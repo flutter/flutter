@@ -19,6 +19,10 @@ class IconButtonToggleApp extends StatelessWidget {
       theme: ThemeData(
         colorSchemeSeed: const Color(0xff6750a4),
         useMaterial3: true,
+        // Desktop and web platforms have a compact visual density by default.
+        // To see buttons with circular background on desktop/web, the "visualDensity"
+        // needs to be set to "VisualDensity.standard".
+        visualDensity: VisualDensity.standard,
       ),
       title: 'Icon Button Types',
       home: const Scaffold(
