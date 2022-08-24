@@ -19,6 +19,8 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
   void SetSigma(Sigma sigma);
 
+  void SetSecondarySigma(Sigma sigma);
+
   void SetDirection(Vector2 direction);
 
   void SetBlurStyle(BlurStyle blur_style);
@@ -42,6 +44,7 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
       const Matrix& effect_transform,
       const Rect& coverage) const override;
   Sigma blur_sigma_;
+  Sigma secondary_blur_sigma_;
   Vector2 blur_direction_;
   BlurStyle blur_style_ = BlurStyle::kNormal;
   Entity::TileMode tile_mode_ = Entity::TileMode::kDecal;

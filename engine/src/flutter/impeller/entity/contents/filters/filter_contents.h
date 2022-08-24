@@ -48,6 +48,7 @@ class FilterContents : public Contents {
       BlurStyle blur_style = BlurStyle::kNormal,
       Entity::TileMode tile_mode = Entity::TileMode::kDecal,
       FilterInput::Ref alpha_mask = nullptr,
+      Sigma secondary_sigma = {},
       const Matrix& effect_transform = Matrix());
 
   static std::shared_ptr<FilterContents> MakeGaussianBlur(
