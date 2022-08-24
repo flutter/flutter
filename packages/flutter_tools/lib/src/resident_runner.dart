@@ -927,13 +927,13 @@ abstract class ResidentHandlers {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
-    final List<FlutterView> views = await flutterDevices
-      .first!
-      .vmService!.getFlutterViews();
-    final Map<String, Object?>? data = await flutterDevices.first!.vmService!.getSkSLs(
+    final FlutterDevice flutterDevice = flutterDevices.first!;
+    final FlutterVmService vmService = flutterDevice.vmService!;
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final Map<String, Object?>? data = await vmService.getSkSLs(
       viewId: views.first.id,
     );
-    final Device device = flutterDevices.first!.device!;
+    final Device device = flutterDevice.device!;
     return sharedSkSlWriter(device, data!);
   }
 
