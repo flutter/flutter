@@ -1091,7 +1091,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   Logger? get logger => globals.logger;
 
   @override
-  FileSystem? get fileSystem => globals.fs;
+  FileSystem get fileSystem => globals.fs;
 
   @override
   final List<FlutterDevice> flutterDevices;
