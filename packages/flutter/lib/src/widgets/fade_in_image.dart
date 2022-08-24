@@ -310,9 +310,13 @@ class FadeInImage extends StatefulWidget {
   /// If not value set, it will fallback to [fit].
   final BoxFit? placeholderFit;
 
+  /// The rendering quality of the image.
+  ///
   /// {@macro flutter.widgets.image.filterQuality}
   final FilterQuality filterQuality;
 
+  /// The rendering quality of the placeholder image.
+  ///
   /// {@macro flutter.widgets.image.filterQuality}
   final FilterQuality? placeholderFilterQuality;
 
