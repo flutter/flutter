@@ -184,7 +184,14 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
 
         // Get the FlatlandView structure corresponding to the platform view.
         auto found = flatland_views_.find(layer_id.value());
-        FML_CHECK(found != flatland_views_.end());
+        FML_CHECK(found != flatland_views_.end())
+            << "No FlatlandView for layer_id = " << layer_id.value()
+            << ". This typically indicates that the Dart code in "
+               "Fuchsia's fuchsia_scenic_flutter library failed to create "
+               "the platform view, leading to a crash later down the road in "
+               "the Flutter Engine code that tries to find that platform view. "
+               "Check the Flutter Framework for changes to PlatformView that "
+               "might have caused a regression.";
         auto& viewport = found->second;
 
         // Compute mutators, and size for the platform view.
