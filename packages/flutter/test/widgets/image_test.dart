@@ -36,54 +36,40 @@ void main() {
   });
 
   testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
+    final _TestImageProvider imageProvider1 = _TestImageProvider();
+    final _TestImageProvider imageProvider2 = _TestImageProvider();
+
     final ValueNotifier<int> outerListenable = ValueNotifier<int>(0);
     final ValueNotifier<int> innerListenable = ValueNotifier<int>(0);
 
-    bool imageLoaded = false;
-    MemoryImage image = MemoryImage(Uint8List.fromList(kTransparentImage));
-
-    Future<void> runAsyncAndIdle() async {
-      for (int i = 0; i < 20; ++i) {
-        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-        await tester.idle();
-      }
-    }
+    _TestImageProvider image = imageProvider1;
 
     await tester.pumpWidget(ValueListenableBuilder<int>(
       valueListenable: outerListenable,
-      builder: (BuildContext _, Object? __, Widget? ___) => Image(
+      builder: (BuildContext context, int value, Widget? child) => Image(
         image: image,
-        frameBuilder: (BuildContext _, Widget child, int? __, bool ___) {
-          if (((child as Semantics).child! as RawImage).image != null) {
-            imageLoaded = true;
-          }
-          return LayoutBuilder(
-            builder: (BuildContext _, BoxConstraints __) => ValueListenableBuilder<int>(
-              valueListenable: innerListenable,
-              builder: (BuildContext _, Object? __, Widget? ___) => KeyedSubtree(
-                key: UniqueKey(),
-                child: child,
-              ),
+        frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) => LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) => ValueListenableBuilder<int>(
+            valueListenable: innerListenable,
+            builder: (BuildContext context, int value, Widget? valueListenableChild) => KeyedSubtree(
+              key: UniqueKey(),
+              child: child,
             ),
-          );
-        },
+          ),
+        ),
       ),
     ));
 
-    while (!imageLoaded) {
-      await runAsyncAndIdle();
-      await tester.pump();
-    }
+    imageProvider1.complete(image10x10);
+    await tester.idle();
+    await tester.pump();
 
-    image = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+    image = imageProvider2;
     outerListenable.value += 1;
-
-    imageLoaded = false;
-    while (!imageLoaded) {
-      await runAsyncAndIdle();
-      innerListenable.value += 1;
-      await tester.pump();
-    }
+    innerListenable.value += 1;
+    imageProvider2.complete(image10x10);
+    await tester.idle();
+    await tester.pump();
   });
 
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
