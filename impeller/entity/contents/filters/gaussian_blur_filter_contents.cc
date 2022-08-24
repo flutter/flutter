@@ -112,6 +112,12 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
 
   auto transformed_blur_radius_length = transformed_blur_radius.GetLength();
 
+  // If the radius length is < .5, the shader will take at most 1 sample,
+  // resulting in no blur.
+  if (transformed_blur_radius_length < .5) {
+    return input_snapshot.value();  // No blur to render.
+  }
+
   // A matrix that rotates the snapshot space such that the blur direction is
   // +X.
   auto texture_rotate = Matrix::MakeRotationZ(
@@ -216,11 +222,11 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   };
 
   Scalar x_scale =
-      std::min(1.0, 1.0 / std::ceil(std::log2(transformed_blur_radius_length)));
-  auto out_texture =
-      renderer.MakeSubpass(ISize(pass_texture_rect.size.width * x_scale,
-                                 pass_texture_rect.size.height),
-                           callback);
+      1.0 /
+      std::ceil(std::log2(std::max(2.0f, transformed_blur_radius_length)));
+  auto scaled_texture_width = pass_texture_rect.size.width * x_scale;
+  auto out_texture = renderer.MakeSubpass(
+      ISize(scaled_texture_width, pass_texture_rect.size.height), callback);
   if (!out_texture) {
     return std::nullopt;
   }
@@ -234,7 +240,10 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
       .texture = out_texture,
       .transform = texture_rotate.Invert() *
                    Matrix::MakeTranslation(pass_texture_rect.origin) *
-                   Matrix::MakeScale(Vector2(1 / x_scale, 1)),
+                   Matrix::MakeScale(Vector2(
+                       (1 / x_scale) * (scaled_texture_width /
+                                        std::floor(scaled_texture_width)),
+                       1)),
       .sampler_descriptor = sampler_desc};
 }
 
