@@ -868,6 +868,7 @@ class Image extends StatefulWidget {
   ///    from a single opacity value.
   final Animation<double>? opacity;
 
+  /// {@template flutter.widgets.image.filterQuality}
   /// The rendering quality of the image.
   ///
   /// If the image is of a high quality and its pixels are perfectly aligned
@@ -884,6 +885,7 @@ class Image extends StatefulWidget {
   ///
   ///  * [FilterQuality], the enum containing all possible filter quality
   ///    options.
+  /// {@endtemplate}
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
