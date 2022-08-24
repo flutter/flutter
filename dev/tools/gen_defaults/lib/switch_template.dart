@@ -14,7 +14,7 @@ class SwitchTemplate extends TokenTemplate {
 class _${blockName}DefaultsM3 extends SwitchThemeData {
   _${blockName}DefaultsM3(BuildContext context)
       : _colors = Theme.of(context).colorScheme;
-  
+
   final ColorScheme _colors;
 
   @override
