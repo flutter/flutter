@@ -2338,6 +2338,7 @@ class TextSelectionGestureDetectorBuilder {
   /// By default, selects the word if possible and shows the toolbar.
   @protected
   void onSecondaryTap() {
+    print('onSecondaryTap');
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2373,6 +2374,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [onSecondaryTap], which is typically called after this.
   @protected
   void onSecondaryTapDown(TapDownDetails details) {
+    print('onSecondaryTapDown');
     renderEditable.handleSecondaryTapDown(details);
     _shouldShowSelectionToolbar = true;
   }
