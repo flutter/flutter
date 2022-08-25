@@ -6,6 +6,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/format.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -17,6 +18,7 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   group('format', () {
     Directory tempDir;
+    BufferLogger logger;
 
     setUp(() {
       Cache.disableLocking();
@@ -40,6 +42,16 @@ void main() {
 
       final String formatted = srcFile.readAsStringSync();
       expect(formatted, original);
+    });
+
+    testUsingContext('empty path', () async {
+      logger = BufferLogger.test();
+      final FormatCommand command = FormatCommand(verboseHelp: false);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['format', '--fix']);
+      expect(logger.errorText.contains('No files specified to be formatted'), true);
+    },  overrides: <Type, Generator>{
+      Logger: () => logger,
     });
 
     testUsingContext('dry-run', () async {
