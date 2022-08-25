@@ -133,7 +133,7 @@ void main() {
     expect(text.style.fontFamily, 'Roboto');
     expect(text.style.color, const Color(0xdd000000));
     expect(text.style.color, const Color(0xdd000000));
-    
+
     final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
     final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
     expect(topLeftMenu, topLeftButton);
@@ -278,6 +278,7 @@ void main() {
       ).last,
     );
     expect(text.style, textStyle);
+
     final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
     final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
     expect(topLeftMenu, topLeftButton);
