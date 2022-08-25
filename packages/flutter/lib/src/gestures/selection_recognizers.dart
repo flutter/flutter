@@ -302,7 +302,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         if (onTapUp != null) {
           invokeCallback('onTapUp', () => onTapUp!(upDetails, consecutiveTapCount));
         }
-        // _initialButtons = null;
         break;
       case kSecondaryButton:
         if (onSecondaryTapUp != null) {
@@ -311,7 +310,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         if (onSecondaryTap != null) {
           invokeCallback<void>('onSecondaryTap', () => onSecondaryTap!());
         }
-        // _initialButtons = null;
         break;
       default:
     }
