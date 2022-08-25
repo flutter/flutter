@@ -493,18 +493,31 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     if (!mtl_index_buffer) {
       return false;
     }
+
     FML_DCHECK(command.index_count *
                    (command.index_type == IndexType::k16bit ? 2 : 4) ==
                command.index_buffer.range.length);
-    // Returns void. All error checking must be done by this point.
-    [encoder drawIndexedPrimitives:ToMTLPrimitiveType(command.primitive_type)
-                        indexCount:command.index_count
-                         indexType:ToMTLIndexType(command.index_type)
-                       indexBuffer:mtl_index_buffer
-                 indexBufferOffset:command.index_buffer.range.offset
-                     instanceCount:command.instance_count
-                        baseVertex:command.base_vertex
-                      baseInstance:0u];
+
+    if (command.instance_count != 1u) {
+#if TARGET_OS_SIMULATOR
+      VALIDATION_LOG << "iOS Simulator does not support instanced rendering.";
+      return false;
+#endif
+      [encoder drawIndexedPrimitives:ToMTLPrimitiveType(command.primitive_type)
+                          indexCount:command.index_count
+                           indexType:ToMTLIndexType(command.index_type)
+                         indexBuffer:mtl_index_buffer
+                   indexBufferOffset:command.index_buffer.range.offset
+                       instanceCount:command.instance_count
+                          baseVertex:command.base_vertex
+                        baseInstance:0u];
+    } else {
+      [encoder drawIndexedPrimitives:ToMTLPrimitiveType(command.primitive_type)
+                          indexCount:command.index_count
+                           indexType:ToMTLIndexType(command.index_type)
+                         indexBuffer:mtl_index_buffer
+                   indexBufferOffset:command.index_buffer.range.offset];
+    }
   }
   return true;
 }
