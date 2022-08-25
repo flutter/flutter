@@ -519,6 +519,8 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   GestureRecognizer? _recognizer;
   int _activeCount = 0;
 
+  _DragAvatar<T>? _activeAvatar;
+
   void _disposeRecognizerIfInactive() {
     if (_activeCount > 0) {
       return;
@@ -570,6 +572,10 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
         }
       },
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
+        if (_activeAvatar != null) {
+          DragTargetPostFrameUpdater.instance._removeDragAvatar(_activeAvatar!);
+          _activeAvatar = null;
+        }
         if (mounted) {
           setState(() {
             _activeCount -= 1;
@@ -594,6 +600,11 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       },
     );
     widget.onDragStarted?.call();
+
+    /// Setup post-frame updates for the now active drag.
+    DragTargetPostFrameUpdater.instance._addDragAvatar(avatar);
+    _activeAvatar = avatar;
+    
     return avatar;
   }
 
@@ -697,6 +708,16 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// Called when a piece of data enters the target. This will be followed by
   /// either [onAccept] and [onAcceptWithDetails], if the data is dropped, or
   /// [onLeave], if the drag leaves the target.
+  ///
+  /// More specifically, the callback is triggered by the following cases:
+  ///
+  ///  * This widget has appeared under the data.
+  ///  * This widget has moved to under the data.
+  ///  * A currently dragged piece of data has moved over this widget.
+  ///
+  /// See also:
+  ///  * [_DragTargetState.build], [_DragAvatar.updateDrag] and [DragTargetPostFrameUpdater]
+  ///    which is how this callback is internally implemented.
   final DragTargetWillAccept<T>? onWillAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
@@ -997,3 +1018,42 @@ class _DragAvatar<T extends Object> extends Drag {
     return Offset(0.0, offset.dy);
   }
 }
+
+/// Once a drag is started, and an [OverlayEntry] is created in [_DragTargetState],
+/// the associated [_DragAvatar] will be registered with this [DragTargetPostFrameUpdater].
+///
+/// Inside [RendererBinding], a persistent frame callback is scheduled to update
+/// the [_DragAvatar] and check if any [_DragTargetState] ([MetaData]) is under the [_DragAvatar].
+///
+/// This allows [DragTarget.onWillAccept] to be called for [_DragTargetState]s that are inserted/moved
+/// under the already active [_DragAvatar].
+/// Otherwise the active [_DragAvatar] would first need to be moved for the overlap to be calculated
+/// and the callback to be executed.
+class DragTargetPostFrameUpdater {
+  DragTargetPostFrameUpdater._();
+
+  /// Singleton instance of [DragTargetPostFrameUpdater]
+  static DragTargetPostFrameUpdater instance = DragTargetPostFrameUpdater._();
+
+  final Set<_AnyDragAvatar> _activeDragAvatars = <_AnyDragAvatar>{};
+
+  /// Update all active [_DragAvatar]s to react to widgets that have been inserted/moved under an active drag.
+  void updateAll() {
+    for (final _AnyDragAvatar dragAvatar in _activeDragAvatars) {
+      if (dragAvatar._entry != null) {
+        /// No changed information,
+        /// just check if a new target sits under the already active drag avatar
+        dragAvatar.update(
+          DragUpdateDetails(
+            globalPosition: dragAvatar._position,
+          ),
+        );
+      }
+    }
+  }
+
+  void _addDragAvatar(_AnyDragAvatar dragAvatar) => _activeDragAvatars.add(dragAvatar);
+  bool _removeDragAvatar(_AnyDragAvatar dragAvatar) => _activeDragAvatars.remove(dragAvatar);
+}
+
+typedef _AnyDragAvatar = _DragAvatar<Object>;
