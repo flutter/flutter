@@ -36,6 +36,8 @@ void main() {
   });
 
   testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
+    final ui.Image image100x100 = (await tester.runAsync(() async => createTestImage(width: 100, height: 100)))!;
+
     final _TestImageProvider imageProvider1 = _TestImageProvider();
     final _TestImageProvider imageProvider2 = _TestImageProvider();
 
@@ -74,7 +76,7 @@ void main() {
     imageLoaded = false;
     imageListenable.value = imageProvider2;
     innerListenable.value += 1;
-    imageProvider2.complete(image10x10);
+    imageProvider2.complete(image100x100);
     await tester.idle();
     await tester.pump();
     expect(imageLoaded, true);
