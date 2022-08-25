@@ -35,7 +35,7 @@ Future<void> main() async {
 
   setUp(() {
     defaultSpellCheckService = DefaultSpellCheckService();
-    locale = const Locale('en', 'us');
+    locale = const Locale('en', 'US');
   });
 
   test(
@@ -147,7 +147,8 @@ Future<void> main() async {
 
     await tester.pumpWidget(const MyApp());
 
-    await tester.enterText(find.byType(EditableText), 'Hey wrororld! Hey!');
+    await tester.enterText(find.byType(EditableText), 'Hey wroerord! Hey!');
+    await tester.pumpAndSettle();
     await tester.pumpAndSettle();
 
     final RenderEditable renderEditable = findRenderEditable(tester, EditableText);
@@ -157,32 +158,10 @@ Future<void> main() async {
         style: style,
         children: <TextSpan>[
           TextSpan(style: style, text: 'Hey '),
-          TextSpan(style: misspelledTextStyle, text: 'wrororld'),
+          TextSpan(style: misspelledTextStyle, text: 'wroerord'),
           TextSpan(style: style, text: '! Hey!'),
         ]);
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
-
-  test(
-      'fetchSpellCheckSuggestions returns null when there is a pending request',
-      () async {
-    final String text =
-        'neaf niofenaifn iofn iefnaoeifn ifneoa finoiafn inf ionfieaon ienf ifn ieonfaiofneionf oieafn oifnaioe nioenfio nefaion oifan' *
-            10;
-
-    defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
-
-    final String modifiedText = text.substring(5);
-
-    final List<SuggestionSpan>? spellCheckSuggestionSpans =
-        await defaultSpellCheckService.fetchSpellCheckSuggestions(
-            locale, modifiedText);
-
-    expect(spellCheckSuggestionSpans, isNull);
-
-    // We expect it to be rare for the first request to complete before the
-    // second, so no text should be saved as of now.
-    expect(defaultSpellCheckService.lastSavedResults, null);
   });
 }
