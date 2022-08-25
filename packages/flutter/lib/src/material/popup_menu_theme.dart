@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of the routes used to display popup menus
 /// as well as [PopupMenuItem] and [PopupMenuDivider] widgets.
 ///

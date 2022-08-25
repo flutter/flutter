@@ -30,6 +30,10 @@ that on an Android device like so:
 
 ## Naming
 
+> `lib/library/file/class_name.n.dart`
+>
+> `lib/library/file/class_name.member_name.n.dart`
+
 The naming scheme for the files is similar to the hierarchy under
 [packages/flutter/lib/src](../../packages/flutter/lib/src), except that the
 files are represented as directories (without the `.dart` suffix), and each

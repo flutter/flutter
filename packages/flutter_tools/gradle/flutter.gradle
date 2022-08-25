@@ -40,9 +40,10 @@ class FlutterExtension {
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
-     * Chosen as default version of the AGP version below.
+     * Chosen as default version of the AGP version below as found in
+     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
      */
-    static String ndkVersion = "21.1.6352462"
+    static String ndkVersion = "21.4.7075529"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -61,7 +62,7 @@ buildscript {
     }
     dependencies {
         /* When bumping, also update ndkVersion above. */
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:7.2.0'
     }
 }
 
@@ -93,6 +94,8 @@ class FlutterPlugin implements Plugin<Project> {
     private static final String ARCH_ARM64      = "arm64-v8a";
     private static final String ARCH_X86        = "x86";
     private static final String ARCH_X86_64     = "x86_64";
+
+    private static final String INTERMEDIATES_DIR = "intermediates";
 
     /** Maps platforms to ABI architectures. */
     private static final Map PLATFORM_ARCH_MAP = [
@@ -482,7 +485,7 @@ class FlutterPlugin implements Plugin<Project> {
                             project.logger.error("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error("One or more plugins require a higher Android NDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion ${maxPluginNdkVersion}\n  ...\n}\n")
+                            project.logger.error("One or more plugins require a higher Android NDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion \"${maxPluginNdkVersion}\"\n  ...\n}\n")
                         }
                     }
                 }
@@ -743,6 +746,7 @@ class FlutterPlugin implements Plugin<Project> {
         return target
     }
 
+    // TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
     /**
      * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
      * When building APKs, this causes an issue where building release requires the debug JAR,
@@ -752,7 +756,9 @@ class FlutterPlugin implements Plugin<Project> {
      * from the command line.
      *
      * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
-     * time of adding this code. Once released, this can be removed.
+     * time of adding this code. Once released, this can be removed. However, after updating to
+     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Futher
+     * investigation necessary to remove this.
      *
      * Tested cases:
      * * `./gradlew assembleRelease`
@@ -893,7 +899,7 @@ class FlutterPlugin implements Plugin<Project> {
                 trackWidgetCreation trackWidgetCreationValue
                 targetPlatformValues = targetPlatforms
                 sourceDir getFlutterSourceDirectory()
-                intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
+                intermediateDir project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
@@ -915,7 +921,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name

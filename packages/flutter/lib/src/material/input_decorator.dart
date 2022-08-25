@@ -19,6 +19,9 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late Widget _myIcon;
+
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
@@ -316,7 +319,7 @@ class _HelperError extends StatefulWidget {
 class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
   // If the height of this widget and the counter are zero ("empty") at
   // layout time, no space is allocated for the subtext.
-  static const Widget empty = SizedBox();
+  static const Widget empty = SizedBox.shrink();
 
   late AnimationController _controller;
   Widget? _helper;
@@ -1758,7 +1761,7 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, `baseStyle` defaults to the `subtitle1` style from the
+  /// If null, `baseStyle` defaults to the `titleMedium` style from the
   /// current [Theme], see [ThemeData.textTheme].
   ///
   /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
@@ -1988,17 +1991,20 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
+    return  MaterialStateProperty.resolveAs(decoration.iconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
       ?? MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
   Color _getPrefixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
+    return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
       ?? MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
   Color _getSuffixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
+    return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
       ?? MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
 
@@ -2023,7 +2029,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
       .merge(style)
@@ -2038,7 +2044,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
       .merge(style);
@@ -2054,7 +2060,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .copyWith(height: 1)
       .merge(defaultTextStyle)
@@ -2877,7 +2883,7 @@ class InputDecoration {
   /// ```dart
   /// prefixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
-  ///   child: myIcon, // myIcon is a 48px-wide widget.
+  ///   child: _myIcon, // _myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
@@ -2999,7 +3005,7 @@ class InputDecoration {
   /// ```dart
   /// suffixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
-  ///   child: myIcon, // myIcon is a 48px-wide widget.
+  ///   child: _myIcon, // myIcon is a 48px-wide widget.
   /// )
   /// ```
   ///
@@ -4351,19 +4357,19 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.caption!.copyWith(color: Colors.transparent);
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
 
-    return themeData.textTheme.caption!.copyWith(color: themeData.hintColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.hintColor);
   });
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.caption!.copyWith(color: Colors.transparent);
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
-    return themeData.textTheme.caption!.copyWith(color: themeData.errorColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.errorColor);
   });
 
   @override

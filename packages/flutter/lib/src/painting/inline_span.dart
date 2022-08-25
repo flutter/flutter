@@ -12,6 +12,9 @@ import 'text_painter.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
+// Examples can assume:
+// late InlineSpan myInlineSpan;
+
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
 class Accumulator {

@@ -137,7 +137,11 @@ class TextButton extends ButtonStyleButton {
   /// ```dart
   /// TextButton(
   ///   style: TextButton.styleFrom(foregroundColor: Colors.green),
-  /// )
+  ///   child: const Text('Give Kate a mix tape'),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  /// ),
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,
@@ -334,7 +338,7 @@ class TextButton extends ButtonStyleButton {
           disabledBackgroundColor: Colors.transparent,
           shadowColor: theme.shadowColor,
           elevation: 0,
-          textStyle: theme.textTheme.button,
+          textStyle: theme.textTheme.labelLarge,
           padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
