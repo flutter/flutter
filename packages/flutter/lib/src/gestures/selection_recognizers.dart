@@ -102,6 +102,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   // For local tap drag count
   int? _consecutiveTapCountWhileDragging;
+
+  // Tap related state
+  PointerUpEvent? _up;
   
   // Drag related state
   late OffsetPair _initialPosition;
@@ -120,6 +123,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   bool isPointerAllowed(PointerEvent event) {
+    print('isPointerAllowed');
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
@@ -145,7 +149,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       }
     } else {
       // There can be multiple drags simultaneously. Their effects are combined.
+      print('hmmmm');
       if (event.buttons != _initialButtons) {
+        print('cant have different buttons');
         return false;
       }
     }
@@ -154,7 +160,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    print('addAllowedPointer $event');
+    print('addAllowedPointer $event ${event.pointer}');
     super.addAllowedPointer(event);
   }
 
@@ -174,26 +180,36 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   @override
   void didStopTrackingLastPointer(int pointer) {
     print('didStopTrackingLastPointer $_state $pointer');
-    switch(_state) {
+    switch (_state) {
       case _DragState.ready:
-        resolve(GestureDisposition.rejected);
-        _checkDragCancel();
-        break;
-      case _DragState.possible:
         resolve(GestureDisposition.rejected);
         _checkCancel();
         break;
+
+      case _DragState.possible:
+        if (_up == null) {
+          resolve(GestureDisposition.rejected);
+          _checkCancel();
+        } else {
+          _checkDragCancel();
+          _checkTapUp(_up!);
+          consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
+        }
+        break;
+
       case _DragState.accepted:
         _checkEnd();
         break;
     }
+    _up = null;
     _initialButtons = null;
     _state = _DragState.ready;
+    _consecutiveTapCountWhileDragging = null;
   }
 
   @override
   void handleEvent(PointerEvent event) {
-    print('handle event');
+    print('handle event ${event.pointer}');
     if (event is PointerDownEvent) {
       print('handle PointerDownEvent $event');
       if (_state == _DragState.ready) {
@@ -222,24 +238,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       }
     } else if (event is PointerUpEvent) {
       print('handle PointerUpEvent $event');
-      switch(_state) {
-        case _DragState.ready:
-          print('cancel from dragstate ready');
-          _giveUpPointer(event.pointer);
-          break;
-        case _DragState.possible:
-          _checkDragCancel();
-          _checkTapUp(event);
-          consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
-          break;
-        case _DragState.accepted:
-          _giveUpPointer(event.pointer);
-          break;
+      if (_state == _DragState.possible) {
+        _up = event;
       }
-
-      _state = _DragState.ready;
-
-      _consecutiveTapCountWhileDragging = null;
+      _giveUpPointer(event.pointer);
     } else if (event is PointerCancelEvent){
       print('cancel from pointercancel');
       _giveUpPointer(event.pointer);
@@ -297,9 +299,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     switch (_initialButtons) {
       case kPrimaryButton:
-        if (onTapDown != null) {
+        if (onTapUp != null) {
           invokeCallback('onTapUp', () => onTapUp!(upDetails, consecutiveTapCount));
         }
+        // _initialButtons = null;
         break;
       case kSecondaryButton:
         if (onSecondaryTapUp != null) {
@@ -308,6 +311,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         if (onSecondaryTap != null) {
           invokeCallback<void>('onSecondaryTap', () => onSecondaryTap!());
         }
+        // _initialButtons = null;
         break;
       default:
     }
@@ -369,6 +373,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _giveUpPointer(int pointer) {
+    print('give up pointer $pointer');
     stopTrackingPointer(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
