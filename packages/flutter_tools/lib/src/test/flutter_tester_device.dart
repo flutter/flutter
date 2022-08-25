@@ -15,7 +15,6 @@ import 'package:stream_channel/stream_channel.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -47,13 +46,7 @@ class FlutterTesterTestDevice extends TestDevice {
   })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
         assert(!debuggingOptions.startPaused || enableObservatory),
         _gotProcessObservatoryUri = enableObservatory
-            ? Completer<Uri?>() : (Completer<Uri?>()..complete()),
-        _operatingSystemUtils = OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+            ? Completer<Uri?>() : (Completer<Uri?>()..complete());
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
@@ -77,7 +70,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
   Process? _process;
   HttpServer? _server;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   /// Starts the device.
   ///
@@ -94,13 +86,6 @@ class FlutterTesterTestDevice extends TestDevice {
     _server = await bind(host, /*port*/ 0);
     logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
     final List<String> command = <String>[
-      // Until an arm64 flutter tester binary is available, force to run in Rosetta
-      // to avoid "unexpectedly got a signal in sigtramp" crash.
-      // https://github.com/flutter/flutter/issues/88106
-      if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) ...<String>[
-        '/usr/bin/arch',
-        '-x86_64',
-      ],
       shellPath,
       if (enableObservatory) ...<String>[
         // Some systems drive the _FlutterPlatform class in an unusual way, where
