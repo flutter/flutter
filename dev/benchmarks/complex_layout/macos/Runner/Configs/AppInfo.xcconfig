@@ -8,7 +8,7 @@
 PRODUCT_NAME = complex_layout
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.complexLayout
+PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.complexLayout
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright 2014 The Flutter Authors. All rights reserved.
