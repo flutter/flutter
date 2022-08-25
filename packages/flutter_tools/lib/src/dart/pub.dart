@@ -379,8 +379,8 @@ class _DefaultPub implements Pub {
     final Status? status = printProgress
       ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',)
       : null;
-    final pubCommand = _pubCommand(arguments);
-    final pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    final List<String> pubCommand = _pubCommand(arguments);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
     try {
       do {
         output = <_OutputLine>[];
