@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
+  // TODO: add real tests before merge.
   test('test', () {
     final MemoryAllocations ma = MemoryAllocations.instance;
     expect(
