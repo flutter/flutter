@@ -44,13 +44,17 @@ void Canvas::Save() {
   Save(false);
 }
 
-void Canvas::Save(bool create_subpass, Entity::BlendMode blend_mode) {
+void Canvas::Save(
+    bool create_subpass,
+    Entity::BlendMode blend_mode,
+    std::optional<EntityPass::BackdropFilterProc> backdrop_filter) {
   auto entry = CanvasStackEntry{};
   entry.xformation = xformation_stack_.back().xformation;
   entry.stencil_depth = xformation_stack_.back().stencil_depth;
   if (create_subpass) {
     entry.is_subpass = true;
     auto subpass = std::make_unique<EntityPass>();
+    subpass->SetBackdropFilter(backdrop_filter);
     subpass->SetBlendMode(blend_mode);
     current_pass_ = GetCurrentPass().AddSubpass(std::move(subpass));
     current_pass_->SetTransformation(xformation_stack_.back().xformation);
@@ -313,12 +317,11 @@ size_t Canvas::GetStencilDepth() const {
 void Canvas::SaveLayer(Paint paint,
                        std::optional<Rect> bounds,
                        std::optional<Paint::ImageFilterProc> backdrop_filter) {
-  Save(true, paint.blend_mode);
+  Save(true, paint.blend_mode, backdrop_filter);
 
   auto& new_layer_pass = GetCurrentPass();
   new_layer_pass.SetDelegate(
       std::make_unique<PaintPassDelegate>(paint, bounds));
-  new_layer_pass.SetBackdropFilter(backdrop_filter);
 
   if (bounds.has_value() && !backdrop_filter.has_value()) {
     // Render target switches due to a save layer can be elided. In such cases
