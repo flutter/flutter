@@ -420,6 +420,8 @@ class RenderParagraph extends RenderBox
   }
 
   /// The color to use when painting the selection.
+  ///
+  /// Ignored if the text is not selectable (e.g. if [registrar] is null).
   Color? get selectionColor => _selectionColor;
   Color? _selectionColor;
   set selectionColor(Color? value) {

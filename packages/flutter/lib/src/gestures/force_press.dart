@@ -204,7 +204,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// value:
   ///
   /// ```dart
-  /// static double interpolateWithEasing(double min, double max, double t) {
+  /// double interpolateWithEasing(double min, double max, double t) {
   ///    final double lerp = (t - min) / (max - min);
   ///    return Curves.easeIn.transform(lerp);
   /// }

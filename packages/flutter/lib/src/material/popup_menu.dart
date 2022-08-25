@@ -267,7 +267,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The text style of the popup menu item.
   ///
   /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
-  /// If [PopupMenuThemeData.textStyle] is also null, then [TextTheme.subtitle1]
+  /// If [PopupMenuThemeData.textStyle] is also null, then [TextTheme.titleMedium]
   /// of [ThemeData.textTheme] is used.
   final TextStyle? textStyle;
 
@@ -344,7 +344,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1!;
+    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.titleMedium!;
 
     if (!widget.enabled) {
       style = style.copyWith(color: theme.disabledColor);
@@ -1009,6 +1009,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     super.key,
     required this.itemBuilder,
     this.initialValue,
+    this.onOpened,
     this.onSelected,
     this.onCanceled,
     this.tooltip,
@@ -1038,6 +1039,9 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// The value of the menu item, if any, that should be highlighted when the menu opens.
   final T? initialValue;
+
+  /// Called when the popup menu is shown.
+  final VoidCallback? onOpened;
 
   /// Called when the user selects a value from the popup menu created by this button.
   ///
@@ -1204,6 +1208,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
+      widget.onOpened?.call();
       showMenu<T?>(
         context: context,
         elevation: widget.elevation ?? popupMenuTheme.elevation,

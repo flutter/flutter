@@ -133,6 +133,18 @@ class RoundedRectangleBorder extends OutlinedBorder {
   }
 
   @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    if (borderRadius == BorderRadius.zero) {
+      canvas.drawRect(rect, paint);
+    } else {
+      canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), paint);
+    }
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
@@ -351,6 +363,19 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     return Path()
       ..addRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)));
   }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect, textDirection)!;
+    if (adjustedBorderRadius == BorderRadius.zero) {
+      canvas.drawRect(_adjustRect(rect), paint);
+    } else {
+      canvas.drawRRect(adjustedBorderRadius.toRRect(_adjustRect(rect)), paint);
+    }
+  }
+
+  @override
+  bool get preferPaintInterior => true;
 
   @override
   _RoundedRectangleToCircleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius, double? circleness, double? eccentricity }) {
