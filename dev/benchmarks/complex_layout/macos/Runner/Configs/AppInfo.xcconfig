@@ -11,4 +11,4 @@ PRODUCT_NAME = complex_layout
 PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.complexLayout
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 com.yourcompany. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright 2014 The Flutter Authors. All rights reserved.
