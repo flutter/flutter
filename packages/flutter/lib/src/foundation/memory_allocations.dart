@@ -64,7 +64,11 @@ class ObjectDisposed implements ObjectEvent {
 }
 
 
+/// The event contains some tracing information that may help with memory
+/// troubleshooting.
 ///
+/// For example, it may be information about ownership transfer
+/// or state change.
 class ObjectTraced implements ObjectEvent {
 
   ///
