@@ -537,6 +537,9 @@ Window::HandleMessage(UINT const message,
       // DefWindowProc will send WM_CHAR for this WM_UNICHAR.
       break;
     }
+    case WM_THEMECHANGED:
+      OnThemeChange();
+      break;
     case WM_DEADCHAR:
     case WM_SYSDEADCHAR:
     case WM_CHAR:
@@ -630,6 +633,19 @@ uint32_t Window::Win32MapVkToChar(uint32_t virtual_key) {
 
 UINT Window::Win32DispatchMessage(UINT Msg, WPARAM wParam, LPARAM lParam) {
   return ::SendMessage(window_handle_, Msg, wParam, lParam);
+}
+
+bool Window::GetHighContrastEnabled() {
+  HIGHCONTRAST high_contrast = {.cbSize = sizeof(HIGHCONTRAST)};
+  // API call is only supported on Windows 8+
+  if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(HIGHCONTRAST),
+                            &high_contrast, 0)) {
+    return high_contrast.dwFlags & HCF_HIGHCONTRASTON;
+  } else {
+    FML_LOG(INFO) << "Failed to get status of high contrast feature,"
+                  << "support only for Windows 8 + ";
+    return false;
+  }
 }
 
 }  // namespace flutter

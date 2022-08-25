@@ -142,6 +142,12 @@ class FlutterWindow : public Window, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   PointerLocation GetPrimaryPointerLocation() override;
 
+  // |Window|
+  void OnThemeChange() override;
+
+  // |WindowBindingHandler|
+  void SendInitialAccessibilityFeatures() override;
+
  private:
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
