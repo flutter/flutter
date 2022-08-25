@@ -30,7 +30,6 @@ enum BorderStyle {
 /// rendering. A more involved explanation is present in [BorderSide.width].
 ///
 /// {@tool snippet}
-///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
 /// the text has a thick bar above it that is light blue, and a thick bar below
@@ -149,6 +148,13 @@ class BorderSide with Diagnosticable {
   /// - [strokeAlignInside] provides padding with full [width].
   /// - [strokeAlignCenter] provides padding with half [width].
   /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
+  ///
+  /// {@tool dartpad}
+  /// This example shows an animation of how `strokeAlign` affects the drawing
+  /// when applied to borders of various shapes.
+  ///
+  /// ** See code in examples/api/lib/painting/borders/border_side.0.dart **
+  /// {@end-tool}
   final double strokeAlign;
 
   /// The border is drawn fully inside of the border path.
