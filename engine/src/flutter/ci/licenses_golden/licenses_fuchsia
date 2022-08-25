@@ -1,4 +1,4 @@
-Signature: 6e8c8027dce5590b0915f65a18ff891f
+Signature: da50717c1a4fd32a1aed068ed0906efb
 
 UNUSED LICENSES:
 
@@ -11,7 +11,6 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/COPYRIGHT.musl
 TYPE: LicenseType.mit
 FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_compact_image.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
@@ -215,7 +214,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_compact_image.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
@@ -625,7 +623,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/tree_service_common/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
@@ -766,7 +763,6 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_compact_image.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
@@ -970,7 +966,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_compact_image.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
@@ -1380,7 +1375,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/tree_service_common/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
@@ -1418,7 +1412,6 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/LICENSE.vulkan
 TYPE: LicenseType.apache
 FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_compact_image.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
@@ -1622,7 +1615,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_compact_image.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
@@ -2032,7 +2024,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/tree_service_common/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/vulkan.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_compact_image.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
@@ -3581,6 +3572,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/ov
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/vendor_specific.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/diagnostics.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/overview.fidl
