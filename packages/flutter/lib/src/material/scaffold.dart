@@ -1305,14 +1305,14 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void didUpdateWidget(_FloatingActionButtonTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
+      // Get the right scale and rotation animations to use for this widget.
+      _updateAnimations();
+    }
     final bool oldChildIsNull = oldWidget.child == null;
     final bool newChildIsNull = widget.child == null;
     if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key) {
       return;
-    }
-    if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
-      // Get the right scale and rotation animations to use for this widget.
-      _updateAnimations();
     }
     if (_previousController.status == AnimationStatus.dismissed) {
       final double currentValue = widget.currentController.value;

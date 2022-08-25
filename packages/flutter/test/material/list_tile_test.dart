@@ -1993,9 +1993,9 @@ void main() {
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
     await tester.pumpWidget(buildFrame());
-    // Enabled color should be default bodyText2 color.
-    expect(textColor(leadingKey), theme.textTheme.bodyText2!.color);
-    expect(textColor(trailingKey), theme.textTheme.bodyText2!.color);
+    // Enabled color should be default bodyMedium color.
+    expect(textColor(leadingKey), theme.textTheme.bodyMedium!.color);
+    expect(textColor(trailingKey), theme.textTheme.bodyMedium!.color);
 
     await tester.pumpWidget(buildFrame(selected: true));
     // Wait for text color to animate.
@@ -2398,25 +2398,25 @@ void main() {
       // ListTile - ListTileStyle.list (default).
       await tester.pumpWidget(buildFrame());
       RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-      expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
       RenderParagraph title = _getTextRenderObject(tester, 'title');
-      expect(title.text.style!.color, theme.textTheme.subtitle1!.color);
+      expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
       RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-      expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
       RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-      expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
 
       // ListTile - ListTileStyle.drawer.
       await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
       await tester.pumpAndSettle();
       leading = _getTextRenderObject(tester, 'leading');
-      expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
       title = _getTextRenderObject(tester, 'title');
-      expect(title.text.style!.color, theme.textTheme.subtitle1!.color);
+      expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
       subtitle = _getTextRenderObject(tester, 'subtitle');
-      expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
       trailing = _getTextRenderObject(tester, 'trailing');
-      expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
     });
   });
 }
