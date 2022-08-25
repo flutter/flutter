@@ -207,6 +207,9 @@ class Window : public KeyboardManager::WindowDelegate {
   // Returns the current pixel per scroll tick value.
   virtual float GetScrollOffsetMultiplier();
 
+  // Check if the high contrast feature is enabled on the OS
+  virtual bool GetHighContrastEnabled();
+
  protected:
   // Win32's DefWindowProc.
   //
@@ -223,6 +226,9 @@ class Window : public KeyboardManager::WindowDelegate {
   // Handles running DirectManipulation on the window to receive trackpad
   // gestures.
   std::unique_ptr<DirectManipulationOwner> direct_manipulation_owner_;
+
+  // Called when a theme change message is issued
+  virtual void OnThemeChange() = 0;
 
  private:
   // Release OS resources associated with window.

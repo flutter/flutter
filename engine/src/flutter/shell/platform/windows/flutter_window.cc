@@ -4,11 +4,16 @@
 
 #include "flutter/shell/platform/windows/flutter_window.h"
 
+#include <WinUser.h>
 #include <dwmapi.h>
+
 #include <chrono>
 #include <map>
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 namespace flutter {
 
@@ -275,6 +280,15 @@ PointerLocation FlutterWindow::GetPrimaryPointerLocation() {
   GetCursorPos(&point);
   ScreenToClient(GetWindowHandle(), &point);
   return {(size_t)point.x, (size_t)point.y};
+}
+
+void FlutterWindow::OnThemeChange() {
+  binding_handler_delegate_->UpdateHighContrastEnabled(
+      GetHighContrastEnabled());
+}
+
+void FlutterWindow::SendInitialAccessibilityFeatures() {
+  OnThemeChange();
 }
 
 }  // namespace flutter

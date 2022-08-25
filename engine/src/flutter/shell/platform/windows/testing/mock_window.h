@@ -65,6 +65,8 @@ class MockWindow : public Window {
   MOCK_METHOD2(OnComposeChange, void(const std::u16string&, int));
   MOCK_METHOD3(OnImeComposition, void(UINT const, WPARAM const, LPARAM const));
 
+  MOCK_METHOD0(OnThemeChange, void());
+
   void CallOnImeComposition(UINT const message,
                             WPARAM const wparam,
                             LPARAM const lparam);

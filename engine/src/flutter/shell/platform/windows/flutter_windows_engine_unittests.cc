@@ -76,6 +76,11 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
                   THREAD_PRIORITY_ABOVE_NORMAL);
         return kSuccess;
       }));
+  // Accessibility updates must do nothing when the embedder engine is mocked
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; });
 
   // It should send locale info.
   bool update_locales_called = false;
@@ -193,6 +198,11 @@ TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
         EXPECT_EQ(config->type, kSoftware);
         return kSuccess;
       }));
+  // Accessibility updates must do nothing when the embedder engine is mocked
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; });
 
   // Stub out UpdateLocales and SendPlatformMessage as we don't have a fully
   // initialized engine instance.
@@ -407,6 +417,33 @@ TEST(FlutterWindowsEngine, SetNextFrameCallback) {
 TEST(FlutterWindowsEngine, GetExecutableName) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EXPECT_EQ(engine->GetExecutableName(), "flutter_windows_unittests.exe");
+}
+
+// Ensure that after setting or resetting the high contrast feature,
+// the corresponding status flag can be retrieved from the engine.
+TEST(FlutterWindowsEngine, UpdateHighContrastFeature) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  bool called = false;
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures, ([&called](auto engine, auto flags) {
+        called = true;
+        return kSuccess;
+      }));
+
+  engine->UpdateHighContrastEnabled(true);
+  EXPECT_TRUE(
+      engine->EnabledAccessibilityFeatures() &
+      FlutterAccessibilityFeature::kFlutterAccessibilityFeatureHighContrast);
+  EXPECT_TRUE(engine->high_contrast_enabled());
+  EXPECT_TRUE(called);
+
+  engine->UpdateHighContrastEnabled(false);
+  EXPECT_FALSE(
+      engine->EnabledAccessibilityFeatures() &
+      FlutterAccessibilityFeature::kFlutterAccessibilityFeatureHighContrast);
+  EXPECT_FALSE(engine->high_contrast_enabled());
 }
 
 }  // namespace testing
