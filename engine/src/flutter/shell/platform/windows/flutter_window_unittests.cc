@@ -128,6 +128,7 @@ class MockFlutterWindow : public FlutterWindow {
                void(double, double, FlutterPointerDeviceKind, int32_t));
   MOCK_METHOD0(OnSetCursor, void());
   MOCK_METHOD0(GetScrollOffsetMultiplier, float());
+  MOCK_METHOD0(GetHighContrastEnabled, bool());
   MOCK_METHOD0(GetDpiScale, float());
   MOCK_METHOD0(IsVisible, bool());
   MOCK_METHOD1(UpdateCursorRect, void(const Rect&));
@@ -375,6 +376,28 @@ TEST(FlutterWindowTest, OnWindowRepaint) {
   EXPECT_CALL(delegate, OnWindowRepaint()).Times(1);
 
   win32window.InjectWindowMessage(WM_PAINT, 0, 0);
+}
+
+TEST(FlutterWindowTest, OnThemeChange) {
+  MockFlutterWindow win32window;
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  ON_CALL(win32window, GetHighContrastEnabled()).WillByDefault(Return(true));
+  EXPECT_CALL(delegate, UpdateHighContrastEnabled(true)).Times(1);
+
+  win32window.InjectWindowMessage(WM_THEMECHANGED, 0, 0);
+}
+
+TEST(FlutterWindowTest, InitialAccessibilityFeatures) {
+  MockFlutterWindow win32window;
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  ON_CALL(win32window, GetHighContrastEnabled()).WillByDefault(Return(true));
+  EXPECT_CALL(delegate, UpdateHighContrastEnabled(true)).Times(1);
+
+  win32window.SendInitialAccessibilityFeatures();
 }
 
 }  // namespace testing

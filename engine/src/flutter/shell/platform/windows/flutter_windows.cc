@@ -85,6 +85,7 @@ FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
 
   // Must happen after engine is running.
   state->view->SendInitialBounds();
+  state->view->SendInitialAccessibilityFeatures();
   return state.release();
 }
 

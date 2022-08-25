@@ -180,6 +180,12 @@ void MockEmbedderApiForKeyboard(
 
         return kSuccess;
       };
+  // Any time the associated EmbedderEngine will be mocked, such as here,
+  // the Update accessibility features must not attempt to actually push the
+  // update
+  modifier.embedder_api().UpdateAccessibilityFeatures =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; };
   modifier.embedder_api().UpdateLocales =
       [](auto engine, const FlutterLocale** locales, size_t locales_count) {
         return kSuccess;
