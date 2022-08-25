@@ -20,7 +20,7 @@ class TestSpecs {
     return endTime - startTime;
   }
 
-  void set endTime(int value) {
+  set endTime(int value) {
     _endTime = value;
   }
 
@@ -130,9 +130,12 @@ Map<String, dynamic> readJsonTestsSubShardFile(String fileName) {
 Map<int, TestSpecs> generateMetrics(File metrics) {
   final Map<int, TestSpecs> allTestSpecs = <int, TestSpecs>{};
   if (!metrics.existsSync()) {
+    print('failed');
     return allTestSpecs;
   }
   bool success = false;
+  print('lines');
+  print(metrics.readAsLinesSync().length);
 
   for(final String metric in metrics.readAsLinesSync()) {
     final Map<String, dynamic> entry = json.decode(metric) as Map<String, dynamic>;
