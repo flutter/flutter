@@ -126,12 +126,17 @@ class RoundedRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Paint paint = Paint()
-          ..color = side.color;
-        final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-        final RRect inner = borderRect.deflate(side.strokeInset);
-        final RRect outer = borderRect.inflate(side.strokeOutset);
-        canvas.drawDRRect(outer, inner, paint);
+        if (side.width == 0.0) {
+          canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
+        } else {
+          final Paint paint = Paint()
+            ..color = side.color;
+          final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+          final RRect inner = borderRect.deflate(side.strokeInset);
+          final RRect outer = borderRect.inflate(side.strokeOutset);
+          canvas.drawDRRect(outer, inner, paint);
+        }
+        break;
     }
   }
 
