@@ -124,7 +124,9 @@ class Canvas {
   size_t GetStencilDepth() const;
 
   void Save(bool create_subpass,
-            Entity::BlendMode = Entity::BlendMode::kSourceOver);
+            Entity::BlendMode = Entity::BlendMode::kSourceOver,
+            std::optional<EntityPass::BackdropFilterProc> backdrop_filter =
+                std::nullopt);
 
   void RestoreClip();
 

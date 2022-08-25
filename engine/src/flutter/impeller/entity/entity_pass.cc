@@ -39,7 +39,7 @@ void EntityPass::SetDelegate(std::unique_ptr<EntityPassDelegate> delegate) {
 
 void EntityPass::AddEntity(Entity entity) {
   if (entity.GetBlendMode() > Entity::BlendMode::kLastPipelineBlendMode) {
-    reads_from_pass_texture_ = true;
+    reads_from_pass_texture_ += 1;
   }
 
   elements_.emplace_back(std::move(entity));
@@ -133,7 +133,7 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
 
   if (pass->blend_mode_ > Entity::BlendMode::kLastPipelineBlendMode ||
       pass->backdrop_filter_proc_.has_value()) {
-    reads_from_pass_texture_ = true;
+    reads_from_pass_texture_ += 1;
   }
 
   auto subpass_pointer = pass.get();
@@ -143,7 +143,7 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
 
 bool EntityPass::Render(ContentContext& renderer,
                         RenderTarget render_target) const {
-  if (reads_from_pass_texture_) {
+  if (reads_from_pass_texture_ > 0) {
     auto offscreen_target = RenderTarget::CreateOffscreenMSAA(
         *renderer.GetContext(),                    // context
         render_target.GetRenderTargetSize(),       // size
@@ -291,7 +291,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     }
 
     RenderTarget subpass_target;
-    if (subpass->reads_from_pass_texture_) {
+    if (subpass->reads_from_pass_texture_ > 0) {
       subpass_target = RenderTarget::CreateOffscreenMSAA(
           *renderer.GetContext(),               // context
           ISize::Ceil(subpass_coverage->size),  // size
@@ -372,7 +372,8 @@ bool EntityPass::OnRender(ContentContext& renderer,
   TRACE_EVENT0("impeller", "EntityPass::OnRender");
 
   auto context = renderer.GetContext();
-  InlinePassContext pass_context(context, render_target);
+  InlinePassContext pass_context(context, render_target,
+                                 reads_from_pass_texture_);
   if (!pass_context.IsValid()) {
     return false;
   }
@@ -530,10 +531,12 @@ void EntityPass::SetBlendMode(Entity::BlendMode blend_mode) {
 }
 
 void EntityPass::SetBackdropFilter(std::optional<BackdropFilterProc> proc) {
-  backdrop_filter_proc_ = proc;
-  if (proc.has_value() && superpass_) {
-    superpass_->reads_from_pass_texture_ = true;
+  if (superpass_) {
+    VALIDATION_LOG << "Backdrop filters cannot be set on EntityPasses that "
+                      "have already been appended to another pass.";
   }
+
+  backdrop_filter_proc_ = proc;
 }
 
 }  // namespace impeller
