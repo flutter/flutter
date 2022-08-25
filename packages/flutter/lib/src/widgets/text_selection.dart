@@ -796,13 +796,13 @@ class SelectionOverlay {
   /// This is NOT the souce of truth for if the magnifier is up or not,
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
-  void showMagnifier(MagnifierInfo initalInfoBearer) {
+  void showMagnifier(MagnifierInfo initalMagnifierInfo) {
     if (_toolbar != null) {
       hideToolbar();
     }
 
     // Start from empty, so we don't utilize any rememnant values.
-    _magnifierInfo.value = initalInfoBearer;
+    _magnifierInfo.value = initalMagnifierInfo;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not

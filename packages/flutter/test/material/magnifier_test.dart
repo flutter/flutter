@@ -28,12 +28,12 @@ void main() {
   Future<void> showMagnifier(
     BuildContext context,
     WidgetTester tester,
-    ValueNotifier<MagnifierInfo> infoBearer,
+    ValueNotifier<MagnifierInfo> magnifierInfo,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
         context: context,
         builder: (_) => TextMagnifier(
-              magnifierInfo: infoBearer,
+              magnifierInfo: magnifierInfo,
             ));
 
     WidgetsBinding.instance.scheduleFrame();

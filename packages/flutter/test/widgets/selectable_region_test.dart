@@ -1101,7 +1101,7 @@ void main() {
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
     group('magnifier', () {
-      late ValueNotifier<MagnifierInfo> infoBearer;
+      late ValueNotifier<MagnifierInfo> magnifierInfo;
       final Widget fakeMagnifier = Container(key: UniqueKey());
 
       testWidgets('Can drag handles to show, unshow, and update magnifier',
@@ -1115,8 +1115,8 @@ void main() {
                 magnifierBuilder: (_,
                     MagnifierController controller,
                     ValueNotifier<MagnifierInfo>
-                        localInfoBearer) {
-                  infoBearer = localInfoBearer;
+                        localMagnifierInfo) {
+                  magnifierInfo = localMagnifierInfo;
                   return fakeMagnifier;
                 },
               ),
@@ -1151,14 +1151,14 @@ void main() {
         // Expect the magnifier to show and then store it's position.
         expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
         final Offset firstDragGesturePosition =
-            infoBearer.value.globalGesturePosition;
+            magnifierInfo.value.globalGesturePosition;
 
         await gesture.moveTo(textOffsetToPosition(paragraph, text.length));
         await tester.pump();
 
         // Expect the position the magnifier gets to have moved.
         expect(firstDragGesturePosition,
-            isNot(infoBearer.value.globalGesturePosition));
+            isNot(magnifierInfo.value.globalGesturePosition));
 
         // Lift the pointer and expect the magnifier to disappear.
         await gesture.up();

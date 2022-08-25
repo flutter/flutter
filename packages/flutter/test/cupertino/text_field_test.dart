@@ -6041,7 +6041,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierInfo> infoBearer;
+    late ValueNotifier<MagnifierInfo> magnifierInfo;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     group('magnifier builder', () {
@@ -6124,8 +6124,8 @@ void main() {
                     magnifierBuilder: (_,
                         MagnifierController controller,
                         ValueNotifier<MagnifierInfo>
-                            localInfoBearer) {
-                  infoBearer = localInfoBearer;
+                            localMagnifierInfo) {
+                  magnifierInfo = localMagnifierInfo;
                   return fakeMagnifier;
                 }),
               ),
@@ -6163,14 +6163,14 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
-      firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+      firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
 
       // Expect the position the magnifier gets to have moved.
       expect(firstDragGesturePosition,
-          isNot(infoBearer.value.globalGesturePosition));
+          isNot(magnifierInfo.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();

@@ -14,18 +14,18 @@ void main() {
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
   final MagnifierController magnifierController = MagnifierController();
 
-  // Make sure that your gesture in infoBearer is within the line in infoBearer,
+  // Make sure that your gesture in magnifierInfo is within the line in magnifierInfo,
   // or else the magnifier status will stay hidden and this will not complete.
   Future<void> showCupertinoMagnifier(
     BuildContext context,
     WidgetTester tester,
-    ValueNotifier<MagnifierInfo> infoBearer,
+    ValueNotifier<MagnifierInfo> magnifierInfo,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
         context: context,
         builder: (_) => CupertinoTextMagnifier(
               controller: magnifierController,
-              magnifierInfo: infoBearer,
+              magnifierInfo: magnifierInfo,
             ));
 
     WidgetsBinding.instance.scheduleFrame();
