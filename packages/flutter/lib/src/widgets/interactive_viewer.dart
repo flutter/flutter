@@ -67,7 +67,10 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    @Deprecated('This property is no longer used, please use panAxis. ')
+    @Deprecated(
+      'This property is no longer used, please use panAxis. '
+      'This feature was deprecated after v3.1.0-0.0.pre.2484',
+    )
     this.alignPanAxis = false,
     this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
@@ -116,7 +119,10 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    @Deprecated('This property is no longer used, please use panAxis. ')
+    @Deprecated(
+      'This property is no longer used, please use panAxis. '
+      'This feature was deprecated after v3.1.0-0.0.pre.2484',
+    )
     this.alignPanAxis = false,
     this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
@@ -175,7 +181,10 @@ class InteractiveViewer extends StatefulWidget {
   /// See also:
   ///  * [constrained], which has an example of creating a table that uses
   ///    alignPanAxis.
-  @Deprecated('This property is no longer used, please use panAxis. ')
+  @Deprecated(
+    'This property is no longer used, please use panAxis. '
+    'This feature was deprecated after v3.1.0-0.0.pre.2484',
+  )
   final bool alignPanAxis;
 
   /// When set to [PanAxis.aligned] panning is only allowed in the horizontal
