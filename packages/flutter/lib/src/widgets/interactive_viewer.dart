@@ -69,7 +69,7 @@ class InteractiveViewer extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     @Deprecated(
       'This property is no longer used, please use panAxis. '
-      'This feature was deprecated after v3.1.0-0.0.pre.2484',
+      'This feature was deprecated after v3.1.0-0.0.pre',
     )
     this.alignPanAxis = false,
     this.panAxis = PanAxis.free,
@@ -121,7 +121,7 @@ class InteractiveViewer extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     @Deprecated(
       'This property is no longer used, please use panAxis. '
-      'This feature was deprecated after v3.1.0-0.0.pre.2484',
+      'This feature was deprecated after v3.1.0-0.0.pre',
     )
     this.alignPanAxis = false,
     this.panAxis = PanAxis.free,
@@ -183,7 +183,7 @@ class InteractiveViewer extends StatefulWidget {
   ///    alignPanAxis.
   @Deprecated(
     'This property is no longer used, please use panAxis. '
-    'This feature was deprecated after v3.1.0-0.0.pre.2484',
+    'This feature was deprecated after v3.1.0-0.0.pre',
   )
   final bool alignPanAxis;
 
