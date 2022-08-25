@@ -233,8 +233,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
           consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
           break;
         case _DragState.accepted:
-          // _checkCancel(isDrag: false);
-          _checkEnd();
+          _giveUpPointer(event.pointer);
           break;
       }
 
