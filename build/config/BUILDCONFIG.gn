@@ -312,7 +312,7 @@ if (!is_clang && using_sanitizer) {
   is_clang = true
 }
 
-use_flutter_cxx = is_clang && (is_linux || is_android || is_mac)
+use_flutter_cxx = is_clang && (is_linux || is_android || is_mac || is_ios)
 
 if (is_msan && !is_linux) {
   assert(false, "Memory sanitizer is only available on Linux.")
