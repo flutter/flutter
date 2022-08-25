@@ -2526,6 +2526,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "13f17a"}
+        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: hello_world_macos__compile
