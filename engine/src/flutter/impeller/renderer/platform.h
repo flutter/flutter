@@ -12,7 +12,7 @@
 namespace impeller {
 
 constexpr size_t DefaultUniformAlignment() {
-#if FML_OS_IOS
+#if FML_OS_IOS && !TARGET_OS_SIMULATOR
   return 16u;
 #elif FML_OS_MACOSX
   return 256u;
