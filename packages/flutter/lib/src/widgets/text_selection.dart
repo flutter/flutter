@@ -509,7 +509,7 @@ class TextSelectionOverlay {
     return endHandleRect?.height ?? renderObject.preferredLineHeight;
   }
 
-  MagnifierInfoBearer _buildMagnifier({
+  MagnifierInfo _buildMagnifier({
     required RenderEditable renderEditable,
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
@@ -533,7 +533,7 @@ class TextSelectionOverlay {
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
 
-    return MagnifierInfoBearer(
+    return MagnifierInfo(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
       caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
@@ -770,8 +770,8 @@ class SelectionOverlay {
   final BuildContext context;
 
 
-  final ValueNotifier<MagnifierInfoBearer> _magnifierInfoBearer =
-      ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty);
+  final ValueNotifier<MagnifierInfo> _magnifierInfo =
+      ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
 
   /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
   /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,
@@ -796,13 +796,13 @@ class SelectionOverlay {
   /// This is NOT the souce of truth for if the magnifier is up or not,
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
-  void showMagnifier(MagnifierInfoBearer initalInfoBearer) {
+  void showMagnifier(MagnifierInfo initalInfoBearer) {
     if (_toolbar != null) {
       hideToolbar();
     }
 
     // Start from empty, so we don't utilize any rememnant values.
-    _magnifierInfoBearer.value = initalInfoBearer;
+    _magnifierInfo.value = initalInfoBearer;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
@@ -810,7 +810,7 @@ class SelectionOverlay {
     final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
       context,
       _magnifierController,
-      _magnifierInfoBearer,
+      _magnifierInfo,
     );
 
     if (builtMagnifier == null) {
@@ -1259,12 +1259,12 @@ class SelectionOverlay {
   /// itself.
   ///
   /// If there is no magnifier in the overlay, this does nothing,
-  void updateMagnifier(MagnifierInfoBearer magnifierInfoBearer) {
+  void updateMagnifier(MagnifierInfo magnifierInfo) {
     if (_magnifierController.overlayEntry == null) {
       return;
     }
 
-    _magnifierInfoBearer.value = magnifierInfoBearer;
+    _magnifierInfo.value = magnifierInfo;
   }
 }
 

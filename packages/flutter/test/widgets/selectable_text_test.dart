@@ -5153,7 +5153,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierInfoBearer> infoBearer;
+    late ValueNotifier<MagnifierInfo> infoBearer;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     testWidgets(
@@ -5166,7 +5166,7 @@ void main() {
         magnifierBuilder: (
           _,
           MagnifierController controller,
-          ValueNotifier<MagnifierInfoBearer> localInfoBearer
+          ValueNotifier<MagnifierInfo> localInfoBearer
         ) {
           infoBearer = localInfoBearer;
           return fakeMagnifier;

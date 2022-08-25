@@ -18,7 +18,7 @@ import 'overlay.dart';
 /// {@template flutter.widgets.magnifier.MagnifierBuilder}
 /// Signature for a builder that builds a [Widget] with a [MagnifierController].
 ///
-/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierInfoBearer]> is not
+/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierInfo]> is not
 /// required, although if a Widget intends to have entry or exit animations, it should take
 /// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
 /// can wait before removing it from the overlay.
@@ -26,28 +26,28 @@ import 'overlay.dart';
 ///
 /// See also:
 ///
-/// - [MagnifierInfoBearer], the data class that updates the
+/// - [MagnifierInfo], the data class that updates the
 ///   magnifier.
 typedef MagnifierBuilder = Widget? Function(
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierInfoBearer> magnifierInfoBearer,
+    ValueNotifier<MagnifierInfo> magnifierInfo,
 );
 
 /// A data class that contains the geometry information of text layouts
 /// and selection gestures, used to position magnifiers.
 @immutable
-class MagnifierInfoBearer {
-  /// Constructs a [MagnifierInfoBearer] from provided geometry values.
-  const MagnifierInfoBearer({
+class MagnifierInfo {
+  /// Constructs a [MagnifierInfo] from provided geometry values.
+  const MagnifierInfo({
     required this.globalGesturePosition,
     required this.caretRect,
     required this.fieldBounds,
     required this.currentLineBoundaries,
   });
 
-  /// Const [MagnifierInfoBearer] with all values set to 0.
-  static const MagnifierInfoBearer empty = MagnifierInfoBearer(
+  /// Const [MagnifierInfo] with all values set to 0.
+  static const MagnifierInfo empty = MagnifierInfo(
     globalGesturePosition: Offset.zero,
     caretRect: Rect.zero,
     currentLineBoundaries: Rect.zero,
@@ -73,7 +73,7 @@ class MagnifierInfoBearer {
     if (identical(this, other)) {
       return true;
     }
-    return other is MagnifierInfoBearer
+    return other is MagnifierInfo
         && other.globalGesturePosition == globalGesturePosition
         && other.caretRect == caretRect
         && other.currentLineBoundaries == currentLineBoundaries

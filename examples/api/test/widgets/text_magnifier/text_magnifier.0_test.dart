@@ -31,7 +31,7 @@ RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(
 }
 
 Offset _textOffsetToPosition<T extends State<StatefulWidget>>(
-  // the global key's state must refer to a TextSelectionGestureDetectorBuilderDelegate.
+  // The global key's state must refer to a TextSelectionGestureDetectorBuilderDelegate.
   GlobalKey<T> textFieldKey,
   int offset,
 ) {

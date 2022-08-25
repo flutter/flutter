@@ -796,6 +796,12 @@ class CupertinoTextField extends StatefulWidget {
   /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
   /// platforms. If it is desired to supress the magnifier, consider passing
   /// [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the magnifier that this text field uses.
+  ///
+  /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
+  /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
@@ -868,14 +874,14 @@ class CupertinoTextField extends StatefulWidget {
     magnifierBuilder: (
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierInfoBearer> magnifierInfoBearer
+    ValueNotifier<MagnifierInfo> magnifierInfo
   ) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
         return CupertinoTextMagnifier(
         controller: controller,
-        magnifierInfoBearer: magnifierInfoBearer,
+        magnifierInfo: magnifierInfo,
       );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

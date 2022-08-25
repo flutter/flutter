@@ -12828,7 +12828,7 @@ void main() {
           editableText.magnifierConfiguration.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty)
+              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty)
             ),
           isNull,
       );

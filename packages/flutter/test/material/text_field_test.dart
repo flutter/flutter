@@ -12118,7 +12118,7 @@ void main() {
           textField.magnifierConfiguration!.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty),
+              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
             ),
           isA<Widget>().having(
               (Widget widget) => widget.key,
@@ -12139,7 +12139,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
@@ -12157,7 +12157,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
@@ -12175,7 +12175,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfoBearer>(MagnifierInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isNull);
       },
@@ -12187,7 +12187,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierInfoBearer> infoBearer;
+    late ValueNotifier<MagnifierInfo> infoBearer;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     testWidgets(
@@ -12203,7 +12203,7 @@ void main() {
               magnifierBuilder: (
                   _,
                   MagnifierController controller,
-                  ValueNotifier<MagnifierInfoBearer> localInfoBearer
+                  ValueNotifier<MagnifierInfo> localInfoBearer
                 ) {
                   infoBearer = localInfoBearer;
                   return fakeMagnifier;

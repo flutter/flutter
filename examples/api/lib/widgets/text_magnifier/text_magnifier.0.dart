@@ -28,8 +28,7 @@ class MyApp extends StatelessWidget {
               magnifierConfiguration: TextMagnifierConfiguration(
                 magnifierBuilder: (BuildContext context,
                         MagnifierController controller,
-                        ValueNotifier<MagnifierInfoBearer>
-                            textSelectionData) =>
+                        ValueNotifier<MagnifierInfo> textSelectionData) =>
                     CustomMagnifier(
                   magnifierInfo: textSelectionData,
                 ),
@@ -50,23 +49,23 @@ class CustomMagnifier extends StatelessWidget {
 
   // This magnifier will consume some text data and position itself
   // based on the info in the magnifier.
-  final ValueNotifier<MagnifierInfoBearer> magnifierInfo;
+  final ValueNotifier<MagnifierInfo> magnifierInfo;
 
   @override
   Widget build(BuildContext context) {
     // Use a value listenable builder because we want to rebuild
-    // everytime the text selection info changes.
+    // every time the text selection info changes.
     // `CustomMagnifier` could also be a `StatefulWidget` and call `setState`
     // when `magnifierInfo` updates. This would be useful for more complex
     // positioning cases.
-    return ValueListenableBuilder<MagnifierInfoBearer>(
+    return ValueListenableBuilder<MagnifierInfo>(
         valueListenable: magnifierInfo,
         builder: (BuildContext context,
-            MagnifierInfoBearer currentMagnifierInfo, _) {
+            MagnifierInfo currentMagnifierInfo, _) {
           // We want to position the magnifier at the global position of the gesture.
           Offset magnifierPosition = currentMagnifierInfo.globalGesturePosition;
 
-          // You may use the `MagnifierInfoBearer` however you'd like:
+          // You may use the `MagnifierInfo` however you'd like:
           // In this case, we make sure the magnifier never goes out of the current line bounds.
           magnifierPosition = Offset(
             clampDouble(
@@ -89,18 +88,22 @@ class CustomMagnifier extends StatelessWidget {
             left: magnifierPosition.dx,
             top: magnifierPosition.dy,
             child: RawMagnifier(
-                magnificationScale: 2,
-                // The focal point starts at the center of the magnifier.
-                // We probably want to point below the magnifier, so
-                // offset the focal poinzzt by half the magnifier height.
-                focalPointOffset: Offset(0, magnifierSize.height / 2),
-                // Decorate it however we'd like!
-                decoration: const MagnifierDecoration(
-                  shape: StarBorder(
-                    side: BorderSide(color: Colors.green, width: 2),
+              magnificationScale: 2,
+              // The focal point starts at the center of the magnifier.
+              // We probably want to point below the magnifier, so
+              // offset the focal poinzzt by half the magnifier height.
+              focalPointOffset: Offset(0, magnifierSize.height / 2),
+              // Decorate it however we'd like!
+              decoration: const MagnifierDecoration(
+                shape: StarBorder(
+                  side: BorderSide(
+                    color: Colors.green,
+                    width: 2,
                   ),
                 ),
-                size: magnifierSize),
+              ),
+              size: magnifierSize,
+            ),
           );
         });
   }
