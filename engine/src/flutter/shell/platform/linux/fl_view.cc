@@ -606,7 +606,10 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->engine);
   g_clear_object(&self->accessibility_plugin);
   g_clear_object(&self->keyboard_manager);
-  g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
+  if (self->keymap_keys_changed_cb_id != 0) {
+    g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
+    self->keymap_keys_changed_cb_id = 0;
+  }
   g_clear_object(&self->mouse_cursor_plugin);
   g_clear_object(&self->platform_plugin);
   g_list_free_full(self->gl_area_list, g_object_unref);
