@@ -2848,7 +2848,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
-      _bringIntoView(oldTextSelection, value.selection, cause);
+      _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
     }
     if (textChanged) {
       try {
@@ -2866,7 +2866,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     endBatchEdit();
   }
 
-  void _bringIntoView(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause){
+  void _bringIntoViewBySelectionState(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause){
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
