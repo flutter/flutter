@@ -153,7 +153,7 @@ class BorderSide with Diagnosticable {
   /// This example shows an animation of how `strokeAlign` affects the drawing
   /// when applied to borders of various shapes.
   ///
-  /// ** See code in examples/api/lib/painting/borders/border_side.0.dart **
+  /// ** See code in examples/api/lib/painting/borders/border_side_stroke_align.0.dart **
   /// {@end-tool}
   final double strokeAlign;
 

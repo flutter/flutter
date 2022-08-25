@@ -2,29 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [BorderSide].
+/// Flutter code sample for [BorderSide.strokeAlign].
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const BorderSideApp());
+void main() => runApp(const StrokeAlignApp());
 
-class BorderSideApp extends StatelessWidget {
-  const BorderSideApp({super.key});
+class StrokeAlignApp extends StatelessWidget {
+  const StrokeAlignApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: BorderSideExample());
+    return const MaterialApp(home: StrokeAlignExample());
   }
 }
 
-class BorderSideExample extends StatefulWidget {
-  const BorderSideExample({super.key});
+class StrokeAlignExample extends StatefulWidget {
+  const StrokeAlignExample({super.key});
 
   @override
-  State<BorderSideExample> createState() => _BorderSideExampleState();
+  State<StrokeAlignExample> createState() => _StrokeAlignExampleState();
 }
 
-class _BorderSideExampleState extends State<BorderSideExample>
+class _StrokeAlignExampleState extends State<StrokeAlignExample>
     with TickerProviderStateMixin {
   late final AnimationController animation;
 
@@ -58,7 +58,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            TestBox(
+            BorderedBox(
               shape: StadiumBorder(
                 side: BorderSide(
                   color: borderColor,
@@ -70,7 +70,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                TestBox(
+                BorderedBox(
                   shape: CircleBorder(
                     side: BorderSide(
                       color: borderColor,
@@ -79,7 +79,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
                     ),
                   ),
                 ),
-                TestBox(
+                BorderedBox(
                   shape: OvalBorder(
                     side: BorderSide(
                       color: borderColor,
@@ -93,7 +93,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                TestBox(
+                BorderedBox(
                   shape: BeveledRectangleBorder(
                     side: BorderSide(
                       color: borderColor,
@@ -102,7 +102,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
                     ),
                   ),
                 ),
-                TestBox(
+                BorderedBox(
                   shape: BeveledRectangleBorder(
                     borderRadius: BorderRadius.circular(cornerRadius),
                     side: BorderSide(
@@ -117,7 +117,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                TestBox(
+                BorderedBox(
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
                       color: borderColor,
@@ -126,7 +126,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
                     ),
                   ),
                 ),
-                TestBox(
+                BorderedBox(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(cornerRadius),
                     side: BorderSide(
@@ -141,7 +141,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                TestBox(
+                BorderedBox(
                   shape: StarBorder(
                     side: BorderSide(
                       color: borderColor,
@@ -150,7 +150,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
                     ),
                   ),
                 ),
-                TestBox(
+                BorderedBox(
                   shape: StarBorder(
                     pointRounding: 1,
                     innerRadiusRatio: 0.5,
@@ -162,7 +162,7 @@ class _BorderSideExampleState extends State<BorderSideExample>
                     ),
                   ),
                 ),
-                TestBox(
+                BorderedBox(
                   shape: StarBorder.polygon(
                     sides: 6,
                     pointRounding: 0.5,
@@ -182,8 +182,8 @@ class _BorderSideExampleState extends State<BorderSideExample>
   }
 }
 
-class TestBox extends StatelessWidget {
-  const TestBox({
+class BorderedBox extends StatelessWidget {
+  const BorderedBox({
     super.key,
     required this.shape,
   });

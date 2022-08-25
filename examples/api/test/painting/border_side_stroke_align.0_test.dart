@@ -3,19 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/painting/borders/border_side.0.dart'
+import 'package:flutter_api_samples/painting/borders/border_side_stroke_align.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Finds the expected TestBox', (WidgetTester tester) async {
+  testWidgets('Finds the expected BorderedBox', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: example.BorderSideExample(),
+        home: example.StrokeAlignExample(),
       ),
     );
 
-    expect(find.byType(example.BorderSideExample), findsOneWidget);
-    expect(find.byType(example.TestBox), findsNWidgets(10));
+    expect(find.byType(example.StrokeAlignExample), findsOneWidget);
+    expect(find.byType(example.BorderedBox), findsNWidgets(10));
   });
 }
