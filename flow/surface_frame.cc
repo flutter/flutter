@@ -6,6 +6,7 @@
 
 #include <limits>
 
+#include "flutter/flow/layers/layer.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
@@ -25,9 +26,7 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
   if (surface_) {
     canvas_ = surface_->getCanvas();
   } else if (display_list_fallback) {
-    dl_recorder_ = sk_make_sp<DisplayListCanvasRecorder>(
-        SkRect::MakeWH(std::numeric_limits<SkScalar>::max(),
-                       std::numeric_limits<SkScalar>::max()));
+    dl_recorder_ = sk_make_sp<DisplayListCanvasRecorder>(kGiantRect);
     canvas_ = dl_recorder_.get();
   }
 }
