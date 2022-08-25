@@ -12,59 +12,60 @@ import 'button_style.dart';
 import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'constants.dart';
-import 'elevated_button_theme.dart';
-import 'ink_ripple.dart';
+import 'filled_button_theme.dart';
 import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// A Material Design "elevated button".
+enum _FilledButtonVariant { filled, tonal }
+
+/// A Material Design filled button.
 ///
-/// Use elevated buttons to add dimension to otherwise mostly flat
-/// layouts, e.g.  in long busy lists of content, or in wide
-/// spaces. Avoid using elevated buttons on already-elevated content
-/// such as dialogs or cards.
+/// Filled buttons have the most visual impact after the [FloatingActionButton],
+/// and should be used for important, final actions that complete a flow,
+/// like **Save**, **Join now**, or **Confirm**.
 ///
-/// An elevated button is a label [child] displayed on a [Material]
-/// widget whose [Material.elevation] increases when the button is
-/// pressed. The label's [Text] and [Icon] widgets are displayed in
+/// A filled button is a label [child] displayed on a [Material]
+/// widget. The label's [Text] and [Icon] widgets are displayed in
 /// [style]'s [ButtonStyle.foregroundColor] and the button's filled
 /// background is the [ButtonStyle.backgroundColor].
 ///
-/// The elevated button's default style is defined by
-/// [defaultStyleOf].  The style of this elevated button can be
-/// overridden with its [style] parameter. The style of all elevated
+/// The filled button's default style is defined by
+/// [defaultStyleOf]. The style of this filled button can be
+/// overridden with its [style] parameter. The style of all filled
 /// buttons in a subtree can be overridden with the
-/// [ElevatedButtonTheme], and the style of all of the elevated
+/// [FilledButtonTheme], and the style of all of the filled
 /// buttons in an app can be overridden with the [Theme]'s
-/// [ThemeData.elevatedButtonTheme] property.
+/// [ThemeData.filledButtonTheme] property.
 ///
 /// The static [styleFrom] method is a convenient way to create a
-/// elevated button [ButtonStyle] from simple values.
+/// filled button [ButtonStyle] from simple values.
 ///
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
 ///
-/// {@tool dartpad}
-/// This sample produces an enabled and a disabled ElevatedButton.
+/// To create a 'filled tonal' button, use [FilledButton.tonal].
 ///
-/// ** See code in examples/api/lib/material/elevated_button/elevated_button.0.dart **
+/// {@tool dartpad}
+/// This sample produces enabled and disabled filled and filled tonal
+/// buttons.
+///
+/// ** See code in examples/api/lib/material/filled_button/filled_button.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [FilledButton], a filled button that doesn't elevate when pressed.
-///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], a button with an outlined border and no fill color.
 ///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
-class ElevatedButton extends ButtonStyleButton {
-  /// Create an ElevatedButton.
+class FilledButton extends ButtonStyleButton {
+  /// Create a FilledButton.
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
-  const ElevatedButton({
+  const FilledButton({
     super.key,
     required super.onPressed,
     super.onLongPress,
@@ -76,16 +77,15 @@ class ElevatedButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
-  });
+  }) : _variant = _FilledButtonVariant.filled;
 
-  /// Create an elevated button from a pair of widgets that serve as the button's
-  /// [icon] and [label].
+  /// Create a filled button from [icon] and [label].
   ///
-  /// The icon and label are arranged in a row and padded by 12 logical pixels
-  /// at the start, and 16 at the end, with an 8 pixel gap in between.
+  /// The icon and label are arranged in a row with padding at the start and end
+  /// and a gap between them.
   ///
   /// The [icon] and [label] arguments must not be null.
-  factory ElevatedButton.icon({
+  factory FilledButton.icon({
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
@@ -97,17 +97,71 @@ class ElevatedButton extends ButtonStyleButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-  }) = _ElevatedButtonWithIcon;
+  }) = _FilledButtonWithIcon;
 
-  /// A static convenience method that constructs an elevated button
+  /// Create a tonal variant of FilledButton.
+  ///
+  /// A filled tonal button is an alternative middle ground between
+  /// [FilledButton] and [OutlinedButton]. They’re useful in contexts where
+  /// a lower-priority button requires slightly more emphasis than an
+  /// outline would give, such as "Next" in an onboarding flow.
+  ///
+  /// The [autofocus] and [clipBehavior] arguments must not be null.
+  const FilledButton.tonal({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    super.statesController,
+    required super.child,
+  }) : _variant = _FilledButtonVariant.tonal;
+
+  /// Create a filled tonal button from [icon] and [label].
+  ///
+  /// The icon and label are arranged in a row with padding at the start and end
+  /// and a gap between them.
+  ///
+  /// The [icon] and [label] arguments must not be null.
+  factory FilledButton.tonalIcon({
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
+    required Widget icon,
+    required Widget label,
+  }) {
+    return _FilledButtonWithIcon.tonal(
+      key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus,
+      clipBehavior: clipBehavior,
+      icon: icon,
+      label: label,
+    );
+  }
+
+  /// A static convenience method that constructs a filled button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor] and [disabledForegroundColor] colors are used
-  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
-  /// a derived [ButtonStyle.overlayColor].
-  ///
-  /// The [backgroundColor] and [disabledBackgroundColor] colors are
-  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
+  /// The [foregroundColor], and [disabledForegroundColor] colors are used to create a
+  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value. The
+  /// [backgroundColor] and [disabledBackgroundColor] are used to create a
+  /// [MaterialStateProperty] [ButtonStyle.backgroundColor] value.
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
@@ -115,7 +169,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// or focused, and elevation + 6 is used when the button is pressed.
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle].mouseCursor.
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -125,32 +179,26 @@ class ElevatedButton extends ButtonStyleButton {
   /// a [ButtonStyle] that doesn't override anything.
   ///
   /// For example, to override the default text and icon colors for a
-  /// [ElevatedButton], as well as its overlay color, with all of the
+  /// [FilledButton], as well as its overlay color, with all of the
   /// standard opacity adjustments for the pressed, focused, and
   /// hovered states, one could write:
   ///
   /// ```dart
-  /// ElevatedButton(
-  ///   style: ElevatedButton.styleFrom(foregroundColor: Colors.green),
-  ///   onPressed: () {
-  ///     // ...
-  ///   },
-  ///   child: const Text('Jump'),
-  /// ),
+  /// FilledButton(
+  ///   style: FilledButton.styleFrom(foregroundColor: Colors.green),
+  ///   onPressed: () {},
+  ///   child: const Text('Filled button'),
+  /// );
   /// ```
   ///
-  /// And to change the fill color:
-  ///
+  /// or for a Filled tonal variant:
   /// ```dart
-  /// ElevatedButton(
-  ///   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-  ///   onPressed: () {
-  ///     // ...
-  ///   },
-  ///   child: const Text('Meow'),
-  /// ),
+  /// FilledButton.tonal(
+  ///   style: FilledButton.styleFrom(foregroundColor: Colors.green),
+  ///   onPressed: () {},
+  ///   child: const Text('Filled tonal button'),
+  /// );
   /// ```
-  ///
   static ButtonStyle styleFrom({
     Color? foregroundColor,
     Color? backgroundColor,
@@ -174,41 +222,24 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
-    @Deprecated(
-      'Use backgroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? primary,
-    @Deprecated(
-      'Use foregroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? onPrimary,
-    @Deprecated(
-      'Use disabledForegroundColor and disabledBackgroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? onSurface,
   }) {
-    final Color? background = backgroundColor ?? primary;
-    final Color? disabledBackground = disabledBackgroundColor ?? onSurface?.withOpacity(0.12);
-    final MaterialStateProperty<Color?>? backgroundColorProp = (background == null && disabledBackground == null)
-      ? null
-      : _ElevatedButtonDefaultColor(background, disabledBackground);
-    final Color? foreground = foregroundColor ?? onPrimary;
-    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
-    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
-      ? null
-      : _ElevatedButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? backgroundColorProp =
+      (backgroundColor == null && disabledBackgroundColor == null)
+        ? null
+        : _FilledButtonDefaultColor(backgroundColor, disabledBackgroundColor);
+    final Color? foreground = foregroundColor;
+    final Color? disabledForeground = disabledForegroundColor;
+    final MaterialStateProperty<Color?>? foregroundColorProp =
+      (foreground == null && disabledForeground == null)
+        ? null
+        : _FilledButtonDefaultColor(foreground, disabledForeground);
     final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
-      : _ElevatedButtonDefaultOverlay(foreground);
-    final MaterialStateProperty<double>? elevationValue = (elevation == null)
-      ? null
-      : _ElevatedButtonDefaultElevation(elevation);
-    final MaterialStateProperty<MouseCursor?>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
-      : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
+      : _FilledButtonDefaultOverlay(foreground);
+    final MaterialStateProperty<MouseCursor?>? mouseCursor =
+      (enabledMouseCursor == null && disabledMouseCursor == null)
+        ? null
+        : _FilledButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
@@ -217,7 +248,7 @@ class ElevatedButton extends ButtonStyleButton {
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
-      elevation: elevationValue,
+      elevation: ButtonStyleButton.allOrNull(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
       fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
@@ -233,6 +264,8 @@ class ElevatedButton extends ButtonStyleButton {
       splashFactory: splashFactory,
     );
   }
+
+  final _FilledButtonVariant _variant;
 
   /// Defines the button's default appearance.
   ///
@@ -258,79 +291,23 @@ class ElevatedButton extends ButtonStyleButton {
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
   ///
-  /// ## Material 2 defaults
-  ///
-  /// * `textStyle` - Theme.textTheme.button
-  /// * `backgroundColor`
-  ///   * disabled - Theme.colorScheme.onSurface(0.12)
-  ///   * others - Theme.colorScheme.primary
-  /// * `foregroundColor`
-  ///   * disabled - Theme.colorScheme.onSurface(0.38)
-  ///   * others - Theme.colorScheme.onPrimary
-  /// * `overlayColor`
-  ///   * hovered - Theme.colorScheme.onPrimary(0.08)
-  ///   * focused or pressed - Theme.colorScheme.onPrimary(0.24)
-  /// * `shadowColor` - Theme.shadowColor
-  /// * `elevation`
-  ///   * disabled - 0
-  ///   * default - 2
-  ///   * hovered or focused - 4
-  ///   * pressed - 8
-  /// * `padding`
-  ///   * `textScaleFactor <= 1` - horizontal(16)
-  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
-  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
-  ///   * `3 < textScaleFactor` - horizontal(4)
-  /// * `minimumSize` - Size(64, 36)
-  /// * `fixedSize` - null
-  /// * `maximumSize` - Size.infinite
-  /// * `side` - null
-  /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
-  /// * `visualDensity` - theme.visualDensity
-  /// * `tapTargetSize` - theme.materialTapTargetSize
-  /// * `animationDuration` - kThemeChangeDuration
-  /// * `enableFeedback` - true
-  /// * `alignment` - Alignment.center
-  /// * `splashFactory` - InkRipple.splashFactory
-  ///
-  /// The default padding values for the [ElevatedButton.icon] factory are slightly different:
-  ///
-  /// * `padding`
-  ///   * `textScaleFactor <= 1` - start(12) end(16)
-  ///   * `1 < textScaleFactor <= 2` - lerp(start(12) end(16), horizontal(8))
-  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
-  ///   * `3 < textScaleFactor` - horizontal(4)
-  ///
-  /// The default value for `side`, which defines the appearance of the button's
-  /// outline, is null. That means that the outline is defined by the button
-  /// shape's [OutlinedBorder.side]. Typically the default value of an
-  /// [OutlinedBorder]'s side is [BorderSide.none], so an outline is not drawn.
-  ///
-  /// ## Material 3 defaults
-  ///
-  /// If [ThemeData.useMaterial3] is set to true the following defaults will
-  /// be used:
-  ///
   /// * `textStyle` - Theme.textTheme.labelLarge
   /// * `backgroundColor`
   ///   * disabled - Theme.colorScheme.onSurface(0.12)
-  ///   * others - Theme.colorScheme.surface
+  ///   * others - Theme.colorScheme.secondaryContainer
   /// * `foregroundColor`
   ///   * disabled - Theme.colorScheme.onSurface(0.38)
-  ///   * others - Theme.colorScheme.primary
+  ///   * others - Theme.colorScheme.onSecondaryContainer
   /// * `overlayColor`
-  ///   * hovered - Theme.colorScheme.primary(0.08)
-  ///   * focused or pressed - Theme.colorScheme.primary(0.12)
+  ///   * hovered - Theme.colorScheme.onSecondaryContainer(0.08)
+  ///   * focused or pressed - Theme.colorScheme.onSecondaryContainer(0.12)
   /// * `shadowColor` - Theme.colorScheme.shadow
-  /// * `surfaceTintColor` - Theme.colorScheme.surfaceTint
+  /// * `surfaceTintColor` - null
   /// * `elevation`
   ///   * disabled - 0
-  ///   * default - 1
-  ///   * hovered - 3
-  ///   * focused or pressed - 1
+  ///   * default - 0
+  ///   * hovered - 1
+  ///   * focused or pressed - 0
   /// * `padding`
   ///   * `textScaleFactor <= 1` - horizontal(16)
   ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
@@ -350,41 +327,35 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  ///
+  /// The default padding values for the [FilledButton.icon] factory are slightly different:
+  ///
+  /// * `padding`
+  ///   * `textScaleFactor <= 1` - start(12) end(16)
+  ///   * `1 < textScaleFactor <= 2` - lerp(start(12) end(16), horizontal(8))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
+  ///   * `3 < textScaleFactor` - horizontal(4)
+  ///
+  /// The default value for `side`, which defines the appearance of the button's
+  /// outline, is null. That means that the outline is defined by the button
+  /// shape's [OutlinedBorder.side]. Typically the default value of an
+  /// [OutlinedBorder]'s side is [BorderSide.none], so an outline is not drawn.
+  ///
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return Theme.of(context).useMaterial3
-      ? _ElevatedButtonDefaultsM3(context)
-      : styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
-          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-          shadowColor: theme.shadowColor,
-          elevation: 2,
-          textStyle: theme.textTheme.labelLarge,
-          padding: _scaledPadding(context),
-          minimumSize: const Size(64, 36),
-          maximumSize: Size.infinite,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-          enabledMouseCursor: SystemMouseCursors.click,
-          disabledMouseCursor: SystemMouseCursors.basic,
-          visualDensity: theme.visualDensity,
-          tapTargetSize: theme.materialTapTargetSize,
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: Alignment.center,
-          splashFactory: InkRipple.splashFactory,
-        );
+    switch (_variant) {
+      case _FilledButtonVariant.filled:
+        return _FilledButtonDefaultsM3(context);
+      case _FilledButtonVariant.tonal:
+        return _FilledTonalButtonDefaultsM3(context);
+    }
   }
 
-  /// Returns the [ElevatedButtonThemeData.style] of the closest
-  /// [ElevatedButtonTheme] ancestor.
+  /// Returns the [FilledButtonThemeData.style] of the closest
+  /// [FilledButtonTheme] ancestor.
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
-    return ElevatedButtonTheme.of(context).style;
+    return FilledButtonTheme.of(context).style;
   }
 }
 
@@ -398,8 +369,8 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 }
 
 @immutable
-class _ElevatedButtonDefaultColor extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultColor(this.color, this.disabled);
+class _FilledButtonDefaultColor extends MaterialStateProperty<Color?> with Diagnosticable {
+  _FilledButtonDefaultColor(this.color, this.disabled);
 
   final Color? color;
   final Color? disabled;
@@ -414,8 +385,8 @@ class _ElevatedButtonDefaultColor extends MaterialStateProperty<Color?> with Dia
 }
 
 @immutable
-class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
-  _ElevatedButtonDefaultOverlay(this.overlay);
+class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
+  _FilledButtonDefaultOverlay(this.overlay);
 
   final Color overlay;
 
@@ -425,39 +396,15 @@ class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
       return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.24);
+      return overlay.withOpacity(0.12);
     }
     return null;
   }
 }
 
 @immutable
-class _ElevatedButtonDefaultElevation extends MaterialStateProperty<double> with Diagnosticable {
-  _ElevatedButtonDefaultElevation(this.elevation);
-
-  final double elevation;
-
-  @override
-  double resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return 0;
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return elevation + 2;
-    }
-    if (states.contains(MaterialState.focused)) {
-      return elevation + 2;
-    }
-    if (states.contains(MaterialState.pressed)) {
-      return elevation + 6;
-    }
-    return elevation;
-  }
-}
-
-@immutable
-class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
-  _ElevatedButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
+class _FilledButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
+  _FilledButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
   final MouseCursor? enabledCursor;
   final MouseCursor? disabledCursor;
@@ -471,8 +418,8 @@ class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
   }
 }
 
-class _ElevatedButtonWithIcon extends ElevatedButton {
-  _ElevatedButtonWithIcon({
+class _FilledButtonWithIcon extends FilledButton {
+  _FilledButtonWithIcon({
     super.key,
     required super.onPressed,
     super.onLongPress,
@@ -489,8 +436,28 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
        super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _ElevatedButtonWithIconChild(icon: icon, label: label),
+         child: _FilledButtonWithIconChild(icon: icon, label: label)
       );
+
+  _FilledButtonWithIcon.tonal({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
+    required Widget icon,
+    required Widget label,
+  }) : assert(icon != null),
+       assert(label != null),
+       super.tonal(
+         autofocus: autofocus ?? false,
+         clipBehavior: clipBehavior ?? Clip.none,
+         child: _FilledButtonWithIconChild(icon: icon, label: label)
+       );
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
@@ -506,8 +473,8 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
   }
 }
 
-class _ElevatedButtonWithIconChild extends StatelessWidget {
-  const _ElevatedButtonWithIconChild({ required this.label, required this.icon });
+class _FilledButtonWithIconChild extends StatelessWidget {
+  const _FilledButtonWithIconChild({ required this.label, required this.icon });
 
   final Widget label;
   final Widget icon;
@@ -515,6 +482,8 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    // Adjust the gap based on the text scale factor. Start at 8, and lerp
+    // to 4 based on how large the text is.
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -523,7 +492,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES - ElevatedButton
+// BEGIN GENERATED TOKEN PROPERTIES - FilledButton
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -532,8 +501,8 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 
 // Token database version: v0_101
 
-class _ElevatedButtonDefaultsM3 extends ButtonStyle {
-  _ElevatedButtonDefaultsM3(this.context)
+class _FilledButtonDefaultsM3 extends ButtonStyle {
+  _FilledButtonDefaultsM3(this.context)
    : super(
        animationDuration: kThemeChangeDuration,
        enableFeedback: true,
@@ -553,7 +522,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
-      return _colors.surface;
+      return _colors.primary;
     });
 
   @override
@@ -562,20 +531,20 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      return _colors.primary;
+      return _colors.onPrimary;
     });
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
-        return _colors.primary.withOpacity(0.08);
+        return _colors.onPrimary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.12);
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.12);
       }
       return null;
     });
@@ -584,9 +553,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color>? get shadowColor =>
     ButtonStyleButton.allOrNull<Color>(_colors.shadow);
 
-  @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
-    ButtonStyleButton.allOrNull<Color>(_colors.surfaceTint);
+  // No default surface tint color
 
   @override
   MaterialStateProperty<double>? get elevation =>
@@ -595,15 +562,15 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
         return 0.0;
       }
       if (states.contains(MaterialState.hovered)) {
-        return 3.0;
+        return 1.0;
       }
       if (states.contains(MaterialState.focused)) {
-        return 1.0;
+        return 0.0;
       }
       if (states.contains(MaterialState.pressed)) {
-        return 1.0;
+        return 0.0;
       }
-      return 1.0;
+      return 0.0;
     });
 
   @override
@@ -645,4 +612,126 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
 
-// END GENERATED TOKEN PROPERTIES - ElevatedButton
+// END GENERATED TOKEN PROPERTIES - FilledButton
+
+// BEGIN GENERATED TOKEN PROPERTIES - FilledTonalButton
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
+  _FilledTonalButtonDefaultsM3(this.context)
+   : super(
+       animationDuration: kThemeChangeDuration,
+       enableFeedback: true,
+       alignment: Alignment.center,
+     );
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  MaterialStateProperty<TextStyle?> get textStyle =>
+    MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+
+  @override
+  MaterialStateProperty<Color?>? get backgroundColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      return _colors.secondaryContainer;
+    });
+
+  @override
+  MaterialStateProperty<Color?>? get foregroundColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      return _colors.onSecondaryContainer;
+    });
+
+  @override
+  MaterialStateProperty<Color?>? get overlayColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSecondaryContainer.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSecondaryContainer.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSecondaryContainer.withOpacity(0.12);
+      }
+      return null;
+    });
+
+  @override
+  MaterialStateProperty<Color>? get shadowColor =>
+    ButtonStyleButton.allOrNull<Color>(_colors.shadow);
+
+  // No default surface tint color
+
+  @override
+  MaterialStateProperty<double>? get elevation =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return 0.0;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return 1.0;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return 0.0;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return 0.0;
+      }
+      return 0.0;
+    });
+
+  @override
+  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
+
+  @override
+  MaterialStateProperty<Size>? get minimumSize =>
+    ButtonStyleButton.allOrNull<Size>(const Size(64.0, 40.0));
+
+  // No default fixedSize
+
+  @override
+  MaterialStateProperty<Size>? get maximumSize =>
+    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+
+  // No default side
+
+  @override
+  MaterialStateProperty<OutlinedBorder>? get shape =>
+    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+
+  @override
+  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return SystemMouseCursors.click;
+    });
+
+  @override
+  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+
+  @override
+  MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+}
+
+// END GENERATED TOKEN PROPERTIES - FilledTonalButton
