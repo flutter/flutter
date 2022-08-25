@@ -61,7 +61,9 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    this.alignPanAxis = PanAxis.both,
+    @Deprecated('This property is no longer used, please use panAxis. ')
+    this.alignPanAxis = false,
+    this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
@@ -76,7 +78,7 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     required Widget this.child,
-  }) : assert(alignPanAxis != null),
+  }) : assert(panAxis != null),
        assert(child != null),
        assert(constrained != null),
        assert(minScale != null),
@@ -108,7 +110,9 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    this.alignPanAxis = PanAxis.both,
+    @Deprecated('This property is no longer used, please use panAxis. ')
+    this.alignPanAxis = false,
+    this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     // These default scale values were eyeballed as reasonable limits for common
     // use cases.
@@ -122,7 +126,7 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     required InteractiveViewerWidgetBuilder this.builder,
-  }) : assert(alignPanAxis != null),
+  }) : assert(panAxis != null),
        assert(builder != null),
        assert(minScale != null),
        assert(minScale > 0),
@@ -152,17 +156,34 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// This property is deprecated, please use [panAxis] instead.
+  ///
+  /// If true, panning is only allowed in the direction of the horizontal axis
+  /// or the vertical axis.
+  ///
+  /// In other words, when this is true, diagonal panning is not allowed. A
+  /// single gesture begun along one axis cannot also cause panning along the
+  /// other axis without stopping and beginning a new gesture. This is a common
+  /// pattern in tables where data is displayed in columns and rows.
+  ///
+  /// See also:
+  ///  * [constrained], which has an example of creating a table that uses
+  ///    alignPanAxis.
+  @Deprecated('This property is no longer used, please use panAxis. ')
+  final bool alignPanAxis;
+
   /// When set to [PanAxis.aligned] panning is only allowed in the horizontal
-  /// axis or the vertical axis, diagonal panning not allowed.
+  /// axis or the vertical axis, diagonal panning is not allowed.
   ///
   /// When set to [PanAxis.vertical] or [PanAxis.horizontal] panning is only
-  /// allowed in the specified axis. For example, if set to [PanAxis.vertical]
-  /// if you try to pan in the horizontal axis the InteractiveViewer will not
-  /// pan. And if you try to pan in diagonal directions the InteractiveViewer will
-  /// only pan in the vertical direction.
+  /// allowed in the specified axis. For example, if set to [PanAxis.vertical],
+  /// panning will only be allowed in the vertical axis. And if set to [PanAxis.horizontal],
+  /// panning will only be allowed in the horizontal axis.
   ///
-  /// Defaults to [PanAxis.both].
-  final PanAxis alignPanAxis;
+  /// When set to [PanAxis.free] panning is allowed in all directions.
+  ///
+  /// Defaults to [PanAxis.free].
+  final PanAxis panAxis;
 
   /// A margin for the visible boundaries of the child.
   ///
@@ -562,7 +583,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     late final Offset alignedTranslation;
 
     if (_panAxis != null) {
-      switch(widget.alignPanAxis){
+      switch(widget.panAxis){
         case PanAxis.horizontal:
           alignedTranslation = _alignAxis(translation, Axis.horizontal);
           break;
@@ -572,7 +593,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         case PanAxis.aligned:
           alignedTranslation = _alignAxis(translation, _panAxis!);
           break;
-        case PanAxis.both:
+        case PanAxis.free:
           alignedTranslation = translation;
           break;
       }
@@ -1310,16 +1331,16 @@ Axis? _getPanAxis(Offset point1, Offset point2) {
 /// This enum is used to specify the behavior of the [InteractiveViewer] when
 /// the user drags the viewport.
 enum PanAxis{
-  /// The user can pan the viewport along the horizontal axis.
+  /// The user can only pan the viewport along the horizontal axis.
   horizontal,
 
-  /// The user can pan the viewport along the vertical axis.
+  /// The user can only pan the viewport along the vertical axis.
   vertical,
 
-  /// The user can pan the viewport along the horizontal and vertical axes but
-  /// not diagonally.
+  /// The user can pan the viewport along the horizontal and vertical axes
+  /// but not diagonally.
   aligned,
 
-  /// The user can pan the viewport along both the horizontal and vertical axes.
-  both,
+  /// The user can pan the viewport freely in any direction.
+  free,
 }
