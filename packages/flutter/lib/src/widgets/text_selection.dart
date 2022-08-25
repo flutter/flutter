@@ -2477,72 +2477,78 @@ class TextSelectionGestureDetectorBuilder {
         );
       }
 
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-          // With a touch device, nothing should happen, unless there was a double tap, or
-          // there was a collapsed selection, and the tap/drag position is at the collapsed selection.
-          // In that case the caret should move with the drag position.
-          //
-          // With a mouse device, a drag should select the range from the origin of the drag
-          // to the current position of the drag.
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.trackpad:
-              return renderEditable.selectPositionAt(
-                from: dragStartGlobalPosition - startOffset,
-                to: details.globalPosition,
-                cause: SelectionChangedCause.drag,
-              );
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-              if(renderEditable.hasFocus
-                  && editableText.textEditingValue.selection.isCollapsed
-                  && _lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)
-              ) {
-                print('hi from drag for ios');
-                return renderEditable.selectPositionAt(
-                  from: details.globalPosition,
-                  cause: SelectionChangedCause.drag,
-                );
-              } else {
-                print('guess that didnt work ${renderEditable.hasFocus}, ${editableText.textEditingValue.selection.isCollapsed}, ${_lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)}');
-              }
-          }
-          return;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          // With a touch device, the cursor should move with the drag.
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.trackpad:
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-              return renderEditable.selectPositionAt(
-                from: dragStartGlobalPosition - editableOffset - scrollableOffset,
-                to: details.globalPosition,
-                cause: SelectionChangedCause.drag,
-              );
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-              if (renderEditable.hasFocus) {
-                return renderEditable.selectPositionAt(
-                  from: details.globalPosition,
-                  cause: SelectionChangedCause.drag,
-                );
-              }
-          }
-          return;
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          return renderEditable.selectPositionAt(
-            from: dragStartGlobalPosition - editableOffset - scrollableOffset,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.drag,
-          );
-      }
+      return renderEditable.selectPositionAt(
+        from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+        to: details.globalPosition,
+        cause: SelectionChangedCause.drag,
+      );
+
+      // switch (defaultTargetPlatform) {
+      //   case TargetPlatform.iOS:
+      //     // With a touch device, nothing should happen, unless there was a double tap, or
+      //     // there was a collapsed selection, and the tap/drag position is at the collapsed selection.
+      //     // In that case the caret should move with the drag position.
+      //     //
+      //     // With a mouse device, a drag should select the range from the origin of the drag
+      //     // to the current position of the drag.
+      //     switch (details.kind) {
+      //       case PointerDeviceKind.mouse:
+      //       case PointerDeviceKind.trackpad:
+      //         return renderEditable.selectPositionAt(
+      //           from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+      //           to: details.globalPosition,
+      //           cause: SelectionChangedCause.drag,
+      //         );
+      //       case PointerDeviceKind.stylus:
+      //       case PointerDeviceKind.invertedStylus:
+      //       case PointerDeviceKind.touch:
+      //       case PointerDeviceKind.unknown:
+      //         if(renderEditable.hasFocus
+      //             && editableText.textEditingValue.selection.isCollapsed
+      //             && _lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)
+      //         ) {
+      //           print('hi from drag for ios');
+      //           return renderEditable.selectPositionAt(
+      //             from: details.globalPosition,
+      //             cause: SelectionChangedCause.drag,
+      //           );
+      //         } else {
+      //           print('guess that didnt work ${renderEditable.hasFocus}, ${editableText.textEditingValue.selection.isCollapsed}, ${_lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)}');
+      //         }
+      //     }
+      //     return;
+      //   case TargetPlatform.android:
+      //   case TargetPlatform.fuchsia:
+      //     // With a touch device, the cursor should move with the drag.
+      //     switch (details.kind) {
+      //       case PointerDeviceKind.mouse:
+      //       case PointerDeviceKind.trackpad:
+      //       case PointerDeviceKind.stylus:
+      //       case PointerDeviceKind.invertedStylus:
+      //         return renderEditable.selectPositionAt(
+      //           from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+      //           to: details.globalPosition,
+      //           cause: SelectionChangedCause.drag,
+      //         );
+      //       case PointerDeviceKind.touch:
+      //       case PointerDeviceKind.unknown:
+      //         if (renderEditable.hasFocus) {
+      //           return renderEditable.selectPositionAt(
+      //             from: details.globalPosition,
+      //             cause: SelectionChangedCause.drag,
+      //           );
+      //         }
+      //     }
+      //     return;
+      //   case TargetPlatform.macOS:
+      //   case TargetPlatform.linux:
+      //   case TargetPlatform.windows:
+      //     return renderEditable.selectPositionAt(
+      //       from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+      //       to: details.globalPosition,
+      //       cause: SelectionChangedCause.drag,
+      //     );
+      // }
     }
 
     if (_shiftTapDragSelection!.isCollapsed
