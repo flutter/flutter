@@ -144,9 +144,9 @@ class WebDriverService extends DriverService {
     late async_io.WebDriver webDriver;
     final Browser browser = _browserNameToEnum(browserName);
     try {
-      Map<String, dynamic>? desiredCapabilities;
-      if (allBrowsersDesiredCapabilities!=null) {
-        desiredCapabilities = allBrowsersDesiredCapabilities[browser] as Map<String, dynamic>;
+      Map<String, Object?>? desiredCapabilities;
+      if (allBrowsersDesiredCapabilities != null) {
+        desiredCapabilities = allBrowsersDesiredCapabilities[browser] as Map<String, Object?>;
       } else {
         desiredCapabilities = getDesiredCapabilities(
           browser,

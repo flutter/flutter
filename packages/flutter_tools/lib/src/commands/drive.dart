@@ -153,7 +153,7 @@ class DriveCommand extends RunCommandBase {
           valueHelp: 'desired_capabilities.json');
   }
 
-  // `pubget` must always be run due to the test script running from source,
+  // `pub` must always be run due to the test script running from source,
   // even if an application binary is used. Default to true unless the user explicitly
   // specified not to.
   @override
@@ -277,10 +277,10 @@ class DriveCommand extends RunCommandBase {
       // Extract desiredCapabilities from file if specifying --web-desired-capablities-from-file
       final String? desiredCapabilitiesJsonFilePath =
           stringArg('web-desired-capabilities-from-file');
-      Map<String, dynamic>? desiredCapabilitiesJsonMap;
-      if (desiredCapabilitiesJsonFilePath!=null && globals.fs.isFileSync(desiredCapabilitiesJsonFilePath)) {
-        final String desiredCapabilitiesJsonRaw = globals.fs.file(desiredCapabilitiesJsonFilePath).readAsStringSync();
-        desiredCapabilitiesJsonMap = json.decode(desiredCapabilitiesJsonRaw) as Map<String, dynamic>;
+      Map<String, Object?>? desiredCapabilitiesJsonMap;
+      if (desiredCapabilitiesJsonFilePath!=null && _fileSystem.isFileSync(desiredCapabilitiesJsonFilePath)) {
+        final String desiredCapabilitiesJsonRaw = _fileSystem.file(desiredCapabilitiesJsonFilePath).readAsStringSync();
+        desiredCapabilitiesJsonMap = json.decode(desiredCapabilitiesJsonRaw) as Map<String, Object?>;
       }
       final int testResult = await driverService.startTest(
         testFile,

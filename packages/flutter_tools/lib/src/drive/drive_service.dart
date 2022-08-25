@@ -100,7 +100,7 @@ abstract class DriverService {
     List<String> webBrowserFlags,
     List<String>? browserDimension,
     String? profileMemory,
-    Map<String, dynamic>? allBrowsersDesiredCapabilities,
+    Map<String, Object?>? allBrowsersDesiredCapabilities,
   });
 
   /// Stop the running application and uninstall it from the device.
@@ -259,7 +259,7 @@ class FlutterDriverService extends DriverService {
     List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
     String? profileMemory,
-    Map<String, dynamic>? allBrowsersDesiredCapabilities,
+    Map<String, Object?>? allBrowsersDesiredCapabilities,
   }) async {
     if (profileMemory != null) {
       unawaited(_devtoolsLauncher.launch(
