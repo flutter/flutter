@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/process.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
@@ -40,26 +41,36 @@ class FormatCommand extends FlutterCommand {
       'format',
     ];
     final List<String> rest = argResults?.rest ?? <String>[];
-    if (rest.isEmpty) {
-      globals.printError(
-        'No files specified to be formatted.'
-      );
+    if (rest.isEmpty || onlyHasOptions(rest)) {
+      globals.printError('No files specified to be formatted.');
       command.add('-h');
     } else {
       command.addAll(<String>[
         for (String arg in rest)
-          if (arg == '--dry-run' || arg == '-n')
-            '--output=none'
-          else
-            arg,
+          if (arg == '--dry-run' || arg == '-n') '--output=none' else arg,
       ]);
     }
 
-    final int result = await globals.processUtils.stream(command);
-    if (result != 0) {
-      throwToolExit('Formatting failed: $result', exitCode: result);
+    final RunResult result = globals.processUtils.runSync(command);
+    if (result.exitCode != 0) {
+      throwToolExit('Formatting failed: ${result.stderr}', exitCode: result.exitCode);
+    } else {
+      globals.logger.printStatus(result.stdout);
     }
 
     return FlutterCommandResult.success();
+  }
+
+  bool onlyHasOptions(List<String> allOptions) {
+    if (allOptions.contains('--help') || allOptions.contains('-h')) {
+      return false;
+    }
+
+    for (final String option in allOptions) {
+      if (!option.startsWith('--') && !option.startsWith('-')) {
+        return false;
+      }
+    }
+    return true;
   }
 }
