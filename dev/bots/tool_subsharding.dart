@@ -9,24 +9,26 @@ class TestSpecs {
 
   TestSpecs({
     required this.path,
-    required this.milliseconds,
-    required this.success,
+    required this.startTime,
   });
 
-  factory TestSpecs.fromMap(Map<String, dynamic> entry) {
-    final String path = entry['path'] as String;
-    final int milliseconds = entry['ms'] as int;
-    final bool success = entry['success'] as bool;
+  final String path;
+  int startTime;
+  int? _endTime;
 
-    return TestSpecs(path: path, milliseconds: milliseconds, success: success);
+  int get milliseconds {
+    return endTime - startTime;
   }
 
-  final String path;
-  final int milliseconds;
-  final bool success;
+  void set endTime(int value) {
+    _endTime = value;
+  }
 
-  static TestSpecs get empty {
-    return TestSpecs(path: '', milliseconds: 0, success: false);
+  int get endTime {
+    if (_endTime == null) {
+      return 0;
+    }
+    return _endTime!;
   }
 }
 
@@ -83,9 +85,6 @@ List<TestSpecsCluster> buildClusters(List<TestSpecs> allFileSpecs) {
 
 List<TestSpecsCluster> makeClusters(List<dynamic> shardResult) {
   final List<TestSpecs> allFileSpecs = <TestSpecs>[];
-  for (final dynamic entry in shardResult) {
-    allFileSpecs.add(TestSpecs.fromMap(entry as Map<String, dynamic>));
-  }
   final List<TestSpecsCluster> allClusters = buildClusters(allFileSpecs);
   return allClusters;
 }
@@ -125,4 +124,44 @@ void writeJsonTestsSubShardFile(Map<String, dynamic> map, String fileName) {
 Map<String, dynamic> readJsonTestsSubShardFile(String fileName) {
   final File file = File(fileName);
   return json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+}
+
+/// Intended to parse the output file of `dart test --file-reporter json:file_name
+Map<int, TestSpecs> generateMetrics(File metrics) {
+  final Map<int, TestSpecs> allTestSpecs = <int, TestSpecs>{};
+  if (!metrics.existsSync()) {
+    return allTestSpecs;
+  }
+  bool success = false;
+
+  for(final String metric in metrics.readAsLinesSync()) {
+    final Map<String, dynamic> entry = json.decode(metric) as Map<String, dynamic>;
+    if (entry.containsKey('suite')) {
+      final Map<dynamic, dynamic> suite = entry['suite'] as Map<dynamic, dynamic>;
+      allTestSpecs[suite['id'] as int] = TestSpecs(
+        path: suite['path'] as String,
+        startTime: entry['time'] as int,
+      );
+    } else if (isMetricDone(entry, allTestSpecs)) {
+      final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
+      final int suiteID = group['suiteID'] as int;
+      final TestSpecs testSpec = allTestSpecs[suiteID]!;
+      testSpec.endTime = entry['time'] as int;
+    } else if (entry.containsKey('success') && entry['success'] == true) {
+      success = true;
+    }
+  }
+
+  if (!success) { // means that not all tests succeeded therefore no metrics are stored
+    return <int, TestSpecs>{};
+  }
+  return allTestSpecs;
+}
+
+bool isMetricDone(Map<String, dynamic> entry, Map<int, TestSpecs> allTestSpecs) {
+  if (entry.containsKey('group') && entry['type'] as String == 'group') {
+    final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
+    return allTestSpecs.containsKey(group['suiteID'] as int);
+  }
+  return false;
 }

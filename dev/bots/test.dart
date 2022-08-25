@@ -63,6 +63,7 @@ import 'package:path/path.dart' as path;
 import 'browser.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
+import 'tool_subsharding.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -417,7 +418,7 @@ Future<void> _runGeneralToolTests() async {
     // This overrides the 15 minute default for tools tests.
     // See the README.md and dart_test.yaml files in the flutter_tools package.
     perTestTimeout: const Duration(seconds: 2),
-    flag: true,
+    collectMetrics: true,
   );
 }
 
@@ -457,6 +458,7 @@ Future<void> _runIntegrationToolTests() async {
     _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
   );
 }
 
@@ -1727,7 +1729,7 @@ Future<void> _runDartTest(String workingDirectory, {
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
-  bool flag = false,
+  bool collectMetrics = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1763,8 +1765,8 @@ Future<void> _runDartTest(String workingDirectory, {
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
-    if (flag)
-      '--file-reporter=json:my_file.json',
+    if (collectMetrics)
+      '--file-reporter=json:$platformName.json',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
@@ -1789,6 +1791,27 @@ Future<void> _runDartTest(String workingDirectory, {
     environment: environment,
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
+
+  if (collectMetrics) {
+    const LocalFileSystem fs = LocalFileSystem();
+    final File metricFile = fs.file('$platformName.json');
+    final Map<int, TestSpecs> testSpecs = generateMetrics(metricFile);
+    print(testSpecs.length);
+  }
+}
+
+String get platformName {
+  if (Platform.isWindows) {
+    return 'windows';
+  }
+  if(Platform.isMacOS) {
+    return 'mac';
+  }
+  if (Platform.isLinux) {
+    return 'linux';
+  }
+
+  return Platform.operatingSystem;
 }
 
 Future<void> _runFlutterTest(String workingDirectory, {
