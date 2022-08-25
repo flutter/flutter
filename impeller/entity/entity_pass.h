@@ -116,12 +116,13 @@ class EntityPass {
   size_t stencil_depth_ = 0u;
   Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;
   bool cover_whole_screen = false;
-  /// This flag is set to `true` whenever an entity is added to the pass that
-  /// requires reading the pass texture during rendering. This can happen in the
-  /// following scenarios:
+
+  /// This value is incremented whenever something is added to the pass that
+  /// requires reading from the backdrop texture. Currently, this can happen in
+  /// the following scenarios:
   ///   1. An entity with an "advanced blend" is added to the pass.
   ///   2. A subpass with a backdrop filter is added to the pass.
-  bool reads_from_pass_texture_ = false;
+  uint32_t reads_from_pass_texture_ = 0;
 
   std::optional<BackdropFilterProc> backdrop_filter_proc_ = std::nullopt;
 
