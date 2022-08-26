@@ -109,10 +109,12 @@ class DragStartDetails {
   String toString() => '${objectRuntimeType(this, 'DragStartDetails')}($globalPosition)';
 }
 
+/// {@template flutter.gestures.dragdetails.GestureDragStartCallback}
 /// Signature for when a pointer has contacted the screen and has begun to move.
 ///
 /// The `details` object provides the position of the touch when it first
 /// touched the surface.
+/// {@endtemplate}
 ///
 /// See [DragGestureRecognizer.onStart].
 typedef GestureDragStartCallback = void Function(DragStartDetails details);
@@ -213,11 +215,13 @@ class DragUpdateDetails {
   String toString() => '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';
 }
 
+/// {@template flutter.gestures.dragdetails.GestureDragUpdateCallback}
 /// Signature for when a pointer that is in contact with the screen and moving
 /// has moved again.
 ///
 /// The `details` object provides the position of the touch and the distance it
 /// has traveled since the last update.
+/// {@endtemplate}
 ///
 /// See [DragGestureRecognizer.onUpdate].
 typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
