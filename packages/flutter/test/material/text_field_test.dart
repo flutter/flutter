@@ -2124,12 +2124,9 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    final Offset fPos = textOffsetToPosition(tester, testValue.indexOf('f'));
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
-    await tester.pump();
-    await gesture.moveTo(fPos);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
