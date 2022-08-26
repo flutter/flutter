@@ -41,7 +41,9 @@ class FormatCommand extends FlutterCommand {
       'format',
     ];
     final List<String> rest = argResults?.rest ?? <String>[];
-    if (rest.isEmpty || onlyHasOptions(rest)) {
+    if (rest.length == 1 && rest.first == '-h' || rest.first == '--help') {
+      command.add('-h');
+    } else if (rest.isEmpty || _onlyHasOptions(rest)) {
       globals.printError('No files specified to be formatted.');
       command.add('-h');
     } else {
@@ -61,13 +63,10 @@ class FormatCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  bool onlyHasOptions(List<String> allOptions) {
-    if (allOptions.contains('--help') || allOptions.contains('-h')) {
-      return false;
-    }
-
-    for (final String option in allOptions) {
-      if (!option.startsWith('--') && !option.startsWith('-')) {
+  /// Checks if arguments has at least a directory or a path
+  bool _onlyHasOptions(List<String> arguments) {
+    for (final String argument in arguments) {
+      if (!argument.startsWith('--') && !argument.startsWith('-')) {
         return false;
       }
     }
