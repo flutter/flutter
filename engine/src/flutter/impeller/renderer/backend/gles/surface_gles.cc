@@ -58,6 +58,7 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(std::shared_ptr<Context> context,
   RenderTarget render_target_desc;
 
   render_target_desc.SetColorAttachment(color0, 0u);
+  render_target_desc.SetStencilAttachment(stencil0);
 
   return std::unique_ptr<SurfaceGLES>(
       new SurfaceGLES(std::move(swap_callback), std::move(render_target_desc)));
