@@ -2466,13 +2466,13 @@ targets:
       - .ci.yaml
 
   - name: Mac flutter_gallery_macos__compile
-    bringup: true # New target https://github.com/flutter/flutter/issues/109633
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13f17a"}
+          {"dependency": "xcode", "version": "13f17a"},
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
         ["devicelab", "hostonly"]
