@@ -80,11 +80,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   DragStartBehavior dragStartBehavior;
 
-  GestureTapCallback? onSecondaryTap;
-
   GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
 
   GestureTapDownCallback? onSecondaryTapDown;
+
+  GestureTapCallback? onSecondaryTap;
 
   GestureDragStartWithConsecutiveTapCountCallback? onStart;
 
