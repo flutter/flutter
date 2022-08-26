@@ -29,6 +29,17 @@ platform_properties:
       os: Ubuntu
       cores: "8"
       device_type: none
+  linux_build_test:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      os: Ubuntu
+      cores: "8"
+      device_type: none
   linux_android:
     properties:
       dependencies: >-
@@ -1922,14 +1933,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: new_gallery__transition_perf
 
-  - name: Linux_android flutter_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
+  - name: Linux_build_test flutter_gallery__transition_perf
+    recipe: devicelab/devicelab_drone_build_test
+    bringup: true # New target https://github.com/flutter/flutter/issues/103542
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf
+      artifact: gallery_app_profile
 
   - name: Linux_android flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone
