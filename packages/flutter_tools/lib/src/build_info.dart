@@ -36,7 +36,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    Map<String, dynamic>? defineConfigJsonMap,
+    this.dartDefineConfigJsonMap,
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
@@ -48,7 +48,6 @@ class BuildInfo {
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
        dartDefines = dartDefines ?? const <String>[],
-       defineConfigJsonMap = defineConfigJsonMap ?? const <String, dynamic>{},
        dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
@@ -140,7 +139,7 @@ class BuildInfo {
   ///
   /// An additional field `defineConfigJsonRawValue` is provided to represent the native JSON value of the configuration file
   ///
-  final Map<String, dynamic> defineConfigJsonMap;
+  final Map<String, Object>? dartDefineConfigJsonMap;
 
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
@@ -266,7 +265,7 @@ class BuildInfo {
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     final Map<String, String> map = <String, String>{};
-    defineConfigJsonMap.forEach((String key, dynamic value) {
+    dartDefineConfigJsonMap?.forEach((String key, Object value) {
       map[key] = '$value';
     });
     final Map<String, String> environmentMap = <String, String>{
@@ -312,7 +311,7 @@ class BuildInfo {
   /// on the command line to gradle.
   List<String> toGradleConfig() {
     final List<String> result = <String>[];
-    defineConfigJsonMap.forEach((String key, dynamic value) {
+    dartDefineConfigJsonMap?.forEach((String key, dynamic value) {
       result.add('-P$key=$value');
     });
     // PACKAGE_CONFIG not currently supported.
@@ -340,7 +339,7 @@ class BuildInfo {
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
-    defineConfigJsonMap.forEach((String key, dynamic value) {
+    dartDefineConfigJsonMap?.forEach((String key, Object value) {
       for (final String gradleConf in gradleList) {
         final String item = gradleConf.split('=')[0];
         if (item == '-P$key') {

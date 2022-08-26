@@ -106,7 +106,6 @@ class FlutterOptions {
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
-  static const String kEnableDartDefineFromFileRawValue = 'enable-dart-define-from-file-raw-value';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
@@ -606,11 +605,6 @@ abstract class FlutterCommand extends Command<void> {
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
           'int.fromEnvironment, and double.fromEnvironment constructors;the key is json filed key, the value is json value.',
       valueHelp: 'use-define-config.json'
-    );
-    argParser.addFlag(
-      FlutterOptions.kEnableDartDefineFromFileRawValue,
-      help: 'This is a switch to indicate if you want all raw json data from ${FlutterOptions.kDartDefineFromFileOption}. '
-          'Use const String.fromEnvironment("DEFINE_CONFIG_JSON_RAW_VALUE") can get all config json file raw value.',
     );
   }
 
@@ -1143,24 +1137,15 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines = updateDartDefines(dartDefines, stringArgDeprecated('web-renderer')!);
     }
 
-    Map<String, dynamic>? defineConfigJsonMap;
+    Map<String, Object>? defineConfigJsonMap;
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
       if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
         String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
         configJsonRaw=configJsonRaw.replaceAll(r'\n',r'\\n');
         try {
-          defineConfigJsonMap =
-          json.decode(configJsonRaw) as Map<String, dynamic>;
-          if (argParser.options.containsKey(
-              FlutterOptions.kEnableDartDefineFromFileRawValue)) {
-            if (boolArgDeprecated(
-                FlutterOptions.kEnableDartDefineFromFileRawValue)) {
-              defineConfigJsonMap[kDefineConfigJsonRawValue] =
-                  jsonEncode(defineConfigJsonMap).replaceAll(r'\\n', r'\n');
-            }
-          }
-          defineConfigJsonMap.forEach((String key, dynamic value) {
+          defineConfigJsonMap = json.decode(configJsonRaw) as Map<String, Object>;
+          defineConfigJsonMap.forEach((String key, Object value) {
             dartDefines.add('$key=$value');
           });
         } on FormatException catch (err) {
@@ -1194,7 +1179,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      defineConfigJsonMap: defineConfigJsonMap,
+      dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
