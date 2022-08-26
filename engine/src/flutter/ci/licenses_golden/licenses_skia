@@ -1,4 +1,4 @@
-Signature: e933777748677ea8053fe5f90e5cb119
+Signature: a01d5ffa3cf63d9f7505b4545e35d159
 
 UNUSED LICENSES:
 
@@ -5604,6 +5604,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/render/BitmapTextRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/BitmapTextRenderStep.h
+FILE: ../../../third_party/skia/src/gpu/graphite/render/CommonDepthStencilSettings.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CoverBoundsRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/DynamicInstancesPatchAllocator.h
@@ -5611,7 +5612,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/render/MiddleOutFanRenderStep.c
 FILE: ../../../third_party/skia/src/gpu/graphite/render/MiddleOutFanRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/SDFTextRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/SDFTextRenderStep.h
-FILE: ../../../third_party/skia/src/gpu/graphite/render/StencilAndCoverDSS.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateCurvesRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateCurvesRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/TessellateStrokesRenderStep.cpp
