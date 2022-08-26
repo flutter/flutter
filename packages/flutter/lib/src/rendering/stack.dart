@@ -705,6 +705,8 @@ class RenderIndexedStack extends RenderStack {
     super.children,
     super.alignment,
     super.textDirection,
+    super.fit,
+    super.clipBehavior,
     int? index = 0,
   }) : _index = index;
 

@@ -43,6 +43,14 @@ void main() {
     expect(value.resolve(<MaterialState>{MaterialState.error}), 123);
   });
 
+  test('toString formats correctly', () {
+    const MaterialStateProperty<Color?> colorProperty = MaterialStatePropertyAll<Color?>(Color(0xFFFFFFFF));
+    expect(colorProperty.toString(), equals('MaterialStatePropertyAll(Color(0xffffffff))'));
+
+    const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(33 + 1/3);
+    expect(doubleProperty.toString(), equals('MaterialStatePropertyAll(33.3)'));
+  });
+
   test("Can interpolate between two MaterialStateProperty's", () {
     const MaterialStateProperty<TextStyle?> textStyle1 =  MaterialStatePropertyAll<TextStyle?>(
       TextStyle(fontSize: 14.0),

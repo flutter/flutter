@@ -396,13 +396,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: theme.tileColor));
+    expect(find.byType(Material), paints..rect(color: theme.tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
   });
 
   testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
@@ -438,13 +438,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
