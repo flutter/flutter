@@ -50,10 +50,6 @@ void main() async {
         throw 'Method channel unavailable';
       }
 
-      if (visible == null || visible == false) {
-        throw 'Window should be visible';
-      }
-
       if (visible == true) {
         if (firstFrame) {
           throw 'Window should be hidden on first frame';
