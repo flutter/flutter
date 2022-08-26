@@ -36,6 +36,8 @@ class FilterContents : public Contents {
     float array[20];
   };
 
+  enum class MorphType { kDilate, kErode };
+
   static std::shared_ptr<FilterContents> MakeBlend(
       Entity::BlendMode blend_mode,
       FilterInput::Vector inputs,
@@ -65,6 +67,17 @@ class FilterContents : public Contents {
       Sigma sigma_y,
       BlurStyle blur_style = BlurStyle::kNormal,
       const Matrix& effect_transform = Matrix());
+
+  static std::shared_ptr<FilterContents> MakeDirectionalMorphology(
+      FilterInput::Ref input,
+      Radius radius,
+      Vector2 direction,
+      MorphType morph_type);
+
+  static std::shared_ptr<FilterContents> MakeMorphology(FilterInput::Ref input,
+                                                        Radius radius_x,
+                                                        Radius radius_y,
+                                                        MorphType morph_type);
 
   static std::shared_ptr<FilterContents> MakeColorMatrix(
       FilterInput::Ref input,
