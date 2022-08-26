@@ -296,13 +296,13 @@ class BuildInfo {
       environmentMap.forEach((String key, String value) {
         if (map.containsKey(key)) {
           globals.printWarning(
-              'The key: [$key] already exists, you cannot use environment variables that have been used by the system! ');
+              'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
         }
         // System priority is greater than user priority
         map[key] = value;
       });
       return map;
-    }else{
+    } else {
       return environmentMap;
     }
   }
@@ -344,7 +344,7 @@ class BuildInfo {
         final String item = gradleConf.split('=')[0];
         if (item == '-P$key') {
           globals.printWarning(
-              'The key: [$key] already exists, you cannot use gradle variables that have been used by the system! ');
+              'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
         }
       }
     });

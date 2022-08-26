@@ -582,7 +582,7 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesDartDefineOption({ bool enableDefineConfigJsonFileOption = true}) {
+  void usesDartDefineOption({ bool enableDartDefineConfigJsonFileOption = true}) {
     argParser.addMultiOption(
       FlutterOptions.kDartDefinesOption,
       aliases: <String>[ kDartDefines ], // supported for historical reasons
@@ -593,12 +593,12 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    if (enableDefineConfigJsonFileOption) {
-      useDefineConfigJsonFileOption();
+    if (enableDartDefineConfigJsonFileOption) {
+      useDartDefineConfigJsonFileOption();
     }
   }
 
-  void useDefineConfigJsonFileOption() {
+  void useDartDefineConfigJsonFileOption() {
     argParser.addOption(
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '

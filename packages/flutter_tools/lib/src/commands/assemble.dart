@@ -120,7 +120,7 @@ class AssembleCommand extends FlutterCommand {
         'root of the current Flutter project.',
     );
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    usesDartDefineOption(enableDefineConfigJsonFileOption: false);
+    usesDartDefineOption(enableDartDefineConfigJsonFileOption: false);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
