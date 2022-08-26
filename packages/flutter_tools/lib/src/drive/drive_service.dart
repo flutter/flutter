@@ -290,9 +290,9 @@ class FlutterDriverService extends DriverService {
   }) async {
     if (writeSkslOnExit != null) {
       final FlutterView flutterView = (await _vmService.getFlutterViews()).first;
-      final Map<String, Object> result = await (_vmService.getSkSLs(
+      final Map<String, Object?>? result = await _vmService.getSkSLs(
         viewId: flutterView.id
-      ) as FutureOr<Map<String, Object>>);
+      );
       await sharedSkSlWriter(_device!, result, outputFile: writeSkslOnExit, logger: _logger);
     }
     // If the application package is available, stop and uninstall.
