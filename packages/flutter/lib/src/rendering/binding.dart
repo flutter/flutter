@@ -9,9 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/drag_target.dart';
+import 'package:flutter/widgets.dart';
 
-import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
