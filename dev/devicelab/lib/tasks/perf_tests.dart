@@ -1405,8 +1405,8 @@ class CompileTest {
         }
         // Validate changes in Dart snapshot format and data layout do not
         // change compression size. This also simulates the size of an IPA on iOS.
-        await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
-        releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
+        await exec('tar', <String>['-zcf', 'build/app.tar.gz', appPath]);
+        releaseSizeInBytes = await file('$cwd/build/app.tar.gz').length();
         if (reportPackageContentSizes) {
           final Map<String, Object> sizeMetrics = await getSizesFromDarwinApp(
             appPath: appPath,
