@@ -124,7 +124,7 @@ class _ChipsTile extends StatelessWidget {
                 alignment: Alignment.center,
                 constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
                 padding: const EdgeInsets.all(8.0),
-                child: Text('None', style: Theme.of(context).textTheme.caption!.copyWith(fontStyle: FontStyle.italic)),
+                child: Text('None', style: Theme.of(context).textTheme.bodySmall!.copyWith(fontStyle: FontStyle.italic)),
               ),
             ),
         ],
@@ -318,7 +318,7 @@ class _ChipDemoState extends State<ChipDemo> {
         child: Center(
           child: Text(
             _createResult(),
-            style: theme.textTheme.headline6,
+            style: theme.textTheme.titleLarge,
           ),
         ),
       ),
