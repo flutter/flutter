@@ -3038,6 +3038,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     super.child,
   });
 
+  /// {@template flutter.widgets.basic.OverflowBox.alignment}
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
@@ -3056,6 +3057,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
+  /// {@endtemplate}
   final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
@@ -3133,24 +3135,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   }) : assert(size != null),
        assert(alignment != null);
 
-  /// How to align the child.
-  ///
-  /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively. An x value of -1.0 means that the left edge of
-  /// the child is aligned with the left edge of the parent whereas an x value
-  /// of 1.0 means that the right edge of the child is aligned with the right
-  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.0 means that the center of the child is aligned
-  /// with the center of the parent.
-  ///
-  /// Defaults to [Alignment.center].
-  ///
-  /// See also:
-  ///
-  ///  * [Alignment], a class with convenient constants typically used to
-  ///    specify an [AlignmentGeometry].
-  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
-  ///    relative to text direction.
+  /// {@macro flutter.widgets.basic.OverflowBox.alignment}
   final AlignmentGeometry alignment;
 
   /// The size this widget should attempt to be.
@@ -3178,6 +3163,73 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
+  }
+}
+
+/// A widget that is the size of its child on one or both axes, but passes its
+/// original constraints through to its child, which it may then overflow and be
+/// clipped according to the clip behavior of its parent.
+///
+/// See also:
+///
+///  * [SizedOverflowBox], a widget that is a specific size but passes its
+///    original constraints through to its child, which may then overflow.
+///  * [OverflowBox], A widget that imposes different constraints on its child
+///    than it gets from its parent, possibly allowing the child to overflow the
+///    parent.
+///  * [ConstrainedBox], a widget that imposes additional constraints on its
+///    child.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * [RenderFittedOverflowBox], the render object that implements this
+///    widget's policies in the render tree.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+class FittedOverflowBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget of a given size that lets its child overflow.
+  ///
+  /// The [size] argument must not be null.
+  const FittedOverflowBox({
+    super.key,
+    this.axis,
+    this.alignment = Alignment.center,
+    super.child,
+  });
+
+  /// {@macro flutter.widgets.basic.OverflowBox.alignment}
+  final AlignmentGeometry alignment;
+
+  /// The optional axis this widget should attempt to fit.
+  ///
+  /// If this is null, then it will fit the child size in both directions.
+  ///
+  /// If it is set to an [Axis] direction, it will only fit the child size in
+  /// that direction.
+  ///
+  /// Defaults to null.
+  final Axis? axis;
+
+  @override
+  RenderFittedOverflowBox createRenderObject(BuildContext context) {
+    return RenderFittedOverflowBox(
+      alignment: alignment,
+      axis: axis,
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderFittedOverflowBox renderObject) {
+    renderObject
+      ..alignment = alignment
+      ..axis = axis
+      ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(DiagnosticsProperty<Axis>('axis', axis, defaultValue: null));
   }
 }
 

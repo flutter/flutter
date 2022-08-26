@@ -1038,6 +1038,126 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
+/// A render object that is the size of its child on one or both axes, but
+/// passes its original constraints through to its child, which it may then
+/// overflow and be clipped according to the clip behavior of its parent.
+///
+/// If the child's resulting size differs from this render object's size, then
+/// the child is aligned according to the [alignment] property.
+///
+/// See also:
+///
+///  * [RenderConstraintsTransformBox] for a render object that applies an
+///    arbitrary transform to its constraints before sizing its child using
+///    the new constraints, treating any overflow as error.
+///  * [RenderConstrainedOverflowBox] for a render object that imposes
+///    different constraints on its child than it gets from its parent,
+///    possibly allowing the child to overflow the parent.
+class RenderFittedOverflowBox extends RenderAligningShiftedBox {
+  /// Creates a render box of a given size that lets its child overflow.
+  ///
+  /// The [requestedSize] and [alignment] arguments must not be null.
+  ///
+  /// The [textDirection] argument must not be null if the [alignment] is
+  /// direction-sensitive.
+  RenderFittedOverflowBox({
+    super.child,
+    Axis? axis,
+    super.alignment,
+    super.textDirection,
+  }) : _axis = axis;
+
+  /// The optional axis this widget should attempt to fit.
+  ///
+  /// If this is null, then it will fit the child size in both directions.
+  ///
+  /// If it is set to an [Axis] direction, it will only fit the child size in
+  /// that direction.
+  ///
+  /// Defaults to null.
+  Axis? get axis => _axis;
+  Axis? _axis;
+  set axis(Axis? value) {
+    if (_axis == value) {
+      return;
+    }
+    _axis = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child != null) {
+      return child!.getMinIntrinsicWidth(height);
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child != null) {
+      return child!.getMaxIntrinsicWidth(height);
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child != null) {
+      return child!.getMinIntrinsicHeight(width);
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child != null) {
+      return child!.getMaxIntrinsicHeight(width);
+    }
+    return 0.0;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    if (child != null) {
+      return child!.getDistanceToActualBaseline(baseline);
+    }
+    return super.computeDistanceToActualBaseline(baseline);
+  }
+
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    if (axis == null) {
+      return constraints;
+    }
+    switch (axis!) {
+      case Axis.horizontal:
+        return constraints.heightConstraints();
+      case Axis.vertical:
+        return constraints.widthConstraints();
+    }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final Size childSize = child!.getDryLayout(_getInnerConstraints(constraints));
+    return constraints.constrain(childSize);
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    if (child == null) {
+      size = constraints.smallest;
+    } else {
+      child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+      size = constraints.constrain(child!.size);
+    }
+  }
+}
+
 /// Sizes its child to a fraction of the total available space.
 ///
 /// For both its width and height, this render object imposes a tight
