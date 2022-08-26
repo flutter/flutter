@@ -1404,7 +1404,7 @@ class CompileTest {
           throw 'Failed to find app bundle in ${buildDirectory.path}';
         }
         // Validate changes in Dart snapshot format and data layout do not
-        // change compression size.
+        // change compression size. This also simulates the size of an IPA on iOS.
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
         if (reportPackageContentSizes) {
