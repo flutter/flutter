@@ -323,7 +323,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
     final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
-        ??  defaults.backgroundColor!;
+        ?? defaults.backgroundColor!;
     final Color? surfaceTintColor = widget.surfaceTintColor
         ?? bannerTheme.surfaceTintColor
         ?? defaults.surfaceTintColor;
@@ -368,7 +368,6 @@ class _MaterialBannerState extends State<MaterialBanner> {
             ),
             if (!isSingleRow)
               buttonBar,
-
             if (elevation == 0)
               Divider(height: 0, color: dividerColor),
           ],
