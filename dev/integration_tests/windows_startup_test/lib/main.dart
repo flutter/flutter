@@ -38,6 +38,8 @@ void main() async {
     const MethodChannel methodChannel =
         MethodChannel('tests.flutter.dev/windows_startup_test');
 
+    // TODO(loic-sharma): Make the window invisible until after the first frame.
+    // https://github.com/flutter/flutter/issues/41980
     final bool? visible = await methodChannel.invokeMethod('isWindowVisible');
     if (visible == null || visible == false) {
       throw 'Window should be visible at startup';
