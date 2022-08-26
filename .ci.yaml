@@ -2417,7 +2417,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "13f17a"}
+          {"dependency": "xcode", "version": "13f17a"},
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
         ["devicelab", "hostonly"]
