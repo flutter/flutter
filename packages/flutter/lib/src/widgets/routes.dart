@@ -134,20 +134,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   bool get opaque;
 
-  /// {@template flutter.widgets.TransitionRoute.preferRasterization}
-  /// Whether the route transition will prefer to animate a rasterized
-  /// snapshot of the entering/exiting routes.
+  /// {@template flutter.widgets.TransitionRoute.allowSnapshotting}
+  /// Whether the route transition will prefer to animate a snapshot of the
+  /// entering/exiting routes.
   ///
   /// When this value is true, certain route transitions (such as the Android
-  /// zoom page transition) will rasterize the entering and exiting routes.
-  /// These textures are then animated in place of the underlying widgets to
+  /// zoom page transition) will snapshot the entering and exiting routes.
+  /// These snapshots are then animated in place of the underlying widgets to
   /// improve performance of the transition.
   ///
   /// Generally this means that animations that occur on the entering/exiting
   /// route while the route animation plays may appear frozen - unless they
   /// are a hero animation or something that is drawn in a separate overlay.
   /// {@endtemplate}
-  bool get preferRasterization => true;
+  bool get allowSnapshotting => true;
 
   // This ensures that if we got to the dismissed state while still current,
   // we will still be disposed when we are eventually popped.
@@ -1749,7 +1749,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   bool get maintainState => true;
 
   @override
-  bool get preferRasterization => false;
+  bool get allowSnapshotting => false;
 }
 
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the

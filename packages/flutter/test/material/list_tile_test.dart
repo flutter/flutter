@@ -2262,7 +2262,7 @@ void main() {
         'isThreeLine: THREE_LINE',
         'dense: true',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
-        'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+        'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
         'style: ListTileStyle.list',
         'selectedColor: Color(0xff0000ff)',
         'iconColor: Color(0xff00ff00)',
