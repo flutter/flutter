@@ -626,8 +626,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
   }
 
-  //late final _EventOrderChildModel _topChildren = _EventOrderChildModel(this);
-
   // Adding/removing deferred child does not affect the layout of other children,
   // or that of the Overlay, so there's no need to invalidate the layout of the
   // Overlay.
@@ -1247,6 +1245,18 @@ class OverlayPortalController {
   int? _showTimestamp;
   final String? _debugLabel;
 
+  static int _wallTime = kIsWeb
+    ? -9007199254740992 // -2^53
+    : -1 << 63;
+
+  // Returns a unique and monotonically increasing timestamp.
+  int _now() {
+    final int now = _wallTime += 1;
+    assert(_showTimestamp == null || _showTimestamp! < now);
+    assert(_attachTarget?._showTimestamp == null || _attachTarget!._showTimestamp! < now);
+    return now;
+  }
+
   /// Show the overlay child of the [OverlayPortal] this controller is attached
   /// to, at the top of the target [Overlay].
   ///
@@ -1262,9 +1272,9 @@ class OverlayPortalController {
   void show() {
     final _OverlayPortalState? state = _attachTarget;
     if (state != null) {
-      state.show();
+      state.show(_now());
     } else {
-      _showTimestamp = _OverlayPortalState.wallTime += 1;
+      _showTimestamp = _now();
     }
   }
 
@@ -1423,8 +1433,10 @@ class OverlayPortal extends StatefulWidget {
   State<OverlayPortal> createState() => _OverlayPortalState();
 }
 
-class _TopmostLocation extends _OverlayLocation with LinkedListEntry<_TopmostLocation> {
-  _TopmostLocation(this._showTimestamp, this._theatreChildModel) : super._();
+// An _OverlayLocation whose occupants get painted above a specific
+// [OverlayEntry] (but below the [OverlayEntry] above that [OverlayEntry]).
+class _OverlayEntryLocation extends _OverlayLocation with LinkedListEntry<_OverlayEntryLocation> {
+  _OverlayEntryLocation(this._showTimestamp, this._theatreChildModel) : super._();
 
   final int _showTimestamp;
   final _EventOrderChildModel _theatreChildModel;
@@ -1463,9 +1475,6 @@ class _TopmostLocation extends _OverlayLocation with LinkedListEntry<_TopmostLoc
     super._deactivate(child);
     _overlayChildRenderBox = null;
   }
-
-  @override
-  String toString() => '$_showTimestamp';
 }
 
 class _RenderTheatreMarker extends InheritedWidget {
@@ -1512,14 +1521,10 @@ class _RenderTheatreMarkerElement extends InheritedElement {
 }
 
 class _OverlayPortalState extends State<OverlayPortal> {
-  // The developer must call `show` to reveal the overlay so we can get the
+  // The developer must call `show` to reveal the overlay so we can get a unique
   // timestamp of the user interaction for sorting.
-  _TopmostLocation? _location;
+  _OverlayEntryLocation? _location;
   int? _showTimestamp;
-  // See https://github.com/dart-lang/sdk/issues/41717.
-  static int wallTime = kIsWeb
-    ? -9007199254740992 // -2^53
-    : -1 << 63;
 
   @override
   void initState() {
@@ -1563,16 +1568,12 @@ class _OverlayPortalState extends State<OverlayPortal> {
     super.dispose();
   }
 
-  void show() {
+  void show(int timestampe) {
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
-    final int now = wallTime += 1;
-    assert(_showTimestamp == null || _showTimestamp! < now);
-    setState(() { _showTimestamp = now; });
+    setState(() { _showTimestamp = timestampe; });
     _location?._dispose();
     _location = null;
   }
-
-  void toggle() => _showTimestamp == null ? show() : hide();
 
   void hide() {
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
@@ -1592,7 +1593,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
       );
     }
     return _OverlayPortal(
-      overlayLocation: _location ??= _TopmostLocation(timestamp, widget._resolveLocation(context)._overlayEntryTopChildModel),
+      overlayLocation: _location ??= _OverlayEntryLocation(timestamp, widget._resolveLocation(context)._overlayEntryTopChildModel),
       overlayChild: _DeferredLayout(child: widget.overlayChildBuilder(context)),
       child: widget.child,
     );
@@ -1673,15 +1674,15 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
   _EventOrderChildModel(this._theatre);
 
   final _RenderTheatre _theatre;
-  final LinkedList<_TopmostLocation> _sortedChildren = LinkedList<_TopmostLocation>();
+  final LinkedList<_OverlayEntryLocation> _sortedChildren = LinkedList<_OverlayEntryLocation>();
 
   // Worst-case O(N), N being the number of children added to the top spot in
   // the same frame. This can be a bit expensive when there's a lot of global
   // key reparenting in the same frame but N is usually a small number.
-  void _add(_TopmostLocation child) {
+  void _add(_OverlayEntryLocation child) {
     assert(_debugNotDisposed());
     assert(!_sortedChildren.contains(child));
-    _TopmostLocation? insertPosition = _sortedChildren.isEmpty ? null : _sortedChildren.last;
+    _OverlayEntryLocation? insertPosition = _sortedChildren.isEmpty ? null : _sortedChildren.last;
     while (insertPosition != null && insertPosition._showTimestamp > child._showTimestamp) {
       insertPosition = insertPosition.previous;
     }
@@ -1699,7 +1700,7 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
     }
   }
 
-  void _remove(_TopmostLocation child) {
+  void _remove(_OverlayEntryLocation child) {
     final bool wasInCollection = _sortedChildren.remove(child);
     assert(wasInCollection);
     if (child._overlayChildRenderBox != null) {
@@ -1709,29 +1710,29 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
     }
   }
 
-  _TopmostLocation? _childAfter(_TopmostLocation? child) {
+  _OverlayEntryLocation? _childAfter(_OverlayEntryLocation? child) {
     if (_sortedChildren.isEmpty) {
       return null;
     }
-    final _TopmostLocation? candidate = child == null ? _sortedChildren.first : child.next;
+    final _OverlayEntryLocation? candidate = child == null ? _sortedChildren.first : child.next;
     return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childAfter(candidate) : null;
   }
 
-  _TopmostLocation? _childBefore(_TopmostLocation? child) {
+  _OverlayEntryLocation? _childBefore(_OverlayEntryLocation? child) {
     if (_sortedChildren.isEmpty) {
       return null;
     }
-    final _TopmostLocation? candidate = child == null ? _sortedChildren.last : child.previous;
+    final _OverlayEntryLocation? candidate = child == null ? _sortedChildren.last : child.previous;
     return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childBefore(candidate) : null;
   }
 
-  static _ChildIterator? _mapIterator(_Iterator<_TopmostLocation>? fromIterator) {
+  static _ChildIterator? _mapIterator(_Iterator<_OverlayEntryLocation>? fromIterator) {
     if (fromIterator == null) {
       return null;
     }
 
     _RenderDeferredLayoutBox? iter() {
-      final _TopmostLocation? location = fromIterator();
+      final _OverlayEntryLocation? location = fromIterator();
       if (location == null) {
         return null;
       }
@@ -1741,8 +1742,8 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
     return iter;
   }
 
-  _Iterator<_TopmostLocation>? _forwardIterator() {
-    _TopmostLocation? child = _childAfter(null);
+  _Iterator<_OverlayEntryLocation>? _forwardIterator() {
+    _OverlayEntryLocation? child = _childAfter(null);
     if (child == null) {
       return null;
     }
@@ -1757,8 +1758,8 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
     };
   }
 
-  _Iterator<_TopmostLocation>? _backwardIterator() {
-    _TopmostLocation? child = _childBefore(null);
+  _Iterator<_OverlayEntryLocation>? _backwardIterator() {
+    _OverlayEntryLocation? child = _childBefore(null);
     if (child == null) {
       return null;
     }

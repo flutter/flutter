@@ -610,6 +610,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       }
       canvas.restore();
     }
+    assert(inkFeatures == _inkFeatures);
     super.paint(context, offset);
   }
 }
