@@ -25,7 +25,10 @@ TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
-TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionE2ETest({
+  bool semanticsEnabled = false,
+  bool enableImpeller = false,
+}) {
   return GalleryTransitionTest(
     testFile: semanticsEnabled
         ? 'transitions_perf_e2e_with_semantics'
@@ -35,6 +38,7 @@ TaskFunction createGalleryTransitionE2ETest({bool semanticsEnabled = false}) {
     transitionDurationFile: null,
     timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
+    enableImpeller: enableImpeller,
   );
 }
 
@@ -59,12 +63,14 @@ class GalleryTransitionTest {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
+    this.enableImpeller = false,
   });
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
+  final bool enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -102,6 +108,7 @@ class GalleryTransitionTest {
       await flutter('drive', options: <String>[
         '--no-dds',
         '--profile',
+        if (enableImpeller) '--enable-impeller',
         if (needFullTimeline)
           '--trace-startup',
         if (applicationBinaryPath != null)
