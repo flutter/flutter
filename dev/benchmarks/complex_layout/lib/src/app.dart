@@ -90,7 +90,23 @@ class ComplexLayout extends StatefulWidget {
 class ComplexLayoutState extends State<ComplexLayout> {
   @override
   Widget build(BuildContext context) {
-    print(widget.badScroll);
+    Widget body = ListView.builder(
+      key: const Key('complex-scroll'), // this key is used by the driver test
+      controller: ScrollController(),  // So that the scroll offset can be tracked
+      itemCount: widget.badScroll ? 500 : null,
+      shrinkWrap: widget.badScroll,
+      itemBuilder: (BuildContext context, int index) {
+        if (index.isEven) {
+          return FancyImageItem(index, key: PageStorageKey<int>(index));
+        } else {
+          return FancyGalleryItem(index, key: PageStorageKey<int>(index));
+        }
+      },
+    );
+    if (widget.badScroll) {
+      body = ListView(children: <Widget>[body]);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Advanced Layout'),
@@ -107,21 +123,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
       ),
       body: Column(
         children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              key: const Key('complex-scroll'), // this key is used by the driver test
-              controller: ScrollController(),  // So that the scroll offset can be tracked
-              itemCount: widget.badScroll ? 500 : null,
-              shrinkWrap: widget.badScroll,
-              itemBuilder: (BuildContext context, int index) {
-                if (index.isEven) {
-                  return FancyImageItem(index, key: PageStorageKey<int>(index));
-                } else {
-                  return FancyGalleryItem(index, key: PageStorageKey<int>(index));
-                }
-              },
-            ),
-          ),
+          Expanded(child: body),
           const BottomBar(),
         ],
       ),
