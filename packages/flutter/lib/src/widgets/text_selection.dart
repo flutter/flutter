@@ -2764,7 +2764,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (consecutiveTapCount == 2) {
+    if (consecutiveTapCount % 2 == 0) {
       print('double tap');
       widget.onDoubleTapDown?.call(details);
     }
