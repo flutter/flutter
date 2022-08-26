@@ -19,12 +19,40 @@ enum _DragState {
   accepted,
 }
 
+/// {@macro flutter.gestures.tap.GestureTapDownCallback}
+/// 
+/// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
+/// 
+/// Used by [TapAndDragGestureRecognizer.onTapDown].
 typedef GestureTapDownWithConsecutiveTapCountCallback  = void Function(TapDownDetails details, int consecutiveTapCount);
+
+/// {@macro flutter.gestures.tap.GestureTapUpCallback}
+/// 
+/// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
+/// 
+/// Used by [TapAndDragGestureRecognizer.onTapUp].
 typedef GestureTapUpWithConsecutiveTapCountCallback  = void Function(TapUpDetails details, int consecutiveTapCount);
+
+/// {@macro flutter.gestures.dragdetails.GestureDragStartCallback}
+///
+/// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
+///
+/// Used by [TapAndDragGestureRecognizer.onStart].
 typedef GestureDragStartWithConsecutiveTapCountCallback = void Function(DragStartDetails details, int consecutiveTapCount);
+
+/// {@macro flutter.gestures.dragdetails.GestureDragUpdateCallback}
+/// 
+/// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
+///
+/// Used by [TapAndDragGestureRecognizer.onUpdate].
 typedef GestureDragUpdateWithConsecutiveTapCountCallback = void Function(DragUpdateDetails details, int consecutiveTapCount);
+
+/// {@macro flutter.gestures.monodrag.GestureDragEndCallback}
+///
+/// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
+///
+/// Used by [TapAndDragGestureRecognizer.onEnd].
 typedef GestureDragEndWithConsecutiveTapCountCallback = void Function(DragEndDetails endDetails, int consecutiveTapCount);
-typedef GestureTapAndDragCancelCallback = void Function();
 
 mixin _ConsecutiveTapMixin {
   // For consecutive tap
@@ -70,6 +98,9 @@ mixin _ConsecutiveTapMixin {
   }
 }
 
+/// Recognizes taps and movements.
+/// 
+/// Takes on the responsibilities of [TapGestureRecognizer] and [DragGestureRecognizer] in one [GestureRecognizer].
 class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _ConsecutiveTapMixin {
   TapAndDragGestureRecognizer({
     super.debugOwner,
@@ -78,26 +109,39 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     super.supportedDevices,
   });
 
+  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.dragStartBehavior}
   DragStartBehavior dragStartBehavior;
 
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
 
-  GestureTapDownCallback? onSecondaryTapDown;
-
-  GestureTapCallback? onSecondaryTap;
-
-  GestureDragStartWithConsecutiveTapCountCallback? onStart;
-
-  GestureDragUpdateWithConsecutiveTapCountCallback? onUpdate;
-
-  GestureDragEndWithConsecutiveTapCountCallback? onEnd;
-
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapUp}
   GestureTapUpWithConsecutiveTapCountCallback? onTapUp;
 
-  GestureTapUpCallback? onSecondaryTapUp;
-
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
+  /// TODO(Renzo-Olivares): Explain cases when onTapCancel is called.
   GestureTapCancelCallback? onTapCancel;
 
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTap}
+  GestureTapCallback? onSecondaryTap;
+
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapDown}
+  GestureTapDownCallback? onSecondaryTapDown;
+
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapUp}
+  GestureTapUpCallback? onSecondaryTapUp;
+
+  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onStart}
+  GestureDragStartWithConsecutiveTapCountCallback? onStart;
+
+  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
+  GestureDragUpdateWithConsecutiveTapCountCallback? onUpdate;
+
+  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
+  GestureDragEndWithConsecutiveTapCountCallback? onEnd;
+
+  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onCancel}
+  /// TODO(Renzo-Olivares): Explain cases when onDragCancel is called.
   GestureDragCancelCallback? onDragCancel;
 
   // For local tap drag count
@@ -406,6 +450,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   String get debugDescription => 'tap_and_drag';
 }
 
+/// Handles taps and recognizes when the user has pressed down at the same location
+/// for a long period of time.
 class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer with _ConsecutiveTapMixin {
   TapAndLongPressGestureRecognizer({
     Duration? duration,
@@ -418,11 +464,22 @@ class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer w
          deadline: duration ?? kLongPressTimeout,
        );
 
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
+
+  /// {@macro flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressStart}
   GestureLongPressStartCallback? onLongPressStart;
+
+  /// {@macro flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressMoveUpdate}
   GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
+
+  /// {@macro flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressEnd}
   GestureLongPressEndCallback? onLongPressEnd;
+
+  /// {@macro flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressCancel}
   GestureLongPressCancelCallback? onLongPressCancel;
+
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapUp}
   GestureTapUpWithConsecutiveTapCountCallback? onTapUp;
 
   bool _isDoubleTap = false;
