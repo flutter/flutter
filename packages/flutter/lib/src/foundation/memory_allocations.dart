@@ -52,7 +52,7 @@ class ObjectDisposed implements ObjectEvent {
   ObjectDisposed({
     required super.object,
     super.details = const <Object>[],
-    super.token
+    super.token,
   });
 }
 
@@ -121,36 +121,38 @@ class MemoryAllocations {
   }
 
   void _subscribeToSdkObjects() {
-    assert(ui.Image.onCreate == null);
-    assert(ui.Image.onDispose == null);
-    assert(ui.Picture.onCreate == null);
-    assert(ui.Picture.onDispose == null);
-    ui.Image.onCreate = _imageOnCreate;
-    ui.Image.onDispose = _imageOnDispose;
-    ui.Picture.onCreate = _pictureOnCreate;
-    ui.Picture.onDispose = _pictureOnDispose;
+    // Uncomment when https://github.com/flutter/engine/pull/35274 lands:
+    // assert(ui.Image.onCreate == null);
+    // assert(ui.Image.onDispose == null);
+    // assert(ui.Picture.onCreate == null);
+    // assert(ui.Picture.onDispose == null);
+    // ui.Image.onCreate = _imageOnCreate;
+    // ui.Image.onDispose = _imageOnDispose;
+    // ui.Picture.onCreate = _pictureOnCreate;
+    // ui.Picture.onDispose = _pictureOnDispose;
   }
 
   void _unSubscribeFromSdkObjects() {
-    assert(ui.Image.onCreate == _imageOnCreate);
-    assert(ui.Image.onDispose == _imageOnDispose);
-    assert(ui.Picture.onCreate == _pictureOnCreate);
-    assert(ui.Picture.onDispose == _pictureOnDispose);
-    ui.Image.onCreate = null;
-    ui.Image.onDispose = null;
-    ui.Picture.onCreate = null;
-    ui.Picture.onDispose = null;
+    // Uncomment when https://github.com/flutter/engine/pull/35274 lands:
+    // assert(ui.Image.onCreate == _imageOnCreate);
+    // assert(ui.Image.onDispose == _imageOnDispose);
+    // assert(ui.Picture.onCreate == _pictureOnCreate);
+    // assert(ui.Picture.onDispose == _pictureOnDispose);
+    // ui.Image.onCreate = null;
+    // ui.Image.onDispose = null;
+    // ui.Picture.onCreate = null;
+    // ui.Picture.onDispose = null;
   }
 
   void _imageOnCreate(ui.Image image) => registerObjectEvent(ObjectCreated(
     library: 'dart:ui',
-    klass: 'Image',
+    className: 'Image',
     object: image,
   ));
 
   void _pictureOnCreate(ui.Picture picture) => registerObjectEvent(ObjectCreated(
     library: 'dart:ui',
-    klass: 'Image',
+    className: 'Image',
     object: picture,
   ));
 
