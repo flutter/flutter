@@ -433,7 +433,7 @@ void sanityCheckDocs() {
 
   // Check a "snippet" example, any one will do.
   final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
-  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
+  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.colorScheme.background;.*</pre>');
   _sanityCheckExample(snippetExample, snippetRegExp);
 
   // Check a "dartpad" example, any one will do.
