@@ -23,8 +23,11 @@ source_set("libcxxabi") {
     "_LIBCPP_BUILDING_LIBRARY",
     "_LIBCXXABI_BUILDING_LIBRARY",
     "LIBCXXABI_SILENT_TERMINATE",
-    "_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
   ]
+
+  if (!is_ios) {
+    defines += [ "_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS" ]
+  }
 
   sources = []
 
