@@ -1409,8 +1409,8 @@ class CompileTest {
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
         if (reportPackageContentSizes) {
           final Map<String, Object> sizeMetrics = await getSizesFromDarwinApp(
-              appPath: appPath,
-              operatingSystem: deviceOperatingSystem,
+            appPath: appPath,
+            operatingSystem: deviceOperatingSystem,
           );
           metrics.addAll(sizeMetrics);
         }
