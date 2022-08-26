@@ -59,8 +59,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [ElevatedButton], a filled Material Design button with a shadow.
-///  * [TextButton], a Material Design button without a shadow.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class OutlinedButton extends ButtonStyleButton {
@@ -127,10 +129,14 @@ class OutlinedButton extends ButtonStyleButton {
   /// ```dart
   /// OutlinedButton(
   ///   style: OutlinedButton.styleFrom(
-  ///      shape: StadiumBorder(),
-  ///      side: BorderSide(width: 2, color: Colors.green),
+  ///      shape: const StadiumBorder(),
+  ///      side: const BorderSide(width: 2, color: Colors.green),
   ///   ),
-  /// )
+  ///   child: const Text('Seasons of Love'),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  /// ),
   /// ```
   static ButtonStyle styleFrom({
     Color? foregroundColor,
@@ -314,7 +320,7 @@ class OutlinedButton extends ButtonStyleButton {
           disabledBackgroundColor: Colors.transparent,
           shadowColor: theme.shadowColor,
           elevation: 0,
-          textStyle: theme.textTheme.button,
+          textStyle: theme.textTheme.labelLarge,
           padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,

@@ -51,8 +51,6 @@ void main() {
     const DialogTheme(
       backgroundColor: Color(0xff123456),
       elevation: 8.0,
-      shadowColor: Color(0xff000001),
-      surfaceTintColor: Color(0xff000002),
       alignment: Alignment.bottomLeft,
       iconColor: Color(0xff654321),
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
@@ -65,8 +63,6 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xff123456)',
       'elevation: 8.0',
-      'shadowColor: Color(0xff000001)',
-      'surfaceTintColor: Color(0xff000002)',
       'alignment: Alignment.bottomLeft',
       'iconColor: Color(0xff654321)',
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
@@ -93,19 +89,11 @@ void main() {
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
-    const Color shadowColor = Color(0xFF000001);
-    const Color surfaceTintColor = Color(0xFF000002);
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(
-      dialogTheme: const DialogTheme(
-        elevation: customElevation,
-        shadowColor: shadowColor,
-        surfaceTintColor: surfaceTintColor,
-      ),
-    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(elevation: customElevation));
 
     await tester.pumpWidget(
       _appWithDialog(tester, dialog, theme: theme),
@@ -115,8 +103,6 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
-    expect(materialWidget.shadowColor, shadowColor);
-    expect(materialWidget.surfaceTintColor, surfaceTintColor);
   });
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
@@ -313,7 +299,7 @@ void main() {
       title: Text(titleText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleLarge: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -361,7 +347,7 @@ void main() {
     const SimpleDialog dialog = SimpleDialog(
       title: Text(titleText),
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleLarge: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -412,7 +398,7 @@ void main() {
       content: Text(contentText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(subtitle1: contentTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleMedium: contentTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));

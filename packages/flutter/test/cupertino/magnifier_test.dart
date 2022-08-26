@@ -79,7 +79,7 @@ void main() {
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifier =
             ValueNotifier<MagnifierOverlayInfoBearer>(
           MagnifierOverlayInfoBearer(
-            currentLineBoundries: fakeTextFieldRect,
+            currentLineBoundaries: fakeTextFieldRect,
             fieldBounds: fakeTextFieldRect,
             caretRect: fakeTextFieldRect,
             // The tap position is dragBelow units below the text field.
@@ -112,7 +112,7 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: reasonableTextField,
+              currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
               // The tap position is far out of the right side of the app.
@@ -145,7 +145,7 @@ void main() {
           tester,
           ValueNotifier<MagnifierOverlayInfoBearer>(
             MagnifierOverlayInfoBearer(
-              currentLineBoundries: reasonableTextField,
+              currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
               caretRect: reasonableTextField,
               // The tap position is dragBelow units below the text field.
@@ -179,7 +179,7 @@ void main() {
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierinfo =
             ValueNotifier<MagnifierOverlayInfoBearer>(
           MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
@@ -193,7 +193,7 @@ void main() {
 
         // Move the gesture to one that should hide it.
         magnifierinfo.value = MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             globalGesturePosition: magnifierinfo.value.globalGesturePosition + const Offset(0, 100),
@@ -219,7 +219,7 @@ void main() {
         final ValueNotifier<MagnifierOverlayInfoBearer> magnifierInfo =
             ValueNotifier<MagnifierOverlayInfoBearer>(
           MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
@@ -232,7 +232,7 @@ void main() {
 
         // Move the gesture to one that should hide it.
         magnifierInfo.value = MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             globalGesturePosition:
@@ -244,7 +244,7 @@ void main() {
 
         // Return the gesture to one that shows it.
         magnifierInfo.value = MagnifierOverlayInfoBearer(
-            currentLineBoundries: reasonableTextField,
+            currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2,

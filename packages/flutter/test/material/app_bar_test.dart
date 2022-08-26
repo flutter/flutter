@@ -401,7 +401,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -456,7 +456,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopRight(title).dx, 620 + 48 + 48);
+    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -3574,5 +3574,35 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
+  });
+
+  testWidgets('AppBar title with actions should have the same position regardless of centerTitle', (WidgetTester tester) async {
+    final Key titleKey = UniqueKey();
+    bool centerTitle = false;
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            centerTitle: centerTitle,
+            title: Container(
+              key: titleKey,
+              constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)),
+            ),
+            actions: const <Widget>[
+              SizedBox(width: 48.0),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Finder title = find.byKey(titleKey);
+    expect(tester.getTopLeft(title).dx, 16.0);
+
+    centerTitle = true;
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(title).dx, 16.0);
   });
 }

@@ -12,6 +12,10 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// bool _throwShotAway = false;
+// late StateSetter setState;
+
 /// A Material Design checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
@@ -87,7 +91,8 @@ class Checkbox extends StatefulWidget {
 
   /// Whether this checkbox is checked.
   ///
-  /// This property must not be null.
+  /// When [tristate] is true, a value of null corresponds to the mixed state.
+  /// When [tristate] is false, this value must not be null.
   final bool? value;
 
   /// Called when the value of the checkbox should change.

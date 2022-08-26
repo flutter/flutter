@@ -12,6 +12,10 @@ import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// typedef MyAppHome = Placeholder;
+
 /// The visual properties that most buttons have in common.
 ///
 /// Buttons and their themes have a ButtonStyle property which defines the visual
@@ -37,13 +41,18 @@ import 'theme_data.dart';
 ///   style: ButtonStyle(
 ///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
 ///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.pressed))
+///         if (states.contains(MaterialState.pressed)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
+///         }
 ///         return null; // Use the component's default.
 ///       },
 ///     ),
 ///   ),
-/// )
+///   child: const Text('Fly me to the moon'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// In this case the background color for all other button states would fallback
@@ -52,10 +61,14 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// ElevatedButton(
-///   style: ButtonStyle(
+///   style: const ButtonStyle(
 ///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
 ///   ),
-/// )
+///   child: const Text('Let me play among the stars'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// Configuring a ButtonStyle directly makes it possible to very
@@ -65,8 +78,8 @@ import 'theme_data.dart';
 /// useful to make relatively sweeping changes based on a few initial
 /// parameters with simple values. The button styleFrom() methods
 /// enable such sweeping changes. See for example:
-/// [TextButton.styleFrom], [ElevatedButton.styleFrom],
-/// [OutlinedButton.styleFrom].
+/// [ElevatedButton.styleFrom], [FilledButton.styleFrom],
+/// [OutlinedButton.styleFrom], [TextButton.styleFrom].
 ///
 /// For example, to override the default text and icon colors for a
 /// [TextButton], as well as its overlay color, with all of the
@@ -76,11 +89,16 @@ import 'theme_data.dart';
 /// ```dart
 /// TextButton(
 ///   style: TextButton.styleFrom(foregroundColor: Colors.green),
-/// )
+///   child: const Text('Let me see what spring is like'),
+///   onPressed: () {
+///     // ...
+///   },
+/// ),
 /// ```
 ///
 /// To configure all of the application's text buttons in the same
 /// way, specify the overall theme's `textButtonTheme`:
+///
 /// ```dart
 /// MaterialApp(
 ///   theme: ThemeData(
@@ -88,8 +106,8 @@ import 'theme_data.dart';
 ///       style: TextButton.styleFrom(foregroundColor: Colors.green),
 ///     ),
 ///   ),
-///   home: MyAppHome(),
-/// )
+///   home: const MyAppHome(),
+/// ),
 /// ```
 ///
 /// ## Material 3 button types
@@ -101,8 +119,8 @@ import 'theme_data.dart';
 /// | Type         | Flutter implementation  |
 /// | :----------- | :---------------------- |
 /// | Elevated     | [ElevatedButton]        |
-/// | Filled       | Styled [ElevatedButton] |
-/// | Filled Tonal | Styled [ElevatedButton] |
+/// | Filled       | [FilledButton]          |
+/// | Filled Tonal | [FilledButton.tonal]    |
 /// | Outlined     | [OutlinedButton]        |
 /// | Text         | [TextButton]            |
 ///
@@ -114,9 +132,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [TextButtonTheme], the theme for [TextButton]s.
 ///  * [ElevatedButtonTheme], the theme for [ElevatedButton]s.
+///  * [FilledButtonTheme], the theme for [FilledButton]s.
 ///  * [OutlinedButtonTheme], the theme for [OutlinedButton]s.
+///  * [TextButtonTheme], the theme for [TextButton]s.
 @immutable
 class ButtonStyle with Diagnosticable {
   /// Create a [ButtonStyle].
@@ -285,7 +304,7 @@ class ButtonStyle with Diagnosticable {
   ///     splashFactory: NoSplash.splashFactory,
   ///   ),
   ///   onPressed: () { },
-  ///   child: Text('No Splash'),
+  ///   child: const Text('No Splash'),
   /// )
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;

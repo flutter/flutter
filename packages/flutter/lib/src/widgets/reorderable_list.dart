@@ -323,10 +323,19 @@ class ReorderableList extends StatefulWidget {
 ///
 /// ```dart
 /// GlobalKey<ReorderableListState> listKey = GlobalKey<ReorderableListState>();
-/// ...
-/// ReorderableList(key: listKey, ...);
-/// ...
-/// listKey.currentState.cancelReorder();
+/// // ...
+/// Widget build(BuildContext context) {
+///   return ReorderableList(
+///     key: listKey,
+///     itemBuilder: (BuildContext context, int index) => const SizedBox(height: 10.0),
+///     itemCount: 5,
+///     onReorder: (int oldIndex, int newIndex) {
+///        // ...
+///     },
+///   );
+/// }
+/// // ...
+/// listKey.currentState!.cancelReorder();
 /// ```
 class ReorderableListState extends State<ReorderableList> {
   final GlobalKey<SliverReorderableListState> _sliverReorderableListKey = GlobalKey();
@@ -540,11 +549,28 @@ class SliverReorderableList extends StatefulWidget {
 /// can refer to the [SliverReorderableList]'s state with a global key:
 ///
 /// ```dart
+/// // (e.g. in a stateful widget)
 /// GlobalKey<SliverReorderableListState> listKey = GlobalKey<SliverReorderableListState>();
-/// ...
-/// SliverReorderableList(key: listKey, ...);
-/// ...
-/// listKey.currentState.cancelReorder();
+///
+/// // ...
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return SliverReorderableList(
+///     key: listKey,
+///     itemBuilder: (BuildContext context, int index) => const SizedBox(height: 10.0),
+///     itemCount: 5,
+///     onReorder: (int oldIndex, int newIndex) {
+///        // ...
+///     },
+///   );
+/// }
+///
+/// // ...
+///
+/// void _stop() {
+///   listKey.currentState!.cancelReorder();
+/// }
 /// ```
 ///
 /// [ReorderableDragStartListener] and [ReorderableDelayedDragStartListener]

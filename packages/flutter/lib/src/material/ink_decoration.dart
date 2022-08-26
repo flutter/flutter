@@ -292,7 +292,7 @@ class _InkState extends State<Ink> {
       _ink!.decoration = widget.decoration;
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? Container();
+    return widget.child ?? const SizedBox();
   }
 
   @override
@@ -334,12 +334,11 @@ class InkDecoration extends InkFeature {
   InkDecoration({
     required Decoration? decoration,
     required ImageConfiguration configuration,
-    required MaterialInkController controller,
+    required super.controller,
     required super.referenceBox,
     super.onRemoved,
   }) : assert(configuration != null),
-       _configuration = configuration,
-       super(controller: controller) {
+       _configuration = configuration {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }
