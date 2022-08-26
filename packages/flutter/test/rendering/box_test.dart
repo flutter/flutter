@@ -36,6 +36,18 @@ class MissingSetSizeRenderBox extends RenderBox {
   void performLayout() { }
 }
 
+class BadBaselineRenderBox extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    throw Exception();
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -1195,6 +1207,27 @@ void main() {
           'set its size in performLayout().',
       ),
     );
+  });
+
+  test('debugDoingBaseline flag is cleared after exception', () {
+    final BadBaselineRenderBox badChild = BadBaselineRenderBox();
+    final RenderBox badRoot = RenderBaseline(
+      child: badChild,
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    final List<dynamic> exceptions = <dynamic>[];
+    layout(badRoot, onErrors: () {
+      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
+    });
+    expect(exceptions, isNotEmpty);
+
+    final RenderBox goodRoot = RenderBaseline(
+      child: RenderDecoratedBox(decoration: const BoxDecoration()),
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    layout(goodRoot, onErrors: () { assert(false); });
   });
 }
 
