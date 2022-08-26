@@ -84,6 +84,8 @@ enum _ScaffoldSlot {
 /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.0.dart **
 /// {@end-tool}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lytQi-slT5Y}
+///
 /// See also:
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
@@ -1303,14 +1305,14 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void didUpdateWidget(_FloatingActionButtonTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
+      // Get the right scale and rotation animations to use for this widget.
+      _updateAnimations();
+    }
     final bool oldChildIsNull = oldWidget.child == null;
     final bool newChildIsNull = widget.child == null;
     if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key) {
       return;
-    }
-    if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
-      // Get the right scale and rotation animations to use for this widget.
-      _updateAnimations();
     }
     if (_previousController.status == AnimationStatus.dismissed) {
       final double currentValue = widget.currentController.value;

@@ -26,6 +26,7 @@ import 'divider_theme.dart';
 import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
+import 'filled_button_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'icon_button_theme.dart';
 import 'ink_ripple.dart';
@@ -87,7 +88,7 @@ abstract class ThemeExtension<T extends ThemeExtension<T>> {
   /// Linearly interpolate with another [ThemeExtension] object.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  ThemeExtension<T> lerp(ThemeExtension<T>? other, double t);
+  ThemeExtension<T> lerp(covariant ThemeExtension<T>? other, double t);
 }
 
 // Deriving these values is black magic. The spec claims that pressed buttons
@@ -199,7 +200,7 @@ enum MaterialTapTargetSize {
 /// its default background color and the [FloatingActionButton] widget
 /// uses the color scheme's [ColorScheme.secondary] for its default
 /// background. By default, the [Text] widget uses
-/// [TextTheme.bodyText2], and the color of that [TextStyle] has been
+/// [TextTheme.bodyMedium], and the color of that [TextStyle] has been
 /// changed to purple.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
@@ -210,7 +211,7 @@ enum MaterialTapTargetSize {
 ///     colorScheme: ColorScheme.fromSwatch().copyWith(
 ///       secondary: Colors.green,
 ///     ),
-///     textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.purple)),
+///     textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
@@ -343,6 +344,7 @@ class ThemeData with Diagnosticable {
     DrawerThemeData? drawerTheme,
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
+    FilledButtonThemeData? filledButtonTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
     IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
@@ -564,6 +566,7 @@ class ThemeData with Diagnosticable {
     dividerTheme ??= const DividerThemeData();
     drawerTheme ??= const DrawerThemeData();
     elevatedButtonTheme ??= const ElevatedButtonThemeData();
+    filledButtonTheme ??= const FilledButtonThemeData();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     iconButtonTheme ??= const IconButtonThemeData();
     listTileTheme ??= const ListTileThemeData();
@@ -655,6 +658,7 @@ class ThemeData with Diagnosticable {
       drawerTheme: drawerTheme,
       elevatedButtonTheme: elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme,
+      filledButtonTheme: filledButtonTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
       iconButtonTheme: iconButtonTheme,
       listTileTheme: listTileTheme,
@@ -761,6 +765,7 @@ class ThemeData with Diagnosticable {
     required this.drawerTheme,
     required this.elevatedButtonTheme,
     required this.expansionTileTheme,
+    required this.filledButtonTheme,
     required this.floatingActionButtonTheme,
     required this.iconButtonTheme,
     required this.listTileTheme,
@@ -909,6 +914,7 @@ class ThemeData with Diagnosticable {
        assert(drawerTheme != null),
        assert(elevatedButtonTheme != null),
        assert(expansionTileTheme != null),
+       assert(filledButtonTheme != null),
        assert(floatingActionButtonTheme != null),
        assert(iconButtonTheme != null),
        assert(listTileTheme != null),
@@ -1211,7 +1217,7 @@ class ThemeData with Diagnosticable {
   ///   * Typography: `typography` (see table above)
   ///
   /// ### Components
-  ///   * Common buttons: [TextButton], [OutlinedButton], [ElevatedButton]
+  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton]
   ///   * FAB: [FloatingActionButton]
   ///   * Extended FAB: [FloatingActionButton.extended]
   ///   * Cards: [Card]
@@ -1464,6 +1470,10 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the visual properties of [ExpansionTile]s.
   final ExpansionTileThemeData expansionTileTheme;
 
+  /// A theme for customizing the appearance and internal layout of
+  /// [FilledButton]s.
+  final FilledButtonThemeData filledButtonTheme;
+
   /// A theme for customizing the shape, elevation, and color of a
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
@@ -1579,7 +1589,7 @@ class ThemeData with Diagnosticable {
   ///
   /// ```dart
   /// final ThemeData theme = Theme.of(context);
-  /// final TextStyle style = theme.textTheme.headline1!.copyWith(
+  /// final TextStyle style = theme.textTheme.displayLarge!.copyWith(
   ///   color: theme.colorScheme.onSecondary,
   /// );
   /// // ...use style...
@@ -1739,6 +1749,7 @@ class ThemeData with Diagnosticable {
     DrawerThemeData? drawerTheme,
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
+    FilledButtonThemeData? filledButtonTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
     IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
@@ -1884,6 +1895,7 @@ class ThemeData with Diagnosticable {
       drawerTheme: drawerTheme ?? this.drawerTheme,
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme ?? this.expansionTileTheme,
+      filledButtonTheme: filledButtonTheme ?? this.filledButtonTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       iconButtonTheme: iconButtonTheme ?? this.iconButtonTheme,
       listTileTheme: listTileTheme ?? this.listTileTheme,
@@ -2083,6 +2095,7 @@ class ThemeData with Diagnosticable {
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t)!,
       expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
+      filledButtonTheme: FilledButtonThemeData.lerp(a.filledButtonTheme, b.filledButtonTheme, t)!,
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t)!,
       iconButtonTheme: IconButtonThemeData.lerp(a.iconButtonTheme, b.iconButtonTheme, t)!,
       listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
@@ -2184,6 +2197,7 @@ class ThemeData with Diagnosticable {
         other.drawerTheme == drawerTheme &&
         other.elevatedButtonTheme == elevatedButtonTheme &&
         other.expansionTileTheme == expansionTileTheme &&
+        other.filledButtonTheme == filledButtonTheme &&
         other.floatingActionButtonTheme == floatingActionButtonTheme &&
         other.iconButtonTheme == iconButtonTheme &&
         other.listTileTheme == listTileTheme &&
@@ -2282,6 +2296,7 @@ class ThemeData with Diagnosticable {
       drawerTheme,
       elevatedButtonTheme,
       expansionTileTheme,
+      filledButtonTheme,
       floatingActionButtonTheme,
       iconButtonTheme,
       listTileTheme,
@@ -2382,6 +2397,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ExpansionTileThemeData>('expansionTileTheme', expansionTileTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<FilledButtonThemeData>('filledButtonTheme', filledButtonTheme, defaultValue: defaultData.filledButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonTheme', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<IconButtonThemeData>('iconButtonTheme', iconButtonTheme, defaultValue: defaultData.iconButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ListTileThemeData>('listTileTheme', listTileTheme, defaultValue: defaultData.listTileTheme, level: DiagnosticLevel.debug));

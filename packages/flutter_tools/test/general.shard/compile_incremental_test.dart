@@ -36,7 +36,6 @@ void main() {
     'sdkroot/',
     '--incremental',
     '--target=flutter',
-    '--debugger-module-names',
     '--experimental-emit-debug-metadata',
     '--output-dill',
     '/build/',

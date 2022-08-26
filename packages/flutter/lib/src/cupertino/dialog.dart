@@ -1389,7 +1389,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     if (title == null && message == null) {
       return SingleChildScrollView(
         controller: scrollController,
-        child: const SizedBox(width: 0.0, height: 0.0),
+        child: const SizedBox.shrink(),
       );
     }
 

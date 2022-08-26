@@ -110,7 +110,7 @@ class MyStatelessWidget extends StatelessWidget {
         child: CircleAvatar(
           backgroundColor: Colors.yellow,
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.headline6!,
+            style: Theme.of(context).textTheme.titleLarge!,
             child: const Text('B'), // Buzz, buzz!
           ),
         ),

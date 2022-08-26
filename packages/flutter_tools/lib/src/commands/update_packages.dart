@@ -31,8 +31,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
-  // A gradle upgrade upstream causes a devicelab test to fail: https://github.com/flutter/flutter/issues/109397
-  'path_provider_android': '2.0.17',
   // Could potentially break color scheme tests on upgrade,
   // so pin and manually update as needed.
   'material_color_utilities': '0.2.0',

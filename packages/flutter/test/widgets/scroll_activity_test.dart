@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -127,6 +128,200 @@ void main() {
     await tester.pump();
     expect(find.text('Page 9'), findsOneWidget);
   });
+
+  List<Widget> childrenSizeIncrease(int n) {
+    return List<Widget>.generate(n, (int i) {
+      return SizedBox(height: 40.0 + i * 3, child: Text('$i'));
+    });
+  }
+
+  testWidgets('Check for duplicate pixels with ClampingScrollPhysics', (WidgetTester tester) async {
+    final List<double> scrollSimulationXList = <double>[];
+    final TestScrollPhysics testScrollPhysics = TestScrollPhysics(
+      scrollSimulationXList,
+      parent: const ClampingScrollPhysics(),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          physics: testScrollPhysics,
+          children: childrenSizeIncrease(100),
+        ),
+      ),
+    );
+    await tester.fling(find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
+    await tester.pumpAndSettle();
+    final Set<double> checkSet = <double>{};
+    checkSet.addAll(scrollSimulationXList);
+    /// checkSet.length + 1 is because:
+    /// simulation.x(0.0) will be called in _startSimulation.
+    /// The first frame of the animation will also call simulation.x(0.0).
+    /// It can be tolerated that it has at most one duplicate value.
+    final bool hasOnlyOneDuplicate = scrollSimulationXList.length == checkSet.length + 1;
+    expect(true, hasOnlyOneDuplicate); // and ends up at the end
+  });
+
+  testWidgets('Check for duplicate pixels with BouncingScrollPhysics', (WidgetTester tester) async {
+    final List<double> scrollSimulationXList = <double>[];
+    final TestScrollPhysics testScrollPhysics = TestScrollPhysics(
+      scrollSimulationXList,
+      parent: const BouncingScrollPhysics(),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          physics: testScrollPhysics,
+          children: childrenSizeIncrease(100),
+        ),
+      ),
+    );
+    await tester.fling(find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
+    await tester.pumpAndSettle();
+    final Set<double> checkSet = <double>{};
+    checkSet.addAll(scrollSimulationXList);
+    /// checkSet.length + 1 is because:
+    /// simulation.x(0.0) will be call in _startSimulation.
+    /// The first frame of the animation will also call simulation.x(0.0).
+    /// It can be tolerated that it has at most one duplicate value.
+    final bool noDuplicate = scrollSimulationXList.length == checkSet.length + 1;
+    expect(true, noDuplicate); // and ends up at the end
+  });
+
+  testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    int? lastTapped;
+    int? lastHovered;
+    await tester.pumpWidget(MaterialApp(
+      home: ListView(
+        controller: controller,
+        children: List<Widget>.generate(30, (int i) {
+          return SizedBox(height: 100.0, child: MouseRegion(
+            onHover: (PointerHoverEvent event) {
+              lastHovered = i;
+            },
+            child: GestureDetector(
+              onTap: () {
+                lastTapped = i;
+              },
+              child: Text('$i')
+            )
+          ));
+        })
+      )
+    ));
+    final TestGesture touchGesture = await tester.createGesture(kind: PointerDeviceKind.touch); // ignore: avoid_redundant_argument_values
+    // Try mouse hovering while scrolling by touch
+    await touchGesture.down(tester.getCenter(find.byType(ListView)));
+    await tester.pump();
+    await touchGesture.moveBy(const Offset(0, 200));
+    await tester.pump();
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.addPointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await hoverGesture.moveBy(const Offset(1, 1));
+    await hoverGesture.removePointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await tester.pumpAndSettle();
+    expect(controller.position.activity?.shouldIgnorePointer, isTrue); // Pointer is ignored for touch scrolling.
+    expect(lastHovered, isNull);
+    await touchGesture.up();
+    await tester.pump();
+    // Try mouse clicking during inertia after scrolling by touch
+    await tester.fling(find.byType(ListView), const Offset(0, -200), 1000);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.position.activity?.shouldIgnorePointer, isTrue); // Pointer is ignored following touch scrolling.
+    await tester.tap(find.text('3'), warnIfMissed: false);
+    expect(lastTapped, isNull);
+    await tester.pumpAndSettle();
+
+    controller.jumpTo(0);
+    await tester.pump();
+    final TestGesture trackpadGesture = await tester.createGesture(kind: PointerDeviceKind.trackpad);
+    // Try mouse hovering while scrolling with a trackpad
+    await trackpadGesture.panZoomStart(tester.getCenter(find.byType(ListView)));
+    await tester.pump();
+    await trackpadGesture.panZoomUpdate(tester.getCenter(find.byType(ListView)), pan: const Offset(0, 200));
+    await tester.pump();
+    await hoverGesture.addPointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await hoverGesture.moveBy(const Offset(1, 1));
+    await hoverGesture.removePointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await tester.pumpAndSettle();
+    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored for trackpad scrolling.
+    expect(lastHovered, equals(3));
+    await trackpadGesture.panZoomEnd();
+    await tester.pump();
+    // Try mouse clicking during inertia after scrolling with a trackpad
+    await tester.trackpadFling(find.byType(ListView), const Offset(0, -200), 1000);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored following trackpad scrolling.
+    await tester.tap(find.text('3'));
+    expect(lastTapped, equals(3));
+    await tester.pumpAndSettle();
+  });
+}
+
+class TestScrollPhysics extends ScrollPhysics {
+  const TestScrollPhysics(this.scrollSimulationXList, { super.parent });
+
+  final List<double> scrollSimulationXList;
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    final Simulation? scrollSimulation = super.createBallisticSimulation(
+      position,
+      velocity,
+    );
+    if (scrollSimulation != null && scrollSimulationXList != null) {
+      return TestScrollScrollSimulation(
+        scrollSimulation,
+        scrollSimulationXList,
+      );
+    }
+    return scrollSimulation;
+  }
+
+  @override
+  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return TestScrollPhysics(
+      scrollSimulationXList,
+      parent: buildParent(ancestor),
+    );
+  }
+}
+
+class TestScrollScrollSimulation extends Simulation {
+  TestScrollScrollSimulation(this.innerScrollSimulation,
+      this.scrollSimulationXList,);
+
+  final Simulation innerScrollSimulation;
+
+  final List<double> scrollSimulationXList;
+
+  @override
+  double dx(double time) => innerScrollSimulation.dx(time);
+
+  @override
+  bool isDone(double time) => innerScrollSimulation.isDone(time);
+
+  @override
+  double x(double time) {
+    final double simulationX = innerScrollSimulation.x(time);
+    if (scrollSimulationXList != null) {
+      scrollSimulationXList.add(simulationX);
+    }
+    return simulationX;
+  }
 }
 
 class PageView62209 extends StatefulWidget {

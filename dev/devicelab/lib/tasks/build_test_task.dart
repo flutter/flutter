@@ -59,6 +59,7 @@ abstract class BuildTestTask {
       }
       section('BUILDING APPLICATION');
       await flutter('build', options: getBuildArgs(deviceOperatingSystem));
+      copyArtifacts();
     });
 
   }
@@ -83,6 +84,11 @@ abstract class BuildTestTask {
   /// Args passed to flutter drive to test the built application.
   List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) => throw UnimplementedError('getTestArgs is not implemented');
 
+  /// Copy artifacts to [applicationBinaryPath] if specified.
+  ///
+  /// This is needed when running from CI, so that LUCI recipes know where to locate and upload artifacts to GCS.
+  void copyArtifacts() => throw UnimplementedError('copyArtifacts is not implemented');
+
   /// Logic to construct [TaskResult] from this test's results.
   Future<TaskResult> parseTaskResult() => throw UnimplementedError('parseTaskResult is not implemented');
 
@@ -98,10 +104,6 @@ abstract class BuildTestTask {
   Future<TaskResult> call() async {
     if (buildOnly && testOnly) {
       throw Exception('Both build and test should not be passed. Pass only one.');
-    }
-
-    if (buildOnly && applicationBinaryPath != null) {
-      throw Exception('Application binary path is only used for tests');
     }
 
     if (!testOnly) {
