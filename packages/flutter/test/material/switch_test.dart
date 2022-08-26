@@ -21,7 +21,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  final ThemeData theme = ThemeData(brightness: Brightness.light);
+  final ThemeData theme = ThemeData();
 
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();

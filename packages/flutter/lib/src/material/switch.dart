@@ -60,6 +60,13 @@ enum _SwitchType { material, adaptive }
 /// ** See code in examples/api/lib/material/switch/switch.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to add icons and images on the thumb of the [Switch]
+/// using [Switch.inactiveIcon], [Switch.activeIcon] and [Switch.thumbImage] properties.
+///
+/// ** See code in examples/api/lib/material/switch/switch.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -344,11 +351,11 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbImage: MaterialStateProperty.resolveWith<ImageProvider>((Set<MaterialState> states) {
+  ///   thumbImage: MaterialStateProperty.resolveWith<ImageProvider?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
-  ///       return MemoryImage(Uint8List.fromList(<int>[1, 2]));
+  ///       return disabledImage;
   ///     }
-  ///     return MemoryImage(Uint8List.fromList(<int>[3, 4]));
+  ///     return null; // All other states will use the default thumbImage.
   ///   }),
   /// )
   /// ```
