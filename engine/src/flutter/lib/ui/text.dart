@@ -2907,6 +2907,36 @@ class Paragraph extends NativeFieldWrapperClass1 {
 
   @FfiNative<Handle Function(Pointer<Void>)>('Paragraph::computeLineMetrics')
   external Float64List _computeLineMetrics();
+
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
+  void dispose() {
+    assert(!_disposed);
+    assert(() {
+      _disposed = true;
+      return true;
+    }());
+    _dispose();
+  }
+
+  /// This can't be a leaf call because the native function calls Dart API
+  /// (Dart_SetNativeInstanceField).
+  @FfiNative<Void Function(Pointer<Void>)>('Paragraph::dispose')
+  external void _dispose();
+
+  bool _disposed = false;
+  /// Whether this reference to the underlying picture is [dispose]d.
+  ///
+  /// This only returns a valid value if asserts are enabled, and must not be
+  /// used otherwise.
+  bool get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _disposed;
+      return true;
+    }());
+    return disposed ?? (throw StateError('$runtimeType.debugDisposed is only available when asserts are enabled.'));
+  }
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
@@ -3166,8 +3196,8 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
     _placeholderScales.add(scale);
   }
 
-  @FfiNative<Handle Function(Pointer<Void>, Double, Double, Uint32, Double, Uint32)>('ParagraphBuilder::addPlaceholder')
-  external String? _addPlaceholder(double width, double height, int alignment, double baselineOffset, int baseline);
+  @FfiNative<Void Function(Pointer<Void>, Double, Double, Uint32, Double, Uint32)>('ParagraphBuilder::addPlaceholder')
+  external void _addPlaceholder(double width, double height, int alignment, double baselineOffset, int baseline);
 
   /// Applies the given paragraph style and returns a [Paragraph] containing the
   /// added text and associated styling.

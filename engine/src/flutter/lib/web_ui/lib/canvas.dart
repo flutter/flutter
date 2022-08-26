@@ -21,7 +21,7 @@ enum VertexMode {
   triangleFan,
 }
 
-class Vertices {
+abstract class Vertices {
   factory Vertices(
     VertexMode mode,
     List<Offset> positions, {
@@ -48,6 +48,9 @@ class Vertices {
       colors: colors,
       indices: indices);
   }
+
+  void dispose();
+  bool get debugDisposed;
 }
 
 abstract class PictureRecorder {

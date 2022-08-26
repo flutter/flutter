@@ -51,6 +51,8 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
 
   size_t GetAllocationSize() const override;
 
+  void dispose();
+
  private:
   std::unique_ptr<txt::Paragraph> m_paragraph;
 

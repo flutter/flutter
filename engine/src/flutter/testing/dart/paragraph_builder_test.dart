@@ -25,7 +25,7 @@ void main() {
     final ParagraphBuilder paragraphBuilder =
         ParagraphBuilder(ParagraphStyle());
     paragraphBuilder.build();
-    paragraphBuilder.pushStyle(TextStyle());
+    expect(() { paragraphBuilder.pushStyle(TextStyle()); }, throwsStateError);
   });
 
   test('GetRectsForRange smoke test', () {

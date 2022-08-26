@@ -197,6 +197,7 @@ typedef CanvasPath Path;
   V(Paragraph, alphabeticBaseline, 1)                  \
   V(Paragraph, computeLineMetrics, 1)                  \
   V(Paragraph, didExceedMaxLines, 1)                   \
+  V(Paragraph, dispose, 1)                             \
   V(Paragraph, getLineBoundary, 2)                     \
   V(Paragraph, getPositionForOffset, 3)                \
   V(Paragraph, getRectsForPlaceholders, 1)             \
@@ -280,7 +281,8 @@ typedef CanvasPath Path;
   V(SemanticsUpdateBuilder, build, 2)                  \
   V(SemanticsUpdateBuilder, updateCustomAction, 5)     \
   V(SemanticsUpdateBuilder, updateNode, 36)            \
-  V(SemanticsUpdate, dispose, 1)
+  V(SemanticsUpdate, dispose, 1)                       \
+  V(Vertices, dispose, 1)
 
 #define FFI_FUNCTION_INSERT(FUNCTION, ARGS)     \
   g_function_dispatchers.insert(std::make_pair( \

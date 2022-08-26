@@ -1017,6 +1017,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
   ///
   /// The returned object can be passed to [PlatformDispatcher.updateSemantics]
   /// to actually update the semantics retained by the system.
+  ///
+  /// This object is unusable after calling build.
   SemanticsUpdate build() {
     final SemanticsUpdate semanticsUpdate = SemanticsUpdate._();
     _build(semanticsUpdate);

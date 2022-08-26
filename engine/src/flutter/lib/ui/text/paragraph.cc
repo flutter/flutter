@@ -66,6 +66,11 @@ void Paragraph::layout(double width) {
 }
 
 void Paragraph::paint(Canvas* canvas, double x, double y) {
+  if (!m_paragraph || !canvas) {
+    // disposed.
+    return;
+  }
+
   SkCanvas* sk_canvas = canvas->canvas();
   if (!sk_canvas) {
     return;
@@ -166,6 +171,11 @@ tonic::Float64List Paragraph::computeLineMetrics() {
   }
 
   return result;
+}
+
+void Paragraph::dispose() {
+  m_paragraph.reset();
+  ClearDartWrapper();
 }
 
 }  // namespace flutter
