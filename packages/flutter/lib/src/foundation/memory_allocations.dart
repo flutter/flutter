@@ -5,28 +5,7 @@
 import 'dart:ui' as ui;
 
 /// A lyfecycle event of an object.
-abstract class ObjectEvent{}
-
-/// A listener of [ObjectEvent].
-typedef ObjectEventListener = void Function(ObjectEvent);
-
-/// An event that describes vreation of an object.
-class ObjectCreated implements ObjectEvent {
-  /// Creates an instance of [ObjectCreated].
-  ObjectCreated({
-    required this.library,
-    required this.klass,
-    required this.object,
-    this.token,
-    this.details = const <Object>[],
-  });
-
-  /// Name of the instrumented library.
-  final String library;
-
-  /// Name of the instrumented class.
-  final String klass;
-
+abstract class ObjectEvent{
   /// Reference to the object.
   ///
   /// The reference should not be stored in any
@@ -45,61 +24,71 @@ class ObjectCreated implements ObjectEvent {
   final List<Object> details;
 }
 
-///
-class ObjectDisposed implements ObjectEvent {
+/// A listener of [ObjectEvent].
+typedef ObjectEventListener = void Function(ObjectEvent);
 
-  ///
-  ObjectDisposed({
-    required this.object,
-    this.details = const <Object>[],
-    this.token }
-  );
+/// An event that describes creation of an object.
+class ObjectCreated implements ObjectEvent {
+  /// Creates an instance of [ObjectCreated].
+  ObjectCreated({
+    required this.library,
+    required this.className,
+    required super.object,
+    super.token,
+    super.details = const <Object>[],
+  });
 
-  ///
-  final Object object;
+  /// Name of the instrumented library.
+  final String library;
 
-  ///
-  final Object? token;
-
-  ///
-  final List<Object> details;
+  /// Name of the instrumented class.
+  final String className;
 }
 
+/// An event that describes disposal of an object.
+class ObjectDisposed implements ObjectEvent {
+
+  /// Creates an instance of [ObjectDisposed].
+  ObjectDisposed({
+    required super.object,
+    super.details = const <Object>[],
+    super.token
+  });
+}
 
 /// The event contains tracing information that may help with memory
 /// troubleshooting.
 ///
-/// For example, it may be information about ownership transfer
+/// For example, information about ownership transfer
 /// or state change.
 class ObjectTraced implements ObjectEvent {
 
-  ///
-  ObjectTraced(
-    this.object, {
+  /// Creates an instance of [ObjectTraced].
+  ObjectTraced({
+    this.object,
     this.details = const <Object>[],
-    this.token, }
-  );
-
-  ///
-  final Object object;
-
-  ///
-  final Object? token;
-
-  ///
-  final List<Object> details;
+    this.token,
+  });
 }
 
+/// An interface for listening to object lyfecycle events.
 ///
+/// [MemoryAllocations] already listens to creation and disposal events
+/// for disposable objects in Flutter Framework.
+/// You can dispatch events for other objects by invoking
+/// [MemoryAllocations.dispatchObjectEvent].
 class MemoryAllocations {
   MemoryAllocations._();
 
-  ///
+  /// The shared instance of [MemoryAllocations].
   static final MemoryAllocations instance = MemoryAllocations._();
 
   List<ObjectEventListener>? _listeners;
 
+  /// Register a listener that is called every time an object event is
+  /// dispatched.
   ///
+  /// Listeners can be removed with [removeListener].
   void addListener(ObjectEventListener listener){
     if (_listeners == null) {
       _listeners = <ObjectEventListener>[];
@@ -108,7 +97,10 @@ class MemoryAllocations {
     _listeners!.add(listener);
   }
 
+  /// Stop calling the given listener every timean object event is
+  /// dispatched.
   ///
+  /// Listeners can be added with [addListener].
   void removeListener(ObjectEventListener listener){
     _listeners?.remove(listener);
     if (_listeners?.isEmpty ?? false) {
@@ -117,8 +109,8 @@ class MemoryAllocations {
     }
   }
 
-  ///
-  void registerObjectEvent(ObjectEvent objectEvent) {
+  /// Dispatch a new object event to listeners.
+  void dispatchObjectEvent(ObjectEvent objectEvent) {
     final List<ObjectEventListener>? listeners = _listeners;
     if (listeners == null || listeners.isEmpty) {
       return;
