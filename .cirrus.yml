@@ -27,6 +27,8 @@ task:
     cpu: $CPU
     memory: $MEMORY
     use_in_memory_disk: $USE_IN_MEMORY_DISK
+    login_script:
+      echo $GOOGLE_CREDENTIALS | docker login -u _json_key --password-stdin https://gcr.io
   environment:
     # We shrink our default resource requirement as much as possible because that way we are more
     # likely to get scheduled. We require 4G of RAM because most of the shards (all but one as of
