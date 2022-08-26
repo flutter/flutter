@@ -102,6 +102,11 @@ mixin _ConsecutiveTapMixin {
 /// 
 /// Takes on the responsibilities of [TapGestureRecognizer] and [DragGestureRecognizer] in one [GestureRecognizer].
 class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _ConsecutiveTapMixin {
+  /// Initialize the object.
+  ///
+  /// [dragStartBehavior] must not be null.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapAndDragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -452,8 +457,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 /// Handles taps and recognizes when the user has pressed down at the same location
 /// for a long period of time.
 class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer with _ConsecutiveTapMixin {
+  /// Creates a tap and long-press gesture recognizer.
   TapAndLongPressGestureRecognizer({
-    /// The deadline for a long tap to be considered a long press.
     Duration? duration,
     // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
     // ignore: avoid_init_to_null
