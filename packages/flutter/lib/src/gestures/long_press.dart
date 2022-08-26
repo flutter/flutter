@@ -287,6 +287,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [GestureDetector.onLongPressDown], which exposes this callback in a widget.
   GestureLongPressDownCallback? onLongPressDown;
 
+  /// {@template flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressCancel}
   /// Called when a pointer that previously triggered [onLongPressDown] will
   /// not end up causing a long-press.
   ///
@@ -303,6 +304,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
+  /// {@endtemplate}
   GestureLongPressCancelCallback? onLongPressCancel;
 
   /// Called when a long press gesture by a primary button has been recognized.
@@ -317,6 +319,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureLongPressCallback? onLongPress;
 
+  /// {@template flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressStart}
   /// Called when a long press gesture by a primary button has been recognized.
   ///
   /// This is equivalent to (and is called immediately before) [onLongPress].
@@ -328,8 +331,10 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [LongPressStartDetails], which is passed as an argument to this callback.
+  /// {@endtemplate}
   GestureLongPressStartCallback? onLongPressStart;
 
+  /// {@template flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressMoveUpdate}
   /// Called when moving after the long press by a primary button is recognized.
   ///
   /// See also:
@@ -337,6 +342,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [LongPressMoveUpdateDetails], which is passed as an argument to this
   ///    callback.
+  /// {@endtemplate}
   GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
 
   /// Called when the pointer stops contacting the screen after a long-press
@@ -352,6 +358,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureLongPressUpCallback? onLongPressUp;
 
+  /// {@template flutter.gestures.longpress.LongPressGestureRecognizer.onLongPressEnd}
   /// Called when the pointer stops contacting the screen after a long-press
   /// by a primary button.
   ///
@@ -365,6 +372,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [LongPressEndDetails], which is passed as an argument to this
   ///    callback.
+  /// {@endtemplate}
   GestureLongPressEndCallback? onLongPressEnd;
 
   /// Called when a pointer has contacted the screen at a particular location
