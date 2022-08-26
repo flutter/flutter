@@ -107,6 +107,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   PointerUpEvent? _up;
   
   // Drag related state
+  OffsetPair? _correctedPosition;
   late OffsetPair _initialPosition;
   late double _globalDistanceMoved;
   _DragState _state = _DragState.ready;
@@ -234,6 +235,20 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
           print('has sufficient global distance to accept');
           _checkTapCancel();
           _checkStart(event);
+          if (event.localDelta != Offset.zero) {
+            print('should call dragupdate here ${event.localDelta} != ${Offset.zero}');
+            final Matrix4? localToGlobal = event.transform != null ? Matrix4.tryInvert(event.transform!) : null;
+            final Offset correctedLocalPosition = _initialPosition.local + event.localDelta;
+            final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
+              untransformedEndPosition: correctedLocalPosition,
+              untransformedDelta: event.localDelta,
+              transform: localToGlobal,
+            );
+            final OffsetPair updateDelta = OffsetPair(local: event.localDelta, global: globalUpdateDelta);
+            _correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
+            _checkUpdate(event);
+            _correctedPosition = null;
+          }
         }
       }
     } else if (event is PointerUpEvent) {
@@ -252,7 +267,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void rejectGesture(int pointer) {
-    // TODO: implement rejectGesture
     print('reject gesture $pointer');
     print('cancel from reject');
     _giveUpPointer(pointer);
@@ -323,8 +337,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     }
     DragStartDetails details = DragStartDetails(
       sourceTimeStamp: event.timeStamp,
-      globalPosition: event.position,
-      localPosition: event.localPosition,
+      globalPosition: _initialPosition.global,
+      localPosition: _initialPosition.local,
       kind: getKindForPointer(event.pointer),
     );
 
@@ -332,15 +346,17 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _checkUpdate(PointerMoveEvent event) {
+    final Offset globalPosition = _correctedPosition != null ? _correctedPosition!.global : event.position;
+    final Offset localPosition = _correctedPosition != null ? _correctedPosition!.local : event.localPosition; 
     DragUpdateDetails details =  DragUpdateDetails(
       sourceTimeStamp: event.timeStamp,
-      delta: event.delta,
+      delta: event.localDelta,
       primaryDelta: null,
-      globalPosition: event.position,
+      globalPosition: globalPosition,
       kind: getKindForPointer(event.pointer),
-      localPosition: event.localPosition,
-      offsetFromOrigin: event.position - _initialPosition.global,
-      localOffsetFromOrigin: event.localPosition - _initialPosition.local,
+      localPosition: localPosition,
+      offsetFromOrigin: globalPosition - _initialPosition.global,
+      localOffsetFromOrigin: localPosition - _initialPosition.local,
     );
     invokeCallback<void>('onUpdate', () => onUpdate!(details, _consecutiveTapCountWhileDragging!));
   }
