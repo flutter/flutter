@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-import 'src/app.dart';
+import 'package:complex_layout/main_bad.dart' as app;
+import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
-  runApp(
-    const ComplexLayoutApp()
-  );
+  enableFlutterDriverExtension();
+  app.main();
 }

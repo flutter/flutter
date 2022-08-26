@@ -7,6 +7,6 @@ import 'src/app.dart';
 
 void main() {
   runApp(
-    const ComplexLayoutApp()
+    const ComplexLayoutApp(badScroll: true)
   );
 }

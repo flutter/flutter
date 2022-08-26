@@ -23,12 +23,19 @@ String _testOutputDirectory(String testDirectory) {
   return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
 }
 
-TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createComplexLayoutScrollPerfTest({
+  bool measureCpuGpu = true,
+  bool badScroll = false,
+  bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-    'test_driver/scroll_perf.dart',
+    badScroll
+      ? 'test_driver/scroll_perf_bad.dart'
+      : 'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
     measureCpuGpu: measureCpuGpu,
+    enableImpeller: enableImpeller,
   ).run;
 }
 

@@ -150,6 +150,8 @@
 /dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_bad_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_bad_impeller_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/cubic_bezier_perf_ios_sksl_warmup__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/external_ui_integration_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test_ios.dart @jmagman @flutter/tool
