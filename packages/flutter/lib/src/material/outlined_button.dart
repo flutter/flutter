@@ -59,8 +59,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [ElevatedButton], a filled Material Design button with a shadow.
-///  * [TextButton], a Material Design button without a shadow.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class OutlinedButton extends ButtonStyleButton {
@@ -165,7 +167,7 @@ class OutlinedButton extends ButtonStyleButton {
     )
     Color? primary,
     @Deprecated(
-      'Use disabledForegroundColor and disabledForegroundColor instead. '
+      'Use disabledForegroundColor instead. '
       'This feature was deprecated after v3.1.0.'
     )
     Color? onSurface,

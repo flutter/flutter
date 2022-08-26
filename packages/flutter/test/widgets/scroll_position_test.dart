@@ -33,24 +33,27 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   await tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
-      child: Navigator(
-        key: navigatorKey,
-        onGenerateRoute: (RouteSettings settings) {
-          if (settings.name == '/') {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (_) => const ThePositiveNumbers(from: 0),
-              maintainState: maintainState,
-            );
-          } else if (settings.name == '/second') {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (_) => const ThePositiveNumbers(from: 10000),
-              maintainState: maintainState,
-            );
-          }
-          return null;
-        },
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (RouteSettings settings) {
+            if (settings.name == '/') {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (_) => const ThePositiveNumbers(from: 0),
+                maintainState: maintainState,
+              );
+            } else if (settings.name == '/second') {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (_) => const ThePositiveNumbers(from: 10000),
+                maintainState: maintainState,
+              );
+            }
+            return null;
+          },
+        ),
       ),
     ),
   );

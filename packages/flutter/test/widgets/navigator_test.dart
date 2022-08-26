@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -201,8 +199,7 @@ void main() {
       };
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: navigator,
           pages: pages,
@@ -566,8 +563,7 @@ void main() {
     }
     final TabController controller = TabController(length: 3, vsync: tester);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: TabBarView(
           controller: controller,
           children: <Widget>[
@@ -598,8 +594,7 @@ void main() {
       );
     }
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -608,8 +603,7 @@ void main() {
     pages.add(const MaterialPage<void>(child: Text('Page 2')));
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -641,8 +635,7 @@ void main() {
       );
     }
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -659,8 +652,7 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -1904,8 +1896,7 @@ void main() {
   testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: testKey,
           initialRoute: '/a/b',
@@ -1947,8 +1938,7 @@ void main() {
     bool onGenerateInitialRoutesCalled = false;
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: testKey,
           initialRoute: 'Hello World',
@@ -2074,8 +2064,7 @@ void main() {
     final Map<String, MaterialPageRoute<dynamic>> routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: navigator,
           initialRoute: 'root',
@@ -2154,8 +2143,7 @@ void main() {
     Widget widgetUnderTest({required bool enabled}) {
       return TickerMode(
         enabled: enabled,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             initialRoute: 'root',
             onGenerateRoute: (RouteSettings settings) {
@@ -2261,8 +2249,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: top,
             initialRoute: 'top1',
@@ -2332,8 +2319,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key1,
             initialRoute: 'navigator1',
@@ -2353,8 +2339,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key2,
             initialRoute: 'navigator2',
@@ -2412,8 +2397,7 @@ void main() {
         );
       };
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Stack(
           children: <Widget>[
             HeroControllerScope(
@@ -2459,8 +2443,7 @@ void main() {
 
     // Swaps the spies.
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Stack(
           children: <Widget>[
             HeroControllerScope(
@@ -2532,8 +2515,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Stack(
             children: <Widget>[
               Navigator(
@@ -2571,8 +2553,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Stack(
             children: <Widget>[
               Navigator(
@@ -2637,8 +2618,7 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+          child: TestDependencies(
             child: Navigator(
               key: key,
               pages: pages,
@@ -2736,8 +2716,7 @@ void main() {
               DefaultMaterialLocalizations.delegate,
               DefaultWidgetsLocalizations.delegate,
             ],
-            child: Directionality(
-              textDirection: TextDirection.ltr,
+            child: TestDependencies(
               child: Navigator(
                 pages: myPages,
               ),
@@ -2832,8 +2811,7 @@ void main() {
               DefaultMaterialLocalizations.delegate,
               DefaultWidgetsLocalizations.delegate,
             ],
-            child: Directionality(
-              textDirection: TextDirection.ltr,
+            child: TestDependencies(
               child: Navigator(
                 pages: myPages,
               ),
@@ -3086,8 +3064,7 @@ void main() {
     testWidgets('Pop no animation page does not crash', (WidgetTester tester) async {
       // Regression Test for https://github.com/flutter/flutter/issues/86604.
       Widget buildNavigator(bool secondPage) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
+        return TestDependencies(
           child: Navigator(
             pages: <Page<void>>[
               const ZeroDurationPage(
@@ -3691,8 +3668,7 @@ void main() {
   testWidgets('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
     final NavigatorObserver observer = NavigatorObserver();
     Widget build([Key? key]) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
+      return TestDependencies(
         child: Navigator(
           key: key,
           observers: <NavigatorObserver>[observer],
@@ -3869,8 +3845,7 @@ void main() {
   testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
     final _MockNavigatorObserver observer = _MockNavigatorObserver();
     Widget build([Key? key]) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
+      return TestDependencies(
         child: Navigator(
           key: key,
           observers: <NavigatorObserver>[observer],
@@ -4122,7 +4097,7 @@ class ZeroDurationPage extends Page<void> {
 
 class ZeroDurationPageRoute extends PageRoute<void> {
   ZeroDurationPageRoute({required ZeroDurationPage page})
-      : super(settings: page, preferRasterization: false);
+      : super(settings: page, allowSnapshotting: false);
 
   @override
   Duration get transitionDuration => Duration.zero;
@@ -4161,5 +4136,22 @@ class _MockNavigatorObserver implements NavigatorObserver {
   Object? noSuchMethod(Invocation invocation) {
     _invocations.add(invocation.memberName);
     return null;
+  }
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: child,
+      )
+    );
   }
 }
