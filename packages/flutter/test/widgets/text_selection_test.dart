@@ -113,7 +113,7 @@ void main() {
     expect(tapCount, 6);
   });
 
-  // TODO (Renzo-Olivares): Now that the gesture recognizer detects consecutive taps, and not just double taps, this test is no longer true.
+  // TODO(Renzo-Olivares): Now that the gesture recognizer detects consecutive taps, and not just double taps, this test is no longer true.
   // testWidgets('in a series of rapid taps, onTapDown and onDoubleTapDown alternate', (WidgetTester tester) async {
   //   await pumpGestureDetector(tester);
   //   await tester.tapAt(const Offset(200, 200));
@@ -197,7 +197,7 @@ void main() {
     expect(singleTapUpCount, 0);
     expect(tapCount, 1);
 
-    // TODO (Renzo-Olivares): Since Taps and Long Presses/ and Taps and Drags are now bundled
+    // TODO(Renzo-Olivares): Since Taps and Long Presses/ and Taps and Drags are now bundled
     // how should the cancel callback be handled.
     // 1. Should it be handled on tap cancel?
     // 2. On Drag/Longpress cancel?
@@ -413,7 +413,7 @@ void main() {
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
 
-    // TODO (Renzo-Olivares): The previous DragGestureRecognizer fired two PointerMoveEvents at the start of
+    // TODO(Renzo-Olivares): The previous DragGestureRecognizer fired two PointerMoveEvents at the start of
     // a drag when DragStartBehavior was set to DragStartBehavior.down. Currently the new TapAndDragGestureRecognizer
     // fires one PointerMoveEvent per PointerEvent that reaches handleEvent. So where before only one
     // gesture.moveBy was necessary to trigger drag update, now two are necessary. Is there any upside/downside to either
@@ -444,7 +444,7 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveBy(const Offset(210.0, 200.0));
-    // TODO (Renzo-Olivares): The previous DragGestureRecognizer fired two PointerMoveEvents at the start of
+    // TODO(Renzo-Olivares): The previous DragGestureRecognizer fired two PointerMoveEvents at the start of
     // a drag when DragStartBehavior was set to DragStartBehavior.down. Currently the new TapAndDragGestureRecognizer
     // fires one PointerMoveEvent per PointerEvent that reaches handleEvent. So where before only one
     // gesture.moveBy was necessary to trigger drag update, now two are necessary. Is there any upside/downside to either
@@ -757,7 +757,7 @@ void main() {
 
     await tester.tapAt(position);
     // Don't do a double tap drag.
-    await tester.pump(Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
