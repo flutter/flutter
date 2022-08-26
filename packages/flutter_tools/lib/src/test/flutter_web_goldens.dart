@@ -102,7 +102,7 @@ class TestGoldenComparator {
     final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
     final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
     if (process == null) {
-      return 'unknown error';
+      return 'process was null';
     }
 
     process.sendCommand(imageFile, goldenKey, updateGoldens);
