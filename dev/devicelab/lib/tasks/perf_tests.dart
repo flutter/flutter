@@ -1403,7 +1403,8 @@ class CompileTest {
         if (appPath == null) {
           throw 'Failed to find app bundle in ${buildDirectory.path}';
         }
-        // IPAs are created manually, https://flutter.dev/ios-release/
+        // Validate changes in Dart snapshot format and data layout do not
+        // change compression size.
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
         if (reportPackageContentSizes) {
