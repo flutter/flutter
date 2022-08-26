@@ -78,8 +78,8 @@ import 'theme_data.dart';
 /// useful to make relatively sweeping changes based on a few initial
 /// parameters with simple values. The button styleFrom() methods
 /// enable such sweeping changes. See for example:
-/// [TextButton.styleFrom], [ElevatedButton.styleFrom],
-/// [OutlinedButton.styleFrom].
+/// [ElevatedButton.styleFrom], [FilledButton.styleFrom],
+/// [OutlinedButton.styleFrom], [TextButton.styleFrom].
 ///
 /// For example, to override the default text and icon colors for a
 /// [TextButton], as well as its overlay color, with all of the
@@ -119,8 +119,8 @@ import 'theme_data.dart';
 /// | Type         | Flutter implementation  |
 /// | :----------- | :---------------------- |
 /// | Elevated     | [ElevatedButton]        |
-/// | Filled       | Styled [ElevatedButton] |
-/// | Filled Tonal | Styled [ElevatedButton] |
+/// | Filled       | [FilledButton]          |
+/// | Filled Tonal | [FilledButton.tonal]    |
 /// | Outlined     | [OutlinedButton]        |
 /// | Text         | [TextButton]            |
 ///
@@ -132,9 +132,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [TextButtonTheme], the theme for [TextButton]s.
 ///  * [ElevatedButtonTheme], the theme for [ElevatedButton]s.
+///  * [FilledButtonTheme], the theme for [FilledButton]s.
 ///  * [OutlinedButtonTheme], the theme for [OutlinedButton]s.
+///  * [TextButtonTheme], the theme for [TextButton]s.
 @immutable
 class ButtonStyle with Diagnosticable {
   /// Create a [ButtonStyle].

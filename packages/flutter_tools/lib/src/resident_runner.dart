@@ -240,7 +240,7 @@ class FlutterDevice {
     bool cacheStartupProfile = false,
     bool enableDds = true,
     required bool allowExistingDdsInstance,
-    bool? ipv6 = false,
+    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     late StreamSubscription<void> subscription;
@@ -927,14 +927,14 @@ abstract class ResidentHandlers {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
-    final List<FlutterView> views = await flutterDevices
-      .first!
-      .vmService!.getFlutterViews();
-    final Map<String, Object> data = await (flutterDevices.first!.vmService!.getSkSLs(
+    final FlutterDevice flutterDevice = flutterDevices.first!;
+    final FlutterVmService vmService = flutterDevice.vmService!;
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final Map<String, Object?>? data = await vmService.getSkSLs(
       viewId: views.first.id,
-    ) as FutureOr<Map<String, Object>>);
-    final Device device = flutterDevices.first!.device!;
-    return sharedSkSlWriter(device, data);
+    );
+    final Device device = flutterDevice.device!;
+    return sharedSkSlWriter(device, data!);
   }
 
   /// Take a screenshot on the provided [device].
@@ -1091,10 +1091,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   Logger? get logger => globals.logger;
 
   @override
-  FileSystem? get fileSystem => globals.fs;
+  FileSystem get fileSystem => globals.fs;
 
   @override
-  final List<FlutterDevice?> flutterDevices;
+  final List<FlutterDevice> flutterDevices;
 
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -1171,7 +1171,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   //
   // Would be null if there is no device connected or
   // there is no devFS associated with the first device.
-  Uri? get uri => flutterDevices.first?.devFS?.baseUri;
+  Uri? get uri => flutterDevices.first.devFS?.baseUri;
 
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;
@@ -1257,7 +1257,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final String address = flutterDevices.first!.vmService!.wsAddress.toString();
+        final String address = flutterDevices.first.vmService!.wsAddress.toString();
         final File vmserviceOutFile = globals.fs.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
@@ -1359,7 +1359,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
-        ipv6: ipv6,
+        ipv6: ipv6 ?? false,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
         cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );
