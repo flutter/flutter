@@ -2362,7 +2362,10 @@ void main() {
   testWidgets(
     'Can drag the left handle while the right handle remains off-screen',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      // Text is longer than textfield width.
+      const String testValue =
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
+      final TextEditingController controller = TextEditingController(text: testValue);
       final ScrollController scrollController = ScrollController();
 
       await tester.pumpWidget(
@@ -2379,12 +2382,6 @@ void main() {
           ),
         ),
       );
-
-      // Text is longer than textfield width.
-      const String testValue =
-          'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
-      await tester.enterText(find.byType(TextField), testValue);
-      await skipPastScrollingAnimation(tester);
 
       // Double tap 'b' to show handles.
       final Offset bPos = textOffsetToPosition(tester, testValue.indexOf('b'));
@@ -2443,7 +2440,7 @@ void main() {
           break;
       }
 
-      // the scroll area of text field should not move.
+      // The scroll area of text field should not move.
       expect(scrollController.offset, beforeScrollOffset);
     },
   );
@@ -2451,7 +2448,10 @@ void main() {
   testWidgets(
     'Can drag the right handle while the left handle remains off-screen',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      // Text is longer than textfield width.
+      const String testValue =
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
+      final TextEditingController controller = TextEditingController(text: testValue);
       final ScrollController scrollController = ScrollController();
 
       await tester.pumpWidget(
@@ -2468,16 +2468,6 @@ void main() {
           ),
         ),
       );
-
-      // Move to the left edge.
-      scrollController.jumpTo(0);
-      await tester.pumpAndSettle();
-
-      // Text is longer than textfield width.
-      const String testValue =
-          'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
-      await tester.enterText(find.byType(TextField), testValue);
-      await skipPastScrollingAnimation(tester);
 
       // Double tap 'a' to show handles.
       final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
@@ -2521,7 +2511,7 @@ void main() {
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, toOffset);
 
-      // the scroll area of text field should not move.
+      // The scroll area of text field should not move.
       expect(scrollController.offset, beforeScrollOffset);
     },
   );

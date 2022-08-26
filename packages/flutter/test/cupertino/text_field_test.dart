@@ -3800,10 +3800,6 @@ void main() {
         ),
       );
 
-      await tester.enterText(find.byType(CupertinoTextField), testValue);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
-
       // Double tap 'b' to show handles.
       final Offset bPos = textOffsetToPosition(tester, testValue.indexOf('b'));
       await tester.tapAt(bPos);
@@ -3885,14 +3881,6 @@ void main() {
           ),
         ),
       );
-
-      // Move to the left edge.
-      scrollController.jumpTo(0);
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(CupertinoTextField), testValue);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
 
       // Double tap 'a' to show handles.
       final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
