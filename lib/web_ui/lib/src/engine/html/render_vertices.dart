@@ -57,6 +57,21 @@ class SurfaceVertices implements ui.Vertices {
     }
     return list;
   }
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+  }
+
+  @override
+  bool get debugDisposed {
+    if (assertionsEnabled) {
+      return _disposed;
+    }
+    throw StateError('Vertices.debugDisposed is only avialalbe when asserts are enabled.');
+  }
 }
 
 /// Lazily initializes web gl.

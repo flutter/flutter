@@ -670,6 +670,8 @@ abstract class Paragraph {
   TextRange getLineBoundary(TextPosition position);
   List<TextBox> getBoxesForPlaceholders();
   List<LineMetrics> computeLineMetrics();
+  void dispose();
+  bool get debugDisposed;
 }
 
 abstract class ParagraphBuilder {
