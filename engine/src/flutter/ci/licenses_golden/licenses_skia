@@ -1,4 +1,4 @@
-Signature: a01d5ffa3cf63d9f7505b4545e35d159
+Signature: ddf5fb669889eb9274722056cb4eba68
 
 UNUSED LICENSES:
 
@@ -2651,8 +2651,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLSharedCompiler.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLSharedCompiler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLThreadContext.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLCanExitWithoutReturningValue.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLCheckProgramStructure.cpp
