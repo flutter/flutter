@@ -495,67 +495,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('test --dart-define-from-file and enable-dart-define-from-file-raw-value ', () async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    await globals.fs.file('config.json').writeAsString(
-        '''
-        {
-          "kInt": 1,
-          "name": "denghaizhu",
-          "kDouble": 1.1,
-          "title": "this is title from config json file"
-        }
-      '''
-    );
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
-
-    await runner.run(<String>[
-      'bundle',
-      '--no-pub',
-      '--dart-define-from-file=config.json',
-      '--enable-dart-define-from-file-raw-value',
-    ]);
-  }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(environment.defines[kDartDefines], 'a0ludD0x,bmFtZT1kZW5naGFpemh1,a0RvdWJsZT0xLjE=,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=,REVGSU5FX0NPTkZJR19KU09OX1JBV19WQUxVRT17ImtJbnQiOjEsIm5hbWUiOiJkZW5naGFpemh1Iiwia0RvdWJsZSI6MS4xLCJ0aXRsZSI6InRoaXMgaXMgdGl0bGUgZnJvbSBjb25maWcganNvbiBmaWxlIn0=');
-    }),
-    FileSystem: fsFactory,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('test --dart-define-from-file and android ', () async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    await globals.fs.file('config.json').writeAsString(
-        '''
-        {
-          "kInt": 1,
-          "name": "denghaizhu",
-          "kDouble": 1.1,
-          "title": "this is title from config json file"
-        }
-      '''
-    );
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
-
-    await runner.run(<String>[
-      'bundle',
-      '--no-pub',
-      '--dart-define-from-file=config.json',
-      '--enable-dart-define-from-file-raw-value',
-    ]);
-  }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(environment.defines[kDartDefines], 'a0ludD0x,bmFtZT1kZW5naGFpemh1,a0RvdWJsZT0xLjE=,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=,REVGSU5FX0NPTkZJR19KU09OX1JBV19WQUxVRT17ImtJbnQiOjEsIm5hbWUiOiJkZW5naGFpemh1Iiwia0RvdWJsZSI6MS4xLCJ0aXRsZSI6InRoaXMgaXMgdGl0bGUgZnJvbSBjb25maWcganNvbiBmaWxlIn0=');
-    }),
-    FileSystem: fsFactory,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

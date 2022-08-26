@@ -910,10 +910,6 @@ String getFuchsiaBuildDirectory() {
 /// These values are URI-encoded and then combined into a comma-separated string.
 const String kDartDefines = 'DartDefines';
 
-/// Defines specified via the `--dart-define-from-file` command-line option,
-/// you can get raw json value by set `--enable-dart-define-from-file-raw-value`
-const String kDefineConfigJsonRawValue = 'DEFINE_CONFIG_JSON_RAW_VALUE';
-
 /// The define to pass a [BuildMode].
 const String kBuildMode = 'BuildMode';
 
