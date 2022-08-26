@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'constants.dart';
-import 'events.dart';
 import 'drag_details.dart';
-import 'long_press.dart' show GestureLongPressStartCallback, GestureLongPressMoveUpdateCallback, GestureLongPressEndCallback, GestureLongPressCancelCallback, LongPressStartDetails, LongPressMoveUpdateDetails, LongPressEndDetails;
-import 'monodrag.dart' show GestureDragCancelCallback, GestureDragEndCallback;
+import 'events.dart';
+import 'long_press.dart' show GestureLongPressCancelCallback, GestureLongPressEndCallback, GestureLongPressMoveUpdateCallback, GestureLongPressStartCallback, LongPressEndDetails, LongPressMoveUpdateDetails, LongPressStartDetails;
+import 'monodrag.dart' show GestureDragCancelCallback;
 import 'recognizer.dart';
-import 'tap.dart' show GestureTapCallback, GestureTapDownCallback, GestureTapUpCallback, GestureTapCancelCallback, TapUpDetails, TapDownDetails;
+import 'tap.dart' show GestureTapCallback, GestureTapCancelCallback, GestureTapDownCallback, GestureTapUpCallback, TapDownDetails, TapUpDetails;
 import 'velocity_tracker.dart';
 
 enum _DragState {
@@ -119,7 +119,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   GestureTapUpWithConsecutiveTapCountCallback? onTapUp;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
-  /// TODO(Renzo-Olivares): Explain cases when onTapCancel is called.
+  // TODO(Renzo-Olivares): Explain cases when onTapCancel is called.
   GestureTapCancelCallback? onTapCancel;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTap}
@@ -141,7 +141,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   GestureDragEndWithConsecutiveTapCountCallback? onEnd;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onCancel}
-  /// TODO(Renzo-Olivares): Explain cases when onDragCancel is called.
+  // TODO(Renzo-Olivares): Explain cases when onDragCancel is called.
   GestureDragCancelCallback? onDragCancel;
 
   // For local tap drag count
@@ -274,7 +274,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
           transform: localToGlobalTransform,
           untransformedDelta: event.localDelta,
           untransformedEndPosition: event.localPosition
-        ).distance * (1).sign;
+        ).distance * 1.sign;
         if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
           print('has sufficient global distance to accept');
           _checkTapCancel();
@@ -324,7 +324,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
     }
 
-    TapDownDetails details = TapDownDetails(
+    final TapDownDetails details = TapDownDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
       kind: getKindForPointer(event.pointer),
@@ -349,7 +349,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _checkTapUp(PointerUpEvent event) {
-    TapUpDetails upDetails = TapUpDetails(
+    final TapUpDetails upDetails = TapUpDetails(
       kind: event.kind,
       globalPosition: event.position,
       localPosition: event.localPosition,
@@ -379,7 +379,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
     }
-    DragStartDetails details = DragStartDetails(
+    final DragStartDetails details = DragStartDetails(
       sourceTimeStamp: event.timeStamp,
       globalPosition: _initialPosition.global,
       localPosition: _initialPosition.local,
@@ -392,10 +392,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void _checkUpdate(PointerMoveEvent event) {
     final Offset globalPosition = _correctedPosition != null ? _correctedPosition!.global : event.position;
     final Offset localPosition = _correctedPosition != null ? _correctedPosition!.local : event.localPosition; 
-    DragUpdateDetails details =  DragUpdateDetails(
+    final DragUpdateDetails details =  DragUpdateDetails(
       sourceTimeStamp: event.timeStamp,
       delta: event.localDelta,
-      primaryDelta: null,
       globalPosition: globalPosition,
       kind: getKindForPointer(event.pointer),
       localPosition: localPosition,
@@ -406,7 +405,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _checkEnd() {
-    DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
+    final DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
     invokeCallback<void>('onEnd', () => onEnd!(endDetails, consecutiveTapCount));
   }
 
@@ -454,6 +453,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 /// for a long period of time.
 class TapAndLongPressGestureRecognizer extends PrimaryPointerGestureRecognizer with _ConsecutiveTapMixin {
   TapAndLongPressGestureRecognizer({
+    /// The deadline for a long tap to be considered a long press.
     Duration? duration,
     // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
     // ignore: avoid_init_to_null
