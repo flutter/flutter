@@ -17,9 +17,8 @@ import 'theme_data.dart';
 /// content. Action chips should appear dynamically and contextually in a UI.
 ///
 /// Action chips can be tapped to trigger an action or show progress and
-/// confirmation. They cannot be disabled; if the action is not applicable, the
-/// chip should not be included in the interface. (This contrasts with buttons,
-/// where unavailable choices are usually represented as disabled controls.)
+/// confirmation. It's preferable to not include disabled ActionChips, instead of
+/// just disabling them.
 ///
 /// Action chips are displayed after primary content, such as below a card or
 /// persistently at the bottom of a screen.
