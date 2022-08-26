@@ -11,6 +11,7 @@ environment:
   # We force BOT to true so that all our tools know we're in a CI environment. This avoids any
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
+  GOOGLE_CREDENTIALS: ENCRYPTED[!f1177d1ddb5330ffaa9ea11c9c9e8e0c542185e895c36071f18cec923dd31c50ece6d18da89c2f6f1cd2d1a98d0c2eea!]
 
 gcp_credentials: ENCRYPTED[!f1177d1ddb5330ffaa9ea11c9c9e8e0c542185e895c36071f18cec923dd31c50ece6d18da89c2f6f1cd2d1a98d0c2eea!]
 
