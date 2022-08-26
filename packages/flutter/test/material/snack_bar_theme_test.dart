@@ -58,7 +58,7 @@ void main() {
       'disabledActionTextColor: Color(0xff00aa00)',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff123456))',
       'elevation: 2.0',
-      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'behavior: SnackBarBehavior.floating',
     ]);
   });

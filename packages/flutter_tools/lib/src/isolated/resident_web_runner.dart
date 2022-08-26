@@ -81,14 +81,14 @@ const String kExitMessage = 'Failed to establish connection with the application
 
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
-    FlutterDevice? device, {
+    FlutterDevice device, {
     String? target,
     bool stayResident = true,
     bool machine = false,
     required this.flutterProject,
     required bool? ipv6,
     required DebuggingOptions debuggingOptions,
-    required FileSystem? fileSystem,
+    required FileSystem fileSystem,
     required Logger? logger,
     required SystemClock systemClock,
     required Usage usage,
@@ -100,8 +100,8 @@ class ResidentWebRunner extends ResidentRunner {
        _usage = usage,
        _urlTunneller = urlTunneller,
        super(
-          <FlutterDevice?>[device],
-          target: target ?? fileSystem!.path.join('lib', 'main.dart'),
+          <FlutterDevice>[device],
+          target: target ?? fileSystem.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
@@ -109,7 +109,7 @@ class ResidentWebRunner extends ResidentRunner {
           devtoolsHandler: devtoolsHandler,
         );
 
-  final FileSystem? _fileSystem;
+  final FileSystem _fileSystem;
   final Logger? _logger;
   final SystemClock _systemClock;
   final Usage _usage;
@@ -119,7 +119,7 @@ class ResidentWebRunner extends ResidentRunner {
   Logger? get logger => _logger;
 
   @override
-  FileSystem? get fileSystem => _fileSystem;
+  FileSystem get fileSystem => _fileSystem;
 
   FlutterDevice? get device => flutterDevices.first;
   final FlutterProject flutterProject;
@@ -245,7 +245,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     _logger!.printStatus(
-      'Launching ${getDisplayPath(target, _fileSystem!)} '
+      'Launching ${getDisplayPath(target, _fileSystem)} '
       'on ${device!.device!.name} in $modeName mode...',
     );
     if (device!.device is ChromiumDevice) {
@@ -271,7 +271,7 @@ class ResidentWebRunner extends ResidentRunner {
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: _enableDwds,
           enableDds: debuggingOptions.enableDds,
-          entrypoint: _fileSystem!.file(target).uri,
+          entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
@@ -425,7 +425,7 @@ class ResidentWebRunner extends ResidentRunner {
   Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig? packageConfig) async {
     File? result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
     if (_generatedEntrypointDirectory == null) {
-      _generatedEntrypointDirectory ??= _fileSystem!.systemTempDirectory.createTempSync('flutter_tools.')
+      _generatedEntrypointDirectory ??= _fileSystem.systemTempDirectory.createTempSync('flutter_tools.')
         ..createSync();
       result = _generatedEntrypointDirectory!.childFile('web_entrypoint.dart');
 
@@ -438,16 +438,17 @@ class ResidentWebRunner extends ResidentRunner {
       Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
-        final String parent = _fileSystem!.file(mainUri).parent.path;
-        flutterDevices.first!.generator!.addFileSystemRoot(parent);
-        flutterDevices.first!.generator!.addFileSystemRoot(_fileSystem!.directory('test').absolute.path);
+        final String parent = _fileSystem.file(mainUri).parent.path;
+        flutterDevices.first.generator!
+          ..addFileSystemRoot(parent)
+          ..addFileSystemRoot(_fileSystem.directory('test').absolute.path);
         importedEntrypoint = Uri(
           scheme: 'org-dartlang-app',
           path: '/${mainUri.pathSegments.last}',
         );
       }
       final LanguageVersion languageVersion = determineLanguageVersion(
-        _fileSystem!.file(mainUri),
+        _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
         Cache.flutterRoot!,
       );
@@ -487,7 +488,7 @@ class ResidentWebRunner extends ResidentRunner {
     );
     final UpdateFSReport report = await device!.devFS!.update(
       mainUri: await _generateEntrypoint(
-        _fileSystem!.file(mainPath).absolute.uri,
+        _fileSystem.file(mainPath).absolute.uri,
         invalidationResult.packageConfig,
       ),
       target: target,
@@ -603,7 +604,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
     if (websocketUri != null) {
       if (debuggingOptions.vmserviceOutFile != null) {
-        _fileSystem!.file(debuggingOptions.vmserviceOutFile)
+        _fileSystem.file(debuggingOptions.vmserviceOutFile)
           ..createSync(recursive: true)
           ..writeAsStringSync(websocketUri.toString());
       }
