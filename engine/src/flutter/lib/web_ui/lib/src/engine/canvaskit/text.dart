@@ -797,6 +797,23 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     }
     return result;
   }
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    delete();
+    didDelete();
+    _disposed = true;
+  }
+
+  @override
+  bool get debugDisposed {
+    if (assertionsEnabled) {
+      return _disposed;
+    }
+    throw StateError('Paragraph.debugDisposed is only available when asserts are enabled.');
+  }
 }
 
 class CkLineMetrics implements ui.LineMetrics {

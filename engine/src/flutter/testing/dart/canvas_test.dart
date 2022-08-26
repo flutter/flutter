@@ -109,6 +109,7 @@ void testNoCrashes() {
     testCanvas((Canvas canvas) => canvas.translate(double.nan, double.nan));
     testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[],
                                                                indices: <int>[]), BlendMode.screen, paint));
+    testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[])..dispose(), BlendMode.screen, paint));
   });
 }
 

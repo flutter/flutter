@@ -30,6 +30,8 @@ class Vertices : public RefCountedDartWrappable<Vertices> {
 
   size_t GetAllocationSize() const override;
 
+  void dispose();
+
  private:
   Vertices();
 

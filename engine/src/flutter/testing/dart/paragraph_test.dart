@@ -197,4 +197,19 @@ void main() {
     expect(line.start, 6);
     expect(line.end, 10);
   });
+
+  test('painting a disposed paragraph does not crash', () {
+    final Paragraph paragraph = ParagraphBuilder(ParagraphStyle()).build();
+    paragraph.dispose();
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    void callback() { canvas.drawParagraph(paragraph, Offset.zero); }
+    if (assertStatementsEnabled) {
+      expectAssertion(callback);
+    } else {
+      expect(callback, throwsStateError);
+    }
+  });
 }
