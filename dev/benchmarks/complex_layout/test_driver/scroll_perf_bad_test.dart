@@ -30,8 +30,6 @@ void main() {
       // See: https://github.com/flutter/flutter/issues/19434
       await Future<void>.delayed(const Duration(milliseconds: 250));
 
-      await driver.forceGC();
-
       final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         final SerializableFinder list = find.byValueKey(listKey);
@@ -56,12 +54,6 @@ void main() {
 
     test('complex_layout_scroll_perf', () async {
       await testScrollPerf('complex-scroll', 'complex_layout_scroll_perf');
-    }, timeout: Timeout.none);
-
-    test('tiles_scroll_perf', () async {
-      await driver.tap(find.byTooltip('Open navigation menu'));
-      await driver.tap(find.byValueKey('scroll-switcher'));
-      await testScrollPerf('tiles-scroll', 'tiles_scroll_perf');
     }, timeout: Timeout.none);
   });
 }
