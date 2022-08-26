@@ -1864,10 +1864,10 @@ class TextSelectionGestureDetectorBuilder {
     }
 
     final TextPosition textPosition = renderEditable.getPositionForPoint(position);
-    print('return ${targetSelection!.start} <= ${textPosition.offset} && ${targetSelection!.end} >= ${textPosition.offset}');
+    print('return ${targetSelection.start} <= ${textPosition.offset} && ${targetSelection.end} >= ${textPosition.offset}');
 
-    return targetSelection!.start <= textPosition.offset
-        && targetSelection!.end >= textPosition.offset;
+    return targetSelection.start <= textPosition.offset
+        && targetSelection.end >= textPosition.offset;
   }
 
   // Expand the selection to the given global position.
@@ -2764,7 +2764,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (consecutiveTapCount % 2 == 0) {
+    if (consecutiveTapCount.isEven) {
       print('double tap');
       widget.onDoubleTapDown?.call(details);
     }
@@ -2782,7 +2782,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onSingleTapCancel?.call();
   }
 
-  // TODO (Renzo-Olivares): Can this be moved into the TapAndDragGestureRecognizer?
+  // TODO(Renzo-Olivares): Can this be moved into the TapAndDragGestureRecognizer?
   DragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
   int? _dragTapCount;
