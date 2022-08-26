@@ -980,6 +980,13 @@ class _SnippetChecker {
   /// Invokes the analyzer on the given [directory] and returns the stdout (with some lines filtered).
   List<String> _runAnalyzer() {
     _createConfigurationFiles();
+    // Run pub get to avoid output from getting dependencies in the analyzer
+    // output.
+    Process.runSync(
+      _flutter,
+      <String>['pub', 'get'],
+      workingDirectory: _tempDirectory.absolute.path,
+    );
     final ProcessResult result = Process.runSync(
       _flutter,
       <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', '.'],
@@ -1006,7 +1013,7 @@ class _SnippetChecker {
     if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
       stdout.removeAt(0);
     }
-    if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter pub get" in ')) {
+    if (stdout.isNotEmpty && stdout.first.isEmpty) {
       stdout.removeAt(0);
     }
     return stdout;
