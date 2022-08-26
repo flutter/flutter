@@ -335,7 +335,7 @@ class _DefaultPub implements Pub {
       generatedDirectory,
       project.manifest.generateSyntheticPackage,
     );
-    if (project.hasExampleApp) {
+    if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
       final Directory exampleGeneratedDirectory = _fileSystem.directory(
         _fileSystem.path.join(project.example.directory.path, '.dart_tool', 'flutter_gen'));
       await _updatePackageConfig(
