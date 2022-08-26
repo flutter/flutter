@@ -991,6 +991,107 @@ TEST_P(EntityTest, GaussianBlurFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(EntityTest, MorphologyFilter) {
+  auto boston = CreateTextureForFixture("boston.jpg");
+  ASSERT_TRUE(boston);
+
+  bool first_frame = true;
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowPos({10, 10});
+    }
+
+    const char* morphology_type_names[] = {"Dilate", "Erode"};
+    const FilterContents::MorphType morphology_types[] = {
+        FilterContents::MorphType::kDilate, FilterContents::MorphType::kErode};
+    static Color input_color = Color::Black();
+    // UI state.
+    static int selected_morphology_type = 0;
+    static float radius[2] = {20, 20};
+    static Color cover_color(1, 0, 0, 0.2);
+    static Color bounds_color(0, 1, 0, 0.1);
+    static float offset[2] = {500, 400};
+    static float rotation = 0;
+    static float scale[2] = {0.65, 0.65};
+    static float skew[2] = {0, 0};
+    static float path_rect[4] = {0, 0,
+                                 static_cast<float>(boston->GetSize().width),
+                                 static_cast<float>(boston->GetSize().height)};
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::Combo("Morphology type", &selected_morphology_type,
+                   morphology_type_names,
+                   sizeof(morphology_type_names) / sizeof(char*));
+      ImGui::SliderFloat2("Radius", radius, 0, 200);
+      ImGui::SliderFloat("Input opacity", &input_color.alpha, 0, 1);
+      ImGui::ColorEdit4("Cover color", reinterpret_cast<float*>(&cover_color));
+      ImGui::ColorEdit4("Bounds color",
+                        reinterpret_cast<float*>(&bounds_color));
+      ImGui::SliderFloat2("Translation", offset, 0,
+                          pass.GetRenderTargetSize().width);
+      ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
+      ImGui::SliderFloat2("Scale", scale, 0, 3);
+      ImGui::SliderFloat2("Skew", skew, -3, 3);
+      ImGui::SliderFloat4("Path XYWH", path_rect, -1000, 1000);
+    }
+    ImGui::End();
+
+    std::shared_ptr<Contents> input;
+    Size input_size;
+
+    auto input_rect =
+        Rect::MakeXYWH(path_rect[0], path_rect[1], path_rect[2], path_rect[3]);
+    auto texture = std::make_shared<TextureContents>();
+    texture->SetSourceRect(Rect::MakeSize(boston->GetSize()));
+    texture->SetPath(PathBuilder{}.AddRect(input_rect).TakePath());
+    texture->SetTexture(boston);
+    texture->SetOpacity(input_color.alpha);
+
+    input = texture;
+    input_size = input_rect.size;
+
+    auto contents = FilterContents::MakeMorphology(
+        FilterInput::Make(input), Radius{radius[0]}, Radius{radius[1]},
+        morphology_types[selected_morphology_type]);
+
+    auto ctm = Matrix::MakeScale(GetContentScale()) *
+               Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
+               Matrix::MakeRotationZ(Radians(rotation)) *
+               Matrix::MakeScale(Vector2(scale[0], scale[1])) *
+               Matrix::MakeSkew(skew[0], skew[1]) *
+               Matrix::MakeTranslation(-Point(input_size) / 2);
+
+    Entity entity;
+    entity.SetContents(contents);
+    entity.SetTransformation(ctm);
+
+    entity.Render(context, pass);
+
+    // Renders a red "cover" rectangle that shows the original position of the
+    // unfiltered input.
+    Entity cover_entity;
+    cover_entity.SetContents(SolidColorContents::Make(
+        PathBuilder{}.AddRect(input_rect).TakePath(), cover_color));
+    cover_entity.SetTransformation(ctm);
+
+    cover_entity.Render(context, pass);
+
+    // Renders a green bounding rect of the target filter.
+    Entity bounds_entity;
+    bounds_entity.SetContents(SolidColorContents::Make(
+        PathBuilder{}.AddRect(contents->GetCoverage(entity).value()).TakePath(),
+        bounds_color));
+    bounds_entity.SetTransformation(Matrix());
+
+    bounds_entity.Render(context, pass);
+
+    return true;
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(EntityTest, SetBlendMode) {
   Entity entity;
   ASSERT_EQ(entity.GetBlendMode(), Entity::BlendMode::kSourceOver);

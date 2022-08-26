@@ -44,6 +44,8 @@
 #include "impeller/entity/linear_gradient_fill.frag.h"
 #include "impeller/entity/linear_to_srgb_filter.frag.h"
 #include "impeller/entity/linear_to_srgb_filter.vert.h"
+#include "impeller/entity/morphology_filter.frag.h"
+#include "impeller/entity/morphology_filter.vert.h"
 #include "impeller/entity/radial_gradient_fill.frag.h"
 #include "impeller/entity/rrect_blur.frag.h"
 #include "impeller/entity/rrect_blur.vert.h"
@@ -114,6 +116,8 @@ using GaussianBlurPipeline =
     PipelineT<GaussianBlurVertexShader, GaussianBlurFragmentShader>;
 using BorderMaskBlurPipeline =
     PipelineT<BorderMaskBlurVertexShader, BorderMaskBlurFragmentShader>;
+using MorphologyFilterPipeline =
+    PipelineT<MorphologyFilterVertexShader, MorphologyFilterFragmentShader>;
 using ColorMatrixColorFilterPipeline =
     PipelineT<ColorMatrixColorFilterVertexShader,
               ColorMatrixColorFilterFragmentShader>;
@@ -212,6 +216,11 @@ class ContentContext {
   std::shared_ptr<Pipeline> GetBorderMaskBlurPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(border_mask_blur_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline> GetMorphologyFilterPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(morphology_filter_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline> GetColorMatrixColorFilterPipeline(
@@ -361,6 +370,7 @@ class ContentContext {
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
   mutable Variants<BorderMaskBlurPipeline> border_mask_blur_pipelines_;
+  mutable Variants<MorphologyFilterPipeline> morphology_filter_pipelines_;
   mutable Variants<ColorMatrixColorFilterPipeline>
       color_matrix_color_filter_pipelines_;
   mutable Variants<LinearToSrgbFilterPipeline> linear_to_srgb_filter_pipelines_;

@@ -584,6 +584,8 @@ FILE: ../../../flutter/impeller/entity/contents/filters/inputs/texture_filter_in
 FILE: ../../../flutter/impeller/entity/contents/filters/inputs/texture_filter_input.h
 FILE: ../../../flutter/impeller/entity/contents/filters/linear_to_srgb_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/linear_to_srgb_filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/morphology_filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/morphology_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.cc
@@ -650,6 +652,8 @@ FILE: ../../../flutter/impeller/entity/shaders/gradient_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/linear_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/linear_to_srgb_filter.frag
 FILE: ../../../flutter/impeller/entity/shaders/linear_to_srgb_filter.vert
+FILE: ../../../flutter/impeller/entity/shaders/morphology_filter.frag
+FILE: ../../../flutter/impeller/entity/shaders/morphology_filter.vert
 FILE: ../../../flutter/impeller/entity/shaders/radial_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.vert

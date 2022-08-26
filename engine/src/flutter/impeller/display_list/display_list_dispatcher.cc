@@ -534,8 +534,36 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
 
       break;
     }
-    case flutter::DlImageFilterType::kDilate:
-    case flutter::DlImageFilterType::kErode:
+    case flutter::DlImageFilterType::kDilate: {
+      auto dilate = filter->asDilate();
+      FML_DCHECK(dilate);
+      if (dilate->radius_x() < 0 || dilate->radius_y() < 0) {
+        return std::nullopt;
+      }
+      auto radius_x = Radius(dilate->radius_x());
+      auto radius_y = Radius(dilate->radius_y());
+      return [radius_x, radius_y](FilterInput::Ref input,
+                                  const Matrix& effect_transform) {
+        return FilterContents::MakeMorphology(
+            input, radius_x, radius_y, FilterContents::MorphType::kDilate);
+      };
+      break;
+    }
+    case flutter::DlImageFilterType::kErode: {
+      auto erode = filter->asErode();
+      FML_DCHECK(erode);
+      if (erode->radius_x() < 0 || erode->radius_y() < 0) {
+        return std::nullopt;
+      }
+      auto radius_x = Radius(erode->radius_x());
+      auto radius_y = Radius(erode->radius_y());
+      return [radius_x, radius_y](FilterInput::Ref input,
+                                  const Matrix& effect_transform) {
+        return FilterContents::MakeMorphology(
+            input, radius_x, radius_y, FilterContents::MorphType::kErode);
+      };
+      break;
+    }
     case flutter::DlImageFilterType::kMatrix:
     case flutter::DlImageFilterType::kLocalMatrixFilter:
     case flutter::DlImageFilterType::kComposeFilter:
