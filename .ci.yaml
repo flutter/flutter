@@ -2410,6 +2410,19 @@ targets:
       tags: >
         ["framework", "hostonly", "shard"]
 
+  - name: Mac complex_layout_macos__compile
+    bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "13f17a"}
+        ]
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: complex_layout_macos__compile
+
   - name: Mac complex_layout_macos__start_up
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
     recipe: devicelab/devicelab_drone
