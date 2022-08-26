@@ -62,12 +62,12 @@ Future<int> run(
         await runner.run(args);
 
         // Triggering [runZoned]'s error callback does not necessarily mean that
-        // we stopped executing the body.  See https://github.com/dart-lang/sdk/issues/42150.
+        // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
         if (firstError == null) {
           return await _exit(0);
         }
 
-        // We already hit some error, so don't return success.  The error path
+        // We already hit some error, so don't return success. The error path
         // (which should be in progress) is responsible for calling _exit().
         return 1;
       } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses

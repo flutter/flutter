@@ -2135,7 +2135,7 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 100dps because the prefix icon's  size
+    // Overall height for this InputDecorator is 100dps because the prefix icon's size
     // is 100x100 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)

@@ -255,7 +255,7 @@ ArgParser _createArgsParser() {
       help: 'Show command help.');
   parser.addFlag('verbose', defaultsTo: true,
       help: 'Whether to report all error messages (on) or attempt to '
-          'filter out some known false positives (off).  Shut this off '
+          'filter out some known false positives (off). Shut this off '
           'locally if you want to address Flutter-specific issues.');
   parser.addFlag('checked', abbr: 'c',
       help: 'Run dartdoc in checked mode.');

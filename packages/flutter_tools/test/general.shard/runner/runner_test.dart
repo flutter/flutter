@@ -34,7 +34,7 @@ void main() {
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
       //
-      // Tests might trigger exit() multiple times.  In real life, exit() would
+      // Tests might trigger exit() multiple times. In real life, exit() would
       // cause the VM to terminate immediately, so only the first one matters.
       firstExitCode = null;
       io.setExitFunctionForTests((int exitCode) {
@@ -102,7 +102,7 @@ void main() {
 
     // This Completer completes when CrashingFlutterCommand.runCommand
     // completes, but ideally we'd want it to complete when execution resumes
-    // runner.run.  Currently the distinction does not matter, but if it ever
+    // runner.run. Currently the distinction does not matter, but if it ever
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
     final Completer<void> commandCompleter = Completer<void>();
@@ -338,7 +338,7 @@ class CustomBugInstructions extends UserMessages {
 /// A fake [CrashReporter] that waits for a [Future] to complete.
 ///
 /// Used to exacerbate a race between the success and failure paths of
-/// [runner.run].  See https://github.com/flutter/flutter/issues/56406.
+/// [runner.run]. See https://github.com/flutter/flutter/issues/56406.
 class WaitingCrashReporter implements CrashReporter {
   WaitingCrashReporter(Future<void> future) : _future = future;
 

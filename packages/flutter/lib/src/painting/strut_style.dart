@@ -70,7 +70,7 @@ import 'text_style.dart';
 // are defined is in the engine paragraph_style.h of LibTxt. The values here//
 // should be updated should it change in the engine. The engine specifies   //
 // the defaults in order to reduce the amount of data we pass to native as  //
-// strut will usually be unspecified.                                       //
+// strut will usually be unspecified.                                      //
 // ///////////////////////////////////////////////////////////////////////////
 
 ///

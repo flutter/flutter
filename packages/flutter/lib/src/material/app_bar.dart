@@ -485,7 +485,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The shape of the app bar's [Material] as well as its shadow.
   ///
   /// If this property is null, then [AppBarTheme.shape] of
-  /// [ThemeData.appBarTheme] is used.  Both properties default to null.
+  /// [ThemeData.appBarTheme] is used. Both properties default to null.
   /// If both properties are null then the shape of the app bar's [Material]
   /// is just a simple rectangle.
   ///
@@ -561,7 +561,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The AppBar is built within a `AnnotatedRegion<SystemUiOverlayStyle>`
   /// which causes [SystemChrome.setSystemUIOverlayStyle] to be called
-  /// automatically.  Apps should not enclose the AppBar with
+  /// automatically. Apps should not enclose the AppBar with
   /// their own [AnnotatedRegion].
   /// {@endtemplate}
   ///
@@ -780,7 +780,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The AppBar's descendants are built within a
   /// `AnnotatedRegion<SystemUiOverlayStyle>` widget, which causes
   /// [SystemChrome.setSystemUIOverlayStyle] to be called
-  /// automatically.  Apps should not enclose an AppBar with their
+  /// automatically. Apps should not enclose an AppBar with their
   /// own [AnnotatedRegion].
   /// {@endtemplate}
   //

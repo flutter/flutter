@@ -327,7 +327,7 @@ class FlutterVersion {
   }
 
   /// log.showSignature=false is a user setting and it will break things,
-  /// so we want to disable it for every git log call.  This is a convenience
+  /// so we want to disable it for every git log call. This is a convenience
   /// wrapper that does that.
   @visibleForTesting
   static List<String> gitLog(List<String> args) {

@@ -74,7 +74,7 @@ import 'theme_data.dart';
 /// Configuring a ButtonStyle directly makes it possible to very
 /// precisely control the button’s visual attributes for all states.
 /// This level of control is typically required when a custom
-/// “branded” look and feel is desirable.  However, in many cases it’s
+/// “branded” look and feel is desirable. However, in many cases it’s
 /// useful to make relatively sweeping changes based on a few initial
 /// parameters with simple values. The button styleFrom() methods
 /// enable such sweeping changes. See for example:

@@ -3516,7 +3516,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// |                     | **newWidget == null**  | **newWidget != null**   |
   /// | :-----------------: | :--------------------- | :---------------------- |
-  /// |  **child == null**  |  Returns null.         |  Returns new [Element]. |
+  /// |  **child == null**  |  Returns null.        |  Returns new [Element]. |
   /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
   ///
   /// The `newSlot` argument is used only if `newWidget` is not null. If `child`

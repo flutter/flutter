@@ -32,7 +32,7 @@ export 'package:flutter/services.dart' show KeyEvent;
 ///  * [RawKeyboardListener], a similar widget based on the old [RawKeyboard]
 ///    API.
 class KeyboardListener extends StatelessWidget {
-  /// Creates a widget that receives  keyboard events.
+  /// Creates a widget that receives keyboard events.
   ///
   /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).

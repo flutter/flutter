@@ -3124,7 +3124,7 @@ class InputDecoration {
   final String? counterText;
 
   /// Optional custom counter widget to go in the place otherwise occupied by
-  /// [counterText].  If this property is non null, then [counterText] is
+  /// [counterText]. If this property is non null, then [counterText] is
   /// ignored.
   final Widget? counter;
 
@@ -3317,7 +3317,7 @@ class InputDecoration {
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
   /// decorator's state. Only the border's shape is used. If custom  [BorderSide]
-  /// values are desired for  a given state, all four borders – [errorBorder],
+  /// values are desired for a given state, all four borders – [errorBorder],
   /// [focusedBorder], [enabledBorder], [disabledBorder] – must be set.
   ///
   /// The decoration's container is the area which is filled if [filled] is

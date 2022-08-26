@@ -114,7 +114,7 @@ class RangeSlider extends StatefulWidget {
   /// the slider. To know when the value starts to change, or when it is done
   /// changing, set the optional callbacks [onChangeStart] and/or [onChangeEnd].
   ///
-  /// * [values], which  determines currently selected values for this range
+  /// * [values], which determines currently selected values for this range
   ///   slider.
   /// * [onChanged], which is called while the user is selecting a new value for
   ///   the range slider.
@@ -190,7 +190,7 @@ class RangeSlider extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [onChangeStart], which  is called when the user starts  changing the
+  ///  * [onChangeStart], which is called when the user starts changing the
   ///    values.
   ///  * [onChangeEnd], which is called when the user stops changing the values.
   final ValueChanged<RangeValues>? onChanged;

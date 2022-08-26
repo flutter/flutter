@@ -34,7 +34,7 @@ import 'gesture_detector.dart';
 /// [WidgetInspector.selectButtonBuilder].
 typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-/// Signature for a  method that registers the service extension `callback` with
+/// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
 ///
 /// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
