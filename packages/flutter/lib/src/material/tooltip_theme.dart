@@ -9,6 +9,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of [Tooltip] widgets.
 ///
 /// Used by [TooltipTheme] to control the visual properties of tooltips in a

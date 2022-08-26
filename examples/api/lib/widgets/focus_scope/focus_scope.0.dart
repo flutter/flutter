@@ -119,7 +119,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   child: const Text('ANOTHER BUTTON TO FOCUS'),
                 ),
                 DefaultTextStyle(
-                    style: Theme.of(context).textTheme.headline2!,
+                    style: Theme.of(context).textTheme.displayMedium!,
                     child: const Text('BACKDROP')),
               ],
             ),
@@ -148,7 +148,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 ? null
                 : () => setState(() => backdropIsVisible = true),
             child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.headline2!,
+                style: Theme.of(context).textTheme.displayMedium!,
                 child: const Text('FOREGROUND')),
           ),
         ),

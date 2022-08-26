@@ -107,23 +107,25 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'dense: true');
-    expect(description[1], 'shape: StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))');
-    expect(description[2], 'style: drawer');
-    expect(description[3], 'selectedColor: Color(0x00000001)');
-    expect(description[4], 'iconColor: Color(0x00000002)');
-    expect(description[5], 'textColor: Color(0x00000003)');
-    expect(description[6], 'contentPadding: EdgeInsets.all(100.0)');
-    expect(description[7], 'tileColor: Color(0x00000004)');
-    expect(description[8], 'selectedTileColor: Color(0x00000005)');
-    expect(description[9], 'horizontalTitleGap: 200.0');
-    expect(description[10], 'minVerticalPadding: 300.0');
-    expect(description[11], 'minLeadingWidth: 400.0');
-    expect(description[12], 'enableFeedback: true');
-    expect(description[13], 'mouseCursor: MaterialStateMouseCursor(clickable)');
     expect(
-      description[14],
-      equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)'),
+      description,
+      equalsIgnoringHashCodes(<String>[
+        'dense: true',
+        'shape: StadiumBorder(BorderSide(width: 0.0, style: none))',
+        'style: drawer',
+        'selectedColor: Color(0x00000001)',
+        'iconColor: Color(0x00000002)',
+        'textColor: Color(0x00000003)',
+        'contentPadding: EdgeInsets.all(100.0)',
+        'tileColor: Color(0x00000004)',
+        'selectedTileColor: Color(0x00000005)',
+        'horizontalTitleGap: 200.0',
+        'minVerticalPadding: 300.0',
+        'minLeadingWidth: 400.0',
+        'enableFeedback: true',
+        'mouseCursor: MaterialStateMouseCursor(clickable)',
+        'visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)',
+      ]),
     );
   });
 
@@ -394,13 +396,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: theme.tileColor));
+    expect(find.byType(Material), paints..rect(color: theme.tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
   });
 
   testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
@@ -436,13 +438,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
