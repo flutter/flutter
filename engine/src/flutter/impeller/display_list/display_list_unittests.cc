@@ -521,6 +521,34 @@ TEST_P(DisplayListTest, CanDrawShadow) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Draw a hexagon using triangle fan
+TEST_P(DisplayListTest, CanConvertTriangleFanToTriangles) {
+  constexpr Scalar hexagon_radius = 125;
+  auto hex_start = Point(200.0, -hexagon_radius + 200.0);
+  auto center_to_flat = 1.73 / 2 * hexagon_radius;
+
+  // clang-format off
+  std::vector<SkPoint> vertices = {
+    SkPoint::Make(hex_start.x, hex_start.y),
+    SkPoint::Make(hex_start.x + center_to_flat, hex_start.y + 0.5 * hexagon_radius),
+    SkPoint::Make(hex_start.x + center_to_flat, hex_start.y + 1.5 * hexagon_radius),
+    SkPoint::Make(hex_start.x + center_to_flat, hex_start.y + 1.5 * hexagon_radius),
+    SkPoint::Make(hex_start.x, hex_start.y + 2 * hexagon_radius),
+    SkPoint::Make(hex_start.x, hex_start.y + 2 * hexagon_radius),
+    SkPoint::Make(hex_start.x - center_to_flat, hex_start.y + 1.5 * hexagon_radius),
+    SkPoint::Make(hex_start.x - center_to_flat, hex_start.y + 1.5 * hexagon_radius),
+    SkPoint::Make(hex_start.x - center_to_flat, hex_start.y + 0.5 * hexagon_radius)
+  };
+  // clang-format on
+  auto paint = flutter::DlPaint().setColor(flutter::DlColor::kDarkGrey());
+  auto dl_vertices = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangleFan, vertices.size(), vertices.data(),
+      nullptr, nullptr);
+  flutter::DisplayListBuilder builder;
+  builder.drawVertices(dl_vertices, flutter::DlBlendMode::kSrcOver, paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawZeroWidthLine) {
   flutter::DisplayListBuilder builder;
   std::vector<flutter::DlStrokeCap> caps = {
