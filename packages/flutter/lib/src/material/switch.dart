@@ -1391,9 +1391,8 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
         return isDark ? Colors.white10 : Colors.black12;
       }
       if (states.contains(MaterialState.selected)) {
-        // final Set<MaterialState> activeState = states..add(MaterialState.selected);
         final Color activeColor = _colors.secondary;
-        return activeColor.withAlpha(0x80);  // 👆就是activeColor
+        return activeColor.withAlpha(0x80);
       }
       return isDark ? Colors.white30 : black32;
     });
