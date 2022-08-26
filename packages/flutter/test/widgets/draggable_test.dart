@@ -3056,6 +3056,63 @@ void main() {
     expect(dragAnchorStrategyCalled, true);
   });
 
+  testWidgets('Drag and drop - onWillAccept triggers when target appears under active avatar', (WidgetTester tester) async {
+    bool onWillAcceptCalled = false;
+    bool onDragStartedCalled = false;
+
+    const String kTarget = 'Target';
+    const String kSource = 'Source';
+    const String kAvatar = 'Avatar';
+
+    Widget buildStackWithTarget() => MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: <Widget>[
+                // Inserted only after the drag has been started (but not yet moved)
+                if (onDragStartedCalled)
+                  Positioned.fill(
+                    child: DragTarget<int>(
+                      // This should trigger directly, without the pointer moving
+                      onWillAccept: (_) => onWillAcceptCalled = true,
+                      builder: (_, __, ___) => const Text(kTarget),
+                    ),
+                  ),
+                // Removed directly after the drag has been started (but not yet moved)
+                if (!onDragStartedCalled)
+                  Positioned.fill(
+                    child: Draggable<int>(
+                      data: 1,
+                      // React to the start of the drag
+                      onDragStarted: () => onDragStartedCalled = true,
+                      feedback: const Text(kAvatar),
+                      child: const Text(kSource),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+
+    // Build once without drag having started
+    await tester.pumpWidget(buildStackWithTarget());
+
+    expect(find.text(kSource), findsOneWidget);
+    expect(find.text(kAvatar), findsNothing);
+    expect(find.text(kTarget), findsNothing);
+
+    // Starting the drag gesture above the draggable, without moving the pointer
+    final Offset firstLocation = tester.getCenter(find.text(kSource));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pumpWidget(buildStackWithTarget());
+
+    expect(find.text(kSource), findsNothing);
+    expect(find.text(kAvatar), findsOneWidget);
+    expect(find.text(kTarget), findsOneWidget);
+
+    expect(onDragStartedCalled, isTrue);
+    expect(onWillAcceptCalled, isTrue);
+  });
+
   testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
