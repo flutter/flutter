@@ -100,9 +100,13 @@ std::shared_ptr<RenderPass> InlinePassContext::GetRenderPass(
 
   // If we're on the last pass of the layer, there's no need to store the
   // multisample texture or stencil because nothing needs to read it.
-  color0.store_action = pass_count_ == total_pass_reads_
-                            ? StoreAction::kMultisampleResolve
-                            : StoreAction::kStoreAndMultisampleResolve;
+  if (color0.resolve_texture) {
+    color0.store_action = pass_count_ == total_pass_reads_
+                              ? StoreAction::kMultisampleResolve
+                              : StoreAction::kStoreAndMultisampleResolve;
+  } else {
+    color0.store_action = StoreAction::kStore;
+  }
   stencil->store_action = pass_count_ == total_pass_reads_
                               ? StoreAction::kDontCare
                               : StoreAction::kStore;
