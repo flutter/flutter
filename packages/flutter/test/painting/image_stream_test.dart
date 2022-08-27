@@ -717,7 +717,7 @@ void main() {
   });
 
   testWidgets('Keep alive handles do not drive frames or prevent last listener callbacks', (WidgetTester tester) async {
-    final Image image10x10 = (await tester.runAsync(() => createTestImage(width: 10, height: 10)))!;
+    final Image image10x10 = createTestImage(width: 10, height: 10);
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
