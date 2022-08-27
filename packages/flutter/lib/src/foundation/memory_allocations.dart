@@ -6,6 +6,13 @@ import 'dart:ui' as ui;
 
 /// A lyfecycle event of an object.
 abstract class ObjectEvent{
+  /// Creates an instance of [ObjectEvent].
+  ObjectEvent({
+    required this.object,
+    this.details = const <Object>[],
+    this.token,
+  });
+
   /// Reference to the object.
   ///
   /// The reference should not be stored in any
@@ -28,7 +35,7 @@ abstract class ObjectEvent{
 typedef ObjectEventListener = void Function(ObjectEvent);
 
 /// An event that describes creation of an object.
-class ObjectCreated implements ObjectEvent {
+class ObjectCreated extends ObjectEvent {
   /// Creates an instance of [ObjectCreated].
   ObjectCreated({
     required this.library,
@@ -46,8 +53,7 @@ class ObjectCreated implements ObjectEvent {
 }
 
 /// An event that describes disposal of an object.
-class ObjectDisposed implements ObjectEvent {
-
+class ObjectDisposed extends ObjectEvent {
   /// Creates an instance of [ObjectDisposed].
   ObjectDisposed({
     required super.object,
@@ -61,13 +67,12 @@ class ObjectDisposed implements ObjectEvent {
 ///
 /// For example, information about ownership transfer
 /// or state change.
-class ObjectTraced implements ObjectEvent {
-
+class ObjectTraced extends ObjectEvent {
   /// Creates an instance of [ObjectTraced].
   ObjectTraced({
-    this.object,
-    this.details = const <Object>[],
-    this.token,
+    required super.object,
+    super.details = const <Object>[],
+    super.token,
   });
 }
 
@@ -97,7 +102,7 @@ class MemoryAllocations {
     _listeners!.add(listener);
   }
 
-  /// Stop calling the given listener every timean object event is
+  /// Stop calling the given listener every time an object event is
   /// dispatched.
   ///
   /// Listeners can be added with [addListener].
@@ -107,6 +112,15 @@ class MemoryAllocations {
       _listeners = null;
       _unSubscribeFromSdkObjects();
     }
+  }
+
+  /// Stop calling all listeners every time an object event is
+  /// dispatched.
+  ///
+  /// Listeners can be added with [addListener].
+  void removeAllListeners(){
+    _listeners = null;
+    _unSubscribeFromSdkObjects();
   }
 
   /// Dispatch a new object event to listeners.
@@ -121,7 +135,8 @@ class MemoryAllocations {
   }
 
   void _subscribeToSdkObjects() {
-    // Uncomment when https://github.com/flutter/engine/pull/35274 lands:
+    // Uncomment and test cover
+    // when https://github.com/flutter/engine/pull/35274 lands:
     // assert(ui.Image.onCreate == null);
     // assert(ui.Image.onDispose == null);
     // assert(ui.Picture.onCreate == null);
@@ -133,7 +148,8 @@ class MemoryAllocations {
   }
 
   void _unSubscribeFromSdkObjects() {
-    // Uncomment when https://github.com/flutter/engine/pull/35274 lands:
+    // Uncomment and test cover
+    // when https://github.com/flutter/engine/pull/35274 lands:
     // assert(ui.Image.onCreate == _imageOnCreate);
     // assert(ui.Image.onDispose == _imageOnDispose);
     // assert(ui.Picture.onCreate == _pictureOnCreate);
@@ -144,23 +160,23 @@ class MemoryAllocations {
     // ui.Picture.onDispose = null;
   }
 
-  void _imageOnCreate(ui.Image image) => registerObjectEvent(ObjectCreated(
+  void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
     library: 'dart:ui',
     className: 'Image',
     object: image,
   ));
 
-  void _pictureOnCreate(ui.Picture picture) => registerObjectEvent(ObjectCreated(
+  void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
     library: 'dart:ui',
     className: 'Image',
     object: picture,
   ));
 
-  void _imageOnDispose(ui.Image image) => registerObjectEvent(ObjectDisposed(
+  void _imageOnDispose(ui.Image image) => dispatchObjectEvent(ObjectDisposed(
     object: image,
   ));
 
-  void _pictureOnDispose(ui.Picture picture) => registerObjectEvent(ObjectDisposed(
+  void _pictureOnDispose(ui.Picture picture) => dispatchObjectEvent(ObjectDisposed(
     object: picture,
   ));
 }
