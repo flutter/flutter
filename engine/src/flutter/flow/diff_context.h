@@ -197,16 +197,7 @@ class DiffContext {
     bool dirty;
     SkRect cull_rect;  // in screen coordinates
 
-    // In order to replicate paint process closely, we need both the original
-    // transform, and the overriden transform (set for layers that need to paint
-    // on integer coordinates). The reason for this is that during paint the
-    // transform matrix is overriden only after layer passes the cull check
-    // first (with original transform). So to cull layer we use transform, but
-    // to get paint coordinates we use transform_override. Child layers are
-    // painted after transform override, so if set we use transform_override as
-    // base when diffing child layers.
     SkMatrix transform;
-    std::optional<SkMatrix> transform_override;
     size_t rect_index_;
 
     // Whether this subtree has filter bounds adjustment function. If so,
