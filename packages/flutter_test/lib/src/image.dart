@@ -37,12 +37,9 @@ ui.Image createTestImage({
 }
 
 ui.Image _createImage(int width, int height) async {
-  final ui.Paint paint = ui.Paint()
-    ..style = ui.PaintingStyle.fill
-    ..color = ui.Color(0x00000000);
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
-  pictureCanvas.drawRect(ui.Rect.fromLTWH(0.0, 0.0, width, height), paint);
+  pictureCanvas.drawColor(ui.Color(0x00000000), ui.BlendMode.src);
   final ui.Picture picture = recorder.endRecording();
   return picture.toImageSync(width, height);
 }
