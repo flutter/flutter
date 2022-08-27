@@ -51,11 +51,12 @@ Future<ui.Image> _createImage(int width, int height, ui.Color color) {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   final int pixel = color.red << 24 | color.green << 16 | color.blue << 8 | color.alpha;
   final Uint8List pixels = Uint8List(width * height * 4);
-  for (int byteOffset; byteOffset < pixels.length; byteOffset += 4) {
-    pixels.buffer.setUint32(byteOffset, pixel); // big-endian produces RGBA
+  final ByteData = pixels.buffer.asByteData();
+  for (int byteOffset = 0; byteOffset < pixels.length; byteOffset += 4) {
+    pixelData.setUint32(byteOffset, pixel); // big-endian produces RGBA
   }
   ui.decodeImageFromPixels(
-    pixels;
+    pixels,
     width,
     height,
     ui.PixelFormat.rgba8888,
@@ -91,7 +92,7 @@ ui.Image createTestImageSync({
     return _cache[cacheKey]!.clone();
   }
 
-  final ui.Image image = _createImage(width, height, color);
+  final ui.Image image = _createImageSync(width, height, color);
   if (cache) {
     _cache[cacheKey] = image.clone();
   }
