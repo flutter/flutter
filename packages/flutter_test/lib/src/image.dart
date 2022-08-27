@@ -31,7 +31,7 @@ ui.Image createTestImage({
     return _cache[cacheKey]!.clone();
   }
 
-  final ui.Image image = _createImage(width, height);
+  final ui.Image image = _createImage(width, height, color);
   if (cache) {
     _cache[cacheKey] = image.clone();
   }
