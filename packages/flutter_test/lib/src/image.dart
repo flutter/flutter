@@ -36,7 +36,7 @@ ui.Image createTestImage({
   return image;
 }
 
-ui.Image _createImage(int width, int height) async {
+ui.Image _createImage(int width, int height) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
   pictureCanvas.drawColor(ui.Color(0x00000000), ui.BlendMode.src);
