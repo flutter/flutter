@@ -66,7 +66,7 @@ Future<ui.Image> _createImage(int width, int height, ui.Color color) {
   return completer.future;
 }
 
-/// Creates an arbitrarily sized image for testing.
+/// Creates an arbitrarily sized image for testing synchronously.
 ///
 /// If [color] isn't provided, fully transparent black fill color is used.
 /// If the [cache] parameter is set to true, the image will be cached for the
