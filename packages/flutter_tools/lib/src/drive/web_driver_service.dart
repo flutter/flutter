@@ -49,6 +49,9 @@ class WebDriverService extends DriverService {
   /// indicates a bug.
   int? _runResult;
 
+  @visibleForTesting
+  Map<String, Object?>? desiredCapabilities;
+
   @override
   Future<void> start(
     BuildInfo buildInfo,
@@ -139,14 +142,13 @@ class WebDriverService extends DriverService {
     List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
     String? profileMemory,
-    Map<String, dynamic>? allBrowsersDesiredCapabilities,
+    Map<String, Object?>? allBrowsersDesiredCapabilities,
   }) async {
     late async_io.WebDriver webDriver;
     final Browser browser = _browserNameToEnum(browserName);
     try {
-      Map<String, Object?>? desiredCapabilities;
       if (allBrowsersDesiredCapabilities != null) {
-        desiredCapabilities = allBrowsersDesiredCapabilities[browser] as Map<String, Object?>;
+        desiredCapabilities = allBrowsersDesiredCapabilities[browser.name]! as Map<String, Object?>;
       } else {
         desiredCapabilities = getDesiredCapabilities(
           browser,
