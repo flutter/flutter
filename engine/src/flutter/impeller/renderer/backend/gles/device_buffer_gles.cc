@@ -14,11 +14,10 @@
 
 namespace impeller {
 
-DeviceBufferGLES::DeviceBufferGLES(ReactorGLES::Ref reactor,
-                                   std::shared_ptr<Allocation> backing_store,
-                                   size_t size,
-                                   StorageMode mode)
-    : DeviceBuffer(size, mode),
+DeviceBufferGLES::DeviceBufferGLES(DeviceBufferDescriptor desc,
+                                   ReactorGLES::Ref reactor,
+                                   std::shared_ptr<Allocation> backing_store)
+    : DeviceBuffer(std::move(desc)),
       reactor_(std::move(reactor)),
       handle_(reactor_ ? reactor_->CreateHandle(HandleType::kBuffer)
                        : HandleGLES::DeadHandle()),
@@ -32,20 +31,10 @@ DeviceBufferGLES::~DeviceBufferGLES() {
 }
 
 // |DeviceBuffer|
-bool DeviceBufferGLES::CopyHostBuffer(const uint8_t* source,
-                                      Range source_range,
-                                      size_t offset) {
-  if (mode_ != StorageMode::kHostVisible) {
-    // One of the storage modes where a transfer queue must be used.
-    return false;
-  }
-
+bool DeviceBufferGLES::OnCopyHostBuffer(const uint8_t* source,
+                                        Range source_range,
+                                        size_t offset) {
   if (!reactor_) {
-    return false;
-  }
-
-  if (offset + source_range.length > size_) {
-    // Out of bounds of this buffer.
     return false;
   }
 

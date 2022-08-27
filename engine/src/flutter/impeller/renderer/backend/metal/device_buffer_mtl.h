@@ -29,15 +29,14 @@ class DeviceBufferMTL final
   const id<MTLBuffer> buffer_;
   const MTLStorageMode storage_mode_;
 
-  DeviceBufferMTL(id<MTLBuffer> buffer,
-                  size_t size,
-                  StorageMode mode,
+  DeviceBufferMTL(DeviceBufferDescriptor desc,
+                  id<MTLBuffer> buffer,
                   MTLStorageMode storage_mode);
 
   // |DeviceBuffer|
-  bool CopyHostBuffer(const uint8_t* source,
-                      Range source_range,
-                      size_t offset) override;
+  bool OnCopyHostBuffer(const uint8_t* source,
+                        Range source_range,
+                        size_t offset) override;
 
   // |DeviceBuffer|
   bool SetLabel(const std::string& label) override;
