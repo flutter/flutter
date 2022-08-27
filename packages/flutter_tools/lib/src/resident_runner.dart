@@ -26,6 +26,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/dart_plugin_registrant.dart';
 import 'build_system/targets/localizations.dart';
+import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -49,6 +50,7 @@ class FlutterDevice {
     this.targetPlatform,
     ResidentCompiler? generator,
     this.userIdentifier,
+    required this.developmentShaderCompiler,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts!.getArtifactPath(
@@ -87,6 +89,16 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
+    final DevelopmentShaderCompiler shaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: ShaderCompiler(
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+      ),
+      fileSystem: globals.fs,
+    );
+
     // For both web and non-web platforms we initialize dill to/from
     // a shared location for faster bootstrapping. If the compiler fails
     // due to a kernel target or version mismatch, no error is reported
@@ -184,6 +196,7 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
+      developmentShaderCompiler: shaderCompiler,
     );
   }
 
@@ -192,6 +205,7 @@ class FlutterDevice {
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
   final String? userIdentifier;
+  final DevelopmentShaderCompiler developmentShaderCompiler;
 
   DevFSWriter? devFSWriter;
   Stream<Uri?>? observatoryUris;
@@ -226,7 +240,7 @@ class FlutterDevice {
     bool cacheStartupProfile = false,
     bool enableDds = true,
     required bool allowExistingDdsInstance,
-    bool? ipv6 = false,
+    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     late StreamSubscription<void> subscription;
@@ -563,6 +577,8 @@ class FlutterDevice {
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
+        shaderCompiler: developmentShaderCompiler,
+        dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -685,6 +701,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
+      if (device?.targetPlatform == TargetPlatform.web_javascript) {
+        logger!.printWarning('Unable to get jank metrics for web');
+        continue;
+      }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
         final Map<String, Object>? rasterData =
@@ -907,13 +927,13 @@ abstract class ResidentHandlers {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
-    final List<FlutterView> views = await flutterDevices
-      .first!
-      .vmService!.getFlutterViews();
-    final Map<String, Object> data = await (flutterDevices.first!.vmService!.getSkSLs(
+    final FlutterDevice flutterDevice = flutterDevices.first!;
+    final FlutterVmService vmService = flutterDevice.vmService!;
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final Map<String, Object?>? data = await vmService.getSkSLs(
       viewId: views.first.id,
-    ) as FutureOr<Map<String, Object>>);
-    final Device device = flutterDevices.first!.device!;
+    );
+    final Device device = flutterDevice.device!;
     return sharedSkSlWriter(device, data);
   }
 
@@ -1071,10 +1091,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   Logger? get logger => globals.logger;
 
   @override
-  FileSystem? get fileSystem => globals.fs;
+  FileSystem get fileSystem => globals.fs;
 
   @override
-  final List<FlutterDevice?> flutterDevices;
+  final List<FlutterDevice> flutterDevices;
 
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -1151,7 +1171,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   //
   // Would be null if there is no device connected or
   // there is no devFS associated with the first device.
-  Uri? get uri => flutterDevices.first?.devFS?.baseUri;
+  Uri? get uri => flutterDevices.first.devFS?.baseUri;
 
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;
@@ -1201,6 +1221,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       platform: globals.platform,
+      usage: globals.flutterUsage,
       projectDir: globals.fs.currentDirectory,
       generateDartPluginRegistry: generateDartPluginRegistry,
       defines: <String, String>{
@@ -1236,7 +1257,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final String address = flutterDevices.first!.vmService!.wsAddress.toString();
+        final String address = flutterDevices.first.vmService!.wsAddress.toString();
         final File vmserviceOutFile = globals.fs.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
@@ -1338,7 +1359,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
-        ipv6: ipv6,
+        ipv6: ipv6 ?? false,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
         cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );

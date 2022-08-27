@@ -553,6 +553,24 @@ void main() {
     parent.buildScene(SceneBuilder());
   }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
 
+  test('ContainerLayer.toImageSync can render interior layer', () {
+    final OffsetLayer parent = OffsetLayer();
+    final OffsetLayer child = OffsetLayer();
+    final OffsetLayer grandChild = OffsetLayer();
+    child.append(grandChild);
+    parent.append(child);
+
+    // This renders the layers and generates engine layers.
+    parent.buildScene(SceneBuilder());
+
+    // Causes grandChild to pass its engine layer as `oldLayer`
+    grandChild.toImageSync(const Rect.fromLTRB(0, 0, 10, 10));
+
+    // Ensure we can render the same scene again after rendering an interior
+    // layer.
+    parent.buildScene(SceneBuilder());
+  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
     expect(layer.debugHandleCount, 0);
@@ -979,6 +997,35 @@ void main() {
     final VoidCallback callback = root.addCompositionCallback((_) { });
     root.dispose();
     expect(() => callback(), returnsNormally);
+  });
+
+  test('Layer types that support rasterization', () {
+    // Supported.
+    final OffsetLayer offsetLayer = OffsetLayer();
+    final OpacityLayer opacityLayer = OpacityLayer();
+    final ClipRectLayer clipRectLayer = ClipRectLayer();
+    final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
+    final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
+    final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
+    final PhysicalModelLayer physicalModelLayer = PhysicalModelLayer();
+    final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
+    final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
+    final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
+    expect(offsetLayer.supportsRasterization(), true);
+    expect(opacityLayer.supportsRasterization(), true);
+    expect(clipRectLayer.supportsRasterization(), true);
+    expect(clipRRectLayer.supportsRasterization(), true);
+    expect(imageFilterLayer.supportsRasterization(), true);
+    expect(backdropFilterLayer.supportsRasterization(), true);
+    expect(physicalModelLayer.supportsRasterization(), true);
+    expect(colorFilterLayer.supportsRasterization(), true);
+    expect(shaderMaskLayer.supportsRasterization(), true);
+    expect(textureLayer.supportsRasterization(), true);
+
+    // Unsupported.
+    final PlatformViewLayer platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
+
+    expect(platformViewLayer.supportsRasterization(), false);
   });
 }
 

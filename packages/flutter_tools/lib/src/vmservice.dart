@@ -24,6 +24,7 @@ const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
 const String kScreenshotMethod = '_flutter.screenshot';
 const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
+const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -478,12 +479,13 @@ class FlutterVmService {
     required Uri assetsDirectory,
     required String? viewId,
     required String? uiIsolateId,
+    required bool windows,
   }) async {
     await callMethodWrapper(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
       args: <String, Object?>{
         'viewId': viewId,
-        'assetDirectory': assetsDirectory.toFilePath(windows: false),
+        'assetDirectory': assetsDirectory.toFilePath(windows: windows),
       });
   }
 
@@ -491,7 +493,7 @@ class FlutterVmService {
   ///
   /// This method will only return data if `--cache-sksl` was provided as a
   /// flutter run argument, and only then on physical devices.
-  Future<Map<String, Object>?> getSkSLs({
+  Future<Map<String, Object?>?> getSkSLs({
     required String viewId,
   }) async {
     final vm_service.Response? response = await callMethodWrapper(
@@ -503,7 +505,7 @@ class FlutterVmService {
     if (response == null) {
       return null;
     }
-    return response.json?['SkSLs'] as Map<String, Object>?;
+    return response.json?['SkSLs'] as Map<String, Object?>?;
   }
 
   /// Flush all tasks on the UI thread for an attached Flutter view.
@@ -727,6 +729,19 @@ class FlutterVmService {
     );
   }
 
+  Future<Map<String, Object?>?> flutterEvictShader(String assetPath, {
+   required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.window.reinitializeShader',
+      isolateId: isolateId,
+      args: <String, Object?>{
+        'assetKey': assetPath,
+      },
+    );
+  }
+
+
   /// Exit the application by calling [exit] from `dart:io`.
   ///
   /// This method is only supported by certain embedders. This is
@@ -864,6 +879,20 @@ class FlutterVmService {
       }
       await Future<void>.delayed(delay);
     }
+  }
+
+  /// Tell the provided flutter view that the font manifest has been updated
+  /// and asset fonts should be reloaded.
+  Future<void> reloadAssetFonts({
+    required String isolateId,
+    required String viewId,
+  }) async {
+    await callMethodWrapper(
+      kReloadAssetFonts,
+      isolateId: isolateId, args: <String, Object?>{
+        'viewId': viewId,
+      },
+    );
   }
 
   /// Waits for a signal from the VM service that [extensionName] is registered.

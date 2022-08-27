@@ -304,6 +304,23 @@ class TestPointer {
     );
   }
 
+  /// Create a [PointerScrollInertiaCancelEvent] (e.g., user resting their finger on the trackpad).
+  ///
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  PointerScrollInertiaCancelEvent scrollInertiaCancel({
+    Duration timeStamp = Duration.zero,
+  }) {
+    assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
+    assert(location != null);
+    return PointerScrollInertiaCancelEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      position: location!
+    );
+  }
+
   /// Create a [PointerPanZoomStartEvent] (e.g., trackpad scroll; not scroll wheel
   /// or finger-drag scroll) with the given delta.
   ///
@@ -314,12 +331,12 @@ class TestPointer {
     Duration timeStamp = Duration.zero
   }) {
     assert(!isPanZoomActive);
+    assert(kind == PointerDeviceKind.trackpad);
     _location = location;
     _pan = Offset.zero;
     _isPanZoomActive = true;
     return PointerPanZoomStartEvent(
       timeStamp: timeStamp,
-      kind: kind,
       device: _device,
       pointer: pointer,
       position: location,
@@ -341,12 +358,12 @@ class TestPointer {
     Duration timeStamp = Duration.zero,
   }) {
     assert(isPanZoomActive);
+    assert(kind == PointerDeviceKind.trackpad);
     _location = location;
     final Offset panDelta = pan - _pan!;
     _pan = pan;
     return PointerPanZoomUpdateEvent(
       timeStamp: timeStamp,
-      kind: kind,
       device: _device,
       pointer: pointer,
       position: location,
@@ -366,11 +383,11 @@ class TestPointer {
     Duration timeStamp = Duration.zero
   }) {
     assert(isPanZoomActive);
+    assert(kind == PointerDeviceKind.trackpad);
     _isPanZoomActive = false;
     _pan = null;
     return PointerPanZoomEndEvent(
       timeStamp: timeStamp,
-      kind: kind,
       device: _device,
       pointer: pointer,
       position: location!,
@@ -511,6 +528,43 @@ class TestGesture {
       assert(_pointer._isDown);
       await _dispatcher(_pointer.cancel(timeStamp: timeStamp));
       assert(!_pointer._isDown);
+    });
+  }
+
+  /// Dispatch a pointer pan zoom start event at the given `location`, caching the
+  /// hit test result.
+  Future<void> panZoomStart(Offset location, { Duration timeStamp = Duration.zero }) async {
+    return TestAsyncUtils.guard<void>(() async {
+      return _dispatcher(_pointer.panZoomStart(location, timeStamp: timeStamp));
+    });
+  }
+
+  /// Dispatch a pointer pan zoom update event at the given `location`, caching the
+  /// hit test result.
+  Future<void> panZoomUpdate(Offset location, {
+    Offset pan = Offset.zero,
+    double scale = 1,
+    double rotation = 0,
+    Duration timeStamp = Duration.zero
+  }) async {
+    return TestAsyncUtils.guard<void>(() async {
+      return _dispatcher(_pointer.panZoomUpdate(location,
+        pan: pan,
+        scale: scale,
+        rotation: rotation,
+        timeStamp: timeStamp
+      ));
+    });
+  }
+
+  /// Dispatch a pointer pan zoom end event, caching the hit test result.
+  Future<void> panZoomEnd({
+    Duration timeStamp = Duration.zero
+  }) async {
+    return TestAsyncUtils.guard<void>(() async {
+      return _dispatcher(_pointer.panZoomEnd(
+        timeStamp: timeStamp
+      ));
     });
   }
 }

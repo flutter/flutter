@@ -159,6 +159,8 @@ void main() {
         'ios/Flutter/AppFrameworkInfo.plist',
         'ios/Runner/AppDelegate.m',
         'ios/Runner/GeneratedPluginRegistrant.h',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
         'lib/main.dart',
       ],
     );
@@ -786,7 +788,7 @@ void main() {
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-    expect(logger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+    expect(logger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
   }, overrides: <Type, Generator>{
     Logger: () => logger,
   });

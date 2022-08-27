@@ -15,9 +15,11 @@ import 'navigation_rail_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-/// A material widget that is meant to be displayed at the left or right of an
+/// A Material Design widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and
 /// five.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=y9xchtVTtqQ}
 ///
 /// The navigation rail is meant for layouts with wide viewports, such as a
 /// desktop web or tablet landscape layout. For smaller layouts, like mobile
@@ -224,7 +226,7 @@ class NavigationRail extends StatefulWidget {
   /// When one of the [destinations] is selected the [selectedLabelTextStyle]
   /// will be used instead.
   ///
-  /// The default value is based on the [Theme]'s [TextTheme.bodyText1]. The
+  /// The default value is based on the [Theme]'s [TextTheme.bodyLarge]. The
   /// default color is based on the [Theme]'s [ColorScheme.onSurface].
   ///
   /// Properties from this text style, or
@@ -237,7 +239,7 @@ class NavigationRail extends StatefulWidget {
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedLabelTextStyle] will be used.
   ///
-  /// The default value is based on the [TextTheme.bodyText1] of
+  /// The default value is based on the [TextTheme.bodyLarge] of
   /// [ThemeData.textTheme]. The default color is based on the [Theme]'s
   /// [ColorScheme.primary].
   ///
@@ -377,7 +379,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
-    final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _NavigationRailDefaultsM3(context) : _NavigationRailDefaultsM2(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? defaults.backgroundColor!;
@@ -400,6 +402,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       ? unselectedIconTheme
       : unselectedIconTheme.copyWith(opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity);
 
+    final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
+
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: Semantics(
@@ -407,52 +411,56 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
         child: Material(
           elevation: elevation,
           color: backgroundColor,
-          child: Column(
-            children: <Widget>[
-              _verticalSpacer,
-              if (widget.leading != null)
-                ...<Widget>[
-                  widget.leading!,
-                  _verticalSpacer,
-                ],
-              Expanded(
-                child: Align(
-                  alignment: Alignment(0, groupAlignment),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      for (int i = 0; i < widget.destinations.length; i += 1)
-                        _RailDestination(
-                          minWidth: minWidth,
-                          minExtendedWidth: minExtendedWidth,
-                          extendedTransitionAnimation: _extendedAnimation,
-                          selected: widget.selectedIndex == i,
-                          icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
-                          label: widget.destinations[i].label,
-                          destinationAnimation: _destinationAnimations[i],
-                          labelType: labelType,
-                          iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
-                          labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
-                          padding: widget.destinations[i].padding,
-                          useIndicator: useIndicator,
-                          indicatorColor: useIndicator ? indicatorColor : null,
-                          onTap: () {
-                            if (widget.onDestinationSelected != null) {
-                              widget.onDestinationSelected!(i);
-                            }
-                          },
-                          indexLabel: localizations.tabLabel(
-                            tabIndex: i + 1,
-                            tabCount: widget.destinations.length,
+          child: SafeArea(
+            right: isRTLDirection,
+            left: !isRTLDirection,
+            child: Column(
+              children: <Widget>[
+                _verticalSpacer,
+                if (widget.leading != null)
+                  ...<Widget>[
+                    widget.leading!,
+                    _verticalSpacer,
+                  ],
+                Expanded(
+                  child: Align(
+                    alignment: Alignment(0, groupAlignment),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        for (int i = 0; i < widget.destinations.length; i += 1)
+                          _RailDestination(
+                            minWidth: minWidth,
+                            minExtendedWidth: minExtendedWidth,
+                            extendedTransitionAnimation: _extendedAnimation,
+                            selected: widget.selectedIndex == i,
+                            icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
+                            label: widget.destinations[i].label,
+                            destinationAnimation: _destinationAnimations[i],
+                            labelType: labelType,
+                            iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
+                            labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+                            padding: widget.destinations[i].padding,
+                            useIndicator: useIndicator,
+                            indicatorColor: useIndicator ? indicatorColor : null,
+                            onTap: () {
+                              if (widget.onDestinationSelected != null) {
+                                widget.onDestinationSelected!(i);
+                              }
+                            },
+                            indexLabel: localizations.tabLabel(
+                              tabIndex: i + 1,
+                              tabCount: widget.destinations.length,
+                            ),
                           ),
-                        ),
-                      if (widget.trailing != null)
-                        widget.trailing!,
-                    ],
+                        if (widget.trailing != null)
+                          widget.trailing!,
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -908,8 +916,9 @@ const Widget _verticalSpacer = SizedBox(height: 8.0);
 const double _verticalIconLabelSpacingM3 = 4.0;
 const double _verticalDestinationSpacingM3 = 12.0;
 
-class _DefaultsM2 extends NavigationRailThemeData {
-  _DefaultsM2(BuildContext context)
+// Hand coded defaults based on Material Design 2.
+class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
+  _NavigationRailDefaultsM2(BuildContext context)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(
@@ -927,11 +936,11 @@ class _DefaultsM2 extends NavigationRailThemeData {
   @override Color? get backgroundColor => _colors.surface;
 
   @override TextStyle? get unselectedLabelTextStyle {
-    return _theme.textTheme.bodyText1!.copyWith(color: _colors.onSurface.withOpacity(0.64));
+    return _theme.textTheme.bodyLarge!.copyWith(color: _colors.onSurface.withOpacity(0.64));
   }
 
   @override TextStyle? get selectedLabelTextStyle {
-    return _theme.textTheme.bodyText1!.copyWith(color: _colors.primary);
+    return _theme.textTheme.bodyLarge!.copyWith(color: _colors.primary);
   }
 
   @override IconThemeData? get unselectedIconTheme {
@@ -951,15 +960,17 @@ class _DefaultsM2 extends NavigationRailThemeData {
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - NavigationRail
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_101
-class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
+  _NavigationRailDefaultsM3(this.context)
       : super(
           elevation: 0.0,
           groupAlignment: -1,
@@ -1001,4 +1012,4 @@ class _TokenDefaultsM3 extends NavigationRailThemeData {
 
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - NavigationRail
