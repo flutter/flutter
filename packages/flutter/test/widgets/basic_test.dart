@@ -578,6 +578,48 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (WidgetTester tester) async {
+    for (final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight:200, maxWidth:200),
+            child: UnconstrainedBox(
+              clipBehavior: clip,
+              child: const SizedBox(width: 400, height: 400),
+            ),
+          ),
+        ),
+      );
+
+      final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+
+      expect(renderObject.clipBehavior, equals(clip), reason: 'for clip = $clip');
+
+      switch(clip) {
+        case Clip.none:
+          // the UnconstrainedBox overflows.
+          final dynamic exception = tester.takeException();
+          expect(exception, isFlutterError, reason: 'for clip = $clip');
+          // ignore: avoid_dynamic_calls
+          expect(exception.diagnostics.first.level, DiagnosticLevel.summary, reason: 'for clip = $clip');
+          expect(
+            // ignore: avoid_dynamic_calls
+            exception.diagnostics.first.toString(),
+            startsWith('A RenderConstraintsTransformBox overflowed'),
+            reason: 'for clip = $clip',
+          );
+          break;
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          expect(renderObject.clipBehavior, equals(Clip.hardEdge), reason: 'for clip = $clip');
+          expect(tester.takeException(), isNull, reason: 'for clip = $clip');
+          break;
+      }
+    }
+  });
+
   group('ConstraintsTransformBox', () {
     test('toString', () {
       expect(

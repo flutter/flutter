@@ -410,16 +410,63 @@ void main() {
       expect(firstErrorDetails?.toString(), contains('is not normalized'));
     });
 
-    test('overflow is reported when insufficient size is given', () {
-      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: double.maxFinite));
-      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+    test('overflow is reported when insufficient size is given and clipBehavior is Clip.none', () {
+      bool hadErrors = false;
+      void expectSomeOverflowedErrors() {
+        hadErrors = true;
+        final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+        final bool overflowed = errorDetails.toString().contains('overflowed');
+        if (!overflowed) {
+          FlutterError.reportError(errorDetails);
+        }
+      }
+
+      const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+      final TestClipPaintingContext context = TestClipPaintingContext();
+
+      // By default, clipBehavior should be Clip.none
+      final RenderConstraintsTransformBox defaultBox = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
         constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
-        child: child,
+        child: box200x200,
       );
+      layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectSomeOverflowedErrors);
+      expect(hadErrors, isTrue);
+      hadErrors = false;
+      context.paintChild(defaultBox, Offset.zero);
+      expect(context.clipBehavior, equals(Clip.none));
 
-      layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      for (final Clip clip in Clip.values) {
+        // final RenderUnconstrainedBox defaultBox = RenderUnconstrainedBox(
+        //   alignment: Alignment.center,
+        //   textDirection: TextDirection.ltr,
+        //   child: box200x200,
+        // );
+
+        final RenderConstrainedBox child = RenderConstrainedBox(
+          additionalConstraints: const BoxConstraints.tightFor(width: double.maxFinite),
+        );
+        final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+          alignment: Alignment.center,
+          textDirection: TextDirection.ltr,
+          constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+          clipBehavior: clip,
+          child: child,
+        );
+        layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectSomeOverflowedErrors);
+        switch (clip) {
+          case Clip.none:
+            expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
+            break;
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
+            break;
+        }
+        hadErrors = false;
+      }
     });
 
     test('handles flow layout', () {
@@ -642,13 +689,25 @@ void main() {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
 
+    bool hadErrors = false;
+    void expectSomeOverflowedErrors() {
+      hadErrors = true;
+      final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+      final bool overflowed = errorDetails.toString().contains('overflowed');
+      if (!overflowed) {
+        FlutterError.reportError(errorDetails);
+      }
+    }
+
     // By default, clipBehavior should be Clip.none
     final RenderUnconstrainedBox defaultBox = RenderUnconstrainedBox(
       alignment: Alignment.center,
       textDirection: TextDirection.ltr,
       child: box200x200,
     );
-    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectSomeOverflowedErrors);
+    expect(hadErrors, isTrue);
+    hadErrors = false;
     context.paintChild(defaultBox, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
@@ -659,7 +718,18 @@ void main() {
           child: box200x200,
           clipBehavior: clip,
       );
-      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectSomeOverflowedErrors);
+      switch (clip) {
+        case Clip.none:
+          expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
+          break;
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
+          break;
+      }
+      hadErrors = false;
       context.paintChild(box, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
