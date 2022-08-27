@@ -12,7 +12,7 @@ final Map<int, ui.Image> _cache = <int, ui.Image>{};
 
 /// Creates an arbitrarily sized image for testing.
 ///
-/// If [color] isn't provided, fully transparent black color is used.
+/// If [color] isn't provided, fully transparent black fill color is used.
 /// If the [cache] parameter is set to true, the image will be cached for the
 /// rest of this suite. This is normally desirable, assuming a test suite uses
 /// images with the same dimensions in most tests, as it will save on memory
@@ -57,7 +57,7 @@ Future<ui.Image> _createImage(int width, int height, ui.Color color) {
 
 /// Creates an arbitrarily sized image for testing.
 ///
-/// If [color] isn't provided, fully transparent black color is used.
+/// If [color] isn't provided, fully transparent black fill color is used.
 /// If the [cache] parameter is set to true, the image will be cached for the
 /// rest of this suite. This is normally desirable, assuming a test suite uses
 /// images with the same dimensions in most tests, as it will save on memory
