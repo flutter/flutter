@@ -10,12 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-Future<void> main() async {
+void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  final ui.Image squareImage = await createTestImage(width: 10, height: 10);
-  final ui.Image wideImage =   await createTestImage(width: 20, height: 10);
-  final ui.Image tallImage =   await createTestImage(width: 10, height: 20);
+  final ui.Image squareImage = createTestImage(width: 10, height: 10);
+  final ui.Image wideImage = createTestImage(width: 20, height: 10);
+  final ui.Image tallImage = createTestImage(width: 10, height: 20);
   test('Image sizing', () {
     RenderImage image;
 
@@ -176,8 +176,8 @@ Future<void> main() async {
     expect(image.colorBlendMode, BlendMode.color);
   });
 
-  test('RenderImage disposes its image', () async {
-    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+  test('RenderImage disposes its image', () {
+    final ui.Image image = createTestImage(width: 10, height: 10, cache: false);
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
     final RenderImage renderImage = RenderImage(image: image.clone());
@@ -193,8 +193,8 @@ Future<void> main() async {
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
-  test('RenderImage does not dispose its image if setting the same image twice', () async {
-    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+  test('RenderImage does not dispose its image if setting the same image twice', () {
+    final ui.Image image = createTestImage(width: 10, height: 10, cache: false);
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
     final RenderImage renderImage = RenderImage(image: image.clone());
@@ -210,8 +210,8 @@ Future<void> main() async {
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
-  test('Render image disposes its image when it is disposed', () async {
-    final ui.Image image = await createTestImage(width: 10, height: 10, cache: false);
+  test('Render image disposes its image when it is disposed', () {
+    final ui.Image image = createTestImage(width: 10, height: 10, cache: false);
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
     final RenderImage renderImage = RenderImage(image: image.clone());

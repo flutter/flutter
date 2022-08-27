@@ -7,11 +7,11 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> main() async {
+void main() {
 
-  final ui.Image smallImage = await createTestImage(width: 10, height: 20);
-  final ui.Image middleImage = await createTestImage(width: 20, height: 100);
-  final ui.Image bigImage = await createTestImage(width: 100, height: 200);
+  final ui.Image smallImage = createTestImage(width: 10, height: 20);
+  final ui.Image middleImage = createTestImage(width: 20, height: 100);
+  final ui.Image bigImage = createTestImage(width: 100, height: 200);
 
   test('ImageInfo sizeBytes', () {
     ImageInfo imageInfo = ImageInfo(image: smallImage);

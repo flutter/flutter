@@ -55,8 +55,8 @@ void main() {
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
 
-  test('ShapeDecoration.image RTL test', () async {
-    final ui.Image image = await createTestImage(width: 100, height: 200);
+  test('ShapeDecoration.image RTL test', () {
+    final ui.Image image = createTestImage(width: 100, height: 200);
     final List<int> log = <int>[];
     final ShapeDecoration decoration = ShapeDecoration(
       shape: const CircleBorder(),

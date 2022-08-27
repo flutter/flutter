@@ -13,8 +13,8 @@ void main() {
 
   late ui.Image testImage;
 
-  setUpAll(() async {
-    testImage = await createTestImage(width: 10, height: 10);
+  setUpAll(() {
+    testImage = createTestImage(width: 10, height: 10);
   });
 
   tearDown(() {

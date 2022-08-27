@@ -26,76 +26,76 @@ void main() {
   test('maintains cache size', () async {
     imageCache.maximumSize = 3;
 
-    final TestImageInfo a = await extractOneFrame(TestImageProvider(1, 1, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo a = await extractOneFrame(TestImageProvider(1, 1, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(a.value, equals(1));
-    final TestImageInfo b = await extractOneFrame(TestImageProvider(1, 2, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo b = await extractOneFrame(TestImageProvider(1, 2, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(b.value, equals(1));
-    final TestImageInfo c = await extractOneFrame(TestImageProvider(1, 3, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo c = await extractOneFrame(TestImageProvider(1, 3, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(c.value, equals(1));
-    final TestImageInfo d = await extractOneFrame(TestImageProvider(1, 4, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo d = await extractOneFrame(TestImageProvider(1, 4, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(d.value, equals(1));
-    final TestImageInfo e = await extractOneFrame(TestImageProvider(1, 5, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo e = await extractOneFrame(TestImageProvider(1, 5, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(e.value, equals(1));
-    final TestImageInfo f = await extractOneFrame(TestImageProvider(1, 6, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo f = await extractOneFrame(TestImageProvider(1, 6, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(f.value, equals(1));
 
     expect(f, equals(a));
 
     // cache still only has one entry in it: 1(1)
 
-    final TestImageInfo g = await extractOneFrame(TestImageProvider(2, 7, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo g = await extractOneFrame(TestImageProvider(2, 7, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(g.value, equals(7));
 
     // cache has two entries in it: 1(1), 2(7)
 
-    final TestImageInfo h = await extractOneFrame(TestImageProvider(1, 8, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo h = await extractOneFrame(TestImageProvider(1, 8, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(h.value, equals(1));
 
     // cache still has two entries in it: 2(7), 1(1)
 
-    final TestImageInfo i = await extractOneFrame(TestImageProvider(3, 9, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo i = await extractOneFrame(TestImageProvider(3, 9, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(i.value, equals(9));
 
     // cache has three entries in it: 2(7), 1(1), 3(9)
 
-    final TestImageInfo j = await extractOneFrame(TestImageProvider(1, 10, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo j = await extractOneFrame(TestImageProvider(1, 10, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(j.value, equals(1));
 
     // cache still has three entries in it: 2(7), 3(9), 1(1)
 
-    final TestImageInfo k = await extractOneFrame(TestImageProvider(4, 11, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo k = await extractOneFrame(TestImageProvider(4, 11, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(k.value, equals(11));
 
     // cache has three entries: 3(9), 1(1), 4(11)
 
-    final TestImageInfo l = await extractOneFrame(TestImageProvider(1, 12, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo l = await extractOneFrame(TestImageProvider(1, 12, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(l.value, equals(1));
 
     // cache has three entries: 3(9), 4(11), 1(1)
 
-    final TestImageInfo m = await extractOneFrame(TestImageProvider(2, 13, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo m = await extractOneFrame(TestImageProvider(2, 13, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(m.value, equals(13));
 
     // cache has three entries: 4(11), 1(1), 2(13)
 
-    final TestImageInfo n = await extractOneFrame(TestImageProvider(3, 14, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo n = await extractOneFrame(TestImageProvider(3, 14, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(n.value, equals(14));
 
     // cache has three entries: 1(1), 2(13), 3(14)
 
-    final TestImageInfo o = await extractOneFrame(TestImageProvider(4, 15, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo o = await extractOneFrame(TestImageProvider(4, 15, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(o.value, equals(15));
 
     // cache has three entries: 2(13), 3(14), 4(15)
 
-    final TestImageInfo p = await extractOneFrame(TestImageProvider(1, 16, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
+    final TestImageInfo p = await extractOneFrame(TestImageProvider(1, 16, image: createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(p.value, equals(16));
 
     // cache has three entries: 3(14), 4(15), 1(16)
   });
 
   test('clear removes all images and resets cache size', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     expect(imageCache.currentSize, 0);
     expect(imageCache.currentSizeBytes, 0);
@@ -113,7 +113,7 @@ void main() {
   });
 
   test('evicts individual images', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
     await extractOneFrame(TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));
     await extractOneFrame(TestImageProvider(2, 2, image: testImage).resolve(ImageConfiguration.empty));
 
@@ -125,7 +125,7 @@ void main() {
   });
 
   test('Do not cache large images', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     imageCache.maximumSizeBytes = 1;
     await extractOneFrame(TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));
@@ -153,7 +153,7 @@ void main() {
   });
 
   test('already pending image is returned when it is put into the cache again', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
@@ -170,7 +170,7 @@ void main() {
   });
 
   test('pending image is removed when cache is cleared', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
@@ -197,7 +197,7 @@ void main() {
   });
 
   test('pending image is removed when image is evicted', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
@@ -217,7 +217,7 @@ void main() {
   });
 
   test("failed image can successfully be removed from the cache's pending images", () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     FailingTestImageProvider(1, 1, image: testImage)
         .resolve(ImageConfiguration.empty)
@@ -235,7 +235,7 @@ void main() {
   });
 
   test('containsKey - pending', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
@@ -248,7 +248,7 @@ void main() {
   });
 
   test('containsKey - completed', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
@@ -265,8 +265,8 @@ void main() {
 
   test('putIfAbsent updates LRU properties of a live image', () async {
     imageCache.maximumSize = 1;
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
-    final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
+    final ui.Image testImage2 = createTestImage(width: 10, height: 10);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()..testSetImage(testImage);
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
@@ -300,12 +300,12 @@ void main() {
   test('Live image cache avoids leaks of unlistened streams', () async {
     imageCache.maximumSize = 3;
 
-    TestImageProvider(1, 1, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(2, 2, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(3, 3, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(4, 4, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(5, 5, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(6, 6, image: await createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(1, 1, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(2, 2, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(3, 3, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(4, 4, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(5, 5, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(6, 6, image: createTestImage()).resolve(ImageConfiguration.empty);
 
     // wait an event loop to let image resolution process.
     await null;
@@ -317,12 +317,12 @@ void main() {
   test('Disabled image cache does not leak live images', () async {
     imageCache.maximumSize = 0;
 
-    TestImageProvider(1, 1, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(2, 2, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(3, 3, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(4, 4, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(5, 5, image: await createTestImage()).resolve(ImageConfiguration.empty);
-    TestImageProvider(6, 6, image: await createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(1, 1, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(2, 2, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(3, 3, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(4, 4, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(5, 5, image: createTestImage()).resolve(ImageConfiguration.empty);
+    TestImageProvider(6, 6, image: createTestImage()).resolve(ImageConfiguration.empty);
 
     // wait an event loop to let image resolution process.
     await null;
@@ -331,11 +331,11 @@ void main() {
     expect(imageCache.liveImageCount, 0);
   });
 
-  test('Clearing image cache does not leak live images', () async {
+  test('Clearing image cache does not leak live images', () {
     imageCache.maximumSize = 1;
 
-    final ui.Image testImage1 = await createTestImage(width: 8, height: 8);
-    final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
+    final ui.Image testImage1 = createTestImage(width: 8, height: 8);
+    final ui.Image testImage2 = createTestImage(width: 10, height: 10);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
@@ -358,8 +358,8 @@ void main() {
   });
 
 
-  test('Evicting a pending image clears the live image by default', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+  test('Evicting a pending image clears the live image by default', () {
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
@@ -373,7 +373,7 @@ void main() {
   });
 
   test('Evicting a pending image does clear the live image when includeLive is false and only cache listening', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
@@ -389,7 +389,7 @@ void main() {
   });
 
   test('Evicting a pending image does clear the live image when includeLive is false and some other listener', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
@@ -406,7 +406,7 @@ void main() {
   });
 
   test('Evicting a completed image does clear the live image by default', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..testSetImage(testImage)
@@ -422,7 +422,7 @@ void main() {
   });
 
   test('Evicting a completed image does not clear the live image when includeLive is set to false', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..testSetImage(testImage)
@@ -440,7 +440,7 @@ void main() {
   });
 
   test('Clearing liveImages removes callbacks', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
 
@@ -483,7 +483,7 @@ void main() {
     // If the live image did not track the size properly, the last line of
     // this test will fail.
 
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
     const int testImageSize = 8 * 8 * 4;
 
     final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
@@ -521,7 +521,7 @@ void main() {
 
   test('Image is obtained and disposed of properly for cache', () async {
     const int key = 1;
-    final ui.Image testImage = await createTestImage(width: 8, height: 8, cache: false);
+    final ui.Image testImage = createTestImage(width: 8, height: 8, cache: false);
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
     late ImageInfo imageInfo;
@@ -566,7 +566,7 @@ void main() {
 
   test('Image is obtained and disposed of properly for cache when listener is still active', () async {
     const int key = 1;
-    final ui.Image testImage = await createTestImage(width: 8, height: 8, cache: false);
+    final ui.Image testImage = createTestImage(width: 8, height: 8, cache: false);
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
     late ImageInfo imageInfo;

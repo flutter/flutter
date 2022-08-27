@@ -12,11 +12,11 @@ import '../painting/mocks_for_image_cache.dart';
 void main() {
   late ImageProvider image;
 
-  setUpAll(() async {
+  setUpAll(() {
     image = TestImageProvider(
       21,
       42,
-      image: await createTestImage(width: 10, height: 10),
+      image: createTestImage(width: 10, height: 10),
     );
   });
 

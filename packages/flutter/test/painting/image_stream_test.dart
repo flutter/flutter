@@ -81,9 +81,9 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
 void main() {
   late Image image20x10;
   late Image image200x100;
-  setUp(() async {
-    image20x10 = await createTestImage(width: 20, height: 10);
-    image200x100 = await createTestImage(width: 200, height: 100);
+  setUp(() {
+    image20x10 = createTestImage(width: 20, height: 10);
+    image200x100 = createTestImage(width: 200, height: 100);
   });
 
   testWidgets('Codec future fails', (WidgetTester tester) async {
@@ -840,8 +840,8 @@ void main() {
     chunkStream.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
   });
 
-  test('ImageStream, setCompleter before addListener - synchronousCall should be true', () async {
-    final Image image = await createTestImage(width: 100, height: 100);
+  test('ImageStream, setCompleter before addListener - synchronousCall should be true', () {
+    final Image image = createTestImage(width: 100, height: 100);
     final OneFrameImageStreamCompleter imageStreamCompleter =
         OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(1, image: image)));
 
@@ -856,8 +856,8 @@ void main() {
     expect(synchronouslyCalled, true);
   });
 
-  test('ImageStream, setCompleter after addListener - synchronousCall should be false', () async {
-    final Image image = await createTestImage(width: 100, height: 100);
+  test('ImageStream, setCompleter after addListener - synchronousCall should be false', () {
+    final Image image = createTestImage(width: 100, height: 100);
     final OneFrameImageStreamCompleter imageStreamCompleter =
         OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(1, image: image)));
 

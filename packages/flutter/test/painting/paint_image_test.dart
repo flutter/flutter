@@ -21,9 +21,9 @@ void main() {
   late ui.Image image300x300;
   late ui.Image image300x200;
 
-  setUpAll(() async {
-    image300x300 = await createTestImage(width: 300, height: 300, cache: false);
-    image300x200 = await createTestImage(width: 300, height: 200, cache: false);
+  setUpAll(() {
+    image300x300 = createTestImage(width: 300, height: 300, cache: false);
+    image300x200 = createTestImage(width: 300, height: 200, cache: false);
   });
 
   setUp(() {

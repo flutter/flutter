@@ -101,11 +101,11 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   }
 }
 
-Future<void> main() async {
+void main() {
   // These must run outside test zone to complete
-  final ui.Image targetImage = await createTestImage();
-  final ui.Image placeholderImage = await createTestImage();
-  final ui.Image replacementImage = await createTestImage();
+  final ui.Image targetImage = createTestImage();
+  final ui.Image placeholderImage = createTestImage();
+  final ui.Image replacementImage = createTestImage();
 
   group('FadeInImage', () {
     testWidgets('animates an uncached image', (WidgetTester tester) async {

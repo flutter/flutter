@@ -1714,8 +1714,8 @@ void main() {
   group('with image', () {
     late ui.Image image;
 
-    setUp(() async {
-      image = await createTestImage(width: 100, height: 100);
+    setUp(() {
+      image = createTestImage(width: 100, height: 100);
     });
 
     testWidgets('do not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {

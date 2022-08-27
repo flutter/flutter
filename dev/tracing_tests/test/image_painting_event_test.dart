@@ -47,7 +47,7 @@ void main() {
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
-    final ui.Image image = await createTestImage(width: 300, height: 300);
+    final ui.Image image = createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,
@@ -83,7 +83,7 @@ void main() {
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
-    final ui.Image image = await createTestImage(width: 300, height: 300);
+    final ui.Image image = createTestImage(width: 300, height: 300);
     final TestCanvas canvas = TestCanvas();
     paintImage(
       canvas: canvas,

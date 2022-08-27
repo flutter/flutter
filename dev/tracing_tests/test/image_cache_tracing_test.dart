@@ -13,7 +13,7 @@ void main() {
   initTimelineTests();
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('Image cache tracing', () async {
+  test('Image cache tracing', () {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
     PaintingBinding.instance.imageCache.putIfAbsent(
@@ -22,7 +22,7 @@ void main() {
     );
     PaintingBinding.instance.imageCache.clear();
 
-    completer2.testSetImage(ImageInfo(image: await createTestImage()));
+    completer2.testSetImage(ImageInfo(image: createTestImage()));
     PaintingBinding.instance.imageCache.putIfAbsent(
       'Test2',
       () => completer2,

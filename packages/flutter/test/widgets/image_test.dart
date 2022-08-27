@@ -24,11 +24,11 @@ void main() {
   late int originalCacheSize;
   late ui.Image image10x10;
 
-  setUp(() async {
+  setUp(() {
     originalCacheSize = imageCache.maximumSize;
     imageCache.clear();
     imageCache.clearLiveImages();
-    image10x10 = await createTestImage(width: 10, height: 10);
+    image10x10 = createTestImage(width: 10, height: 10);
   });
 
   tearDown(() {

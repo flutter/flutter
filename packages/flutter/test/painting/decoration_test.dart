@@ -157,8 +157,8 @@ void main() {
     expect(a, equals(b));
   });
 
-  test('BoxDecorationImageListenerSync', () async {
-    final ui.Image image = await createTestImage(width: 100, height: 100);
+  test('BoxDecorationImageListenerSync', () {
+    final ui.Image image = createTestImage(width: 100, height: 100);
     final ImageProvider imageProvider = SynchronousTestImageProvider(image);
     final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
 
@@ -176,8 +176,8 @@ void main() {
     expect(onChangedCalled, equals(false));
   });
 
-  test('BoxDecorationImageListenerAsync', () async {
-    final ui.Image image = await createTestImage(width: 10, height: 10);
+  test('BoxDecorationImageListenerAsync', () {
+    final ui.Image image = createTestImage(width: 10, height: 10);
     FakeAsync().run((FakeAsync async) {
       final ImageProvider imageProvider = AsyncTestImageProvider(image);
       final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
@@ -200,8 +200,8 @@ void main() {
   });
 
   test('BoxDecorationImageListener does not change when image is clone', () async {
-    final ui.Image image1 = await createTestImage(width: 10, height: 10, cache: false);
-    final ui.Image image2 = await createTestImage(width: 10, height: 10, cache: false);
+    final ui.Image image1 = createTestImage(width: 10, height: 10, cache: false);
+    final ui.Image image2 = createTestImage(width: 10, height: 10, cache: false);
     final MultiImageCompleter completer = MultiImageCompleter();
     final MultiFrameImageProvider imageProvider = MultiFrameImageProvider(completer);
     final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
@@ -238,7 +238,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () async {
-    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final ui.Image image = createTestImage(width: 100, height: 100);
     void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
       assert(shape != null);
       FakeAsync().run((FakeAsync async) async {
@@ -291,9 +291,9 @@ void main() {
     testDecoration(expectClip: false);
   });
 
-  test('DecorationImage test', () async {
+  test('DecorationImage test', () {
     const ColorFilter colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
-    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final ui.Image image = createTestImage(width: 100, height: 100);
     final DecorationImage backgroundImage = DecorationImage(
       image: SynchronousTestImageProvider(image),
       colorFilter: colorFilter,
@@ -328,9 +328,9 @@ void main() {
     expect(paint.invertColors, !kIsWeb);
   });
 
-  test('DecorationImage with null textDirection configuration should throw Error', () async {
+  test('DecorationImage with null textDirection configuration should throw Error', () {
     const ColorFilter colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
-    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final ui.Image image = createTestImage(width: 100, height: 100);
     final DecorationImage backgroundImage = DecorationImage(
       image: SynchronousTestImageProvider(image),
       colorFilter: colorFilter,
@@ -510,12 +510,12 @@ void main() {
     expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 1.0), isA<BoxDecoration>());
   });
 
-  test('paintImage BoxFit.none scale test', () async {
+  test('paintImage BoxFit.none scale test', () {
     for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
       final TestCanvas canvas = TestCanvas();
 
       const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
-      final ui.Image image = await createTestImage(width: 100, height: 100);
+      final ui.Image image = createTestImage(width: 100, height: 100);
 
       paintImage(
         canvas: canvas,
@@ -551,13 +551,13 @@ void main() {
     }
   });
 
-  test('paintImage BoxFit.scaleDown scale test', () async {
+  test('paintImage BoxFit.scaleDown scale test', () {
     for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
       final TestCanvas canvas = TestCanvas();
 
       // container size > scaled image size
       const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
-      final ui.Image image = await createTestImage(width: 100, height: 100);
+      final ui.Image image = createTestImage(width: 100, height: 100);
 
       paintImage(
         canvas: canvas,
@@ -593,12 +593,12 @@ void main() {
     }
   });
 
-  test('paintImage BoxFit.scaleDown test', () async {
+  test('paintImage BoxFit.scaleDown test', () {
     final TestCanvas canvas = TestCanvas();
 
     // container height (20 px) < scaled image height (50 px)
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
-    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final ui.Image image = createTestImage(width: 100, height: 100);
 
     paintImage(
       canvas: canvas,
@@ -648,7 +648,7 @@ void main() {
       final TestCanvas canvas = TestCanvas();
 
       const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
-      final ui.Image image = await createTestImage(width: 100, height: 100);
+      final ui.Image image = createTestImage(width: 100, height: 100);
 
       paintImage(
         canvas: canvas,
@@ -669,8 +669,8 @@ void main() {
     }
   });
 
-  test('DecorationImage scale test', () async {
-    final ui.Image image = await createTestImage(width: 100, height: 100);
+  test('DecorationImage scale test', () {
+    final ui.Image image = createTestImage(width: 100, height: 100);
     final DecorationImage backgroundImage = DecorationImage(
       image: SynchronousTestImageProvider(image),
       scale: 4,

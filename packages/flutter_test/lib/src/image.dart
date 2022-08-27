@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
-
-import 'test_async_utils.dart';
 
 final Map<int, ui.Image> _cache = <int, ui.Image>{};
 
@@ -19,16 +15,11 @@ final Map<int, ui.Image> _cache = <int, ui.Image>{};
 /// avoided for images that are used only once in a test suite, especially if
 /// the image is large, as it will require holding on to the memory for that
 /// image for the duration of the suite.
-///
-/// This method requires real async work, and will not work properly in the
-/// [FakeAsync] zones set up by [testWidgets]. Typically, it should be invoked
-/// as a setup step before [testWidgets] are run, such as [setUp] or [setUpAll].
-/// If needed, it can be invoked using [WidgetTester.runAsync].
-Future<ui.Image> createTestImage({
+ui.Image createTestImage({
   int width = 1,
   int height = 1,
   bool cache = true,
-}) => TestAsyncUtils.guard(() async {
+}) {
   assert(width != null && width > 0);
   assert(height != null && height > 0);
   assert(cache != null);
@@ -38,23 +29,20 @@ Future<ui.Image> createTestImage({
     return _cache[cacheKey]!.clone();
   }
 
-  final ui.Image image = await _createImage(width, height);
+  final ui.Image image = _createImage(width, height);
   if (cache) {
     _cache[cacheKey] = image.clone();
   }
   return image;
-});
+}
 
-Future<ui.Image> _createImage(int width, int height) async {
-  final Completer<ui.Image> completer = Completer<ui.Image>();
-  ui.decodeImageFromPixels(
-    Uint8List.fromList(List<int>.filled(width * height * 4, 0)),
-    width,
-    height,
-    ui.PixelFormat.rgba8888,
-    (ui.Image image) {
-      completer.complete(image);
-    },
-  );
-  return completer.future;
+ui.Image _createImage(int width, int height) async {
+  final ui.Paint paint = ui.Paint()
+    ..style = ui.PaintingStyle.fill
+    ..color = ui.Color(0x00000000);
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+  pictureCanvas.drawRect(ui.Rect.fromLTWH(0.0, 0.0, width, height), paint);
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImageSync(width, height);
 }

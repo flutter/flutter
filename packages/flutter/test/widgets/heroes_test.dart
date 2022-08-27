@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_test_utils.dart' show TestImageProvider;
 
-Future<ui.Image> createTestImage() {
+ui.Image createTestImage() {
   final ui.Paint paint = ui.Paint()
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 1.0;
@@ -21,7 +21,7 @@ Future<ui.Image> createTestImage() {
   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
   pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
   final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(300, 300);
+  return picture.toImageSync(300, 300);
 }
 
 Key firstKey = const Key('first');
@@ -203,8 +203,8 @@ class FakeWindowPadding implements WindowPadding {
 }
 
 
-Future<void> main() async {
-  final ui.Image testImage = await createTestImage();
+Future<void> main() {
+  final ui.Image testImage = createTestImage();
   assert(testImage != null);
 
   setUp(() {

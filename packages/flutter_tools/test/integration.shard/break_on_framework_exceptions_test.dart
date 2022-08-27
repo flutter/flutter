@@ -338,8 +338,8 @@ void main() {
       ''',
       setup: r'''
         late ui.Image image;
-        setUp(() async {
-          image = await createTestImage();
+        setUp(() {
+          image = createTestImage();
         });
       '''
     );

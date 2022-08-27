@@ -11,8 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> main() async {
-  final ui.Image image = await createTestImage();
+void main() {
+  final ui.Image image = createTestImage();
 
   testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
     imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(

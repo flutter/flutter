@@ -165,10 +165,10 @@ void main() {
   const String image = 'assets/image.png';
 
   final Map<double, ui.Image> images = <double, ui.Image>{};
-  setUpAll(() async {
+  setUpAll(() {
     for (final double scale in const <double>[0.5, 1.0, 1.5, 2.0, 4.0, 10.0]) {
       final int dimension = (48 * scale).floor();
-      images[scale] = await createTestImage(width: dimension, height: dimension);
+      images[scale] = createTestImage(width: dimension, height: dimension);
     }
   });
 
