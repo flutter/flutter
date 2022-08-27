@@ -106,4 +106,3 @@ ui.Image _createImageSync(int width, int height, ui.Color color) {
   final ui.Picture picture = recorder.endRecording();
   return picture.toImageSync(width, height);
 }
-
