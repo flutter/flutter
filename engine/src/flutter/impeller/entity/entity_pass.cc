@@ -146,6 +146,11 @@ static RenderTarget CreateRenderTarget(ContentContext& renderer,
                                        bool readable) {
   auto context = renderer.GetContext();
 
+  /// All of the load/store actions are managed by `InlinePassContext` when
+  /// `RenderPasses` are created, so we just set them to `kDontCare` here.
+  /// What's important is the `StorageMode` of the textures, which cannot be
+  /// changed for the lifetime of the textures.
+
   if (context->SupportsOffscreenMSAA()) {
     return RenderTarget::CreateOffscreenMSAA(
         *context,      // context
@@ -154,30 +159,26 @@ static RenderTarget CreateRenderTarget(ContentContext& renderer,
         readable ? StorageMode::kDevicePrivate
                  : StorageMode::kDeviceTransient,  // color_storage_mode
         StorageMode::kDevicePrivate,               // color_resolve_storage_mode
-        LoadAction::kClear,                        // color_load_action
-        readable ? StoreAction::kStoreAndMultisampleResolve
-                 : StoreAction::kMultisampleResolve,  // color_store_action
+        LoadAction::kDontCare,                     // color_load_action
+        StoreAction::kDontCare,                    // color_store_action
         readable ? StorageMode::kDevicePrivate
                  : StorageMode::kDeviceTransient,  // stencil_storage_mode
-        LoadAction::kClear,                        // stencil_load_action
-        readable ? StoreAction::kStore
-                 : StoreAction::kDontCare  // stencil_store_action
+        LoadAction::kDontCare,                     // stencil_load_action
+        StoreAction::kDontCare                     // stencil_store_action
     );
   }
 
   return RenderTarget::CreateOffscreen(
-      *context,      // context
-      size,          // size
-      "EntityPass",  // label
-      readable ? StorageMode::kDevicePrivate
-               : StorageMode::kDeviceTransient,  // color_storage_mode
-      LoadAction::kClear,                        // color_load_action
-      StoreAction::kStore,                       // color_store_action
+      *context,                     // context
+      size,                         // size
+      "EntityPass",                 // label
+      StorageMode::kDevicePrivate,  // color_storage_mode
+      LoadAction::kDontCare,        // color_load_action
+      StoreAction::kDontCare,       // color_store_action
       readable ? StorageMode::kDevicePrivate
                : StorageMode::kDeviceTransient,  // stencil_storage_mode
-      LoadAction::kClear,                        // stencil_load_action
-      readable ? StoreAction::kStore
-               : StoreAction::kDontCare  // stencil_store_action
+      LoadAction::kDontCare,                     // stencil_load_action
+      StoreAction::kDontCare                     // stencil_store_action
   );
 }
 
