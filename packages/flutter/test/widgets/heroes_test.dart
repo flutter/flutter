@@ -203,7 +203,7 @@ class FakeWindowPadding implements WindowPadding {
 }
 
 
-Future<void> main() {
+void main() {
   final ui.Image testImage = createTestImage();
   assert(testImage != null);
 
