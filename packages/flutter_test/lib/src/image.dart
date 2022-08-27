@@ -48,11 +48,22 @@ Future<ui.Image> createTestImage({
 });
 
 Future<ui.Image> _createImage(int width, int height, ui.Color color) {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
-  pictureCanvas.drawColor(color, ui.BlendMode.src);
-  final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(width, height);
+  final Completer<ui.Image> completer = Completer<ui.Image>();
+  final int pixel = color.red << 24 | color.green << 16 | color.blue << 8 | color.alpha;
+  final Uint8List pixels = Uint8List(width * height * 4);
+  for (int index; index < pixels.length; index += 4) {
+    pixels.buffer.setUint32(index, pixel); // big-endian produces RGBA
+  }
+  ui.decodeImageFromPixels(
+    pixels;
+    width,
+    height,
+    ui.PixelFormat.rgba8888,
+    (ui.Image image) {
+      completer.complete(image);
+    },
+  );
+  return completer.future;
 }
 
 /// Creates an arbitrarily sized image for testing.
