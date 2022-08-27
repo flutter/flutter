@@ -70,12 +70,13 @@ bool ImGui_ImplImpeller_Init(std::shared_ptr<impeller::Context> context) {
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
     auto texture_descriptor = impeller::TextureDescriptor{};
+    texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
     texture_descriptor.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
     texture_descriptor.size = {width, height};
     texture_descriptor.mip_count = 1u;
 
-    bd->font_texture = context->GetResourceAllocator()->CreateTexture(
-        impeller::StorageMode::kHostVisible, texture_descriptor);
+    bd->font_texture =
+        context->GetResourceAllocator()->CreateTexture(texture_descriptor);
     IM_ASSERT(bd->font_texture != nullptr &&
               "Could not allocate ImGui font texture.");
     bd->font_texture->SetLabel("ImGui Font Texture");
@@ -136,8 +137,11 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
   }
 
   // Allocate buffer for vertices + indices.
-  auto buffer = bd->context->GetResourceAllocator()->CreateBuffer(
-      impeller::StorageMode::kHostVisible, total_vtx_bytes + total_idx_bytes);
+  impeller::DeviceBufferDescriptor buffer_desc;
+  buffer_desc.size = total_vtx_bytes + total_idx_bytes;
+  buffer_desc.storage_mode = impeller::StorageMode::kHostVisible;
+
+  auto buffer = bd->context->GetResourceAllocator()->CreateBuffer(buffer_desc);
   buffer->SetLabel(impeller::SPrintF("ImGui vertex+index buffer"));
 
   auto display_rect =

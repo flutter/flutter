@@ -17,6 +17,7 @@ namespace impeller {
 ///             that can then used used an allocator to create that texture.
 ///
 struct TextureDescriptor {
+  StorageMode storage_mode = StorageMode::kDeviceTransient;
   TextureType type = TextureType::kTexture2D;
   PixelFormat format = PixelFormat::kUnknown;
   ISize size;

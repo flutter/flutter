@@ -164,6 +164,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
   const auto& pixmap = bitmap->pixmap();
 
   TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = StorageMode::kHostVisible;
   texture_descriptor.format = PixelFormat::kA8UNormInt;
   texture_descriptor.size = ISize::MakeWH(atlas_size, atlas_size);
 
@@ -172,8 +173,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
     return nullptr;
   }
 
-  auto texture =
-      allocator->CreateTexture(StorageMode::kHostVisible, texture_descriptor);
+  auto texture = allocator->CreateTexture(texture_descriptor);
   if (!texture || !texture->IsValid()) {
     return nullptr;
   }

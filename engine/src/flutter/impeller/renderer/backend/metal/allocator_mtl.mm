@@ -161,26 +161,25 @@ static MTLStorageMode ToMTLStorageMode(StorageMode mode,
   FML_UNREACHABLE();
 }
 
-std::shared_ptr<DeviceBuffer> AllocatorMTL::CreateBuffer(StorageMode mode,
-                                                         size_t length) {
-  const auto resource_options =
-      ToMTLResourceOptions(mode, supports_memoryless_targets_, supports_uma_);
-  const auto storage_mode =
-      ToMTLStorageMode(mode, supports_memoryless_targets_, supports_uma_);
+std::shared_ptr<DeviceBuffer> AllocatorMTL::OnCreateBuffer(
+    const DeviceBufferDescriptor& desc) {
+  const auto resource_options = ToMTLResourceOptions(
+      desc.storage_mode, supports_memoryless_targets_, supports_uma_);
+  const auto storage_mode = ToMTLStorageMode(
+      desc.storage_mode, supports_memoryless_targets_, supports_uma_);
 
-  auto buffer = [device_ newBufferWithLength:length options:resource_options];
+  auto buffer = [device_ newBufferWithLength:desc.size
+                                     options:resource_options];
   if (!buffer) {
     return nullptr;
   }
-  return std::shared_ptr<DeviceBufferMTL>(new DeviceBufferMTL(buffer,       //
-                                                              length,       //
-                                                              mode,         //
+  return std::shared_ptr<DeviceBufferMTL>(new DeviceBufferMTL(desc,         //
+                                                              buffer,       //
                                                               storage_mode  //
                                                               ));
 }
 
-std::shared_ptr<Texture> AllocatorMTL::CreateTexture(
-    StorageMode mode,
+std::shared_ptr<Texture> AllocatorMTL::OnCreateTexture(
     const TextureDescriptor& desc) {
   if (!IsValid()) {
     return nullptr;
@@ -193,8 +192,8 @@ std::shared_ptr<Texture> AllocatorMTL::CreateTexture(
     return nullptr;
   }
 
-  mtl_texture_desc.storageMode =
-      ToMTLStorageMode(mode, supports_memoryless_targets_, supports_uma_);
+  mtl_texture_desc.storageMode = ToMTLStorageMode(
+      desc.storage_mode, supports_memoryless_targets_, supports_uma_);
   auto texture = [device_ newTextureWithDescriptor:mtl_texture_desc];
   if (!texture) {
     return nullptr;

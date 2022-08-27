@@ -336,13 +336,14 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   }
 
   auto texture_descriptor = TextureDescriptor{};
+  texture_descriptor.storage_mode = StorageMode::kHostVisible;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_descriptor.size = image->GetSize();
   texture_descriptor.mip_count =
       enable_mipmapping ? image->GetSize().MipCount() : 1u;
 
   auto texture = renderer_->GetContext()->GetResourceAllocator()->CreateTexture(
-      StorageMode::kHostVisible, texture_descriptor);
+      texture_descriptor);
   if (!texture) {
     VALIDATION_LOG << "Could not allocate texture for fixture " << fixture_name;
     return nullptr;
@@ -370,13 +371,14 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
   }
 
   auto texture_descriptor = TextureDescriptor{};
+  texture_descriptor.storage_mode = StorageMode::kHostVisible;
   texture_descriptor.type = TextureType::kTextureCube;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_descriptor.size = images[0].GetSize();
   texture_descriptor.mip_count = 1u;
 
   auto texture = renderer_->GetContext()->GetResourceAllocator()->CreateTexture(
-      StorageMode::kHostVisible, texture_descriptor);
+      texture_descriptor);
   if (!texture) {
     VALIDATION_LOG << "Could not allocate texture cube.";
     return nullptr;

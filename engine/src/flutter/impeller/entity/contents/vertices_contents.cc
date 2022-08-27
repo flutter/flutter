@@ -80,8 +80,12 @@ bool VerticesContents::Render(const ContentContext& renderer,
   size_t total_vtx_bytes = vertex_data.size() * sizeof(VS::PerVertexData);
   size_t total_idx_bytes = vertices_.GetIndices().size() * sizeof(uint16_t);
 
-  auto buffer = renderer.GetContext()->GetResourceAllocator()->CreateBuffer(
-      StorageMode::kHostVisible, total_vtx_bytes + total_idx_bytes);
+  DeviceBufferDescriptor buffer_desc;
+  buffer_desc.size = total_vtx_bytes + total_idx_bytes;
+  buffer_desc.storage_mode = StorageMode::kHostVisible;
+
+  auto buffer =
+      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
 
   if (!buffer->CopyHostBuffer(reinterpret_cast<uint8_t*>(vertex_data.data()),
                               Range{0, total_vtx_bytes}, 0)) {
