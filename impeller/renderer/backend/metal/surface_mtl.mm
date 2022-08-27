@@ -44,6 +44,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   }
 
   TextureDescriptor color0_tex_desc;
+  color0_tex_desc.storage_mode = StorageMode::kDeviceTransient;
   color0_tex_desc.type = TextureType::kTexture2DMultisample;
   color0_tex_desc.sample_count = SampleCount::kCount4;
   color0_tex_desc.format = color_format;
@@ -52,8 +53,8 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
       static_cast<ISize::Type>(current_drawable.texture.height)};
   color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
-  auto msaa_tex = context->GetResourceAllocator()->CreateTexture(
-      StorageMode::kDeviceTransient, color0_tex_desc);
+  auto msaa_tex =
+      context->GetResourceAllocator()->CreateTexture(color0_tex_desc);
   if (!msaa_tex) {
     VALIDATION_LOG << "Could not allocate MSAA resolve texture.";
     return nullptr;
@@ -76,14 +77,15 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
       color0_resolve_tex_desc, current_drawable.texture);
 
   TextureDescriptor stencil0_tex;
+  stencil0_tex.storage_mode = StorageMode::kDeviceTransient;
   stencil0_tex.type = TextureType::kTexture2DMultisample;
   stencil0_tex.sample_count = SampleCount::kCount4;
   stencil0_tex.format = PixelFormat::kDefaultStencil;
   stencil0_tex.size = color0_tex_desc.size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  auto stencil_texture = context->GetResourceAllocator()->CreateTexture(
-      StorageMode::kDeviceTransient, stencil0_tex);
+  auto stencil_texture =
+      context->GetResourceAllocator()->CreateTexture(stencil0_tex);
 
   if (!stencil_texture) {
     VALIDATION_LOG << "Could not create stencil texture.";

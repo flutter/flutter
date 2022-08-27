@@ -322,15 +322,16 @@ TEST_P(RendererTest, CanRenderToTexture) {
     ASSERT_NE(pipeline_desc->GetColorAttachmentDescriptor(0u), nullptr);
     texture_descriptor.format =
         pipeline_desc->GetColorAttachmentDescriptor(0u)->format;
+    texture_descriptor.storage_mode = StorageMode::kHostVisible;
     texture_descriptor.size = {400, 400};
     texture_descriptor.mip_count = 1u;
     texture_descriptor.usage =
         static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
 
-    color0.texture = context->GetResourceAllocator()->CreateTexture(
-        StorageMode::kHostVisible, texture_descriptor);
+    color0.texture =
+        context->GetResourceAllocator()->CreateTexture(texture_descriptor);
 
-    ASSERT_TRUE(color0);
+    ASSERT_TRUE(color0.IsValid());
 
     color0.texture->SetLabel("r2t_target");
 
@@ -338,12 +339,13 @@ TEST_P(RendererTest, CanRenderToTexture) {
     stencil0.load_action = LoadAction::kClear;
     stencil0.store_action = StoreAction::kDontCare;
     TextureDescriptor stencil_texture_desc;
+    stencil_texture_desc.storage_mode = StorageMode::kDeviceTransient;
     stencil_texture_desc.size = texture_descriptor.size;
     stencil_texture_desc.format = PixelFormat::kS8UInt;
     stencil_texture_desc.usage =
         static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-    stencil0.texture = context->GetResourceAllocator()->CreateTexture(
-        StorageMode::kDeviceTransient, stencil_texture_desc);
+    stencil0.texture =
+        context->GetResourceAllocator()->CreateTexture(stencil_texture_desc);
 
     RenderTarget r2t_desc;
     r2t_desc.SetColorAttachment(color0, 0u);
@@ -458,14 +460,14 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
   ASSERT_TRUE(mipmaps_pipeline);
 
   TextureDescriptor texture_desc;
+  texture_desc.storage_mode = StorageMode::kHostVisible;
   texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_desc.size = {800, 600};
   texture_desc.mip_count = 1u;
   texture_desc.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget) |
       static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
-  auto texture = context->GetResourceAllocator()->CreateTexture(
-      StorageMode::kHostVisible, texture_desc);
+  auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
   ASSERT_TRUE(texture);
 
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");

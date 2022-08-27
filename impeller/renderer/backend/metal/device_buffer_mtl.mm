@@ -11,11 +11,12 @@
 
 namespace impeller {
 
-DeviceBufferMTL::DeviceBufferMTL(id<MTLBuffer> buffer,
-                                 size_t size,
-                                 StorageMode mode,
+DeviceBufferMTL::DeviceBufferMTL(DeviceBufferDescriptor desc,
+                                 id<MTLBuffer> buffer,
                                  MTLStorageMode storage_mode)
-    : DeviceBuffer(size, mode), buffer_(buffer), storage_mode_(storage_mode) {}
+    : DeviceBuffer(std::move(desc)),
+      buffer_(buffer),
+      storage_mode_(storage_mode) {}
 
 DeviceBufferMTL::~DeviceBufferMTL() = default;
 
@@ -23,19 +24,9 @@ id<MTLBuffer> DeviceBufferMTL::GetMTLBuffer() const {
   return buffer_;
 }
 
-[[nodiscard]] bool DeviceBufferMTL::CopyHostBuffer(const uint8_t* source,
-                                                   Range source_range,
-                                                   size_t offset) {
-  if (mode_ != StorageMode::kHostVisible) {
-    // One of the storage modes where a transfer queue must be used.
-    return false;
-  }
-
-  if (offset + source_range.length > size_) {
-    // Out of bounds of this buffer.
-    return false;
-  }
-
+[[nodiscard]] bool DeviceBufferMTL::OnCopyHostBuffer(const uint8_t* source,
+                                                     Range source_range,
+                                                     size_t offset) {
   auto dest = static_cast<uint8_t*>(buffer_.contents);
 
   if (!dest) {
