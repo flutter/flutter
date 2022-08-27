@@ -607,8 +607,8 @@ void main() {
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
-  test('clear does not leave pending images stuck', () async {
-    final ui.Image testImage = await createTestImage(width: 8, height: 8);
+  test('clear does not leave pending images stuck', () {
+    final ui.Image testImage = createTestImage(width: 8, height: 8);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
