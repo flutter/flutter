@@ -51,8 +51,8 @@ Future<ui.Image> _createImage(int width, int height, ui.Color color) {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   final int pixel = color.red << 24 | color.green << 16 | color.blue << 8 | color.alpha;
   final Uint8List pixels = Uint8List(width * height * 4);
-  for (int index; index < pixels.length; index += 4) {
-    pixels.buffer.setUint32(index, pixel); // big-endian produces RGBA
+  for (int byteOffset; byteOffset < pixels.length; byteOffset += 4) {
+    pixels.buffer.setUint32(byteOffset, pixel); // big-endian produces RGBA
   }
   ui.decodeImageFromPixels(
     pixels;
