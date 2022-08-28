@@ -2567,6 +2567,10 @@ class Path extends NativeFieldWrapperClass1 {
   /// crosses the horizontal line that intersects the center of the
   /// rectangle and with positive angles going clockwise around the
   /// oval.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc.png)
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc_ccw.png)
   void addArc(Rect oval, double startAngle, double sweepAngle) {
     assert(_rectIsValid(oval));
     _addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
@@ -5001,6 +5005,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// angles going clockwise around the oval. If `useCenter` is true, the arc is
   /// closed back to the center, forming a circle sector. Otherwise, the arc is
   /// not closed, forming a circle segment.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_draw_arc.png)
   ///
   /// This method is optimized for drawing arcs and should be faster than [Path.arcTo].
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
