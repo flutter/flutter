@@ -104,7 +104,10 @@ class ComplexLayoutState extends State<ComplexLayout> {
       },
     );
     if (widget.badScroll) {
-      body = ListView(children: <Widget>[body]);
+      body = ListView(
+        key: const Key('complex-scroll-bad'),
+        children: <Widget>[body],
+      );
     }
 
     return Scaffold(
