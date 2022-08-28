@@ -4,6 +4,16 @@
 
 import 'dart:ui' as ui;
 
+import 'assertions.dart';
+import 'diagnostics.dart';
+
+/// Enum-like list of the Flutter Framework and SDK libraries with instrumented
+/// classes.
+class FlutterLibraries {
+  static const String dartUi = 'dart:ui';
+  static const String flutterFoundation = 'package:flutter/foundation.dart';
+}
+
 /// A lyfecycle event of an object.
 abstract class ObjectEvent{
   /// Creates an instance of [ObjectEvent].
@@ -82,13 +92,20 @@ class ObjectTraced extends ObjectEvent {
 /// for disposable objects in Flutter Framework.
 /// You can dispatch events for other objects by invoking
 /// [MemoryAllocations.dispatchObjectEvent].
+///
+/// The class is optimized for massive event flow and small number of
+/// added or removed listeners.
 class MemoryAllocations {
   MemoryAllocations._();
 
   /// The shared instance of [MemoryAllocations].
   static final MemoryAllocations instance = MemoryAllocations._();
 
-  List<ObjectEventListener>? _listeners;
+  /// List of listeners.
+  ///
+  /// The elements are nullable, because the listeners should be removable
+  /// while iterating through the list.
+  List<ObjectEventListener?>? _listeners;
 
   /// Register a listener that is called every time an object event is
   /// dispatched.
@@ -102,36 +119,97 @@ class MemoryAllocations {
     _listeners!.add(listener);
   }
 
+  /// Number of active notification loops.
+  ///
+  /// When equal to zero, we can delete listeners from the list,
+  /// otherwize should null them.
+  int _activeDispatchLoops = 0;
+
+  /// If true, listeners were nulled by [removeListener].
+  bool _listenersContainsNulls = false;
+
   /// Stop calling the given listener every time an object event is
   /// dispatched.
   ///
   /// Listeners can be added with [addListener].
   void removeListener(ObjectEventListener listener){
-    _listeners?.remove(listener);
-    if (_listeners?.isEmpty ?? false) {
-      _listeners = null;
-      _unSubscribeFromSdkObjects();
+    final List<ObjectEventListener?>? listeners = _listeners;
+    if (listeners == null) {
+      return;
+    }
+
+    if (_activeDispatchLoops > 0) {
+      // If there are active dispatch loops the method 'remove'
+      // should not be invoked for the list of listeners, as it will
+      // break the loops correctness.
+      for (int i = 0; i < listeners.length; i++) {
+        if (listeners[i] == listener) {
+          listeners[i] = null;
+          _listenersContainsNulls = true;
+        }
+      }
+    } else {
+      listeners.remove(listener);
+      _checkListenersForEmptiness();
     }
   }
 
-  /// Stop calling all listeners every time an object event is
-  /// dispatched.
-  ///
-  /// Listeners can be added with [addListener].
-  void removeAllListeners(){
-    _listeners = null;
-    _unSubscribeFromSdkObjects();
+  void _tryDefragmentListeners() {
+    if (_activeDispatchLoops > 0 || !_listenersContainsNulls) {
+      return;
+    }
+    _listeners?.removeWhere((ObjectEventListener? e) => e == null);
+    _listenersContainsNulls = false;
+    _checkListenersForEmptiness();
   }
 
+  void _checkListenersForEmptiness() {
+    if (_listeners?.isEmpty ?? false) {
+        _listeners = null;
+        _unSubscribeFromSdkObjects();
+    }
+  }
+
+  /// Return true if there are listeners.
+  ///
+  /// If there is no listeners, the app can save on creating the event object.
+  bool get hasListeners => _listeners?.isNotEmpty ?? false;
+
   /// Dispatch a new object event to listeners.
+  ///
+  /// Exceptions thrown by listeners will be caught and reported using
+  /// [FlutterError.reportError].
   void dispatchObjectEvent(ObjectEvent objectEvent) {
-    final List<ObjectEventListener>? listeners = _listeners;
+    final List<ObjectEventListener?>? listeners = _listeners;
     if (listeners == null || listeners.isEmpty) {
       return;
     }
-    for (final ObjectEventListener listener in listeners) {
-      listener(objectEvent);
+
+    _activeDispatchLoops++;
+    final int end = listeners.length;
+    for (int i = 0; i < end; i++) {
+      try {
+        listeners[i]?.call(objectEvent);
+      } catch (exception, stack) {
+        final String type = objectEvent.object.runtimeType.toString();
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'foundation library',
+          context: ErrorDescription('MemoryAllocations while '
+          'dispatching notifications for $type'),
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<Object>(
+              'The $type sending notification was',
+              objectEvent.object,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
+        ));
+      }
     }
+    _activeDispatchLoops--;
+    _tryDefragmentListeners();
   }
 
   void _subscribeToSdkObjects() {
@@ -161,14 +239,14 @@ class MemoryAllocations {
   }
 
   void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
-    library: 'dart:ui',
+    library: FlutterLibraries.dartUi,
     className: 'Image',
     object: image,
   ));
 
   void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
-    library: 'dart:ui',
-    className: 'Image',
+    library: FlutterLibraries.dartUi,
+    className: 'Picture',
     object: picture,
   ));
 
