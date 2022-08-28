@@ -39,21 +39,23 @@ TaskFunction createComplexLayoutScrollPerfTest({
   ).run;
 }
 
-TaskFunction createTilesScrollPerfTest() {
+TaskFunction createTilesScrollPerfTest({bool enableImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'tiles_scroll_perf',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfTest() {
+TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -123,7 +125,10 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createBackdropFilterPerfTest({
+    bool measureCpuGpu = true,
+    bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -131,6 +136,7 @@ TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
     saveTraceFile: true,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -163,7 +169,10 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createSimpleAnimationPerfTest({
+  bool measureCpuGpu = true,
+  bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -171,6 +180,7 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/simple_animation_perf_test.dart',
     saveTraceFile: true,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -341,10 +351,13 @@ TaskFunction createFullscreenTextfieldPerfTest() {
   ).run;
 }
 
-TaskFunction createFullscreenTextfieldPerfE2ETest() {
+TaskFunction createFullscreenTextfieldPerfE2ETest({
+  bool enableImpeller = false,
+}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/fullscreen_textfield_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -365,10 +378,11 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
-TaskFunction createColorFilterAndFadePerfE2ETest() {
+TaskFunction createColorFilterAndFadePerfE2ETest({bool enableImpeller = false}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_and_fade_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -410,13 +424,16 @@ TaskFunction createFadingChildAnimationPerfTest() {
   ).run;
 }
 
-TaskFunction createImageFilteredTransformAnimationPerfTest() {
+TaskFunction createImageFilteredTransformAnimationPerfTest({
+  bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
     saveTraceFile: true,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -600,10 +617,13 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createAnimatedComplexOpacityPerfE2ETest() {
+TaskFunction createAnimatedComplexOpacityPerfE2ETest({
+  bool enableImpeller = false,
+}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/animated_complex_opacity_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
