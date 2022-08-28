@@ -53,7 +53,7 @@ void main() {
     }
 
     test('complex_layout_scroll_perf', () async {
-      await testScrollPerf('complex-scroll', 'complex_layout_scroll_perf');
+      await testScrollPerf('complex-scroll-bad', 'complex_layout_scroll_perf');
     }, timeout: Timeout.none);
   });
 }
