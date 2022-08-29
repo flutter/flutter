@@ -17,6 +17,7 @@ import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
+import '../dart/pub.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -547,6 +548,24 @@ abstract class CreateBase extends FlutterCommand {
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+      );
+
+      await pub.get(
+        context: PubContext.create,
+        directory: directory.path,
+        offline: boolArgDeprecated('offline'),
+        // For templates that use the l10n localization tooling, make sure
+        // importing the generated package works right after `flutter create`.
+        generateSyntheticPackage: true,
+      );
+
+      await project.ensureReadyForPlatformSpecificTooling(
+        androidPlatform: androidPlatform,
+        iosPlatform: iosPlatform,
+        linuxPlatform: linuxPlatform,
+        macOSPlatform: macOSPlatform,
+        windowsPlatform: windowsPlatform,
+        webPlatform: webPlatform,
       );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];

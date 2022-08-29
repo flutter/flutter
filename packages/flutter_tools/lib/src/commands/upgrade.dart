@@ -12,7 +12,6 @@ import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -331,7 +330,7 @@ class UpgradeCommandRunner {
       globals.printStatus('');
       await pub.get(
         context: PubContext.pubUpgrade,
-        project: FlutterProject.fromDirectory(globals.fs.directory(projectRoot)),
+        directory: projectRoot,
         upgrade: true,
       );
     }

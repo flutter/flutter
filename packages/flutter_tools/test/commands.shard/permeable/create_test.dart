@@ -66,7 +66,6 @@ void main() {
   LoggingProcessManager loggingProcessManager;
   FakeProcessManager fakeProcessManager;
   BufferLogger logger;
-  FakeStdio mockStdio;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -83,7 +82,6 @@ void main() {
       channel: frameworkChannel,
     );
     fakeProcessManager = FakeProcessManager.empty();
-    mockStdio = FakeStdio();
   });
 
   tearDown(() {
@@ -175,7 +173,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -223,7 +220,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -250,7 +246,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -280,7 +275,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -306,7 +300,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
     ...noColorTerminalOverride,
   });
@@ -332,7 +325,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
     ...noColorTerminalOverride,
   });
@@ -366,7 +358,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -399,7 +390,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -427,7 +417,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -466,7 +455,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -496,7 +484,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -535,7 +522,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -566,7 +552,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -597,7 +582,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
     Logger: ()=>logger,
   });
@@ -625,7 +609,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -747,7 +730,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -1446,7 +1428,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -1475,7 +1456,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -1733,7 +1713,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -1758,7 +1737,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -1909,7 +1887,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 
@@ -1934,14 +1911,13 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub(
+      Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-      stdio: mockStdio,
       ),
     },
   );
@@ -2895,7 +2871,6 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
-      stdio: mockStdio,
     ),
   });
 

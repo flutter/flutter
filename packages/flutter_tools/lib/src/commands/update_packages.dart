@@ -16,7 +16,6 @@ import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
@@ -400,7 +399,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       // needed packages to the pub cache, upgrading if requested.
       await pub.get(
         context: PubContext.updatePackages,
-        project: FlutterProject.fromDirectory(tempDir),
+        directory: tempDir.path,
         upgrade: doUpgrade,
         offline: boolArgDeprecated('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
@@ -423,6 +422,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           filter: tree.fill,
+          retry: false, // errors here are usually fatal since we're not hitting the network
         );
       }
     } finally {
@@ -502,7 +502,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           stopwatch.start();
           await pub.get(
             context: PubContext.updatePackages,
-            project: FlutterProject.fromDirectory(dir),
+            directory: dir.path,
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
