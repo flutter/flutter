@@ -696,7 +696,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
     // For backward-compatibility and also for Tester, where it must match
     // host platform name (HostPlatform.darwin_x64)
     case 'darwin-x64':
-    case 'darwin-arm':
+    case 'darwin-arm64':
       return TargetPlatform.darwin;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
@@ -1034,8 +1034,8 @@ String getNameForHostPlatformArch(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'x64';
-    case HostPlatform.darwin_arm:
-      return 'arm';
+    case HostPlatform.darwin_arm64:
+      return 'arm64';
     case HostPlatform.linux_x64:
       return 'x64';
     case HostPlatform.linux_arm64:
