@@ -1769,14 +1769,6 @@ Future<void> _runDartTest(String workingDirectory, {
     if (collectMetrics)
       '--file-reporter=json:$platformName.json',
   ];
-  const LocalFileSystem fs = LocalFileSystem();
-  final File metricFile = fs.file('$platformName.json');
-  print(metricFile.path);
-  if (metricFile.existsSync()) {
-    print('exists');
-  } else {
-    print('no exists');
-  }
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
     if (includeLocalEngineEnv)
@@ -1800,6 +1792,15 @@ Future<void> _runDartTest(String workingDirectory, {
     environment: environment,
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
+
+  const LocalFileSystem fs = LocalFileSystem();
+  final File metricFile = fs.file('$platformName.json');
+  print(metricFile.path);
+  if (metricFile.existsSync()) {
+    print('exists');
+  } else {
+    print('no exists');
+  }
 
   if (collectMetrics) {
     const LocalFileSystem fs = LocalFileSystem();
