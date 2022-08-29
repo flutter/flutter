@@ -64,7 +64,7 @@ class GenerateFallbackFontDataCommand extends Command<bool>
     final Map<String, Uri> urlForFamily = <String, Uri>{};
     for (final Map<String, dynamic> fontData in fontDatas) {
       if (fallbackFonts.contains(fontData['family'])) {
-        final Uri uri = Uri.parse(fontData['files']['regular'] as String);
+        final Uri uri = Uri.parse(fontData['files']['regular'] as String).replace(scheme: 'https');
         urlForFamily[fontData['family'] as String] = uri;
       }
     }
