@@ -248,7 +248,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  FakeDartDevelopmentService(this.uri, this.original, {UriConverter? this.uriConverter});
+  FakeDartDevelopmentService(this.uri, this.original, {this.uriConverter});
 
   final Uri original;
   final UriConverter? uriConverter;
