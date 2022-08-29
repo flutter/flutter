@@ -153,14 +153,13 @@ static RenderTarget CreateRenderTarget(ContentContext& renderer,
 
   if (context->SupportsOffscreenMSAA()) {
     return RenderTarget::CreateOffscreenMSAA(
-        *context,      // context
-        size,          // size
-        "EntityPass",  // label
-        readable ? StorageMode::kDevicePrivate
-                 : StorageMode::kDeviceTransient,  // color_storage_mode
-        StorageMode::kDevicePrivate,               // color_resolve_storage_mode
-        LoadAction::kDontCare,                     // color_load_action
-        StoreAction::kDontCare,                    // color_store_action
+        *context,                       // context
+        size,                           // size
+        "EntityPass",                   // label
+        StorageMode::kDeviceTransient,  // color_storage_mode
+        StorageMode::kDevicePrivate,    // color_resolve_storage_mode
+        LoadAction::kDontCare,          // color_load_action
+        StoreAction::kDontCare,         // color_store_action
         readable ? StorageMode::kDevicePrivate
                  : StorageMode::kDeviceTransient,  // stencil_storage_mode
         LoadAction::kDontCare,                     // stencil_load_action
@@ -391,20 +390,37 @@ bool EntityPass::OnRender(ContentContext& renderer,
 
   auto render_element = [&stencil_depth_floor, &pass_context, &pass_depth,
                          &renderer](Entity& element_entity) {
-    element_entity.SetStencilDepth(element_entity.GetStencilDepth() -
-                                   stencil_depth_floor);
+    auto result = pass_context.GetRenderPass(pass_depth);
 
-    auto pass = pass_context.GetRenderPass(pass_depth);
-
-    if (!pass) {
+    if (!result.pass) {
       return false;
     }
 
-    if (!element_entity.ShouldRender(pass->GetRenderTargetSize())) {
+    if (!element_entity.ShouldRender(result.pass->GetRenderTargetSize())) {
       return true;  // Nothing to render.
     }
 
-    if (!element_entity.Render(renderer, *pass)) {
+    // If the pass context returns a texture, we need to draw it to the current
+    // pass. We do this because it's faster and takes significantly less memory
+    // than storing/loading large MSAA textures.
+    if (result.backdrop_texture) {
+      auto size_rect = Rect::MakeSize(result.pass->GetRenderTargetSize());
+      auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
+      msaa_backdrop_contents->SetStencilEnabled(false);
+      msaa_backdrop_contents->SetLabel("MSAA backdrop");
+      msaa_backdrop_contents->SetSourceRect(size_rect);
+      msaa_backdrop_contents->SetTexture(result.backdrop_texture);
+
+      Entity msaa_backdrop_entity;
+      msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
+      if (!msaa_backdrop_entity.Render(renderer, *result.pass)) {
+        return false;
+      }
+    }
+
+    element_entity.SetStencilDepth(element_entity.GetStencilDepth() -
+                                   stencil_depth_floor);
+    if (!element_entity.Render(renderer, *result.pass)) {
       return false;
     }
     return true;
