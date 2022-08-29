@@ -1769,6 +1769,14 @@ Future<void> _runDartTest(String workingDirectory, {
     if (collectMetrics)
       '--file-reporter=json:$platformName.json',
   ];
+  const LocalFileSystem fs = LocalFileSystem();
+  final File metricFile = fs.file('$platformName.json');
+  print(metricFile.path);
+  if (metricFile.existsSync()) {
+    print('exists');
+  } else {
+    print('no exists');
+  }
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
     if (includeLocalEngineEnv)
