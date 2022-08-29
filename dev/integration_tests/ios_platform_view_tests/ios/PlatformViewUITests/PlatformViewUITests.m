@@ -36,11 +36,10 @@ static const CGFloat kStandardTimeOut = 60.0;
   if ([appIcon waitForExistenceWithTimeout:kStandardTimeOut]) {
     NSLog(@"Deleting previously installed app.");
 
-    if (!appIcon.isHittable) {
-      // It's possible that app icon is not hittable yet.
-      [NSThread sleepForTimeInterval:kStandardTimeOut];
-      XCTAssert(appIcon.isHittable, @"App icon should be hittable after timeout");
-    }
+    // It's possible that app icon is not hittable yet.
+    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
+    [self expectationForPredicate:hittable evaluatedWithObject:appIcon handler:nil];
+    [self waitForExpectationsWithTimeout:kStandardTimeOut handler:nil];
 
     // Pressing for 2 seconds will bring up context menu.
     // Pressing for 3 seconds will dismiss the context menu and make icons wiggle.
