@@ -627,6 +627,19 @@ class PlatformDispatcher {
   @FfiNative<Void Function(Handle)>('PlatformConfigurationNativeApi::SetIsolateDebugName')
   external static void _setIsolateDebugName(String name);
 
+  /// Requests the Dart VM to adjusts the GC heuristics based on the requested `performance_mode`.
+  ///
+  /// This operation is a no-op of web. The request to change a performance may be ignored by the
+  /// engine or not resolve in a predictable way.
+  ///
+  /// See [DartPerformanceMode] for more information on individual performance modes.
+  void requestDartPerformanceMode(DartPerformanceMode mode) {
+    _requestDartPerformanceMode(mode.index);
+  }
+
+  @FfiNative<Int Function(Int)>('PlatformConfigurationNativeApi::RequestDartPerformanceMode')
+  external static int _requestDartPerformanceMode(int mode);
+
   /// The embedder can specify data that the isolate can request synchronously
   /// on launch. This accessor fetches that data.
   ///
@@ -2086,4 +2099,27 @@ class Locale {
     }
     return out.toString();
   }
+}
+
+/// Various performance modes for tuning the Dart VM's GC performance.
+///
+/// For the editor of this enum, please keep the order in sync with `Dart_PerformanceMode`
+/// in [dart_api.h](https://github.com/dart-lang/sdk/blob/main/runtime/include/dart_api.h#L1302).
+enum DartPerformanceMode {
+  /// This is the default mode that the Dart VM is in.
+  balanced,
+
+  /// Optimize for low latency, at the expense of throughput and memory overhead
+  /// by performing work in smaller batches (requiring more overhead) or by
+  /// delaying work (requiring more memory). An embedder should not remain in
+  /// this mode indefinitely.
+  latency,
+
+  /// Optimize for high throughput, at the expense of latency and memory overhead
+  /// by performing work in larger batches with more intervening growth.
+  throughput,
+
+  /// Optimize for low memory, at the expensive of throughput and latency by more
+  /// frequently performing work.
+  memory,
 }

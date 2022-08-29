@@ -40,6 +40,12 @@ void customOnErrorThrow() {
 }
 
 @pragma('vm:entry-point')
+void setLatencyPerformanceMode() {
+  PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.latency);
+  _finish();
+}
+
+@pragma('vm:entry-point')
 void validateSceneBuilderAndScene() {
   final SceneBuilder builder = SceneBuilder();
   builder.pushOffset(10, 10);
