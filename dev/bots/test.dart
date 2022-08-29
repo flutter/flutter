@@ -1752,6 +1752,8 @@ Future<void> _runDartTest(String workingDirectory, {
     cpus = 1;
   }
 
+  const LocalFileSystem fs = LocalFileSystem();
+  final File metricFile = fs.currentDirectory.childFile('$platformName.json');
   final List<String> args = <String>[
     'run',
     'test',
@@ -1767,7 +1769,7 @@ Future<void> _runDartTest(String workingDirectory, {
       for (final String testPath in testPaths)
         testPath,
     if (collectMetrics)
-      '--file-reporter=json:$platformName.json',
+      '--file-reporter=json:${metricFile.path}',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
@@ -1793,8 +1795,6 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
-  const LocalFileSystem fs = LocalFileSystem();
-  final File metricFile = fs.currentDirectory.childFile('$platformName.json');
   print(metricFile.path);
   if (metricFile.existsSync()) {
     print('exists');
