@@ -401,7 +401,7 @@ class Lipo {
   /// Static only.
   Lipo._();
 
-  /// Create a "fat" binary bo combining multiple architecture-specific ones.
+  /// Create a "fat" binary by combining multiple architecture-specific ones.
   static Future<void> create(
       Environment environment,
       List<DarwinArch> darwinArchs,

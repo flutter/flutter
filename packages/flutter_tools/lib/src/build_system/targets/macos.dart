@@ -330,6 +330,7 @@ class CompileMacOSFramework extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 }
 
@@ -548,6 +549,16 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     CompileMacOSFramework(),
     ProfileUnpackMacOS(),
   ];
+
+  @override
+  List<Source> get inputs => super.inputs + const <Source>[
+    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+
+  @override
+  List<Source> get outputs => super.outputs + const <Source>[
+    Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
 }
 
 
@@ -562,6 +573,16 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
     ReleaseUnpackMacOS(),
+  ];
+
+  @override
+  List<Source> get inputs => super.inputs + const <Source>[
+    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+
+  @override
+  List<Source> get outputs => super.outputs + const <Source>[
+    Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 
   @override
