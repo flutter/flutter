@@ -656,7 +656,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
-/// A [RenderBox]  that applies an arbitrary transform to its constraints,
+/// A [RenderBox] that applies an arbitrary transform to its constraints,
 /// and sizes its child using the resulting [BoxConstraints], optionally
 /// clipping, or treating the overflow as an error.
 ///
@@ -732,10 +732,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// In debug mode, if `clipBehavior` is [Clip.none], and the child overflows
-  /// its constraints, a warning will be printed on the console, and black and
-  /// yellow striped areas will appear where the overflow occurs. For other
-  /// values of `clipBehavior`, the contents are clipped accordingly.
+  /// {@macro flutter.widgets.ConstraintsTransformBox.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   Clip get clipBehavior => _clipBehavior;
