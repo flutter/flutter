@@ -1,4 +1,4 @@
-Signature: 4148259c22e3446d6257e8794c229f6a
+Signature: 8d7149fa962a3d5c73f38e0d8029df98
 
 UNUSED LICENSES:
 
@@ -6250,11 +6250,11 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrTessellationShader.c
 FILE: ../../../third_party/skia/src/gpu/tessellate/AffineMatrix.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/Tessellation.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLDSLParser.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLDSLParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLErrorReporter.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParsedModule.h
+FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
