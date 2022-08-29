@@ -4,7 +4,7 @@
 
 // This file is auto generated.
 // To update all the settings.gradle files in the Flutter repo,
-// See dev/tools/bin/generate_gradle_lockfiles.dart.
+// See dev/tools/bin/generate_gradle_lockfile.dart.
 
 include ':app'
 
