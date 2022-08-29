@@ -54,7 +54,7 @@ G_DECLARE_FINAL_TYPE(FlMethodChannel,
  * (fl_method_not_implemented_response_new ());
  *
  *   g_autoptr(GError) error = NULL;
- *   if (!fl_method_call_respond(method_call, response))
+ *   if (!fl_method_call_respond(method_call, response, &error))
  *     g_warning ("Failed to send response: %s", error->message);
  * }
  *
