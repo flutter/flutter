@@ -258,8 +258,7 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
   color0_tex_desc.sample_count = SampleCount::kCount4;
   color0_tex_desc.format = PixelFormat::kDefaultColor;
   color0_tex_desc.size = size;
-  color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget) |
-                          static_cast<uint64_t>(TextureUsage::kShaderRead);
+  color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
   auto color0_msaa_tex =
       context.GetResourceAllocator()->CreateTexture(color0_tex_desc);

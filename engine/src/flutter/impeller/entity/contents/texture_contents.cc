@@ -12,6 +12,7 @@
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/tessellator/tessellator.h"
@@ -29,6 +30,10 @@ std::shared_ptr<TextureContents> TextureContents::MakeRect(Rect destination) {
   return contents;
 }
 
+void TextureContents::SetLabel(std::string label) {
+  label_ = label;
+}
+
 void TextureContents::SetPath(Path path) {
   path_ = std::move(path);
   is_rect_ = false;
@@ -44,6 +49,10 @@ std::shared_ptr<Texture> TextureContents::GetTexture() const {
 
 void TextureContents::SetOpacity(Scalar opacity) {
   opacity_ = opacity;
+}
+
+void TextureContents::SetStencilEnabled(bool enabled) {
+  stencil_enabled_ = enabled;
 }
 
 std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
@@ -141,9 +150,16 @@ bool TextureContents::Render(const ContentContext& renderer,
   frag_info.alpha = opacity_;
 
   Command cmd;
-  cmd.label = "TextureFill";
-  cmd.pipeline =
-      renderer.GetTexturePipeline(OptionsFromPassAndEntity(pass, entity));
+  cmd.label = "Texture Fill";
+  if (!label_.empty()) {
+    cmd.label += ": " + label_;
+  }
+
+  auto pipeline_options = OptionsFromPassAndEntity(pass, entity);
+  if (!stencil_enabled_) {
+    pipeline_options.stencil_compare = CompareFunction::kAlways;
+  }
+  cmd.pipeline = renderer.GetTexturePipeline(pipeline_options);
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindVertInfo(cmd, host_buffer.EmplaceUniform(vert_info));
