@@ -2717,4 +2717,142 @@ void main() {
 
     expect(scrollController.offset, 0.0);
   });
+
+  testWidgets('Scrollbar thumb can only be dragged from long press point', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107765
+
+    final ScrollController scrollController = ScrollController();
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: CustomScrollView(
+                  primary: true,
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      key: uniqueKey,
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 600.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 200.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Long press on the thumb in the center and drag down to the bottom.
+    const double scrollAmount = 400.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 100.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    // Drag down past the long press point.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, 100));
+    await tester.pumpAndSettle();
+
+    // Drag up without reaching press point on the thumb.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, -50));
+    await tester.pumpAndSettle();
+
+    // Thumb should not move yet.
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 400.0, 800.0, 600.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag up to reach press point on the thumb.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, -50));
+    await tester.pumpAndSettle();
+
+    // Drag up.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, -300));
+    await tester.pumpAndSettle();
+
+    // Thumb should be moved.
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 100.0, 800.0, 300.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag up to reach the top and exceed the long press point.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, -200));
+    await tester.pumpAndSettle();
+
+    // Drag down to reach the long press point.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, 100));
+    await tester.pumpAndSettle();
+
+    // Thumb should not move yet.
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 200.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Drag down past the long press point.
+    await dragScrollbarGesture.moveBy(const Offset(0.0, 100));
+    await tester.pumpAndSettle();
+
+    // Thumb should be moved.
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 100.0, 800.0, 300.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 }
