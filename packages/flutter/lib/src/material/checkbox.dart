@@ -786,7 +786,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
       return _colors.onSurface;
     });
   }
-  
+
   @override
   MaterialStateProperty<Color?> get checkColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -811,7 +811,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
       return Colors.transparent; // No icons available when the checkbox is unselected.
     });
   }
-  
+
   @override
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -839,10 +839,10 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
       return null;
     });
   }
-  
+
   @override
   double get splashRadius => 40.0 / 2;
-  
+
   @override
   MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
 
