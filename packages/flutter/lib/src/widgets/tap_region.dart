@@ -465,7 +465,7 @@ class RenderTapRegion extends RenderProxyBox {
   set groupId(Object? value) {
     if (_groupId != value) {
       // If the group changes, we need to unregister and re-register under the
-      // new group.
+      // new group. The re-registration happens automatically in layout().
       if (_isRegistered) {
         _registry!.unregisterTapRegion(this);
         _isRegistered = false;
