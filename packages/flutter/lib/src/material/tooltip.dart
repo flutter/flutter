@@ -197,9 +197,9 @@ class Tooltip extends StatefulWidget {
   ///
   /// If null, the message's [TextStyle] will be determined based on
   /// [ThemeData]. If [ThemeData.brightness] is set to [Brightness.dark],
-  /// [TextTheme.bodyText2] of [ThemeData.textTheme] will be used with
+  /// [TextTheme.bodyMedium] of [ThemeData.textTheme] will be used with
   /// [Colors.white]. Otherwise, if [ThemeData.brightness] is set to
-  /// [Brightness.light], [TextTheme.bodyText2] of [ThemeData.textTheme] will be
+  /// [Brightness.light], [TextTheme.bodyMedium] of [ThemeData.textTheme] will be
   /// used with [Colors.black].
   final TextStyle? textStyle;
 
@@ -704,7 +704,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final TextStyle defaultTextStyle;
     final BoxDecoration defaultDecoration;
     if (theme.brightness == Brightness.dark) {
-      defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
+      defaultTextStyle = theme.textTheme.bodyMedium!.copyWith(
         color: Colors.black,
         fontSize: _getDefaultFontSize(),
       );
@@ -713,7 +713,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         borderRadius: const BorderRadius.all(Radius.circular(4)),
       );
     } else {
-      defaultTextStyle = theme.textTheme.bodyText2!.copyWith(
+      defaultTextStyle = theme.textTheme.bodyMedium!.copyWith(
         color: Colors.white,
         fontSize: _getDefaultFontSize(),
       );
@@ -857,7 +857,7 @@ class _TooltipOverlay extends StatelessWidget {
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: height),
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodyText2!,
+            style: Theme.of(context).textTheme.bodyMedium!,
             child: Container(
               decoration: decoration,
               padding: padding,

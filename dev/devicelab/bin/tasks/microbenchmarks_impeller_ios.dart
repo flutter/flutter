@@ -4,9 +4,10 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/perf_tests.dart';
+import 'package:flutter_devicelab/tasks/microbenchmarks.dart';
 
+/// Runs microbenchmarks on iOS.
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createCubicBezierPerfSkSLWarmupTest());
+  await task(createMicrobenchmarkTask(enableImpeller: true));
 }

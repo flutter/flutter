@@ -103,6 +103,8 @@ Future<void> main(List<String> args) async {
 
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
   ButtonTemplate('md.comp.elevated-button', 'ElevatedButton', '$materialLib/elevated_button.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.filled-button', 'FilledButton', '$materialLib/filled_button.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.filled-tonal-button', 'FilledTonalButton', '$materialLib/filled_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.outlined-button', 'OutlinedButton', '$materialLib/outlined_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();

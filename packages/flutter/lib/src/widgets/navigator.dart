@@ -17,6 +17,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'heroes.dart';
 import 'overlay.dart';
@@ -217,7 +218,7 @@ abstract class Route<T> {
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
       if (navigator?.widget.requestFocus ?? false) {
-        navigator!.focusScopeNode.requestFocus();
+        navigator!.focusNode.enclosingScope?.requestFocus();
       }
     });
   }
@@ -233,11 +234,11 @@ abstract class Route<T> {
   @mustCallSuper
   void didAdd() {
     if (navigator?.widget.requestFocus ?? false) {
-      // This TickerFuture serves two purposes. First, we want to make sure
-      // that animations triggered by other operations will finish before focusing the
-      // navigator. Second, navigator.focusScopeNode might acquire more focused
-      // children in Route.install asynchronously. This TickerFuture will wait for
-      // it to finish first.
+      // This TickerFuture serves two purposes. First, we want to make sure that
+      // animations triggered by other operations will finish before focusing
+      // the navigator. Second, navigator.focusNode might acquire more focused
+      // children in Route.install asynchronously. This TickerFuture will wait
+      // for it to finish first.
       //
       // The later case can be found when subclasses manage their own focus scopes.
       // For example, ModalRoute creates a focus scope in its overlay entries. The
@@ -255,7 +256,7 @@ abstract class Route<T> {
         // Since the reference to the navigator will be set to null after it is
         // disposed, we have to do a null-safe operation in case that happens
         // within the same frame when it is added.
-        navigator?.focusScopeNode.requestFocus();
+        navigator?.focusNode.enclosingScope?.requestFocus();
       });
     }
   }
@@ -3207,8 +3208,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
   final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
 
-  /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
-  final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'Navigator Scope');
+  /// The [FocusScopeNode] for the [FocusScope] that encloses the topmost navigator.
+  @Deprecated(
+    'Use focusNode.enclosingScope! instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.'
+  )
+  FocusScopeNode get focusScopeNode => focusNode.enclosingScope!;
+
+  /// The [FocusNode] for the [Focus] that encloses the routes.
+  final FocusNode focusNode = FocusNode(debugLabel: 'Navigator');
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
@@ -3531,7 +3539,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }());
     _updateHeroController(null);
-    focusScopeNode.dispose();
+    focusNode.dispose();
     for (final _RouteEntry entry in _history) {
       entry.dispose();
     }
@@ -5226,14 +5234,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         onPointerCancel: _handlePointerUpOrCancel,
         child: AbsorbPointer(
           absorbing: false, // it's mutated directly by _cancelActivePointers above
-          child: FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: UnmanagedRestorationScope(
-              bucket: bucket,
-              child: Overlay(
-                key: _overlayKey,
-                initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+          child: FocusTraversalGroup(
+            child: Focus(
+              focusNode: focusNode,
+              autofocus: true,
+              skipTraversal: true,
+              includeSemantics: false,
+              child: UnmanagedRestorationScope(
+                bucket: bucket,
+                child: Overlay(
+                  key: _overlayKey,
+                  initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                ),
               ),
             ),
           ),
