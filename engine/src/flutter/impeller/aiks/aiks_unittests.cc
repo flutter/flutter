@@ -481,6 +481,43 @@ TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanPictureConvertToImage) {
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    static int size[2] = {1000, 1000};
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderInt2("Size", size, 0, 1000);
+    ImGui::End();
+
+    Canvas recorder_canvas;
+    Paint paint;
+    paint.color = Color{0.9568, 0.2627, 0.2118, 1.0};
+    recorder_canvas.DrawRect({100.0, 100.0, 600, 600}, paint);
+    paint.color = Color{0.1294, 0.5882, 0.9529, 1.0};
+    recorder_canvas.DrawRect({200.0, 200.0, 600, 600}, paint);
+
+    Canvas canvas;
+    paint.color = Color::BlackTransparent();
+    canvas.DrawPaint(paint);
+    Picture picture = recorder_canvas.EndRecordingAsPicture();
+    auto image = picture.ToImage(renderer, ISize{size[0], size[1]});
+    if (image) {
+      canvas.DrawImage(image, Point(), Paint());
+      paint.color = Color{0.1, 0.1, 0.1, 0.2};
+      canvas.DrawRect(Rect::MakeSize(ISize{size[0], size[1]}), paint);
+    }
+
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, BlendModeShouldCoverWholeScreen) {
   Canvas canvas;
   Paint paint;
