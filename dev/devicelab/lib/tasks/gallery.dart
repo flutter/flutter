@@ -25,14 +25,29 @@ TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
+TaskFunction createGalleryTransitionE2EBuildTest(
+  List<String> args, {
+  bool semanticsEnabled = false,
+  bool enableImpeller = false,
+}) {
+  return GalleryTransitionBuildTest(
+    args,
+    testFile: semanticsEnabled ? 'transitions_perf_e2e_with_semantics' : 'transitions_perf_e2e',
+    needFullTimeline: false,
+    timelineSummaryFile: 'e2e_perf_summary',
+    transitionDurationFile: null,
+    timelineTraceFile: null,
+    driverFile: 'transitions_perf_e2e_test',
+    enableImpeller: enableImpeller,
+  );
+}
+
 TaskFunction createGalleryTransitionE2ETest({
   bool semanticsEnabled = false,
   bool enableImpeller = false,
 }) {
   return GalleryTransitionTest(
-    testFile: semanticsEnabled
-        ? 'transitions_perf_e2e_with_semantics'
-        : 'transitions_perf_e2e',
+    testFile: semanticsEnabled ? 'transitions_perf_e2e_with_semantics' : 'transitions_perf_e2e',
     needFullTimeline: false,
     timelineSummaryFile: 'e2e_perf_summary',
     transitionDurationFile: null,
@@ -45,14 +60,11 @@ TaskFunction createGalleryTransitionE2ETest({
 TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(
     semanticsEnabled: semanticsEnabled,
-    driverFile: semanticsEnabled
-        ? 'transitions_perf_hybrid_with_semantics_test'
-        : 'transitions_perf_hybrid_test',
+    driverFile: semanticsEnabled ? 'transitions_perf_hybrid_with_semantics_test' : 'transitions_perf_hybrid_test',
   );
 }
 
 class GalleryTransitionTest {
-
   GalleryTransitionTest({
     this.semanticsEnabled = false,
     this.testFile = 'transitions_perf',
@@ -101,23 +113,20 @@ class GalleryTransitionTest {
         applicationBinaryPath = 'build/app/outputs/flutter-apk/app-profile.apk';
       }
 
-      final String testDriver = driverFile ?? (semanticsEnabled
-          ? '${testFile}_with_semantics_test'
-          : '${testFile}_test');
+      final String testDriver =
+          driverFile ?? (semanticsEnabled ? '${testFile}_with_semantics_test' : '${testFile}_test');
       section('DRIVE START');
       await flutter('drive', options: <String>[
         '--no-dds',
         '--profile',
         if (enableImpeller) '--enable-impeller',
-        if (needFullTimeline)
-          '--trace-startup',
+        if (needFullTimeline) '--trace-startup',
         if (applicationBinaryPath != null)
           '--use-application-binary=$applicationBinaryPath'
-        else
-          ...<String>[
-            '-t',
-            'test_driver/$testFile.dart',
-          ],
+        else ...<String>[
+          '-t',
+          'test_driver/$testFile.dart',
+        ],
         '--driver',
         'test_driver/$testDriver.dart',
         '-d',
@@ -125,7 +134,8 @@ class GalleryTransitionTest {
       ]);
     });
 
-    final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
+    final String testOutputDirectory =
+        Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
     final Map<String, dynamic> summary = json.decode(
       file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
@@ -143,16 +153,14 @@ class GalleryTransitionTest {
     }
 
     final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
-    return TaskResult.success(summary,
+    return TaskResult.success(
+      summary,
       detailFiles: <String>[
-        if (transitionDurationFile != null)
-          '$testOutputDirectory/$transitionDurationFile.json',
-        if (timelineTraceFile != null)
-          '$testOutputDirectory/$timelineTraceFile.json',
+        if (transitionDurationFile != null) '$testOutputDirectory/$transitionDurationFile.json',
+        if (timelineTraceFile != null) '$testOutputDirectory/$timelineTraceFile.json',
       ],
       benchmarkScoreKeys: <String>[
-        if (transitionDurationFile != null)
-          'missed_transition_count',
+        if (transitionDurationFile != null) 'missed_transition_count',
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
         '90th_percentile_frame_build_time_millis',
@@ -205,23 +213,26 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
+    this.enableImpeller = false,
   }) : super(workingDirectory: galleryDirectory);
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
+  final bool enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
   final String? transitionDurationFile;
   final String? driverFile;
 
-  final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
+  final String testOutputDirectory =
+      Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
 
   @override
   void copyArtifacts() {
-    if(applicationBinaryPath != null) {
+    if (applicationBinaryPath != null) {
       copy(
         file('${galleryDirectory.path}/build/app/outputs/flutter-apk/app-profile.apk'),
         Directory(applicationBinaryPath!),
@@ -247,6 +258,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     final String testDriver = driverFile ?? (semanticsEnabled ? '${testFile}_with_semantics_test' : '${testFile}_test');
     return <String>[
       '--profile',
+      if (enableImpeller) '--enable-impeller',
       if (needFullTimeline) '--trace-startup',
       '-t',
       'test_driver/$testFile.dart',
