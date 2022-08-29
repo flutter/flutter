@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -162,7 +163,7 @@ class FlutterTesterTestDevice extends TestDevice {
         Uri? forwardingUri;
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-          final DartDevelopmentService dds = await startDds(detectedUri);
+          final DartDevelopmentService dds = await startDds(detectedUri, uriConverter: context.get<UriConverter>());
           forwardingUri = dds.uri;
           logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {
@@ -239,12 +240,13 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @visibleForTesting
   @protected
-  Future<DartDevelopmentService> startDds(Uri uri) {
+  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) {
     return DartDevelopmentService.startDartDevelopmentService(
       uri,
       serviceUri: _ddsServiceUri,
       enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
       ipv6: host!.type == InternetAddressType.IPv6,
+      uriConverter: uriConverter,
     );
   }
 
