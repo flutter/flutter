@@ -477,6 +477,23 @@ class PlatformConfigurationNativeApi {
 
   static void RespondToPlatformMessage(int response_id,
                                        const tonic::DartByteData& data);
+
+  //--------------------------------------------------------------------------
+  /// @brief      Requests the Dart VM to adjusts the GC heuristics based on
+  ///             the requested `performance_mode`. Returns the old performance
+  ///             mode.
+  ///
+  ///             Requesting a performance mode doesn't guarantee any
+  ///             performance characteristics. This is best effort, and should
+  ///             be used after careful consideration of the various GC
+  ///             trade-offs.
+  ///
+  /// @param[in]  performance_mode The requested performance mode. Please refer
+  ///                              to documentation of `Dart_PerformanceMode`
+  ///                              for more details about what each performance
+  ///                              mode does.
+  ///
+  static int RequestDartPerformanceMode(int mode);
 };
 
 }  // namespace flutter
