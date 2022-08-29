@@ -385,19 +385,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     });
   }
 
-  // MaterialStateProperty<Color> get _defaultFillColor {
-  //   final ThemeData themeData = Theme.of(context);
-  //   return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-  //     if (states.contains(MaterialState.disabled)) {
-  //       return themeData.disabledColor;
-  //     }
-  //     if (states.contains(MaterialState.selected)) {
-  //       return themeData.colorScheme.secondary;
-  //     }
-  //     return themeData.unselectedWidgetColor;
-  //   });
-  // }
-
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide) {
       return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
