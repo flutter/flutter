@@ -174,7 +174,7 @@ class TextButton extends ButtonStyleButton {
     )
     Color? primary,
     @Deprecated(
-      'Use disabledForegroundColor and disabledForegroundColor instead. '
+      'Use disabledForegroundColor instead. '
       'This feature was deprecated after v3.1.0.'
     )
     Color? onSurface,

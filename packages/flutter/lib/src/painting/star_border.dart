@@ -514,7 +514,6 @@ class _StarGenerator {
     } else {
       scale = Offset(squash * scale.dx + (1 - squash) * scale.dy, scale.dy);
     }
-
     // Scale the border so that it matches the size of the widget rectangle, so
     // that "rotation" of the shape doesn't affect how much of the rectangle it
     // covers.
@@ -610,10 +609,12 @@ class _StarGenerator {
     }
 
     // The rounding added to the valley radius can sometimes push it outside of
-    // the rounding of the point, since the rounding amount can be different, so
-    // we have to evaluate both the valley and the point radii, and pick the
-    // largest.
-    return math.max(valleyRadius, pointRadius);
+    // the rounding of the point, since the rounding amount can be different
+    // between the points and the valleys, so we have to evaluate both the
+    // valley and the point radii, and pick the largest. Also, since this value
+    // is used later to determine the scale, we need to keep it finite and
+    // non-zero.
+    return clampDouble(math.max(valleyRadius, pointRadius), double.minPositive, double.maxFinite);
   }
 
   void _drawPoints(Path path, List<_PointInfo> points) {

@@ -13,12 +13,12 @@ import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 
-Future<String?> sharedSkSlWriter(Device device, Map<String, Object?> data, {
+Future<String?> sharedSkSlWriter(Device device, Map<String, Object?>? data, {
   File? outputFile,
   Logger? logger,
 }) async {
   logger ??= globals.logger;
-  if (data.isEmpty) {
+  if (data == null || data.isEmpty) {
     logger.printStatus(
       'No data was received. To ensure SkSL data can be generated use a '
       'physical device then:\n'
