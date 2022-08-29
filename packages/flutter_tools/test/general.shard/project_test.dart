@@ -217,7 +217,8 @@ void main() {
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
-        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.none);
+        // Default is "DeprecationBehavior.none"
+        project.checkForDeprecation();
         expect(testLogger.statusText, isEmpty);
       });
       _testInMemory('Android project not on v2 embedding ignore continues', () async {
