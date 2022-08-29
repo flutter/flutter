@@ -7,6 +7,7 @@ import 'package:package_config/package_config.dart';
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
+import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
@@ -392,5 +393,47 @@ abstract class CopyFlutterAotBundle extends Target {
       outputFile.parent.createSync(recursive: true);
     }
     environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+/// Lipo CLI tool wrapper shared by iOS and macOS builds.
+class Lipo {
+  /// Static only.
+  Lipo._();
+
+  /// Create a "fat" binary bo combining multiple architecture-specific ones.
+  static Future<void> create(
+      Environment environment,
+      List<DarwinArch> darwinArchs,
+      String path,
+      String inputDir,
+      {bool skipMissingInputs = false}) async {
+
+    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, path);
+    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
+
+    Iterable<String> inputPaths = darwinArchs.map(
+      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, getNameForDarwinArch(iosArch), path)
+    );
+    if (skipMissingInputs) {
+      inputPaths = inputPaths.where(environment.fileSystem.isFileSync);
+      if (inputPaths.isEmpty) {
+        return;
+      }
+    }
+
+    final List<String> lipoArgs = <String>[
+      'lipo',
+      ...inputPaths,
+      '-create',
+      '-output',
+      resultPath,
+    ];
+
+    environment.logger.printTrace('running ${lipoArgs.join(' ')}');
+    final ProcessResult result = await environment.processManager.run(lipoArgs);
+    if (result.exitCode != 0) {
+      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
+    }
   }
 }
