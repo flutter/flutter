@@ -433,22 +433,26 @@ targets:
       - web_sdk/**
 
   - name: Mac iOS Engine Profile
-    presubmit: false
     recipe: engine/engine
     properties:
       build_ios: "true"
       ios_profile: "true"
       jazzy_version: "0.14.1"
     timeout: 90
+    runIf:
+      - DEPS
+      - .ci.yaml
 
   - name: Mac iOS Engine Release
-    presubmit: false
     recipe: engine/engine
     properties:
       build_ios: "true"
       ios_release: "true"
       jazzy_version: "0.14.1"
     timeout: 90
+    runIf:
+      - DEPS
+      - .ci.yaml
 
   - name: Linux ci_yaml engine roller
     bringup: true
