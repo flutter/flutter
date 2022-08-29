@@ -1359,20 +1359,32 @@ class CompileTest {
     return inDirectory<TaskResult>(testDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> compileRelease = await _compileApp(reportPackageContentSizes: reportPackageContentSizes);
-      final Map<String, dynamic> compileDebug = await _compileDebug(
+      // "initial" compile required downloading and creating the `android/.gradle` directory while "full"
+      // compiles only run `flutter clean` between runs.
+      final Map<String, dynamic> compileInitialRelease = await _compileApp(deleteGradleCache: true);
+      final Map<String, dynamic> compileFullRelease = await _compileApp(deleteGradleCache: false);
+      final Map<String, dynamic> compileInitialDebug = await _compileDebug(
         clean: true,
+        deleteGradleCache: true,
+        metricKey: 'debug_initial_compile_millis',
+      );
+      final Map<String, dynamic> compileFullDebug = await _compileDebug(
+        clean: true,
+        deleteGradleCache: false,
         metricKey: 'debug_full_compile_millis',
       );
       // Build again without cleaning, should be faster.
       final Map<String, dynamic> compileSecondDebug = await _compileDebug(
         clean: false,
+        deleteGradleCache: false,
         metricKey: 'debug_second_compile_millis',
       );
 
       final Map<String, dynamic> metrics = <String, dynamic>{
-        ...compileRelease,
-        ...compileDebug,
+        ...compileInitialRelease,
+        ...compileFullRelease,
+        ...compileInitialDebug,
+        ...compileFullDebug,
         ...compileSecondDebug,
       };
 
@@ -1384,6 +1396,7 @@ class CompileTest {
         // Build after "edit" without clean should be faster than first build
         final Map<String, dynamic> compileAfterEditDebug = await _compileDebug(
           clean: false,
+          deleteGradleCache: false,
           metricKey: 'debug_compile_after_edit_millis',
         );
         metrics.addAll(compileAfterEditDebug);
@@ -1395,8 +1408,12 @@ class CompileTest {
     });
   }
 
-  static Future<Map<String, dynamic>> _compileApp({ bool reportPackageContentSizes = false }) async {
+  Future<Map<String, dynamic>> _compileApp({required bool deleteGradleCache}) async {
     await flutter('clean');
+    if (deleteGradleCache) {
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      gradleCacheDir.deleteSync(recursive: true);
+    }
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes;
     final List<String> options = <String>['--release'];
@@ -1502,19 +1519,24 @@ class CompileTest {
     }
 
     metrics.addAll(<String, dynamic>{
-      'release_full_compile_millis': watch.elapsedMilliseconds,
+      'release_${deleteGradleCache ? 'initial' : 'full'}_compile_millis': watch.elapsedMilliseconds,
       'release_size_bytes': releaseSizeInBytes,
     });
 
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileDebug({
+  Future<Map<String, dynamic>> _compileDebug({
+    required bool deleteGradleCache,
     required bool clean,
     required String metricKey,
   }) async {
     if (clean) {
       await flutter('clean');
+    }
+    if (deleteGradleCache) {
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      gradleCacheDir.deleteSync(recursive: true);
     }
     final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];
