@@ -45,10 +45,6 @@ static const CGFloat kStandardTimeOut = 60.0;
     // Pressing for 3 seconds will dismiss the context menu and make icons wiggle.
     [appIcon pressForDuration:2];
 
-    XCTAttachment *screenshotAttachment = [XCTAttachment attachmentWithScreenshot:[XCUIScreen.mainScreen screenshot]];
-    screenshotAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
-    [self addAttachment:screenshotAttachment];
-
     // The "Remove App" button in context menu.
     XCUIElement *contextMenuRemoveButton = springboard.buttons[@"Remove App"];
     XCTAssert([contextMenuRemoveButton waitForExistenceWithTimeout:kStandardTimeOut], @"The context menu remove app button must appear.");
