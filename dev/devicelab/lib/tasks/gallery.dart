@@ -57,6 +57,17 @@ TaskFunction createGalleryTransitionE2ETest({
   );
 }
 
+TaskFunction createGalleryTransitionHybridBuildTest(
+  List<String> args, {
+  bool semanticsEnabled = false,
+}) {
+  return GalleryTransitionBuildTest(
+    args,
+    semanticsEnabled: semanticsEnabled,
+    driverFile: semanticsEnabled ? 'transitions_perf_hybrid_with_semantics_test' : 'transitions_perf_hybrid_test',
+  );
+}
+
 TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(
     semanticsEnabled: semanticsEnabled,
