@@ -177,7 +177,7 @@ class PlatformViewPartialIntersectionScenario extends Scenario
 
     finishBuilder(
       builder,
-      overlayOffset: const Offset(150, 250),
+      overlayOffset: const Offset(150, 240),
     );
   }
 }
