@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:native_stack_traces/native_stack_traces.dart';
-import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -113,9 +112,12 @@ class SymbolizeCommand extends FlutterCommand {
 
     // If it's a dSYM container, expand the path to the actual DWARF.
     if (debugInfoPath.endsWith('.dSYM')) {
-      final Directory debugInfoDir = _fileSystem.directory(
-        path.join(debugInfoPath, 'Contents', 'Resources','DWARF')
-      );
+      final Directory debugInfoDir = _fileSystem
+        .directory(debugInfoPath)
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF');
+
       final List<FileSystemEntity> dwarfFiles =
         debugInfoDir.listSync().where(
           (FileSystemEntity f) => f.statSync().type == FileSystemEntityType.file
