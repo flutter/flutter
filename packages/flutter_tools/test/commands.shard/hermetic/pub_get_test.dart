@@ -169,17 +169,18 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     required PubContext context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fileSystem.directory(directory)
+    fileSystem.directory(project.directory)
       .childDirectory('.dart_tool')
       .childFile('package_config.json')
       ..createSync(recursive: true)

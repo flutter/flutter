@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -560,4 +561,14 @@ class FakeStopwatchFactory implements StopwatchFactory {
   Stopwatch createStopwatch([String name = '']) {
     return stopwatches[name] ?? FakeStopwatch();
   }
+}
+
+class FakeFlutterProjectFactory implements FlutterProjectFactory {
+  @override
+  FlutterProject fromDirectory(Directory directory) {
+    return FlutterProject.fromDirectoryTest(directory);
+  }
+
+  @override
+  Map<String, FlutterProject> get projects => throw UnimplementedError();
 }

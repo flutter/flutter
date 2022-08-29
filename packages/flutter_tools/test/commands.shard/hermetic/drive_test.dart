@@ -308,11 +308,12 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     PubContext context,
-    String directory,
+    FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,

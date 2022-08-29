@@ -12,12 +12,14 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
 
 /// The [Pub] instance.
@@ -148,9 +150,10 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Stdio stdio,
   }) = _DefaultPub;
 
-  /// Runs `pub get`.
+  /// Runs `pub get` or `pub upgrade` for [project].
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
@@ -158,13 +161,13 @@ abstract class Pub {
   /// If [shouldSkipThirdPartyGenerator] is true, the overall pub get will be
   /// skipped if the package config file has a "generator" other than "pub".
   /// Defaults to true.
+  /// Will also resolve dependencies in the example folder if present.
   Future<void> get({
     required PubContext context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
@@ -177,9 +180,8 @@ abstract class Pub {
   /// the corresponding stream of this process, optionally applying filtering.
   /// The pub process will not receive anything on its stdin stream.
   ///
-  /// The `--trace` argument is passed to `pub` (by mutating the provided
-  /// `arguments` list) when `showTraceForErrors` is true, and when `showTraceForErrors`
-  /// is null/unset, and `isRunningOnBot` is true.
+  /// The `--trace` argument is passed to `pub` when `showTraceForErrors`
+  /// `isRunningOnBot` is true.
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
@@ -189,8 +191,6 @@ abstract class Pub {
     String? directory,
     MessageFilter? filter,
     String failureMessage = 'pub failed',
-    required bool retry,
-    bool? showTraceForErrors,
   });
 
   /// Runs pub in 'interactive' mode.
@@ -214,6 +214,7 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Stdio stdio,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -223,7 +224,8 @@ class _DefaultPub implements Pub {
          logger: logger,
          processManager: processManager,
        ),
-       _processManager = processManager;
+       _processManager = processManager,
+       _stdio = stdio;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -232,40 +234,40 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final Usage _usage;
   final ProcessManager _processManager;
+  final Stdio _stdio;
 
   @override
   Future<void> get({
     required PubContext context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    directory ??= _fileSystem.currentDirectory.path;
-    final File packageConfigFile = _fileSystem.file(
-      _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
+    final String directory = project.directory.path;
+    final File packageConfigFile = project.packageConfigFile;
     final Directory generatedDirectory = _fileSystem.directory(
       _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
     final File lastVersion = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'version'));
     final File currentVersion = _fileSystem.file(
       _fileSystem.path.join(Cache.flutterRoot!, 'version'));
-    final File pubspecYaml = _fileSystem.file(
-      _fileSystem.path.join(directory, 'pubspec.yaml'));
+    final File pubspecYaml = project.pubspecFile;
     final File pubLockFile = _fileSystem.file(
       _fileSystem.path.join(directory, 'pubspec.lock')
     );
 
-    if (shouldSkipThirdPartyGenerator && packageConfigFile.existsSync()) {
+    if (shouldSkipThirdPartyGenerator && project.packageConfigFile.existsSync()) {
       Map<String, Object?> packageConfigMap;
       try {
         packageConfigMap = jsonDecode(
-          packageConfigFile.readAsStringSync(),
+          project.packageConfigFile.readAsStringSync(),
         ) as Map<String, Object?>;
       } on FormatException {
         packageConfigMap = <String, Object?>{};
@@ -298,31 +300,118 @@ class _DefaultPub implements Pub {
     }
 
     final String command = upgrade ? 'upgrade' : 'get';
-    final Status? status = printProgress ? _logger.startProgress(
-      'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
-    ) : null;
     final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
+      if (_logger.supportsColor)
+        '--color',
       if (verbose)
-        '--verbose'
-      else
-        '--verbosity=warning',
+        '--verbose',
+      '--directory',
+      _fileSystem.path.relative(directory),
       ...<String>[
         command,
-        '--no-precompile',
       ],
       if (offline)
         '--offline',
+      '--example',
     ];
-    try {
-      await batch(
-        args,
-        context: context,
-        directory: directory,
-        failureMessage: 'pub $command failed',
-        retry: !offline,
-        flutterRootOverride: flutterRootOverride,
+    await _runWithRetries(
+      args,
+      command: command,
+      context: context,
+      directory: directory,
+      failureMessage: 'pub $command failed',
+      retry: !offline,
+      flutterRootOverride: flutterRootOverride,
+      printProgress: printProgress
+    );
+
+    if (!packageConfigFile.existsSync()) {
+      throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
+    }
+    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
+    await _updatePackageConfig(
+      packageConfigFile,
+      generatedDirectory,
+      project.manifest.generateSyntheticPackage,
+    );
+    if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+      final Directory exampleGeneratedDirectory = _fileSystem.directory(
+        _fileSystem.path.join(project.example.directory.path, '.dart_tool', 'flutter_gen'));
+      await _updatePackageConfig(
+        project.example.packageConfigFile,
+        exampleGeneratedDirectory,
+        project.example.manifest.generateSyntheticPackage,
       );
+    }
+  }
+
+  /// Runs pub with [arguments].
+  ///
+  /// Retries the command as long as the exit code is
+  /// `_kPubExitCodeUnavailable`.
+  ///
+  /// Prints the stderr and stdout of the last run.
+  ///
+  /// Sends an analytics event
+  Future<void> _runWithRetries(
+    List<String> arguments, {
+    required String command,
+    required bool printProgress,
+    required PubContext context,
+    required bool retry,
+    required String directory,
+    String failureMessage = 'pub failed',
+    String? flutterRootOverride,
+  }) async {
+    int exitCode;
+    int attempts = 0;
+    int duration = 1;
+
+    List<_OutputLine>? output;
+    StreamSubscription<String> recordLines(Stream<List<int>> stream, _OutputStream streamName) {
+      return stream
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) => output!.add(_OutputLine(line, streamName)));
+    }
+
+    final Status? status = printProgress
+      ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',)
+      : null;
+    final List<String> pubCommand = _pubCommand(arguments);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    try {
+      do {
+        output = <_OutputLine>[];
+        attempts += 1;
+        final io.Process process = await _processUtils.start(
+          pubCommand,
+          workingDirectory: _fileSystem.path.current,
+          environment: pubEnvironment,
+        );
+        final StreamSubscription<String> stdoutSubscription =
+          recordLines(process.stdout, _OutputStream.stdout);
+        final StreamSubscription<String> stderrSubscription =
+          recordLines(process.stderr, _OutputStream.stderr);
+
+        exitCode = await process.exitCode;
+        unawaited(stdoutSubscription.cancel());
+        unawaited(stderrSubscription.cancel());
+
+        if (retry && exitCode == _kPubExitCodeUnavailable) {
+          _logger.printStatus(
+            '$failureMessage (server unavailable) -- attempting retry $attempts in $duration '
+            'second${ duration == 1 ? "" : "s"}...',
+          );
+          await Future<void>.delayed(Duration(seconds: duration));
+          if (duration < 64) {
+            duration *= 2;
+          }
+          // This will cause a retry.
+          output = null;
+        }
+      } while (output == null);
       status?.stop();
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
@@ -342,15 +431,45 @@ class _DefaultPub implements Pub {
       rethrow;
     }
 
-    if (!packageConfigFile.existsSync()) {
-      throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
+    if (printProgress) {
+      // Show the output of the last run.
+      for (final _OutputLine line in output) {
+        switch (line.stream) {
+          case _OutputStream.stdout:
+            _stdio.stdoutWrite('${line.line}\n');
+            break;
+          case _OutputStream.stderr:
+            _stdio.stderrWrite('${line.line}\n');
+            break;
+        }
+      }
     }
-    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
-    await _updatePackageConfig(
-      packageConfigFile,
-      generatedDirectory,
-      generateSyntheticPackage,
-    );
+
+    final int code = exitCode;
+    String result = 'success';
+    if (output.any((_OutputLine line) => line.line.contains('version solving failed'))) {
+      result = 'version-solving-failed';
+    } else if (code != 0) {
+      result = 'failure';
+    }
+    PubResultEvent(
+      context: context.toAnalyticsString(),
+      result: result,
+      usage: _usage,
+    ).send();
+    final String lastPubMessage = output.isEmpty ? 'no message' : output.last.line;
+
+    if (code != 0) {
+      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      buffer.writeln('command: "${pubCommand.join(' ')}"');
+      buffer.write(_stringifyPubEnv(pubEnvironment));
+      buffer.writeln('exit code: $code');
+      buffer.writeln('last line of pub output: "${lastPubMessage.trim()}"');
+      throwToolExit(
+        buffer.toString(),
+        exitCode: code,
+      );
+    }
   }
 
   // For surfacing pub env in crash reporting
@@ -374,19 +493,13 @@ class _DefaultPub implements Pub {
     String? directory,
     MessageFilter? filter,
     String failureMessage = 'pub failed',
-    required bool retry,
-    bool? showTraceForErrors,
     String? flutterRootOverride,
   }) async {
-    showTraceForErrors ??= await _botDetector.isRunningOnBot;
+    final bool showTraceForErrors = await _botDetector.isRunningOnBot;
 
     String lastPubMessage = 'no message';
-    bool versionSolvingFailed = false;
     String? filterWrapper(String line) {
       lastPubMessage = line;
-      if (line.contains('version solving failed')) {
-        versionSolvingFailed = true;
-      }
       if (filter == null) {
         return line;
       }
@@ -396,44 +509,17 @@ class _DefaultPub implements Pub {
     if (showTraceForErrors) {
       arguments.insert(0, '--trace');
     }
-    int attempts = 0;
-    int duration = 1;
-    int code;
-    final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
-    while (true) {
-      attempts += 1;
-      code = await _processUtils.stream(
+    final List<String> pubCommand = _pubCommand(arguments);
+    final int code = await _processUtils.stream(
         pubCommand,
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
         environment: pubEnvironment,
       );
-      String? message;
-      if (retry) {
-        if (code == _kPubExitCodeUnavailable) {
-          message = 'server unavailable';
-        }
-      }
-      if (message == null) {
-        break;
-      }
-      versionSolvingFailed = false;
-      _logger.printStatus(
-        '$failureMessage ($message) -- attempting retry $attempts in $duration '
-        'second${ duration == 1 ? "" : "s"}...',
-      );
-      await Future<void>.delayed(Duration(seconds: duration));
-      if (duration < 64) {
-        duration *= 2;
-      }
-    }
-    assert(code != null);
 
     String result = 'success';
-    if (versionSolvingFailed) {
-      result = 'version-solving-failed';
-    } else if (code != 0) {
+    if (code != 0) {
       result = 'failure';
     }
     PubResultEvent(
@@ -465,7 +551,10 @@ class _DefaultPub implements Pub {
   }) async {
     // Fully resolved pub or pub.bat is calculated based on current platform.
     final io.Process process = await _processUtils.start(
-      _pubCommand(arguments),
+      _pubCommand(<String>[
+          if (_logger.supportsColor) '--color',
+          ...arguments,
+      ]),
       workingDirectory: directory,
       environment: await _createPubEnvironment(PubContext.interactive),
     );
@@ -720,4 +809,15 @@ class _DefaultPub implements Pub {
     buffer.writeln(packageConfig.version);
     return buffer.toString();
   }
+}
+
+class _OutputLine {
+  _OutputLine(this.line, this.stream);
+  final String line;
+  final _OutputStream stream;
+}
+
+enum _OutputStream {
+  stdout,
+  stderr,
 }
