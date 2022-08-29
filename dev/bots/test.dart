@@ -1794,7 +1794,7 @@ Future<void> _runDartTest(String workingDirectory, {
   );
 
   const LocalFileSystem fs = LocalFileSystem();
-  final File metricFile = fs.file('$platformName.json');
+  final File metricFile = fs.currentDirectory.childFile('$platformName.json');
   print(metricFile.path);
   if (metricFile.existsSync()) {
     print('exists');
