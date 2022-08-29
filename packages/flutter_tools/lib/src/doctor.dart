@@ -543,6 +543,8 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
+    messages.addAll(await _checkToolTempDirs());
+
     ValidationType valid;
     if (messages.every((ValidationMessage message) => message.isInformation)) {
       valid = ValidationType.installed;
@@ -566,6 +568,43 @@ class FlutterValidator extends DoctorValidator {
         _platform.localeName,
       ),
     );
+  }
+
+  static const int _kMaxAllowedToolTempDirs = 10;
+  Future<List<ValidationMessage>> _checkToolTempDirs() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+
+    final FileSystem fs = _fileSystem;
+
+    final Directory systemTempDir;
+    if (fs is LocalFileSystem) {
+      systemTempDir = fs.superSystemTempDirectory;
+    } else {
+      systemTempDir = fs.systemTempDirectory;
+    }
+
+    final List<Directory> toolTempDirs = await _allToolTempDirectories(systemTempDir);
+    final int toolTempDirCount = toolTempDirs.length;
+    if (toolTempDirCount > _kMaxAllowedToolTempDirs) {
+      final String message = 'The Flutter tool has created $toolTempDirCount temporary directories on your system.';
+      messages.add(ValidationMessage.error(message));
+    }
+
+    return messages;
+  }
+
+  Future<List<Directory>> _allToolTempDirectories(Directory systemTempDir) async {
+    final List<FileSystemEntity> allContents = await systemTempDir.list().toList();
+    final List<Directory> toolTempDirectories = <Directory>[];
+    for (final FileSystemEntity entity in allContents) {
+      if (entity is! Directory) {
+        continue;
+      }
+      if (entity.basename.startsWith(r'flutter_tools.')) {
+        toolTempDirectories.add(entity);
+      }
+    }
+    return toolTempDirectories;
   }
 
   ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {

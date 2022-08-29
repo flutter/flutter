@@ -248,6 +248,5 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   }
 
   // This only exist because the memory file system does not support a systemTemp that does not exists #74042
-  @visibleForTesting
   Directory get superSystemTempDirectory => super.systemTempDirectory;
 }
