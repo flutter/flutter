@@ -307,6 +307,14 @@ class FlutterPlatformViewsController {
 
   // WeakPtrFactory must be the last member.
   std::unique_ptr<fml::WeakPtrFactory<FlutterPlatformViewsController>> weak_factory_;
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  // A set to keep track of embedded views that does not have (0, 0) origin.
+  // An insertion triggers a warning message about non-zero origin logged on the debug console.
+  // See https://github.com/flutter/flutter/issues/109700 for details.
+  std::unordered_set<int64_t> non_zero_origin_views_;
+#endif
+
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };
 
