@@ -472,8 +472,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         ?? checkboxTheme.splashRadius
         ?? defaults.splashRadius!;
 
-    // final OutlinedBorder effectiveShape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!;
-
     return Semantics(
       checked: widget.value ?? false,
       child: buildToggleable(
@@ -696,20 +694,20 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 
   @override
   MaterialStateProperty<Color> get fillColor {
-   return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-     if (states.contains(MaterialState.disabled)) {
-       return _theme.disabledColor;
-     }
-     if (states.contains(MaterialState.selected)) {
-       return _colors.secondary;
-     }
-     return _theme.unselectedWidgetColor;
-   });
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _theme.disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _colors.secondary;
+      }
+      return _theme.unselectedWidgetColor;
+    });
   }
 
   @override
   MaterialStateProperty<Color> get checkColor {
-   return MaterialStateProperty.all<Color>(const Color(0xFFFFFFFF));
+    return MaterialStateProperty.all<Color>(const Color(0xFFFFFFFF));
   }
 
   @override
