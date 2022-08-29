@@ -257,6 +257,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
     final String testDriver = driverFile ?? (semanticsEnabled ? '${testFile}_with_semantics_test' : '${testFile}_test');
     return <String>[
+      '--no-dds',
       '--profile',
       if (enableImpeller) '--enable-impeller',
       if (needFullTimeline) '--trace-startup',
