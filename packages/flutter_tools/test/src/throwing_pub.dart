@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/project.dart';
 
 class ThrowingPub implements Pub {
   @override
@@ -13,6 +12,8 @@ class ThrowingPub implements Pub {
     String? directory,
     MessageFilter? filter,
     String? failureMessage = 'pub failed',
+    bool? retry,
+    bool? showTraceForErrors,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
@@ -20,14 +21,13 @@ class ThrowingPub implements Pub {
   @override
   Future<void> get({
     PubContext? context,
-    required FlutterProject project,
+    String? directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,

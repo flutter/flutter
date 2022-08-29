@@ -1541,7 +1541,7 @@ class AppRunLogger extends DelegatingLogger {
   }
 
   @override
-  bool get supportsColor => false;
+  bool get supportsColor => throw UnimplementedError();
 
   @override
   bool get hasTerminal => false;

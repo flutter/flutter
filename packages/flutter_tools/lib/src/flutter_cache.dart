@@ -19,7 +19,6 @@ import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'globals.dart' as globals;
-import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
@@ -30,7 +29,6 @@ class FlutterCache extends Cache {
     required super.fileSystem,
     required Platform platform,
     required super.osUtils,
-    required FlutterProjectFactory projectFactory,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
@@ -56,7 +54,6 @@ class FlutterCache extends Cache {
       // before the version is determined.
       flutterRoot: () => Cache.flutterRoot!,
       pub: () => pub,
-      projectFactory: projectFactory,
     ));
   }
 }
@@ -73,17 +70,14 @@ class PubDependencies extends ArtifactSet {
     required String Function() flutterRoot,
     required Logger logger,
     required Pub Function() pub,
-    required FlutterProjectFactory projectFactory,
   }) : _logger = logger,
        _flutterRoot = flutterRoot,
        _pub = pub,
-       _projectFactory = projectFactory,
        super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
   final Logger _logger;
   final Pub Function() _pub;
-  final FlutterProjectFactory _projectFactory;
 
   @override
   Future<bool> isUpToDate(
@@ -124,9 +118,7 @@ class PubDependencies extends ArtifactSet {
   ) async {
     await _pub().get(
       context: PubContext.pubGet,
-      project: _projectFactory.fromDirectory(
-        fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))
-      ),
+      directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
       offline: offline
     );
   }

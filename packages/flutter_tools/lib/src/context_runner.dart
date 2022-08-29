@@ -152,7 +152,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         osUtils: globals.os,
-        projectFactory: globals.projectFactory,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
@@ -313,7 +312,6 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        stdio: globals.stdio,
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
