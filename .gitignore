@@ -108,7 +108,6 @@ unlinked_spec.ds
 **/xcuserdata/
 
 # Windows
-**/windows/flutter/generated_plugins.cmake
 **/windows/flutter/generated_plugin_registrant.cc
 **/windows/flutter/generated_plugin_registrant.h
 
