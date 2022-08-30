@@ -242,6 +242,7 @@ ${migrateConfig.getOutputFileString()}''';
 /// Each platform tracks a different set of revisions because flutter create can be
 /// used to add support for new platforms, so the base and create revision may not always be the same.
 class MigrateConfig {
+
   MigrateConfig({
     Map<SupportedPlatform, MigratePlatformConfig>? platformConfigs,
     this.unmanagedFiles = _kDefaultUnmanagedFiles
@@ -359,7 +360,7 @@ migration:
   ///
   /// This merge is biased such that the results are consistent with the
   /// way project migration occurs such as not updating create_revision.
-  factory MigrateConfig merge(MigrateConfig current, MigrateConfig base, MigrateConfig target, Logger logger) {
+  factory MigrateConfig.merge(MigrateConfig current, MigrateConfig base, MigrateConfig target, Logger logger) {
     // Create the superset of current and target platforms with baseRevision updated to be that of target.
     final Map<SupportedPlatform, MigratePlatformConfig> platformConfigs = <SupportedPlatform, MigratePlatformConfig>{};
     for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry in current.platformConfigs.entries) {
