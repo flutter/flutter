@@ -549,4 +549,7 @@ class Locale {
 
 enum DartPerformanceMode {
   balanced,
+  latency,
+  throughput,
+  memory,
 }
