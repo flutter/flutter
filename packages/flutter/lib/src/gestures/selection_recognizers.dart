@@ -268,6 +268,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       }
     } else if (event is PointerMoveEvent) {
       print('handle PointerMoveEvent $event');
+      if (_initialButtons == kSecondaryButton) {
+        resolve(GestureDisposition.rejected);
+        return;
+      }
 
       if (_state == _DragState.accepted) {
         print('PointerMoveEvent while drag is accepted');
