@@ -2900,7 +2900,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
       gestures[TapAndDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndDragGestureRecognizer>(
-        () => TapAndDragGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse, PointerDeviceKind.touch }),
+        () => TapAndDragGestureRecognizer(deadline: kPressTimeout, debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse, PointerDeviceKind.touch }),
         (TapAndDragGestureRecognizer instance) {
           instance
             // Text selection should start from the position of the first pointer
