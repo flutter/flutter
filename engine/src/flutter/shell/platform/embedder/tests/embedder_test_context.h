@@ -71,11 +71,10 @@ class EmbedderTestContext {
 
   void AddNativeCallback(const char* name, Dart_NativeFunction function);
 
-  void SetSemanticsNodeCallback(
-      const SemanticsNodeCallback& update_semantics_node);
+  void SetSemanticsNodeCallback(SemanticsNodeCallback update_semantics_node);
 
   void SetSemanticsCustomActionCallback(
-      const SemanticsActionCallback& semantics_custom_action);
+      SemanticsActionCallback semantics_custom_action);
 
   void SetPlatformMessageCallback(
       const std::function<void(const FlutterPlatformMessage*)>& callback);

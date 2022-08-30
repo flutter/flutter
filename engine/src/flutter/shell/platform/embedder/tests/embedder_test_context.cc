@@ -119,14 +119,14 @@ void EmbedderTestContext::AddNativeCallback(const char* name,
 }
 
 void EmbedderTestContext::SetSemanticsNodeCallback(
-    const SemanticsNodeCallback& update_semantics_node_callback) {
-  update_semantics_node_callback_ = update_semantics_node_callback;
+    SemanticsNodeCallback update_semantics_node_callback) {
+  update_semantics_node_callback_ = std::move(update_semantics_node_callback);
 }
 
 void EmbedderTestContext::SetSemanticsCustomActionCallback(
-    const SemanticsActionCallback& update_semantics_custom_action_callback) {
+    SemanticsActionCallback update_semantics_custom_action_callback) {
   update_semantics_custom_action_callback_ =
-      update_semantics_custom_action_callback;
+      std::move(update_semantics_custom_action_callback);
 }
 
 void EmbedderTestContext::SetPlatformMessageCallback(
