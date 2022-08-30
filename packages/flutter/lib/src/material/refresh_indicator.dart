@@ -98,7 +98,7 @@ enum RefreshIndicatorTriggerMode {
 /// ```dart
 /// ListView(
 ///   physics: const AlwaysScrollableScrollPhysics(),
-///   children: ...
+///   // ...
 /// )
 /// ```
 ///

@@ -36,6 +36,18 @@ class MissingSetSizeRenderBox extends RenderBox {
   void performLayout() { }
 }
 
+class BadBaselineRenderBox extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    throw Exception();
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -410,16 +422,65 @@ void main() {
       expect(firstErrorDetails?.toString(), contains('is not normalized'));
     });
 
-    test('overflow is reported when insufficient size is given', () {
-      final RenderConstrainedBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: double.maxFinite));
-      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
-        alignment: Alignment.center,
-        textDirection: TextDirection.ltr,
-        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
-        child: child,
-      );
+    test('overflow is reported when insufficient size is given and clipBehavior is Clip.none', () {
+      bool hadErrors = false;
+      void expectOverflowedErrors() {
+        absorbOverflowedErrors();
+        hadErrors = true;
+      }
 
-      layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      final TestClipPaintingContext context = TestClipPaintingContext();
+      for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+        final RenderConstraintsTransformBox box;
+        switch (clip) {
+          case Clip.none:
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            box = RenderConstraintsTransformBox(
+              alignment: Alignment.center,
+              textDirection: TextDirection.ltr,
+              constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              clipBehavior: clip!,
+              child: RenderConstrainedBox(
+                additionalConstraints: const BoxConstraints.tightFor(
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                ),
+              ),
+            );
+            break;
+          case null:
+            box = RenderConstraintsTransformBox(
+              alignment: Alignment.center,
+              textDirection: TextDirection.ltr,
+              constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              child: RenderConstrainedBox(
+                additionalConstraints: const BoxConstraints.tightFor(
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                ),
+              ),
+            );
+            break;
+        }
+        layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+        context.paintChild(box, Offset.zero);
+        // By default, clipBehavior should be Clip.none
+        expect(context.clipBehavior, equals(clip ?? Clip.none));
+        switch (clip) {
+          case null:
+          case Clip.none:
+            expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
+            break;
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
+            break;
+        }
+        hadErrors = false;
+      }
     });
 
     test('handles flow layout', () {
@@ -642,26 +703,50 @@ void main() {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
 
-    // By default, clipBehavior should be Clip.none
-    final RenderUnconstrainedBox defaultBox = RenderUnconstrainedBox(
-      alignment: Alignment.center,
-      textDirection: TextDirection.ltr,
-      child: box200x200,
-    );
-    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    context.paintChild(defaultBox, Offset.zero);
-    expect(context.clipBehavior, equals(Clip.none));
+    bool hadErrors = false;
+    void expectOverflowedErrors() {
+      absorbOverflowedErrors();
+      hadErrors = true;
+    }
 
-    for (final Clip clip in Clip.values) {
-      final RenderUnconstrainedBox box = RenderUnconstrainedBox(
-          alignment: Alignment.center,
-          textDirection: TextDirection.ltr,
-          child: box200x200,
-          clipBehavior: clip,
-      );
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      final RenderUnconstrainedBox box;
+      switch (clip) {
+        case Clip.none:
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          box = RenderUnconstrainedBox(
+            alignment: Alignment.center,
+            textDirection: TextDirection.ltr,
+            child: box200x200,
+            clipBehavior: clip!,
+          );
+          break;
+        case null:
+          box = RenderUnconstrainedBox(
+            alignment: Alignment.center,
+            textDirection: TextDirection.ltr,
+            child: box200x200,
+          );
+          break;
+      }
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      switch (clip) {
+        case null:
+        case Clip.none:
+          expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
+          break;
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
+          break;
+      }
+      hadErrors = false;
       context.paintChild(box, Offset.zero);
-      expect(context.clipBehavior, equals(clip));
+      // By default, clipBehavior should be Clip.none
+      expect(context.clipBehavior, equals(clip ?? Clip.none), reason: 'for $clip');
     }
   });
 
@@ -1122,6 +1207,27 @@ void main() {
           'set its size in performLayout().',
       ),
     );
+  });
+
+  test('debugDoingBaseline flag is cleared after exception', () {
+    final BadBaselineRenderBox badChild = BadBaselineRenderBox();
+    final RenderBox badRoot = RenderBaseline(
+      child: badChild,
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    final List<dynamic> exceptions = <dynamic>[];
+    layout(badRoot, onErrors: () {
+      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
+    });
+    expect(exceptions, isNotEmpty);
+
+    final RenderBox goodRoot = RenderBaseline(
+      child: RenderDecoratedBox(decoration: const BoxDecoration()),
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    layout(goodRoot, onErrors: () { assert(false); });
   });
 }
 

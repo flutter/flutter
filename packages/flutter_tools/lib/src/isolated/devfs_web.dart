@@ -625,6 +625,12 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
+typedef VmServiceFactory = Future<vm_service.VmService> Function(
+  Uri, {
+  CompressionOptions compression,
+  required Logger logger,
+});
+
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
   /// Create a new [WebDevFS] instance.
@@ -686,9 +692,17 @@ class WebDevFS implements DevFS {
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
-  Future<ConnectionResult?> connect(bool useDebugExtension) {
+  Future<ConnectionResult?> connect(
+    bool useDebugExtension, {
+    @visibleForTesting
+    VmServiceFactory vmServiceFactory = createVmServiceDelegate,
+  }) {
     final Completer<ConnectionResult> firstConnection =
         Completer<ConnectionResult>();
+    // Note there is an asynchronous gap between this being set to true and
+    // [firstConnection] completing; thus test the boolean to determine if
+    // the current connection is the first.
+    bool foundFirstConnection = false;
     _connectedApps =
         dwds.connectedApps.listen((AppConnection appConnection) async {
       try {
@@ -696,10 +710,11 @@ class WebDevFS implements DevFS {
             ? await (_cachedExtensionFuture ??=
                 dwds.extensionDebugConnections.stream.first)
             : await dwds.debugConnection(appConnection);
-        if (firstConnection.isCompleted) {
+        if (foundFirstConnection) {
           appConnection.runMain();
         } else {
-          final vm_service.VmService vmService = await createVmServiceDelegate(
+          foundFirstConnection = true;
+          final vm_service.VmService vmService = await vmServiceFactory(
             Uri.parse(debugConnection.uri),
             logger: globals.logger,
           );
@@ -713,7 +728,8 @@ class WebDevFS implements DevFS {
       }
     }, onError: (Object error, StackTrace stackTrace) {
       globals.printError(
-          'Unknown error while waiting for debug connection:$error\n$stackTrace');
+        'Unknown error while waiting for debug connection:$error\n$stackTrace',
+      );
       if (!firstConnection.isCompleted) {
         firstConnection.completeError(error, stackTrace);
       }
@@ -756,6 +772,7 @@ class WebDevFS implements DevFS {
       nullSafetyMode,
       testMode: testMode,
     );
+
     final int selectedPort = webAssetServer.selectedPort;
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
       webAssetServer.webRenderer = WebRendererMode.autoDetect;
@@ -1025,7 +1042,12 @@ void log(logging.LogRecord event) {
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
-    globals.printWarning('${event.loggerName}: ${event.message}$error');
+    // Note: Temporary fix for https://github.com/flutter/flutter/issues/109792
+    // TODO(annagrin): Remove the condition after the bogus warning is
+    // removed in dwds: https://github.com/dart-lang/webdev/issues/1722
+    if (!event.message.contains('No module for')) {
+      globals.printWarning('${event.loggerName}: ${event.message}$error');
+    }
   } else  {
     globals.printTrace('${event.loggerName}: ${event.message}$error');
   }

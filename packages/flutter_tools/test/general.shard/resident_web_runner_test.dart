@@ -1352,7 +1352,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   }
 
   @override
-  Future<ConnectionResult> connect(bool useDebugExtension) async {
+  Future<ConnectionResult> connect(bool useDebugExtension, {VmServiceFactory vmServiceFactory = createVmServiceDelegate}) async {
     if (exception != null) {
       assert(exception is Exception || exception is Error);
       // ignore: only_throw_errors, exception is either Error or Exception here.

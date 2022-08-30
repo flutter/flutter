@@ -266,8 +266,10 @@ class SliderThemeData with Diagnosticable {
     this.trackHeight,
     this.activeTrackColor,
     this.inactiveTrackColor,
+    this.secondaryActiveTrackColor,
     this.disabledActiveTrackColor,
     this.disabledInactiveTrackColor,
+    this.disabledSecondaryActiveTrackColor,
     this.activeTickMarkColor,
     this.inactiveTickMarkColor,
     this.disabledActiveTickMarkColor,
@@ -317,8 +319,10 @@ class SliderThemeData with Diagnosticable {
     // component Colors (with opacity) from base colors.
     const int activeTrackAlpha = 0xff;
     const int inactiveTrackAlpha = 0x3d; // 24% opacity
+    const int secondaryActiveTrackAlpha = 0x8a; // 54% opacity
     const int disabledActiveTrackAlpha = 0x52; // 32% opacity
     const int disabledInactiveTrackAlpha = 0x1f; // 12% opacity
+    const int disabledSecondaryActiveTrackAlpha = 0x1f; // 12% opacity
     const int activeTickMarkAlpha = 0x8a; // 54% opacity
     const int inactiveTickMarkAlpha = 0x8a; // 54% opacity
     const int disabledActiveTickMarkAlpha = 0x1f; // 12% opacity
@@ -332,8 +336,10 @@ class SliderThemeData with Diagnosticable {
       trackHeight: 2.0,
       activeTrackColor: primaryColor.withAlpha(activeTrackAlpha),
       inactiveTrackColor: primaryColor.withAlpha(inactiveTrackAlpha),
+      secondaryActiveTrackColor: primaryColor.withAlpha(secondaryActiveTrackAlpha),
       disabledActiveTrackColor: primaryColorDark.withAlpha(disabledActiveTrackAlpha),
       disabledInactiveTrackColor: primaryColorDark.withAlpha(disabledInactiveTrackAlpha),
+      disabledSecondaryActiveTrackColor: primaryColorDark.withAlpha(disabledSecondaryActiveTrackAlpha),
       activeTickMarkColor: primaryColorLight.withAlpha(activeTickMarkAlpha),
       inactiveTickMarkColor: primaryColor.withAlpha(inactiveTickMarkAlpha),
       disabledActiveTickMarkColor: primaryColorLight.withAlpha(disabledActiveTickMarkAlpha),
@@ -368,9 +374,17 @@ class SliderThemeData with Diagnosticable {
   /// [Slider.max] position.
   final Color? inactiveTrackColor;
 
+  /// The color of the [Slider] track between the current thumb position and the
+  /// [Slider.secondaryTrackValue] position.
+  final Color? secondaryActiveTrackColor;
+
   /// The color of the [Slider] track between the [Slider.min] position and the
   /// current thumb position when the [Slider] is disabled.
   final Color? disabledActiveTrackColor;
+
+  /// The color of the [Slider] track between the current thumb position and the
+  /// [Slider.secondaryTrackValue] position when the [Slider] is disabled.
+  final Color? disabledSecondaryActiveTrackColor;
 
   /// The color of the [Slider] track between the current thumb position and the
   /// [Slider.max] position when the [Slider] is disabled.
@@ -573,8 +587,10 @@ class SliderThemeData with Diagnosticable {
     double? trackHeight,
     Color? activeTrackColor,
     Color? inactiveTrackColor,
+    Color? secondaryActiveTrackColor,
     Color? disabledActiveTrackColor,
     Color? disabledInactiveTrackColor,
+    Color? disabledSecondaryActiveTrackColor,
     Color? activeTickMarkColor,
     Color? inactiveTickMarkColor,
     Color? disabledActiveTickMarkColor,
@@ -603,8 +619,10 @@ class SliderThemeData with Diagnosticable {
       trackHeight: trackHeight ?? this.trackHeight,
       activeTrackColor: activeTrackColor ?? this.activeTrackColor,
       inactiveTrackColor: inactiveTrackColor ?? this.inactiveTrackColor,
+      secondaryActiveTrackColor: secondaryActiveTrackColor ?? this.secondaryActiveTrackColor,
       disabledActiveTrackColor: disabledActiveTrackColor ?? this.disabledActiveTrackColor,
       disabledInactiveTrackColor: disabledInactiveTrackColor ?? this.disabledInactiveTrackColor,
+      disabledSecondaryActiveTrackColor: disabledSecondaryActiveTrackColor ?? this.disabledSecondaryActiveTrackColor,
       activeTickMarkColor: activeTickMarkColor ?? this.activeTickMarkColor,
       inactiveTickMarkColor: inactiveTickMarkColor ?? this.inactiveTickMarkColor,
       disabledActiveTickMarkColor: disabledActiveTickMarkColor ?? this.disabledActiveTickMarkColor,
@@ -644,8 +662,10 @@ class SliderThemeData with Diagnosticable {
       trackHeight: lerpDouble(a.trackHeight, b.trackHeight, t),
       activeTrackColor: Color.lerp(a.activeTrackColor, b.activeTrackColor, t),
       inactiveTrackColor: Color.lerp(a.inactiveTrackColor, b.inactiveTrackColor, t),
+      secondaryActiveTrackColor: Color.lerp(a.secondaryActiveTrackColor, b.secondaryActiveTrackColor, t),
       disabledActiveTrackColor: Color.lerp(a.disabledActiveTrackColor, b.disabledActiveTrackColor, t),
       disabledInactiveTrackColor: Color.lerp(a.disabledInactiveTrackColor, b.disabledInactiveTrackColor, t),
+      disabledSecondaryActiveTrackColor: Color.lerp(a.disabledSecondaryActiveTrackColor, b.disabledSecondaryActiveTrackColor, t),
       activeTickMarkColor: Color.lerp(a.activeTickMarkColor, b.activeTickMarkColor, t),
       inactiveTickMarkColor: Color.lerp(a.inactiveTickMarkColor, b.inactiveTickMarkColor, t),
       disabledActiveTickMarkColor: Color.lerp(a.disabledActiveTickMarkColor, b.disabledActiveTickMarkColor, t),
@@ -677,8 +697,10 @@ class SliderThemeData with Diagnosticable {
     trackHeight,
     activeTrackColor,
     inactiveTrackColor,
+    secondaryActiveTrackColor,
     disabledActiveTrackColor,
     disabledInactiveTrackColor,
+    disabledSecondaryActiveTrackColor,
     activeTickMarkColor,
     inactiveTickMarkColor,
     disabledActiveTickMarkColor,
@@ -691,9 +713,9 @@ class SliderThemeData with Diagnosticable {
     overlayShape,
     tickMarkShape,
     thumbShape,
-    trackShape,
-    valueIndicatorShape,
     Object.hash(
+      trackShape,
+      valueIndicatorShape,
       rangeTickMarkShape,
       rangeThumbShape,
       rangeTrackShape,
@@ -718,8 +740,10 @@ class SliderThemeData with Diagnosticable {
         && other.trackHeight == trackHeight
         && other.activeTrackColor == activeTrackColor
         && other.inactiveTrackColor == inactiveTrackColor
+        && other.secondaryActiveTrackColor == secondaryActiveTrackColor
         && other.disabledActiveTrackColor == disabledActiveTrackColor
         && other.disabledInactiveTrackColor == disabledInactiveTrackColor
+        && other.disabledSecondaryActiveTrackColor == disabledSecondaryActiveTrackColor
         && other.activeTickMarkColor == activeTickMarkColor
         && other.inactiveTickMarkColor == inactiveTickMarkColor
         && other.disabledActiveTickMarkColor == disabledActiveTickMarkColor
@@ -752,8 +776,10 @@ class SliderThemeData with Diagnosticable {
     properties.add(DoubleProperty('trackHeight', trackHeight, defaultValue: defaultData.trackHeight));
     properties.add(ColorProperty('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
     properties.add(ColorProperty('inactiveTrackColor', inactiveTrackColor, defaultValue: defaultData.inactiveTrackColor));
+    properties.add(ColorProperty('secondaryActiveTrackColor', secondaryActiveTrackColor, defaultValue: defaultData.secondaryActiveTrackColor));
     properties.add(ColorProperty('disabledActiveTrackColor', disabledActiveTrackColor, defaultValue: defaultData.disabledActiveTrackColor));
     properties.add(ColorProperty('disabledInactiveTrackColor', disabledInactiveTrackColor, defaultValue: defaultData.disabledInactiveTrackColor));
+    properties.add(ColorProperty('disabledSecondaryActiveTrackColor', disabledSecondaryActiveTrackColor, defaultValue: defaultData.disabledSecondaryActiveTrackColor));
     properties.add(ColorProperty('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor));
     properties.add(ColorProperty('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor));
     properties.add(ColorProperty('disabledActiveTickMarkColor', disabledActiveTickMarkColor, defaultValue: defaultData.disabledActiveTickMarkColor));
@@ -1047,6 +1073,11 @@ abstract class SliderTrackShape {
   /// relative to the origin of the [PaintingContext.canvas]. It can be used as
   /// the point that divides the track into 2 segments.
   ///
+  /// The `secondaryOffset` argument is the offset of the secondary value
+  /// relative to the origin of the [PaintingContext.canvas].
+  ///
+  /// If not null, the track is divided into 3 segments.
+  ///
   /// {@macro flutter.material.SliderTickMarkShape.getPreferredSize.isEnabled}
   ///
   /// {@macro flutter.material.SliderComponentShape.paint.isDiscrete}
@@ -1068,6 +1099,7 @@ abstract class SliderTrackShape {
     required SliderThemeData sliderTheme,
     required Animation<double> enableAnimation,
     required Offset thumbCenter,
+    Offset? secondaryOffset,
     bool isEnabled,
     bool isDiscrete,
     required TextDirection textDirection,
@@ -1534,6 +1566,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     required Animation<double> enableAnimation,
     required TextDirection textDirection,
     required Offset thumbCenter,
+    Offset? secondaryOffset,
     bool isDiscrete = false,
     bool isEnabled = false,
   }) {
@@ -1593,6 +1626,25 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     if (!rightTrackSegment.isEmpty) {
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
     }
+
+    final bool showSecondaryTrack = (secondaryOffset != null) &&
+        ((textDirection == TextDirection.ltr)
+            ? (secondaryOffset.dx > thumbCenter.dx)
+            : (secondaryOffset.dx < thumbCenter.dx));
+
+    if (showSecondaryTrack) {
+      final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
+      final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+      final Rect secondaryTrackSegment = Rect.fromLTRB(
+        (textDirection == TextDirection.ltr) ? thumbCenter.dx : secondaryOffset.dx,
+        trackRect.top,
+        (textDirection == TextDirection.ltr) ? secondaryOffset.dx : thumbCenter.dx,
+        trackRect.bottom,
+      );
+      if (!secondaryTrackSegment.isEmpty) {
+        context.canvas.drawRect(secondaryTrackSegment, secondaryTrackPaint);
+      }
+    }
   }
 }
 
@@ -1635,6 +1687,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     required Animation<double> enableAnimation,
     required TextDirection textDirection,
     required Offset thumbCenter,
+    Offset? secondaryOffset,
     bool isDiscrete = false,
     bool isEnabled = false,
     double additionalActiveTrackHeight = 2,
@@ -1709,6 +1762,41 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       ),
       rightTrackPaint,
     );
+
+    final bool showSecondaryTrack = (secondaryOffset != null) &&
+        ((textDirection == TextDirection.ltr)
+            ? (secondaryOffset.dx > thumbCenter.dx)
+            : (secondaryOffset.dx < thumbCenter.dx));
+
+    if (showSecondaryTrack) {
+      final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
+      final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+      if (textDirection == TextDirection.ltr) {
+        context.canvas.drawRRect(
+          RRect.fromLTRBAndCorners(
+            thumbCenter.dx,
+            trackRect.top,
+            secondaryOffset.dx,
+            trackRect.bottom,
+            topRight: trackRadius,
+            bottomRight: trackRadius,
+          ),
+          secondaryTrackPaint,
+        );
+      } else {
+        context.canvas.drawRRect(
+          RRect.fromLTRBAndCorners(
+            secondaryOffset.dx,
+            trackRect.top,
+            thumbCenter.dx,
+            trackRect.bottom,
+            topLeft: trackRadius,
+            bottomLeft: trackRadius,
+          ),
+          secondaryTrackPaint,
+        );
+      }
+    }
   }
 }
 

@@ -28,7 +28,7 @@ class DateTimeItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(
-      style: theme.textTheme.subtitle1!,
+      style: theme.textTheme.titleMedium!,
       child: Row(
         children: <Widget>[
           Expanded(
@@ -116,7 +116,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     }
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
+    final TextStyle dialogTextStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
 
     return showDialog<bool>(
       context: context,
@@ -154,7 +154,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         title: Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
           TextButton(
-            child: Text('SAVE', style: theme.textTheme.bodyText2!.copyWith(color: Colors.white)),
+            child: Text('SAVE', style: theme.textTheme.bodyMedium!.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             },
@@ -176,7 +176,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                     labelText: 'Event name',
                     filled: true,
                   ),
-                  style: theme.textTheme.headline5,
+                  style: theme.textTheme.headlineSmall,
                   onChanged: (String value) {
                     setState(() {
                       _hasName = value.isNotEmpty;
@@ -206,7 +206,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('From', style: theme.textTheme.caption),
+                  Text('From', style: theme.textTheme.bodySmall),
                   DateTimeItem(
                     dateTime: _fromDateTime,
                     onChanged: (DateTime value) {
@@ -221,7 +221,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('To', style: theme.textTheme.caption),
+                  Text('To', style: theme.textTheme.bodySmall),
                   DateTimeItem(
                     dateTime: _toDateTime,
                     onChanged: (DateTime value) {

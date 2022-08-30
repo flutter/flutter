@@ -18,11 +18,17 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
+import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
+
+// Examples can assume:
+// FocusNode _focusNode = FocusNode();
+// late GlobalKey key;
 
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.touch,
@@ -32,12 +38,21 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 
 /// A widget that introduces an area for user selections.
 ///
-/// Flutter widgets are not selectable by default. To enable selection for
-/// a Flutter application, consider wrapping a portion of widget subtree with
-/// [SelectableRegion]. The wrapped subtree can be selected by users using mouse
-/// or touch gestures, e.g. users can select widgets by holding the mouse
+/// Flutter widgets are not selectable by default. Wrapping a widget subtree
+/// with a [SelectableRegion] widget enables selection within that subtree (for
+/// example, [Text] widgets automatically look for selectable regions to enable
+/// selection). The wrapped subtree can be selected by users using mouse or
+/// touch gestures, e.g. users can select widgets by holding the mouse
 /// left-click and dragging across widgets, or they can use long press gestures
 /// to select words on touch devices.
+///
+/// A [SelectableRegion] widget requires configuration; in particular specific
+/// [selectionControls] must be provided.
+///
+/// The [SelectionArea] widget from the [material] library configures a
+/// [SelectableRegion] in a platform-specific manner (e.g. using a Material
+/// toolbar on Android, a Cupertino toolbar on iOS), and it may therefore be
+/// simpler to use that widget rather than using [SelectableRegion] directly.
 ///
 /// ## An overview of the selection system.
 ///
@@ -75,7 +90,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// MaterialApp(
 ///   home: SelectableRegion(
 ///     selectionControls: materialTextSelectionControls,
-///     focusNode: FocusNode(),
+///     focusNode: _focusNode, // initialized to FocusNode()
 ///     child: Scaffold(
 ///       appBar: AppBar(title: const Text('Flutter Code Sample')),
 ///       body: ListView(
@@ -90,7 +105,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// ```
 /// {@end-tool}
 ///
-/// ```
 ///
 ///               SelectionContainer
 ///               (SelectableRegion)
@@ -108,7 +122,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///                     Selectable        Selectable
 ///                     ("Item 0")         ("Item 1")
 ///
-///```
 ///
 /// ## Making a widget selectable
 ///
@@ -160,6 +173,16 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// child selection area can not extend past its subtree, and the selection of
 /// the parent selection area can not extend inside the child selection area.
 ///
+/// ## Tests
+///
+/// In a test, a region can be selected either by faking drag events (e.g. using
+/// [WidgetTester.dragFrom]) or by sending intents to a widget inside the region
+/// that has been given a [GlobalKey], e.g.:
+///
+/// ```dart
+/// Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
+/// ```
+///
 /// See also:
 ///  * [SelectionArea], which creates a [SelectableRegion] with
 ///    platform-adaptive selection controls.
@@ -181,15 +204,16 @@ class SelectableRegion extends StatefulWidget {
     required this.selectionControls,
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.onSelectionChanged,
   });
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
   /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -202,7 +226,13 @@ class SelectableRegion extends StatefulWidget {
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
+  ///
+  /// The [emptyTextSelectionControls] global variable provides a default
+  /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
+
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   @override
   State<StatefulWidget> createState() => _SelectableRegionState();
@@ -226,6 +256,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
   Orientation? _lastOrientation;
+  SelectedContent? _lastSelectedContent;
 
   @override
   void initState() {
@@ -288,7 +319,13 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleFocusChanged() {
     if (!widget.focusNode.hasFocus) {
+      if (kIsWeb) {
+        PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+      }
       _clearSelection();
+    }
+    if (kIsWeb) {
+      PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
 
@@ -357,8 +394,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectEndTo(offset: details.globalPosition, continuous: true);
   }
 
+  void _updateSelectedContentIfNeeded() {
+    if (_lastSelectedContent?.plainText != _selectable?.getSelectedContent()?.plainText) {
+      _lastSelectedContent = _selectable?.getSelectedContent();
+      widget.onSelectionChanged?.call(_lastSelectedContent);
+    }
+  }
+
   void _handleMouseDragEnd(DragEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
@@ -366,6 +411,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectWordAt(offset: details.globalPosition);
     _showToolbar();
     _showHandles();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
@@ -374,6 +420,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleRightClickDown(TapDownDetails details) {
@@ -381,6 +428,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectWordAt(offset: details.globalPosition);
     _showHandles();
     _showToolbar(location: details.globalPosition);
+    _updateSelectedContentIfNeeded();
   }
 
   // Selection update helper methods.
@@ -419,6 +467,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
  void _onAnyDragEnd(DragEndDetails details) {
   _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
   _stopSelectionEndEdgeUpdate();
+  _updateSelectedContentIfNeeded();
  }
 
   void _stopSelectionEndEdgeUpdate() {
@@ -535,7 +584,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         globalGesturePosition: globalGesturePosition,
         caretRect: caretRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,
-        currentLineBoundries: globalTransformAsOffset & _selectable!.size,
+        currentLineBoundaries: globalTransformAsOffset & _selectable!.size,
       );
   }
 
@@ -770,6 +819,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   void _clearSelection() {
     _finalizeSelection();
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
+    _updateSelectedContentIfNeeded();
   }
 
   Future<void> _copy() async {
@@ -804,6 +854,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       _showToolbar();
       _showHandles();
     }
+    _updateSelectedContentIfNeeded();
   }
 
   @override
@@ -867,6 +918,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
+    Widget result = SelectionContainer(
+      registrar: this,
+      delegate: _selectionDelegate,
+      child: widget.child,
+    );
+    if (kIsWeb) {
+      result = PlatformSelectableRegionContextMenu(
+        child: result,
+      );
+    }
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
       child: RawGestureDetector(
@@ -878,11 +939,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
           child: Focus(
             includeSemantics: false,
             focusNode: widget.focusNode,
-            child: SelectionContainer(
-              registrar: this,
-              delegate: _selectionDelegate,
-              child: widget.child,
-            ),
+            child: result,
           ),
         ),
       ),

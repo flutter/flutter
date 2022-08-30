@@ -173,7 +173,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// controller goes from 0.0 to 1.0:
   ///
   /// ```dart
-  /// Animation<Alignment> _alignment1 = _controller.drive(
+  /// Animation<Alignment> alignment1 = _controller.drive(
   ///   AlignmentTween(
   ///     begin: Alignment.topLeft,
   ///     end: Alignment.topRight,
@@ -208,13 +208,30 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// values that depend on other variables:
   ///
   /// ```dart
-  /// Animation<Alignment> _alignment3 = _controller
+  /// Animation<Alignment> alignment3 = _controller
   ///   .drive(CurveTween(curve: Curves.easeIn))
   ///   .drive(AlignmentTween(
   ///     begin: Alignment.topLeft,
   ///     end: Alignment.topRight,
   ///   ));
   /// ```
+  /// {@end-tool}
+  /// {@tool snippet}
+  ///
+  /// This method can be paired with an [Animatable] created via
+  /// [Animatable.fromCallback] in order to transform an animation with a
+  /// callback function. This can be useful for performing animations that
+  /// do not have well defined start or end points. This example transforms
+  /// the current scroll position into a color that cycles through values
+  /// of red.
+  ///
+  /// ```dart
+  /// Animation<Color> color = Animation<double>.fromValueListenable(_scrollPosition)
+  ///   .drive(Animatable<Color>.fromCallback((double value) {
+  ///     return Color.fromRGBO(value.round() % 255, 0, 0, 1);
+  ///   }));
+  /// ```
+  ///
   /// {@end-tool}
   ///
   /// See also:
@@ -224,6 +241,8 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///  * [CurvedAnimation], an alternative to [CurveTween] for applying easing
   ///    curves, which supports distinct curves in the forward direction and the
   ///    reverse direction.
+  ///  * [Animatable.fromCallback], which allows creating an [Animatable] from an
+  ///    arbitrary transformation.
   @optionalTypeArgs
   Animation<U> drive<U>(Animatable<U> child) {
     assert(this is Animation<double>);
@@ -266,8 +285,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
 // An implementation of an animation that delegates to a value listenable with a fixed direction.
 class _ValueListenableDelegateAnimation<T> extends Animation<T> {
-  _ValueListenableDelegateAnimation(this._listenable, { ValueListenableTransformer<T>? transformer })
-    : _transformer = transformer;
+  _ValueListenableDelegateAnimation(this._listenable, {
+    ValueListenableTransformer<T>? transformer,
+  }) : _transformer = transformer;
 
   final ValueListenable<T> _listenable;
   final ValueListenableTransformer<T>? _transformer;

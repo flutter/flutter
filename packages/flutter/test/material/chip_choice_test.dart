@@ -79,7 +79,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(Brightness.light));
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x3d000000)));
+    expect(getMaterialBox(tester), paints..rrect(color: const Color(0x3d000000)));
     expect(tester.getSize(find.byType(ChoiceChip)), const Size(108.0, 48.0));
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
@@ -88,7 +88,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(Brightness.dark));
     await tester.pumpAndSettle(); // Theme transition animation
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x3dffffff)));
+    expect(getMaterialBox(tester), paints..rrect(color: const Color(0x3dffffff)));
     expect(tester.getSize(find.byType(ChoiceChip)), const Size(108.0, 48.0));
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);

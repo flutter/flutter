@@ -10,6 +10,9 @@ import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 
@@ -24,9 +27,14 @@ const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 ///
 /// ```dart
 /// ScaffoldMessenger.of(context).showMaterialBanner(
-///   MaterialBanner( ... )
+///   const MaterialBanner(
+///     content: Text('Message...'),
+///     actions: <Widget>[
+///       // ...
+///     ],
+///   )
 /// ).closed.then((MaterialBannerClosedReason reason) {
-///    ...
+///    // ...
 /// });
 /// ```
 enum MaterialBannerClosedReason {
@@ -113,7 +121,7 @@ class MaterialBanner extends StatefulWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [TextTheme.bodyText2] of [ThemeData.textTheme] is used.
+  /// also `null`, [TextTheme.bodyMedium] of [ThemeData.textTheme] is used.
   final TextStyle? contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
@@ -291,7 +299,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? theme.colorScheme.surface;
     final TextStyle? textStyle = widget.contentTextStyle
         ?? bannerTheme.contentTextStyle
-        ?? theme.textTheme.bodyText2;
+        ?? theme.textTheme.bodyMedium;
 
     Widget materialBanner = Container(
       margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
