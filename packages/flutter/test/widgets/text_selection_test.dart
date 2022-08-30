@@ -196,14 +196,7 @@ void main() {
     await tester.pump();
     expect(singleTapUpCount, 0);
     expect(tapCount, 1);
-
-    // TODO(Renzo-Olivares): Since Taps and Long Presses/ and Taps and Drags are now bundled
-    // how should the cancel callback be handled.
-    // 1. Should it be handled on tap cancel?
-    // 2. On Drag/Longpress cancel?
-    // 3. Both.
     expect(singleTapCancelCount, 1);
-
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
@@ -388,7 +381,6 @@ void main() {
     );
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
-    await gesture.moveBy(const Offset(210.0, 210.0));
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -412,13 +404,6 @@ void main() {
     );
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
-
-    // TODO(Renzo-Olivares): The previous DragGestureRecognizer fired two PointerMoveEvents at the start of
-    // a drag when DragStartBehavior was set to DragStartBehavior.down. Currently the new TapAndDragGestureRecognizer
-    // fires one PointerMoveEvent per PointerEvent that reaches handleEvent. So where before only one
-    // gesture.moveBy was necessary to trigger drag update, now two are necessary. Is there any upside/downside to either
-    // approach?
-    await gesture.moveBy(const Offset(210.0, 210.0));
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -444,12 +429,6 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveBy(const Offset(210.0, 200.0));
-    // TODO(Renzo-Olivares): The previous DragGestureRecognizer fired two PointerMoveEvents at the start of
-    // a drag when DragStartBehavior was set to DragStartBehavior.down. Currently the new TapAndDragGestureRecognizer
-    // fires one PointerMoveEvent per PointerEvent that reaches handleEvent. So where before only one
-    // gesture.moveBy was necessary to trigger drag update, now two are necessary. Is there any upside/downside to either
-    // approach?
-    await gesture.moveBy(const Offset(210.0, 210.0));
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
