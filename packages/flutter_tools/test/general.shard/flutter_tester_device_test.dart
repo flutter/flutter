@@ -238,9 +238,16 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   Future<Uri> ddsServiceUriFuture() => _ddsServiceUriCompleter.future;
 
   @override
-  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) async {
+  Future<DartDevelopmentService> startDds(
+    Uri uri, {
+    UriConverter? uriConverter,
+  }) async {
     _ddsServiceUriCompleter.complete(uri);
-    dds = FakeDartDevelopmentService(Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'), Uri.parse('http://localhost:8080'), uriConverter: uriConverter);
+    dds = FakeDartDevelopmentService(
+      Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'),
+      Uri.parse('http://localhost:8080'),
+      uriConverter: uriConverter,
+    );
     return dds;
   }
 
