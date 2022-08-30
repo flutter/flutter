@@ -154,7 +154,7 @@ class BannerPainter extends CustomPainter {
       ..drawRect(_kRect, _paintBanner);
     const double width = _kOffset * 2.0;
     _textPainter!.layout(minWidth: width, maxWidth: width);
-    _textPainter!.paint(canvas, _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
+    _textPainter!.paint(canvas, _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter!.height) / 2.0));
   }
 
   @override
