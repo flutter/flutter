@@ -241,16 +241,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void acceptGesture(int pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     if (pointer == _primaryPointer) {
-      _stopDeadlineTimer();
       print('is primary pointer');
       // _checkTapDown(event);
       if (_down != null) {
         _checkTapDown(_down!);
         // _checkTapUp(_up!);
       }
-      if (_up != null) {
-        _checkTapUp(_up!);
-      }
+      _stopDeadlineTimer();
     }
     _acceptedActivePointers.add(pointer);
     print('accept gesture $pointer');
@@ -259,7 +256,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   @override
   void didStopTrackingLastPointer(int pointer) {
     print('didStopTrackingLastPointer $_state $pointer');
-    _stopDeadlineTimer();
     switch (_state) {
       case _DragState.ready:
         resolve(GestureDisposition.rejected);
@@ -281,6 +277,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         _checkEnd();
         break;
     }
+    _stopDeadlineTimer();
     _up = null;
     _down = null;
     _initialButtons = null;
@@ -354,9 +351,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void rejectGesture(int pointer) {
     print('reject gesture $pointer');
     print('cancel from reject');
-    if (pointer == _primaryPointer) {
-      _stopDeadlineTimer();
-    }
     _giveUpPointer(pointer);
   }
 
