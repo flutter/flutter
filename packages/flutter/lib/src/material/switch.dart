@@ -348,14 +348,12 @@ class Switch extends StatelessWidget {
   /// [MaterialState.disabled].
   ///
   /// ```dart
-  /// ImageProvider disabledImage = MemoryImage(Uint8List.fromList(<int>[1, 2]));
-  ///
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
   ///   thumbImage: MaterialStateProperty.resolveWith<ImageProvider?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
-  ///       return disabledImage;
+  ///       return MemoryImage(Uint8List.fromList(<int>[1, 2]));
   ///     }
   ///     return null; // All other states will use the default thumbImage.
   ///   }),
