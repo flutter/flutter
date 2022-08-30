@@ -654,10 +654,20 @@ mixin SchedulerBinding on BindingBase {
   /// executed after the transient frame callbacks they can drive the
   /// rendering pipeline.
   ///
-  /// Persistent frame callbacks cannot be unregistered. Once registered, they
-  /// are called for every frame for the lifetime of the application.
+  /// If the same callback is added twice, it will be executed twice.
+  ///
+  /// See also:
+  ///
+  ///  * [removePersistentFrameCallback], which can be used to remove a callback
+  ///    added using this method.
   void addPersistentFrameCallback(FrameCallback callback) {
     _persistentCallbacks.add(callback);
+  }
+
+  /// Removes a callback that was earlier added by [addPersistentFrameCallback].
+  void removePersistentFrameCallback(FrameCallback callback) {
+    assert(_persistentCallbacks.contains(callback));
+    _persistentCallbacks.remove(callback);
   }
 
   final List<FrameCallback> _postFrameCallbacks = <FrameCallback>[];

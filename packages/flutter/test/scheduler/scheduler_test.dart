@@ -250,6 +250,23 @@ void main() {
     warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
   });
+
+  test('Persistent frame callback is called', () {
+    bool isCalled = false;
+    void callback(_) => isCalled = true;
+    SchedulerBinding.instance.addPersistentFrameCallback(callback);
+    tick(Duration.zero);
+    expect(isCalled, true);
+  });
+
+  test('Persistent frame callback is not called after being removed', () {
+    bool isCalled = false;
+    void callback(_) => isCalled = true;
+    SchedulerBinding.instance.addPersistentFrameCallback(callback);
+    SchedulerBinding.instance.removePersistentFrameCallback(callback);
+    tick(Duration.zero);
+    expect(isCalled, false);
+  });
 }
 
 class DummyTimer implements Timer {
