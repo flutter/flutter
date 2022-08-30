@@ -120,40 +120,47 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   latch.Wait();
 
   // Wait for UpdateSemantics callback on platform (current) thread.
-  int node_count = 0;
   int node_batch_end_count = 0;
-  context.SetSemanticsNodeCallback(
-      [&node_count, &node_batch_end_count](const FlutterSemanticsNode* node) {
-        if (node->id == kFlutterSemanticsNodeIdBatchEnd) {
-          ++node_batch_end_count;
-        } else {
-          ++node_count;
-          ASSERT_EQ(1.0, node->transform.scaleX);
-          ASSERT_EQ(2.0, node->transform.skewX);
-          ASSERT_EQ(3.0, node->transform.transX);
-          ASSERT_EQ(4.0, node->transform.skewY);
-          ASSERT_EQ(5.0, node->transform.scaleY);
-          ASSERT_EQ(6.0, node->transform.transY);
-          ASSERT_EQ(7.0, node->transform.pers0);
-          ASSERT_EQ(8.0, node->transform.pers1);
-          ASSERT_EQ(9.0, node->transform.pers2);
+  int action_batch_end_count = 0;
 
-          if (node->id == 128) {
-            ASSERT_EQ(0x3f3, node->platform_view_id);
-          } else {
-            ASSERT_EQ(0, node->platform_view_id);
-          }
-        }
-      });
+  int node_count = 0;
+  context.SetSemanticsNodeCallback([&](const FlutterSemanticsNode* node) {
+    if (node->id == kFlutterSemanticsNodeIdBatchEnd) {
+      ++node_batch_end_count;
+    } else {
+      // Batches should be completed after all nodes are received.
+      ASSERT_EQ(0, node_batch_end_count);
+      ASSERT_EQ(0, action_batch_end_count);
+
+      ++node_count;
+      ASSERT_EQ(1.0, node->transform.scaleX);
+      ASSERT_EQ(2.0, node->transform.skewX);
+      ASSERT_EQ(3.0, node->transform.transX);
+      ASSERT_EQ(4.0, node->transform.skewY);
+      ASSERT_EQ(5.0, node->transform.scaleY);
+      ASSERT_EQ(6.0, node->transform.transY);
+      ASSERT_EQ(7.0, node->transform.pers0);
+      ASSERT_EQ(8.0, node->transform.pers1);
+      ASSERT_EQ(9.0, node->transform.pers2);
+
+      if (node->id == 128) {
+        ASSERT_EQ(0x3f3, node->platform_view_id);
+      } else {
+        ASSERT_EQ(0, node->platform_view_id);
+      }
+    }
+  });
 
   int action_count = 0;
-  int action_batch_end_count = 0;
   context.SetSemanticsCustomActionCallback(
-      [&action_count,
-       &action_batch_end_count](const FlutterSemanticsCustomAction* action) {
+      [&](const FlutterSemanticsCustomAction* action) {
         if (action->id == kFlutterSemanticsCustomActionIdBatchEnd) {
           ++action_batch_end_count;
         } else {
+          // Batches should be completed after all actions are received.
+          ASSERT_EQ(0, node_batch_end_count);
+          ASSERT_EQ(0, action_batch_end_count);
+
           ++action_count;
         }
       });

@@ -63,7 +63,7 @@ void AccessibilityBridge::CommitUpdates() {
 
   for (size_t i = results.size(); i > 0; i--) {
     for (SemanticsNode node : results[i - 1]) {
-      ConvertFluterUpdate(node, update);
+      ConvertFlutterUpdate(node, update);
     }
   }
 
@@ -191,8 +191,8 @@ void AccessibilityBridge::GetSubTreeList(SemanticsNode target,
   }
 }
 
-void AccessibilityBridge::ConvertFluterUpdate(const SemanticsNode& node,
-                                              ui::AXTreeUpdate& tree_update) {
+void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
+                                               ui::AXTreeUpdate& tree_update) {
   ui::AXNodeData node_data;
   node_data.id = node.id;
   SetRoleFromFlutterUpdate(node_data, node);
