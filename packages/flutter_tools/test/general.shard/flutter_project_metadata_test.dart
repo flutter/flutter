@@ -186,12 +186,6 @@ migration:
   });
 
   group('.metadata merge', () {
-    // late MetadataCustomMerge merger;
-
-    // setUp(() {
-    //   merger = MetadataCustomMerge(logger: logger);
-    // });
-
     String performMerge(File current, File base, File target) {
       final FlutterProjectMetadata result = FlutterProjectMetadata.merge(
         FlutterProjectMetadata(current, logger),
