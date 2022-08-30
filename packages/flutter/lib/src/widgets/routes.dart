@@ -249,7 +249,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     _animation = createAnimation()
       ..addStatusListener(_handleStatusChanged);
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
-    PerformanceModeHandler.instance.createRequest(this, ui.DartPerformanceMode.latency);
+    SchedulerBinding.instance.createPerformanceModeRequest(this, ui.DartPerformanceMode.latency);
     super.install();
     if (_animation!.isCompleted && overlayEntries.isNotEmpty) {
       overlayEntries.first.opaque = opaque;
@@ -465,7 +465,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
-    PerformanceModeHandler.instance.disposeRequest(this);
+    SchedulerBinding.instance.disposePerformanceModeRequest(this);
     _animation?.removeStatusListener(_handleStatusChanged);
     if (willDisposeAnimationController) {
       _controller?.dispose();

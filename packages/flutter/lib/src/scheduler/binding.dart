@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, PlatformDispatcher, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, DartPerformanceMode, FramePhase, FrameTiming, PlatformDispatcher, TimingsCallback;
 
 import 'package:collection/collection.dart' show HeapPriorityQueue, PriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -1083,6 +1083,48 @@ mixin SchedulerBinding on BindingBase {
     } finally {
       _schedulerPhase = SchedulerPhase.midFrameMicrotasks;
     }
+  }
+
+  final Map<dynamic, DartPerformanceMode> _performanceModes = <Object, DartPerformanceMode>{};
+
+  /// Request a specific [DartPerformanceMode]. `requestor` is the handle to
+  /// component making the request, typically the component itself. Returns
+  /// `true` is the request was successfully made to the engine, `false` otherwise.
+  /// Even if the result is `true`, the engine may choose to ignore the request or
+  /// the performance mode may not be guaranteed to be the one requested.
+  ///
+  /// If conflicting requests are made, only the first request will be honored.
+  bool createPerformanceModeRequest(Object requestor, DartPerformanceMode mode) {
+    if (_performanceModes.isNotEmpty) {
+      final DartPerformanceMode oldRequest = _performanceModes.entries.first.value;
+      if (oldRequest != mode) {
+        return false;
+      }
+    }
+    _performanceModes[requestor] = mode;
+    PlatformDispatcher.instance.requestDartPerformanceMode(mode);
+    return true;
+  }
+
+  /// Remove a request for a specific [DartPerformanceMode]. `requestor` is the
+  /// handle to component making the request, typically the component itself. If
+  /// all the pending requests have been disposed, the engine will revert to the
+  /// [DartPerformanceMode.balanced] performance mode.
+  void disposePerformanceModeRequest(Object requestor) {
+    _performanceModes.remove(requestor);
+    if (_performanceModes.isEmpty) {
+      PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
+    }
+  }
+
+  /// Returns the current [DartPerformanceMode] requested. If no requests have
+  /// been made, returns `null`.
+  @visibleForTesting
+  DartPerformanceMode? getRequestedPerformanceMode() {
+    if (_performanceModes.isEmpty) {
+      return null;
+    }
+    return _performanceModes.entries.first.value;
   }
 
   /// Called by the engine to produce a new frame.
