@@ -1940,25 +1940,29 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf
-      artifact: gallery_app_profile
+      artifact: gallery__transition_perf
 
-  - name: Linux_android flutter_gallery__transition_perf_e2e
-    recipe: devicelab/devicelab_drone
+  - name: Linux_build_test flutter_gallery__transition_perf_e2e
+    recipe: devicelab/devicelab_drone_build_test
+    bringup: true # New target https://github.com/flutter/flutter/issues/103542
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_e2e
+      artifact: gallery__transition_perf_e2e
 
-  - name: Linux_android flutter_gallery__transition_perf_hybrid
-    recipe: devicelab/devicelab_drone
+  - name: Linux_build_test flutter_gallery__transition_perf_hybrid
+    recipe: devicelab/devicelab_drone_build_test
+    bringup: true # New target https://github.com/flutter/flutter/issues/103542
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_hybrid
+      artifact: gallery__transition_perf_hybrid
 
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
