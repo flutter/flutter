@@ -12,7 +12,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -44,6 +43,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.icudtlPath,
     required this.compileExpression,
     required this.fontConfigManager,
+    required this.uriConverter,
   })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
         assert(!debuggingOptions.startPaused || enableObservatory),
         _gotProcessObservatoryUri = enableObservatory
@@ -65,6 +65,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final String? icudtlPath;
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
+  final UriConverter? uriConverter;
 
   final Completer<Uri?> _gotProcessObservatoryUri;
   final Completer<int> _exitCode = Completer<int>();
@@ -163,7 +164,10 @@ class FlutterTesterTestDevice extends TestDevice {
         Uri? forwardingUri;
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-          final DartDevelopmentService dds = await startDds(detectedUri, uriConverter: context.get<UriConverter>());
+          final DartDevelopmentService dds = await startDds(
+            detectedUri,
+            uriConverter: uriConverter,
+          );
           forwardingUri = dds.uri;
           logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {

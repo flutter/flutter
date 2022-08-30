@@ -46,6 +46,7 @@ void main() {
       processManager: processManager,
       enableObservatory: enableObservatory,
       dartEntrypointArgs: dartEntrypointArgs,
+      uriConverter: (String input) => '$input/converted',
     );
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -187,12 +188,13 @@ void main() {
       await device.start('example.dill');
       await device.observatoryUri;
 
-      final String? result = ((device as TestFlutterTesterDevice).dds
-              as FakeDartDevelopmentService)
+      final FakeDartDevelopmentService dds = ((device as TestFlutterTesterDevice).dds
+      as FakeDartDevelopmentService);
+      final String? result = dds
           .uriConverter
           ?.call('test');
       expect(result, 'test/converted');
-    }, overrides: <Type, Generator>{UriConverter: () => (String input) => '$input/converted'});
+    });
   });
 }
 
@@ -206,6 +208,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.processManager,
     required super.enableObservatory,
     required List<String> dartEntrypointArgs,
+    required UriConverter uriConverter,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -226,6 +229,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     icudtlPath: null,
     compileExpression: null,
     fontConfigManager: FontConfigManager(),
+    uriConverter: uriConverter,
   );
   late DartDevelopmentService dds;
 
