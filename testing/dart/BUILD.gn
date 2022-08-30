@@ -25,6 +25,7 @@ tests = [
   "image_filter_test.dart",
   "image_resize_test.dart",
   "image_shader_test.dart",
+  "image_test.dart",
   "isolate_name_server_test.dart",
   "isolate_test.dart",
   "lerp_test.dart",
