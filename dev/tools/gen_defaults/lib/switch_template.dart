@@ -117,7 +117,7 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
   double get splashRadius => ${tokens['md.comp.switch.state-layer.size']} / 2;
 }
 
-class _SwitchConfigM3 {
+class _SwitchConfigM3 with _SwitchConfig {
   _SwitchConfigM3(this.context)
     : _colors = Theme.of(context).colorScheme;
 
@@ -125,30 +125,11 @@ class _SwitchConfigM3 {
   final ColorScheme _colors;
 
   static const double iconSize = ${tokens['md.comp.switch.unselected.icon.size']};
-  static const double thumbRadiusWithIcon = ${tokens['md.comp.switch.with-icon.handle.width']} / 2;
-  static const double inactiveThumbRadius = ${tokens['md.comp.switch.unselected.handle.width']} / 2;
-  static const double activeThumbRadius = ${tokens['md.comp.switch.selected.handle.width']} / 2;
-  static const double pressedThumbRadius = ${tokens['md.comp.switch.pressed.handle.width']} / 2;
-  static const double trackWidth = ${tokens['md.comp.switch.track.width']};
-  static const double trackHeight = ${tokens['md.comp.switch.track.height']};
-  static const double trackRadius = ${tokens['md.comp.switch.track.height']} / 2.0;
-
-  static const double switchWidth = trackWidth - 2 * trackRadius + _kSwitchMinSize;
-  static const double switchHeight = _kSwitchMinSize + 8.0;
-  static const double switchHeightCollapsed = _kSwitchMinSize;
-
-  MaterialStateProperty<Color?> get trackOutlineColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return null;
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return ${componentColor('md.comp.switch.disabled.unselected.track.outline')}.withOpacity(${opacity('md.comp.switch.disabled.track.opacity')});
-      }
-      return ${componentColor('md.comp.switch.unselected.track.outline')};
-    });
-  }
-
+  
+  @override
+  double get activeThumbRadius => ${tokens['md.comp.switch.selected.handle.width']} / 2;
+  
+  @override
   MaterialStateProperty<Color> get iconColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -181,6 +162,46 @@ class _SwitchConfigM3 {
       return ${componentColor('md.comp.switch.unselected.icon')};
     });
   }
+  
+  @override
+  double get inactiveThumbRadius => ${tokens['md.comp.switch.unselected.handle.width']} / 2;
+  
+  @override
+  double get pressedThumbRadius => ${tokens['md.comp.switch.pressed.handle.width']} / 2;
+  
+  @override
+  double get switchHeight => _kSwitchMinSize + 8.0;
+  
+  @override
+  double get switchHeightCollapsed => _kSwitchMinSize;
+  
+  @override
+  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  
+  @override
+  double get thumbRadiusWithIcon => ${tokens['md.comp.switch.with-icon.handle.width']} / 2;
+  
+  @override
+  List<BoxShadow>? get thumbShadow => kElevationToShadow[0];
+
+  @override
+  double get trackHeight => ${tokens['md.comp.switch.track.height']};
+  
+  @override
+    MaterialStateProperty<Color?> get trackOutlineColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return null;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return ${componentColor('md.comp.switch.disabled.unselected.track.outline')}.withOpacity(${opacity('md.comp.switch.disabled.track.opacity')});
+      }
+      return ${componentColor('md.comp.switch.unselected.track.outline')};
+    });
+  }
+  
+  @override
+  double get trackWidth => ${tokens['md.comp.switch.track.width']};
 }
 ''';
 

@@ -348,6 +348,8 @@ class Switch extends StatelessWidget {
   /// [MaterialState.disabled].
   ///
   /// ```dart
+  /// ImageProvider disabledImage = MemoryImage(Uint8List.fromList(<int>[1, 2]));
+  ///
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
@@ -475,16 +477,16 @@ class Switch extends StatelessWidget {
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final _SwitchDefaults defaults = _SwitchDefaults(context);
+    final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
 
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        return Size(defaults.switchWidth, defaults.switchHeight);
+        return Size(switchConfig.switchWidth, switchConfig.switchHeight);
       case MaterialTapTargetSize.shrinkWrap:
-        return Size(defaults.switchWidth, defaults.switchHeightCollapsed);
+        return Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed);
     }
   }
 
@@ -760,8 +762,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final _SwitchDefaults defaults = _SwitchDefaults(context);
-    final SwitchThemeData defaultThemeData = defaults.defaultThemeData;
+    final _SwitchConfig switchConfig = theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+    final SwitchThemeData defaults = theme.useMaterial3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
@@ -772,21 +774,21 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         ?? _widgetThumbColor.resolve(activeStates)
         ?? switchTheme.thumbColor?.resolve(activeStates);
     final Color effectiveActiveThumbColor = activeThumbColor
-        ?? defaultThemeData.thumbColor!.resolve(activeStates)!;
+        ?? defaults.thumbColor!.resolve(activeStates)!;
     final Color? inactiveThumbColor = widget.thumbColor?.resolve(inactiveStates)
         ?? _widgetThumbColor.resolve(inactiveStates)
         ?? switchTheme.thumbColor?.resolve(inactiveStates);
     final Color effectiveInactiveThumbColor = inactiveThumbColor
-        ?? defaultThemeData.thumbColor!.resolve(inactiveStates)!;
+        ?? defaults.thumbColor!.resolve(inactiveStates)!;
     final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
         ?? _widgetTrackColor.resolve(activeStates)
         ?? switchTheme.trackColor?.resolve(activeStates)
-        ?? defaultThemeData.trackColor!.resolve(activeStates)!;
+        ?? defaults.trackColor!.resolve(activeStates)!;
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
         ?? _widgetTrackColor.resolve(inactiveStates)
         ?? switchTheme.trackColor?.resolve(inactiveStates)
-        ?? defaultThemeData.trackColor!.resolve(inactiveStates)!;
-    final Color? effectiveInactiveTrackOutlineColor = defaults.trackOutlineColor?.resolve(inactiveStates);
+        ?? defaults.trackColor!.resolve(inactiveStates)!;
+    final Color? effectiveInactiveTrackOutlineColor = switchConfig.trackOutlineColor?.resolve(inactiveStates);
     final ImageProvider? effectiveActiveThumbImage = widget.thumbImage?.resolve(activeStates)
         ?? _widgetThumbImage.resolve(activeStates)
         ?? switchTheme.thumbImage?.resolve(activeStates);
@@ -798,25 +800,25 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
         ?? widget.focusColor
         ?? switchTheme.overlayColor?.resolve(focusedStates)
-        ?? defaultThemeData.overlayColor!.resolve(focusedStates)!;
+        ?? defaults.overlayColor!.resolve(focusedStates)!;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
         ?? widget.hoverColor
         ?? switchTheme.overlayColor?.resolve(hoveredStates)
-        ?? defaultThemeData.overlayColor!.resolve(hoveredStates)!;
+        ?? defaults.overlayColor!.resolve(hoveredStates)!;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
         ?? switchTheme.overlayColor?.resolve(activePressedStates)
         ?? activeThumbColor?.withAlpha(kRadialReactionAlpha)
-        ?? defaultThemeData.overlayColor!.resolve(activePressedStates)!;
+        ?? defaults.overlayColor!.resolve(activePressedStates)!;
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
         ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
         ?? inactiveThumbColor?.withAlpha(kRadialReactionAlpha)
-        ?? defaultThemeData.overlayColor!.resolve(inactivePressedStates)!;
+        ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
@@ -824,13 +826,13 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
     });
 
-    final Color effectiveActiveIconColor = defaults.iconColor.resolve(activeStates);
-    final Color effectiveInactiveIconColor = defaults.iconColor.resolve(inactiveStates);
+    final Color effectiveActiveIconColor = switchConfig.iconColor.resolve(activeStates);
+    final Color effectiveInactiveIconColor = switchConfig.iconColor.resolve(inactiveStates);
     final IconData? effectiveActiveIcon = theme.useMaterial3 ? widget.activeIcon : null;
     final IconData? effectiveInactiveIcon = theme.useMaterial3 ? widget.inactiveIcon : null;
-    final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? defaults.activeThumbRadius : defaults.thumbRadiusWithIcon;
-    final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null ? defaults.inactiveThumbRadius : defaults.thumbRadiusWithIcon;
-    final double effectiveSplashRadius = widget.splashRadius ?? switchTheme.splashRadius ?? defaultThemeData.splashRadius!;
+    final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? switchConfig.activeThumbRadius : switchConfig.thumbRadiusWithIcon;
+    final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null ? switchConfig.inactiveThumbRadius : switchConfig.thumbRadiusWithIcon;
+    final double effectiveSplashRadius = widget.splashRadius ?? switchTheme.splashRadius ?? defaults.splashRadius!;
 
     return Semantics(
       toggled: widget.value,
@@ -875,14 +877,14 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..surfaceColor = theme.colorScheme.surface
             ..inactiveThumbRadius = effectiveInactiveThumbRadius
             ..activeThumbRadius = effectiveActiveThumbRadius
-            ..pressedThumbRadius = defaults.pressedThumbRadius
-            ..trackHeight = defaults.trackHeight
-            ..trackWidth = defaults.trackWidth
+            ..pressedThumbRadius = switchConfig.pressedThumbRadius
+            ..trackHeight = switchConfig.trackHeight
+            ..trackWidth = switchConfig.trackWidth
             ..activeIconColor = effectiveActiveIconColor
             ..inactiveIconColor = effectiveInactiveIconColor
             ..activeIcon = effectiveActiveIcon
             ..inactiveIcon = effectiveInactiveIcon
-            ..thumbShadow = defaults.thumbShadow,
+            ..thumbShadow = switchConfig.thumbShadow,
         ),
       ),
     );
@@ -1330,41 +1332,62 @@ class _SwitchPainter extends ToggleablePainter {
   }
 }
 
-class _SwitchDefaults {
-  _SwitchDefaults(this.context)
-      : material3 = Theme.of(context).useMaterial3,
-        switchConfigM3 = _SwitchConfigM3(context);
-
-  BuildContext context;
-  final bool material3;
-  final _SwitchConfigM3 switchConfigM3;
-
-  // M2 constants
-  static const double _kTrackHeight = 14.0;
-  static const double _kTrackWidth = 33.0;
-  static const double _kTrackRadius = _kTrackHeight / 2.0;
-  static const double _kThumbRadius = 10.0;
-  static const double _kSwitchMinSize = kMinInteractiveDimension - 8.0;
-  static const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + _kSwitchMinSize;
-  static const double _kSwitchHeight = _kSwitchMinSize + 8.0;
-  static const double _kSwitchHeightCollapsed = _kSwitchMinSize;
-
-  double get trackHeight => material3 ? _SwitchConfigM3.trackHeight : _kTrackHeight;
-  double get trackWidth => material3 ? _SwitchConfigM3.trackWidth : _kTrackWidth;
-  double get switchWidth => material3 ? _SwitchConfigM3.switchWidth : _kSwitchWidth;
-  double get switchHeight => material3 ? _SwitchConfigM3.switchHeight : _kSwitchHeight;
-  double get switchHeightCollapsed => material3 ? _SwitchConfigM3.switchHeightCollapsed : _kSwitchHeightCollapsed;
-  double get activeThumbRadius => material3 ? _SwitchConfigM3.activeThumbRadius : _kThumbRadius;
-  double get inactiveThumbRadius => material3 ? _SwitchConfigM3.inactiveThumbRadius : _kThumbRadius;
-  double get pressedThumbRadius => material3 ? _SwitchConfigM3.pressedThumbRadius : _kThumbRadius;
-  double get thumbRadiusWithIcon => material3 ? _SwitchConfigM3.thumbRadiusWithIcon : _kThumbRadius;
-  List<BoxShadow>? get thumbShadow => material3 ? kElevationToShadow[0] : kElevationToShadow[1];
-  MaterialStateProperty<Color?>? get trackOutlineColor => material3 ? switchConfigM3.trackOutlineColor : null;
-  MaterialStateProperty<Color> get iconColor => switchConfigM3.iconColor;
-  SwitchThemeData get defaultThemeData => material3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
+mixin _SwitchConfig {
+  double get trackHeight;
+  double get trackWidth;
+  double get switchWidth;
+  double get switchHeight;
+  double get switchHeightCollapsed;
+  double get activeThumbRadius;
+  double get inactiveThumbRadius;
+  double get pressedThumbRadius;
+  double get thumbRadiusWithIcon;
+  List<BoxShadow>? get thumbShadow;
+  MaterialStateProperty<Color?>? get trackOutlineColor;
+  MaterialStateProperty<Color> get iconColor;
 }
 
 // Hand coded defaults based on Material Design 2.
+class _SwitchConfigM2 with _SwitchConfig {
+    _SwitchConfigM2();
+
+  @override
+  double get activeThumbRadius => 10.0;
+
+  @override
+  MaterialStateProperty<Color> get iconColor => MaterialStateProperty.all<Color>(Colors.transparent);
+
+  @override
+  double get inactiveThumbRadius => 10.0;
+
+  @override
+  double get pressedThumbRadius => 10.0;
+
+  @override
+  double get switchHeight => _kSwitchMinSize + 8.0;
+
+  @override
+  double get switchHeightCollapsed => _kSwitchMinSize;
+
+  @override
+  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+
+  @override
+  double get thumbRadiusWithIcon => 10.0;
+
+  @override
+  List<BoxShadow>? get thumbShadow => kElevationToShadow[1];
+
+  @override
+  double get trackHeight => 14.0;
+
+  @override
+  MaterialStateProperty<Color?>? get trackOutlineColor => null;
+
+  @override
+  double get trackWidth => 33.0;
+}
+
 class _SwitchDefaultsM2 extends SwitchThemeData {
   _SwitchDefaultsM2(BuildContext context)
       : _theme = Theme.of(context),
@@ -1547,38 +1570,19 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   double get splashRadius => 40.0 / 2;
 }
 
-class _SwitchConfigM3 {
+class _SwitchConfigM3 with _SwitchConfig {
   _SwitchConfigM3(this.context)
-      : _colors = Theme.of(context).colorScheme;
+    : _colors = Theme.of(context).colorScheme;
 
   BuildContext context;
   final ColorScheme _colors;
 
   static const double iconSize = 16.0;
-  static const double thumbRadiusWithIcon = 24.0 / 2;
-  static const double inactiveThumbRadius = 16.0 / 2;
-  static const double activeThumbRadius = 24.0 / 2;
-  static const double pressedThumbRadius = 28.0 / 2;
-  static const double trackWidth = 52.0;
-  static const double trackHeight = 32.0;
-  static const double trackRadius = 32.0 / 2.0;
-
-  static const double switchWidth = trackWidth - 2 * trackRadius + _kSwitchMinSize;
-  static const double switchHeight = _kSwitchMinSize + 8.0;
-  static const double switchHeightCollapsed = _kSwitchMinSize;
-
-  MaterialStateProperty<Color?> get trackOutlineColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return null;
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.12);
-      }
-      return _colors.outline;
-    });
-  }
-
+  
+  @override
+  double get activeThumbRadius => 24.0 / 2;
+  
+  @override
   MaterialStateProperty<Color> get iconColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -1611,6 +1615,46 @@ class _SwitchConfigM3 {
       return _colors.surfaceVariant;
     });
   }
+  
+  @override
+  double get inactiveThumbRadius => 16.0 / 2;
+  
+  @override
+  double get pressedThumbRadius => 28.0 / 2;
+  
+  @override
+  double get switchHeight => _kSwitchMinSize + 8.0;
+  
+  @override
+  double get switchHeightCollapsed => _kSwitchMinSize;
+  
+  @override
+  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  
+  @override
+  double get thumbRadiusWithIcon => 24.0 / 2;
+  
+  @override
+  List<BoxShadow>? get thumbShadow => kElevationToShadow[0];
+
+  @override
+  double get trackHeight => 32.0;
+  
+  @override
+    MaterialStateProperty<Color?> get trackOutlineColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return null;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      return _colors.outline;
+    });
+  }
+  
+  @override
+  double get trackWidth => 52.0;
 }
 
 // END GENERATED TOKEN PROPERTIES - Switch
