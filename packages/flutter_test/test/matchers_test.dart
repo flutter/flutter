@@ -764,6 +764,9 @@ void main() {
       // This should fail due to the mis-match between the `namesRoute` value.
       void failedExpectation() => expect(tester.getSemantics(find.byKey(key)),
         matchesSemantics(
+          // Adding the explicit `false` for test readability
+          // ignore: avoid_redundant_argument_values
+          namesRoute: false,
           label: 'foo',
           hint: 'bar',
           value: 'baz',
@@ -775,7 +778,6 @@ void main() {
           isButton: true,
           isLink: true,
           isHeader: true,
-          namesRoute: false,
           onTapHint: 'scan',
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
@@ -785,7 +787,7 @@ void main() {
         ),
       );
 
-      expect(failedExpectation, throwsA(isA<TestFailure>()));//.having((TestFailure failure) => failure., description, matcher)))
+      expect(failedExpectation, throwsA(isA<TestFailure>()));
     });
   });
 
