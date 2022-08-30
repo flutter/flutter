@@ -1480,24 +1480,24 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         return _colors.onSurface.withOpacity(0.38);
       }
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primaryContainer;
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primaryContainer;
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primaryContainer;
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primaryContainer;
-        }
         return _colors.onPrimary;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurfaceVariant;
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurfaceVariant;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurfaceVariant;
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSurfaceVariant;
       }
       return _colors.outline;
@@ -1514,24 +1514,24 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         return _colors.surfaceVariant.withOpacity(0.12);
       }
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary;
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary;
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary;
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary;
-        }
         return _colors.primary;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.surfaceVariant;
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.surfaceVariant;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.surfaceVariant;
       }
       return _colors.surfaceVariant;
@@ -1542,24 +1542,24 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
-        }
         return null;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSurface.withOpacity(0.12);
       }
       return null;
@@ -1578,10 +1578,10 @@ class _SwitchConfigM3 with _SwitchConfig {
   final ColorScheme _colors;
 
   static const double iconSize = 16.0;
-  
+
   @override
   double get activeThumbRadius => 24.0 / 2;
-  
+
   @override
   MaterialStateProperty<Color> get iconColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -1592,16 +1592,19 @@ class _SwitchConfigM3 with _SwitchConfig {
         return _colors.surfaceVariant.withOpacity(0.38);
       }
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimaryContainer;
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimaryContainer;
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimaryContainer;
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimaryContainer;
-        }
         return _colors.onPrimaryContainer;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.surfaceVariant;
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.surfaceVariant;
@@ -1609,37 +1612,34 @@ class _SwitchConfigM3 with _SwitchConfig {
       if (states.contains(MaterialState.focused)) {
         return _colors.surfaceVariant;
       }
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
-      }
       return _colors.surfaceVariant;
     });
   }
-  
+
   @override
   double get inactiveThumbRadius => 16.0 / 2;
-  
+
   @override
   double get pressedThumbRadius => 28.0 / 2;
-  
+
   @override
   double get switchHeight => _kSwitchMinSize + 8.0;
-  
+
   @override
   double get switchHeightCollapsed => _kSwitchMinSize;
-  
+
   @override
   double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
-  
+
   @override
   double get thumbRadiusWithIcon => 24.0 / 2;
-  
+
   @override
   List<BoxShadow>? get thumbShadow => kElevationToShadow[0];
 
   @override
   double get trackHeight => 32.0;
-  
+
   @override
     MaterialStateProperty<Color?> get trackOutlineColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -1652,7 +1652,7 @@ class _SwitchConfigM3 with _SwitchConfig {
       return _colors.outline;
     });
   }
-  
+
   @override
   double get trackWidth => 52.0;
 }
