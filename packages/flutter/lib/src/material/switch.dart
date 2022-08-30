@@ -830,7 +830,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final IconData? effectiveActiveIcon = theme.useMaterial3 ? widget.activeIcon : null;
     final IconData? effectiveInactiveIcon = theme.useMaterial3 ? widget.inactiveIcon : null;
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? switchConfig.activeThumbRadius : switchConfig.thumbRadiusWithIcon;
-    final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null ? switchConfig.inactiveThumbRadius : switchConfig.thumbRadiusWithIcon;
+    final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null && effectiveInactiveThumbImage == null
+      ? switchConfig.inactiveThumbRadius : switchConfig.thumbRadiusWithIcon;
     final double effectiveSplashRadius = widget.splashRadius ?? switchTheme.splashRadius ?? defaults.splashRadius!;
 
     return Semantics(
