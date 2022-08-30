@@ -14,7 +14,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  final ThemeData theme = ThemeData(useMaterial3: true);
+  final ThemeData theme = ThemeData();
   setUp(() {
     debugResetSemanticsIdCounter();
   });

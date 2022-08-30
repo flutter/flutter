@@ -32,22 +32,22 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('md.comp.checkbox.selected.pressed.container')};
         }
-        if (states.contains(MaterialState.focused)) {
-          return ${componentColor('md.comp.checkbox.selected.focus.container')};
-        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor('md.comp.checkbox.selected.hover.container')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.checkbox.selected.focus.container')};
         }
         return ${componentColor('md.comp.checkbox.selected.container')};
       }
       if (states.contains(MaterialState.pressed)) {
         return ${componentColor('md.comp.checkbox.unselected.pressed.outline')};
       }
-      if (states.contains(MaterialState.focused)) {
-        return ${componentColor('md.comp.checkbox.unselected.focus.outline')};
-      }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.checkbox.unselected.hover.outline')};
+      }
+      if (states.contains(MaterialState.focused)) {
+        return ${componentColor('md.comp.checkbox.unselected.focus.outline')};
       }
       return ${componentColor('md.comp.checkbox.unselected.outline')};
     });
@@ -66,11 +66,11 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('md.comp.checkbox.selected.pressed.icon')};
         }
-        if (states.contains(MaterialState.focused)) {
-          return ${componentColor('md.comp.checkbox.selected.focus.icon')};
-        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor('md.comp.checkbox.selected.hover.icon')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.checkbox.selected.focus.icon')};
         }
         return ${componentColor('md.comp.checkbox.selected.icon')};
       }
@@ -85,22 +85,22 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('md.comp.checkbox.selected.pressed.state-layer')};
         }
-        if (states.contains(MaterialState.focused)) {
-          return ${componentColor('md.comp.checkbox.selected.focus.state-layer')};
-        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor('md.comp.checkbox.selected.hover.state-layer')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.checkbox.selected.focus.state-layer')};
         }
         return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
         return ${componentColor('md.comp.checkbox.unselected.pressed.state-layer')};
       }
-      if (states.contains(MaterialState.focused)) {
-        return ${componentColor('md.comp.checkbox.unselected.focus.state-layer')};
-      }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.checkbox.unselected.hover.state-layer')};
+      }
+      if (states.contains(MaterialState.focused)) {
+        return ${componentColor('md.comp.checkbox.unselected.focus.state-layer')};
       }
       return Colors.transparent;
     });
