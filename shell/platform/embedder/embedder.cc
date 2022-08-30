@@ -1400,88 +1400,110 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
   }
 
-  flutter::PlatformViewEmbedder::UpdateSemanticsNodesCallback
-      update_semantics_nodes_callback = nullptr;
+  FlutterUpdateSemanticsNodeCallback update_semantics_node_callback = nullptr;
   if (SAFE_ACCESS(args, update_semantics_node_callback, nullptr) != nullptr) {
-    update_semantics_nodes_callback =
-        [ptr = args->update_semantics_node_callback,
-         user_data](flutter::SemanticsNodeUpdates update) {
-          for (const auto& value : update) {
-            const auto& node = value.second;
-            SkMatrix transform = node.transform.asM33();
-            FlutterTransformation flutter_transform{
-                transform.get(SkMatrix::kMScaleX),
-                transform.get(SkMatrix::kMSkewX),
-                transform.get(SkMatrix::kMTransX),
-                transform.get(SkMatrix::kMSkewY),
-                transform.get(SkMatrix::kMScaleY),
-                transform.get(SkMatrix::kMTransY),
-                transform.get(SkMatrix::kMPersp0),
-                transform.get(SkMatrix::kMPersp1),
-                transform.get(SkMatrix::kMPersp2)};
-            const FlutterSemanticsNode embedder_node{
-                sizeof(FlutterSemanticsNode),
-                node.id,
-                static_cast<FlutterSemanticsFlag>(node.flags),
-                static_cast<FlutterSemanticsAction>(node.actions),
-                node.textSelectionBase,
-                node.textSelectionExtent,
-                node.scrollChildren,
-                node.scrollIndex,
-                node.scrollPosition,
-                node.scrollExtentMax,
-                node.scrollExtentMin,
-                node.elevation,
-                node.thickness,
-                node.label.c_str(),
-                node.hint.c_str(),
-                node.value.c_str(),
-                node.increasedValue.c_str(),
-                node.decreasedValue.c_str(),
-                static_cast<FlutterTextDirection>(node.textDirection),
-                FlutterRect{node.rect.fLeft, node.rect.fTop, node.rect.fRight,
-                            node.rect.fBottom},
-                flutter_transform,
-                node.childrenInTraversalOrder.size(),
-                node.childrenInTraversalOrder.data(),
-                node.childrenInHitTestOrder.data(),
-                node.customAccessibilityActions.size(),
-                node.customAccessibilityActions.data(),
-                node.platformViewId,
-            };
-            ptr(&embedder_node, user_data);
-          }
-          const FlutterSemanticsNode batch_end_sentinel = {
-              sizeof(FlutterSemanticsNode),
-              kFlutterSemanticsNodeIdBatchEnd,
-          };
-          ptr(&batch_end_sentinel, user_data);
-        };
+    update_semantics_node_callback = args->update_semantics_node_callback;
   }
 
-  flutter::PlatformViewEmbedder::UpdateSemanticsCustomActionsCallback
-      update_semantics_custom_actions_callback = nullptr;
+  FlutterUpdateSemanticsCustomActionCallback
+      update_semantics_custom_action_callback = nullptr;
   if (SAFE_ACCESS(args, update_semantics_custom_action_callback, nullptr) !=
       nullptr) {
-    update_semantics_custom_actions_callback =
-        [ptr = args->update_semantics_custom_action_callback,
-         user_data](flutter::CustomAccessibilityActionUpdates actions) {
-          for (const auto& value : actions) {
-            const auto& action = value.second;
-            const FlutterSemanticsCustomAction embedder_action = {
-                sizeof(FlutterSemanticsCustomAction),
-                action.id,
-                static_cast<FlutterSemanticsAction>(action.overrideId),
-                action.label.c_str(),
-                action.hint.c_str(),
-            };
-            ptr(&embedder_action, user_data);
+    update_semantics_custom_action_callback =
+        args->update_semantics_custom_action_callback;
+  }
+
+  flutter::PlatformViewEmbedder::UpdateSemanticsCallback
+      update_semantics_callback = nullptr;
+  if (update_semantics_node_callback != nullptr ||
+      update_semantics_custom_action_callback != nullptr) {
+    update_semantics_callback =
+        [update_semantics_node_callback,
+         update_semantics_custom_action_callback,
+         user_data](flutter::SemanticsNodeUpdates update,
+                    flutter::CustomAccessibilityActionUpdates actions) {
+          // First, queue all node and custom action updates.
+          if (update_semantics_node_callback != nullptr) {
+            for (const auto& value : update) {
+              const auto& node = value.second;
+              SkMatrix transform = node.transform.asM33();
+              FlutterTransformation flutter_transform{
+                  transform.get(SkMatrix::kMScaleX),
+                  transform.get(SkMatrix::kMSkewX),
+                  transform.get(SkMatrix::kMTransX),
+                  transform.get(SkMatrix::kMSkewY),
+                  transform.get(SkMatrix::kMScaleY),
+                  transform.get(SkMatrix::kMTransY),
+                  transform.get(SkMatrix::kMPersp0),
+                  transform.get(SkMatrix::kMPersp1),
+                  transform.get(SkMatrix::kMPersp2)};
+              const FlutterSemanticsNode embedder_node{
+                  sizeof(FlutterSemanticsNode),
+                  node.id,
+                  static_cast<FlutterSemanticsFlag>(node.flags),
+                  static_cast<FlutterSemanticsAction>(node.actions),
+                  node.textSelectionBase,
+                  node.textSelectionExtent,
+                  node.scrollChildren,
+                  node.scrollIndex,
+                  node.scrollPosition,
+                  node.scrollExtentMax,
+                  node.scrollExtentMin,
+                  node.elevation,
+                  node.thickness,
+                  node.label.c_str(),
+                  node.hint.c_str(),
+                  node.value.c_str(),
+                  node.increasedValue.c_str(),
+                  node.decreasedValue.c_str(),
+                  static_cast<FlutterTextDirection>(node.textDirection),
+                  FlutterRect{node.rect.fLeft, node.rect.fTop, node.rect.fRight,
+                              node.rect.fBottom},
+                  flutter_transform,
+                  node.childrenInTraversalOrder.size(),
+                  node.childrenInTraversalOrder.data(),
+                  node.childrenInHitTestOrder.data(),
+                  node.customAccessibilityActions.size(),
+                  node.customAccessibilityActions.data(),
+                  node.platformViewId,
+              };
+              update_semantics_node_callback(&embedder_node, user_data);
+            }
           }
-          const FlutterSemanticsCustomAction batch_end_sentinel = {
-              sizeof(FlutterSemanticsCustomAction),
-              kFlutterSemanticsCustomActionIdBatchEnd,
-          };
-          ptr(&batch_end_sentinel, user_data);
+
+          if (update_semantics_custom_action_callback != nullptr) {
+            for (const auto& value : actions) {
+              const auto& action = value.second;
+              const FlutterSemanticsCustomAction embedder_action = {
+                  sizeof(FlutterSemanticsCustomAction),
+                  action.id,
+                  static_cast<FlutterSemanticsAction>(action.overrideId),
+                  action.label.c_str(),
+                  action.hint.c_str(),
+              };
+              update_semantics_custom_action_callback(&embedder_action,
+                                                      user_data);
+            }
+          }
+
+          // Second, mark node and action batches completed now that all
+          // updates are queued.
+          if (update_semantics_node_callback != nullptr) {
+            const FlutterSemanticsNode batch_end_sentinel = {
+                sizeof(FlutterSemanticsNode),
+                kFlutterSemanticsNodeIdBatchEnd,
+            };
+            update_semantics_node_callback(&batch_end_sentinel, user_data);
+          }
+
+          if (update_semantics_custom_action_callback != nullptr) {
+            const FlutterSemanticsCustomAction batch_end_sentinel = {
+                sizeof(FlutterSemanticsCustomAction),
+                kFlutterSemanticsCustomActionIdBatchEnd,
+            };
+            update_semantics_custom_action_callback(&batch_end_sentinel,
+                                                    user_data);
+          }
         };
   }
 
@@ -1576,8 +1598,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
       {
-          update_semantics_nodes_callback,            //
-          update_semantics_custom_actions_callback,   //
+          update_semantics_callback,                  //
           platform_message_response_callback,         //
           vsync_callback,                             //
           compute_platform_resolved_locale_callback,  //

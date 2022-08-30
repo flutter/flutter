@@ -31,10 +31,9 @@ namespace flutter {
 
 class PlatformViewEmbedder final : public PlatformView {
  public:
-  using UpdateSemanticsNodesCallback =
-      std::function<void(flutter::SemanticsNodeUpdates update)>;
-  using UpdateSemanticsCustomActionsCallback =
-      std::function<void(flutter::CustomAccessibilityActionUpdates actions)>;
+  using UpdateSemanticsCallback =
+      std::function<void(flutter::SemanticsNodeUpdates update,
+                         flutter::CustomAccessibilityActionUpdates actions)>;
   using PlatformMessageResponseCallback =
       std::function<void(std::unique_ptr<PlatformMessage>)>;
   using ComputePlatformResolvedLocaleCallback =
@@ -43,9 +42,7 @@ class PlatformViewEmbedder final : public PlatformView {
   using OnPreEngineRestartCallback = std::function<void()>;
 
   struct PlatformDispatchTable {
-    UpdateSemanticsNodesCallback update_semantics_nodes_callback;  // optional
-    UpdateSemanticsCustomActionsCallback
-        update_semantics_custom_actions_callback;  // optional
+    UpdateSemanticsCallback update_semantics_callback;  // optional
     PlatformMessageResponseCallback
         platform_message_response_callback;             // optional
     VsyncWaiterEmbedder::VsyncCallback vsync_callback;  // optional
