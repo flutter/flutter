@@ -23,6 +23,7 @@ import 'toggleable.dart';
 // Examples can assume:
 // bool _giveVerse = true;
 // late StateSetter setState;
+// late ImageProvider disabledImage;
 
 const double _kSwitchMinSize = kMinInteractiveDimension - 8.0;
 
@@ -353,7 +354,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (_) => true,
   ///   thumbImage: MaterialStateProperty.resolveWith<ImageProvider?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
-  ///       return MemoryImage(Uint8List.fromList(<int>[1, 2]));
+  ///       return disabledImage;
   ///     }
   ///     return null; // All other states will use the default thumbImage.
   ///   }),
