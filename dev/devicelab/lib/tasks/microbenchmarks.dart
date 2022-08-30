@@ -32,8 +32,8 @@ TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
             // --release doesn't work on iOS due to code signing issues
             '--profile',
             '--no-publish-port',
-            '-d',
             if (enableImpeller) '--enable-impeller',
+            '-d',
             device.deviceId,
           ];
           options.add(benchmarkPath);

@@ -1425,18 +1425,19 @@ class CompileTest {
           cwd,
           'build',
         ));
-        final String? appBundlePath =
+        final String? appPath =
             _findDarwinAppInBuildDirectory(buildDirectory.path);
-        if (appBundlePath == null) {
+        if (appPath == null) {
           throw 'Failed to find app bundle in ${buildDirectory.path}';
         }
-        // IPAs are created manually, https://flutter.dev/ios-release/
-        await exec('tar', <String>['-zcf', 'build/app.ipa', appBundlePath]);
-        releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
+        // Validate changes in Dart snapshot format and data layout do not
+        // change compression size. This also simulates the size of an IPA on iOS.
+        await exec('tar', <String>['-zcf', 'build/app.tar.gz', appPath]);
+        releaseSizeInBytes = await file('$cwd/build/app.tar.gz').length();
         if (reportPackageContentSizes) {
           final Map<String, Object> sizeMetrics = await getSizesFromDarwinApp(
-              appPath: appBundlePath,
-              operatingSystem: deviceOperatingSystem,
+            appPath: appPath,
+            operatingSystem: deviceOperatingSystem,
           );
           metrics.addAll(sizeMetrics);
         }

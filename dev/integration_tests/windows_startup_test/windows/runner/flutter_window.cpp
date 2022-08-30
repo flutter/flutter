@@ -5,6 +5,8 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <mutex>
+
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 
@@ -33,6 +35,16 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
+  static std::mutex visible_mutex;
+  static bool visible = false;
+
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {
+    std::scoped_lock lock(visible_mutex);
+    this->Show();
+    visible = true;
+  });
+
+  // Create a method channel to check the window's visibility.
   flutter::MethodChannel<> channel(
       flutter_controller_->engine()->messenger(), "tests.flutter.dev/windows_startup_test",
       &flutter::StandardMethodCodec::GetInstance());
@@ -40,8 +52,9 @@ bool FlutterWindow::OnCreate() {
   channel.SetMethodCallHandler(
     [](const flutter::MethodCall<>& call,
        std::unique_ptr<flutter::MethodResult<>> result) {
+      std::scoped_lock lock(visible_mutex);
       if (call.method_name() == "isWindowVisible") {
-        result->Success(true);
+        result->Success(visible);
       } else {
         result->NotImplemented();
       }
