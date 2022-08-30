@@ -3768,6 +3768,25 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac channels_integration_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "13f17a"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: channels_integration_test_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
