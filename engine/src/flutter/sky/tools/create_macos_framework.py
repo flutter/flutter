@@ -34,6 +34,8 @@ def main():
   parser.add_argument('--x64-out-dir', type=str, required=True)
   parser.add_argument('--strip', action="store_true", default=False)
   parser.add_argument('--dsym', action="store_true", default=False)
+  # TODO(godofredoc): Remove after recipes v2 have landed.
+  parser.add_argument('--zip', action="store_true", default=False)
 
   args = parser.parse_args()
 
@@ -101,11 +103,11 @@ def process_framework(dst, args, fat_framework, fat_framework_binary):
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
     subprocess.check_call([DSYMUTIL, '-o', dsym_out, fat_framework_binary])
-    subprocess.check_call([
-        'zip', '-r',
-        '%s/FlutterMacOS.dSYM.zip' % dst,
-        '%s/FlutterMacOS.dSYM/Contents' % dst
-    ])
+    if args.zip:
+      subprocess.check_call([
+          'zip', '-r', '-y', 'FlutterMacOS.dSYM.zip', 'FlutterMacOS.dSYM'
+      ],
+                            cwd=dst)
 
   if args.strip:
     # copy unstripped
@@ -113,6 +115,14 @@ def process_framework(dst, args, fat_framework, fat_framework_binary):
     shutil.copyfile(fat_framework_binary, unstripped_out)
 
     subprocess.check_call(["strip", "-x", "-S", fat_framework_binary])
+
+  # Zip FlutterMacOS.framework.
+  if args.zip:
+    subprocess.check_call([
+        'zip', '-r', '-y', 'FlutterMacOS.framework.zip',
+        'FlutterMacOS.framework'
+    ],
+                          cwd=dst)
 
 
 if __name__ == '__main__':
