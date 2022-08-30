@@ -1,4 +1,4 @@
-Signature: 8bac2ba4371fa6b4f5be581c4481db35
+Signature: b211c59707f78eea9c03e2ddca54b6a5
 
 UNUSED LICENSES:
 
@@ -2593,7 +2593,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/DrawWriter.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GpuWorkSubmission.h
 FILE: ../../../third_party/skia/src/gpu/graphite/GraphicsPipeline.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/GraphicsPipeline.h
-FILE: ../../../third_party/skia/src/gpu/graphite/GraphicsPipelineDesc.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/GraphicsPipelineDesc.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Graphite.h
@@ -5573,6 +5572,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecordingPriv.h
+FILE: ../../../third_party/skia/src/gpu/graphite/Renderer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/RendererProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/RendererProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Resource.cpp
