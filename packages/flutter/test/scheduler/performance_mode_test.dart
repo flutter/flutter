@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,7 +25,7 @@ void main() {
 
     binding.disposePerformanceModeRequest(handle1);
     expect(binding.getRequestedPerformanceMode(), isNull);
-  });
+  }, skip: kIsWeb); // [intended] performance mode handling is not supported on web.
 
   test('PerformanceModeHandler make conflicting requests', () async {
     const int handle1 = 1;
@@ -39,7 +40,7 @@ void main() {
 
     binding.disposePerformanceModeRequest(handle1);
     expect(binding.getRequestedPerformanceMode(), isNull);
-  });
+  }, skip: kIsWeb); // [intended] performance mode handling is not supported on web.
 
   test('PerformanceModeHandler revert only after last requestor disposed', () async {
     const int handle1 = 1;
@@ -57,6 +58,6 @@ void main() {
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
     binding.disposePerformanceModeRequest(handle2);
     expect(binding.getRequestedPerformanceMode(), isNull);
-  });
+  }, skip: kIsWeb); // [intended] performance mode handling is not supported on web.
 
 }

@@ -605,6 +605,19 @@ mixin SchedulerBinding on BindingBase {
     return true;
   }
 
+  /// Asserts that there are no pending performance mode requests. If there are
+  /// any pending requests, throws an exception as it indicates undisposed
+  /// performance mode requests.
+  bool debugAssertNoPendingPerformanceModeRequests(String reason) {
+    assert(() {
+      if (_performanceModes.isNotEmpty) {
+        throw FlutterError(reason);
+      }
+      return true;
+    }());
+    return true;
+  }
+
   /// Prints the stack for where the current transient callback was registered.
   ///
   /// A transient frame callback is one that was registered with
