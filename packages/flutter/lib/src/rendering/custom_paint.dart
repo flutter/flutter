@@ -7,8 +7,6 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'object.dart';
 import 'proxy_box.dart';
@@ -397,8 +395,9 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// If the new value is null, then there is no background custom painter.
   set painter(CustomPainter? value) {
-    if (_painter == value)
+    if (_painter == value) {
       return;
+    }
     final CustomPainter? oldPainter = _painter;
     _painter = value;
     _didUpdatePainter(_painter, oldPainter);
@@ -422,8 +421,9 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// If the new value is null, then there is no foreground custom painter.
   set foregroundPainter(CustomPainter? value) {
-    if (_foregroundPainter == value)
+    if (_foregroundPainter == value) {
       return;
+    }
     final CustomPainter? oldPainter = _foregroundPainter;
     _foregroundPainter = value;
     _didUpdatePainter(_foregroundPainter, oldPainter);
@@ -447,8 +447,9 @@ class RenderCustomPaint extends RenderProxyBox {
     // Check if we need to rebuild semantics.
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
-      if (attached)
+      if (attached) {
         markNeedsSemanticsUpdate();
+      }
     } else if (oldPainter == null ||
         newPainter.runtimeType != oldPainter.runtimeType ||
         newPainter.shouldRebuildSemantics(oldPainter)) {
@@ -467,8 +468,9 @@ class RenderCustomPaint extends RenderProxyBox {
   Size _preferredSize;
   set preferredSize(Size value) {
     assert(value != null);
-    if (preferredSize == value)
+    if (preferredSize == value) {
       return;
+    }
     _preferredSize = value;
     markNeedsLayout();
   }
@@ -488,29 +490,33 @@ class RenderCustomPaint extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child == null)
+    if (child == null) {
       return preferredSize.width.isFinite ? preferredSize.width : 0;
+    }
     return super.computeMinIntrinsicWidth(height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child == null)
+    if (child == null) {
       return preferredSize.width.isFinite ? preferredSize.width : 0;
+    }
     return super.computeMaxIntrinsicWidth(height);
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child == null)
+    if (child == null) {
       return preferredSize.height.isFinite ? preferredSize.height : 0;
+    }
     return super.computeMinIntrinsicHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child == null)
+    if (child == null) {
       return preferredSize.height.isFinite ? preferredSize.height : 0;
+    }
     return super.computeMaxIntrinsicHeight(width);
   }
 
@@ -530,8 +536,9 @@ class RenderCustomPaint extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    if (_foregroundPainter != null && (_foregroundPainter!.hitTest(position) ?? false))
+    if (_foregroundPainter != null && (_foregroundPainter!.hitTest(position) ?? false)) {
       return true;
+    }
     return super.hitTestChildren(result, position: position);
   }
 
@@ -558,8 +565,9 @@ class RenderCustomPaint extends RenderProxyBox {
       debugPreviousCanvasSaveCount = canvas.getSaveCount();
       return true;
     }());
-    if (offset != Offset.zero)
+    if (offset != Offset.zero) {
       canvas.translate(offset.dx, offset.dy);
+    }
     painter.paint(canvas, size);
     assert(() {
       // This isn't perfect. For example, we can't catch the case of
@@ -613,10 +621,12 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   void _setRasterCacheHints(PaintingContext context) {
-    if (isComplex)
+    if (isComplex) {
       context.setIsComplexHint();
-    if (willChange)
+    }
+    if (willChange) {
       context.setWillChangeHint();
+    }
   }
 
   /// Builds semantics for the picture drawn by [painter].
@@ -745,8 +755,9 @@ class RenderCustomPaint extends RenderProxyBox {
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
       final SemanticsNode oldChild = oldSemantics[oldChildrenTop];
       final CustomPainterSemantics newSemantics = newChildSemantics[newChildrenTop];
-      if (!_canUpdateSemanticsChild(oldChild, newSemantics))
+      if (!_canUpdateSemanticsChild(oldChild, newSemantics)) {
         break;
+      }
       final SemanticsNode newChild = _updateSemanticsChild(oldChild, newSemantics);
       newChildren[newChildrenTop] = newChild;
       newChildrenTop += 1;
@@ -757,8 +768,9 @@ class RenderCustomPaint extends RenderProxyBox {
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
       final SemanticsNode oldChild = oldSemantics[oldChildrenBottom];
       final CustomPainterSemantics newChild = newChildSemantics[newChildrenBottom];
-      if (!_canUpdateSemanticsChild(oldChild, newChild))
+      if (!_canUpdateSemanticsChild(oldChild, newChild)) {
         break;
+      }
       oldChildrenBottom -= 1;
       newChildrenBottom -= 1;
     }
@@ -770,8 +782,9 @@ class RenderCustomPaint extends RenderProxyBox {
       oldKeyedChildren = <Key, SemanticsNode>{};
       while (oldChildrenTop <= oldChildrenBottom) {
         final SemanticsNode oldChild = oldSemantics[oldChildrenTop];
-        if (oldChild.key != null)
+        if (oldChild.key != null) {
           oldKeyedChildren[oldChild.key!] = oldChild;
+        }
         oldChildrenTop += 1;
       }
     }

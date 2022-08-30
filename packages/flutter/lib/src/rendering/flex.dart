@@ -504,8 +504,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! FlexParentData)
+    if (child.parentData is! FlexParentData) {
       child.parentData = FlexParentData();
+    }
   }
 
   bool get _canComputeIntrinsics => crossAxisAlignment != CrossAxisAlignment.baseline;
@@ -589,8 +590,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       child = firstChild;
       while (child != null) {
         final int flex = _getFlex(child);
-        if (flex > 0)
+        if (flex > 0) {
           maxCrossSize = math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
+        }
         final FlexParentData childParentData = child.parentData! as FlexParentData;
         child = childParentData.nextSibling;
       }
@@ -637,8 +639,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (_direction == Axis.horizontal)
+    if (_direction == Axis.horizontal) {
       return defaultComputeDistanceToHighestActualBaseline(baseline);
+    }
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
@@ -730,16 +733,20 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               RenderBox? node = this;
               switch (_direction) {
                 case Axis.horizontal:
-                  while (!node!.constraints.hasBoundedWidth && node.parent is RenderBox)
+                  while (!node!.constraints.hasBoundedWidth && node.parent is RenderBox) {
                     node = node.parent! as RenderBox;
-                  if (!node.constraints.hasBoundedWidth)
+                  }
+                  if (!node.constraints.hasBoundedWidth) {
                     node = null;
+                  }
                   break;
                 case Axis.vertical:
-                  while (!node!.constraints.hasBoundedHeight && node.parent is RenderBox)
+                  while (!node!.constraints.hasBoundedHeight && node.parent is RenderBox) {
                     node = node.parent! as RenderBox;
-                  if (!node.constraints.hasBoundedHeight)
+                  }
+                  if (!node.constraints.hasBoundedHeight) {
                     node = null;
+                  }
                   break;
               }
               if (node != null) {
@@ -943,8 +950,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       double maxSizeBelowBaseline = 0;
       while (child != null) {
         assert(() {
-          if (textBaseline == null)
+          if (textBaseline == null) {
             throw FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
+          }
           return true;
         }());
         final double? distance = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
@@ -1039,17 +1047,19 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           if (_direction == Axis.horizontal) {
             assert(textBaseline != null);
             final double? distance = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
-            if (distance != null)
+            if (distance != null) {
               childCrossPosition = maxBaselineDistance - distance;
-            else
+            } else {
               childCrossPosition = 0.0;
+            }
           } else {
             childCrossPosition = 0.0;
           }
           break;
       }
-      if (flipMainAxis)
+      if (flipMainAxis) {
         childMainPosition -= _getMainSize(child.size);
+      }
       switch (_direction) {
         case Axis.horizontal:
           childParentData.offset = Offset(childMainPosition, childCrossPosition);
@@ -1080,23 +1090,18 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // There's no point in drawing the children if we're empty.
-    if (size.isEmpty)
+    if (size.isEmpty) {
       return;
-
-    if (clipBehavior == Clip.none) {
-      _clipRectLayer.layer = null;
-      defaultPaint(context, offset);
-    } else {
-      // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer.layer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        Offset.zero & size,
-        defaultPaint,
-        clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer.layer,
-      );
     }
+
+    _clipRectLayer.layer = context.pushClipRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      defaultPaint,
+      clipBehavior: clipBehavior,
+      oldLayer: _clipRectLayer.layer,
+    );
 
     assert(() {
       // Only set this if it's null to save work. It gets reset to null if the
@@ -1150,14 +1155,25 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  Rect? describeApproximatePaintClip(RenderObject child) => _hasOverflow ? Offset.zero & size : null;
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _hasOverflow ? Offset.zero & size : null;
+    }
+  }
+
 
   @override
   String toStringShort() {
     String header = super.toStringShort();
     if (!kReleaseMode) {
-      if (_hasOverflow)
+      if (_hasOverflow) {
         header += ' OVERFLOWING';
+      }
     }
     return header;
   }

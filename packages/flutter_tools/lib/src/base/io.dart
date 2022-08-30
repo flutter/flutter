@@ -209,8 +209,7 @@ class ProcessSignal {
 @visibleForTesting
 class PosixProcessSignal extends ProcessSignal {
 
-  const PosixProcessSignal(io.ProcessSignal wrappedSignal, {@visibleForTesting Platform platform = const LocalPlatform()})
-    : super(wrappedSignal, platform: platform);
+  const PosixProcessSignal(super.wrappedSignal, {@visibleForTesting super.platform});
 
   @override
   Stream<ProcessSignal> watch() {

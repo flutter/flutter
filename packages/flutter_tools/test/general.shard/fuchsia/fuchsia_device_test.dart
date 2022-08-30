@@ -440,7 +440,11 @@ void main() {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
-        throwsA(equals('file.invalid must be a .ppm file')),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'message',
+          contains('file.invalid must be a .ppm file')
+        )),
       );
     });
 
@@ -460,7 +464,11 @@ void main() {
 
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
-        throwsA(equals('Could not take a screenshot on device tester:\n<error-message>')),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'message',
+          contains('Could not take a screenshot on device tester:\n<error-message>')
+        )),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -506,7 +514,11 @@ void main() {
 
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
-        throwsA(equals('Failed to copy screenshot from device:\n<error-message>')),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'message',
+          contains('Failed to copy screenshot from device:\n<error-message>')
+        )),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -645,7 +657,7 @@ void main() {
             jsonResponse: <String, Object>{
               'views': <Object>[
                 for (FlutterView view in views)
-                  view.toJson()
+                  view.toJson(),
               ],
             },
           ),
@@ -864,26 +876,6 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
   }
 }
 
-class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
-
-  @override
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
-    return FakeFuchsiaIsolateDiscoveryProtocol();
-  }
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia_arm64;
-}
-
-class FakeFuchsiaIsolateDiscoveryProtocol implements FuchsiaIsolateDiscoveryProtocol {
-  @override
-  FutureOr<Uri> get uri => Uri.parse('http://[::1]:37');
-
-  @override
-  void dispose() {}
-}
-
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
   Future<List<String>> list({Duration timeout}) async {
@@ -932,6 +924,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {}
 
   @override

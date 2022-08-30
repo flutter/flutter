@@ -16,24 +16,24 @@ typedef MethodCallHandler = Future<dynamic> Function(MethodCall call);
 typedef SimpleAnnotationFinder = Iterable<HitTestTarget> Function(Offset offset);
 
 void main() {
-  final TestMouseTrackerFlutterBinding _binding = TestMouseTrackerFlutterBinding();
-  MethodCallHandler? _methodCallHandler;
+  final TestMouseTrackerFlutterBinding binding = TestMouseTrackerFlutterBinding();
+  MethodCallHandler? methodCallHandler;
 
   // Only one of `logCursors` and `cursorHandler` should be specified.
-  void _setUpMouseTracker({
+  void setUpMouseTracker({
     required SimpleAnnotationFinder annotationFinder,
     List<_CursorUpdateDetails>? logCursors,
     MethodCallHandler? cursorHandler,
   }) {
     assert(logCursors == null || cursorHandler == null);
-    _methodCallHandler = logCursors != null
+    methodCallHandler = logCursors != null
       ? (MethodCall call) async {
         logCursors.add(_CursorUpdateDetails.wrap(call));
         return;
       }
       : cursorHandler;
 
-    _binding.setHitTest((BoxHitTestResult result, Offset position) {
+    binding.setHitTest((BoxHitTestResult result, Offset position) {
       for (final HitTestTarget target in annotationFinder(position)) {
         result.addWithRawTransform(
           transform: Matrix4.identity(),
@@ -49,36 +49,36 @@ void main() {
   }
 
   void dispatchRemoveDevice([int device = 0]) {
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero, device: device),
     ]));
   }
 
   setUp(() {
-    _binding.postFrameCallbacks.clear();
-    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
-      if (_methodCallHandler != null) {
-        return _methodCallHandler!(call);
+    binding.postFrameCallbacks.clear();
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
+      if (methodCallHandler != null) {
+        return methodCallHandler!(call);
       }
       return null;
     });
   });
 
   tearDown(() {
-    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, null);
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, null);
   });
 
   test('Should work on platforms that does not support mouse cursor', () async {
     const TestAnnotationTarget annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
 
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[annotation],
       cursorHandler: (MethodCall call) async {
         return null;
       },
     );
 
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
     addTearDown(dispatchRemoveDevice);
@@ -89,13 +89,13 @@ void main() {
   test('pointer is added and removed out of any annotations', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
     // Pointer is added outside of the annotation.
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
 
@@ -106,7 +106,7 @@ void main() {
 
     // Pointer moves into the annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
     ]));
 
@@ -117,7 +117,7 @@ void main() {
 
     // Pointer moves within the annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(10.0, 0.0)),
     ]));
 
@@ -126,7 +126,7 @@ void main() {
 
     // Pointer moves out of the annotation
     annotation = null;
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, Offset.zero),
     ]));
 
@@ -136,7 +136,7 @@ void main() {
     logCursors.clear();
 
     // Pointer is removed outside of the annotation.
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
@@ -146,14 +146,14 @@ void main() {
   test('pointer is added and removed in an annotation', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
     // Pointer is added in the annotation.
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
 
@@ -164,7 +164,7 @@ void main() {
 
     // Pointer moves out of the annotation
     annotation = null;
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
     ]));
 
@@ -175,7 +175,7 @@ void main() {
 
     // Pointer moves around out of the annotation
     annotation = null;
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(10.0, 0.0)),
     ]));
 
@@ -184,7 +184,7 @@ void main() {
 
     // Pointer moves back into the annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, Offset.zero),
     ]));
 
@@ -194,7 +194,7 @@ void main() {
     logCursors.clear();
 
     // Pointer is removed within the annotation.
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
@@ -204,13 +204,13 @@ void main() {
   test('pointer change caused by new frames', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
     // Pointer is added outside of the annotation.
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
 
@@ -221,8 +221,8 @@ void main() {
 
     // Synthesize a new frame while changing annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    _binding.scheduleMouseTrackerPostFrameCheck();
-    _binding.flushPostFrameCallbacks(Duration.zero);
+    binding.scheduleMouseTrackerPostFrameCheck();
+    binding.flushPostFrameCallbacks(Duration.zero);
 
     expect(logCursors, <_CursorUpdateDetails>[
       _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
@@ -231,13 +231,13 @@ void main() {
 
     // Synthesize a new frame without changing annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    _binding.scheduleMouseTrackerPostFrameCheck();
+    binding.scheduleMouseTrackerPostFrameCheck();
 
     expect(logCursors, <_CursorUpdateDetails>[]);
     logCursors.clear();
 
     // Pointer is removed outside of the annotation.
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
 
@@ -247,7 +247,7 @@ void main() {
   test('The first annotation with non-deferring cursor is used', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
@@ -257,7 +257,7 @@ void main() {
       const TestAnnotationTarget(cursor: SystemMouseCursors.click),
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
 
@@ -267,7 +267,7 @@ void main() {
     logCursors.clear();
 
     // Remove
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(5.0, 0.0)),
     ]));
   });
@@ -275,7 +275,7 @@ void main() {
   test('Annotations with deferring cursors are ignored', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
@@ -285,7 +285,7 @@ void main() {
       const TestAnnotationTarget(),
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
 
@@ -295,7 +295,7 @@ void main() {
     logCursors.clear();
 
     // Remove
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(5.0, 0.0)),
     ]));
   });
@@ -303,13 +303,13 @@ void main() {
   test('Finding no annotation is equivalent to specifying default cursor', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
     // Pointer is added outside of the annotation.
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
 
@@ -320,7 +320,7 @@ void main() {
 
     // Pointer moved to an annotation specified with the default cursor
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.basic);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
     ]));
 
@@ -329,7 +329,7 @@ void main() {
 
     // Pointer moved to no annotations
     annotation = null;
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, Offset.zero),
     ]));
 
@@ -337,7 +337,7 @@ void main() {
     logCursors.clear();
 
     // Remove
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
   });
@@ -345,14 +345,14 @@ void main() {
   test('Removing a pointer resets it back to the default cursor', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
     // Pointer is added to the annotation, then removed
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.click);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
       _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
       _pointerData(PointerChange.remove, const Offset(5.0, 0.0)),
@@ -362,7 +362,7 @@ void main() {
 
     // Pointer is added out of the annotation
     annotation = null;
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero),
     ]));
     addTearDown(dispatchRemoveDevice);
@@ -375,7 +375,7 @@ void main() {
 
   test('Pointing devices display cursors separately', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
-    _setUpMouseTracker(
+    setUpMouseTracker(
       annotationFinder: (Offset position) sync* {
         if (position.dx > 200) {
           yield const TestAnnotationTarget(cursor: SystemMouseCursors.forbidden);
@@ -387,7 +387,7 @@ void main() {
     );
 
     // Pointers are added outside of the annotation.
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, Offset.zero, device: 1),
       _pointerData(PointerChange.add, Offset.zero, device: 2),
     ]));
@@ -401,7 +401,7 @@ void main() {
     logCursors.clear();
 
     // Pointer 1 moved to cursor "click"
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(101.0, 0.0), device: 1),
     ]));
 
@@ -411,7 +411,7 @@ void main() {
     logCursors.clear();
 
     // Pointer 2 moved to cursor "click"
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(102.0, 0.0), device: 2),
     ]));
 
@@ -421,7 +421,7 @@ void main() {
     logCursors.clear();
 
     // Pointer 2 moved to cursor "forbidden"
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(202.0, 0.0), device: 2),
     ]));
 
@@ -440,17 +440,16 @@ ui.PointerData _pointerData(
 }) {
   return ui.PointerData(
     change: change,
-    physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
-    physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
+    physicalX: logicalPosition.dx * RendererBinding.instance.window.devicePixelRatio,
+    physicalY: logicalPosition.dy * RendererBinding.instance.window.devicePixelRatio,
     kind: kind,
     device: device,
   );
 }
 
 class _CursorUpdateDetails extends MethodCall {
-  const _CursorUpdateDetails(String method, Map<String, dynamic> arguments)
-    : assert(arguments != null),
-      super(method, arguments);
+  const _CursorUpdateDetails(super.method, Map<String, dynamic> super.arguments)
+    : assert(arguments != null);
 
   _CursorUpdateDetails.wrap(MethodCall call)
     : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
@@ -464,10 +463,12 @@ class _CursorUpdateDetails extends MethodCall {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(other, this))
+    if (identical(other, this)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _CursorUpdateDetails
         && other.method == method
         && other.arguments.length == arguments.length
@@ -478,7 +479,7 @@ class _CursorUpdateDetails extends MethodCall {
   }
 
   @override
-  int get hashCode => hashValues(method, arguments);
+  int get hashCode => Object.hash(method, arguments);
 
   @override
   String toString() {

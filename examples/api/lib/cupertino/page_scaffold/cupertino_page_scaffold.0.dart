@@ -6,30 +6,28 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const PageScaffoldApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class PageScaffoldApp extends StatelessWidget {
+  const PageScaffoldApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: PageScaffoldExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class PageScaffoldExample extends StatefulWidget {
+  const PageScaffoldExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<PageScaffoldExample> createState() => _PageScaffoldExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _PageScaffoldExampleState extends State<PageScaffoldExample> {
   int _count = 0;
 
   @override
@@ -38,18 +36,24 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       // Uncomment to change the background color
       // backgroundColor: CupertinoColors.systemPink,
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Sample Code'),
+        middle: Text('CupertinoPageScaffold Sample'),
       ),
-      child: ListView(
-        children: <Widget>[
-          CupertinoButton(
-            onPressed: () => setState(() => _count++),
-            child: const Icon(CupertinoIcons.add),
-          ),
-          Center(
-            child: Text('You have pressed the button $_count times.'),
-          ),
-        ],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Center(
+              child: Text('You have pressed the button $_count times.'),
+            ),
+            const SizedBox(height: 20.0),
+            Center(
+              child: CupertinoButton.filled(
+                onPressed: () => setState(() => _count++),
+                child: const Icon(CupertinoIcons.add),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

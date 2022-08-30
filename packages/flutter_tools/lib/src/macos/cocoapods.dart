@@ -68,8 +68,8 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
-const Version cocoaPodsMinimumVersion = Version.withText(1, 9, 0, '1.9.0');
-const Version cocoaPodsRecommendedVersion = Version.withText(1, 10, 0, '1.10.0');
+const Version cocoaPodsMinimumVersion = Version.withText(1, 10, 0, '1.10.0');
+const Version cocoaPodsRecommendedVersion = Version.withText(1, 11, 0, '1.11.0');
 
 /// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
@@ -349,10 +349,11 @@ class CocoaPods {
   }
 
   void _diagnosePodInstallFailure(ProcessResult result) {
-    if (result.stdout is! String) {
+    final Object? stdout = result.stdout;
+    final Object? stderr = result.stderr;
+    if (stdout is! String || stderr is! String) {
       return;
     }
-    final String stdout = result.stdout as String;
     if (stdout.contains('out-of-date source repos')) {
       _logger.printError(
         "Error: CocoaPods's specs repository is too out-of-date to satisfy dependencies.\n"
@@ -360,7 +361,7 @@ class CocoaPods {
         '  pod repo update\n',
         emphasis: true,
       );
-    } else if (stdout.contains('ffi_c.bundle') && stdout.contains('LoadError') &&
+    } else if ((stderr.contains('ffi_c.bundle') || stderr.contains('/ffi/')) &&
         _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
@@ -370,7 +371,7 @@ class CocoaPods {
       ).send();
       _logger.printError(
         'Error: To set up CocoaPods for ARM macOS, run:\n'
-        '  arch -x86_64 sudo gem install ffi\n',
+        '  sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc\n',
         emphasis: true,
       );
     }

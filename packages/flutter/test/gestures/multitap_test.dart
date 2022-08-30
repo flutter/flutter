@@ -7,11 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {
-}
-
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize pan', (GestureTester tester) {
     final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(longTapDelay: kLongPressTimeout);

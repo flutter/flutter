@@ -145,24 +145,24 @@ class SnackBarThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      actionTextColor,
-      disabledActionTextColor,
-      contentTextStyle,
-      elevation,
-      shape,
-      behavior,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    actionTextColor,
+    disabledActionTextColor,
+    contentTextStyle,
+    elevation,
+    shape,
+    behavior,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SnackBarThemeData
         && other.backgroundColor == backgroundColor
         && other.actionTextColor == actionTextColor

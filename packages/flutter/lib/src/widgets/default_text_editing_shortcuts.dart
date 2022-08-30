@@ -10,8 +10,7 @@ import 'framework.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
-/// A [Shortcuts] widget with the shortcuts used for the default text editing
-/// behavior.
+/// A widget with the shortcuts used for the default text editing behavior.
 ///
 /// This default behavior can be overridden by placing a [Shortcuts] widget
 /// lower in the widget tree than this. See the [Action] class for an example
@@ -69,7 +68,7 @@ import 'text_editing_intents.dart';
 /// class DecrementCounterIntent extends Intent {}
 ///
 /// class MyWidget extends StatefulWidget {
-///   const MyWidget({ Key? key }) : super(key: key);
+///   const MyWidget({ super.key });
 ///
 ///   @override
 ///   MyWidgetState createState() => MyWidgetState();
@@ -146,21 +145,19 @@ import 'text_editing_intents.dart';
 /// See also:
 ///
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
-class DefaultTextEditingShortcuts extends Shortcuts {
-  /// Creates a [Shortcuts] widget that provides the default text editing
+class DefaultTextEditingShortcuts extends StatelessWidget {
+  /// Creates a [DefaultTextEditingShortcuts] widget that provides the default text editing
   /// shortcuts on the current platform.
-  DefaultTextEditingShortcuts({
-    Key? key,
-    required Widget child,
-  }) : super(
-    key: key,
-    debugLabel: '<Default Text Editing Shortcuts>',
-    shortcuts: _shortcuts,
-    child: child,
-  );
+  const DefaultTextEditingShortcuts({
+    super.key,
+    required this.child,
+  });
+
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
 
   // These are shortcuts are shared between most platforms except macOS for it
-  // uses different modifier keys as the line/word modifer.
+  // uses different modifier keys as the line/word modifier.
   static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     for (final bool pressShift in const <bool>[true, false])
@@ -205,6 +202,12 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
     const SingleActivator(LogicalKeyboardKey.keyV, control: true): const PasteTextIntent(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyA, control: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, control: true): const UndoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, control: true): const RedoTextIntent(SelectionChangedCause.keyboard),
+    // These keys should go to the IME when a field is focused, not to other
+    // Shortcuts.
+    const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
   };
 
   // The following key combinations have no effect on text editing on this
@@ -215,6 +218,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
+  //   * Meta + shift? + Z
   //   * Meta + shift? + arrow down
   //   * Meta + shift? + arrow left
   //   * Meta + shift? + arrow right
@@ -226,24 +230,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   static final Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
 
   static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
-
-  // The following key combinations have no effect on text editing on this
-  // platform:
-  //   * End
-  //   * Home
-  //   * Meta + X
-  //   * Meta + C
-  //   * Meta + V
-  //   * Meta + A
-  //   * Meta + shift? + arrow down
-  //   * Meta + shift? + arrow left
-  //   * Meta + shift? + arrow right
-  //   * Meta + shift? + arrow up
-  //   * Shift + end
-  //   * Shift + home
-  //   * Meta + shift? + delete
-  //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _commonShortcuts;
 
   static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
@@ -259,6 +245,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + C
     //   * Meta + V
     //   * Meta + A
+    //   * Meta + shift? + Z
     //   * Meta + shift? + arrow down
     //   * Meta + shift? + arrow left
     //   * Meta + shift? + arrow right
@@ -307,25 +294,46 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: true),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.keyT, control: true): const TransposeCharactersIntent(),
+
+    const SingleActivator(LogicalKeyboardKey.home): const ScrollToDocumentBoundaryIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.end): const ScrollToDocumentBoundaryIntent(forward: true),
+    const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
     const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
     const SingleActivator(LogicalKeyboardKey.keyV, meta: true): const PasteTextIntent(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): const UndoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, meta: true): const RedoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyE, control: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyA, control: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyF, control: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyB, control: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyN, control: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.keyP, control: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    // These keys should go to the IME when a field is focused, not to other
+    // Shortcuts.
+    const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * End
     //   * Home
     //   * Control + shift? + end
     //   * Control + shift? + home
+    //   * Control + shift? + Z
   };
+
+  // There is no complete documentation of iOS shortcuts. Use mac shortcuts for
+  // now.
+  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
@@ -341,10 +349,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + backspace
   static final Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
-    const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true, continuesAtWrap: true),
+    const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true, continuesAtWrap: true),
+    const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, continuesAtWrap: true),
+    const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, continuesAtWrap: true),
     const SingleActivator(LogicalKeyboardKey.home, control: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.end, control: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true, control: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
@@ -353,7 +361,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
   // Web handles its text selection natively and doesn't use any of these
   // shortcuts in Flutter.
-  static final Map<ShortcutActivator, Intent> _webShortcuts = <ShortcutActivator, Intent>{
+  static final Map<ShortcutActivator, Intent> _webDisablingTextShortcuts = <ShortcutActivator, Intent>{
     for (final bool pressShift in const <bool>[true, false])
       ...<SingleActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
@@ -400,6 +408,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     const SingleActivator(LogicalKeyboardKey.end, control: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.home, control: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.enter): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.keyX, control: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): const DoNothingAndStopPropagationTextIntent(),
@@ -411,10 +420,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
-    if (kIsWeb) {
-      return _webShortcuts;
-    }
-
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return _androidShortcuts;
@@ -429,5 +434,30 @@ class DefaultTextEditingShortcuts extends Shortcuts {
       case TargetPlatform.windows:
         return _windowsShortcuts;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget result = child;
+    if (kIsWeb) {
+      // On the web, these shortcuts make sure of the following:
+      //
+      // 1. Shortcuts fired when an EditableText is focused are ignored and
+      //    forwarded to the browser by the EditableText's Actions, because it
+      //    maps DoNothingAndStopPropagationTextIntent to DoNothingAction.
+      // 2. Shortcuts fired when no EditableText is focused will still trigger
+      //    _shortcuts assuming DoNothingAndStopPropagationTextIntent is
+      //    unhandled elsewhere.
+      result = Shortcuts(
+        debugLabel: '<Web Disabling Text Editing Shortcuts>',
+        shortcuts: _webDisablingTextShortcuts,
+        child: result
+      );
+    }
+    return Shortcuts(
+      debugLabel: '<Default Text Editing Shortcuts>',
+      shortcuts: _shortcuts,
+      child: result
+    );
   }
 }

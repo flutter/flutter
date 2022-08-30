@@ -22,12 +22,11 @@ const String _communityEditionId = 'IdeaIC';
 
 /// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title, this.installPath, {
+  IntelliJValidator(super.title, this.installPath, {
     required FileSystem fileSystem,
     required UserMessages userMessages,
   }) : _fileSystem = fileSystem,
-       _userMessages = userMessages,
-       super(title);
+       _userMessages = userMessages;
 
   final String installPath;
   final FileSystem _fileSystem;

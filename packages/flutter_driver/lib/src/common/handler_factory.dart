@@ -185,11 +185,11 @@ mixin CommandHandlerFactory {
   Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
 
   Future<LayerTree> _getLayerTree(Command command) async {
-    return LayerTree(RendererBinding.instance?.renderView.debugLayer?.toStringDeep());
+    return LayerTree(RendererBinding.instance.renderView.debugLayer?.toStringDeep());
   }
 
   Future<RenderTree> _getRenderTree(Command command) async {
-    return RenderTree(RendererBinding.instance?.renderView.toStringDeep());
+    return RenderTree(RendererBinding.instance.renderView.toStringDeep());
   }
 
   Future<Result> _enterText(Command command) async {
@@ -260,8 +260,9 @@ mixin CommandHandlerFactory {
     'This feature was deprecated after v1.9.3.'
   )
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
-    if (SchedulerBinding.instance!.transientCallbackCount != 0)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
+    if (SchedulerBinding.instance.transientCallbackCount != 0) {
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
     return Result.empty;
   }
 
@@ -290,8 +291,8 @@ mixin CommandHandlerFactory {
   )
   Future<Result> _waitUntilNoPendingFrame(Command command) async {
     await _waitUntilFrame(() {
-      return SchedulerBinding.instance!.transientCallbackCount == 0
-          && !SchedulerBinding.instance!.hasScheduledFrame;
+      return SchedulerBinding.instance.transientCallbackCount == 0
+          && !SchedulerBinding.instance.hasScheduledFrame;
     });
     return Result.empty;
   }
@@ -310,8 +311,9 @@ mixin CommandHandlerFactory {
       node = renderObject.debugSemantics;
       renderObject = renderObject.parent as RenderObject?;
     }
-    if (node == null)
+    if (node == null) {
       throw StateError('No semantics data found');
+    }
     return GetSemanticsIdResult(node.id);
   }
 
@@ -361,23 +363,23 @@ mixin CommandHandlerFactory {
     )));
   }
 
-  Future<Result> _scroll(Command command, WidgetController _prober, CreateFinderFactory finderFactory) async {
+  Future<Result> _scroll(Command command, WidgetController prober, CreateFinderFactory finderFactory) async {
     final Scroll scrollCommand = command as Scroll;
     final Finder target = await waitForElement(finderFactory.createFinder(scrollCommand.finder));
     final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
     final Offset delta = Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
-    final Offset startLocation = _prober.getCenter(target);
+    final Offset startLocation = prober.getCenter(target);
     Offset currentLocation = startLocation;
     final TestPointer pointer = TestPointer();
-    _prober.binding.handlePointerEvent(pointer.down(startLocation));
+    prober.binding.handlePointerEvent(pointer.down(startLocation));
     await Future<void>.value(); // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
-      _prober.binding.handlePointerEvent(pointer.move(currentLocation));
+      prober.binding.handlePointerEvent(pointer.move(currentLocation));
       await Future<void>.delayed(pause);
     }
-    _prober.binding.handlePointerEvent(pointer.up());
+    prober.binding.handlePointerEvent(pointer.up());
 
     return Result.empty;
   }
@@ -413,7 +415,7 @@ mixin CommandHandlerFactory {
     }
 
     if (text == null) {
-      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+      throw UnsupportedError('Type ${widget.runtimeType} is currently not supported by getText');
     }
 
     return GetTextResult(text);
@@ -430,17 +432,17 @@ mixin CommandHandlerFactory {
   }
 
   SemanticsHandle? _semantics;
-  bool get _semanticsIsEnabled => RendererBinding.instance!.pipelineOwner.semanticsOwner != null;
+  bool get _semanticsIsEnabled => RendererBinding.instance.pipelineOwner.semanticsOwner != null;
 
   Future<SetSemanticsResult> _setSemantics(Command command) async {
     final SetSemantics setSemanticsCommand = command as SetSemantics;
     final bool semanticsWasEnabled = _semanticsIsEnabled;
     if (setSemanticsCommand.enabled && _semantics == null) {
-      _semantics = RendererBinding.instance!.pipelineOwner.ensureSemantics();
+      _semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
       if (!semanticsWasEnabled) {
         // wait for the first frame where semantics is enabled.
         final Completer<void> completer = Completer<void>();
-        SchedulerBinding.instance!.addPostFrameCallback((Duration d) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration d) {
           completer.complete();
         });
         await completer.future;
@@ -458,32 +460,36 @@ mixin CommandHandlerFactory {
     'This feature was deprecated after v1.9.3.'
   )
   Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
-    await WidgetsBinding.instance!.waitUntilFirstFrameRasterized;
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     return Result.empty;
   }
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> waitForElement(Finder finder) async {
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
+    if (_frameSync) {
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     await _waitUntilFrame(() => finder.evaluate().isNotEmpty);
 
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
+    if (_frameSync) {
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     return finder;
   }
 
   /// Runs `finder` repeatedly until it finds zero [Element]s.
   Future<Finder> waitForAbsentElement(Finder finder) async {
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
+    if (_frameSync) {
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     await _waitUntilFrame(() => finder.evaluate().isEmpty);
 
-    if (_frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance!.transientCallbackCount == 0);
+    if (_frameSync) {
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     return finder;
   }
@@ -492,7 +498,7 @@ mixin CommandHandlerFactory {
   Future<void> _waitUntilFrame(bool Function() condition, [ Completer<void>? completer ]) {
     completer ??= Completer<void>();
     if (!condition()) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         _waitUntilFrame(condition, completer);
       });
     } else {

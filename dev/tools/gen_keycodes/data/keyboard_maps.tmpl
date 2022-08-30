@@ -9,7 +9,9 @@
 // Edit the template dev/tools/gen_keycodes/data/keyboard_maps.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
-import 'keyboard_key.dart';
+import 'keyboard_key.g.dart';
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
 /// Maps Android-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{

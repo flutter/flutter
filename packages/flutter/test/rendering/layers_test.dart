@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
     final RenderOpacity root = RenderOpacity(
@@ -164,7 +166,31 @@ void main() {
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
   });
 
-  test('leader layers are always dirty when connected to follower layer', () {
+  test('switching layer link of an attached leader layer should not crash', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    leaderLayer.attach(view);
+    final LayerLink link2 = LayerLink();
+    leaderLayer.link = link2;
+    // This should not crash.
+    leaderLayer.detach();
+    expect(leaderLayer.link, link2);
+  });
+
+  test('layer link attach/detach order should not crash app.', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
+    final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    leaderLayer1.attach(view);
+    leaderLayer2.attach(view);
+    leaderLayer2.detach();
+    leaderLayer1.detach();
+    expect(link.leader, isNull);
+  });
+
+  test('leader layers not dirty when connected to follower layer', () {
     final ContainerLayer root = ContainerLayer()..attach(Object());
 
     final LayerLink link = LayerLink();
@@ -178,7 +204,7 @@ void main() {
     followerLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     followerLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
   });
 
   test('leader layers are not dirty when all followers disconnects', () {
@@ -192,30 +218,60 @@ void main() {
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
-    // Connecting a follower requires adding to scene.
+    // Connecting a follower does not require adding to scene
     final FollowerLayer follower1 = FollowerLayer(link: link);
     root.append(follower1);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
     final FollowerLayer follower2 = FollowerLayer(link: link);
     root.append(follower2);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
-    // Disconnecting one follower, still needs add to scene.
+    // Disconnecting one follower, still does not needs add to scene.
     follower2.remove();
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
     // Disconnecting all followers goes back to not requiring add to scene.
     follower1.remove();
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+  });
+
+  test('LeaderLayer.applyTransform can be called after retained rendering', () {
+    void expectTransform(RenderObject leader) {
+      final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
+      final Matrix4 expected = Matrix4.identity()
+        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final Matrix4 transformed = Matrix4.identity();
+      leaderLayer.applyTransform(null, transformed);
+      expect(transformed, expected);
+    }
+
+    final LayerLink link = LayerLink();
+    late RenderLeaderLayer leader;
+    final RenderRepaintBoundary root = RenderRepaintBoundary(
+      child:RenderRepaintBoundary(
+        child: leader = RenderLeaderLayer(link: link),
+      ),
+    );
+    layout(root, phase: EnginePhase.composite);
+
+    expectTransform(leader);
+
+    // Causes a repaint, but the LeaderLayer of RenderLeaderLayer will be added
+    // as retained and LeaderLayer.addChildrenToScene will not be called.
+    root.markNeedsPaint();
+    pumpFrame(phase: EnginePhase.composite);
+
+    // The LeaderLayer.applyTransform call shouldn't crash.
+    expectTransform(leader);
   });
 
   test('depthFirstIterateChildren', () {
@@ -277,7 +333,7 @@ void main() {
     expect(layer.debugSubtreeNeedsAddToScene, true);
   }
 
-  List<String> _getDebugInfo(Layer layer) {
+  List<String> getDebugInfo(Layer layer) {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     layer.debugFillProperties(builder);
     return builder.properties
@@ -286,27 +342,35 @@ void main() {
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipRectLayer()), contains('clipBehavior: Clip.hardEdge'));
+    expect(getDebugInfo(ClipRectLayer()), contains('clipBehavior: Clip.hardEdge'));
     expect(
-      _getDebugInfo(ClipRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      getDebugInfo(ClipRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
     );
   });
 
   test('ClipRRectLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipRRectLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(getDebugInfo(ClipRRectLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
-      _getDebugInfo(ClipRRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      getDebugInfo(ClipRRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
     );
   });
 
   test('ClipPathLayer prints clipBehavior in debug info', () {
-    expect(_getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
-      _getDebugInfo(ClipPathLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      getDebugInfo(ClipPathLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
       contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
     );
+  });
+
+  test('BackdropFilterLayer prints filter and blendMode in debug info', () {
+    final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
+    final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
+    final List<String> info = getDebugInfo(layer);
+    expect(info, contains(isBrowser ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)' : 'filter: ImageFilter.blur(1.0, 1.0, repeated)'));
+    expect(info, contains('blendMode: clear'));
   });
 
   test('PictureLayer prints picture, raster cache hints in debug info', () {
@@ -318,7 +382,7 @@ void main() {
     layer.picture = picture;
     layer.isComplexHint = true;
     layer.willChangeHint = false;
-    final List<String> info = _getDebugInfo(layer);
+    final List<String> info = getDebugInfo(layer);
     expect(info, contains('picture: ${describeIdentity(picture)}'));
     expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
     expect(info, contains('raster cache hints: isComplex = true, willChange = false'));
@@ -326,11 +390,11 @@ void main() {
 
   test('Layer prints engineLayer if it is not null in debug info', () {
     final ConcreteLayer layer = ConcreteLayer();
-    List<String> info = _getDebugInfo(layer);
+    List<String> info = getDebugInfo(layer);
     expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
 
     layer.engineLayer = FakeEngineLayer();
-    info = _getDebugInfo(layer);
+    info = getDebugInfo(layer);
     expect(info, contains('engine layer: ${describeIdentity(layer.engineLayer)}'));
   });
 
@@ -652,6 +716,273 @@ void main() {
     layer.addToScene(builder);
     expect(layer.engineLayer, null);
   });
+<<<<<<< HEAD
+=======
+
+  test('Layers describe clip bounds', () {
+    ContainerLayer layer = ContainerLayer();
+    expect(layer.describeClipBounds(), null);
+
+    const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
+    final RRect rbounds = RRect.fromRectXY(bounds, 2, 2);
+    layer = ClipRectLayer(clipRect: bounds);
+    expect(layer.describeClipBounds(), bounds);
+
+    layer = ClipRRectLayer(clipRRect: rbounds);
+    expect(layer.describeClipBounds(), rbounds.outerRect);
+
+    layer = ClipPathLayer(clipPath: Path()..addRect(bounds));
+    expect(layer.describeClipBounds(), bounds);
+  });
+
+  test('Subtree has composition callbacks', () {
+    final ContainerLayer root = ContainerLayer();
+    expect(root.subtreeHasCompositionCallbacks, false);
+
+    final List<VoidCallback> cancellationCallbacks = <VoidCallback>[];
+
+    cancellationCallbacks.add(root.addCompositionCallback((_) {}));
+    expect(root.subtreeHasCompositionCallbacks, true);
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, false);
+    cancellationCallbacks.add(b1.addCompositionCallback((_) {}));
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, true);
+
+    cancellationCallbacks.removeAt(0)();
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, true);
+
+    cancellationCallbacks.removeAt(0)();
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, false);
+  });
+
+  test('Subtree has composition callbacks - removeChild', () {
+    final ContainerLayer root = ContainerLayer();
+    expect(root.subtreeHasCompositionCallbacks, false);
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    expect(b1.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+
+    b1.addCompositionCallback((_) { });
+
+    expect(b1.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+
+    b1.remove();
+
+    expect(b1.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+  });
+
+  test('No callback if removed', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    // Add and immediately remove the callback.
+    b1.addCompositionCallback((Layer layer) {
+      fail('Should not have called back');
+    })();
+
+    root.buildScene(SceneBuilder()).dispose();
+  });
+
+  test('Observe layer tree composition - not retained', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(SceneBuilder()).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - retained', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    // Actually build the retained layer so that the engine sees it as real and
+    // reusable.
+    SceneBuilder builder = SceneBuilder();
+    b1.engineLayer = builder.pushOffset(0, 0);
+    builder.build().dispose();
+    builder = SceneBuilder();
+
+    // Force the layer to appear clean and have an engine layer for retained
+    // rendering.
+    expect(b1.engineLayer, isNotNull);
+    b1.debugMarkClean();
+    expect(b1.debugSubtreeNeedsAddToScene, false);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(builder).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - asserts on mutation', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      expect(() => layer.remove(), throwsAssertionError);
+      expect(() => layer.dispose(), throwsAssertionError);
+      expect(() => layer.markNeedsAddToScene(), throwsAssertionError);
+      expect(() => layer.debugMarkClean(), throwsAssertionError);
+      expect(() => layer.updateSubtreeNeedsAddToScene(), throwsAssertionError);
+      expect(() => layer.dropChild(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.adoptChild(ContainerLayer()), throwsAssertionError);
+      expect(() => (layer as ContainerLayer).append(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.engineLayer = null, throwsAssertionError);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(SceneBuilder()).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - detach triggers callback', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    root.attach(Object());
+    expect(compositedB1, false);
+    root.detach();
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - observer count correctly maintained', () {
+    final ContainerLayer root = ContainerLayer();
+    final ContainerLayer a1 = ContainerLayer();
+    root.append(a1);
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+
+    final VoidCallback remover1 = a1.addCompositionCallback((_) { });
+    final VoidCallback remover2 = a1.addCompositionCallback((_) { });
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+
+    remover1();
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+
+    remover2();
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+  });
+
+  test('Double removing a observe callback throws', () {
+    final ContainerLayer root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) { });
+    callback();
+
+    expect(() => callback(), throwsAssertionError);
+  });
+
+  test('Removing an observe callback on a disposed layer does not throw', () {
+    final ContainerLayer root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) { });
+    root.dispose();
+    expect(() => callback(), returnsNormally);
+  });
+>>>>>>> ffccd96b62ee8cec7740dab303538c5fc26ac543
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {
@@ -692,27 +1023,28 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
   }
 
   bool pushedOpacity = false;
-  @override
-  OpacityEngineLayer pushOpacity(int alpha, {Offset? offset = Offset.zero, OpacityEngineLayer? oldLayer}) {
-    pushedOpacity = true;
-    return FakeOpacityEngineLayer();
-  }
-
   bool pushedOffset = false;
-  @override
-  OffsetEngineLayer pushOffset(double x, double y, {OffsetEngineLayer? oldLayer}) {
-    pushedOffset = true;
-    return FakeOffsetEngineLayer();
-  }
-
   bool addedPicture = false;
-  @override
-  void addPicture(Offset offset, Picture picture, {bool isComplexHint = false, bool willChangeHint = false}) {
-    addedPicture = true;
-  }
 
   @override
-  void pop() {}
+  dynamic noSuchMethod(Invocation invocation) {
+    // Use noSuchMethod forwarding instead of override these methods to make it easier
+    // for these methods to add new optional arguments in the future.
+    switch (invocation.memberName) {
+      case #pushOpacity:
+        pushedOpacity = true;
+        return FakeOpacityEngineLayer();
+      case #pushOffset:
+        pushedOffset = true;
+        return FakeOffsetEngineLayer();
+      case #addPicture:
+        addedPicture = true;
+        return;
+      case #pop:
+        return;
+    }
+    super.noSuchMethod(invocation);
+  }
 }
 
 class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}

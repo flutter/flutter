@@ -188,6 +188,7 @@ void main() {
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
+        '-8',
         '-av',
         '--delete',
         'build/ios/Release-iphoneos/My Super Awesome App.app',
@@ -208,7 +209,7 @@ void main() {
           const <String>[
             '--enable-dart-profiling',
             '--disable-service-auth-codes',
-          ].join(' ')
+          ].join(' '),
         ])
       );
 
@@ -264,7 +265,7 @@ void main() {
           const <String>[
             '--enable-dart-profiling',
             '--disable-service-auth-codes',
-          ].join(' ')
+          ].join(' '),
         ])
       );
 

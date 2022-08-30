@@ -239,7 +239,7 @@ Future<void> main() async {
       // Add the new plugins we just made.
       pubspecContent = pubspecContent.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  url_launcher:\n  url_launcher_macos:\n',
+        '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  url_launcher: 6.0.16\n  url_launcher_macos:\n',
       );
       objcPubspec.writeAsStringSync(pubspecContent, flush: true);
 
@@ -248,7 +248,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
           // TODO(jmagman): Make Objective-C applications handle Swift libraries https://github.com/flutter/flutter/issues/16049
           canFail: true
@@ -272,7 +272,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -305,7 +305,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -326,7 +326,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -390,7 +390,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });

@@ -112,13 +112,13 @@ void main() {
       // When updating this test, try to pick shard numbers that ensure we're checking
       // that unequal test distributions don't miss tests.
       ProcessResult result = await runScript(
-        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '1_3'},
+        <String, String>{'SHARD': 'test_harness_tests', 'SUBSHARD': '1_3'},
       );
       expectExitCode(result, 0);
       expect(result.stdout, contains('Selecting subshard 1 of 3 (range 1-3 of 8)'));
 
       result = await runScript(
-        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '3_3'},
+        <String, String>{'SHARD': 'test_harness_tests', 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
       expect(result.stdout, contains('Selecting subshard 3 of 3 (range 7-8 of 8)'));
@@ -126,7 +126,7 @@ void main() {
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {
       final ProcessResult result = await runScript(
-        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '100_99'},
+        <String, String>{'SHARD': 'test_harness_tests', 'SUBSHARD': '100_99'},
       );
       expectExitCode(result, 1);
       expect(result.stdout, contains('Invalid subshard name'));

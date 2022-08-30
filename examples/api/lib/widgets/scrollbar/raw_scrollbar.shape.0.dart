@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +33,13 @@ class MyStatelessWidget extends StatelessWidget {
             side: BorderSide(color: Colors.brown, width: 3.0)),
         thickness: 15.0,
         thumbColor: Colors.blue,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: ListView(
+          // On mobile platforms, setting primary to true is not required, as
+          // the PrimaryScrollController automatically attaches to vertical
+          // ScrollPositions. On desktop platforms however, using the
+          // PrimaryScrollController requires ScrollView.primary be set.
+          primary: true,
           physics: const BouncingScrollPhysics(),
           children: List<Text>.generate(
               100, (int index) => Text((index * index).toString())),

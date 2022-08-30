@@ -27,41 +27,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
-
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final FlutterView fakeFlutterView = FlutterView(
-  id: 'a',
-  uiIsolate: fakeUnpausedIsolate,
-);
-
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
-  method: kListViewsMethod,
-  jsonResponse: <String, Object>{
-    'views': <Object>[
-      fakeFlutterView.toJson(),
-    ],
-  },
-);
 
 void main() {
   group('validateReloadReport', () {
@@ -465,7 +431,7 @@ void main() {
         final List<FlutterDevice> devices = <FlutterDevice>[
           fakeFlutterDevice,
         ];
-        fakeFlutterDevice.updateDevFSReportCallback = () async => throw 'updateDevFS failed';
+        fakeFlutterDevice.updateDevFSReportCallback = () async => throw Exception('updateDevFS failed');
 
         final HotRunner runner = HotRunner(
           devices,
@@ -474,7 +440,7 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(fullRestart: true), throwsA('updateDevFS failed'));
+        await expectLater(runner.restart(fullRestart: true), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -499,7 +465,7 @@ void main() {
         final List<FlutterDevice> devices = <FlutterDevice>[
           fakeFlutterDevice,
         ];
-        fakeFlutterDevice.updateDevFSReportCallback = () async => throw 'updateDevFS failed';
+        fakeFlutterDevice.updateDevFSReportCallback = () async => throw Exception('updateDevFS failed');
 
         final HotRunner runner = HotRunner(
           devices,
@@ -508,7 +474,7 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(), throwsA('updateDevFS failed'));
+        await expectLater(runner.restart(), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -548,7 +514,7 @@ void main() {
       final int exitCode = await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).attach();
+      ).attach(needsFullRestart: false);
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => TestHotRunnerConfig(),
@@ -709,6 +675,7 @@ class TestFlutterDevice extends FlutterDevice {
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     bool ipv6 = false,
     int hostVmServicePort,
     int ddsPort,

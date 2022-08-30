@@ -7,9 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -150,7 +148,7 @@ abstract class ScrollActivity {
 /// activity to restore the view.
 class IdleScrollActivity extends ScrollActivity {
   /// Creates a scroll activity that does nothing.
-  IdleScrollActivity(ScrollActivityDelegate delegate) : super(delegate);
+  IdleScrollActivity(super.delegate);
 
   @override
   void applyNewDimensions() {
@@ -382,8 +380,9 @@ class ScrollDragController implements Drag {
     if (offset == 0.0) {
       return;
     }
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       offset = -offset;
+    }
     delegate.applyUserOffset(offset);
   }
 
@@ -394,8 +393,9 @@ class ScrollDragController implements Drag {
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
     double velocity = -details.primaryVelocity!;
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       velocity = -velocity;
+    }
     _lastDetails = details;
 
     if (_retainMomentum) {
@@ -444,10 +444,9 @@ class DragScrollActivity extends ScrollActivity {
   /// Creates an activity for when the user drags their finger across the
   /// screen.
   DragScrollActivity(
-    ScrollActivityDelegate delegate,
+    super.delegate,
     ScrollDragController controller,
-  ) : _controller = controller,
-      super(delegate);
+  ) : _controller = controller;
 
   ScrollDragController? _controller;
 
@@ -524,10 +523,10 @@ class BallisticScrollActivity extends ScrollActivity {
   ///
   /// The [delegate], [simulation], and [vsync] arguments must not be null.
   BallisticScrollActivity(
-    ScrollActivityDelegate delegate,
+    super.delegate,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(delegate) {
+  ) {
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
       vsync: vsync,
@@ -550,8 +549,9 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _tick() {
-    if (!applyMoveTo(_controller.value))
+    if (!applyMoveTo(_controller.value)) {
       delegate.goIdle();
+    }
   }
 
   /// Move the position to the given location.
@@ -611,7 +611,7 @@ class DrivenScrollActivity extends ScrollActivity {
   ///
   /// All of the parameters must be non-null.
   DrivenScrollActivity(
-    ScrollActivityDelegate delegate, {
+    super.delegate, {
     required double from,
     required double to,
     required Duration duration,
@@ -621,8 +621,7 @@ class DrivenScrollActivity extends ScrollActivity {
        assert(to != null),
        assert(duration != null),
        assert(duration > Duration.zero),
-       assert(curve != null),
-       super(delegate) {
+       assert(curve != null) {
     _completer = Completer<void>();
     _controller = AnimationController.unbounded(
       value: from,
@@ -645,8 +644,9 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (delegate.setPixels(_controller.value) != 0.0)
+    if (delegate.setPixels(_controller.value) != 0.0) {
       delegate.goIdle();
+    }
   }
 
   void _end() {

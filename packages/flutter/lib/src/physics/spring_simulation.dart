@@ -7,8 +7,9 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
-import 'tolerance.dart';
 import 'utils.dart';
+
+export 'tolerance.dart' show Tolerance;
 
 /// Structure that describes a spring's constants.
 ///
@@ -48,7 +49,7 @@ class SpringDescription {
   /// The damping coefficient (c).
   ///
   /// Do not confuse the damping _coefficient_ (c) with the damping _ratio_ (ζ).
-  /// To create a [SpringDescription] with a damping ratio, use the [new
+  /// To create a [SpringDescription] with a damping ratio, use the [
   /// SpringDescription.withDampingRatio] constructor.
   ///
   /// The units of the damping coefficient are M/T, where M is the mass unit
@@ -94,17 +95,16 @@ class SpringSimulation extends Simulation {
     double start,
     double end,
     double velocity, {
-    Tolerance tolerance = Tolerance.defaultTolerance,
+    super.tolerance,
   }) : _endPosition = end,
-       _solution = _SpringSolution(spring, start - end, velocity),
-       super(tolerance: tolerance);
+       _solution = _SpringSolution(spring, start - end, velocity);
 
   final double _endPosition;
   final _SpringSolution _solution;
 
   /// The kind of spring being simulated, for debugging purposes.
   ///
-  /// This is derived from the [SpringDescription] provided to the [new
+  /// This is derived from the [SpringDescription] provided to the [
   /// SpringSimulation] constructor.
   SpringType get type => _solution.type;
 
@@ -130,15 +130,15 @@ class ScrollSpringSimulation extends SpringSimulation {
   /// Creates a spring simulation from the provided spring description, start
   /// distance, end distance, and initial velocity.
   ///
-  /// See the [new SpringSimulation] constructor on the superclass for a
+  /// See the [SpringSimulation.new] constructor on the superclass for a
   /// discussion of the arguments' units.
   ScrollSpringSimulation(
-    SpringDescription spring,
-    double start,
-    double end,
-    double velocity, {
-    Tolerance tolerance = Tolerance.defaultTolerance,
-  }) : super(spring, start, end, velocity, tolerance: tolerance);
+    super.spring,
+    super.start,
+    super.end,
+    super.velocity, {
+    super.tolerance,
+  });
 
   @override
   double x(double time) => isDone(time) ? _endPosition : super.x(time);
@@ -160,10 +160,12 @@ abstract class _SpringSolution {
     assert(initialPosition != null);
     assert(initialVelocity != null);
     final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
-    if (cmk == 0.0)
+    if (cmk == 0.0) {
       return _CriticalSolution(spring, initialPosition, initialVelocity);
-    if (cmk > 0.0)
+    }
+    if (cmk > 0.0) {
       return _OverdampedSolution(spring, initialPosition, initialVelocity);
+    }
     return _UnderdampedSolution(spring, initialPosition, initialVelocity);
   }
 

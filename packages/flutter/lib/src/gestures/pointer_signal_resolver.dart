@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'events.dart';
 
+export 'events.dart' show PointerSignalEvent;
+
 /// The callback to register with a [PointerSignalResolver] to express
 /// interest in a pointer signal event.
 typedef PointerSignalResolvedCallback = void Function(PointerSignalEvent event);
@@ -30,7 +32,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///
 /// ```dart
 /// void handleSignalEvent(PointerSignalEvent event) {
-///   GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///   GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent event) {
 ///     // handle the event...
 ///   });
 /// }

@@ -47,17 +47,27 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Version
 //
 
-#ifdef FLUTTER_BUILD_NUMBER
-#define VERSION_AS_NUMBER FLUTTER_BUILD_NUMBER
+#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)
+#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD
 #else
-#define VERSION_AS_NUMBER 1,0,0
+#define VERSION_AS_NUMBER 1,0,0,0
 #endif
 
-#ifdef FLUTTER_BUILD_NAME
-#define VERSION_AS_STRING #FLUTTER_BUILD_NAME
+#if defined(FLUTTER_VERSION)
+#define VERSION_AS_STRING FLUTTER_VERSION
 #else
 #define VERSION_AS_STRING "1.0.0"
 #endif
@@ -79,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "A new Flutter project." "\0"
+            VALUE "CompanyName", "dev.flutter" "\0"
+            VALUE "FileDescription", "manual_tests" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "manual_tests" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2021 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2021 dev.flutter. All rights reserved." "\0"
             VALUE "OriginalFilename", "manual_tests.exe" "\0"
             VALUE "ProductName", "manual_tests" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

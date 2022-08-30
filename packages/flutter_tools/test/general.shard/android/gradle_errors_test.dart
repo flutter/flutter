@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('gradleErrors', () {
@@ -29,58 +31,22 @@ void main() {
           permissionDeniedErrorHandler,
           flavorUndefinedHandler,
           r8FailureHandler,
-          minSdkVersion,
-          transformInputIssue,
-          lockFileDepMissing,
+          minSdkVersionHandler,
+          transformInputIssueHandler,
+          lockFileDepMissingHandler,
           multidexErrorHandler,
           incompatibleKotlinVersionHandler,
+          minCompileSdkVersionHandler,
+          jvm11RequiredHandler,
+          outdatedGradleHandler,
+          sslExceptionHandler,
+          zipExceptionHandler,
         ])
       );
     });
   });
 
   group('network errors', () {
-    testUsingContext('retries and deletes zip if gradle fails to unzip', () async {
-      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
-      const String errorMessage = r'''
-Exception in thread "main" java.util.zip.ZipException: error in opening zip file
-at java.util.zip.ZipFile.open(Native Method)
-at java.util.zip.ZipFile.(ZipFile.java:225)
-at java.util.zip.ZipFile.(ZipFile.java:155)
-at java.util.zip.ZipFile.(ZipFile.java:169)
-at org.gradle.wrapper.Install.unzip(Install.java:214)
-at org.gradle.wrapper.Install.access$600(Install.java:27)
-at org.gradle.wrapper.Install$1.call(Install.java:74)
-at org.gradle.wrapper.Install$1.call(Install.java:48)
-at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
-at org.gradle.wrapper.Install.createDist(Install.java:48)
-at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
-at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-[!] Gradle threw an error while trying to update itself. Retrying the update...
-Exception in thread "main" java.util.zip.ZipException: error in opening zip file
-at java.util.zip.ZipFile.open(Native Method)
-at java.util.zip.ZipFile.(ZipFile.java:225)
-at java.util.zip.ZipFile.(ZipFile.java:155)
-at java.util.zip.ZipFile.(ZipFile.java:169)
-at org.gradle.wrapper.Install.unzip(Install.java:214)
-at org.gradle.wrapper.Install.access$600(Install.java:27)
-at org.gradle.wrapper.Install$1.call(Install.java:74)
-at org.gradle.wrapper.Install$1.call(Install.java:48)
-at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
-at org.gradle.wrapper.Install.createDist(Install.java:48)
-at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
-at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-''';
-
-      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
-      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
-    });
-
     testUsingContext('retries if gradle fails while downloading', () async {
       const String errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
@@ -101,8 +67,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -132,8 +97,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -154,8 +118,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -192,8 +155,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -222,8 +184,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -263,8 +224,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -291,8 +251,7 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -323,8 +282,7 @@ A problem occurred configuring root project 'android'.
 
       expect(testLogger.errorText,
         contains(
-          'Gradle threw an error while downloading artifacts from the network. '
-          'Retrying to download...'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -364,6 +322,11 @@ Execution failed for task ':app:mergeDexDebug'.
       expect(testLogger.statusText,
         contains(
           'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information.'
         )
       );
       expect(testLogger.statusText,
@@ -433,7 +396,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('y')
+      AnsiTerminal: () => _TestPromptTerminal('y'),
     });
 
     testUsingContext('exits if multidex support skipped', () async {
@@ -499,7 +462,7 @@ Execution failed for task ':app:mergeDexDebug'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      AnsiTerminal: () => _TestPromptTerminal('n')
+      AnsiTerminal: () => _TestPromptTerminal('n'),
     });
 
     testUsingContext('exits if multidex support disabled', () async {
@@ -760,13 +723,13 @@ assembleProfile
 
     testWithoutContext('pattern', () {
       expect(
-        minSdkVersion.test(stdoutLine),
+        minSdkVersionHandler.test(stdoutLine),
         isTrue,
       );
     });
 
     testUsingContext('suggestion', () async {
-      await minSdkVersion.handler(
+      await minSdkVersionHandler.handler(
         line: stdoutLine,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
@@ -787,6 +750,8 @@ assembleProfile
           "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
           '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
           '│ Android SDK.                                                                                  │\n'
+          '│ For more information, see:                                                                    │\n'
+          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -802,7 +767,7 @@ assembleProfile
   group('transform input issue', () {
     testWithoutContext('pattern', () {
       expect(
-        transformInputIssue.test(
+        transformInputIssueHandler.test(
           'https://issuetracker.google.com/issues/158753935'
         ),
         isTrue,
@@ -810,7 +775,7 @@ assembleProfile
     });
 
     testUsingContext('suggestion', () async {
-      await transformInputIssue.handler(
+      await transformInputIssueHandler.handler(
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
@@ -840,7 +805,7 @@ assembleProfile
   group('Dependency mismatch', () {
     testWithoutContext('pattern', () {
       expect(
-        lockFileDepMissing.test('''
+        lockFileDepMissingHandler.test('''
 * What went wrong:
 Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 > Could not resolve all artifacts for configuration ':app:debugRuntimeClasspath'.
@@ -852,7 +817,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     });
 
     testUsingContext('suggestion', () async {
-      await lockFileDepMissing.handler(
+      await lockFileDepMissingHandler.handler(
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       );
 
@@ -881,6 +846,10 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         incompatibleKotlinVersionHandler.test('Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.'),
         isTrue,
       );
+      expect(
+        incompatibleKotlinVersionHandler.test("class 'kotlin.Unit' was compiled with an incompatible version of Kotlin."),
+        isTrue,
+      );
     });
 
     testUsingContext('suggestion', () async {
@@ -905,6 +874,329 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       Platform: () => fakePlatform('android'),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Bump Gradle', () {
+    const String errorMessage = '''
+A problem occurred evaluating project ':app'.
+> Failed to apply plugin [id 'kotlin-android']
+   > The current Gradle version 4.10.2 is not compatible with the Kotlin Gradle plugin. Please use Gradle 6.1.1 or newer, or the previous version of the Kotlin plugin.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        outdatedGradleHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await outdatedGradleHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project needs to upgrade Gradle and the Android Gradle plugin.          │\n'
+          '│                                                                                  │\n'
+          '│ To fix this issue, replace the following content:                                │\n'
+          '│ /android/build.gradle:                                                           │\n'
+          "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
+          "│     + classpath 'com.android.tools.build:gradle:7.1.2'                           │\n"
+          '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
+          '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.4-all.zip               │\n'
+          '└──────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Required compileSdkVersion', () {
+    const String errorMessage = '''
+Execution failed for task ':app:checkDebugAarMetadata'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
+   > One or more issues found when checking AAR metadata values:
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window-java:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/2adc32c5b3f24bed763d33fbfb203338/transformed/jetified-window-java-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/88f7e476ef68cecca729426edff955b5/transformed/jetified-window-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        minCompileSdkVersionHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await minCompileSdkVersionHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
+          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   compileSdkVersion 31                                                        │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Java 11 requirement', () {
+    testWithoutContext('pattern', () {
+      expect(
+        jvm11RequiredHandler.test('''
+* What went wrong:
+A problem occurred evaluating project ':flutter'.
+> Failed to apply plugin 'com.android.internal.library'.
+   > Android Gradle plugin requires Java 11 to run. You are currently using Java 1.8.
+     You can try some of the following options:
+       - changing the IDE settings.
+       - changing the JAVA_HOME environment variable.
+       - changing `org.gradle.java.home` in `gradle.properties`.'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await jvm11RequiredHandler.handler();
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] You need Java 11 or higher to build your app with this version of Gradle. │\n'
+          '│                                                                               │\n'
+          '│ To get Java 11, update to the latest version of Android Studio on             │\n'
+          '│ https://developer.android.com/studio/install.                                 │\n'
+          '│                                                                               │\n'
+          '│ To check the Java version used by Flutter, run `flutter doctor -v`.           │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('SSLException', () {
+    testWithoutContext('pattern', () {
+      expect(
+        sslExceptionHandler.test(r'''
+Exception in thread "main" javax.net.ssl.SSLException: Tag mismatch!
+at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:129)
+at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:321)
+at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:264)
+at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:259)
+at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:129)
+at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1155)
+at java.base/sun.security.ssl.SSLSocketImpl.readApplicationRecord(SSLSocketImpl.java:1125)
+at java.base/sun.security.ssl.SSLSocketImpl$AppInputStream.read(SSLSocketImpl.java:823)
+at java.base/java.io.BufferedInputStream.read1(BufferedInputStream.java:290)
+at java.base/java.io.BufferedInputStream.read(BufferedInputStream.java:351)
+at java.base/sun.net.www.MeteredStream.read(MeteredStream.java:134)
+at java.base/java.io.FilterInputStream.read(FilterInputStream.java:133)
+at java.base/sun.net.www.protocol.http.HttpURLConnection$HttpInputStream.read(HttpURLConnection.java:3444)
+at java.base/sun.net.www.protocol.http.HttpURLConnection$HttpInputStream.read(HttpURLConnection.java:3437)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:62)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install$1.call(Install.java:61)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
+        ),
+        isTrue,
+      );
+
+      expect(
+        sslExceptionHandler.test(r'''
+Caused by: javax.crypto.AEADBadTagException: Tag mismatch!
+at java.base/com.sun.crypto.provider.GaloisCounterMode.decryptFinal(GaloisCounterMode.java:580)
+at java.base/com.sun.crypto.provider.CipherCore.finalNoPadding(CipherCore.java:1049)
+at java.base/com.sun.crypto.provider.CipherCore.doFinal(CipherCore.java:985)
+at java.base/com.sun.crypto.provider.AESCipher.engineDoFinal(AESCipher.java:491)
+at java.base/javax.crypto.CipherSpi.bufferCrypt(CipherSpi.java:779)
+at java.base/javax.crypto.CipherSpi.engineDoFinal(CipherSpi.java:730)
+at java.base/javax.crypto.Cipher.doFinal(Cipher.java:2497)
+at java.base/sun.security.ssl.SSLCipher$T12GcmReadCipherGenerator$GcmReadCipher.decrypt(SSLCipher.java:1613)
+at java.base/sun.security.ssl.SSLSocketInputRecord.decodeInputRecord(SSLSocketInputRecord.java:262)
+at java.base/sun.security.ssl.SSLSocketInputRecord.decode(SSLSocketInputRecord.java:190)
+at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      final GradleBuildStatus status = await sslExceptionHandler.handler();
+
+      expect(status, GradleBuildStatus.retry);
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Zip exception', () {
+    testWithoutContext('pattern', () {
+      expect(
+        zipExceptionHandler.test(r'''
+Exception in thread "main" java.util.zip.ZipException: error in opening zip file
+at java.util.zip.ZipFile.open(Native Method)
+at java.util.zip.ZipFile.(ZipFile.java:225)
+at java.util.zip.ZipFile.(ZipFile.java:155)
+at java.util.zip.ZipFile.(ZipFile.java:169)
+at org.gradle.wrapper.Install.unzip(Install.java:214)
+at org.gradle.wrapper.Install.access$600(Install.java:27)
+at org.gradle.wrapper.Install$1.call(Install.java:74)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+       expect(testLogger.statusText, '');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      BotDetector: () => const FakeBotDetector(false),
+    });
+
+    testUsingContext('suggestion if running as bot', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
+
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(
+        testLogger.statusText,
+        contains('Deleting foo/.gradle\n'),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      BotDetector: () => const FakeBotDetector(true),
+    });
+
+    testUsingContext('suggestion if stdin has terminal and user entered y', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(
+        testLogger.statusText,
+        contains('Deleting foo/.gradle\n'),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      AnsiTerminal: () => _TestPromptTerminal('y'),
+      BotDetector: () => const FakeBotDetector(false),
+    });
+
+    testUsingContext('suggestion if stdin has terminal and user entered n', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler();
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(testLogger.statusText, '');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      AnsiTerminal: () => _TestPromptTerminal('n'),
+      BotDetector: () => const FakeBotDetector(false),
     });
   });
 }
@@ -947,4 +1239,7 @@ class _TestPromptTerminal extends AnsiTerminal {
   }) {
     return Future<String>.value(promptResult);
   }
+
+  @override
+  bool get stdinHasTerminal => true;
 }

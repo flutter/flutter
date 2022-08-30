@@ -1519,7 +1519,7 @@ void main() {
   testWidgets('BottomNavigationBar change backgroundColor test', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/19653
 
-    Color _backgroundColor = Colors.red;
+    Color backgroundColor = Colors.red;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1531,7 +1531,7 @@ void main() {
                   child: const Text('green'),
                   onPressed: () {
                     setState(() {
-                      _backgroundColor = Colors.green;
+                      backgroundColor = Colors.green;
                     });
                   },
                 ),
@@ -1541,12 +1541,12 @@ void main() {
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     label: 'Page 1',
-                    backgroundColor: _backgroundColor,
+                    backgroundColor: backgroundColor,
                     icon: const Icon(Icons.dashboard),
                   ),
                   BottomNavigationBarItem(
                     label: 'Page 2',
-                    backgroundColor: _backgroundColor,
+                    backgroundColor: backgroundColor,
                     icon: const Icon(Icons.menu),
                   ),
                 ],
@@ -1560,24 +1560,25 @@ void main() {
     final Finder backgroundMaterial = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byWidgetPredicate((Widget w) {
-        if (w is Material)
+        if (w is Material) {
           return w.type == MaterialType.canvas;
+        }
         return false;
       }),
     );
 
-    expect(_backgroundColor, Colors.red);
+    expect(backgroundColor, Colors.red);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.red);
     await tester.tap(find.text('green'));
     await tester.pumpAndSettle();
-    expect(_backgroundColor, Colors.green);
+    expect(backgroundColor, Colors.green);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
   });
 
   group('BottomNavigationBar shifting backgroundColor with transition', () {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
     Widget runTest() {
-      int _currentIndex = 0;
+      int currentIndex = 0;
       return MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -1585,10 +1586,10 @@ void main() {
               bottomNavigationBar: RepaintBoundary(
                 child: BottomNavigationBar(
                   type: BottomNavigationBarType.shifting,
-                  currentIndex: _currentIndex,
+                  currentIndex: currentIndex,
                   onTap: (int index) {
                     setState(() {
-                      _currentIndex = index;
+                      currentIndex = index;
                     });
                   },
                   items: const <BottomNavigationBarItem>[
@@ -1828,11 +1829,10 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.text('AC')));
-    addTearDown(gesture.removePointer);
 
     await tester.pumpAndSettle();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1851,7 +1851,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   group('feedback', () {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/commands/create_base.dart';
 
 import '../src/common.dart';
@@ -20,5 +18,14 @@ void main() {
     expect(isValidPackageName('fizz93'), true);
 
     expect(isValidPackageName('Foo_bar'), false);
+  });
+
+  test('kWindowsDrivePattern', () {
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'D:\'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'z:\'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'\d:'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'ef:'), isFalse);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'D:'), isTrue);
+    expect(CreateBase.kWindowsDrivePattern.hasMatch(r'c:'), isTrue);
   });
 }

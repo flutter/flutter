@@ -13,7 +13,7 @@ import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
-  const FirstWidget({ Key? key }) : super(key: key);
+  const FirstWidget({ super.key });
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -29,7 +29,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatefulWidget {
-  const SecondWidget({ Key? key }) : super(key: key);
+  const SecondWidget({ super.key });
   @override
   SecondWidgetState createState() => SecondWidgetState();
 }
@@ -50,7 +50,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ Key? key, required this.targetKey, required this.onException }) : super(key: key);
+  const ThirdWidget({ super.key, required this.targetKey, required this.onException });
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -72,7 +72,7 @@ class ThirdWidget extends StatelessWidget {
 }
 
 class OnTapPage extends StatelessWidget {
-  const OnTapPage({ Key? key, required this.id, this.onTap }) : super(key: key);
+  const OnTapPage({ super.key, required this.id, this.onTap });
 
   final String id;
   final VoidCallback? onTap;
@@ -93,8 +93,7 @@ class OnTapPage extends StatelessWidget {
 }
 
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
-  SlideInOutPageRoute({required WidgetBuilder bodyBuilder, RouteSettings? settings}) : super(
-    settings: settings,
+  SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings}) : super(
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
     transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
         return SlideTransition(
@@ -181,6 +180,47 @@ void main() {
     await tester.tap(find.byKey(targetKey));
     expect(exception, isFlutterError);
     expect('$exception', startsWith('Navigator operation requested with a context'));
+  });
+
+  testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
+    final List<Page<void>> pages = <Page<void>>[
+      const ZeroTransitionPage(name: 'Page 1'),
+      const ZeroTransitionPage(name: 'Page 2'),
+    ];
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+
+    final TestObserver observer = TestObserver()
+      ..onPopped = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route?.settings.name,
+            previous: previousRoute?.settings.name,
+            operation: 'pop',
+          ),
+        );
+      };
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          observers: <NavigatorObserver>[observer],
+          onPopPage: (Route<dynamic> route, dynamic result) {
+            pages.removeLast();
+            return route.didPop(result);
+          },
+        ),
+      ),
+    );
+
+    navigator.currentState!.pop();
+    await tester.pump();
+
+    expect(observations.length, 1);
+    expect(observations[0].current, 'Page 2');
+    expect(observations[0].previous, 'Page 1');
   });
 
   testWidgets('Navigator.of rootNavigator finds root Navigator', (WidgetTester tester) async {
@@ -2590,7 +2630,7 @@ void main() {
       List<NavigatorObserver> observers = const <NavigatorObserver>[],
     }) {
       return MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2644,6 +2684,42 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
 
+    testWidgets('can handle duplicate page key if update before transition finishes', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/97363.
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      final List<TestPage> myPages1 = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+      ];
+      final List<TestPage> myPages2 = <TestPage>[
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+
+      bool onPopPage(Route<dynamic> route, dynamic result) => false;
+
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages1, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pump();
+      expect(find.text('initial'), findsOneWidget);
+      // Update multiple times without waiting for pop to finish to leave
+      // multiple popping route entries in route stack with the same page key.
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages2, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pump();
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages1, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pump();
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages2, onPopPage: onPopPage, key: navigator),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('second'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name:'initial'),
@@ -2653,7 +2729,7 @@ void main() {
 
       await tester.pumpWidget(
         MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2683,7 +2759,7 @@ void main() {
       );
     });
 
-    Widget _buildFrame(String action) {
+    Widget buildFrame(String action) {
       const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/' : (BuildContext context) => OnTapPage(
@@ -2703,7 +2779,7 @@ void main() {
       return MaterialApp(routes: routes);
     }
 
-    void _checkException(WidgetTester tester) {
+    void checkException(WidgetTester tester) {
       final dynamic exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
@@ -2719,24 +2795,24 @@ void main() {
     }
 
     testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('push'));
+      await tester.pumpWidget(buildFrame('push'));
       await tester.tap(find.text('push'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('pushReplacement'));
+      await tester.pumpWidget(buildFrame('pushReplacement'));
       await tester.tap(find.text('pushReplacement'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildFrame('pushAndRemoveUntil'));
+      await tester.pumpWidget(buildFrame('pushAndRemoveUntil'));
       await tester.tap(find.text('pushAndRemoveUntil'));
       await tester.pumpAndSettle();
-      _checkException(tester);
+      checkException(tester);
     });
 
     testWidgets('throw if page list is empty', (WidgetTester tester) async {
@@ -2749,7 +2825,7 @@ void main() {
       };
       await tester.pumpWidget(
         MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
@@ -3800,8 +3876,8 @@ class RouteAnnouncementSpy extends Route<void> {
     this.onDidChangePrevious,
     this.onDidChangeNext,
     this.onDidPopNext,
-    RouteSettings? settings,
-  }) : super(settings: settings);
+    super.settings,
+  });
   final AnnouncementCallBack? onDidChangePrevious;
   final AnnouncementCallBack? onDidChangeNext;
   final AnnouncementCallBack? onDidPopNext;
@@ -3873,8 +3949,9 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }) {
     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
     void handleExitingRoute(RouteTransitionRecord? location) {
-      if (!locationToExitingPageRoute.containsKey(location))
+      if (!locationToExitingPageRoute.containsKey(location)) {
         return;
+      }
 
       final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location]!;
       if (exitingPageRoute.isWaitingForExitingDecision) {
@@ -3905,12 +3982,28 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }
 }
 
+class ZeroTransitionPage extends Page<void> {
+  const ZeroTransitionPage({
+    super.key,
+    super.arguments,
+    required String super.name,
+  });
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return NoAnimationPageRoute(
+      settings: this,
+      pageBuilder: (BuildContext context) => Text(name!),
+    );
+  }
+}
+
 class TestPage extends Page<void> {
   const TestPage({
-    LocalKey? key,
-    required String name,
-    Object? arguments,
-  }) : super(key: key, name: name, arguments: arguments);
+    super.key,
+    required String super.name,
+    super.arguments,
+  });
 
   @override
   Route<void> createRoute(BuildContext context) {
@@ -3922,19 +4015,20 @@ class TestPage extends Page<void> {
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
-  NoAnimationPageRoute({required WidgetBuilder pageBuilder})
-      : super(pageBuilder: (BuildContext context, __, ___) {
-          return pageBuilder(context);
-        });
-
-  @override
-  AnimationController createAnimationController() {
-    return super.createAnimationController()..value = 1.0;
-  }
+  NoAnimationPageRoute({
+    super.settings,
+    required WidgetBuilder pageBuilder
+  }) : super(
+         transitionDuration: Duration.zero,
+         reverseTransitionDuration: Duration.zero,
+         pageBuilder: (BuildContext context, __, ___) {
+           return pageBuilder(context);
+         }
+       );
 }
 
 class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key? key}) : super(key: key);
+  const StatefulTestWidget({super.key});
 
   @override
   State<StatefulTestWidget> createState() => StatefulTestState();
@@ -3969,7 +4063,7 @@ class NavigatorObservation {
 }
 
 class BuilderPage extends Page<void> {
-  const BuilderPage({LocalKey? key, String? name, required this.pageBuilder}) : super(key: key, name: name);
+  const BuilderPage({super.key, super.name, required this.pageBuilder});
 
   final RoutePageBuilder pageBuilder;
 

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble, WindowPadding;
 
 import 'package:flutter/foundation.dart';
@@ -12,8 +11,8 @@ import 'basic_types.dart';
 /// Base class for [EdgeInsets] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [new
-/// EdgeInsets.fromLTRB] and its variants, or [new
+/// A property or argument of this type accepts classes created either with [
+/// EdgeInsets.fromLTRB] and its variants, or [
 /// EdgeInsetsDirectional.fromSTEB] and its variants.
 ///
 /// To convert an [EdgeInsetsGeometry] object of indeterminate type into a
@@ -162,12 +161,12 @@ abstract class EdgeInsetsGeometry {
   /// or equal to `min`, and less than or equal to `max`.
   EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
     return _MixedEdgeInsets.fromLRSETB(
-      _left.clamp(min._left, max._left),
-      _right.clamp(min._right, max._right),
-      _start.clamp(min._start, max._start),
-      _end.clamp(min._end, max._end),
-      _top.clamp(min._top, max._top),
-      _bottom.clamp(min._bottom, max._bottom),
+      clampDouble(_left, min._left, max._left),
+      clampDouble(_right, min._right, max._right),
+      clampDouble(_start, min._start, max._start),
+      clampDouble(_end, min._end, max._end),
+      clampDouble(_top, min._top, max._top),
+      clampDouble(_bottom, min._bottom, max._bottom),
     );
   }
 
@@ -218,16 +217,21 @@ abstract class EdgeInsetsGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsGeometry? lerp(EdgeInsetsGeometry? a, EdgeInsetsGeometry? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
-    if (a is EdgeInsets && b is EdgeInsets)
+    }
+    if (a is EdgeInsets && b is EdgeInsets) {
       return EdgeInsets.lerp(a, b, t);
-    if (a is EdgeInsetsDirectional && b is EdgeInsetsDirectional)
+    }
+    if (a is EdgeInsetsDirectional && b is EdgeInsetsDirectional) {
       return EdgeInsetsDirectional.lerp(a, b, t);
+    }
     return _MixedEdgeInsets.fromLRSETB(
       ui.lerpDouble(a._left, b._left, t)!,
       ui.lerpDouble(a._right, b._right, t)!,
@@ -252,10 +256,12 @@ abstract class EdgeInsetsGeometry {
   @override
   String toString() {
     if (_start == 0.0 && _end == 0.0) {
-      if (_left == 0.0 && _right == 0.0 && _top == 0.0 && _bottom == 0.0)
+      if (_left == 0.0 && _right == 0.0 && _top == 0.0 && _bottom == 0.0) {
         return 'EdgeInsets.zero';
-      if (_left == _right && _right == _top && _top == _bottom)
+      }
+      if (_left == _right && _right == _top && _top == _bottom) {
         return 'EdgeInsets.all(${_left.toStringAsFixed(1)})';
+      }
       return 'EdgeInsets(${_left.toStringAsFixed(1)}, '
                         '${_top.toStringAsFixed(1)}, '
                         '${_right.toStringAsFixed(1)}, '
@@ -290,7 +296,7 @@ abstract class EdgeInsetsGeometry {
   }
 
   @override
-  int get hashCode => hashValues(_left, _right, _start, _end, _top, _bottom);
+  int get hashCode => Object.hash(_left, _right, _start, _end, _top, _bottom);
 }
 
 /// An immutable set of offsets in each of the four cardinal directions.
@@ -491,25 +497,27 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   @override
   EdgeInsetsGeometry subtract(EdgeInsetsGeometry other) {
-    if (other is EdgeInsets)
+    if (other is EdgeInsets) {
       return this - other;
+    }
     return super.subtract(other);
   }
 
   @override
   EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
-    if (other is EdgeInsets)
+    if (other is EdgeInsets) {
       return this + other;
+    }
     return super.add(other);
   }
 
   @override
   EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
     return EdgeInsets.fromLTRB(
-      _left.clamp(min._left, max._left),
-      _top.clamp(min._top, max._top),
-      _right.clamp(min._right, max._right),
-      _bottom.clamp(min._bottom, max._bottom),
+      clampDouble(_left, min._left, max._left),
+      clampDouble(_top, min._top, max._top),
+      clampDouble(_right, min._right, max._right),
+      clampDouble(_bottom, min._bottom, max._bottom),
     );
   }
 
@@ -597,12 +605,15 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsets? lerp(EdgeInsets? a, EdgeInsets? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
+    }
     return EdgeInsets.fromLTRB(
       ui.lerpDouble(a.left, b.left, t)!,
       ui.lerpDouble(a.top, b.top, t)!,
@@ -738,15 +749,17 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   @override
   EdgeInsetsGeometry subtract(EdgeInsetsGeometry other) {
-    if (other is EdgeInsetsDirectional)
+    if (other is EdgeInsetsDirectional) {
       return this - other;
+    }
     return super.subtract(other);
   }
 
   @override
   EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
-    if (other is EdgeInsetsDirectional)
+    if (other is EdgeInsetsDirectional) {
       return this + other;
+    }
     return super.add(other);
   }
 
@@ -838,12 +851,15 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsDirectional? lerp(EdgeInsetsDirectional? a, EdgeInsetsDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
+    }
     return EdgeInsetsDirectional.fromSTEB(
       ui.lerpDouble(a.start, b.start, t)!,
       ui.lerpDouble(a.top, b.top, t)!,

@@ -141,6 +141,21 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
 
   @override
   void autofill(TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
 }
 
 class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {

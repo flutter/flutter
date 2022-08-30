@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
 class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
@@ -383,6 +383,29 @@ void main() {
 
     await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('Clip.none is respected by describeApproximateClip', (WidgetTester tester) async {
+    await tester.pumpWidget(Stack(
+      textDirection: TextDirection.ltr,
+      children: const <Widget>[Positioned(left: 1000, right: 2000, child: SizedBox(width: 2000, height: 2000))],
+    ));
+    final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    bool visited = false;
+    renderObject.visitChildren((RenderObject child) {
+      visited = true;
+      expect(renderObject.describeApproximatePaintClip(child), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
+    });
+    expect(visited, true);
+    visited = false;
+    renderObject.clipBehavior = Clip.none;
+    renderObject.visitChildren((RenderObject child) {
+      visited = true;
+      expect(renderObject.describeApproximatePaintClip(child), null);
+    });
+    expect(visited, true);
   });
 
   testWidgets('IndexedStack with null index', (WidgetTester tester) async {

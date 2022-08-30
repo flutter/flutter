@@ -17,11 +17,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
-import 'install_manifest.dart';
 import 'visual_studio.dart';
-
-/// Update the string when non-backwards compatible changes are made to the UWP template.
-const int kCurrentUwpTemplateVersion = 0;
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
@@ -116,6 +112,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 }
 
+<<<<<<< HEAD
 /// Build the Windows UWP project.
 ///
 /// Note that this feature is currently unfinished.
@@ -242,6 +239,8 @@ Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, Str
   }
 }
 
+=======
+>>>>>>> ffccd96b62ee8cec7740dab303538c5fc26ac543
 Future<void> _runCmakeGeneration({
   required String cmakePath,
   required String generator,
@@ -298,11 +297,11 @@ Future<void> _runBuild(
         if (install)
           ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)
-          '--verbose'
+          '--verbose',
       ],
       environment: <String, String>{
         if (globals.logger.isVerbose)
-          'VERBOSE_SCRIPT_LOGGING': 'true'
+          'VERBOSE_SCRIPT_LOGGING': 'true',
       },
       trace: true,
       stdoutErrorMatcher: errorMatcher,
@@ -336,7 +335,59 @@ void _writeGeneratedFlutterConfig(
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, environment);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
+}
+
+// Works around the Visual Studio 17.1.0 CMake bug described in
+// https://github.com/flutter/flutter/issues/97086
+//
+// Rather than attempt to remove all the duplicate entries within the
+// <CustomBuild> element, which would require a more complicated parser, this
+// just fixes the incorrect duplicates to have the correct `$<CONFIG>` value,
+// making the duplication harmless.
+//
+// TODO(stuartmorgan): Remove this workaround either once 17.1.0 is
+// sufficiently old that we no longer need to support it, or when
+// dropping VS 2022 support.
+void _fixBrokenCmakeGeneration(Directory buildDirectory) {
+  final File assembleProject = buildDirectory
+    .childDirectory('flutter')
+    .childFile('flutter_assemble.vcxproj');
+  if (assembleProject.existsSync()) {
+    // E.g.: <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    final RegExp commandRegex = RegExp(
+      r'<Command Condition=.*\(Configuration\)\|\$\(Platform\).==.(Debug|Profile|Release)\|');
+    // E.g.: [...]/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+    final RegExp assembleCallRegex = RegExp(
+      r'^.*/tool_backend\.bat windows[^ ]* (Debug|Profile|Release)');
+    String? lastCommandConditionConfig;
+    final StringBuffer newProjectContents = StringBuffer();
+    // vcxproj files contain a BOM, which readAsLinesSync drops; re-add it.
+    newProjectContents.writeCharCode(unicodeBomCharacterRune);
+    for (final String line in assembleProject.readAsLinesSync()) {
+      final RegExpMatch? commandMatch = commandRegex.firstMatch(line);
+      if (commandMatch != null) {
+        lastCommandConditionConfig = commandMatch.group(1);
+      } else if (lastCommandConditionConfig != null) {
+        final RegExpMatch? assembleCallMatch = assembleCallRegex.firstMatch(line);
+        if (assembleCallMatch != null) {
+          final String callConfig = assembleCallMatch.group(1)!;
+          if (callConfig != lastCommandConditionConfig) {
+            // The config is the end of the line; make sure to replace that one,
+            // in case config-matching strings appear anywhere else in the line
+            // (e.g., the project path).
+            final int badConfigIndex = line.lastIndexOf(assembleCallMatch.group(1)!);
+            final String correctedLine = line.replaceFirst(
+              callConfig, lastCommandConditionConfig, badConfigIndex);
+            newProjectContents.writeln('$correctedLine\r');
+            continue;
+          }
+        }
+      }
+      newProjectContents.writeln('$line\r');
+    }
+    assembleProject.writeAsStringSync(newProjectContents.toString());
+  }
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

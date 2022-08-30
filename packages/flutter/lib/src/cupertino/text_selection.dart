@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -25,7 +26,6 @@ const double _kArrowScreenPadding = 26.0;
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
   const _CupertinoTextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.endpoints,
     required this.globalEditableRegion,
@@ -35,7 +35,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-  }) : super(key: key);
+  });
 
   final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
@@ -52,8 +52,6 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
 }
 
 class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSelectionControlsToolbar> {
-  ClipboardStatusNotifier? _clipboardStatus;
-
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
@@ -63,47 +61,28 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
   @override
   void initState() {
     super.initState();
-    if (widget.handlePaste != null) {
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      _clipboardStatus!.update();
-    }
+    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(_CupertinoTextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.clipboardStatus != widget.clipboardStatus) {
-      if (_clipboardStatus != null) {
-        _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-        _clipboardStatus!.dispose();
-      }
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      if (widget.handlePaste != null) {
-        _clipboardStatus!.update();
-      }
+      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-    // When used in an Overlay, this can be disposed after its creator has
-    // already disposed _clipboardStatus.
-    if (_clipboardStatus != null && !_clipboardStatus!.disposed) {
-      _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-      if (widget.clipboardStatus == null) {
-        _clipboardStatus!.dispose();
-      }
-    }
+    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
   }
 
   @override
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null
-        && _clipboardStatus!.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -113,10 +92,13 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough
     // space at the bottom in this case.
-    final double anchorX = (widget.selectionMidpoint.dx + widget.globalEditableRegion.left).clamp(
+    final double anchorX = clampDouble(widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
+
+    final double topAmountInEditableRegion = widget.endpoints.first.point.dy - widget.textLineHeight;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top;
 
     // The y-coordinate has to be calculated instead of directly quoting
     // selectionMidpoint.dy, since the caller
@@ -124,7 +106,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // going to be facing up or down.
     final Offset anchorAbove = Offset(
       anchorX,
-      widget.endpoints.first.point.dy - widget.textLineHeight + widget.globalEditableRegion.top,
+      anchorTop,
     );
     final Offset anchorBelow = Offset(
       anchorX,
@@ -157,7 +139,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
     if (widget.handlePaste != null
-        && _clipboardStatus!.value == ClipboardStatus.pasteable) {
+        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
@@ -229,15 +211,15 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
       endpoints: endpoints,
       globalEditableRegion: globalEditableRegion,
-      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       selectionMidpoint: selectionMidpoint,
@@ -247,14 +229,8 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     // iOS selection handles do not respond to taps.
-
-    // We want a size that's a vertical line the height of the text plus a 18.0
-    // padding in every direction that will constitute the selection drag area.
-    startGlyphHeight = startGlyphHeight ?? textLineHeight;
-    endGlyphHeight = endGlyphHeight ?? textLineHeight;
-
     final Size desiredSize;
     final Widget handle;
 
@@ -267,14 +243,14 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     // on top of the text selection endpoints.
     switch (type) {
       case TextSelectionHandleType.left:
-        desiredSize = getHandleSize(startGlyphHeight);
+        desiredSize = getHandleSize(textLineHeight);
         handle = SizedBox.fromSize(
           size: desiredSize,
           child: customPaint,
         );
         return handle;
       case TextSelectionHandleType.right:
-        desiredSize = getHandleSize(endGlyphHeight);
+        desiredSize = getHandleSize(textLineHeight);
         handle = SizedBox.fromSize(
           size: desiredSize,
           child: customPaint,
@@ -296,17 +272,14 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
-    startGlyphHeight = startGlyphHeight ?? textLineHeight;
-    endGlyphHeight = endGlyphHeight ?? textLineHeight;
-
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     final Size handleSize;
 
     switch (type) {
       // The circle is at the top for the left handle, and the anchor point is
       // all the way at the bottom of the line.
       case TextSelectionHandleType.left:
-        handleSize = getHandleSize(startGlyphHeight);
+        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height,
@@ -314,7 +287,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       // The right handle is vertically flipped, and the anchor point is near
       // the top of the circle to give slight overlap.
       case TextSelectionHandleType.right:
-        handleSize = getHandleSize(endGlyphHeight);
+        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,

@@ -39,7 +39,7 @@ class ChannelCommand extends FlutterCommand {
     switch (rest.length) {
       case 0:
         await _listChannels(
-          showAll: boolArg('all'),
+          showAll: boolArgDeprecated('all'),
           verbose: globalResults?['verbose'] == true,
         );
         return FlutterCommandResult.success();
@@ -79,6 +79,10 @@ class ChannelCommand extends FlutterCommand {
 
     for (final String line in rawOutput) {
       final List<String> split = line.split('/');
+      if (split.length != 2) {
+        // We don't know how to parse this line, skip it.
+        continue;
+      }
       final String branch = split[1];
       if (split.length > 1) {
         final int index = officialChannels.indexOf(branch);
@@ -123,12 +127,24 @@ class ChannelCommand extends FlutterCommand {
 
   Future<void> _switchChannel(String branchName) async {
     globals.printStatus("Switching to flutter channel '$branchName'...");
-    if (!kOfficialChannels.contains(branchName)) {
+    if (kObsoleteBranches.containsKey(branchName)) {
+      final String alternative = kObsoleteBranches[branchName]!;
+      globals.printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
+    } else if (!kOfficialChannels.contains(branchName)) {
       globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     await _checkout(branchName);
     globals.printStatus("Successfully switched to flutter channel '$branchName'.");
     globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
+  }
+
+  static Future<void> upgradeChannel(FlutterVersion currentVersion) async {
+    final String channel = currentVersion.channel;
+    if (kObsoleteBranches.containsKey(channel)) {
+      final String alternative = kObsoleteBranches[channel]!;
+      globals.printStatus("Transitioning from '$channel' to '$alternative'...");
+      return _checkout(alternative);
+    }
   }
 
   static Future<void> _checkout(String branchName) async {

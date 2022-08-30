@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,18 +15,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		AA1F617779EAA28FB12EC66E /* libPods-Runner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C77CA0BBC4B57129484236F4 /* libPods-Runner.a */; };
-		F7C2268825DCA70C00389C82 /* GalleryUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = F7C2268725DCA70C00389C82 /* GalleryUITests.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		F7C2268A25DCA70C00389C82 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
-			remoteInfo = Runner;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
@@ -60,9 +49,6 @@
 		C77CA0BBC4B57129484236F4 /* libPods-Runner.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Runner.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC01738FBE39EADD5AC4BF42 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		ECF490DDAB8ABCEEFB1780BE /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
-		F7C2268525DCA70C00389C82 /* GalleryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GalleryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F7C2268725DCA70C00389C82 /* GalleryUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GalleryUITests.m; sourceTree = "<group>"; };
-		F7C2268925DCA70C00389C82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,13 +57,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA1F617779EAA28FB12EC66E /* libPods-Runner.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F7C2268225DCA70C00389C82 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,7 +79,6 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
-				F7C2268625DCA70C00389C82 /* GalleryUITests */,
 				97C146EF1CF9000F007C117D /* Products */,
 				CF3B75C9A7D2FA2A4C99F110 /* Frameworks */,
 				E54E8B7296D73DD9B2385312 /* Pods */,
@@ -111,7 +89,6 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* Flutter Gallery.app */,
-				F7C2268525DCA70C00389C82 /* GalleryUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -158,15 +135,6 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		F7C2268625DCA70C00389C82 /* GalleryUITests */ = {
-			isa = PBXGroup;
-			children = (
-				F7C2268725DCA70C00389C82 /* GalleryUITests.m */,
-				F7C2268925DCA70C00389C82 /* Info.plist */,
-			);
-			path = GalleryUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -191,24 +159,6 @@
 			productReference = 97C146EE1CF9000F007C117D /* Flutter Gallery.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F7C2268425DCA70C00389C82 /* GalleryUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F7C2268F25DCA70C00389C82 /* Build configuration list for PBXNativeTarget "GalleryUITests" */;
-			buildPhases = (
-				F7C2268125DCA70C00389C82 /* Sources */,
-				F7C2268225DCA70C00389C82 /* Frameworks */,
-				F7C2268325DCA70C00389C82 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				F7C2268B25DCA70C00389C82 /* PBXTargetDependency */,
-			);
-			name = GalleryUITests;
-			productName = GalleryUITests;
-			productReference = F7C2268525DCA70C00389C82 /* GalleryUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -220,11 +170,6 @@
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
-					};
-					F7C2268425DCA70C00389C82 = {
-						CreatedOnToolsVersion = 12.4;
-						ProvisioningStyle = Automatic;
-						TestTargetID = 97C146ED1CF9000F007C117D;
 					};
 				};
 			};
@@ -242,7 +187,6 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
-				F7C2268425DCA70C00389C82 /* GalleryUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -256,13 +200,6 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F7C2268325DCA70C00389C82 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,7 +250,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -328,23 +265,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F7C2268125DCA70C00389C82 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F7C2268825DCA70C00389C82 /* GalleryUITests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		F7C2268B25DCA70C00389C82 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 97C146ED1CF9000F007C117D /* Runner */;
-			targetProxy = F7C2268A25DCA70C00389C82 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
@@ -407,7 +328,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -475,7 +396,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -524,7 +445,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -558,45 +479,6 @@
 			};
 			name = Release;
 		};
-		F7C2268C25DCA70C00389C82 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = GalleryUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.flutterio.GalleryUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = Runner;
-			};
-			name = Debug;
-		};
-		F7C2268D25DCA70C00389C82 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = GalleryUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.flutterio.GalleryUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = Runner;
-			};
-			name = Release;
-		};
-		F7C2268E25DCA70C00389C82 /* Profile */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = GalleryUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.flutterio.GalleryUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = Runner;
-			};
-			name = Profile;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -616,16 +498,6 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				244B5B83218289A200D656CE /* Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F7C2268F25DCA70C00389C82 /* Build configuration list for PBXNativeTarget "GalleryUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F7C2268C25DCA70C00389C82 /* Debug */,
-				F7C2268D25DCA70C00389C82 /* Release */,
-				F7C2268E25DCA70C00389C82 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

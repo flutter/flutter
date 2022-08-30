@@ -11,6 +11,8 @@ import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Describe transform control test', () {
     final Matrix4 identity = Matrix4.identity();
     final List<String> description = debugDescribeTransform(identity);
@@ -220,7 +222,7 @@ void main() {
     );
     final RenderOpacity root = RenderOpacity(
       opacity: .5,
-      child: blackBox,
+      child: RenderRepaintBoundary(child: blackBox),
     );
     layout(root, phase: EnginePhase.compositingBits);
 
@@ -229,7 +231,8 @@ void main() {
       rootLayer,
       const Rect.fromLTWH(0, 0, 500, 500),
     );
-    root.paint(context, const Offset(40, 40));
+    context.paintChild(root, const Offset(40, 40));
+
     final OpacityLayer opacityLayer = rootLayer.firstChild! as OpacityLayer;
     expect(opacityLayer.offset, const Offset(40, 40));
     debugDisableOpacityLayers = false;

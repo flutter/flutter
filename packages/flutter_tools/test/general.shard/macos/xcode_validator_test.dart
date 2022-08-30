@@ -56,7 +56,7 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Flutter requires a minimum Xcode version of 12.3'));
+      expect(result.messages.last.message, contains('Flutter requires Xcode 13 or higher'));
     });
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
@@ -70,7 +70,7 @@ void main() {
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.hint);
       expect(result.messages.last.message, contains('Flutter recommends a minimum Xcode version of 13'));
-    });
+    }, skip: true); // [intended] Unskip and update when minimum and required check versions diverge.
 
     testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -183,11 +183,12 @@ void main() {
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.installed);
-      expect(result.messages.length, 1);
+      expect(result.messages.length, 2);
       final ValidationMessage firstMessage = result.messages.first;
       expect(firstMessage.type, ValidationMessageType.information);
       expect(firstMessage.message, 'Xcode at /Library/Developer/CommandLineTools');
       expect(result.statusInfo, '1000.0.0');
+      expect(result.messages[1].message, 'Build 13C100');
     });
   });
 }

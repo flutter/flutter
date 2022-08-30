@@ -30,7 +30,7 @@ void main() {
   element.rootAncestorStateOfType(TypeMatcher<targetType>());
   element.ancestorRenderObjectOfType(TypeMatcher<targetType>());
 
-  // Changes made in https://github.com/flutter/flutter/pull/45941
+  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrameReport();
   binding.allowFirstFrameReport();
@@ -521,4 +521,55 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/96115
   Icon icon = Icons.pie_chart_outlined;
+<<<<<<< HEAD
+=======
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  Scrollbar scrollbar = Scrollbar(isAlwaysShown: true);
+  bool nowShowing = scrollbar.isAlwaysShown;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(isAlwaysShown: nowShowing);
+  scrollbarTheme.copyWith(isAlwaysShown: nowShowing);
+  scrollbarTheme.isAlwaysShown;
+  RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
+  nowShowing = rawScrollbar.isAlwaysShown;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  Chip chip = Chip();
+  chip = Chip(useDeleteButtonTooltip: false);
+  chip = Chip(useDeleteButtonTooltip: true);
+  chip = Chip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  chip.useDeleteButtonTooltip;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(useDeleteButtonTooltip: false);
+  inputChip = InputChip(useDeleteButtonTooltip: true);
+  inputChip = InputChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  inputChip.useDeleteButtonTooltip;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(useDeleteButtonTooltip: false);
+  rawChip = RawChip(useDeleteButtonTooltip: true);
+  rawChip = RawChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  rawChip.useDeleteButtonTooltip;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  TextSelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/105291
+  ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
+    primary: Colors.blue,
+    onPrimary: Colors.white,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
+  ButtonStyle textButtonStyle = TextButton.styleFrom(
+    primary: Colors.blue,
+    onSurface: Colors.grey,
+  );
+>>>>>>> ffccd96b62ee8cec7740dab303538c5fc26ac543
 }

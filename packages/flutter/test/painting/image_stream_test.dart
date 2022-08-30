@@ -3,15 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 import 'fake_codec.dart';
+import 'mocks_for_image_cache.dart';
 
 class FakeFrameInfo implements FrameInfo {
   const FakeFrameInfo(this._duration, this._image);
@@ -739,7 +740,7 @@ void main() {
     expect(lastListenerDropped, false);
     final ImageStreamCompleterHandle handle = imageStream.keepAlive();
     expect(lastListenerDropped, false);
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
 
     codecCompleter.complete(mockCodec);
     await tester.idle();
@@ -749,7 +750,7 @@ void main() {
     final FakeFrameInfo frame1 = FakeFrameInfo(Duration.zero, image20x10);
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
     await tester.pump();
     expect(onImageCount, 0);
 
@@ -758,7 +759,7 @@ void main() {
     final FakeFrameInfo frame2 = FakeFrameInfo(Duration.zero, image10x10);
     mockCodec.completeNextFrame(frame2);
     await tester.idle();
-    expect(SchedulerBinding.instance!.transientCallbackCount, 1);
+    expect(SchedulerBinding.instance.transientCallbackCount, 1);
     await tester.pump();
 
     expect(onImageCount, 1);
@@ -768,16 +769,16 @@ void main() {
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
-    expect(SchedulerBinding.instance!.transientCallbackCount, 1);
+    expect(SchedulerBinding.instance.transientCallbackCount, 1);
     await tester.pump();
 
     expect(onImageCount, 1);
 
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
 
     mockCodec.completeNextFrame(frame2);
     await tester.idle();
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Only passive listeners');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Only passive listeners');
     await tester.pump();
 
     expect(onImageCount, 1);
@@ -837,5 +838,38 @@ void main() {
     // receiving chunk events. Streams from the network can keep sending data
     // even after evicting an image from the cache, for example.
     chunkStream.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
+  });
+
+  test('ImageStream, setCompleter before addListener - synchronousCall should be true', () async {
+    final Image image = await createTestImage(width: 100, height: 100);
+    final OneFrameImageStreamCompleter imageStreamCompleter =
+        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(1, image: image)));
+
+    final ImageStream imageStream = ImageStream();
+    imageStream.setCompleter(imageStreamCompleter);
+
+    bool? synchronouslyCalled;
+    imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      synchronouslyCalled = synchronousCall;
+    }));
+
+    expect(synchronouslyCalled, true);
+  });
+
+  test('ImageStream, setCompleter after addListener - synchronousCall should be false', () async {
+    final Image image = await createTestImage(width: 100, height: 100);
+    final OneFrameImageStreamCompleter imageStreamCompleter =
+        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(1, image: image)));
+
+    final ImageStream imageStream = ImageStream();
+
+    bool? synchronouslyCalled;
+    imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      synchronouslyCalled = synchronousCall;
+    }));
+
+    imageStream.setCompleter(imageStreamCompleter);
+
+    expect(synchronouslyCalled, false);
   });
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -60,7 +61,7 @@ import 'icon_theme_data.dart';
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
-///  * [Icons], for the list of available icons for use with this class.
+///  * [Icons], the library of Material Icons available for use with this class.
 ///  * [IconTheme], which provides ambient configuration for icons.
 ///  * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
 class Icon extends StatelessWidget {
@@ -69,12 +70,13 @@ class Icon extends StatelessWidget {
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const Icon(
     this.icon, {
-    Key? key,
+    super.key,
     this.size,
     this.color,
     this.semanticLabel,
     this.textDirection,
-  }) : super(key: key);
+    this.shadows,
+  });
 
   /// The icon to display. The available icons are described in [Icons].
   ///
@@ -150,6 +152,15 @@ class Icon extends StatelessWidget {
   /// specified, either directly using this property or using [Directionality].
   final TextDirection? textDirection;
 
+  /// A list of [Shadow]s that will be painted underneath the icon.
+  ///
+  /// Multiple shadows are supported to replicate lighting from multiple light
+  /// sources.
+  ///
+  /// Shadows must be in the same order for [Icon] to be considered as
+  /// equivalent as order produces differing transparency.
+  final List<Shadow>? shadows;
+
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
@@ -158,6 +169,8 @@ class Icon extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
 
     final double? iconSize = size ?? iconTheme.size;
+
+    final List<Shadow>? iconShadows = shadows ?? iconTheme.shadows;
 
     if (icon == null) {
       return Semantics(
@@ -168,8 +181,9 @@ class Icon extends StatelessWidget {
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
     Color iconColor = color ?? iconTheme.color!;
-    if (iconOpacity != 1.0)
+    if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+    }
 
     Widget iconWidget = RichText(
       overflow: TextOverflow.visible, // Never clip.
@@ -182,6 +196,7 @@ class Icon extends StatelessWidget {
           fontSize: iconSize,
           fontFamily: icon!.fontFamily,
           package: icon!.fontPackage,
+          shadows: iconShadows,
         ),
       ),
     );
@@ -221,5 +236,6 @@ class Icon extends StatelessWidget {
     properties.add(IconDataProperty('icon', icon, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
   }
 }

@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -224,7 +223,7 @@ void main() {
 }
 
 class _TickingWidget extends StatefulWidget {
-  const _TickingWidget({Key? key, this.onTick}) : super(key: key);
+  const _TickingWidget({super.key, this.onTick});
 
   final VoidCallback? onTick;
 
@@ -258,9 +257,7 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 }
 
 class _MultiTickingWidget extends StatefulWidget {
-  const _MultiTickingWidget({Key? key, this.onTick}) : super(key: key);
-
-  final VoidCallback? onTick;
+  const _MultiTickingWidget({super.key});
 
   @override
   State<_MultiTickingWidget> createState() => _MultiTickingWidgetState();
@@ -274,7 +271,6 @@ class _MultiTickingWidgetState extends State<_MultiTickingWidget> with TickerPro
   void initState() {
     super.initState();
     ticker = createTicker((Duration _) {
-      widget.onTick?.call();
     })..start();
   }
 

@@ -1020,14 +1020,13 @@ void main() {
   });
 
   testWidgets('Overlay can set and update clipBehavior', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => Positioned(left: 2000, right: 2500, child: Container()),
             ),
           ],
         ),
@@ -1035,9 +1034,9 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.hardEdge
-    final dynamic renderObject = tester.renderObject(find.byType(Overlay));
+    final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
     // ignore: avoid_dynamic_calls
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect((renderObject as dynamic).clipBehavior, equals(Clip.hardEdge));
 
     for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
@@ -1053,14 +1052,142 @@ void main() {
           ),
         ),
       );
+
       // ignore: avoid_dynamic_calls
-      expect(renderObject.clipBehavior, clip);
+      expect((renderObject as dynamic).clipBehavior, clip);
+      bool visited = false;
+      renderObject.visitChildren((RenderObject child) {
+        visited = true;
+        switch(clip) {
+          case Clip.none:
+            expect(renderObject.describeApproximatePaintClip(child), null);
+            break;
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            expect(
+              renderObject.describeApproximatePaintClip(child),
+              const Rect.fromLTRB(0, 0, 800, 600),
+            );
+            break;
+        }
+      });
+      expect(visited, true);
     }
+  });
+
+  group('OverlayEntry listenable', () {
+    final GlobalKey overlayKey = GlobalKey();
+    final Widget emptyOverlay = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(key: overlayKey),
+    );
+
+    testWidgets('mounted state can be listened', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final List<bool> mountedLog = <bool>[];
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+
+      entry.addListener(() {
+        mountedLog.add(entry.mounted);
+      });
+
+      overlay.insert(entry);
+      expect(mountedLog, isEmpty);
+
+      // Pump a frame. The Overlay entry will be mounted.
+      await tester.pump();
+      expect(mountedLog, <bool>[true]);
+
+      entry.remove();
+      expect(mountedLog, <bool>[true]);
+      await tester.pump();
+      expect(mountedLog, <bool>[true, false]);
+
+      // Insert & remove again.
+      overlay.insert(entry);
+      await tester.pump();
+      entry.remove();
+      await tester.pump();
+
+      expect(mountedLog, <bool>[true, false, true, false]);
+    });
+
+    testWidgets('throw if disposed before removal', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+
+      overlay.insert(entry);
+      Object? error;
+      try {
+        entry.dispose();
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error, isAssertionError);
+    });
+
+    test('dispose works', () {
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+
+      entry.dispose();
+
+      Object? error;
+      try {
+        entry.addListener(() {  });
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isAssertionError);
+    });
+
+    testWidgets('delayed dispose', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final List<bool> mountedLog = <bool>[];
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+      entry.addListener(() {
+        mountedLog.add(entry.mounted);
+      });
+
+      overlay.insert(entry);
+      await tester.pump();
+      expect(mountedLog, <bool>[true]);
+
+      entry.remove();
+      // Call dispose on the entry. The listeners should be notified for one
+      // last time after this.
+      entry.dispose();
+      expect(mountedLog, <bool>[true]);
+      await tester.pump();
+      expect(mountedLog, <bool>[true, false]);
+      expect(tester.takeException(), isNull);
+
+      // The entry is no longer usable.
+      Object? error;
+      try {
+        entry.addListener(() {  });
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isAssertionError);
+    });
   });
 }
 
 class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key? key}) : super(key: key);
+  const StatefulTestWidget({super.key});
 
   @override
   State<StatefulTestWidget> createState() => StatefulTestState();

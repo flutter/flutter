@@ -56,7 +56,7 @@ void main() {
           ],
           'method': 'TextInputClient.updateEditingStateWithDeltas',
         });
-        await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/textinput',
           messageBytes,
               (ByteData? _) {},
@@ -112,6 +112,21 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   @override
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);

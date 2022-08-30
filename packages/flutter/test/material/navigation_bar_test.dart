@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -63,6 +64,31 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
+  testWidgets('NavigationBar can update elevation', (WidgetTester tester) async {
+    const double elevation = 42.0;
+
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          elevation: elevation,
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+
+    expect(_getMaterial(tester).elevation, equals(elevation));
+  });
+
   testWidgets('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
     const double bottomPadding = 40.0;
 
@@ -110,6 +136,161 @@ void main() {
 
     final double expectedHeight = defaultSize + bottomPadding;
     expect(tester.getSize(find.byType(NavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+    const double safeAreaPadding = 40.0;
+    Widget navigationBar() {
+      return NavigationBar(
+        destinations: const <Widget>[
+          NavigationDestination(
+            icon: Icon(Icons.ac_unit),
+            label: 'AC',
+          ),
+          NavigationDestination(
+            key: Key('Center'),
+            icon: Icon(Icons.center_focus_strong),
+            label: 'Center',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.access_alarm),
+            label: 'Alarm',
+          ),
+        ],
+        onDestinationSelected: (int i) {},
+      );
+    }
+
+    await tester.pumpWidget(_buildWidget(navigationBar()));
+    final double defaultWidth = tester.getSize(find.byType(NavigationBar)).width;
+    final Finder defaultCenterItem = find.byKey(const Key('Center'));
+    final Offset center = tester.getCenter(defaultCenterItem);
+    expect(center.dx, defaultWidth / 2);
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(left: safeAreaPadding),
+          ),
+          child: navigationBar(),
+        ),
+      ),
+    );
+
+    // The position of center item of navigation bar should indicate whether
+    // the safe area is sufficiently respected, when safe area is on the left side.
+    // e.g. Android device with system navigation bar in landscape mode.
+    final Finder leftPaddedCenterItem = find.byKey(const Key('Center'));
+    final Offset leftPaddedCenter = tester.getCenter(leftPaddedCenterItem);
+    expect(
+      leftPaddedCenter.dx,
+      closeTo((defaultWidth + safeAreaPadding) / 2.0, precisionErrorTolerance),
+    );
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+              padding: EdgeInsets.only(right: safeAreaPadding)
+          ),
+          child: navigationBar(),
+        ),
+      ),
+    );
+
+    // The position of center item of navigation bar should indicate whether
+    // the safe area is sufficiently respected, when safe area is on the right side.
+    // e.g. Android device with system navigation bar in landscape mode.
+    final Finder rightPaddedCenterItem = find.byKey(const Key('Center'));
+    final Offset rightPaddedCenter = tester.getCenter(rightPaddedCenterItem);
+    expect(
+      rightPaddedCenter.dx,
+      closeTo((defaultWidth - safeAreaPadding) / 2, precisionErrorTolerance),
+    );
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.fromLTRB(
+                safeAreaPadding,
+                0,
+                safeAreaPadding,
+                safeAreaPadding
+            ),
+          ),
+          child: navigationBar(),
+        ),
+      ),
+    );
+
+    // The position of center item of navigation bar should indicate whether
+    // the safe area is sufficiently respected, when safe areas are on both sides.
+    // e.g. iOS device with both sides of round corner.
+    final Finder paddedCenterItem = find.byKey(const Key('Center'));
+    final Offset paddedCenter = tester.getCenter(paddedCenterItem);
+    expect(
+      paddedCenter.dx,
+      closeTo(defaultWidth / 2, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
+    // Pre-M3 settings that were hand coded.
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+
+    expect(_getMaterial(tester).color, const Color(0xffeaeaea));
+    expect(_getMaterial(tester).surfaceTintColor, null);
+    expect(_getMaterial(tester).elevation, 0);
+    expect(tester.getSize(find.byType(NavigationBar)).height, 80);
+    expect(_indicator(tester)?.color, const Color(0x3d2196f3));
+    expect(_indicator(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
+
+    // M3 settings from the token database.
+    await tester.pumpWidget(
+      _buildWidget(
+        Theme(
+          data: ThemeData.light().copyWith(useMaterial3: true),
+          child: NavigationBar(
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
+    expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
+    expect(_getMaterial(tester).elevation, 3);
+    expect(tester.getSize(find.byType(NavigationBar)).height, 80);
+    expect(_indicator(tester)?.color, const Color(0xff2196f3));
+    expect(_indicator(tester)?.shape, const StadiumBorder());
   });
 
   testWidgets('NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
@@ -212,7 +393,7 @@ void main() {
 
 
   testWidgets('Navigation bar semantics', (WidgetTester tester) async {
-    Widget _widget({int selectedIndex = 0}) {
+    Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
           selectedIndex: selectedIndex,
@@ -230,7 +411,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(widget());
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -252,7 +433,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_widget(selectedIndex: 1));
+    await tester.pumpWidget(widget(selectedIndex: 1));
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -276,7 +457,7 @@ void main() {
   });
 
   testWidgets('Navigation bar semantics with some labels hidden', (WidgetTester tester) async {
-    Widget _widget({int selectedIndex = 0}) {
+    Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
           labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
@@ -295,7 +476,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(widget());
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -317,7 +498,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_widget(selectedIndex: 1));
+    await tester.pumpWidget(widget(selectedIndex: 1));
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -341,14 +522,14 @@ void main() {
   });
 
   testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
-    const int _animationMilliseconds = 800;
+    const int animationMilliseconds = 800;
 
-    Widget _widget({double textScaleFactor = 1}) {
+    Widget widget({double textScaleFactor = 1}) {
       return _buildWidget(
         MediaQuery(
           data: MediaQueryData(textScaleFactor: textScaleFactor),
           child: NavigationBar(
-            animationDuration: const Duration(milliseconds: _animationMilliseconds),
+            animationDuration: const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[
               NavigationDestination(
                 icon: Icon(Icons.ac_unit),
@@ -364,10 +545,10 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(widget());
     final double initialHeight = tester.getSize(find.byType(NavigationBar)).height;
 
-    await tester.pumpWidget(_widget(textScaleFactor: 2));
+    await tester.pumpWidget(widget(textScaleFactor: 2));
     final double newHeight = tester.getSize(find.byType(NavigationBar)).height;
 
     expect(newHeight, equals(initialHeight));
@@ -389,4 +570,13 @@ Material _getMaterial(WidgetTester tester) {
   return tester.firstWidget<Material>(
     find.descendant(of: find.byType(NavigationBar), matching: find.byType(Material)),
   );
+}
+
+ShapeDecoration? _indicator(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }

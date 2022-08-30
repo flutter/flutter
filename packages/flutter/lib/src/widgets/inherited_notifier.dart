@@ -61,11 +61,10 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   ///
   /// The [child] argument must not be null.
   const InheritedNotifier({
-    Key? key,
+    super.key,
     this.notifier,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(child != null);
 
   /// The [Listenable] object to which to listen.
   ///
@@ -95,14 +94,11 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
     widget.notifier?.addListener(_handleUpdate);
   }
 
-  @override
-  InheritedNotifier<T> get widget => super.widget as InheritedNotifier<T>;
-
   bool _dirty = false;
 
   @override
   void update(InheritedNotifier<T> newWidget) {
-    final T? oldNotifier = widget.notifier;
+    final T? oldNotifier = (widget as InheritedNotifier<T>).notifier;
     final T? newNotifier = newWidget.notifier;
     if (oldNotifier != newNotifier) {
       oldNotifier?.removeListener(_handleUpdate);
@@ -113,8 +109,9 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
 
   @override
   Widget build() {
-    if (_dirty)
-      notifyClients(widget);
+    if (_dirty) {
+      notifyClients(widget as InheritedNotifier<T>);
+    }
     return super.build();
   }
 
@@ -131,7 +128,7 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
 
   @override
   void unmount() {
-    widget.notifier?.removeListener(_handleUpdate);
+    (widget as InheritedNotifier<T>).notifier?.removeListener(_handleUpdate);
     super.unmount();
   }
 }

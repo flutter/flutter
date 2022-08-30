@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
@@ -53,7 +52,7 @@ class FakeVmServiceHost {
           'error': <String, Object?>{
             'code': fakeRequest.errorCode,
             'message': 'error',
-          }
+          },
         }));
       }
       _applyStreamListen();
@@ -94,7 +93,7 @@ abstract class VmServiceExpectation {
 class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     required this.method,
-    this.args = const <String, Object>{},
+    this.args = const <String, Object?>{},
     this.jsonResponse,
     this.errorCode,
     this.close = false,
@@ -108,7 +107,7 @@ class FakeVmServiceRequest implements VmServiceExpectation {
   /// If non-null, the error code for a [vm_service.RPCError] in place of a
   /// standard response.
   final int? errorCode;
-  final Map<String, Object>? args;
+  final Map<String, Object?>? args;
   final Map<String, Object?>? jsonResponse;
 
   @override
