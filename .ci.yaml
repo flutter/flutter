@@ -1915,7 +1915,6 @@ targets:
       task_name: new_gallery__crane_perf
 
   - name: Linux_android old_gallery__transition_perf
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1935,7 +1934,6 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone_build_test
-    bringup: true # New target https://github.com/flutter/flutter/issues/103542
     presubmit: false
     timeout: 60
     properties:
@@ -2438,7 +2436,6 @@ targets:
       task_name: complex_layout_macos__compile
 
   - name: Mac complex_layout_macos__start_up
-    bringup: true # New target https://github.com/flutter/flutter/issues/109633
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3053,7 +3050,6 @@ targets:
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/105715
     presubmit: false
     runIf:
       - dev/**
@@ -3065,7 +3061,6 @@ targets:
 
   - name: Mac_arm64_android run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/105715
     presubmit: false
     runIf:
       - dev/**
@@ -3105,7 +3100,6 @@ targets:
   - name: Mac_ios backdrop_filter_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3180,7 +3174,6 @@ targets:
   - name: Mac_ios complex_layout_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3190,7 +3183,6 @@ targets:
   - name: Mac_ios color_filter_and_fade_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3200,7 +3192,6 @@ targets:
   - name: Mac_ios color_filter_and_fade_perf_impeller_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3210,7 +3201,6 @@ targets:
   - name: Mac_ios imagefiltered_transform_animation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3220,7 +3210,6 @@ targets:
   - name: Mac_ios imagefiltered_transform_animation_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3480,7 +3469,6 @@ targets:
   - name: Mac_ios microbenchmarks_impeller_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
     timeout: 60
     properties:
       tags: >
@@ -3581,7 +3569,6 @@ targets:
   - name: Mac_ios platform_views_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3609,7 +3596,6 @@ targets:
   - name: Mac_ios simple_animation_perf_impeller_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3628,7 +3614,6 @@ targets:
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3638,7 +3623,6 @@ targets:
   - name: Mac_ios fullscreen_textfield_perf_impeller_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3657,7 +3641,6 @@ targets:
   - name: Mac_ios tiles_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3676,7 +3659,6 @@ targets:
   - name: Mac_ios flutter_gallery__transition_perf_e2e_impeller_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4302,7 +4284,6 @@ targets:
 
   - name: Windows flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # New target https://github.com/flutter/flutter/issues/70027
     timeout: 60
     properties:
       tags: >
@@ -4315,8 +4296,7 @@ targets:
 
   - name: Windows platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60 # New target https://github.com/flutter/flutter/issues/70027
+    timeout: 60
     properties:
       tags: >
         ["devicelab", "hostonly"]
@@ -4398,7 +4378,6 @@ targets:
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # New target https://github.com/flutter/flutter/issues/41980
     timeout: 60
     properties:
       dependencies: >-
