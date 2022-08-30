@@ -160,7 +160,7 @@ class MallocMapping final : public Mapping {
   /// for `uint8_t` and `char`.
   template <typename T>
   static MallocMapping Copy(const T* begin, const T* end) {
-    FML_DCHECK(end > begin);
+    FML_DCHECK(end >= begin);
     size_t length = end - begin;
     return Copy(begin, length);
   }
