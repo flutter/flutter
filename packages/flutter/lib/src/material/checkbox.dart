@@ -430,13 +430,13 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
     final Color? activeColor = widget.fillColor?.resolve(activeStates)
-        ?? _widgetFillColor.resolve(activeStates)
-        ?? checkboxTheme.fillColor?.resolve(activeStates);
+      ?? _widgetFillColor.resolve(activeStates)
+      ?? checkboxTheme.fillColor?.resolve(activeStates);
     final Color effectiveActiveColor = activeColor
       ?? defaults.fillColor!.resolve(activeStates)!;
     final Color? inactiveColor = widget.fillColor?.resolve(inactiveStates)
-        ?? _widgetFillColor.resolve(inactiveStates)
-        ?? checkboxTheme.fillColor?.resolve(inactiveStates);
+      ?? _widgetFillColor.resolve(inactiveStates)
+      ?? checkboxTheme.fillColor?.resolve(inactiveStates);
     final Color effectiveInactiveColor = inactiveColor
       ?? defaults.fillColor!.resolve(inactiveStates)!;
 
@@ -448,29 +448,29 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? checkboxTheme.overlayColor?.resolve(hoveredStates)
-        ?? defaults.overlayColor!.resolve(hoveredStates)!;
+      ?? widget.hoverColor
+      ?? checkboxTheme.overlayColor?.resolve(hoveredStates)
+      ?? defaults.overlayColor!.resolve(hoveredStates)!;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? checkboxTheme.overlayColor?.resolve(activePressedStates)
-        ?? activeColor?.withAlpha(kRadialReactionAlpha)
-        ?? defaults.overlayColor!.resolve(activePressedStates)!;
+      ?? checkboxTheme.overlayColor?.resolve(activePressedStates)
+      ?? activeColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(activePressedStates)!;
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? checkboxTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? inactiveColor?.withAlpha(kRadialReactionAlpha)
-        ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
+      ?? checkboxTheme.overlayColor?.resolve(inactivePressedStates)
+      ?? inactiveColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
 
     final Color effectiveCheckColor = widget.checkColor
-        ?? checkboxTheme.checkColor?.resolve(states)
-        ?? defaults.checkColor!.resolve(states)!;
+      ?? checkboxTheme.checkColor?.resolve(states)
+      ?? defaults.checkColor!.resolve(states)!;
 
     final double effectiveSplashRadius = widget.splashRadius
-        ?? checkboxTheme.splashRadius
-        ?? defaults.splashRadius!;
+      ?? checkboxTheme.splashRadius
+      ?? defaults.splashRadius!;
 
     return Semantics(
       checked: widget.value ?? false,
@@ -713,16 +713,16 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
   @override
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
+      }
       if (states.contains(MaterialState.focused)) {
         return _theme.focusColor;
       }
       if (states.contains(MaterialState.hovered)) {
         return _theme.hoverColor;
       }
-      if (states.contains(MaterialState.pressed)) {
-        return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
-      }
-      return null;
+      return Colors.transparent;
     });
   }
 
@@ -763,24 +763,24 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
         return _colors.onSurface.withOpacity(0.38);
       }
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary;
+        }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary;
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary;
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary;
-        }
         return _colors.primary;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface;
       }
       if (states.contains(MaterialState.focused)) {
         return _colors.onSurface;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurface;
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSurface;
       }
       return _colors.onSurface;
@@ -797,13 +797,13 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
         return Colors.transparent; // No icons available when the checkbox is unselected.
       }
       if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(MaterialState.pressed)) {
           return _colors.onPrimary;
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary;
         }
-        if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary;
         }
         return _colors.onPrimary;
@@ -816,27 +816,27 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.hovered)) {
-          return _colors.primary.withOpacity(0.08);
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurface.withOpacity(0.12);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.primary.withOpacity(0.08);
         }
-        return null;
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurface.withOpacity(0.08);
-      }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
         return _colors.primary.withOpacity(0.12);
       }
-      return null;
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface.withOpacity(0.08);
+      }
+      return Colors.transparent;
     });
   }
 

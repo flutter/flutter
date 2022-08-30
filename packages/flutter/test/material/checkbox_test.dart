@@ -14,7 +14,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  final ThemeData theme = ThemeData();
+  final ThemeData theme = ThemeData(useMaterial3: true);
   setUp(() {
     debugResetSemanticsIdCounter();
   });
@@ -984,6 +984,82 @@ void main() {
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(5)),
           inner: RRect.fromLTRBR(19.0, 19.0, 29.0, 29.0, const Radius.circular(1)),
         ),
+    );
+  });
+
+  testWidgets('Checkbox default overlay color in active/pressed/focused/hovered states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    final ColorScheme colors = theme.colorScheme;
+    final bool material3 = theme.useMaterial3;
+    Widget buildCheckbox({bool active = false, bool focused = false}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Checkbox(
+            focusNode: focusNode,
+            autofocus: focused,
+            value: active,
+            onChanged: (_) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCheckbox());
+    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      material3
+        ? (paints..circle(color: colors.primary.withOpacity(0.12)))
+        : (paints
+          ..circle(color: theme.unselectedWidgetColor.withAlpha(kRadialReactionAlpha),)
+        ),
+      reason: 'Default inactive pressed Checkbox should have overlay color from default fillColor',
+    );
+
+    await tester.pumpWidget(buildCheckbox(active: true));
+    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      material3
+        ? (paints..circle(color: colors.onSurface.withOpacity(0.12)))
+        : (paints
+          ..circle(color: colors.secondary.withAlpha(kRadialReactionAlpha),)
+        ),
+      reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
+    );
+
+    await tester.pumpWidget(buildCheckbox(focused: true));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      material3
+        ? (paints..circle(color: colors.onSurface.withOpacity(0.12)))
+        : (paints..circle(color: theme.focusColor)),
+      reason: 'Focused Checkbox should use default focused overlay color',
+    );
+
+    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(buildCheckbox());
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      material3
+          ? (paints..circle(color: colors.onSurface.withOpacity(0.08)))
+          : (paints..circle(color: theme.hoverColor)),
+      reason: 'Hovered Checkbox should use default hovered overlay color',
     );
   });
 
