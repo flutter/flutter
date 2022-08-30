@@ -1,4 +1,4 @@
-Signature: 5845f362fdd776b4d994b93db773c12e
+Signature: 8bac2ba4371fa6b4f5be581c4481db35
 
 UNUSED LICENSES:
 
@@ -2643,8 +2643,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTypesPriv.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlUtils.h
-FILE: ../../../third_party/skia/src/gpu/graphite/render/StencilAndFillPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/graphite/render/TextRenderer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
@@ -4100,8 +4098,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLConstantFolder.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLConstantFolder.h
 FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.h
-FILE: ../../../third_party/skia/src/sksl/SkSLInliner.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLInliner.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.h
@@ -5577,6 +5573,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecordingPriv.h
+FILE: ../../../third_party/skia/src/gpu/graphite/RendererProvider.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/RendererProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Resource.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Resource.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ResourceCache.cpp
@@ -5632,7 +5630,6 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsTrivialExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h
-FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinFunctions.cpp
 FILE: ../../../third_party/skia/src/text/StrikeForGPU.cpp
