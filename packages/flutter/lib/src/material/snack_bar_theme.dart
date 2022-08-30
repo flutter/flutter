@@ -7,6 +7,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'material_state.dart';
 import 'theme.dart';
 
 /// Defines where a [SnackBar] should appear within a [Scaffold] and how its
@@ -60,6 +61,7 @@ class SnackBarThemeData with Diagnosticable {
     this.elevation,
     this.shape,
     this.behavior,
+    this.actionBackgroundColor,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// Default value for [SnackBar.backgroundColor].
@@ -104,6 +106,11 @@ class SnackBarThemeData with Diagnosticable {
   /// If null, [SnackBar] will default to [SnackBarBehavior.fixed].
   final SnackBarBehavior? behavior;
 
+  /// Default value for [SnackBarAction.backgroundColor].
+  ///
+  /// If null, falls back to [TextButton] defaults.
+  final MaterialStateProperty<Color?>? actionBackgroundColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SnackBarThemeData copyWith({
@@ -114,6 +121,7 @@ class SnackBarThemeData with Diagnosticable {
     double? elevation,
     ShapeBorder? shape,
     SnackBarBehavior? behavior,
+    MaterialStateProperty<Color?>? actionBackgroundColor,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -123,6 +131,7 @@ class SnackBarThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
       behavior: behavior ?? this.behavior,
+      actionBackgroundColor: actionBackgroundColor ?? this.actionBackgroundColor,
     );
   }
 
@@ -141,6 +150,7 @@ class SnackBarThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       behavior: t < 0.5 ? a?.behavior : b?.behavior,
+      actionBackgroundColor: MaterialStateProperty.lerp<Color?>(a?.actionBackgroundColor, b?.actionBackgroundColor, t, Color.lerp),
     );
   }
 
@@ -153,6 +163,7 @@ class SnackBarThemeData with Diagnosticable {
     elevation,
     shape,
     behavior,
+    actionBackgroundColor,
   );
 
   @override
@@ -170,7 +181,8 @@ class SnackBarThemeData with Diagnosticable {
         && other.contentTextStyle == contentTextStyle
         && other.elevation == elevation
         && other.shape == shape
-        && other.behavior == behavior;
+        && other.behavior == behavior
+        && other.actionBackgroundColor == actionBackgroundColor;
   }
 
   @override
@@ -183,5 +195,6 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('actionBackgroundColor', actionBackgroundColor, defaultValue: null));
   }
 }

@@ -92,12 +92,18 @@ class SnackBarAction extends StatefulWidget {
     this.disabledTextColor,
     required this.label,
     required this.onPressed,
+    this.backgroundColor,
   }) : assert(label != null),
        assert(onPressed != null);
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
   final Color? textColor;
+
+  /// The button background fill color.
+  /// The state contains [MaterialState.disabled] after the [SnackBarAction]
+  /// is dismissed and can be used to show a different color after being dismissed.
+  final MaterialStateColor? backgroundColor;
 
   /// The button disabled label color. This color is shown after the
   /// [SnackBarAction] is dismissed.
@@ -132,6 +138,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
+    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
     Color? resolveForegroundColor(Set<MaterialState> states) {
       final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
       if (states.contains(MaterialState.disabled)) {
@@ -143,6 +150,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
     return TextButton(
       style: ButtonStyle(
         foregroundColor: MaterialStateProperty.resolveWith<Color?>(resolveForegroundColor),
+        backgroundColor: widget.backgroundColor ?? snackBarTheme.actionBackgroundColor,
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
