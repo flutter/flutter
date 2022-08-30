@@ -126,7 +126,7 @@ class MemoryAllocations {
   int _activeDispatchLoops = 0;
 
   /// If true, listeners were nulled by [removeListener].
-  bool _listenersContainsNulls = false;
+  bool _listenersContainNulls = false;
 
   /// Stop calling the given listener every time an object event is
   /// dispatched.
@@ -145,7 +145,7 @@ class MemoryAllocations {
       for (int i = 0; i < listeners.length; i++) {
         if (listeners[i] == listener) {
           listeners[i] = null;
-          _listenersContainsNulls = true;
+          _listenersContainNulls = true;
         }
       }
     } else {
@@ -155,11 +155,11 @@ class MemoryAllocations {
   }
 
   void _tryDefragmentListeners() {
-    if (_activeDispatchLoops > 0 || !_listenersContainsNulls) {
+    if (_activeDispatchLoops > 0 || !_listenersContainNulls) {
       return;
     }
     _listeners?.removeWhere((ObjectEventListener? e) => e == null);
-    _listenersContainsNulls = false;
+    _listenersContainNulls = false;
     _checkListenersForEmptiness();
   }
 
@@ -179,6 +179,12 @@ class MemoryAllocations {
   ///
   /// Exceptions thrown by listeners will be caught and reported using
   /// [FlutterError.reportError].
+  ///
+  /// Listeners added during an event dispatching, will start being invoked
+  /// for next events, but will be skipped for this event.
+  ///
+  /// Listeners, removed during an event dispatching, will not be invoked
+  /// after the removal.
   void dispatchObjectEvent(ObjectEvent objectEvent) {
     final List<ObjectEventListener?>? listeners = _listeners;
     if (listeners == null || listeners.isEmpty) {

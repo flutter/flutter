@@ -8,7 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
-  setUp(() => ma.removeAllListeners());
+  setUp(() {
+    assert(!ma.hasListeners);
+  });
 
   test('addListener and removeListener add and remove listeners.', () {
     final ObjectEvent event = ObjectTraced(object: 'object');
@@ -28,24 +30,28 @@ void main() {
     expect(ma.hasListeners, isFalse);
   });
 
-  test('removeAllListeners removes all listeners.', () {
+  testWidgets('bad listener is handled', (WidgetTester tester) async {
     final ObjectEvent event = ObjectTraced(object: 'object');
-    ObjectEvent? recievedEvent;
-    ObjectEvent listener1(ObjectEvent event) => recievedEvent = event;
-    ObjectEvent listener2(ObjectEvent event) => recievedEvent = event;
-    expect(ma.hasListeners, isFalse);
+    final List<String> log = <String>[];
+    void listener1(ObjectEvent event) => log.add('listener1');
+    void badListener(ObjectEvent event) => log.add('badListener');
+    void listener2(ObjectEvent event) => log.add('listener2');
 
     ma.addListener(listener1);
-    expect(ma.hasListeners, isTrue);
+    ma.addListener(badListener);
     ma.addListener(listener2);
-    expect(ma.hasListeners, isTrue);
-    ma.dispatchObjectEvent(event);
-    expect(recievedEvent, equals(event));
-    recievedEvent = null;
 
-    ma.removeAllListeners();
     ma.dispatchObjectEvent(event);
-    expect(recievedEvent, isNull);
+    expect(log, <String>['listener1', 'badListener','listener2']);
+    expect(tester.takeException(), isArgumentError);
+
+    ma.removeListener(listener1);
+    ma.removeListener(badListener);
+    ma.removeListener(listener2);
+
+    log.clear();
     expect(ma.hasListeners, isFalse);
+    ma.dispatchObjectEvent(event);
+    expect(log, <String>[]);
   });
 }
