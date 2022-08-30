@@ -2177,6 +2177,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
   PersistentBottomSheetController<dynamic>? _currentBottomSheet;
   final GlobalKey _currentBottomSheetKey = GlobalKey();
+  LocalHistoryEntry? _persistentSheetHistoryEntry;
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
@@ -2184,22 +2185,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
       final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
-      LocalHistoryEntry? persistentSheetHistoryEntry;
       bool persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
-        if (notification.extent > notification.initialExtent) {
-          if (persistentSheetHistoryEntry == null) {
-            persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
-              if (notification.extent > notification.initialExtent) {
-                DraggableScrollableActuator.reset(notification.context);
-              }
+        if (notification.extent - notification.initialExtent > precisionErrorTolerance) {
+          if (_persistentSheetHistoryEntry == null) {
+            _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+              DraggableScrollableActuator.reset(notification.context);
               showBodyScrim(false, 0.0);
               _floatingActionButtonVisibilityValue = 1.0;
-              persistentSheetHistoryEntry = null;
+              _persistentSheetHistoryEntry = null;
             });
-            ModalRoute.of(context)!.addLocalHistoryEntry(persistentSheetHistoryEntry!);
+            ModalRoute.of(context)!.addLocalHistoryEntry(_persistentSheetHistoryEntry!);
           }
-        } else if (persistentSheetHistoryEntry != null) {
-          ModalRoute.of(context)!.removeLocalHistoryEntry(persistentSheetHistoryEntry!);
+        } else if (_persistentSheetHistoryEntry != null) {
+          _persistentSheetHistoryEntry!.remove();
         }
         return false;
       }
@@ -2298,6 +2296,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     bool removedEntry = false;
     bool doingDispose = false;
+
+    void removePersistentSheetHistoryEntryIfNeeded() {
+      assert(isPersistent);
+      if (_persistentSheetHistoryEntry != null) {
+        _persistentSheetHistoryEntry!.remove();
+        _persistentSheetHistoryEntry = null;
+      }
+    }
+
     void removeCurrentBottomSheet() {
       removedEntry = true;
       if (_currentBottomSheet == null) {
@@ -2306,6 +2313,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       assert(_currentBottomSheet!._widget == bottomSheet);
       assert(bottomSheetKey.currentState != null);
       _showFloatingActionButton();
+
+      if (isPersistent) {
+        removePersistentSheetHistoryEntryIfNeeded();
+      }
 
       bottomSheetKey.currentState!.close();
       setState(() {
