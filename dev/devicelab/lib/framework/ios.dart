@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'host_agent.dart';
-import 'task_result.dart';
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
