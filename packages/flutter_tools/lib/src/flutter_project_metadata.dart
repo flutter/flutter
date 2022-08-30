@@ -247,10 +247,10 @@ class MigrateConfig {
 
   /// Performs a 2-way merge on current and target MigrateConfigs.
   ///
-  /// The base is the common ancestor config which is not needed here as 
+  /// The base is the common ancestor config which is not needed here as
   /// we do not want to inherit any base values if new ones are present.
   /// The target is a newly generated config modern config. Current is the
-  /// existing config in the project. 
+  /// existing config in the project.
   ///
   /// This merge is biased such that the results are consistent with the
   /// way project migration occurs such as not updating create_revision.

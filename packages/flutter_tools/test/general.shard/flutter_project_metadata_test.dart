@@ -225,7 +225,8 @@ version:
   revision: null
   channel: null
 
-project_type: 
+project_type: ''' + '''
+
 
 # Tracks metadata for the flutter migrate command
 migration:
