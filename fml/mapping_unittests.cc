@@ -60,4 +60,10 @@ TEST(MallocMapping, IsDontNeedSafe) {
   ASSERT_FALSE(mapping.IsDontNeedSafe());
 }
 
+TEST(MallocMapping, CopySizeZero) {
+  char ch = 'a';
+  MallocMapping mapping = MallocMapping::Copy(&ch, &ch);
+  ASSERT_EQ(0u, mapping.GetSize());
+}
+
 }  // namespace fml
