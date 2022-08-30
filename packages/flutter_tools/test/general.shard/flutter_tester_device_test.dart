@@ -188,8 +188,8 @@ void main() {
       await device.start('example.dill');
       await device.observatoryUri;
 
-      final FakeDartDevelopmentService dds = ((device as TestFlutterTesterDevice).dds
-      as FakeDartDevelopmentService);
+      final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
+      as FakeDartDevelopmentService;
       final String? result = dds
           .uriConverter
           ?.call('test');
