@@ -2440,8 +2440,8 @@ class _MatchesSemanticsData extends Matcher {
         final bool actionPresent = (action.index & data.actions) == action.index;
         if (actionPresent != actionExpected) {
           final List<String> actionSummary = <String>[
-            for (final int action in SemanticsAction.values.keys)
-              if ((data.actions & action) != 0) describeEnum(action),
+            for (final SemanticsAction action in SemanticsAction.values.values)
+              if ((data.actions & action.index) != 0) describeEnum(action),
           ];
           return failWithDescription(matchState, 'actions were: $actionSummary');
         }
@@ -2479,8 +2479,8 @@ class _MatchesSemanticsData extends Matcher {
         final bool flagPresent = flag.index & data.flags == flag.index;
         if (flagPresent != flagExpected) {
           final List<String> flagSummary = <String>[
-            for (final int flag in SemanticsFlag.values.keys)
-              if ((data.flags & flag) != 0) describeEnum(flag),
+            for (final SemanticsFlag flag in SemanticsFlag.values.values)
+              if ((data.flags & flag.index) != 0) describeEnum(flag),
           ];
           return failWithDescription(matchState, 'flags were: $flagSummary');
         }
