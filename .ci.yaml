@@ -1541,6 +1541,8 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: cubic_bezier_perf__e2e_summary
+      gn_artifacts: "true"
+    scheduler: luci
 
   - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
