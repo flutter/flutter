@@ -31,7 +31,10 @@ class _${blockName}DefaultsM3 extends DialogTheme {
   Color? get backgroundColor => ${componentColor("md.comp.dialog.container")};
 
   @override
-  Color? get surfaceTintColor => ${componentColor("md.comp.dialog.container.surface-tint-layer")};
+  Color? get shadowColor => ${colorOrTransparent("md.comp.dialog.container.shadow-color")};
+
+  @override
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.dialog.container.surface-tint-layer.color")};
 
   @override
   TextStyle? get titleTextStyle => ${textStyle("md.comp.dialog.headline")};

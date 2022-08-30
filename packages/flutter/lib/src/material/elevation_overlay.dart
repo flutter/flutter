@@ -23,11 +23,12 @@ class ElevationOverlay {
   /// elevated. The amount of opacity will vary with the elevation as described
   /// in: https://m3.material.io/styles/color/the-color-system/color-roles.
   ///
-  /// If [surfaceTint] is not null then the returned color will be the given
-  /// [color] with the [surfaceTint] of the appropriate opacity applies to it.
-  /// Otherwise it will just return [color] unmodified.
+  /// If [surfaceTint] is not null and not completely transparent ([Color.alpha]
+  /// is 0), then the returned color will be the given [color] with the
+  /// [surfaceTint] of the appropriate opacity applied to it. Otherwise it will
+  /// just return [color] unmodified.
   static Color applySurfaceTint(Color color, Color? surfaceTint, double elevation) {
-    if (surfaceTint != null) {
+    if (surfaceTint != null && surfaceTint.alpha != 0) {
       return Color.alphaBlend(surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)), color);
     }
     return color;

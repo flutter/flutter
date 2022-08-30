@@ -91,7 +91,11 @@ class Dialog extends StatelessWidget {
   /// {@template flutter.material.dialog.shadowColor}
   /// The color to paint the [elevation] shadow under the dialog's [Material].
   ///
-  /// If null then no drop shadow will be painted.
+  /// If null and [ThemeData.useMaterial3] is true then no drop shadow will
+  /// be rendered.
+  ///
+  /// If null and [ThemeData.useMaterial3] is false then it will default to
+  /// [ThemeData.shadowColor].
   ///
   /// See also:
   ///   * [Material.shadowColor], which describes how the drop shadow is painted.
@@ -105,7 +109,13 @@ class Dialog extends StatelessWidget {
   /// The color used as a surface tint overlay on the dialog's background color,
   /// which reflects the dialog's [elevation].
   ///
-  /// If null then no surface tint will be applied.
+  /// If [ThemeData.useMaterial3] is false property has no effect.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
+  /// [ColorScheme.surfaceTint] will be used.
+  ///
+  /// To disable this feature, set [surfaceTintColor] to a transparent color
+  /// (i.e. [Color.alpha] is 0).
   ///
   /// See also:
   ///   * [Material.surfaceTintColor], which describes how the surface tint will
@@ -1398,6 +1408,9 @@ class _DialogDefaultsM3 extends DialogTheme {
 
   @override
   Color? get backgroundColor => _colors.surface;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 
   @override
   Color? get surfaceTintColor => _colors.surfaceTint;
