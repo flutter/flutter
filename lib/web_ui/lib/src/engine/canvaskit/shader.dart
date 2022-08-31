@@ -21,26 +21,6 @@ abstract class CkShader extends ManagedSkiaObject<SkShader>
   void delete() {
     rawSkiaObject?.delete();
   }
-
-  bool _disposed = false;
-
-  @override
-  bool get debugDisposed {
-    late bool disposed;
-    assert(() {
-      disposed = _disposed;
-      return true;
-    }());
-    return disposed;
-  }
-
-  @override
-  void dispose() {
-    assert(() {
-      _disposed = true;
-      return true;
-    }());
-  }
 }
 
 class CkGradientSweep extends CkShader implements ui.Gradient {
@@ -239,9 +219,24 @@ class CkImageShader extends CkShader implements ui.ImageShader {
     rawSkiaObject?.delete();
   }
 
+  bool _disposed = false;
+
+  @override
+  bool get debugDisposed {
+    late bool disposed;
+    assert(() {
+      disposed = _disposed;
+      return true;
+    }());
+    return disposed;
+  }
+
   @override
   void dispose() {
-    super.dispose();
+    assert(() {
+      _disposed = true;
+      return true;
+    }());
     _image.dispose();
   }
 }
