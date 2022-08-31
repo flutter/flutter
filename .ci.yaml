@@ -2303,6 +2303,7 @@ targets:
 
   - name: Mac basic_material_app_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2440,6 +2441,7 @@ targets:
 
   - name: Mac complex_layout_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2454,6 +2456,7 @@ targets:
 
   - name: Mac complex_layout_macos__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -2495,6 +2498,7 @@ targets:
 
   - name: Mac flutter_gallery_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2605,6 +2609,7 @@ targets:
 
   - name: Mac hello_world_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4278,6 +4283,7 @@ targets:
 
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4290,6 +4296,7 @@ targets:
 
   - name: Windows flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4302,6 +4309,7 @@ targets:
 
   - name: Windows flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4314,6 +4322,7 @@ targets:
 
   - name: Windows complex_layout_win_desktop__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4326,6 +4335,7 @@ targets:
 
   - name: Windows complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4338,6 +4348,7 @@ targets:
 
   - name: Windows flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4350,6 +4361,7 @@ targets:
 
   - name: Windows platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
