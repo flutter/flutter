@@ -248,7 +248,7 @@ PlistParser? _plistInstance;
 /// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 
-ShutdownHooks? get shutdownHooks => context.get<ShutdownHooks>();
+final ShutdownHooks shutdownHooks = ShutdownHooks();
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance
