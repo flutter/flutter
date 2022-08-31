@@ -30,8 +30,9 @@ class PipelineCreateInfoVK {
   vk::UniqueRenderPass render_pass_;
 };
 
-class PipelineVK final : public Pipeline,
-                         public BackendCast<PipelineVK, Pipeline> {
+class PipelineVK final
+    : public Pipeline<PipelineDescriptor>,
+      public BackendCast<PipelineVK, Pipeline<PipelineDescriptor>> {
  public:
   PipelineVK(std::weak_ptr<PipelineLibrary> library,
              PipelineDescriptor desc,

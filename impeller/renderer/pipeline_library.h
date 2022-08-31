@@ -6,6 +6,7 @@
 
 #include <optional>
 
+#include "compute_pipeline_descriptor.h"
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
@@ -18,12 +19,19 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
  public:
   virtual ~PipelineLibrary();
 
-  PipelineFuture GetRenderPipeline(
+  PipelineFuture<PipelineDescriptor> GetPipeline(
       std::optional<PipelineDescriptor> descriptor);
+
+  PipelineFuture<ComputePipelineDescriptor> GetPipeline(
+      std::optional<ComputePipelineDescriptor> descriptor);
 
   virtual bool IsValid() const = 0;
 
-  virtual PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor) = 0;
+  virtual PipelineFuture<PipelineDescriptor> GetPipeline(
+      PipelineDescriptor descriptor) = 0;
+
+  virtual PipelineFuture<ComputePipelineDescriptor> GetPipeline(
+      ComputePipelineDescriptor descriptor) = 0;
 
  protected:
   PipelineLibrary();

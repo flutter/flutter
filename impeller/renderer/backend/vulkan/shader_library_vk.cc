@@ -17,6 +17,8 @@ static ShaderStage ToShaderStage(BlobShaderType type) {
       return ShaderStage::kVertex;
     case BlobShaderType::kFragment:
       return ShaderStage::kFragment;
+    case BlobShaderType::kCompute:
+      return ShaderStage::kCompute;
   }
   FML_UNREACHABLE();
 }

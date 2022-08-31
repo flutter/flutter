@@ -768,6 +768,10 @@ FILE: ../../../flutter/impeller/renderer/backend/metal/blit_pass_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/blit_pass_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/metal/command_buffer_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/command_buffer_mtl.mm
+FILE: ../../../flutter/impeller/renderer/backend/metal/compute_pass_mtl.h
+FILE: ../../../flutter/impeller/renderer/backend/metal/compute_pass_mtl.mm
+FILE: ../../../flutter/impeller/renderer/backend/metal/compute_pipeline_mtl.h
+FILE: ../../../flutter/impeller/renderer/backend/metal/compute_pipeline_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/metal/context_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/context_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/metal/device_buffer_mtl.h
@@ -849,6 +853,14 @@ FILE: ../../../flutter/impeller/renderer/command.cc
 FILE: ../../../flutter/impeller/renderer/command.h
 FILE: ../../../flutter/impeller/renderer/command_buffer.cc
 FILE: ../../../flutter/impeller/renderer/command_buffer.h
+FILE: ../../../flutter/impeller/renderer/compute_command.cc
+FILE: ../../../flutter/impeller/renderer/compute_command.h
+FILE: ../../../flutter/impeller/renderer/compute_pass.cc
+FILE: ../../../flutter/impeller/renderer/compute_pass.h
+FILE: ../../../flutter/impeller/renderer/compute_pipeline_builder.cc
+FILE: ../../../flutter/impeller/renderer/compute_pipeline_builder.h
+FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.cc
+FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.h
 FILE: ../../../flutter/impeller/renderer/context.cc
 FILE: ../../../flutter/impeller/renderer/context.h
 FILE: ../../../flutter/impeller/renderer/descriptor_set_layout.h

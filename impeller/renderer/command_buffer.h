@@ -9,9 +9,11 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/compute_pass.h"
 
 namespace impeller {
 
+class ComputePass;
 class Context;
 class RenderPass;
 class RenderTarget;
@@ -81,6 +83,13 @@ class CommandBuffer {
   ///
   std::shared_ptr<BlitPass> CreateBlitPass() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Create a compute pass to record compute commands into.
+  ///
+  /// @return     A valid compute pass or null.
+  ///
+  std::shared_ptr<ComputePass> CreateComputePass() const;
+
  protected:
   std::weak_ptr<const Context> context_;
 
@@ -92,6 +101,8 @@ class CommandBuffer {
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() const = 0;
 
   [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
+
+  virtual std::shared_ptr<ComputePass> OnCreateComputePass() const = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);

@@ -16,8 +16,6 @@
 
 namespace impeller {
 
-class Pipeline;
-
 class FilterContents : public Contents {
  public:
   enum class BlurStyle {

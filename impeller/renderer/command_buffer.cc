@@ -5,6 +5,7 @@
 #include "impeller/renderer/command_buffer.h"
 
 #include "flutter/fml/trace_event.h"
+#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 
@@ -45,6 +46,18 @@ std::shared_ptr<BlitPass> CommandBuffer::CreateBlitPass() const {
   auto pass = OnCreateBlitPass();
   if (pass && pass->IsValid()) {
     pass->SetLabel("BlitPass");
+    return pass;
+  }
+  return nullptr;
+}
+
+std::shared_ptr<ComputePass> CommandBuffer::CreateComputePass() const {
+  if (!IsValid()) {
+    return nullptr;
+  }
+  auto pass = OnCreateComputePass();
+  if (pass && pass->IsValid()) {
+    pass->SetLabel("ComputePass");
     return pass;
   }
   return nullptr;

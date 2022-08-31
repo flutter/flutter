@@ -562,7 +562,11 @@ template("impeller_shaders") {
     gles_shaders = "gles_$target_name"
     impeller_shaders_gles(gles_shaders) {
       name = invoker.name
-      shaders = invoker.shaders
+      if (defined(invoker.gles_exclusions)) {
+        shaders = invoker.shaders - invoker.gles_exclusions
+      } else {
+        shaders = invoker.shaders
+      }
     }
   }
 

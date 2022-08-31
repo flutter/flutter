@@ -64,4 +64,11 @@ std::shared_ptr<BlitPass> CommandBufferGLES::OnCreateBlitPass() const {
   return pass;
 }
 
+// |CommandBuffer|
+std::shared_ptr<ComputePass> CommandBufferGLES::OnCreateComputePass() const {
+  // Compute passes aren't supported until GLES 3.2, at which point Vulkan is
+  // available anyway.
+  return nullptr;
+}
+
 }  // namespace impeller
