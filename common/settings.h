@@ -301,11 +301,6 @@ struct Settings {
   // Max bytes threshold of resource cache, or 0 for unlimited.
   size_t resource_cache_max_bytes_threshold = 0;
 
-  /// A timestamp representing when the engine started. The value is based
-  /// on the clock used by the Dart timeline APIs. This timestamp is used
-  /// to log a timeline event that tracks the latency of engine startup.
-  std::chrono::microseconds engine_start_timestamp = {};
-
   /// The minimum number of samples to require in multipsampled anti-aliasing.
   ///
   /// Setting this value to 0 or 1 disables MSAA.
