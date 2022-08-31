@@ -208,7 +208,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
         _systemTemp?.deleteSync(recursive: true);
       }
     } on FileSystemException {
-      globals.printTrace('Failed trying to clean up temporary directory ${_systemTemp?.path}.');
+      // ignore
     }
     _systemTemp = null;
   }
