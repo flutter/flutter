@@ -6,6 +6,8 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
+import '../globals.dart' as globals;
+
 import 'common.dart';
 import 'io.dart';
 import 'platform.dart';
@@ -183,11 +185,11 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   LocalFileSystem.test({
     required Signals signals,
     List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
-  }) : this(signals, fatalSignals, null);
+  }) : this(signals, fatalSignals, ShutdownHooks());
 
   Directory? _systemTemp;
   final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
-  final ShutdownHooks? _shutdownHooks;
+  final ShutdownHooks _shutdownHooks;
 
   Future<void> dispose() async {
     _tryToDeleteTemp();
@@ -206,7 +208,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
         _systemTemp?.deleteSync(recursive: true);
       }
     } on FileSystemException {
-      // ignore.
+      globals.printTrace('Failed trying to clean up temporary directory ${_systemTemp?.path}.');
     }
     _systemTemp = null;
   }

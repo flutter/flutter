@@ -56,7 +56,9 @@ class _DefaultShutdownHooks implements ShutdownHooks {
 
   @override
   Future<void> runShutdownHooks(Logger logger) async {
-    logger.printTrace('Running shutdown hooks');
+    logger.printTrace(
+      'Running ${_shutdownHooks.length} shutdown hook${_shutdownHooks.length == 1 ? '' : 's'}',
+    );
     _shutdownHooksRunning = true;
     try {
       final List<Future<dynamic>> futures = <Future<dynamic>>[];
