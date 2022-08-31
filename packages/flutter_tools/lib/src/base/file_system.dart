@@ -239,7 +239,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       }
       // Make sure that the temporary directory is cleaned up when the tool
       // exits normally.
-      _shutdownHooks?.addShutdownHook(
+      _shutdownHooks.addShutdownHook(
         _tryToDeleteTemp,
       );
     }

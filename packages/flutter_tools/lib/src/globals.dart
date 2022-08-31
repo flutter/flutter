@@ -248,6 +248,10 @@ PlistParser? _plistInstance;
 /// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 
+/// Global [ShutdownHooks] that should be run before the tool process exits.
+///
+/// This is depended on by [localFileSystem] which is called before any
+/// [Context] is set up, and thus this cannot be a Context getter.
 final ShutdownHooks shutdownHooks = ShutdownHooks();
 
 // Unless we're in a test of this class's signal handling features, we must
