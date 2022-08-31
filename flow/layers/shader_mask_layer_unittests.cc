@@ -373,17 +373,16 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
     {
       expected_builder.translate(offset.fX, offset.fY);
       /* ShaderMaskLayer::Paint() */ {
-        expected_builder.setColor(opacity_alpha << 24);
-        expected_builder.saveLayer(&child_path.getBounds(), true);
+        DlPaint sl_paint = DlPaint().setColor(opacity_alpha << 24);
+        expected_builder.saveLayer(&child_path.getBounds(), &sl_paint);
         {
           /* child layer paint */ {
-            expected_builder.setColor(0xFF000000);
-            expected_builder.drawPath(child_path);
+            expected_builder.drawPath(child_path, DlPaint());
           }
           expected_builder.translate(mask_rect.fLeft, mask_rect.fTop);
-          expected_builder.setBlendMode(DlBlendMode::kSrc);
           expected_builder.drawRect(
-              SkRect::MakeWH(mask_rect.width(), mask_rect.height()));
+              SkRect::MakeWH(mask_rect.width(), mask_rect.height()),
+              DlPaint().setBlendMode(DlBlendMode::kSrc));
         }
         expected_builder.restore();
       }
