@@ -820,7 +820,7 @@ Delete a device from the config file.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    final String? id = globalResults!['device-id'];
+    final String? id = globalResults!['device-id'] as String?;
     if (id == null || !customDevicesConfig.contains(id)) {
       throwToolExit('Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"');
     }
