@@ -2876,6 +2876,36 @@ void main() {
     expect(actionIconColor(), foregroundColor);
   });
 
+  testWidgets('Leading, title, and actions default color match M3 spec', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(onSurface: Colors.red, onSurfaceVariant: Colors.yellow),
+        useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: const Icon(Icons.add_circle),
+            title: const Text('title'),
+            actions: const <Widget>[
+              Icon(Icons.ac_unit)
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color!;
+    }
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(textColor(), Colors.red);
+    expect(leadingIconColor(), Colors.red);
+    expect(actionIconColor(), Colors.yellow);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/107305
   group('Icons are colored correctly by IconTheme and ActionIconTheme in M3', () {
     testWidgets('Icons and IconButtons are colored by IconTheme in M3', (WidgetTester tester) async {
