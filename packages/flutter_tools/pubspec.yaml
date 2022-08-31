@@ -29,7 +29,7 @@ dependencies:
   stack_trace: 1.10.0
   usage: 4.1.0
   webdriver: 3.0.0
-  webkit_inspection_protocol: 1.1.0
+  webkit_inspection_protocol: 1.2.0
   xml: 6.1.0
   yaml: 3.1.1
   native_stack_traces: 0.5.2
@@ -103,4 +103,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 577c
+# PUBSPEC CHECKSUM: 867d
