@@ -67,6 +67,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   color0_resolve_tex_desc.size = color0_tex_desc.size;
   color0_resolve_tex_desc.usage =
       static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  color0_resolve_tex_desc.storage_mode = StorageMode::kDevicePrivate;
 
   ColorAttachment color0;
   color0.texture = msaa_tex;
