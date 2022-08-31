@@ -2883,9 +2883,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (widget.onSingleLongTapStart != null ||
         widget.onSingleLongTapMoveUpdate != null ||
         widget.onSingleLongTapEnd != null) {
-      gestures[TapAndLongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndLongPressGestureRecognizer>(
-        () => TapAndLongPressGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
-        (TapAndLongPressGestureRecognizer instance) {
+      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+        () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
+        (LongPressGestureRecognizer instance) {
           instance
             // ..onTapDown = _handleTapDown
             ..onLongPressStart = _handleLongPressStart
