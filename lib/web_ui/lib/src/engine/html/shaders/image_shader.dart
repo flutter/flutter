@@ -284,6 +284,6 @@ class EngineImageShader implements ui.ImageShader {
       _disposed = true;
       return true;
     }());
-      image.dispose();
+    image.dispose();
   }
 }
