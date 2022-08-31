@@ -335,13 +335,18 @@ void main() {
       );
 
       // Drag it by a bit but not enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
+      TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('10')));
+      // Use custom gesture to work around the DragStartBehavior.start.
+      // First 20 initiates the drag, next 30 is the actual drag.
+      await gesture.moveBy(const Offset(0.0, 20.0)); // has an IgnorePointer
+      await gesture.moveBy(const Offset(0.0, 30.0)); // has an IgnorePointer
 
       // The item that was in the center now moved a bit.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '10')),
         const Offset(200.0, 280.0),
       );
+      await gesture.up();
 
       await tester.pumpAndSettle();
 
@@ -352,8 +357,13 @@ void main() {
       expect(selectedItems.isEmpty, true);
 
       // Drag it by enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
+      gesture = await tester.startGesture(tester.getCenter(find.text('10')));
+      await gesture.moveBy(const Offset(0.0, 20.0)); // has an IgnorePointer
+      // Use custom gesture to work around the DragStartBehavior.start.
+      // First 20 initiates the drag, next 70 is the actual drag.
+      await gesture.moveBy(const Offset(0.0, 70.0)); // has an IgnorePointer
 
+      await gesture.up();
       await tester.pumpAndSettle();
 
       expect(

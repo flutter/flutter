@@ -285,15 +285,16 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
 
     assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
+    final FixedExtentScrollController controller = widget.scrollController ?? _controller!;
     final Widget result = DefaultTextStyle(
       style: textStyle.copyWith(color: CupertinoDynamicColor.maybeResolve(textStyle.color, context)),
       child: Stack(
         children: <Widget>[
           Positioned.fill(
             child: _CupertinoPickerSemantics(
-              scrollController: widget.scrollController ?? _controller!,
+              scrollController: controller,
               child: ListWheelScrollView.useDelegate(
-                controller: widget.scrollController ?? _controller,
+                controller: controller,
                 physics: const FixedExtentScrollPhysics(),
                 diameterRatio: widget.diameterRatio,
                 offAxisFraction: widget.offAxisFraction,
@@ -303,7 +304,16 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: _handleSelectedItemChanged,
-                childDelegate: widget.childDelegate,
+                childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
+                  widget.childDelegate,
+                  onTappedChild: (int index) {
+                    controller.animateToItem(
+                      index,
+                      duration: const Duration(milliseconds: 150),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -493,8 +503,11 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     final SemanticsNode scrollable = children.first;
     final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
     scrollable.visitChildren((SemanticsNode child) {
-      assert(child.indexInParent != null);
-      indexedChildren[child.indexInParent!] = child;
+      child.visitChildren((SemanticsNode child) {
+        assert(child.indexInParent != null);
+        indexedChildren[child.indexInParent!] = child;
+        return true;
+      });
       return true;
     });
     if (indexedChildren[_currentIndex] == null) {
@@ -513,4 +526,35 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     }
     node.updateWith(config: config);
   }
+}
+
+class _CupertinoPickerListWheelChildDelegateWrapper implements ListWheelChildDelegate {
+  _CupertinoPickerListWheelChildDelegateWrapper(
+    this._wrapped, {
+    required this.onTappedChild,
+  });
+
+  final ListWheelChildDelegate _wrapped;
+  final void Function(int index) onTappedChild;
+
+  @override
+  Widget? build(BuildContext context, int index) {
+    final Widget? child = _wrapped.build(context, index);
+    if (child == null) {
+      return null;
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => onTappedChild(index),
+      child: child,
+    );
+  }
+
+  @override
+  int? get estimatedChildCount => _wrapped.estimatedChildCount;
+  @override
+  bool shouldRebuild(covariant _CupertinoPickerListWheelChildDelegateWrapper oldDelegate) => _wrapped.shouldRebuild(oldDelegate._wrapped);
+  @override
+  int trueIndexOf(int index) => _wrapped.trueIndexOf(index);
 }
