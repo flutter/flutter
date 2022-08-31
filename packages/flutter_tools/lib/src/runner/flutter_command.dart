@@ -1343,6 +1343,7 @@ abstract class FlutterCommand extends Command<void> {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );
@@ -1555,7 +1556,9 @@ abstract class FlutterCommand extends Command<void> {
   int? intArg(String name) => argResults?[name] as int?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
-  List<String> stringsArg(String name) => argResults?[name] as List<String>? ?? <String>[];
+  List<String> stringsArg(String name) {
+    return argResults![name]! as List<String>? ?? <String>[];
+  }
 }
 
 /// A mixin which applies an implementation of [requiredArtifacts] that only
