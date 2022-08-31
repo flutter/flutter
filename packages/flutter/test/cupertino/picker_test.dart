@@ -515,4 +515,30 @@ void main() {
     await tester.tap(find.text('2'));
     expect(taps, equals(1));
   });
+
+  testWidgets('Tapping on child in a CupertinoPicker selects that child', (WidgetTester tester) async {
+    int selectedItem = 0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPicker(
+          itemExtent: 15.0,
+          onSelectedItemChanged: (int i) {
+            selectedItem = i;
+          },
+          selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
+              background: Color(0x12345678)),
+          children: const <Widget>[
+             Text('2'),
+             Text('1'),
+          ],
+        ),
+      ),
+    );
+
+    expect(selectedItem, equals(0));
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+    expect(selectedItem, equals(1));
+  });
 }
