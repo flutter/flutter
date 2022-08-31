@@ -467,7 +467,7 @@ void main() {
       ]
     );
 
-    final Map<String, Object>? skSLs = await fakeVmServiceHost.vmService.getSkSLs(
+    final Map<String, Object?>? skSLs = await fakeVmServiceHost.vmService.getSkSLs(
       viewId: '1234',
     );
     expect(skSLs, isNull);
