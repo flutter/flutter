@@ -9,6 +9,7 @@ import 'scenario.dart';
 
 /// Echo platform messages back to the sender.
 mixin PlatformEchoMixin on Scenario {
+  /// Handle a platform message.
   @override
   void onPlatformMessage(
     String name,
