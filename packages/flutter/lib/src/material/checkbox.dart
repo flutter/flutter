@@ -788,7 +788,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color?> get checkColor {
+  MaterialStateProperty<Color> get checkColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
@@ -813,7 +813,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  MaterialStateProperty<Color?> get overlayColor {
+  MaterialStateProperty<Color> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
