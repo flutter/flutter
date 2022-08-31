@@ -65,7 +65,7 @@ struct Command {
   //----------------------------------------------------------------------------
   /// The pipeline to use for this command.
   ///
-  std::shared_ptr<Pipeline> pipeline;
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline;
   //----------------------------------------------------------------------------
   /// The buffer, texture, and sampler bindings used by the vertex pipeline
   /// stage.

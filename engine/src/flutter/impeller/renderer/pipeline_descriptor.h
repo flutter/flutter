@@ -24,6 +24,7 @@ namespace impeller {
 
 class ShaderFunction;
 class VertexDescriptor;
+template <typename T>
 class Pipeline;
 
 class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
@@ -132,10 +133,10 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       back_stencil_attachment_descriptor_;
 };
 
-using PipelineMap =
-    std::unordered_map<PipelineDescriptor,
-                       std::shared_future<std::shared_ptr<Pipeline>>,
-                       ComparableHash<PipelineDescriptor>,
-                       ComparableEqual<PipelineDescriptor>>;
+using PipelineMap = std::unordered_map<
+    PipelineDescriptor,
+    std::shared_future<std::shared_ptr<Pipeline<PipelineDescriptor>>>,
+    ComparableHash<PipelineDescriptor>,
+    ComparableEqual<PipelineDescriptor>>;
 
 }  // namespace impeller

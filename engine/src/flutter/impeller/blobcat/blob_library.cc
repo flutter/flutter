@@ -18,6 +18,8 @@ constexpr BlobShaderType ToShaderType(fb::Stage stage) {
       return BlobShaderType::kVertex;
     case fb::Stage::kFragment:
       return BlobShaderType::kFragment;
+    case fb::Stage::kCompute:
+      return BlobShaderType::kCompute;
   }
   FML_UNREACHABLE();
 }

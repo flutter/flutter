@@ -25,6 +25,7 @@ class PipelineLibraryMTL final : public PipelineLibrary {
 
   id<MTLDevice> device_ = nullptr;
   PipelineMap pipelines_;
+  ComputePipelineMap compute_pipelines_;
 
   PipelineLibraryMTL(id<MTLDevice> device);
 
@@ -32,7 +33,12 @@ class PipelineLibraryMTL final : public PipelineLibrary {
   bool IsValid() const override;
 
   // |PipelineLibrary|
-  PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor) override;
+  PipelineFuture<PipelineDescriptor> GetPipeline(
+      PipelineDescriptor descriptor) override;
+
+  // |PipelineLibrary|
+  PipelineFuture<ComputePipelineDescriptor> GetPipeline(
+      ComputePipelineDescriptor descriptor) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryMTL);
 };

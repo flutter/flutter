@@ -12,8 +12,9 @@
 
 namespace impeller {
 
-class PipelineMTL final : public Pipeline,
-                          public BackendCast<PipelineMTL, Pipeline> {
+class PipelineMTL final
+    : public Pipeline<PipelineDescriptor>,
+      public BackendCast<PipelineMTL, Pipeline<PipelineDescriptor>> {
  public:
   // |Pipeline|
   ~PipelineMTL() override;

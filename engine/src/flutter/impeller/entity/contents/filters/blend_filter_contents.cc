@@ -24,8 +24,8 @@ BlendFilterContents::BlendFilterContents() {
 
 BlendFilterContents::~BlendFilterContents() = default;
 
-using PipelineProc =
-    std::shared_ptr<Pipeline> (ContentContext::*)(ContentContextOptions) const;
+using PipelineProc = std::shared_ptr<Pipeline<PipelineDescriptor>> (
+    ContentContext::*)(ContentContextOptions) const;
 
 template <typename TPipeline>
 static std::optional<Snapshot> AdvancedBlend(
@@ -93,7 +93,7 @@ static std::optional<Snapshot> AdvancedBlend(
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     auto options = OptionsFromPassAndEntity(pass, entity);
-    std::shared_ptr<Pipeline> pipeline =
+    std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline =
         std::invoke(pipeline_proc, renderer, options);
 
     Command cmd;

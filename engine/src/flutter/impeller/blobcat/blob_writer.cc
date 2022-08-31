@@ -22,6 +22,8 @@ std::optional<BlobShaderType> InferShaderTypefromFileExtension(
     return BlobShaderType::kVertex;
   } else if (path == ".frag") {
     return BlobShaderType::kFragment;
+  } else if (path == ".comp") {
+    return BlobShaderType::kCompute;
   }
   return std::nullopt;
 }
@@ -88,6 +90,8 @@ constexpr fb::Stage ToStage(BlobShaderType type) {
       return fb::Stage::kVertex;
     case BlobShaderType::kFragment:
       return fb::Stage::kFragment;
+    case BlobShaderType::kCompute:
+      return fb::Stage::kCompute;
   }
   FML_UNREACHABLE();
 }
