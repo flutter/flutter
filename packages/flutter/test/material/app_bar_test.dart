@@ -2876,10 +2876,14 @@ void main() {
     expect(actionIconColor(), foregroundColor);
   });
 
-  testWidgets('Leading, title, and actions default color match M3 spec', (WidgetTester tester) async {
+  testWidgets('Leading, title, and actions show correct default colors', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.from(
-        colorScheme: const ColorScheme.light(onSurface: Colors.red, onSurfaceVariant: Colors.yellow),
-        useMaterial3: true);
+      colorScheme: const ColorScheme.light(
+        onPrimary: Colors.blue,
+        onSurface: Colors.red,
+        onSurfaceVariant: Colors.yellow),
+    );
+    final bool material3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -2901,9 +2905,11 @@ void main() {
     Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
     Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
 
-    expect(textColor(), Colors.red);
-    expect(leadingIconColor(), Colors.red);
-    expect(actionIconColor(), Colors.yellow);
+    // M2 default color are onPrimary, and M3 has onSurface for leading and title,
+    // onSurfaceVariant for actions.
+    expect(textColor(), material3 ? Colors.red : Colors.blue);
+    expect(leadingIconColor(), material3 ? Colors.red : Colors.blue);
+    expect(actionIconColor(), material3 ? Colors.yellow : Colors.blue);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/107305
