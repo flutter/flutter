@@ -54,12 +54,6 @@ abstract class EngineGradient implements ui.Gradient {
   /// Creates a CanvasImageSource to paint gradient.
   Object createImageBitmap(
       ui.Rect? shaderBounds, double density, bool createDataUrl);
-
-  @override
-  bool debugDisposed = false;
-
-  @override
-  void dispose() {}
 }
 
 class GradientSweep extends EngineGradient {
