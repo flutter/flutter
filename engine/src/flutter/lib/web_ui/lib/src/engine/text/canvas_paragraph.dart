@@ -260,8 +260,9 @@ class CanvasParagraph implements ui.Paragraph {
 
   @override
   void dispose() {
-    spans.clear();
-    plainText = '';
+    // TODO(dnfield): It should be possible to clear resources here, but would
+    // need refcounting done on any surfaces/pictures holding references to this
+    // object.
     _disposed = true;
   }
 
@@ -270,7 +271,7 @@ class CanvasParagraph implements ui.Paragraph {
     if (assertionsEnabled) {
       return _disposed;
     }
-    throw StateError('Vertices.debugDisposed is only avialalbe when asserts are enabled.');
+    throw StateError('Paragraph.debugDisposed is only avialalbe when asserts are enabled.');
   }
 }
 
