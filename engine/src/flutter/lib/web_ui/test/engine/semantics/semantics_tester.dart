@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
-import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/embedder.dart';
 import 'package:ui/src/engine/host_node.dart';
@@ -28,9 +27,7 @@ HostNode get appHostNode => flutterViewEmbedder.glassPaneShadow!;
 /// CSS style applied to the root of the semantics tree.
 // TODO(yjbanov): this should be handled internally by [expectSemanticsTree].
 //                No need for every test to inject it.
-final String rootSemanticStyle = browserEngine != BrowserEngine.edge
-  ? 'filter: opacity(0%); color: rgba(0, 0, 0, 0)'
-  : 'color: rgba(0, 0, 0, 0); filter: opacity(0%)';
+const String rootSemanticStyle = 'filter: opacity(0%); color: rgba(0, 0, 0, 0)';
 
 /// A convenience wrapper of the semantics API for building and inspecting the
 /// semantics tree in unit tests.

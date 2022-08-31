@@ -81,7 +81,7 @@ Future<void> testMain() async {
       expect(buffer.toString(), '0/100,100/100,');
     });
 
-    /// Regression test for Firefox/ie11
+    /// Regression test for Firefox
     /// https://github.com/flutter/flutter/issues/66412
     test('Returns nonzero natural width/height', () async {
       final HtmlCodec codec = HtmlCodec(

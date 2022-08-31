@@ -400,9 +400,7 @@ void testMain() {
 
       semantics().semanticsEnabled = false;
     });
-  },
-  // TODO(mdebbar): https://github.com/flutter/flutter/issues/50769
-  skip: browserEngine == BrowserEngine.edge);
+  });
 }
 
 SemanticsObject createTextFieldSemantics({

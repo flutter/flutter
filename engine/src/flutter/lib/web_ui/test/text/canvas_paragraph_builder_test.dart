@@ -22,7 +22,6 @@ String fontFamilyToAttribute(String fontFamily) {
   if (browserEngine == BrowserEngine.firefox) {
     return fontFamily.replaceAll('"', '&quot;');
   } else if (browserEngine == BrowserEngine.blink ||
-      browserEngine == BrowserEngine.samsung ||
       browserEngine == BrowserEngine.webkit) {
     return fontFamily.replaceAll('"', '');
   }

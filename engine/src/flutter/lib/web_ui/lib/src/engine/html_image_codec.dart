@@ -56,9 +56,7 @@ class HtmlCodec implements ui.Codec {
         int naturalWidth = imgElement.naturalWidth;
         int naturalHeight = imgElement.naturalHeight;
         // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=700533.
-        if (naturalWidth == 0 && naturalHeight == 0 && (
-            browserEngine == BrowserEngine.firefox ||
-                browserEngine == BrowserEngine.ie11)) {
+        if (naturalWidth == 0 && naturalHeight == 0 && browserEngine == BrowserEngine.firefox) {
           const int kDefaultImageSizeFallback = 300;
           naturalWidth = kDefaultImageSizeFallback;
           naturalHeight = kDefaultImageSizeFallback;
