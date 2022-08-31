@@ -21,6 +21,7 @@ import '../text/paragraph.dart';
 import '../util.dart';
 import 'autofill_hint.dart';
 import 'composition_aware_mixin.dart';
+import 'input_action.dart';
 import 'input_type.dart';
 import 'text_capitalization.dart';
 
@@ -1179,6 +1180,9 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
     if (config.inputType == EngineInputType.none) {
       activeDomElement.setAttribute('inputmode', 'none');
     }
+
+    final EngineInputAction action = EngineInputAction.fromName(config.inputAction);
+    action.configureInputAction(activeDomElement);
 
     final AutofillInfo? autofill = config.autofill;
     if (autofill != null) {
