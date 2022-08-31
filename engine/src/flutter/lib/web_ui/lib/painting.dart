@@ -270,6 +270,10 @@ abstract class Paint {
 
 abstract class Shader {
   Shader._();
+
+  void dispose();
+
+  bool get debugDisposed;
 }
 
 abstract class Gradient extends Shader {
@@ -700,8 +704,10 @@ abstract class ImageShader extends Shader {
     FilterQuality? filterQuality,
   }) => engine.renderer.createImageShader(image, tmx, tmy, matrix4, filterQuality);
 
+  @override
   void dispose();
 
+  @override
   bool get debugDisposed;
 }
 
@@ -799,12 +805,34 @@ class FragmentProgram {
     throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
   }
 
-  static Future<FragmentProgram> fromAssetAsync(String assetKey) {
-    return Future<FragmentProgram>.microtask(() => FragmentProgram.fromAsset(assetKey));
+  FragmentShader fragmentShader() {
+    throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
   }
 
   Shader shader({
     Float32List? floatUniforms,
     List<ImageShader>? samplerUniforms,
   }) => throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
+}
+
+class FragmentShader extends Shader {
+  FragmentShader._() : super._();
+
+  void setFloat(int index, double value) {
+    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
+  }
+
+  void setSampler(int index, ImageShader sampler) {
+    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
+  }
+
+  @override
+  void dispose() {
+    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
+  }
+
+  @override
+  bool get debugDisposed {
+    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
+  }
 }
