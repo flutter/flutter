@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
-import 'material_state_mixin_test.dart';
 
 Widget buildSliverAppBarApp({
   bool floating = false,
