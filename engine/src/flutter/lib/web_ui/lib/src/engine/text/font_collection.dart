@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'package:ui/src/engine/fonts.dart';
 
 import '../assets.dart';
-import '../browser_detection.dart';
 import '../dom.dart';
 import '../safe_browser_api.dart';
 import '../util.dart';
@@ -252,8 +251,7 @@ class _PolyfillFontManager extends FontManager {
     paragraph.style.position = 'absolute';
     paragraph.style.visibility = 'hidden';
     paragraph.style.fontSize = '72px';
-    final String fallbackFontName =
-        browserEngine == BrowserEngine.ie11 ? 'Times New Roman' : 'sans-serif';
+    const String fallbackFontName = 'sans-serif';
     paragraph.style.fontFamily = fallbackFontName;
     if (descriptors['style'] != null) {
       paragraph.style.fontStyle = descriptors['style']!;

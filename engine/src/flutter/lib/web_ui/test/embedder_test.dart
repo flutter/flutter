@@ -40,9 +40,7 @@ void testMain() {
     embedder.reset();
   },
       // TODO(ferhat): https://github.com/flutter/flutter/issues/46638
-      // TODO(ferhat): https://github.com/flutter/flutter/issues/50828
-      skip: browserEngine == BrowserEngine.firefox ||
-          browserEngine == BrowserEngine.edge);
+      skip: browserEngine == BrowserEngine.firefox);
 
   test('accesibility placeholder is attached after creation', () {
     final FlutterViewEmbedder embedder = FlutterViewEmbedder();
