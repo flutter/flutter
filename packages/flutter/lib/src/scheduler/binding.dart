@@ -183,6 +183,33 @@ enum SchedulerPhase {
   postFrameCallbacks,
 }
 
+/// This callback invoked when a request for [DartPerformanceMode] is disposed.
+///
+/// See: [PerformanceModeRequestHandle].
+typedef PerformanceModeCleaupCallback = void Function();
+
+/// An opaque handle that keeps a request for [DartPerformanceMode] active until
+/// disposed.
+///
+/// To create a [PerformanceModeHandle], use `createPerformanceModeRequest`. The
+/// component that makes the request is responsible for disposing the handle.
+class PerformanceModeRequestHandle {
+  PerformanceModeRequestHandle._(PerformanceModeCleaupCallback this._cleanup);
+
+  PerformanceModeCleaupCallback? _cleanup;
+
+  /// Call this method to signal to [SchedulerBinding] that a request for a [DartPerformanceMode]
+  /// is no longer needed.
+  ///
+  /// This method must only be called once per object.
+  void dispose() {
+    assert(_cleanup != null);
+    _cleanup!();
+    _cleanup = null;
+  }
+
+}
+
 /// Scheduler for running the following:
 ///
 /// * _Transient callbacks_, triggered by the system's
@@ -1098,32 +1125,31 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
-  final Map<dynamic, DartPerformanceMode> _performanceModes = <Object, DartPerformanceMode>{};
+  final Map<Object, DartPerformanceMode> _performanceModes = <Object, DartPerformanceMode>{};
 
-  /// Request a specific [DartPerformanceMode]. `requestor` is the handle to
-  /// component making the request, typically the component itself. Returns
-  /// `true` is the request was successfully made to the engine, `false` otherwise.
-  /// Even if the result is `true`, the engine may choose to ignore the request or
-  /// the performance mode may not be guaranteed to be the one requested.
+  /// Request a specific [DartPerformanceMode].
   ///
-  /// If conflicting requests are made, only the first request will be honored.
-  bool createPerformanceModeRequest(Object requestor, DartPerformanceMode mode) {
+  /// Requestor passes a handle (`requestor`) when making the request, this is typically
+  /// the component itself. Returns `null` if the request was not successful due to
+  /// conflicting performance mode requests. Requestor is responsible for calling
+  /// [PerformanceModeRequestHandle.dispose] when it no longer requires the performance mode.
+  PerformanceModeRequestHandle? createPerformanceModeRequest(Object requestor, DartPerformanceMode mode) {
     if (_performanceModes.isNotEmpty) {
       final DartPerformanceMode oldRequest = _performanceModes.entries.first.value;
       if (oldRequest != mode) {
-        return false;
+        return null;
       }
     }
     _performanceModes[requestor] = mode;
     PlatformDispatcher.instance.requestDartPerformanceMode(mode);
-    return true;
+    return PerformanceModeRequestHandle._(() => _disposePerformanceModeRequest(requestor));
   }
 
-  /// Remove a request for a specific [DartPerformanceMode]. `requestor` is the
-  /// handle to component making the request, typically the component itself. If
-  /// all the pending requests have been disposed, the engine will revert to the
+  /// Remove a request for a specific [DartPerformanceMode].
+  ///
+  /// If all the pending requests have been disposed, the engine will revert to the
   /// [DartPerformanceMode.balanced] performance mode.
-  void disposePerformanceModeRequest(Object requestor) {
+  void _disposePerformanceModeRequest(Object requestor) {
     _performanceModes.remove(requestor);
     if (_performanceModes.isEmpty) {
       PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);

@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,45 +18,44 @@ void main() {
 
   test('PerformanceModeHandler make one request', () async {
     const int handle1 = 1;
-    final bool success = binding.createPerformanceModeRequest(handle1, DartPerformanceMode.latency);
-    expect(success, isTrue);
+    final PerformanceModeRequestHandle? requestHandle = binding.createPerformanceModeRequest(handle1, DartPerformanceMode.latency);
+    expect(requestHandle, isNotNull);
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
-
-    binding.disposePerformanceModeRequest(handle1);
+    requestHandle?.dispose();
     expect(binding.getRequestedPerformanceMode(), isNull);
-  }, skip: kIsWeb); // [intended] performance mode handling is not supported on web.
+  });
 
   test('PerformanceModeHandler make conflicting requests', () async {
     const int handle1 = 1;
-    final bool success1 = binding.createPerformanceModeRequest(handle1, DartPerformanceMode.latency);
-    expect(success1, isTrue);
+    final PerformanceModeRequestHandle? requestHandle1 = binding.createPerformanceModeRequest(handle1, DartPerformanceMode.latency);
+    expect(requestHandle1, isNotNull);
 
     const int handle2 = 2;
-    final bool success2 = binding.createPerformanceModeRequest(handle2, DartPerformanceMode.throughput);
-    expect(success2, isFalse);
+    final PerformanceModeRequestHandle? requestHandle2 = binding.createPerformanceModeRequest(handle2, DartPerformanceMode.throughput);
+    expect(requestHandle2, isNull);
 
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
 
-    binding.disposePerformanceModeRequest(handle1);
+    requestHandle1?.dispose();
     expect(binding.getRequestedPerformanceMode(), isNull);
-  }, skip: kIsWeb); // [intended] performance mode handling is not supported on web.
+  });
 
-  test('PerformanceModeHandler revert only after last requestor disposed', () async {
+  test('PerformanceModeHandler revert only after last requestor disposed',
+      () async {
     const int handle1 = 1;
-    final bool success1 = binding.createPerformanceModeRequest(handle1, DartPerformanceMode.latency);
-    expect(success1, isTrue);
+    final PerformanceModeRequestHandle? requestHandle1 = binding.createPerformanceModeRequest(handle1, DartPerformanceMode.latency);
+    expect(requestHandle1, isNotNull);
 
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
 
     const int handle2 = 2;
-    final bool success2 = binding.createPerformanceModeRequest(handle2, DartPerformanceMode.latency);
-    expect(success2, isTrue);
+    final PerformanceModeRequestHandle? requestHandle2 = binding.createPerformanceModeRequest(handle2, DartPerformanceMode.latency);
+    expect(requestHandle2, isNotNull);
 
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
-    binding.disposePerformanceModeRequest(handle1);
+    requestHandle1?.dispose();
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
-    binding.disposePerformanceModeRequest(handle2);
+    requestHandle2?.dispose();
     expect(binding.getRequestedPerformanceMode(), isNull);
-  }, skip: kIsWeb); // [intended] performance mode handling is not supported on web.
-
+  });
 }

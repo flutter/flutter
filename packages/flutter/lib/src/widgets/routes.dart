@@ -108,6 +108,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Future<T?> get completed => _transitionCompleter.future;
   final Completer<T?> _transitionCompleter = Completer<T?>();
 
+  /// Handle to the performance mode request.
+  ///
+  /// When the route is installed, the performance mode is requested, and this is
+  /// then disposed when the route is disposed. Requesting [DartPerformanceMode.latency]
+  /// indicated to the engine that the transition is latency sensitive and to delay
+  /// non-essential work while this handle is active.
+  PerformanceModeRequestHandle? _performanceModeRequestHandle;
+
   /// {@template flutter.widgets.TransitionRoute.transitionDuration}
   /// The duration the transition going forwards.
   ///
@@ -249,7 +257,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     _animation = createAnimation()
       ..addStatusListener(_handleStatusChanged);
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
-    SchedulerBinding.instance.createPerformanceModeRequest(this, ui.DartPerformanceMode.latency);
+    _performanceModeRequestHandle =
+      SchedulerBinding.instance.createPerformanceModeRequest(this, ui.DartPerformanceMode.latency);
     super.install();
     if (_animation!.isCompleted && overlayEntries.isNotEmpty) {
       overlayEntries.first.opaque = opaque;
@@ -465,7 +474,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
-    SchedulerBinding.instance.disposePerformanceModeRequest(this);
+    _performanceModeRequestHandle?.dispose();
     _animation?.removeStatusListener(_handleStatusChanged);
     if (willDisposeAnimationController) {
       _controller?.dispose();
