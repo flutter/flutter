@@ -674,6 +674,27 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.bottom = 0.0,
   });
 
+  /// Creates insets with symmetric vertical and horizontal offsets.
+  ///
+  /// This is equivalent to [EdgeInsets.symmetric], since the inset is the same
+  /// with either [TextDirection]. This constructor is just a convenience for
+  /// type compatibilty.
+  ///
+  /// {@tool snippet}
+  /// Eight pixel margin above and below, no horizontal margins:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.symmetric(vertical: 8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.symmetric({
+    double horizontal = 0.0,
+    double vertical = 0.0,
+  })  : start = horizontal,
+        end = horizontal,
+        top = vertical,
+        bottom = vertical;
+
   /// Creates insets where all the offsets are `value`.
   ///
   /// {@tool snippet}

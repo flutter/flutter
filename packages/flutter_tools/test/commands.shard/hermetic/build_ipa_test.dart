@@ -349,6 +349,7 @@ void main() {
     expect(testLogger.statusText, contains('Building App Store IPA'));
     expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
     expect(testLogger.statusText, contains('To upload to the App Store'));
+    expect(testLogger.statusText, contains('Apple Transporter macOS app'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

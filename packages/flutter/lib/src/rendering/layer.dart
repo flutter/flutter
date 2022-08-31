@@ -887,12 +887,6 @@ class TextureLayer extends Layer {
   /// The identity of the backend texture.
   final int textureId;
 
-  // TODO(jonahwilliams): remove once https://github.com/flutter/flutter/issues/107576 is fixed.
-  @override
-  bool supportsRasterization() {
-    return false;
-  }
-
   /// When true the texture will not be updated with new frames.
   ///
   /// This is used for resizing embedded Android views: when resizing there

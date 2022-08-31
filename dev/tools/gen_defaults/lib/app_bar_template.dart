@@ -49,7 +49,7 @@ class _${blockName}DefaultsM3 extends AppBarTheme {
   );
 
   @override
-  TextStyle? get toolbarTextStyle => _textTheme.bodyText2;
+  TextStyle? get toolbarTextStyle => _textTheme.bodyMedium;
 
   @override
   TextStyle? get titleTextStyle => ${textStyle('md.comp.top-app-bar.small.headline')};

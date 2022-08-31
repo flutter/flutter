@@ -13,6 +13,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -1625,19 +1626,23 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     } else if (_usesNavigator) {
       assert(_navigator != null);
-      routing = Navigator(
-        restorationScopeId: 'nav',
-        key: _navigator,
-        initialRoute: _initialRouteName,
-        onGenerateRoute: _onGenerateRoute,
-        onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
-          ? Navigator.defaultGenerateInitialRoutes
-          : (NavigatorState navigator, String initialRouteName) {
-            return widget.onGenerateInitialRoutes!(initialRouteName);
-          },
-        onUnknownRoute: _onUnknownRoute,
-        observers: widget.navigatorObservers!,
-        reportsRouteUpdateToEngine: true,
+      routing = FocusScope(
+        debugLabel: 'Navigator Scope',
+        autofocus: true,
+        child: Navigator(
+          restorationScopeId: 'nav',
+          key: _navigator,
+          initialRoute: _initialRouteName,
+          onGenerateRoute: _onGenerateRoute,
+          onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+            ? Navigator.defaultGenerateInitialRoutes
+            : (NavigatorState navigator, String initialRouteName) {
+              return widget.onGenerateInitialRoutes!(initialRouteName);
+            },
+          onUnknownRoute: _onUnknownRoute,
+          observers: widget.navigatorObservers!,
+          reportsRouteUpdateToEngine: true,
+        ),
       );
     } else if (_usesRouterWithConfig) {
       routing = Router<Object>.withConfig(

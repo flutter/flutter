@@ -89,11 +89,7 @@ final FakeVmServiceRequest getVM = FakeVmServiceRequest(
 
 void main() {
   testWithoutContext('Exits if device fails to start', () {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
-      getVM,
-    ]);
-    final FakeProcessManager processManager = FakeProcessManager.empty();
-    final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
+    final DriverService driverService = setUpDriverService();
     final Device device = FakeDevice(LaunchResult.failed());
 
     expect(
@@ -428,8 +424,8 @@ void main() {
 
 FlutterDriverService setUpDriverService({
   Logger? logger,
-  required ProcessManager processManager,
-  required FlutterVmService vmService,
+  ProcessManager? processManager,
+  FlutterVmService? vmService,
   DevtoolsLauncher? devtoolsLauncher,
 }) {
   logger ??= BufferLogger.test();
@@ -438,7 +434,7 @@ FlutterDriverService setUpDriverService({
     logger: logger,
     processUtils: ProcessUtils(
       logger: logger,
-      processManager: processManager,
+      processManager: processManager ?? FakeProcessManager.any(),
     ),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
@@ -459,7 +455,7 @@ FlutterDriverService setUpDriverService({
       if (httpUri.path.endsWith('/ws')) {
         fail('Expected HTTP uri to not contain `/ws`, found $httpUri');
       }
-      return vmService;
+      return vmService!;
     }
   );
 }
@@ -513,15 +509,15 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage? package, {
+    covariant ApplicationPackage package, {
     String? mainPath,
     String? route,
-    DebuggingOptions? debuggingOptions,
-    Map<String, dynamic>? platformArgs,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String? userIdentifier,
-  }) async {
+    }) async {
     if (failOnce) {
       failOnce = false;
       return LaunchResult.failed();
@@ -530,7 +526,7 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
     didStopApp = true;
     return true;
   }

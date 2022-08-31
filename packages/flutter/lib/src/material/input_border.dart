@@ -109,6 +109,14 @@ class _NoInputBorder extends InputBorder {
   }
 
   @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
   void paint(
     Canvas canvas,
     Rect rect, {
@@ -193,6 +201,14 @@ class UnderlineInputBorder extends InputBorder {
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
@@ -386,6 +402,14 @@ class OutlineInputBorder extends InputBorder {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
 
   Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
     // When the corner radii on any side add up to be greater than the

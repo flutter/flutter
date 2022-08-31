@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'desktop_text_selection.dart';
@@ -41,6 +42,7 @@ class SelectionArea extends StatefulWidget {
     this.focusNode,
     this.selectionControls,
     this.magnifierConfiguration,
+    this.onSelectionChanged,
     required this.child,
   });
 
@@ -62,6 +64,9 @@ class SelectionArea extends StatefulWidget {
   ///
   /// If it is null, the platform specific selection control is used.
   final TextSelectionControls? selectionControls;
+
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   /// The child widget this selection area applies to.
   ///
@@ -112,6 +117,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       focusNode: _effectiveFocusNode,
       selectionControls: controls,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+      onSelectionChanged: widget.onSelectionChanged,
       child: widget.child,
     );
   }
