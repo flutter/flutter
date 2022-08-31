@@ -503,11 +503,8 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     final SemanticsNode scrollable = children.first;
     final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
     scrollable.visitChildren((SemanticsNode child) {
-      child.visitChildren((SemanticsNode child) {
-        assert(child.indexInParent != null);
-        indexedChildren[child.indexInParent!] = child;
-        return true;
-      });
+      assert(child.indexInParent != null);
+      indexedChildren[child.indexInParent!] = child;
       return true;
     });
     if (indexedChildren[_currentIndex] == null) {
@@ -546,6 +543,7 @@ class _CupertinoPickerListWheelChildDelegateWrapper implements ListWheelChildDel
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
+      excludeFromSemantics: true,
       onTap: () => onTappedChild(index),
       child: child,
     );
