@@ -15,10 +15,8 @@
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/lib/vars.sh || exit $?
 
-ensure_fuchsia_dir
-
-engine-info "Syncing to Fuchsia's checkout of the Flutter engine."
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/sync_to_fuchsia.sh || exit $?
+engine-info "git checkout Fuchsia's version of Flutter Engine..."
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/checkout_fuchsia_revision.sh || exit $?
 
 engine-info "Creating new branch '$1'."
 git checkout -b $1
