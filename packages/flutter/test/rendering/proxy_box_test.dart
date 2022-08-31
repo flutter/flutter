@@ -536,19 +536,24 @@ void main() {
 
   test('RenderFittedBox respects clipBehavior', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
-    final TestClipPaintingContext context = TestClipPaintingContext();
-
-    // By default, clipBehavior should be Clip.none
-    final RenderFittedBox defaultBox = RenderFittedBox(child: box200x200, fit: BoxFit.none);
-    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultBox.paint(context, Offset.zero);
-    expect(context.clipBehavior, equals(Clip.none));
-
-    for (final Clip clip in Clip.values) {
-      final RenderFittedBox box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip);
-      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      final TestClipPaintingContext context = TestClipPaintingContext();
+      final RenderFittedBox box;
+      switch (clip) {
+        case Clip.none:
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip!);
+          break;
+        case null:
+          box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
+          break;
+      }
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       box.paint(context, Offset.zero);
-      expect(context.clipBehavior, equals(clip));
+      // By default, clipBehavior should be Clip.none
+      expect(context.clipBehavior, equals(clip ?? Clip.none));
     }
   });
 
