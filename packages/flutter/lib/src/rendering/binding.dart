@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import '../widgets/drag_target.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracker.dart';
@@ -373,6 +374,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   void _handlePersistentFrameCallback(Duration timeStamp) {
     drawFrame();
     _scheduleMouseTrackerUpdate();
+    _scheduleDragTargetUpdate();
   }
 
   bool _debugMouseTrackerUpdateScheduled = false;
@@ -389,6 +391,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         return true;
       }());
       _mouseTracker!.updateAllDevices(renderView.hitTestMouseTrackers);
+    });
+  }
+
+  void _scheduleDragTargetUpdate() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      DragTargetPostFrameUpdater.instance.updateAll();
     });
   }
 
