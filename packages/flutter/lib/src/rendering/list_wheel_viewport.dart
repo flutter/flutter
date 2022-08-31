@@ -1039,7 +1039,7 @@ class RenderListWheelViewport
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
-    transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
+    transform.translate(parentData.offset.dx, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
   }
 
   @override
@@ -1051,7 +1051,23 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
+      final double top = _getUntransformedPaintingCoordinateY(parentData.offset.dy);
+      final double bottom = top + itemExtent;
+      if (position.dy > top && position.dy < bottom) {
+        return child.hitTest(
+          result,
+          position: position.translate(-parentData.offset.dx, -top),
+        );
+      }
+      child = childAfter(child);
+    }
+    return false;
+  }
+
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
