@@ -657,7 +657,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
 
   @override
   void delete() {
-    _skParagraph!.delete();
+    _skParagraph?.delete();
+    _skParagraph = null;
   }
 
   @override
