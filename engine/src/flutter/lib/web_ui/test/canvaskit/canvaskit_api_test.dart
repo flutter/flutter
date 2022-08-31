@@ -10,7 +10,6 @@ import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:web_engine_tester/golden_tester.dart';
 
 import '../matchers.dart';
 import 'common.dart';
@@ -50,9 +49,7 @@ void testMain() {
     _matrix4x4CompositionTests();
     _toSkRectTests();
     _skVerticesTests();
-    group('SkParagraph', () {
-      _paragraphTests();
-    });
+    _paragraphTests();
     group('SkPath', () {
       _pathTests();
     });
@@ -1450,36 +1447,31 @@ void _textStyleTests() {
 }
 
 void _paragraphTests() {
-  setUpAll(() async {
-    CanvasKitRenderer.instance.fontCollection.debugRegisterTestFonts();
-    await CanvasKitRenderer.instance.fontCollection.ensureFontsLoaded();
-  });
-
   // This test is just a kitchen sink that blasts CanvasKit with all paragraph
   // properties all at once, making sure CanvasKit doesn't choke on anything.
   // In particular, this tests that our JS bindings are correct, such as that
   // arguments are of acceptable types and passed in the correct order.
-  test('kitchensink', () async {
+  test('SkParagraph API kitchensink', () {
     final SkParagraphStyleProperties props = SkParagraphStyleProperties();
-    props.textAlign = canvasKit.TextAlign.Left;
+    props.textAlign = canvasKit.TextAlign.Center;
     props.textDirection = canvasKit.TextDirection.RTL;
     props.heightMultiplier = 3;
     props.textHeightBehavior = canvasKit.TextHeightBehavior.All;
     props.maxLines = 4;
     props.ellipsis = '___';
     props.textStyle = SkTextStyleProperties()
-      ..backgroundColor = Float32List.fromList(<double>[0.2, 0, 0, 0.5])
-      ..color = Float32List.fromList(<double>[0, 1, 0, 1])
-      ..foregroundColor = Float32List.fromList(<double>[1, 0, 1, 1])
+      ..backgroundColor = Float32List.fromList(<double>[1, 2, 3, 4])
+      ..color = Float32List.fromList(<double>[5, 6, 7, 8])
+      ..foregroundColor = Float32List.fromList(<double>[9, 10, 11, 12])
       ..decoration = 0x2
       ..decorationThickness = 2.0
       ..decorationColor = Float32List.fromList(<double>[13, 14, 15, 16])
       ..decorationStyle = canvasKit.DecorationStyle.Dotted
       ..textBaseline = canvasKit.TextBaseline.Ideographic
-      ..fontSize = 48
+      ..fontSize = 24
       ..letterSpacing = 5
       ..wordSpacing = 10
-      ..heightMultiplier = 1.3
+      ..heightMultiplier = 2.5
       ..halfLeading = true
       ..locale = 'en_CA'
       ..fontFamilies = <String>['Roboto', 'serif']
@@ -1494,24 +1486,23 @@ void _paragraphTests() {
         SkFontFeature()
           ..name = 'tnum'
           ..value = 1,
-      ]
-    ;
+      ];
     props.strutStyle = SkStrutStyleProperties()
       ..fontFamilies = <String>['Roboto', 'Noto']
       ..fontStyle = (SkFontStyle()
         ..slant = canvasKit.FontSlant.Italic
         ..weight = canvasKit.FontWeight.Bold)
-      ..fontSize = 72
-      ..heightMultiplier = 1.5
+      ..fontSize = 23
+      ..heightMultiplier = 5
       ..halfLeading = true
-      ..leading = 0
+      ..leading = 6
       ..strutEnabled = true
       ..forceStrutHeight = false;
 
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
-    final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontProvider(
+    final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.Make(
       paragraphStyle,
-      CanvasKitRenderer.instance.fontCollection.fontProvider,
+      CanvasKitRenderer.instance.fontCollection.skFontMgr,
     );
 
     builder.addText('Hello');
@@ -1522,93 +1513,51 @@ void _paragraphTests() {
       canvasKit.TextBaseline.Ideographic,
       4.0,
     );
-    builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()
-      ..color = Float32List.fromList(<double>[1, 0, 0, 1])
-      ..fontSize = 24
-      ..fontFamilies = <String>['Roboto', 'serif']
-    ));
+    builder
+        .pushStyle(canvasKit.TextStyle(SkTextStyleProperties()..fontSize = 12));
     builder.addText('World');
     builder.pop();
     builder.pushPaintStyle(
-      canvasKit.TextStyle(SkTextStyleProperties()
-        ..color = Float32List.fromList(<double>[1, 0, 0, 1])
-        ..fontSize = 60
-        ..fontFamilies = <String>['Roboto', 'serif']
-      ),
-      SkPaint()..setColorInt(0xFF0000FF),
-      SkPaint()..setColorInt(0xFFFF0000),
-    );
+        canvasKit.TextStyle(SkTextStyleProperties()..fontSize = 12),
+        SkPaint(),
+        SkPaint());
     builder.addText('!');
     builder.pop();
     builder.pushStyle(
         canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
     final SkParagraph paragraph = builder.build();
-    paragraph.layout(500);
-
-    final DomCanvasElement canvas = createDomCanvasElement(
-      width: 400,
-      height: 160,
-    );
-    domDocument.body!.append(canvas);
-
-    // TODO(yjbanov): WebGL screenshot tests do not work on Firefox - https://github.com/flutter/flutter/issues/109265
-    if (!isFirefox) {
-      final SkSurface surface = canvasKit.MakeWebGLCanvasSurface(canvas);
-      final SkCanvas skCanvas = surface.getCanvas();
-      skCanvas.drawColorInt(0xFFCCCCCC, toSkBlendMode(ui.BlendMode.srcOver));
-      skCanvas.drawParagraph(paragraph, 20, 20);
-      skCanvas.drawRect(
-        Float32List.fromList(<double>[20, 20, 20 + paragraph.getMaxIntrinsicWidth(), 20 + paragraph.getHeight()]),
-        SkPaint()
-          ..setStyle(toSkPaintStyle(ui.PaintingStyle.stroke))
-          ..setStrokeWidth(1)
-          ..setColorInt(0xFF00FF00),
-      );
-      surface.flush();
-
-      await matchGoldenFile(
-        'paragraph_kitchen_sink.png',
-        region: const ui.Rect.fromLTRB(0, 0, 400, 160),
-        maxDiffRatePercent: 0.0,
-        write: true,
-      );
-    }
-
-    void expectAlmost(double actual, double expected) {
-      expect(actual, within<double>(distance: actual / 100, from: expected));
-    }
-
-    expectAlmost(paragraph.getAlphabeticBaseline(), 85.5);
+    paragraph.layout(55);
+    expect(paragraph.getAlphabeticBaseline(),
+        within<double>(distance: 0.5, from: 20.7));
     expect(paragraph.didExceedMaxLines(), isFalse);
-    expectAlmost(paragraph.getHeight(), 108);
-    expectAlmost(paragraph.getIdeographicBaseline(), 108);
-    expectAlmost(paragraph.getLongestLine(), 263);
-    expectAlmost(paragraph.getMaxIntrinsicWidth(), 263);
-    expectAlmost(paragraph.getMinIntrinsicWidth(), 135);
-    expectAlmost(paragraph.getMaxWidth(), 500);
+    expect(paragraph.getHeight(), 25);
+    expect(paragraph.getIdeographicBaseline(),
+        within<double>(distance: 0.5, from: 25));
+    expect(paragraph.getLongestLine(), 50);
+    expect(paragraph.getMaxIntrinsicWidth(), 50);
+    expect(paragraph.getMinIntrinsicWidth(), 50);
+    expect(paragraph.getMaxWidth(), 55);
     expect(
-      paragraph.getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max).single,
-      hasLength(4),
-    );
+        paragraph.getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight,
+            canvasKit.RectWidthStyle.Max),
+        <double>[]);
     expect(paragraph.getRectsForPlaceholders(), hasLength(1));
     expect(paragraph.getLineMetrics(), hasLength(1));
 
     final SkLineMetrics lineMetrics =
         paragraph.getLineMetrics().cast<SkLineMetrics>().single;
-    expectAlmost(lineMetrics.ascent, 55.6);
-    expectAlmost(lineMetrics.descent, 14.8);
+    expect(lineMetrics.ascent, within<double>(distance: 0.5, from: 20.7));
+    expect(lineMetrics.descent, within<double>(distance: 0.2, from: 4.3));
     expect(lineMetrics.isHardBreak, isTrue);
-    expectAlmost(lineMetrics.baseline, 85.5);
-    expectAlmost(lineMetrics.height, 108);
-    expectAlmost(lineMetrics.left, 2.5);
-    expectAlmost(lineMetrics.width, 263);
+    expect(lineMetrics.baseline, within<double>(distance: 0.5, from: 20.7));
+    expect(lineMetrics.height, 25);
+    expect(lineMetrics.left, 2.5);
+    expect(lineMetrics.width, 50);
     expect(lineMetrics.lineNumber, 0);
 
-    expect(
-      paragraph.getGlyphPositionAtCoordinate(5, 5).affinity,
-      canvasKit.Affinity.Upstream,
-    );
+    expect(paragraph.getGlyphPositionAtCoordinate(5, 5).affinity,
+        canvasKit.Affinity.Downstream);
 
     // "Hello"
     for (int i = 0; i < 5; i++) {
