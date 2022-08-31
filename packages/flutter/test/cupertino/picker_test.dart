@@ -487,4 +487,32 @@ void main() {
       expect(borderRadius, isA<BorderRadiusDirectional>());
     });
   });
+
+  testWidgets('Picker children should be hittable', (WidgetTester tester) async {
+    int taps = 0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPicker(
+          itemExtent: 15.0,
+          onSelectedItemChanged: (int i) {},
+          selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
+              background: Color(0x12345678)),
+          children: <Widget>[
+            const Text('2'),
+            GestureDetector(
+              onTap: () => taps++,
+              behavior: HitTestBehavior.opaque,
+              child: const Text('1'),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(taps, equals(0));
+    await tester.tap(find.text('1'));
+    expect(taps, equals(1));
+    await tester.tap(find.text('2'));
+    expect(taps, equals(1));
+  });
 }
