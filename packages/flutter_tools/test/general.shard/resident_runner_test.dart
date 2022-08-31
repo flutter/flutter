@@ -157,7 +157,7 @@ void main() {
   late Testbed testbed;
   late FakeFlutterDevice flutterDevice;
   late FakeDevFS devFS;
-  late ResidentRunner  residentRunner;
+  late ResidentRunner residentRunner;
   late FakeDevice device;
   FakeVmServiceHost? fakeVmServiceHost;
 
