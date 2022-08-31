@@ -18,6 +18,7 @@
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "flutter/lib/ui/painting/engine_layer.h"
 #include "flutter/lib/ui/painting/fragment_program.h"
+#include "flutter/lib/ui/painting/fragment_shader.h"
 #include "flutter/lib/ui/painting/gradient.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/image_descriptor.h"
@@ -67,6 +68,7 @@ typedef CanvasPath Path;
   V(Canvas::Create, 6)                                                \
   V(ColorFilter::Create, 1)                                           \
   V(FragmentProgram::Create, 1)                                       \
+  V(ReusableFragmentShader::Create, 4)                                \
   V(Gradient::Create, 1)                                              \
   V(ImageFilter::Create, 1)                                           \
   V(ImageShader::Create, 1)                                           \
@@ -167,6 +169,8 @@ typedef CanvasPath Path;
   V(EngineLayer, dispose, 1)                           \
   V(FragmentProgram, initFromAsset, 2)                 \
   V(FragmentProgram, shader, 4)                        \
+  V(ReusableFragmentShader, Dispose, 1)                \
+  V(ReusableFragmentShader, SetSampler, 3)             \
   V(Gradient, initLinear, 6)                           \
   V(Gradient, initRadial, 8)                           \
   V(Gradient, initSweep, 9)                            \
