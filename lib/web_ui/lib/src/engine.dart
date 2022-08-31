@@ -161,6 +161,7 @@ export 'engine/text/word_break_properties.dart';
 export 'engine/text/word_breaker.dart';
 export 'engine/text_editing/autofill_hint.dart';
 export 'engine/text_editing/composition_aware_mixin.dart';
+export 'engine/text_editing/input_action.dart';
 export 'engine/text_editing/input_type.dart';
 export 'engine/text_editing/text_capitalization.dart';
 export 'engine/text_editing/text_editing.dart';
