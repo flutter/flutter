@@ -162,17 +162,17 @@ void main() {
       // catch it in a zone.
       unawaited(runZoned<Future<void>>(
         () {
-        unawaited(runner.run(
-          <String>['crash'],
-          () => <FlutterCommand>[
-            CrashingFlutterCommand(),
-          ],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          reportCrashes: true,
-          shutdownHooks: ShutdownHooks(),
-        ));
-        return null;
+          unawaited(runner.run(
+            <String>['crash'],
+            () => <FlutterCommand>[
+              CrashingFlutterCommand(),
+            ],
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
+          ));
+          return null;
         },
         onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
