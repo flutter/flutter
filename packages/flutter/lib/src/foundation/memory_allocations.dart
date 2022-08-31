@@ -7,11 +7,18 @@ import 'dart:ui' as ui;
 import 'assertions.dart';
 import 'diagnostics.dart';
 
-/// Enum-like list of the Flutter Framework and SDK libraries with instrumented
+/// List of the Flutter Framework and SDK libraries with instrumented
 /// classes.
 class FlutterLibraries {
   static const String dartUi = 'dart:ui';
   static const String flutterFoundation = 'package:flutter/foundation.dart';
+}
+
+/// List of field names for dart form of [ObjectEvent].
+class FieldNames {
+  static const String eventType = 'eventType';
+  static const String labraryName = 'labraryName';
+  static const String className = 'className';
 }
 
 /// A lyfecycle event of an object.
@@ -19,8 +26,6 @@ abstract class ObjectEvent{
   /// Creates an instance of [ObjectEvent].
   ObjectEvent({
     required this.object,
-    this.details = const <Object>[],
-    this.token,
   });
 
   /// Reference to the object.
@@ -29,16 +34,13 @@ abstract class ObjectEvent{
   /// long living place as it will prevent garbage collection.
   final Object object;
 
-  /// A token that uniquely identify object, for object tracking
-  /// accross events.
+  /// The representation of the event in a form, acceptible by a
+  /// pure dart library, that cannot depend on Flutter.
   ///
-  /// If not provided, the consumers of the event may use
-  /// [identityHashCode] and handle small risk of duplicates.
-  /// The object's token should be the same accross all events.
-  final Object? token;
-
-  /// Details that may help with troubleshooting.
-  final List<Object> details;
+  /// The method enables the code like:
+  /// MemoryAllocations.instance
+  ///   .addListener((event) => dartMethod(event.toDart()));
+  Map<Object, Map<String, dynamic>> toDart();
 }
 
 /// A listener of [ObjectEvent].
@@ -51,8 +53,6 @@ class ObjectCreated extends ObjectEvent {
     required this.library,
     required this.className,
     required super.object,
-    super.token,
-    super.details = const <Object>[],
   });
 
   /// Name of the instrumented library.
@@ -60,6 +60,14 @@ class ObjectCreated extends ObjectEvent {
 
   /// Name of the instrumented class.
   final String className;
+
+  @override
+  Map<Object, Map<String, dynamic>> toDart() =>
+    <Object, Map<String, dynamic>>{object: <String, dynamic>{
+      FieldNames.labraryName: library,
+      FieldNames.className: className,
+      FieldNames.eventType: 'created',
+    }};
 }
 
 /// An event that describes disposal of an object.
@@ -67,23 +75,13 @@ class ObjectDisposed extends ObjectEvent {
   /// Creates an instance of [ObjectDisposed].
   ObjectDisposed({
     required super.object,
-    super.details = const <Object>[],
-    super.token,
   });
-}
 
-/// The event contains tracing information that may help with memory
-/// troubleshooting.
-///
-/// For example, information about ownership transfer
-/// or state change.
-class ObjectTraced extends ObjectEvent {
-  /// Creates an instance of [ObjectTraced].
-  ObjectTraced({
-    required super.object,
-    super.details = const <Object>[],
-    super.token,
-  });
+  @override
+  Map<Object, Map<String, dynamic>> toDart() =>
+    <Object, Map<String, dynamic>>{object: <String, dynamic>{
+      FieldNames.eventType: 'disposed',
+    }};
 }
 
 /// An interface for listening to object lyfecycle events.
@@ -139,17 +137,23 @@ class MemoryAllocations {
     }
 
     if (_activeDispatchLoops > 0) {
-      // If there are active dispatch loops the method 'remove'
-      // should not be invoked for the list of listeners, as it will
-      // break the loops correctness.
+      print('remove11 $listeners');
+      // If there are active dispatch loops, listeners.remove
+      // should not be invoked, as it will
+      // break the dispatch loops correctness.
       for (int i = 0; i < listeners.length; i++) {
+        print('111');
         if (listeners[i] == listener) {
+          print('112');
           listeners[i] = null;
+          print('113');
           _listenersContainNulls = true;
         }
       }
+      print('remove12 $listeners');
     } else {
-      listeners.remove(listener);
+      print('remove2');
+      listeners.removeWhere((ObjectEventListener? l) => l == listener);
       _checkListenersForEmptiness();
     }
   }
@@ -173,7 +177,12 @@ class MemoryAllocations {
   /// Return true if there are listeners.
   ///
   /// If there is no listeners, the app can save on creating the event object.
-  bool get hasListeners => _listeners?.isNotEmpty ?? false;
+  bool get hasListeners {
+    if (_listenersContainNulls) {
+      return _listeners?.firstWhere((ObjectEventListener? l) => l != null) != null;
+    }
+    return _listeners?.isNotEmpty ?? false;
+  }
 
   /// Dispatch a new object event to listeners.
   ///
