@@ -159,6 +159,27 @@ Future<void> testMain() async {
       editingStrategy!.disable();
     });
 
+    test('Knows how to create non-default text actions', () {
+      final InputConfiguration config = InputConfiguration(
+        inputAction: 'TextInputAction.send'
+      );
+      editingStrategy!.enable(
+        config,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
+      final DomElement input = defaultTextEditingRoot.querySelector('input')!;
+      expect(editingStrategy!.domElement, input);
+      if (operatingSystem == OperatingSystem.iOs || operatingSystem == OperatingSystem.android){
+        expect(input.getAttribute('enterkeyhint'), 'send');
+      } else {
+        expect(input.getAttribute('enterkeyhint'), null);
+      }
+
+      editingStrategy!.disable();
+    });
+
     test('Knows to turn autocorrect off', () {
       final InputConfiguration config = InputConfiguration(
         autocorrect: false,
