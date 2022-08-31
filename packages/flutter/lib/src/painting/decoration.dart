@@ -8,6 +8,9 @@ import 'basic_types.dart';
 import 'edge_insets.dart';
 import 'image_provider.dart';
 
+// Examples can assume:
+// late Decoration myDecoration;
+
 // This group of classes is intended for painting in cartesian coordinates.
 
 /// A description of a box decoration (a decoration applied to a [Rect]).

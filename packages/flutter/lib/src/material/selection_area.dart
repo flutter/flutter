@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 
+import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'magnifier.dart';
 import 'text_selection.dart';
@@ -18,6 +20,10 @@ import 'theme.dart';
 /// Flutter widgets are not selectable by default. To enable selection for
 /// a specific screen, consider wrapping the body of the [Route] with a
 /// [SelectionArea].
+///
+/// The [SelectionArea] widget must have a [Localizations] ancestor that
+/// contains a [MaterialLocalizations] delegate; using the [MaterialApp] widget
+/// ensures that such an ancestor is present.
 ///
 /// {@tool dartpad}
 /// This example shows how to make a screen selectable.
@@ -36,14 +42,15 @@ class SelectionArea extends StatefulWidget {
     this.focusNode,
     this.selectionControls,
     this.magnifierConfiguration,
+    this.onSelectionChanged,
     required this.child,
   });
 
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.intro}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   ///
-  /// {@macro flutter.widgets.text_selection.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
   /// Android, and builds nothing on all other platforms. If it is desired to supress
@@ -57,6 +64,9 @@ class SelectionArea extends StatefulWidget {
   ///
   /// If it is null, the platform specific selection control is used.
   final TextSelectionControls? selectionControls;
+
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   /// The child widget this selection area applies to.
   ///
@@ -85,6 +95,7 @@ class _SelectionAreaState extends State<SelectionArea> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     TextSelectionControls? controls = widget.selectionControls;
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
@@ -106,6 +117,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       focusNode: _effectiveFocusNode,
       selectionControls: controls,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+      onSelectionChanged: widget.onSelectionChanged,
       child: widget.child,
     );
   }

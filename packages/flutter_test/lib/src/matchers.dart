@@ -2030,7 +2030,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       imageFuture = captureImage(elements.single);
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
       final ByteData? bytes = await image.toByteData();

@@ -302,7 +302,9 @@ class _TabControllerScope extends InheritedWidget {
 ///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
-///   final List<Tab> myTabs = <Tab>[
+///   const MyDemo({super.key});
+///
+///   static const List<Tab> myTabs = <Tab>[
 ///     Tab(text: 'LEFT'),
 ///     Tab(text: 'RIGHT'),
 ///   ];
@@ -313,13 +315,13 @@ class _TabControllerScope extends InheritedWidget {
 ///       length: myTabs.length,
 ///       child: Scaffold(
 ///         appBar: AppBar(
-///           bottom: TabBar(
+///           bottom: const TabBar(
 ///             tabs: myTabs,
 ///           ),
 ///         ),
 ///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             final String label = tab.text.toLowerCase();
+///             final String label = tab.text!.toLowerCase();
 ///             return Center(
 ///               child: Text(
 ///                 'This is the $label tab',

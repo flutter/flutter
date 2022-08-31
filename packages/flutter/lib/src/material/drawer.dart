@@ -14,6 +14,9 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// The possible alignments of a [Drawer].
 enum DrawerAlignment {
   /// Denotes that the [Drawer] is at the start side of the [Scaffold].
@@ -117,8 +120,8 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///
 /// ```dart
 /// ListTile(
-///   leading: Icon(Icons.change_history),
-///   title: Text('Change history'),
+///   leading: const Icon(Icons.change_history),
+///   title: const Text('Change history'),
 ///   onTap: () {
 ///     // change app state...
 ///     Navigator.pop(context); // close the drawer

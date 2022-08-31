@@ -35,6 +35,9 @@ import 'viewport.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Signature used by [Scrollable] to build the viewport through which the
 /// scrollable content is displayed.
 typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset position);
@@ -291,7 +294,7 @@ class Scrollable extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ScrollableState scrollable = Scrollable.of(context);
+  /// ScrollableState scrollable = Scrollable.of(context)!;
   /// ```
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]

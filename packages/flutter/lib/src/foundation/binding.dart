@@ -119,6 +119,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// class.
 ///
 /// ```dart
+/// // continuing from previous example...
 /// class FooLibraryBinding extends BindingBase with BarBinding, FooBinding {
 ///   static FooBinding ensureInitialized() {
 ///     if (FooBinding._instance == null) {

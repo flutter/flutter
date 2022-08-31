@@ -21,6 +21,11 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late List<DataColumn> _columns;
+// late List<DataRow> _rows;
+
 /// Signature for [DataColumn.onSort] callback.
 typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
 
@@ -183,10 +188,14 @@ class DataRow {
   /// ```dart
   /// DataRow(
   ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected))
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
+  ///   cells: const <DataCell>[
+  ///     // ...
+  ///   ],
   /// )
   /// ```
   ///
@@ -228,7 +237,7 @@ class DataCell {
   }) : assert(child != null);
 
   /// A cell that has no content and has zero width and height.
-  static const DataCell empty = DataCell(SizedBox(width: 0.0, height: 0.0));
+  static const DataCell empty = DataCell(SizedBox.shrink());
 
   /// The data for the row.
   ///
@@ -474,10 +483,13 @@ class DataTable extends StatelessWidget {
   /// ```dart
   /// DataTable(
   ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected))
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
+  ///   columns: _columns,
+  ///   rows: _rows,
   /// )
   /// ```
   ///
@@ -503,7 +515,7 @@ class DataTable extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataTextStyle] is used. By default, the text
-  /// style is [TextTheme.bodyText2].
+  /// style is [TextTheme.bodyMedium].
   final TextStyle? dataTextStyle;
 
   /// {@template flutter.material.dataTable.headingRowColor}
@@ -521,9 +533,12 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.headingRowColor}
   /// ```dart
   /// DataTable(
+  ///   columns: _columns,
+  ///   rows: _rows,
   ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.hovered))
+  ///     if (states.contains(MaterialState.hovered)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
   /// )
@@ -550,7 +565,7 @@ class DataTable extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.headingTextStyle] is used. By default, the
-  /// text style is [TextTheme.subtitle2].
+  /// text style is [TextTheme.titleSmall].
   final TextStyle? headingTextStyle;
 
   /// {@template flutter.material.dataTable.horizontalMargin}
@@ -759,7 +774,7 @@ class DataTable extends StatelessWidget {
     final TextStyle effectiveHeadingTextStyle = headingTextStyle
       ?? dataTableTheme.headingTextStyle
       ?? themeData.dataTableTheme.headingTextStyle
-      ?? themeData.textTheme.subtitle2!;
+      ?? themeData.textTheme.titleSmall!;
     final double effectiveHeadingRowHeight = headingRowHeight
       ?? dataTableTheme.headingRowHeight
       ?? themeData.dataTableTheme.headingRowHeight
@@ -822,7 +837,7 @@ class DataTable extends StatelessWidget {
     final TextStyle effectiveDataTextStyle = dataTextStyle
       ?? dataTableTheme.dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
-      ?? themeData.textTheme.bodyText2!;
+      ?? themeData.textTheme.bodyMedium!;
     final double effectiveDataRowHeight = dataRowHeight
       ?? dataTableTheme.dataRowHeight
       ?? themeData.dataTableTheme.dataRowHeight

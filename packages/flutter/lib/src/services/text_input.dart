@@ -1248,17 +1248,22 @@ mixin DeltaTextInputClient implements TextInputClient {
   /// This example shows what an implementation of this method could look like.
   ///
   /// ```dart
-  /// TextEditingValue? _localValue;
-  /// @override
-  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   if (_localValue == null) {
-  ///     return;
+  /// class MyClient with DeltaTextInputClient {
+  ///   TextEditingValue? _localValue;
+  ///
+  ///   @override
+  ///   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///     if (_localValue == null) {
+  ///       return;
+  ///     }
+  ///     TextEditingValue newValue = _localValue!;
+  ///     for (final TextEditingDelta delta in textEditingDeltas) {
+  ///       newValue = delta.apply(newValue);
+  ///     }
+  ///     _localValue = newValue;
   ///   }
-  ///   TextEditingValue newValue = _localValue!;
-  ///   for (final TextEditingDelta delta in textEditingDeltas) {
-  ///     newValue = delta.apply(newValue);
-  ///   }
-  ///   _localValue = newValue;
+  ///
+  ///   // ...
   /// }
   /// ```
   /// {@end-tool}
@@ -1518,7 +1523,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
-    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
     : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
