@@ -310,6 +310,8 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject? flutterProject;
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
+
+  // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
   final UriConverter? uriConverter;
 
   /// The device to run the test on for Integration Tests.
