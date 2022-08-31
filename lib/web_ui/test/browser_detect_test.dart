@@ -37,15 +37,6 @@ void testMain() {
               '(khtml, like gecko) version/14.0.3 safari/605.1.15');
       expect(browserEngine, BrowserEngine.webkit);
     });
-
-    test('Should detect Samsung browser', () {
-      // Samsung 13.2.1.70 on Galaxy Tab S6.
-      final BrowserEngine browserEngine = detectBrowserEngineByVendorAgent(
-          'Google Inc.',
-          'mozilla/5.0 (x11; linux x86_64) applewebkit/537.36 (khtml, like gecko)'
-              ' samsungbrowser/13.2 chrome/83.0.4103.106 safari/537.36');
-      expect(browserEngine, BrowserEngine.samsung);
-    });
   });
 
   group('detectOperatingSystem', () {

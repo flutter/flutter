@@ -37,7 +37,6 @@ const int _kReturnKeyCode = 13;
 /// is autofilled.
 bool browserHasAutofillOverlay() =>
     browserEngine == BrowserEngine.blink ||
-    browserEngine == BrowserEngine.samsung ||
     browserEngine == BrowserEngine.webkit;
 
 /// `transparentTextEditing` class is configured to make the autofill overlay
