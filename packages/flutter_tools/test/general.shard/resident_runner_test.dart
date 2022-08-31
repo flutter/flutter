@@ -1388,6 +1388,47 @@ flutter:
     expect(testLogger.statusText, isEmpty);
   }));
 
+  testUsingContext('ResidentRunner generates files when l10n.yaml exists', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+      ..nextOutput = const CompilerOutput('foo', 1 ,<Uri>[]);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+    );
+    flutterDevice.generator = residentCompiler;
+
+    await residentRunner.run();
+
+    final File generatedLocalizationsFile = globals.fs.directory('.dart_tool')
+      .childDirectory('flutter_gen')
+      .childDirectory('gen_l10n')
+      .childFile('app_localizations.dart');
+    expect(generatedLocalizationsFile.existsSync(), isTrue);
+
+    // Completing this future ensures that the daemon can exit correctly.
+    expect(await residentRunner.waitForAppToFinish(), 1);
+  }));
+
   testUsingContext('ResidentRunner printHelpDetails hot runner', () => testbed.run(() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
