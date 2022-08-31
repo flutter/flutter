@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/formats.h"
 
+#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/texture.h"
 
@@ -26,8 +27,6 @@ bool Attachment::IsValid() const {
     return false;
   }
 
-// TODO(110385): Enable attachment validation.
-#if 0
   if (StoreActionNeedsResolveTexture(store_action)) {
     if (!resolve_texture || !resolve_texture->IsValid()) {
       VALIDATION_LOG << "Store action needs resolve but no valid resolve "
@@ -36,16 +35,43 @@ bool Attachment::IsValid() const {
     }
   }
 
-  if (texture->GetTextureDescriptor().storage_mode ==
-      StorageMode::kDeviceTransient) {
-    if (load_action != LoadAction::kDontCare &&
-        store_action != StoreAction::kDontCare) {
+  if (resolve_texture) {
+    if (store_action != StoreAction::kMultisampleResolve &&
+        store_action != StoreAction::kStoreAndMultisampleResolve) {
+      VALIDATION_LOG << "A resolve texture was specified, but the store action "
+                        "doesn't include multisample resolve.";
+      return false;
+    }
+
+    if (texture->GetTextureDescriptor().storage_mode ==
+            StorageMode::kDeviceTransient &&
+        store_action == StoreAction::kStoreAndMultisampleResolve) {
       VALIDATION_LOG
-          << "Load or store actions specified on device transient textures.";
+          << "The multisample texture cannot be transient when "
+             "specifying the StoreAndMultisampleResolve StoreAction.";
+    }
+  }
+
+  auto storage_mode = resolve_texture
+                          ? resolve_texture->GetTextureDescriptor().storage_mode
+                          : texture->GetTextureDescriptor().storage_mode;
+
+  if (storage_mode == StorageMode::kDeviceTransient) {
+    if (load_action == LoadAction::kLoad) {
+      VALIDATION_LOG << "The LoadAction cannot be Load when attaching a device "
+                        "transient " +
+                            std::string(resolve_texture ? "resolve texture."
+                                                        : "texture.");
+      return false;
+    }
+    if (store_action != StoreAction::kDontCare) {
+      VALIDATION_LOG << "The StoreAction must be DontCare when attaching a "
+                        "device transient " +
+                            std::string(resolve_texture ? "resolve texture."
+                                                        : "texture.");
       return false;
     }
   }
-#endif
 
   return true;
 }
