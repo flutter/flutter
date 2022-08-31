@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -23,7 +21,7 @@ void main() {
     testUsingContext('rasterizer and skia screenshots do not require a device', () async {
       // Throw a specific exception when attempting to make a VM Service connection to
       // verify that we've made it past the initial validation.
-      openChannelForTesting = (String url, {CompressionOptions compression, Logger logger}) async {
+      openChannelForTesting = (String url, {CompressionOptions? compression, Logger? logger}) async {
         expect(url, 'ws://localhost:8181/ws');
         throw Exception('dummy');
       };
