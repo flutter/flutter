@@ -191,7 +191,7 @@ typedef PerformanceModeCleaupCallback = void Function();
 /// An opaque handle that keeps a request for [DartPerformanceMode] active until
 /// disposed.
 ///
-/// To create a [PerformanceModeHandle], use `createPerformanceModeRequest`. The
+/// To create a [PerformanceModeRequestHandle], use `createPerformanceModeRequest`. The
 /// component that makes the request is responsible for disposing the handle.
 class PerformanceModeRequestHandle {
   PerformanceModeRequestHandle._(PerformanceModeCleaupCallback this._cleanup);
