@@ -722,13 +722,13 @@ void main() {
         'debounces/merges same operation type and returns same result',
         () async {
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>?> operations = <Future<int>?>[
+        final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP1', debounceDuration, () async => 2),
         ];
 
         time.elapse(debounceDuration * 5);
-        final List<int> results = await Future.wait(operations as Iterable<Future<int>>);
+        final List<int> results = await Future.wait(operations);
 
         expect(results, orderedEquals(<int>[1, 1]));
       });
@@ -737,14 +737,14 @@ void main() {
     testWithoutContext('does not merge results outside of the debounce duration',
         () async {
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>?> operations = <Future<int>?>[
+        final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
-          Future<int>.delayed(debounceDuration * 2).then((_) =>
-              queue.queueAndDebounce('OP1', debounceDuration, () async => 2)!),
+          Future<void>.delayed(debounceDuration * 2).then((_) =>
+              queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
         ];
 
         time.elapse(debounceDuration * 5);
-        final List<int> results = await Future.wait(operations as Iterable<Future<int>>);
+        final List<int> results = await Future.wait(operations);
 
         expect(results, orderedEquals(<int>[1, 2]));
       });
@@ -753,13 +753,13 @@ void main() {
     testWithoutContext('does not merge results of different operations',
         () async {
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>?> operations = <Future<int>?>[
+        final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP2', debounceDuration, () async => 2),
         ];
 
         time.elapse(debounceDuration * 5);
-        final List<int> results = await Future.wait(operations as Iterable<Future<int>>);
+        final List<int> results = await Future.wait(operations);
 
         expect(results, orderedEquals(<int>[1, 2]));
       });
@@ -780,13 +780,13 @@ void main() {
       }
 
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>?> operations = <Future<int>?>[
+        final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () => f(1)),
           queue.queueAndDebounce('OP2', debounceDuration, () => f(2)),
         ];
 
         time.elapse(debounceDuration * 5);
-        final List<int> results = await Future.wait(operations as Iterable<Future<int>>);
+        final List<int> results = await Future.wait(operations);
 
         expect(results, orderedEquals(<int>[1, 2]));
       });
