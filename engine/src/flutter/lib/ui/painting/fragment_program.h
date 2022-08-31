@@ -7,6 +7,7 @@
 
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/fragment_shader.h"
+#include "flutter/lib/ui/painting/shader.h"
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/typed_data/typed_list.h"
@@ -15,6 +16,8 @@
 #include <vector>
 
 namespace flutter {
+
+class FragmentShader;
 
 class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
   DEFINE_WRAPPERTYPEINFO();
@@ -29,6 +32,10 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
   fml::RefPtr<FragmentShader> shader(Dart_Handle shader,
                                      Dart_Handle uniforms_handle,
                                      Dart_Handle samplers);
+
+  std::shared_ptr<DlColorSource> MakeDlColorSource(
+      sk_sp<SkData> float_uniforms,
+      const std::vector<std::shared_ptr<DlColorSource>>& children);
 
  private:
   FragmentProgram();

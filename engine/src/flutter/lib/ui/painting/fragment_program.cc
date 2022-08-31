@@ -133,6 +133,13 @@ fml::RefPtr<FragmentShader> FragmentProgram::shader(Dart_Handle shader,
                                        std::move(uniform_data)));
 }
 
+std::shared_ptr<DlColorSource> FragmentProgram::MakeDlColorSource(
+    sk_sp<SkData> float_uniforms,
+    const std::vector<std::shared_ptr<DlColorSource>>& children) {
+  return DlColorSource::MakeRuntimeEffect(runtime_effect_, std::move(children),
+                                          std::move(float_uniforms));
+}
+
 void FragmentProgram::Create(Dart_Handle wrapper) {
   auto res = fml::MakeRefCounted<FragmentProgram>();
   res->AssociateWithDartWrapper(wrapper);
