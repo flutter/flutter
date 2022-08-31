@@ -84,6 +84,21 @@ static std::string ExecutionModelToString(spv::ExecutionModel model) {
   }
 }
 
+static std::string ExecutionModelToCommandTypeName(
+    spv::ExecutionModel execution_model) {
+  switch (execution_model) {
+    case spv::ExecutionModel::ExecutionModelVertex:
+    case spv::ExecutionModel::ExecutionModelFragment:
+    case spv::ExecutionModel::ExecutionModelTessellationControl:
+    case spv::ExecutionModel::ExecutionModelTessellationEvaluation:
+      return "Command&";
+    case spv::ExecutionModel::ExecutionModelGLCompute:
+      return "ComputeCommand&";
+    default:
+      return "unsupported";
+  }
+}
+
 static std::string StringToShaderStage(std::string str) {
   if (str == "vertex") {
     return "ShaderStage::kVertex";
@@ -209,11 +224,11 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     return std::nullopt;
   }
 
+  auto execution_model = entrypoints.front().execution_model;
   {
     root["entrypoint"] = options_.entry_point_name;
     root["shader_name"] = options_.shader_name;
-    root["shader_stage"] =
-        ExecutionModelToString(entrypoints.front().execution_model);
+    root["shader_stage"] = ExecutionModelToString(execution_model);
     root["header_file_name"] = options_.header_file_name;
   }
 
@@ -315,7 +330,8 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
         });
   }
 
-  root["bind_prototypes"] = EmitBindPrototypes(shader_resources);
+  root["bind_prototypes"] =
+      EmitBindPrototypes(shader_resources, execution_model);
 
   return root;
 }
@@ -887,7 +903,8 @@ std::string Reflector::GetMemberNameAtIndex(
 }
 
 std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
-    const spirv_cross::ShaderResources& resources) const {
+    const spirv_cross::ShaderResources& resources,
+    spv::ExecutionModel execution_model) const {
   std::vector<BindPrototype> prototypes;
   for (const auto& uniform_buffer : resources.uniform_buffers) {
     auto& proto = prototypes.emplace_back(BindPrototype{});
@@ -900,7 +917,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
       proto.docstring = stream.str();
     }
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "Command&",
+        .type_name = ExecutionModelToCommandTypeName(execution_model),
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
@@ -919,7 +936,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
       proto.docstring = stream.str();
     }
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "Command&",
+        .type_name = ExecutionModelToCommandTypeName(execution_model),
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
@@ -938,7 +955,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
       proto.docstring = stream.str();
     }
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "Command&",
+        .type_name = ExecutionModelToCommandTypeName(execution_model),
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
@@ -992,8 +1009,9 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
 }
 
 nlohmann::json::array_t Reflector::EmitBindPrototypes(
-    const spirv_cross::ShaderResources& resources) const {
-  const auto prototypes = ReflectBindPrototypes(resources);
+    const spirv_cross::ShaderResources& resources,
+    spv::ExecutionModel execution_model) const {
+  const auto prototypes = ReflectBindPrototypes(resources, execution_model);
   nlohmann::json::array_t result;
   for (const auto& res : prototypes) {
     auto& item = result.emplace_back(nlohmann::json::object_t{});

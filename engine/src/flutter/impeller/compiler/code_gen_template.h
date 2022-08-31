@@ -20,6 +20,8 @@ constexpr std::string_view kReflectionHeaderTemplate =
 
 #include "impeller/renderer/command.h"                    {# // nogncheck #}
 
+#include "impeller/renderer/compute_command.h"            {# // nogncheck #}
+
 #include "impeller/renderer/descriptor_set_layout.h"      {# // nogncheck #}
 
 #include "impeller/renderer/sampler.h"                    {# // nogncheck #}

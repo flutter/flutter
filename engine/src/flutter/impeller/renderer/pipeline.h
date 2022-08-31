@@ -6,13 +6,18 @@
 
 #include <future>
 
+#include "compute_pipeline_descriptor.h"
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/compute_pipeline_builder.h"
+#include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_builder.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
 
 class PipelineLibrary;
+template <typename PipelineDescriptor_>
 class Pipeline;
 
 // TODO(csg): Using a simple future is sub-optimal since callers that want to
@@ -21,7 +26,8 @@ class Pipeline;
 // would be a concurrency pessimization.
 //
 // Use a struct that stores the future and the descriptor separately.
-using PipelineFuture = std::shared_future<std::shared_ptr<Pipeline>>;
+template <class T>
+using PipelineFuture = std::shared_future<std::shared_ptr<Pipeline<T>>>;
 
 //------------------------------------------------------------------------------
 /// @brief      Describes the fixed function and programmable aspects of
@@ -37,6 +43,7 @@ using PipelineFuture = std::shared_future<std::shared_ptr<Pipeline>>;
 ///             Impeller offline shader compiler to generate a typed pipeline
 ///             object.
 ///
+template <typename T>
 class Pipeline {
  public:
   virtual ~Pipeline();
@@ -50,44 +57,52 @@ class Pipeline {
   ///
   /// @return     The descriptor.
   ///
-  const PipelineDescriptor& GetDescriptor() const;
+  const T& GetDescriptor() const;
 
-  PipelineFuture CreateVariant(
-      std::function<void(PipelineDescriptor& desc)> descriptor_callback) const;
+  PipelineFuture<T> CreateVariant(
+      std::function<void(T& desc)> descriptor_callback) const;
 
  protected:
-  Pipeline(std::weak_ptr<PipelineLibrary> library, PipelineDescriptor desc);
+  Pipeline(std::weak_ptr<PipelineLibrary> library, T desc);
 
  private:
   const std::weak_ptr<PipelineLibrary> library_;
-  const PipelineDescriptor desc_;
+  const T desc_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
 };
 
-PipelineFuture CreatePipelineFuture(const Context& context,
-                                    std::optional<PipelineDescriptor> desc);
+extern template class Pipeline<PipelineDescriptor>;
+extern template class Pipeline<ComputePipelineDescriptor>;
+
+PipelineFuture<PipelineDescriptor> CreatePipelineFuture(
+    const Context& context,
+    std::optional<PipelineDescriptor> desc);
+
+PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
+    const Context& context,
+    std::optional<ComputePipelineDescriptor> desc);
 
 template <class VertexShader_, class FragmentShader_>
-class PipelineT {
+class RenderPipelineT {
  public:
   using VertexShader = VertexShader_;
   using FragmentShader = FragmentShader_;
   using Builder = PipelineBuilder<VertexShader, FragmentShader>;
 
-  explicit PipelineT(const Context& context)
-      : PipelineT(CreatePipelineFuture(
+  explicit RenderPipelineT(const Context& context)
+      : RenderPipelineT(CreatePipelineFuture(
             context,
             Builder::MakeDefaultPipelineDescriptor(context))) {}
 
-  explicit PipelineT(const Context& context,
-                     std::optional<PipelineDescriptor> desc)
-      : PipelineT(CreatePipelineFuture(context, desc)) {}
+  explicit RenderPipelineT(const Context& context,
+                           std::optional<PipelineDescriptor> desc)
+      : RenderPipelineT(CreatePipelineFuture(context, desc)) {}
 
-  explicit PipelineT(PipelineFuture future)
+  explicit RenderPipelineT(PipelineFuture<PipelineDescriptor> future)
       : pipeline_future_(std::move(future)) {}
 
-  std::shared_ptr<Pipeline> WaitAndGet() {
+  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet() {
     if (did_wait_) {
       return pipeline_;
     }
@@ -99,11 +114,49 @@ class PipelineT {
   }
 
  private:
-  PipelineFuture pipeline_future_;
-  std::shared_ptr<Pipeline> pipeline_;
+  PipelineFuture<PipelineDescriptor> pipeline_future_;
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_;
   bool did_wait_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineT);
+  FML_DISALLOW_COPY_AND_ASSIGN(RenderPipelineT);
+};
+
+template <class ComputeShader_>
+class ComputePipelineT {
+ public:
+  using ComputeShader = ComputeShader_;
+  using Builder = ComputePipelineBuilder<ComputeShader>;
+
+  explicit ComputePipelineT(const Context& context)
+      : ComputePipelineT(CreatePipelineFuture(
+            context,
+            Builder::MakeDefaultPipelineDescriptor(context))) {}
+
+  explicit ComputePipelineT(
+      const Context& context,
+      std::optional<ComputePipelineDescriptor> compute_desc)
+      : ComputePipelineT(CreatePipelineFuture(context, compute_desc)) {}
+
+  explicit ComputePipelineT(PipelineFuture<ComputePipelineDescriptor> future)
+      : pipeline_future_(std::move(future)) {}
+
+  std::shared_ptr<Pipeline<ComputePipelineDescriptor>> WaitAndGet() {
+    if (did_wait_) {
+      return pipeline_;
+    }
+    did_wait_ = true;
+    if (pipeline_future_.valid()) {
+      pipeline_ = pipeline_future_.get();
+    }
+    return pipeline_;
+  }
+
+ private:
+  PipelineFuture<ComputePipelineDescriptor> pipeline_future_;
+  std::shared_ptr<Pipeline<ComputePipelineDescriptor>> pipeline_;
+  bool did_wait_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ComputePipelineT);
 };
 
 }  // namespace impeller

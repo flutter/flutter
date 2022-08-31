@@ -51,6 +51,9 @@ class CommandBufferVK final : public CommandBuffer {
   // |CommandBuffer|
   std::shared_ptr<BlitPass> OnCreateBlitPass() const override;
 
+  // |CommandBuffer|
+  std::shared_ptr<ComputePass> OnCreateComputePass() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferVK);
 };
 
