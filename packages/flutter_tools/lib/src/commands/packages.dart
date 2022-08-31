@@ -6,13 +6,17 @@ import 'package:args/args.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/localizations.dart';
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../localizations/gen_l10n.dart';
+import '../localizations/localizations_utils.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -341,6 +345,35 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
         await generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: globals.buildSystem,
+        );
+      }
+    } else if (flutterProject!.directory.childFile('l10n.yaml').existsSync()) {
+      final Environment environment = Environment(
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        platform: globals.platform,
+        usage: globals.flutterUsage,
+        projectDir: flutterProject.directory,
+        generateDartPluginRegistry: true,
+      );
+      final BuildResult result = await globals.buildSystem.build(
+        const GenerateLocalizationsTarget(),
+        environment,
+      );
+      if (result == null) {
+        throwToolExit('Generating synthetic localizations package failed: result is null.');
+      }
+      if (result.hasException) {
+        throwToolExit(
+          'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
+          '\n\n'
+          '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
         );
       }
     }

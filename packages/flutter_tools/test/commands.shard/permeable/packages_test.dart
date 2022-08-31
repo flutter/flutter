@@ -237,6 +237,32 @@ void main() {
       ),
     });
 
+    testUsingContext('get generates synthetic package when l10n.yaml has synthetic-package: true', () {
+
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
+    testUsingContext('get generates normal files when l10n.yaml has synthetic-package: false', () {
+
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
     testUsingContext('set no plugins as usage value', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
