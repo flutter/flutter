@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'material_state_mixin_test.dart';
 
 Widget buildSliverAppBarApp({
   bool floating = false,
@@ -693,10 +694,12 @@ void main() {
     expect(iconColor(), color);
   });
 
-  testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
+  testWidgets('leading widget extends to edge and is square', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
+    final bool material3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: themeData,
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -706,9 +709,44 @@ void main() {
       ),
     );
 
-    final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), Offset.zero);
-    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
+    // Default IconButton has a size of (48x48) in M3, (56x56) in M2
+    final Finder hamburger = find.byType(IconButton);
+    expect(tester.getTopLeft(hamburger), material3 ? const Offset(4.0, 4.0) : Offset.zero);
+    expect(tester.getSize(hamburger), material3 ? const Size(48.0, 48.0) : const Size(56.0, 56.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: Container(),
+            title: const Text('X'),
+          ),
+        ),
+      ),
+    );
+
+    // Default leading widget has a size of (56x56) for both M2 and M3
+    final Finder leadingBox = find.byType(Container);
+    expect(tester.getTopLeft(leadingBox), Offset.zero);
+    expect(tester.getSize(leadingBox), const Size(56.0, 56.0));
+
+    // The custom leading widget should still be 56x56 even if its size is smaller.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: const SizedBox(height: 36, width: 36,),
+            title: const Text('X'),
+          ), // Doesn't really matter. Triggers a hamburger regardless.
+        ),
+      ),
+    );
+
+    final Finder leading = find.byType(SizedBox);
+    expect(tester.getTopLeft(leading), Offset.zero);
+    expect(tester.getSize(leading), const Size(56.0, 56.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
