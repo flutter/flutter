@@ -749,9 +749,11 @@ void main() {
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(platform: TargetPlatform.android);
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: theme,
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -774,14 +776,14 @@ void main() {
       ),
     );
 
-    final Finder addButton = find.byTooltip('Add');
+    final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
     expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
-    final Finder shareButton = find.byTooltip('Share');
+    final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
-    expect(tester.getSize(shareButton), const Size(48.0, 56.0));
+    expect(tester.getSize(shareButton), material3 ? const Size(48.0, 48.0) : const Size(48.0, 56.0));
   });
 
   testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
