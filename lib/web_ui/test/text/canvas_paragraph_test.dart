@@ -780,6 +780,27 @@ Future<void> testMain() async {
     expect(paragraph.width, 30);
     expect(paragraph.height, 10);
   });
+
+  test('Render after dispose', () {
+    final ui.Paragraph paragraph = plain(ahemStyle, 'abc');
+    paragraph.layout(const ui.ParagraphConstraints(width: 30.8));
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    canvas.drawParagraph(paragraph, ui.Offset.zero);
+    final ui.Picture picture = recorder.endRecording();
+
+    paragraph.dispose();
+
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+    builder.addPicture(ui.Offset.zero, picture);
+    final ui.Scene scene = builder.build();
+
+    ui.window.render(scene);
+
+    picture.dispose();
+    scene.dispose();
+  });
 }
 
 /// Shortcut to create a [ui.TextBox] with an optional [ui.TextDirection].
