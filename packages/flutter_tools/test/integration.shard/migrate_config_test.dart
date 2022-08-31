@@ -228,11 +228,11 @@ migration:
   testUsingContext('equality compares platform', () async {
     const String testCreateRevision = 'testmc9skl32nlnf23lnakcs9njr3';
     const String testBaseRevision = 'testanas9anlnq9ba7bjhavan3kma';
-    MigratePlatformConfig configAndroid = MigratPlatformeConfig(platform: SupportedPlatform.android, createRevision: testCreateRevision, baseRevision: testBaseRevision);
-    MigratePlatformConfig configIos = MigratPlatformeConfig(SupportedPlatform.ios: MigratePlatformConfig(platform: SupportedPlatform.ios, createRevision: testCreateRevision, baseRevision: testBaseRevision);
+    final MigratePlatformConfig configAndroid = MigratePlatformConfig(platform: SupportedPlatform.android, createRevision: testCreateRevision, baseRevision: testBaseRevision);
+    final MigratePlatformConfig configIos = MigratePlatformConfig(platform: SupportedPlatform.ios, createRevision: testCreateRevision, baseRevision: testBaseRevision);
 
     expect(configAndroid.equals(configIos), false);
-    expectFals(configAndroid.equals(configAndroid), true);
-    expectFals(configIos.equals(configIos), true);
+    expect(configAndroid.equals(configAndroid), true);
+    expect(configIos.equals(configIos), true);
   });
 }
