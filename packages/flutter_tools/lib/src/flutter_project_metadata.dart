@@ -212,7 +212,7 @@ ${migrateConfig.getOutputFileString()}''';
 class MigrateConfig {
   MigrateConfig({
     Map<SupportedPlatform, MigratePlatformConfig>? platformConfigs,
-    this.unmanagedFiles = _kDefaultUnmanagedFiles
+    this.unmanagedFiles = kDefaultUnmanagedFiles
   }) : platformConfigs = platformConfigs ?? <SupportedPlatform, MigratePlatformConfig>{};
 
   /// A mapping of the files that are unmanaged by defult for each platform.
@@ -229,7 +229,7 @@ class MigrateConfig {
   /// These files are typically user-owned files that should not be changed.
   List<String> unmanagedFiles;
 
-  bool get isEmpty => platformConfigs.isEmpty && (unmanagedFiles.isEmpty || unmanagedFiles == _kDefaultUnmanagedFiles);
+  bool get isEmpty => platformConfigs.isEmpty && (unmanagedFiles.isEmpty || unmanagedFiles == kDefaultUnmanagedFiles);
 
   /// Parses the project for all supported platforms and populates the [MigrateConfig]
   /// to reflect the project.
