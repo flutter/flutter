@@ -6,8 +6,6 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
-import '../globals.dart' as globals;
-
 import 'common.dart';
 import 'io.dart';
 import 'platform.dart';
