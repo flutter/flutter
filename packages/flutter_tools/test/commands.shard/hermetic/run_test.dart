@@ -1047,10 +1047,10 @@ class FakeDevice extends Fake implements Device {
 }
 
 class TestRunCommandWithFakeResidentRunner extends RunCommand {
-  FakeResidentRunner? fakeResidentRunner;
+  late FakeResidentRunner fakeResidentRunner;
 
   @override
-  Future<ResidentRunner?> createRunner({
+  Future<ResidentRunner> createRunner({
     required bool hotMode,
     required List<FlutterDevice> flutterDevices,
     required String? applicationBinaryPath,
