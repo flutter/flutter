@@ -36,11 +36,11 @@ List<String> getDartClassFields({
   final RegExp fieldExp = RegExp(r'_k(\w*)Index');
   final List<String> fields = <String>[];
   for (final CompilationUnitMember unitMember in result.unit.declarations) {
-    if (unitMember is ClassDeclaration && unitMember.name.name == className) { // ignore: deprecated_member_use
+    if (unitMember is ClassDeclaration && unitMember.name2.lexeme == className) {
       for (final ClassMember classMember in unitMember.members) {
         if (classMember is FieldDeclaration) {
           for (final VariableDeclaration field in classMember.fields.variables) {
-            final String fieldName = field.name.name; // ignore: deprecated_member_use
+            final String fieldName = field.name2.lexeme;
             final RegExpMatch? match = fieldExp.firstMatch(fieldName);
             if (match != null) {
               fields.add(match.group(1)!);
