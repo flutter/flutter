@@ -1657,6 +1657,30 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
 
+  testWidgets('InputDecorator iconColor/prefixIconColor/suffixIconColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            decoration: InputDecoration(
+              icon: Icon(Icons.cabin),
+              prefixIcon: Icon(Icons.sailing),
+              suffixIcon: Icon(Icons.close),
+              iconColor: Colors.amber,
+              prefixIconColor: Colors.green,
+              suffixIconColor: Colors.red,
+              filled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, Colors.amber);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.sailing).first).data.color, Colors.green);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.close).first).data.color, Colors.red);
+  });
+
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
     const Key pKey = Key('p');
     const Key sKey = Key('s');

@@ -141,7 +141,7 @@ class HotRunner extends ResidentRunner {
     }
 
     if (flutterDevices.length == 1) {
-      final Device device = flutterDevices.first!.device!;
+      final Device device = flutterDevices.first.device!;
       _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
       _sdkName = await device.sdkNameAndVersion;
       _emulator = await device.isLocalEmulator;
@@ -257,8 +257,8 @@ class HotRunner extends ResidentRunner {
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first!.vmService!.httpAddress,
-            wsUri: flutterDevices.first!.vmService!.wsAddress,
+            httpUri: flutterDevices.first.vmService!.httpAddress,
+            wsUri: flutterDevices.first.vmService!.wsAddress,
             baseUri: baseUris.first.toString(),
           ),
         );
@@ -454,12 +454,13 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch findInvalidationTimer = _stopwatchFactory.createStopwatch('updateDevFS')..start();
+    final DevFS devFS = flutterDevices[0].devFS!;
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
-      lastCompiled: flutterDevices[0]!.devFS!.lastCompiled,
-      urisToMonitor: flutterDevices[0]!.devFS!.sources,
+      lastCompiled: devFS.lastCompiled,
+      urisToMonitor: devFS.sources,
       packagesPath: packagesFilePath,
       asyncScanning: hotRunnerConfig!.asyncScanning,
-      packageConfig: flutterDevices[0]!.devFS!.lastPackageConfig
+      packageConfig: devFS.lastPackageConfig
           ?? debuggingOptions.buildInfo.packageConfig,
     );
     findInvalidationTimer.stop();
@@ -474,7 +475,7 @@ class HotRunner extends ResidentRunner {
     }
     final UpdateFSReport results = UpdateFSReport(
       success: true,
-      scannedSourcesCount: flutterDevices[0]!.devFS!.sources.length,
+      scannedSourcesCount: devFS.sources.length,
       findInvalidatedDuration: findInvalidationTimer.elapsed,
     );
     for (final FlutterDevice? device in flutterDevices) {
@@ -497,21 +498,27 @@ class HotRunner extends ResidentRunner {
   }
 
   void _resetDirtyAssets() {
-    for (final FlutterDevice? device in flutterDevices) {
-      device!.devFS!.assetPathsToEvict.clear();
-      device.devFS!.shaderPathsToEvict.clear();
+    for (final FlutterDevice device in flutterDevices) {
+      final DevFS? devFS = device.devFS;
+      if (devFS == null) {
+        // This is sometimes null, however we don't know why and have not been
+        // able to reproduce, https://github.com/flutter/flutter/issues/108653
+        continue;
+      }
+      devFS.assetPathsToEvict.clear();
+      devFS.shaderPathsToEvict.clear();
     }
   }
 
   Future<void> _cleanupDevFS() async {
     final List<Future<void>> futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS != null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.devFS != null) {
         // Cleanup the devFS, but don't wait indefinitely.
         // We ignore any errors, because it's not clear what we would do anyway.
         futures.add(device.devFS!.destroy()
           .timeout(const Duration(milliseconds: 250))
-          .catchError((dynamic error) {
+          .catchError((Object? error) {
             globals.printTrace('Ignored error while cleaning up DevFS: $error');
           }));
       }
@@ -756,7 +763,7 @@ class HotRunner extends ResidentRunner {
     String? restartEvent;
     try {
       final Stopwatch restartTimer = _stopwatchFactory.createStopwatch('fullRestartHelper')..start();
-      if (!(await (hotRunnerConfig!.setupHotRestart() as FutureOr<bool>))) {
+      if ((await hotRunnerConfig!.setupHotRestart()) != true) {
         return OperationResult(1, 'setupHotRestart failed');
       }
       result = await _restartFromSources(reason: reason);
@@ -885,7 +892,7 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch reloadTimer = _stopwatchFactory.createStopwatch('reloadSources:reload')..start();
-    if (!(await (hotRunnerConfig!.setupHotReload() as FutureOr<bool>))) {
+    if ((await hotRunnerConfig!.setupHotReload()) != true) {
       return OperationResult(1, 'setupHotReload failed');
     }
     final Stopwatch devFSTimer = Stopwatch()..start();

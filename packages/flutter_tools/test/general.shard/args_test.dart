@@ -7,6 +7,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
+import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
@@ -23,6 +24,12 @@ void main() {
       verbose: true,
     ).forEach(runner.addCommand);
     verifyCommandRunner(runner);
+    for (final Command<void> command in runner.commands.values) {
+      if(command.name == 'analyze') {
+        final AnalyzeCommand analyze = command as AnalyzeCommand;
+        expect(analyze.allProjectValidators().length, 1);
+      }
+    }
   }));
 
   testUsingContext('bool? safe argResults', () async {

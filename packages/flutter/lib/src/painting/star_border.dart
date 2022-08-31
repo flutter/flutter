@@ -11,7 +11,6 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'basic_types.dart';
 import 'borders.dart';
 import 'circle_border.dart';
-import 'edge_insets.dart';
 import 'rounded_rectangle_border.dart';
 import 'stadium_border.dart';
 
@@ -165,18 +164,6 @@ class StarBorder extends OutlinedBorder {
   ///
   /// Defaults to zero, and must be between zero and one, inclusive.
   final double squash;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        return EdgeInsets.all(side.width);
-      case StrokeAlign.center:
-        return EdgeInsets.all(side.width / 2);
-      case StrokeAlign.outside:
-        return EdgeInsets.zero;
-    }
-  }
 
   @override
   ShapeBorder scale(double t) {
@@ -388,18 +375,7 @@ class StarBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    final Rect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = rect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = rect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = rect;
-        break;
-    }
+    final Rect adjustedRect = rect.deflate(side.strokeInset);
     return _StarGenerator(
       points: points,
       rotation: _rotationRadians,
@@ -428,18 +404,7 @@ class StarBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Rect adjustedRect;
-        switch (side.strokeAlign) {
-          case StrokeAlign.inside:
-            adjustedRect = rect.deflate(side.width / 2);
-            break;
-          case StrokeAlign.center:
-            adjustedRect = rect;
-            break;
-          case StrokeAlign.outside:
-            adjustedRect = rect.inflate(side.width / 2);
-            break;
-        }
+        final Rect adjustedRect = rect.inflate(side.strokeOffset / 2);
         final Path path = _StarGenerator(
           points: points,
           rotation: _rotationRadians,
@@ -549,7 +514,6 @@ class _StarGenerator {
     } else {
       scale = Offset(squash * scale.dx + (1 - squash) * scale.dy, scale.dy);
     }
-
     // Scale the border so that it matches the size of the widget rectangle, so
     // that "rotation" of the shape doesn't affect how much of the rectangle it
     // covers.
@@ -645,10 +609,12 @@ class _StarGenerator {
     }
 
     // The rounding added to the valley radius can sometimes push it outside of
-    // the rounding of the point, since the rounding amount can be different, so
-    // we have to evaluate both the valley and the point radii, and pick the
-    // largest.
-    return math.max(valleyRadius, pointRadius);
+    // the rounding of the point, since the rounding amount can be different
+    // between the points and the valleys, so we have to evaluate both the
+    // valley and the point radii, and pick the largest. Also, since this value
+    // is used later to determine the scale, we need to keep it finite and
+    // non-zero.
+    return clampDouble(math.max(valleyRadius, pointRadius), double.minPositive, double.maxFinite);
   }
 
   void _drawPoints(Path path, List<_PointInfo> points) {
