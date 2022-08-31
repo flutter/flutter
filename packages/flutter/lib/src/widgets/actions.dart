@@ -260,12 +260,12 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if your override of `invoke` returns an `int`, then define
-  /// it like so:
+  /// For instance, if an override of `invoke` returned an `int`, then it might
+  /// be defined like so:
   ///
   /// ```dart
   /// class IncrementIntent extends Intent {
-  ///   const IncrementIntent({this.index});
+  ///   const IncrementIntent({required this.index});
   ///
   ///   final int index;
   /// }
@@ -479,19 +479,19 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if your override of `invoke` returns an `int`, then define
-  /// it like so:
+  /// For instance, if an override of `invoke` returned an `int`, then it might
+  /// be defined like so:
   ///
   /// ```dart
   /// class IncrementIntent extends Intent {
-  ///   const IncrementIntent({this.index});
+  ///   const IncrementIntent({required this.index});
   ///
   ///   final int index;
   /// }
   ///
   /// class MyIncrementAction extends ContextAction<IncrementIntent> {
   ///   @override
-  ///   int invoke(IncrementIntent intent, [BuildContext context]) {
+  ///   int invoke(IncrementIntent intent, [BuildContext? context]) {
   ///     return intent.index + 1;
   ///   }
   /// }

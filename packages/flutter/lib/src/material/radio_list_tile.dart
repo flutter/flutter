@@ -15,6 +15,8 @@ import 'theme_data.dart';
 // Examples can assume:
 // void setState(VoidCallback fn) { }
 // enum Meridiem { am, pm }
+// enum SingingCharacter { lafayette }
+// late SingingCharacter? _character;
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
@@ -206,7 +208,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///   title: const Text('Lafayette'),
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
-  ///   onChanged: (SingingCharacter newValue) {
+  ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
   ///     });

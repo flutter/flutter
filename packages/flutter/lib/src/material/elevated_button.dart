@@ -54,8 +54,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [TextButton], a simple flat button without a shadow.
-///  * [OutlinedButton], a [TextButton] with a border outline.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
@@ -130,7 +132,11 @@ class ElevatedButton extends ButtonStyleButton {
   /// ```dart
   /// ElevatedButton(
   ///   style: ElevatedButton.styleFrom(foregroundColor: Colors.green),
-  /// )
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Jump'),
+  /// ),
   /// ```
   ///
   /// And to change the fill color:
@@ -138,7 +144,11 @@ class ElevatedButton extends ButtonStyleButton {
   /// ```dart
   /// ElevatedButton(
   ///   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-  /// )
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Meow'),
+  /// ),
   /// ```
   ///
   static ButtonStyle styleFrom({
@@ -354,7 +364,7 @@ class ElevatedButton extends ButtonStyleButton {
           disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           shadowColor: theme.shadowColor,
           elevation: 2,
-          textStyle: theme.textTheme.button,
+          textStyle: theme.textTheme.labelLarge,
           padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,

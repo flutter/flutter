@@ -78,7 +78,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   'You have pressed or released in this area this many times:'),
               Text(
                 '$_downCounter presses\n$_upCounter releases',
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
               Text(
                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',

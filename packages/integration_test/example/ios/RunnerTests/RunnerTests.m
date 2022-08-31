@@ -67,7 +67,7 @@ INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
   XCTAssertEqualObjects([FLTIntegrationTestRunner
                          testCaseNameFromDartTestName:@"VALIDATE multi-point 🚀 UNICODE123: 😁"], @"testValidateMultiPointUnicode123");
   XCTAssertEqualObjects([FLTIntegrationTestRunner
-                         testCaseNameFromDartTestName:@"!UPPERCASE:\\ lower_seperate?"], @"testUppercaseLowerSeperate");
+                         testCaseNameFromDartTestName:@"!UPPERCASE:\\ lower_separate?"], @"testUppercaseLowerSeparate");
 }
 
 - (void)testDuplicatedDartTests {

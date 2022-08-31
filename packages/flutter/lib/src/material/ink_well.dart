@@ -16,6 +16,9 @@ import 'material.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// An ink feature that displays a [color] "splash" in response to a user
 /// gesture that can be confirmed or canceled.
 ///

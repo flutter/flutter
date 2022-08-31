@@ -17,6 +17,10 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// bool _giveVerse = true;
+// late StateSetter setState;
+
 const double _kTrackHeight = 14.0;
 const double _kTrackWidth = 33.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;

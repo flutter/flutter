@@ -119,8 +119,8 @@ void main() {
       'checkMarkColor: Color(0xfffffff7)',
       'labelPadding: EdgeInsets.all(1.0)',
       'padding: EdgeInsets.all(2.0)',
-      'side: BorderSide(Color(0xff000000), 10.0, BorderStyle.solid)',
-      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+      'side: BorderSide(width: 10.0)',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
       'labelStyle: TextStyle(inherit: true, size: 10.0)',
       'secondaryLabelStyle: TextStyle(inherit: true, size: 20.0)',
       'brightness: dark',
@@ -159,7 +159,7 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).shape, chipTheme.shape);
@@ -212,7 +212,7 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(getMaterial(tester).shape, chipTheme.shape);
@@ -264,7 +264,7 @@ void main() {
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: backgroundColor));
+    expect(materialBox, paints..circle(color: backgroundColor));
     expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
     expect(getMaterial(tester).elevation, elevation);
     expect(getMaterial(tester).shape, shape);
@@ -327,7 +327,7 @@ void main() {
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
-    final TextStyle customStyle = ThemeData.fallback().textTheme.bodyText1!.copyWith(color: customColor2);
+    final TextStyle customStyle = ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: customColor2);
 
     final ChipThemeData lightTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
@@ -391,7 +391,7 @@ void main() {
     final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
       secondaryColor: Colors.black,
       brightness: Brightness.dark,
-      labelStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: Colors.black),
+      labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.black),
     ).copyWith(
       elevation: 1.0,
       labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -407,7 +407,7 @@ void main() {
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
       brightness: Brightness.light,
-      labelStyle: ThemeData.fallback().textTheme.bodyText1!.copyWith(color: Colors.white),
+      labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.white),
     ).copyWith(
       padding: const EdgeInsets.all(2.0),
       labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
@@ -660,11 +660,11 @@ void main() {
 
     // Default.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
   testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {
@@ -702,11 +702,11 @@ void main() {
 
     // Default.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
   testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
