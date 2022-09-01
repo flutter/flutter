@@ -148,7 +148,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// This sample shows how to implement a rudimentary `CopyableText` widget
   /// that responds to Ctrl-C by copying its own content to the clipboard.
   ///
-  /// if `CopyableText` is to be provided in a package, developers use the
+  /// if `CopyableText` is to be provided in a package, developers using the
   /// widget may want to change how copying is handled. As the author of the
   /// package, you can enable that by making the corresponding [Action]
   /// overridable. In the second part of the code sample, three `CopyableText`
