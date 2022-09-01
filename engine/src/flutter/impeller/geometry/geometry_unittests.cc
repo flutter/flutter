@@ -229,7 +229,7 @@ TEST(GeometryTest, MatrixTransformDirection) {
   }
 
   {
-    auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
+    auto matrix = Matrix::MakeTranslation({0, -0.4, 100}) *
                   Matrix::MakeRotationZ(Radians{kPiOver2}) *
                   Matrix::MakeScale({2.0, 2.0, 2.0});
     auto vector = Point(10, 20);

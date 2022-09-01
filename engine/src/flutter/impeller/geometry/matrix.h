@@ -249,7 +249,7 @@ struct Matrix {
   }
 
   constexpr Scalar GetDirectionScale(Vector3 direction) const {
-    return 1.0 / (this->Invert() * direction.Normalize()).Length() *
+    return 1.0 / (this->Basis().Invert() * direction.Normalize()).Length() *
            direction.Length();
   }
 
