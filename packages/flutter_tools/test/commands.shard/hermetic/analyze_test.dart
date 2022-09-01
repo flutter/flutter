@@ -156,6 +156,7 @@ void main() {
         'startColumn': 4,
       },
       'message': 'Prefer final for variable declarations if they are not reassigned.',
+      'code': 'var foo = 123;',
       'hasFix': false,
     };
     expect(WrittenError.fromJson(json).toString(),
