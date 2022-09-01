@@ -26,4 +26,8 @@ bool Surface::EnableRasterCache() const {
   return true;
 }
 
+impeller::AiksContext* Surface::GetAiksContext() const {
+  return nullptr;
+}
+
 }  // namespace flutter

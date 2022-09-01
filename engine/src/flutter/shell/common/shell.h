@@ -216,7 +216,7 @@ class Shell final : public PlatformView::Delegate,
   //------------------------------------------------------------------------------
   /// @return     The settings used to launch this shell.
   ///
-  const Settings& GetSettings() const;
+  const Settings& GetSettings() const override;
 
   //------------------------------------------------------------------------------
   /// @brief      If callers wish to interact directly with any shell

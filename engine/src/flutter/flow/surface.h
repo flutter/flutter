@@ -12,6 +12,10 @@
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/macros.h"
 
+namespace impeller {
+class AiksContext;
+}  // namespace impeller
+
 namespace flutter {
 
 /// Abstract Base Class that represents where we will be rendering content.
@@ -36,6 +40,8 @@ class Surface {
   virtual bool AllowsDrawingWhenGpuDisabled() const;
 
   virtual bool EnableRasterCache() const;
+
+  virtual impeller::AiksContext* GetAiksContext() const;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);

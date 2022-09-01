@@ -55,6 +55,9 @@ class GPUSurfaceGLImpeller final : public Surface {
   // |Surface|
   bool EnableRasterCache() const override;
 
+  // |Surface|
+  impeller::AiksContext* GetAiksContext() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGLImpeller);
 };
 

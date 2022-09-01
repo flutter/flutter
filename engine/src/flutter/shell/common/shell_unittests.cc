@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "include/core/SkMatrix.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
@@ -2345,8 +2344,8 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
       shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
-        sk_sp<SkImage> image = delegate->MakeRasterSnapshot(
-            SkPicture::MakePlaceholder({0, 0, 50, 50}), SkISize::Make(50, 50));
+        sk_sp<DlImage> image = delegate->MakeRasterSnapshot(
+            MakeSizedDisplayList(50, 50), SkISize::Make(50, 50));
         EXPECT_NE(image, nullptr);
 
         latch->Signal();
