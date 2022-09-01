@@ -244,6 +244,12 @@ class RecordingCanvas {
     _saveCount--;
   }
 
+  void restoreToCount(int count) {
+    while (count < _saveCount && _saveCount > 1) {
+      restore();
+    }
+  }
+
   void translate(double dx, double dy) {
     assert(!_recordingEnded);
     _paintBounds.translate(dx, dy);
