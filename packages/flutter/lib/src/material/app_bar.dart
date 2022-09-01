@@ -942,11 +942,13 @@ class _AppBarState extends State<AppBar> {
         ?? appBarTheme.iconTheme
         ?? defaults.iconTheme!.copyWith(color: foregroundColor);
 
+    final Color? actionForegroundColor = widget.foregroundColor
+      ?? appBarTheme.foregroundColor;
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? defaults.actionsIconTheme?.copyWith(color: foregroundColor)
+      ?? defaults.actionsIconTheme?.copyWith(color: actionForegroundColor)
       ?? overallIconTheme;
 
     TextStyle? toolbarTextStyle = backwardsCompatibility

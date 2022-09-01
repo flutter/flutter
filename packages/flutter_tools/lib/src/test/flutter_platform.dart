@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -65,6 +66,7 @@ FlutterPlatform installHook({
   Device? integrationTestDevice,
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
+  UriConverter? uriConverter,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
@@ -95,6 +97,7 @@ FlutterPlatform installHook({
     integrationTestDevice: integrationTestDevice,
     integrationTestUserIdentifier: integrationTestUserIdentifier,
     testTimeRecorder: testTimeRecorder,
+    uriConverter: uriConverter,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -290,6 +293,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestDevice,
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
+    this.uriConverter,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -306,6 +310,9 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject? flutterProject;
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
+
+  // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
+  final UriConverter? uriConverter;
 
   /// The device to run the test on for Integration Tests.
   ///
@@ -428,7 +435,8 @@ class FlutterPlatform extends PlatformPlugin {
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
       compileExpression: _compileExpressionService,
-      fontConfigManager: _fontConfigManager
+      fontConfigManager: _fontConfigManager,
+      uriConverter: uriConverter,
     );
   }
 

@@ -1258,6 +1258,30 @@ void main() {
     );
   });
 
+  testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
+    final Widget buildApp = MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ListTile(
+              onTap: () {},
+              splashColor: const Color(0xff88ff88),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildApp);
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(ListTile)).center);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Material), paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)));
+    await gesture.up();
+  });
+
   testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Key tileKey = Key('ListTile');
