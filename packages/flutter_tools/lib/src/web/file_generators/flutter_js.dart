@@ -206,7 +206,7 @@ _flutter.loader = null;
         // Remove the resolver after the first time, so Flutter Web can hot restart.
         this._didCreateEngineInitializerResolve = null;
         // Make the engine revert to "auto" initialization on hot restart.
-        // delete _flutter.loader.didCreateEngineInitializer;
+        delete _flutter.loader.didCreateEngineInitializer;
       }
       if (typeof this._onEntrypointLoaded === "function") {
         this._onEntrypointLoaded(engineInitializer);
