@@ -100,14 +100,15 @@ class EntityPass {
                                    uint32_t pass_depth,
                                    size_t stencil_depth_floor) const;
 
-  bool OnRender(ContentContext& renderer,
-                ISize root_pass_size,
-                RenderTarget render_target,
-                Point position,
-                Point parent_position,
-                uint32_t pass_depth,
-                size_t stencil_depth_floor = 0,
-                std::shared_ptr<Contents> backdrop_contents = nullptr) const;
+  bool OnRender(
+      ContentContext& renderer,
+      ISize root_pass_size,
+      RenderTarget render_target,
+      Point position,
+      Point parent_position,
+      uint32_t pass_depth,
+      size_t stencil_depth_floor = 0,
+      std::shared_ptr<Contents> backdrop_filter_contents = nullptr) const;
 
   std::vector<Element> elements_;
 
@@ -115,7 +116,7 @@ class EntityPass {
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
   Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;
-  bool cover_whole_screen = false;
+  bool cover_whole_screen_ = false;
 
   /// This value is incremented whenever something is added to the pass that
   /// requires reading from the backdrop texture. Currently, this can happen in
