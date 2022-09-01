@@ -351,7 +351,7 @@ class Overlay extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// OverlayState overlay = Overlay.of(context)!;
+  /// OverlayState overlay = Overlay.of(context);
   /// ```
   ///
   /// If `rootOverlay` is set to true, the state from the furthest instance of
@@ -394,7 +394,7 @@ class Overlay extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// OverlayState? overlay = Overlay.maybeOf(context)!;
+  /// OverlayState? overlay = Overlay.maybeOf(context);
   /// ```
   ///
   /// If `rootOverlay` is set to true, the state from the furthest instance of

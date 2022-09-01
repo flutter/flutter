@@ -168,7 +168,7 @@ class MagnifierController {
   ///   final MagnifierController myMagnifierController = MagnifierController();
   ///
   ///   // Placed below the magnifier, so it will show.
-  ///   Overlay.of(context)!.insert(OverlayEntry(
+  ///   Overlay.of(context).insert(OverlayEntry(
   ///       builder: (BuildContext context) => const Text('I WILL display in the magnifier')));
   ///
   ///   // Will display in the magnifier, since this entry was passed to show.
@@ -176,7 +176,7 @@ class MagnifierController {
   ///       builder: (BuildContext context) =>
   ///           const Text('I WILL display in the magnifier'));
   ///
-  ///   Overlay.of(context)!
+  ///   Overlay.of(context)
   ///       .insert(displayInMagnifier);
   ///   myMagnifierController.show(
   ///       context: context,
@@ -186,10 +186,10 @@ class MagnifierController {
   ///           ));
   ///
   ///   // By default, new entries will be placed over the top entry.
-  ///   Overlay.of(context)!.insert(OverlayEntry(
+  ///   Overlay.of(context).insert(OverlayEntry(
   ///       builder: (BuildContext context) => const Text('I WILL NOT display in the magnifier')));
   ///
-  ///   Overlay.of(context)!.insert(
+  ///   Overlay.of(context).insert(
   ///       below:
   ///           myMagnifierController.overlayEntry, // Explicitly placed below the magnifier.
   ///       OverlayEntry(
