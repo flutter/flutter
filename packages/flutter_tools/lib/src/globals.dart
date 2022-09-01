@@ -46,9 +46,6 @@ import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
-/// The flutter GitHub repository.
-String get flutterGit => platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
 Cache get cache => context.get<Cache>()!;

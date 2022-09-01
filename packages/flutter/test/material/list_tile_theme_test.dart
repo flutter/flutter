@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({ Key? key }) : super(key: key);
+  const TestIcon({ super.key });
 
   @override
   TestIconState createState() => TestIconState();
@@ -27,7 +27,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, { Key? key }) : super(key: key);
+  const TestText(this.text, { super.key });
 
   final String text;
 
@@ -294,7 +294,6 @@ void main() {
     final Offset listTile = tester.getCenter(find.byKey(titleKey));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(listTile);
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
@@ -444,5 +443,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(Material), paints..path(color: selectedTileColor));
+  });
+
+  testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/106303
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final ShapeBorder shapeBorder =  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0));
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        listTileTheme: ListTileThemeData(shape: shapeBorder),
+      ),
+      home: Scaffold(
+        key: scaffoldKey,
+        drawer: const Drawer(
+          child: ListTile(),
+        ),
+        body: Container(),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    scaffoldKey.currentState!.openDrawer();
+    // Start drawer animation.
+    await tester.pump();
+
+    final ShapeBorder? inkWellBorder = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byType(ListTile),
+        matching: find.byType(InkWell),
+    )).customBorder;
+    // Test shape.
+    expect(inkWellBorder, shapeBorder);
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
@@ -131,7 +129,6 @@ void main() {
         'linux-x64': false,
         'linux-arm64': false,
         'windows-x64': false,
-        'windows-uwp-x64': false,
         'web-javascript': true,
         'ios': false,
         'android': false,

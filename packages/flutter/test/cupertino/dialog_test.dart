@@ -1233,7 +1233,7 @@ void main() {
 
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         restorationScopeId: 'app',
         home: _RestorableDialogTestWidget(),
       ),
@@ -1480,7 +1480,6 @@ void main() {
 
     final Offset dialogAction = tester.getCenter(find.text('OK'));
     await gesture.moveTo(dialogAction);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -1547,6 +1546,8 @@ Widget createAppWithCenteredButton(Widget child) {
 
 
 class _RestorableDialogTestWidget extends StatelessWidget {
+  const _RestorableDialogTestWidget();
+
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,

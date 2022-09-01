@@ -837,7 +837,7 @@ class ColorScheme with Diagnosticable {
       inversePrimary : inversePrimary ?? this.inversePrimary,
       primaryVariant: primaryVariant ?? this.primaryVariant,
       secondaryVariant: secondaryVariant ?? this.secondaryVariant,
-      surfaceTint: _surfaceTint ?? this.surfaceTint,
+      surfaceTint: surfaceTint ?? this.surfaceTint,
     );
   }
 
@@ -882,10 +882,12 @@ class ColorScheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ColorScheme
       && other.brightness == brightness
       && other.primary == primary

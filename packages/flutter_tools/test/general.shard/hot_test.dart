@@ -27,41 +27,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
-
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final FlutterView fakeFlutterView = FlutterView(
-  id: 'a',
-  uiIsolate: fakeUnpausedIsolate,
-);
-
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
-  method: kListViewsMethod,
-  jsonResponse: <String, Object>{
-    'views': <Object>[
-      fakeFlutterView.toJson(),
-    ],
-  },
-);
 
 void main() {
   group('validateReloadReport', () {
@@ -548,7 +514,7 @@ void main() {
       final int exitCode = await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).attach();
+      ).attach(needsFullRestart: false);
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => TestHotRunnerConfig(),

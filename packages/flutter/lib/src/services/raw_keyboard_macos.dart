@@ -4,17 +4,22 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Convert a UTF32 rune to its lower case.
 int runeToLowerCase(int rune) {
   // Assume only Basic Multilingual Plane runes have lower and upper cases.
   // For other characters, return them as is.
   const int utf16BmpUpperBound = 0xD7FF;
-  if (rune > utf16BmpUpperBound)
+  if (rune > utf16BmpUpperBound) {
     return rune;
+  }
   return String.fromCharCode(rune).toLowerCase().codeUnitAt(0);
 }
 
@@ -36,6 +41,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
+    this.specifiedLogicalKey,
   }) : assert(characters != null),
        assert(charactersIgnoringModifiers != null),
        assert(keyCode != null),
@@ -70,6 +76,15 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///  * [Apple's NSEvent documentation](https://developer.apple.com/documentation/appkit/nsevent/1535211-modifierflags?language=objc)
   final int modifiers;
 
+  /// A logical key specified by the embedding that should be used instead of
+  /// deriving from raw data.
+  ///
+  /// The macOS embedding detects the keyboard layout and maps some keys to
+  /// logical keys in a way that can not be derived from per-key information.
+  ///
+  /// This is not part of the native macOS key event.
+  final int? specifiedLogicalKey;
+
   @override
   String get keyLabel => charactersIgnoringModifiers;
 
@@ -78,6 +93,10 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
+    if (specifiedLogicalKey != null) {
+      final int key = specifiedLogicalKey!;
+      return LogicalKeyboardKey.findKeyByKeyId(key) ?? LogicalKeyboardKey(key);
+    }
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
@@ -232,14 +251,17 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
     properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
     properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+    properties.add(DiagnosticsProperty<int?>('specifiedLogicalKey', specifiedLogicalKey, defaultValue: null));
   }
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataMacOs
         && other.characters == characters
         && other.charactersIgnoringModifiers == charactersIgnoringModifiers

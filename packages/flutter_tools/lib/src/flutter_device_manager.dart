@@ -29,7 +29,7 @@ import 'macos/xcdevice.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
-import 'windows/uwptool.dart';
+
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
 
@@ -40,7 +40,7 @@ class FlutterDeviceManager extends DeviceManager {
     required Platform platform,
     required ProcessManager processManager,
     required FileSystem fileSystem,
-    required AndroidSdk androidSdk,
+    required AndroidSdk? androidSdk,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,
     required XCDevice xcDevice,
@@ -56,7 +56,6 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required super.terminal,
     required CustomDevicesConfig customDevicesConfig,
-    required UwpTool uwptool,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -120,8 +119,6 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       fileSystem: fileSystem,
       windowsWorkflow: windowsWorkflow,
-      featureFlags: featureFlags,
-      uwptool: uwptool,
     ),
     WebDevices(
       featureFlags: featureFlags,

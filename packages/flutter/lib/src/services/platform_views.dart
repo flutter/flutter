@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'dart:typed_data';
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +10,12 @@ import 'package:flutter/gestures.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
+
+export 'dart:ui' show Offset, Size, TextDirection, VoidCallback;
+
+export 'package:flutter/gestures.dart' show PointerEvent;
+
+export 'message_codec.dart' show MessageCodec;
 
 /// Converts a given point from the global coordinate system in logical pixels
 /// to the local coordinate system for a box.
@@ -199,6 +204,8 @@ class PlatformViewsService {
   /// factory for this view type must have been registered on the platform side.
   /// Platform view factories are typically registered by plugin code.
   ///
+  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
+  /// get the input focus.
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   static Future<UiKitViewController> initUiKitView({
@@ -207,6 +214,7 @@ class PlatformViewsService {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
   }) async {
     assert(id != null);
     assert(viewType != null);
@@ -227,6 +235,9 @@ class PlatformViewsService {
       );
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
     return UiKitViewController._(id, layoutDirection);
   }
 }
@@ -634,6 +645,7 @@ class _AndroidMotionEventConverter {
     int toolType = AndroidPointerProperties.kToolTypeUnknown;
     switch (event.kind) {
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
         toolType = AndroidPointerProperties.kToolTypeFinger;
         break;
       case PointerDeviceKind.mouse:
@@ -646,8 +658,6 @@ class _AndroidMotionEventConverter {
         toolType = AndroidPointerProperties.kToolTypeEraser;
         break;
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }
@@ -750,18 +760,38 @@ abstract class AndroidViewController extends PlatformViewController {
     return ((pointerId << 8) & 0xff00) | (action & 0xff);
   }
 
+  /// Sends the message to dispose the platform view.
   Future<void> _sendDisposeMessage();
-  Future<void> _sendCreateMessage();
 
-  /// Creates the Android View.
+  /// True if [_sendCreateMessage] can only be called with a non-null size.
+  bool get _createRequiresSize;
+
+  /// Sends the message to create the platform view with an initial [size].
   ///
-  /// Throws an [AssertionError] if view was already disposed.
-  Future<void> create() async {
+  /// If [_createRequiresSize] is true, `size` is non-nullable, and the call
+  /// should instead be deferred until the size is available.
+  Future<void> _sendCreateMessage({required covariant Size? size});
+
+  /// Sends the message to resize the platform view to [size].
+  Future<Size> _sendResizeMessage(Size size);
+
+  @override
+  bool get awaitingCreation => _state == _AndroidViewState.waitingForSize;
+
+  @override
+  Future<void> create({Size? size}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
+    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
 
-    await _sendCreateMessage();
+    if (_createRequiresSize && size == null) {
+      // Wait for a setSize call.
+      return;
+    }
 
+    _state = _AndroidViewState.creating;
+    await _sendCreateMessage(size: size);
     _state = _AndroidViewState.created;
+
     for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
       callback(viewId);
     }
@@ -781,7 +811,17 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// As a result, consumers are expected to clip the texture using [size], while using
   /// the return value to size the texture.
-  Future<Size> setSize(Size size);
+  Future<Size> setSize(Size size) async {
+    assert(_state != _AndroidViewState.disposed, 'Android view is disposed. View id: $viewId');
+    if (_state == _AndroidViewState.waitingForSize) {
+      // Either `create` hasn't been called, or it couldn't run due to missing
+      // size information, so create the view now.
+      await create(size: size);
+      return size;
+    } else {
+      return _sendResizeMessage(size);
+    }
+  }
 
   /// Sets the offset of the platform view.
   ///
@@ -854,16 +894,18 @@ abstract class AndroidViewController extends PlatformViewController {
       'trying to set a layout direction for a disposed UIView. View id: $viewId',
     );
 
-    if (layoutDirection == _layoutDirection)
+    if (layoutDirection == _layoutDirection) {
       return;
+    }
 
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
 
     // If the view was not yet created we just update _layoutDirection and return, as the new
     // direction will be used in _create.
-    if (_state == _AndroidViewState.waitingForSize)
+    if (_state == _AndroidViewState.waitingForSize) {
       return;
+    }
 
     await SystemChannels.platform_views
         .invokeMethod<void>('setDirection', <String, dynamic>{
@@ -925,8 +967,9 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   @override
   Future<void> dispose() async {
-    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created)
+    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created) {
       await _sendDisposeMessage();
+    }
     _platformViewCreatedCallbacks.clear();
     _state = _AndroidViewState.disposed;
     PlatformViewsService._instance._focusCallbacks.remove(viewId);
@@ -938,39 +981,30 @@ abstract class AndroidViewController extends PlatformViewController {
 /// and is defined for backward compatibility.
 class SurfaceAndroidViewController extends TextureAndroidViewController{
     SurfaceAndroidViewController._({
-    required int viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-  })  : super._(
-          viewId: viewId,
-          viewType: viewType,
-          layoutDirection: layoutDirection,
-          creationParams: creationParams,
-          creationParamsCodec: creationParamsCodec,
-        );
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  })  : super._();
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
 /// This controller is created from the [PlatformViewsService.initExpensiveAndroidView] factory.
 class ExpensiveAndroidViewController extends AndroidViewController {
   ExpensiveAndroidViewController._({
-    required int viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-  })  : super._(
-          viewId: viewId,
-          viewType: viewType,
-          layoutDirection: layoutDirection,
-          creationParams: creationParams,
-          creationParamsCodec: creationParamsCodec,
-        );
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  })  : super._();
 
   @override
-  Future<void> _sendCreateMessage() {
+  bool get _createRequiresSize => false;
+
+  @override
+  Future<void> _sendCreateMessage({required Size? size}) async {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
@@ -986,7 +1020,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
         paramsByteData.lengthInBytes,
       );
     }
-    return SystemChannels.platform_views.invokeMethod<void>('create', args);
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
   }
 
   @override
@@ -996,15 +1030,14 @@ class ExpensiveAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendDisposeMessage() {
-    return SystemChannels.platform_views
-        .invokeMethod<void>('dispose', <String, dynamic>{
+    return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': true,
     });
   }
 
   @override
-  Future<Size> setSize(Size size) {
+  Future<Size> _sendResizeMessage(Size size) {
     throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
   }
 
@@ -1014,25 +1047,20 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   }
 }
 
-/// Controls an Android view that is rendered to a texture.
+/// Controls an Android view that is rendered as a texture.
+/// This is typically used by [AndroidView] to display a View in the Android view hierarchy.
 ///
-/// This is typically used by [AndroidView] to display an Android View in the Android view hierarchy.
+/// The platform view is created by calling [create] with an initial size.
 ///
-/// Typically created with [PlatformViewsService.initAndroidView].
+/// The controller is typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {
   TextureAndroidViewController._({
-    required int viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-  }) : super._(
-          viewId: viewId,
-          viewType: viewType,
-          layoutDirection: layoutDirection,
-          creationParams: creationParams,
-          creationParamsCodec: creationParamsCodec,
-        );
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  }) : super._();
 
   /// The texture entry id into which the Android view is rendered.
   int? _textureId;
@@ -1044,24 +1072,14 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   int? get textureId => _textureId;
 
-  /// The size used to create the platform view.
-  Size? _initialSize;
-
   /// The current offset of the platform view.
   Offset _off = Offset.zero;
 
   @override
-  Future<Size> setSize(Size size) async {
-    assert(_state != _AndroidViewState.disposed, 'trying to size a disposed Android View. View id: $viewId');
-
+  Future<Size> _sendResizeMessage(Size size) async {
+    assert(_state != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
     assert(size != null);
     assert(!size.isEmpty);
-
-    if (_state == _AndroidViewState.waitingForSize) {
-      _initialSize = size;
-      await create();
-      return size;
-    }
 
     final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
       'resize',
@@ -1079,14 +1097,16 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> setOffset(Offset off) async {
-    if (off == _off)
+    if (off == _off) {
       return;
+    }
 
     // Don't set the offset unless the Android view has been created.
     // The implementation of this method channel throws if the Android view for this viewId
     // isn't addressable.
-    if (_state != _AndroidViewState.created)
+    if (_state != _AndroidViewState.created) {
       return;
+    }
 
     _off = off;
 
@@ -1100,27 +1120,19 @@ class TextureAndroidViewController extends AndroidViewController {
     );
   }
 
-  /// Creates the Android View.
-  ///
-  /// This should not be called before [AndroidViewController.setSize].
-  ///
-  /// Throws an [AssertionError] if view was already disposed.
   @override
-  Future<void> create() async {
-    if (_initialSize != null)
-      return super.create();
-  }
+  bool get _createRequiresSize => true;
 
   @override
-  Future<void> _sendCreateMessage() async {
-    assert(_initialSize != null, 'trying to create $TextureAndroidViewController without setting an initial size.');
-    assert(!_initialSize!.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+  // Size is non-nullable due to _createRequiresSize returning true.
+  Future<void> _sendCreateMessage({required Size size}) async {
+    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
-      'width': _initialSize!.width,
-      'height': _initialSize!.height,
+      'width': size.width,
+      'height': size.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
     };
     if (_creationParams != null) {
@@ -1170,8 +1182,9 @@ class UiKitViewController {
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
 
-    if (layoutDirection == _layoutDirection)
+    if (layoutDirection == _layoutDirection) {
       return;
+    }
 
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
@@ -1227,8 +1240,24 @@ abstract class PlatformViewController {
   ///  * [PlatformViewsRegistry], which is a helper for managing platform view IDs.
   int get viewId;
 
+  /// True if [create] has not been successfully called the platform view.
+  ///
+  /// This can indicate either that [create] was never called, or that [create]
+  /// was deferred for implementation-specific reasons.
+  ///
+  /// A `false` return value does not necessarily indicate that the [Future]
+  /// returned by [create] has completed, only that creation has been started.
+  bool get awaitingCreation => false;
+
   /// Dispatches the `event` to the platform view.
   Future<void> dispatchPointerEvent(PointerEvent event);
+
+  /// Creates the platform view with the initial [size].
+  ///
+  /// [size] is the view's initial size in logical pixel.
+  /// [size] can be omitted if the concrete implementation doesn't require an initial size
+  /// to create the platform view.
+  Future<void> create({Size? size}) async {}
 
   /// Disposes the platform view.
   ///

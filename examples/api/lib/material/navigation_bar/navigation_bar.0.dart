@@ -15,7 +15,7 @@ class Destination {
 }
 
 class RootPage extends StatelessWidget {
-  const RootPage({ Key? key, required this.destination }) : super(key: key);
+  const RootPage({ super.key, required this.destination });
 
   final Destination destination;
 
@@ -35,7 +35,7 @@ class RootPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyle headline5 = Theme.of(context).textTheme.headline5!;
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
-      primary: destination.color,
+      backgroundColor: destination.color,
       visualDensity: VisualDensity.comfortable,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       textStyle: headline5,
@@ -117,7 +117,7 @@ class RootPage extends StatelessWidget {
 }
 
 class ListPage extends StatelessWidget {
-  const ListPage({ Key? key, required this.destination }) : super(key: key);
+  const ListPage({ super.key, required this.destination });
 
   final Destination destination;
 
@@ -125,7 +125,7 @@ class ListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     const int itemCount = 50;
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
-      primary: destination.color,
+      foregroundColor: destination.color,
       fixedSize: const Size.fromHeight(128),
       textStyle: Theme.of(context).textTheme.headline5,
     );
@@ -143,7 +143,7 @@ class ListPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
-                  backgroundColor: MaterialStateProperty.all<Color>(
+                  backgroundColor: MaterialStatePropertyAll<Color>(
                     Color.lerp(destination.color[100], Colors.white, index / itemCount)!
                   ),
                 ),
@@ -161,7 +161,7 @@ class ListPage extends StatelessWidget {
 }
 
 class TextPage extends StatefulWidget {
-  const TextPage({ Key? key, required this.destination }) : super(key: key);
+  const TextPage({ super.key, required this.destination });
 
   final Destination destination;
 
@@ -217,10 +217,10 @@ class _TextPageState extends State<TextPage> {
 
 class DestinationView extends StatefulWidget {
   const DestinationView({
-    Key? key,
+    super.key,
     required this.destination,
     required this.navigatorKey,
-  }) : super(key: key);
+  });
 
   final Destination destination;
   final Key navigatorKey;
@@ -256,7 +256,7 @@ class _DestinationViewState extends State<DestinationView> {
 }
 
 class Home extends StatefulWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({ super.key });
 
   @override
   State<Home> createState() => _HomeState();
@@ -267,7 +267,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
     Destination(0, 'Teal', Icons.home, Colors.teal),
     Destination(1, 'Cyan', Icons.business, Colors.cyan),
     Destination(2, 'Orange', Icons.school, Colors.orange),
-    Destination(3, 'Blue', Icons.flight, Colors.blue)
+    Destination(3, 'Blue', Icons.flight, Colors.blue),
   ];
 
   late final List<GlobalKey<NavigatorState>> navigatorKeys;

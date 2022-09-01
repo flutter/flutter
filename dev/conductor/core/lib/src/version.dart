@@ -278,14 +278,14 @@ class Version {
     final String branchX = branchMatch.group(1)!;
     if (x != int.tryParse(branchX)) {
       throw ConductorException(
-        'Parsed version ${toString()} has a different x value than candidate '
+        'Parsed version $this has a different x value than candidate '
         'branch $candidateBranch',
       );
     }
     final String branchY = branchMatch.group(2)!;
     if (y != int.tryParse(branchY)) {
       throw ConductorException(
-        'Parsed version ${toString()} has a different y value than candidate '
+        'Parsed version $this has a different y value than candidate '
         'branch $candidateBranch',
       );
     }
@@ -295,7 +295,7 @@ class Version {
       final String branchM = branchMatch.group(3)!;
       if (m != int.tryParse(branchM)) {
         throw ConductorException(
-          'Parsed version ${toString()} has a different m value than candidate '
+          'Parsed version $this has a different m value than candidate '
           'branch $candidateBranch with type $type',
         );
       }

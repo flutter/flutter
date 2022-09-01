@@ -47,7 +47,7 @@ class OpacityFlowDelegate extends FlowDelegate {
 
 // OpacityFlowDelegate that paints one of its children twice
 class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
-  DuplicatePainterOpacityFlowDelegate(double opacity) : super(opacity);
+  DuplicatePainterOpacityFlowDelegate(super.opacity);
 
   @override
   void paintChildren(FlowPaintingContext context) {
@@ -148,8 +148,9 @@ void main() {
       ),
     );
     ContainerLayer? layer = RendererBinding.instance.renderView.debugLayer;
-    while (layer != null && layer is! OpacityLayer)
+    while (layer != null && layer is! OpacityLayer) {
       layer = layer.firstChild as ContainerLayer?;
+    }
     expect(layer, isA<OpacityLayer>());
     final OpacityLayer? opacityLayer = layer as OpacityLayer?;
     expect(opacityLayer!.alpha, equals(opacity * 255));

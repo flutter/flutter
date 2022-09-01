@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
-  Future<void> _checkNonLinearAnimation(WidgetTester tester) async {
+  Future<void> checkNonLinearAnimation(WidgetTester tester) async {
     final Offset firstPosition = tester.getCenter(find.text('BottomSheet'));
     await tester.pump(const Duration(milliseconds: 30));
     final Offset secondPosition = tester.getCenter(find.text('BottomSheet'));
@@ -218,7 +218,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) {
         numBuilderCalls++;
         return const Text('BottomSheet');
@@ -323,7 +322,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-      isDismissible: true,
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
@@ -360,13 +358,13 @@ void main() {
     );
     await tester.pump();
 
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle();
 
     // Tap above the bottom sheet to dismiss it.
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(find.text('BottomSheet'), findsNothing);
   });
@@ -498,7 +496,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
@@ -531,7 +528,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) {
         numBuilderCalls++;
         return const Text('BottomSheet');
@@ -1657,7 +1653,7 @@ void main() {
 }
 
 class _TestPage extends StatelessWidget {
-  const _TestPage({Key? key, this.useRootNavigator}) : super(key: key);
+  const _TestPage({this.useRootNavigator});
 
   final bool? useRootNavigator;
 

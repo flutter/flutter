@@ -6,36 +6,31 @@
 
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutter/material.dart';
+void main() => runApp(const FormSectionApp());
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class FormSectionApp extends StatelessWidget {
+  const FormSectionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+    return const CupertinoApp(
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: FromSectionExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class FromSectionExample extends StatelessWidget {
+  const FromSectionExample({super.key});
 
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      child: Center(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoFormSection Sample'),
+      ),
+      // Add safe area widget to place the CupertinoFormSection below the navigation bar.
+      child: SafeArea(
         child: Form(
           autovalidateMode: AutovalidateMode.always,
           onChanged: () {

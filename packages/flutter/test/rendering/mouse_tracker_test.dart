@@ -17,7 +17,7 @@ typedef SimpleAnnotationFinder = Iterable<TestAnnotationEntry> Function(Offset o
 
 void main() {
   final TestMouseTrackerFlutterBinding binding = TestMouseTrackerFlutterBinding();
-  void _setUpMouseAnnotationFinder(SimpleAnnotationFinder annotationFinder) {
+  void setUpMouseAnnotationFinder(SimpleAnnotationFinder annotationFinder) {
     binding.setHitTest((BoxHitTestResult result, Offset position) {
       for (final TestAnnotationEntry entry in annotationFinder(position)) {
         result.addWithRawTransform(
@@ -38,24 +38,27 @@ void main() {
   // `logEvents`.
   // This annotation also contains a cursor with a value of `testCursor`.
   // The mouse tracker records the cursor requests it receives to `logCursors`.
-  TestAnnotationTarget _setUpWithOneAnnotation({
+  TestAnnotationTarget setUpWithOneAnnotation({
     required List<PointerEvent> logEvents,
   }) {
     final TestAnnotationTarget oneAnnotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) {
-        if (logEvents != null)
+        if (logEvents != null) {
           logEvents.add(event);
+        }
       },
       onHover: (PointerHoverEvent event) {
-        if (logEvents != null)
+        if (logEvents != null) {
           logEvents.add(event);
+        }
       },
       onExit: (PointerExitEvent event) {
-        if (logEvents != null)
+        if (logEvents != null) {
           logEvents.add(event);
+        }
       },
     );
-    _setUpMouseAnnotationFinder(
+    setUpMouseAnnotationFinder(
       (Offset position) sync* {
         yield TestAnnotationEntry(oneAnnotation);
       },
@@ -77,7 +80,7 @@ void main() {
 
   test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
     final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
+    setUpWithOneAnnotation(logEvents: events);
 
     final List<bool> listenerLogs = <bool>[];
     _mouseTracker.addListener(() {
@@ -133,9 +136,19 @@ void main() {
     listenerLogs.clear();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/90838
+  test('should not crash if the first event is a Removed event', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    setUpWithOneAnnotation(logEvents: events);
+    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, Offset.zero),
+    ]));
+    events.clear();
+  });
+
   test('should correctly handle multiple devices', () {
     final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
+    setUpWithOneAnnotation(logEvents: events);
 
     expect(_mouseTracker.mouseIsConnected, isFalse);
 
@@ -216,7 +229,7 @@ void main() {
 
   test('should not handle non-hover events', () {
     final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
+    setUpWithOneAnnotation(logEvents: events);
 
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
@@ -251,7 +264,7 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
         yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
@@ -299,7 +312,7 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
         yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
@@ -349,7 +362,7 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
         yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
@@ -387,7 +400,7 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
         yield TestAnnotationEntry(annotation, Matrix4.translationValues(10, 20, 0));
       }
@@ -426,7 +439,7 @@ void main() {
   });
 
   test('should not schedule post-frame callbacks when no mouse is connected', () {
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    setUpMouseAnnotationFinder((Offset position) sync* {
     });
 
     // Connect a touch device, which should not be recognized by MouseTracker
@@ -447,11 +460,12 @@ void main() {
     final TestAnnotationTarget annotation2 = TestAnnotationTarget(
       onExit: (PointerExitEvent event) {},
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
-      if (isInHitRegionOne)
+    setUpMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegionOne) {
         yield TestAnnotationEntry(annotation1);
-      else if (isInHitRegionTwo)
+      } else if (isInHitRegionTwo) {
         yield TestAnnotationEntry(annotation2);
+      }
     });
 
     isInHitRegionOne = false;
@@ -487,7 +501,7 @@ void main() {
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    setUpMouseAnnotationFinder((Offset position) sync* {
       // Children's annotations come before parents'.
       if (isInB) {
         yield TestAnnotationEntry(annotationB);
@@ -541,7 +555,7 @@ void main() {
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInA) {
         yield TestAnnotationEntry(annotationA);
       } else if (isInB) {
@@ -648,7 +662,7 @@ class BaseEventMatcher extends Matcher {
 }
 
 class EventMatcher<T extends PointerEvent> extends BaseEventMatcher {
-  EventMatcher(T expected) : super(expected);
+  EventMatcher(T super.expected);
 
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
@@ -684,12 +698,14 @@ class _EventListCriticalFieldsMatcher extends Matcher {
 
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
-    if (untypedItem is! Iterable<PointerEvent>)
+    if (untypedItem is! Iterable<PointerEvent>) {
       return false;
+    }
     final Iterable<PointerEvent> item = untypedItem;
     final Iterator<PointerEvent> iterator = item.iterator;
-    if (item.length != _expected.length)
+    if (item.length != _expected.length) {
       return false;
+    }
     int i = 0;
     for (final BaseEventMatcher matcher in _expected) {
       iterator.moveNext();

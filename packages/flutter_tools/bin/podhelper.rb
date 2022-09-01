@@ -34,7 +34,7 @@ def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
   # [target.deployment_target] is a [String] formatted as "8.0".
-  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 11
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -60,10 +60,10 @@ def flutter_additional_ios_build_settings(target)
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
-      continue if xcframework_file.start_with?(".") # Hidden file, possibly on external disk.
+      next if xcframework_file.start_with?(".") # Hidden file, possibly on external disk.
       if xcframework_file.end_with?("-simulator") # ios-arm64_x86_64-simulator
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
-      elsif xcframework_file.start_with?("ios-") # ios-armv7_arm64
+      elsif xcframework_file.start_with?("ios-") # ios-arm64
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       else
         # Info.plist or another platform.
@@ -81,6 +81,7 @@ def flutter_additional_ios_build_settings(target)
     # Override legacy Xcode 11 style VALID_ARCHS[sdk=iphonesimulator*]=x86_64 and prefer Xcode 12 EXCLUDED_ARCHS.
     build_configuration.build_settings['VALID_ARCHS[sdk=iphonesimulator*]'] = '$(ARCHS_STANDARD)'
     build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = '$(inherited) i386'
+    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphoneos*]'] = '$(inherited) armv7'
   end
 end
 
@@ -160,7 +161,8 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   ios_application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
   raise 'Could not find iOS application path' unless ios_application_path
 
-  copied_podspec_path = File.expand_path('Flutter.podspec', File.join(ios_application_path, 'Flutter'))
+  podspec_directory = File.join(ios_application_path, 'Flutter')
+  copied_podspec_path = File.expand_path('Flutter.podspec', podspec_directory)
 
   # Generate a fake podspec to represent the Flutter framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'Flutter'`, and if this Podfile
@@ -175,12 +177,12 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
       Pod::Spec.new do |s|
         s.name             = 'Flutter'
         s.version          = '1.0.0'
-        s.summary          = 'High-performance, high-fidelity mobile apps.'
-        s.homepage         = 'https://flutter.io'
-        s.license          = { :type => 'MIT' }
+        s.summary          = 'A UI toolkit for beautiful and fast apps.'
+        s.homepage         = 'https://flutter.dev'
+        s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.ios.deployment_target = '9.0'
+        s.ios.deployment_target = '11.0'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'Flutter'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
@@ -189,7 +191,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   }
 
   # Keep pod path relative so it can be checked into Podfile.lock.
-  pod 'Flutter', :path => 'Flutter'
+  pod 'Flutter', :path => flutter_relative_path_from_podfile(podspec_directory)
 end
 
 # Same as flutter_install_ios_engine_pod for macOS.
@@ -213,9 +215,9 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
       Pod::Spec.new do |s|
         s.name             = 'FlutterMacOS'
         s.version          = '1.0.0'
-        s.summary          = 'High-performance, high-fidelity mobile apps.'
-        s.homepage         = 'https://flutter.io'
-        s.license          = { :type => 'MIT' }
+        s.summary          = 'A UI toolkit for beautiful and fast apps.'
+        s.homepage         = 'https://flutter.dev'
+        s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
         s.osx.deployment_target = '10.11'
@@ -259,7 +261,9 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
       File.symlink(plugin_path, symlink)
 
       # Keep pod path relative so it can be checked into Podfile.lock.
-      pod plugin_name, :path => File.join(relative_symlink_dir, 'plugins', plugin_name, platform)
+      relative = flutter_relative_path_from_podfile(symlink)
+
+      pod plugin_name, :path => File.join(relative, platform)
     end
   end
 end
@@ -268,7 +272,7 @@ end
 # https://flutter.dev/go/plugins-list-migration
 def flutter_parse_plugins_file(file, platform)
   file_path = File.expand_path(file)
-  return [] unless File.exists? file_path
+  return [] unless File.exist? file_path
 
   dependencies_file = File.read(file)
   dependencies_hash = JSON.parse(dependencies_file)
@@ -277,4 +281,13 @@ def flutter_parse_plugins_file(file, platform)
   return [] unless dependencies_hash.has_key?('plugins')
   return [] unless dependencies_hash['plugins'].has_key?('ios')
   dependencies_hash['plugins'][platform] || []
+end
+
+def flutter_relative_path_from_podfile(path)
+  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
+  project_directory_pathname = defined_in_file.dirname
+
+  pathname = Pathname.new File.expand_path(path)
+  relative = pathname.relative_path_from project_directory_pathname
+  relative.to_s
 end

@@ -477,8 +477,9 @@ class RenderBigSliver extends RenderSliver {
   double get height => _height;
   double _height;
   set height(double value) {
-    if (value == _height)
+    if (value == _height) {
       return;
+    }
     _height = value;
     markNeedsLayout();
   }
@@ -496,7 +497,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  const BigSliver({ Key? key, required this.height }) : super(key: key);
+  const BigSliver({ super.key, required this.height });
 
   final double height;
 

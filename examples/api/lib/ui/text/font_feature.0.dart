@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const ExampleApp());
 
 class ExampleApp extends StatelessWidget {
-  const ExampleApp({Key? key}) : super(key: key);
+  const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ final TextStyle titleStyle = TextStyle(
 );
 
 class ExampleWidget extends StatelessWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+  const ExampleWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

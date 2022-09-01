@@ -163,13 +163,6 @@ const String defaultConfigLinux2 = r'''
 }
 ''';
 
-final Platform linuxPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': linuxFlutterRoot,
-    'HOME': '/',
-  }
-);
-
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
@@ -283,7 +276,7 @@ class FakeCommandRunner extends FlutterCommandRunner {
 
     return context.run<void>(
       overrides: <Type, Generator>{
-        Logger: () => logger
+        Logger: () => logger,
       },
       body: () {
         Cache.flutterRoot ??= Cache.defaultFlutterRoot(
@@ -330,7 +323,7 @@ CustomDevicesCommand createCustomDevicesCommand({
       hostPlatform: platform.isLinux ? HostPlatform.linux_x64
         : platform.isWindows ? HostPlatform.windows_x64
         : platform.isMacOS ? HostPlatform.darwin_x64
-        : throw FallThroughError()
+        : throw UnsupportedError('Unsupported operating system')
     ),
     terminal: terminal != null
       ? terminal(platform)
@@ -552,7 +545,7 @@ void main() {
                 'ping',
                 '-c', '1',
                 '-w', '1',
-                'testhostname'
+                'testhostname',
               ],
               postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
@@ -560,19 +553,19 @@ void main() {
                 '-r',
                 '-o', 'BatchMode=yes',
                 r'${localPath}',
-                r'testuser@testhostname:/tmp/${appName}'
+                r'testuser@testhostname:/tmp/${appName}',
               ],
               uninstallCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                r'rm -rf "/tmp/${appName}"'
+                r'rm -rf "/tmp/${appName}"',
               ],
               runDebugCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                'testrundebug'
+                'testrundebug',
               ],
               forwardPortCommand: const <String>[
                 'ssh',
@@ -580,14 +573,14 @@ void main() {
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
                 'testuser@testhostname',
-                "echo 'Port forwarding success'; read"
+                "echo 'Port forwarding success'; read",
               ],
               forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                'testscreenshot'
+                'testscreenshot',
               ],
             )
           )
@@ -642,7 +635,7 @@ void main() {
                 'ping',
                 '-c', '1',
                 '-w', '1',
-                '192.168.178.1'
+                '192.168.178.1',
               ],
               postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
@@ -650,19 +643,19 @@ void main() {
                 '-r',
                 '-o', 'BatchMode=yes',
                 r'${localPath}',
-                r'testuser@192.168.178.1:/tmp/${appName}'
+                r'testuser@192.168.178.1:/tmp/${appName}',
               ],
               uninstallCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@192.168.178.1',
-                r'rm -rf "/tmp/${appName}"'
+                r'rm -rf "/tmp/${appName}"',
               ],
               runDebugCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@192.168.178.1',
-                'testrundebug'
+                'testrundebug',
               ],
               forwardPortCommand: const <String>[
                 'ssh',
@@ -670,19 +663,19 @@ void main() {
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
                 'testuser@192.168.178.1',
-                "echo 'Port forwarding success'; read"
+                "echo 'Port forwarding success'; read",
               ],
               forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@192.168.178.1',
-                'testscreenshot'
-              ]
-            )
-          )
+                'testscreenshot',
+              ],
+            ),
+          ),
         );
-      }
+      },
     );
 
     testUsingContext(
@@ -732,7 +725,7 @@ void main() {
                 '-6',
                 '-c', '1',
                 '-w', '1',
-                '::1'
+                '::1',
               ],
               postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
@@ -741,21 +734,21 @@ void main() {
                 '-o', 'BatchMode=yes',
                 '-6',
                 r'${localPath}',
-                r'testuser@[::1]:/tmp/${appName}'
+                r'testuser@[::1]:/tmp/${appName}',
               ],
               uninstallCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 '-6',
                 'testuser@[::1]',
-                r'rm -rf "/tmp/${appName}"'
+                r'rm -rf "/tmp/${appName}"',
               ],
               runDebugCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 '-6',
                 'testuser@[::1]',
-                'testrundebug'
+                'testrundebug',
               ],
               forwardPortCommand: const <String>[
                 'ssh',
@@ -764,7 +757,7 @@ void main() {
                 '-6',
                 '-L', r'[::1]:${hostPort}:[::1]:${devicePort}',
                 'testuser@[::1]',
-                "echo 'Port forwarding success'; read"
+                "echo 'Port forwarding success'; read",
               ],
               forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
@@ -772,12 +765,12 @@ void main() {
                 '-o', 'BatchMode=yes',
                 '-6',
                 'testuser@[::1]',
-                'testscreenshot'
-              ]
-            )
-          )
+                'testscreenshot',
+              ],
+            ),
+          ),
         );
-      }
+      },
     );
 
     testUsingContext(
@@ -826,7 +819,7 @@ void main() {
                 'ping',
                 '-c', '1',
                 '-w', '1',
-                'testhostname'
+                'testhostname',
               ],
               postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: <String>[
@@ -834,30 +827,30 @@ void main() {
                 '-r',
                 '-o', 'BatchMode=yes',
                 r'${localPath}',
-                r'testuser@testhostname:/tmp/${appName}'
+                r'testuser@testhostname:/tmp/${appName}',
               ],
               uninstallCommand: <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                r'rm -rf "/tmp/${appName}"'
+                r'rm -rf "/tmp/${appName}"',
               ],
               runDebugCommand: <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                'testrundebug'
+                'testrundebug',
               ],
               screenshotCommand: <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                'testscreenshot'
-              ]
-            )
-          )
+                'testscreenshot',
+              ],
+            ),
+          ),
         );
-      }
+      },
     );
 
     testUsingContext(
@@ -880,12 +873,12 @@ void main() {
             apply: 'y',
           ),
           fileSystem: fs,
-          featureEnabled: true
+          featureEnabled: true,
         );
 
         await expectLater(
           runner.run(const <String>['custom-devices', 'add', '--no-check']),
-          completes
+          completes,
         );
 
         final CustomDevicesConfig config = CustomDevicesConfig.test(
@@ -906,7 +899,7 @@ void main() {
                 'ping',
                 '-c', '1',
                 '-w', '1',
-                'testhostname'
+                'testhostname',
               ],
               postBuildCommand: null, // ignore: avoid_redundant_argument_values
               installCommand: const <String>[
@@ -914,19 +907,19 @@ void main() {
                 '-r',
                 '-o', 'BatchMode=yes',
                 r'${localPath}',
-                r'testuser@testhostname:/tmp/${appName}'
+                r'testuser@testhostname:/tmp/${appName}',
               ],
               uninstallCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                r'rm -rf "/tmp/${appName}"'
+                r'rm -rf "/tmp/${appName}"',
               ],
               runDebugCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                'testrundebug'
+                'testrundebug',
               ],
               forwardPortCommand: const <String>[
                 'ssh',
@@ -934,7 +927,7 @@ void main() {
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
                 'testuser@testhostname',
-                "echo 'Port forwarding success'; read"
+                "echo 'Port forwarding success'; read",
               ],
               forwardPortSuccessRegex: RegExp('Port forwarding success'),
             )
@@ -1230,7 +1223,7 @@ void main() {
                 'ping',
                 '-n', '1',
                 '-w', '500',
-                'testhostname'
+                'testhostname',
               ],
               pingSuccessRegex: RegExp(r'[<=]\d+ms'),
               postBuildCommand: null, // ignore: avoid_redundant_argument_values
@@ -1239,19 +1232,19 @@ void main() {
                 '-r',
                 '-o', 'BatchMode=yes',
                 r'${localPath}',
-                r'testuser@testhostname:/tmp/${appName}'
+                r'testuser@testhostname:/tmp/${appName}',
               ],
               uninstallCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                r'rm -rf "/tmp/${appName}"'
+                r'rm -rf "/tmp/${appName}"',
               ],
               runDebugCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                'testrundebug'
+                'testrundebug',
               ],
               forwardPortCommand: const <String>[
                 'ssh',
@@ -1259,17 +1252,17 @@ void main() {
                 '-o', 'ExitOnForwardFailure=yes',
                 '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
                 'testuser@testhostname',
-                "echo 'Port forwarding success'; read"
+                "echo 'Port forwarding success'; read",
               ],
               forwardPortSuccessRegex: RegExp('Port forwarding success'),
               screenshotCommand: const <String>[
                 'ssh',
                 '-o', 'BatchMode=yes',
                 'testuser@testhostname',
-                'testscreenshot'
-              ]
-            )
-          )
+                'testscreenshot',
+              ],
+            ),
+          ),
         );
       },
     );

@@ -1,6 +1,6 @@
 **Welcome to the Flutter API reference documentation!**
 
-Flutter is Google's SDK for crafting beautiful, fast user experiences for 
+Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
 code, is used by developers and organizations around the world, and is free
 and open source.
@@ -57,8 +57,8 @@ import 'package:file/local.dart';
 ### Packages on pub.dev
 
 Flutter has a rich ecosystem of packages that have been contributed by the
-Flutter team and the broader open source community to a central repository. 
-Among the thousands of packages, you'll find support for Firebase, Google 
+Flutter team and the broader open source community to a central repository.
+Among the thousands of packages, you'll find support for Firebase, Google
 Fonts, hardware services like Bluetooth and camera, new widgets and
 animations, and integration with other popular web services. You can browse
 those packages at [pub.dev](https://pub.dev).

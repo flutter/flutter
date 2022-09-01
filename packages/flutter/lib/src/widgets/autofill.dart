@@ -67,11 +67,10 @@ class AutofillGroup extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const AutofillGroup({
-    Key? key,
+    super.key,
     required this.child,
     this.onDisposeAction = AutofillContextAction.commit,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// Returns the closest [AutofillGroupState] which encloses the given context.
   ///
@@ -187,8 +186,9 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   void dispose() {
     super.dispose();
 
-    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null)
+    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null) {
       return;
+    }
     switch (widget.onDisposeAction) {
       case AutofillContextAction.cancel:
         TextInput.finishAutofillContext(shouldSave: false);
@@ -202,11 +202,9 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
 class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     AutofillGroupState? autofillScopeState,
-  }) : _scope = autofillScopeState,
-       super(key: key, child: child);
+  }) : _scope = autofillScopeState;
 
   final AutofillGroupState? _scope;
 

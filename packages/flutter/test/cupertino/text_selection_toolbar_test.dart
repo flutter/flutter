@@ -55,7 +55,7 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
 }
 
 class TestBox extends SizedBox {
-  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
+  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
 
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;
@@ -65,7 +65,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // Find by a runtimeType String, including private types.
-  Finder _findPrivate(String type) {
+  Finder findPrivate(String type) {
     return find.descendant(
       of: find.byType(CupertinoApp),
       matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
@@ -75,10 +75,10 @@ void main() {
   // Finding CupertinoTextSelectionToolbar won't give you the position as the user sees
   // it because it's a full-sized Stack at the top level. This method finds the
   // visible part of the toolbar for use in measurements.
-  Finder _findToolbar() => _findPrivate('_CupertinoTextSelectionToolbarContent');
+  Finder findToolbar() => findPrivate('_CupertinoTextSelectionToolbarContent');
 
-  Finder _findOverflowNextButton() => find.text('▶');
-  Finder _findOverflowBackButton() => find.text('◀');
+  Finder findOverflowNextButton() => find.text('▶');
+  Finder findOverflowBackButton() => find.text('◀');
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
@@ -102,8 +102,8 @@ void main() {
 
     // All children fit on the screen, so they are all rendered.
     expect(find.byType(TestBox), findsNWidgets(children.length));
-    expect(_findOverflowNextButton(), findsNothing);
-    expect(_findOverflowBackButton(), findsNothing);
+    expect(findOverflowNextButton(), findsNothing);
+    expect(findOverflowBackButton(), findsNothing);
 
     // Adding one more child makes the children overflow.
     setState(() {
@@ -113,30 +113,30 @@ void main() {
     });
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(children.length - 1));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsNothing);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsNothing);
 
     // Tap the overflow next button to show the next page of children.
-    await tester.tap(_findOverflowNextButton());
+    await tester.tap(findOverflowNextButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsOneWidget);
 
     // Tapping the overflow next button again does nothing because it is
     // disabled and there are no more children to display.
-    await tester.tap(_findOverflowNextButton());
+    await tester.tap(findOverflowNextButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
-    await tester.tap(_findOverflowBackButton());
+    await tester.tap(findOverflowBackButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsNothing);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsNothing);
 
     // Adding 7 more children overflows onto a third page.
     setState(() {
@@ -149,37 +149,37 @@ void main() {
     });
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsNothing);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsNothing);
 
     // Tap the overflow next button to show the second page of children.
-    await tester.tap(_findOverflowNextButton());
+    await tester.tap(findOverflowNextButton());
     await tester.pumpAndSettle();
     // With the back button, only six children fit on this page.
     expect(find.byType(TestBox), findsNWidgets(6));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow next button again to show the third page of children.
-    await tester.tap(_findOverflowNextButton());
+    await tester.tap(findOverflowNextButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the second page.
-    await tester.tap(_findOverflowBackButton());
+    await tester.tap(findOverflowBackButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(6));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
-    await tester.tap(_findOverflowBackButton());
+    await tester.tap(findOverflowBackButton());
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
-    expect(_findOverflowNextButton(), findsOneWidget);
-    expect(_findOverflowBackButton(), findsNothing);
+    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
@@ -211,7 +211,7 @@ void main() {
 
     // When the toolbar doesn't fit above aboveAnchor, it positions itself below
     // belowAnchor.
-    double toolbarY = tester.getTopLeft(_findToolbar()).dy;
+    double toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
 
     // Even when it barely doesn't fit.
@@ -219,7 +219,7 @@ void main() {
       anchorAboveY = 50.0;
     });
     await tester.pump();
-    toolbarY = tester.getTopLeft(_findToolbar()).dy;
+    toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
 
     // When it does fit above aboveAnchor, it positions itself there.
@@ -227,7 +227,7 @@ void main() {
       anchorAboveY = 60.0;
     });
     await tester.pump();
-    toolbarY = tester.getTopLeft(_findToolbar()).dy;
+    toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 

@@ -70,9 +70,6 @@ class DevelopmentArtifact {
   /// Artifacts required for the Flutter Runner.
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', feature: flutterFuchsiaFeature);
 
-  /// Artifacts required for desktop Windows UWP.
-  static const DevelopmentArtifact windowsUwp = DevelopmentArtifact._('winuwp', feature: windowsUwpEmbedding);
-
   /// Artifacts required for any development platform.
   ///
   /// This does not need to be explicitly returned from requiredArtifacts as
@@ -92,7 +89,6 @@ class DevelopmentArtifact {
     fuchsia,
     universal,
     flutterRunner,
-    windowsUwp,
   ];
 
   @override
@@ -393,10 +389,10 @@ class Cache {
         throw Exception('Could not find file at $versionFilePath');
       }
       final dynamic data = jsonDecode(versionFile.readAsStringSync());
-      if (data is! Map<String, Object>) {
-        throw Exception("Expected object of type 'Map<String, Object>' but got one of type '${data.runtimeType}'");
+      if (data is! Map<String, Object?>) {
+        throw Exception("Expected object of type 'Map<String, Object?>' but got one of type '${data.runtimeType}'");
       }
-      final dynamic version = data['version'];
+      final Object? version = data['version'];
       if (version == null) {
         throw Exception('Could not parse DevTools version from $version');
       }
@@ -524,7 +520,7 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
-    _logger.printStatus(
+    _logger.printError(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
     );
@@ -665,7 +661,7 @@ class Cache {
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
     if (!_lockEnabled) {
       return;
     }
@@ -678,7 +674,7 @@ class Cache {
         continue;
       }
       try {
-        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils);
+        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline: offline);
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
@@ -744,6 +740,7 @@ abstract class ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   );
 
   /// The canonical name of the artifact.
@@ -797,6 +794,7 @@ abstract class CachedArtifact extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   ) async {
     if (!location.existsSync()) {
       try {

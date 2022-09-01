@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-import 'package:xml/xml.dart';
-
-import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
-import 'cmake.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
 
@@ -82,45 +77,6 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
-}
-
-/// The Windows UWP version of the Windows project.
-class WindowsUwpProject extends WindowsProject {
-  WindowsUwpProject.fromFlutter(super.parent) : super.fromFlutter();
-
-  @override
-  String get _childDirectory => 'winuwp';
-
-  File get runnerCmakeFile => _editableDirectory.childDirectory('runner_uwp').childFile('CMakeLists.txt');
-
-  /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
-  int? get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
-
-  /// Retrieve the GUID of the UWP package.
-  late final String? packageGuid = getCmakePackageGuid(runnerCmakeFile);
-
-  File get appManifest => _editableDirectory.childDirectory('runner_uwp').childFile('appxmanifest.in');
-
-  late final String? packageVersion = parseAppVersion(this);
-}
-
-@visibleForTesting
-String? parseAppVersion(WindowsUwpProject project) {
-  final File appManifestFile = project.appManifest;
-  if (!appManifestFile.existsSync()) {
-    return null;
-  }
-
-  XmlDocument document;
-  try {
-    document = XmlDocument.parse(appManifestFile.readAsStringSync());
-  } on XmlParserException {
-    throwToolExit('Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
-  }
-  for (final XmlElement metaData in document.findAllElements('Identity')) {
-    return metaData.getAttribute('Version');
-  }
-  return null;
 }
 
 /// The Linux sub project.

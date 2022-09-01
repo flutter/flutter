@@ -44,7 +44,7 @@ import 'framework.dart';
 ///    recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
-  const StreamBuilderBase({ Key? key, this.stream }) : super(key: key);
+  const StreamBuilderBase({ super.key, this.stream });
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null. When changed, the current summary is updated using
@@ -246,10 +246,12 @@ class AsyncSnapshot<T> {
   /// Throws [error], if [hasError]. Throws [StateError], if neither [hasData]
   /// nor [hasError].
   T get requireData {
-    if (hasData)
+    if (hasData) {
       return data!;
-    if (hasError)
+    }
+    if (hasError) {
       Error.throwWithStackTrace(error!, stackTrace!);
+    }
     throw StateError('Snapshot has neither data nor error');
   }
 
@@ -294,8 +296,9 @@ class AsyncSnapshot<T> {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is AsyncSnapshot<T>
         && other.connectionState == connectionState
         && other.data == data
@@ -391,12 +394,11 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   ///
   /// The [builder] must not be null.
   const StreamBuilder({
-    Key? key,
+    super.key,
     this.initialData,
-    Stream<T>? stream,
+    super.stream,
     required this.builder,
-  }) : assert(builder != null),
-       super(key: key, stream: stream);
+  }) : assert(builder != null);
 
   /// The build strategy currently used by this builder.
   ///
@@ -522,12 +524,11 @@ class FutureBuilder<T> extends StatefulWidget {
   ///
   /// The [builder] must not be null.
   const FutureBuilder({
-    Key? key,
+    super.key,
     this.future,
     this.initialData,
     required this.builder,
-  }) : assert(builder != null),
-       super(key: key);
+  }) : assert(builder != null);
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.

@@ -28,7 +28,7 @@ const double _kSwitchHeightCollapsed = _kSwitchMinSize;
 
 enum _SwitchType { material, adaptive }
 
-/// A material design switch.
+/// A Material Design switch.
 ///
 /// Used to toggle the on/off state of a single setting.
 ///
@@ -44,6 +44,20 @@ enum _SwitchType { material, adaptive }
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [Switch]. When the thumb slides to the other
+/// side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/material/switch/switch.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to customize [Switch] using [MaterialStateProperty]
+/// switch properties.
+///
+/// ** See code in examples/api/lib/material/switch/switch.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -51,9 +65,11 @@ enum _SwitchType { material, adaptive }
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
+///  * [MaterialStateProperty], an interface for objects that "resolve" to
+///    different values depending on a widget's material state.
 ///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatelessWidget {
-  /// Creates a material design switch.
+  /// Creates a Material Design switch.
   ///
   /// The switch itself does not maintain any state. Instead, when the state of
   /// the switch changes, the widget calls the [onChanged] callback. Most widgets
@@ -65,7 +81,7 @@ class Switch extends StatelessWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const Switch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -90,8 +106,7 @@ class Switch extends StatelessWidget {
   })  : _switchType = _SwitchType.material,
         assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -109,7 +124,7 @@ class Switch extends StatelessWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -134,8 +149,7 @@ class Switch extends StatelessWidget {
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        _switchType = _SwitchType.adaptive,
-        super(key: key);
+        _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
   ///
@@ -240,7 +254,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -281,7 +295,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -493,7 +507,6 @@ class Switch extends StatelessWidget {
 
 class _MaterialSwitch extends StatefulWidget {
   const _MaterialSwitch({
-    Key? key,
     required this.value,
     required this.onChanged,
     required this.size,
@@ -518,8 +531,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.autofocus = false,
   })  : assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -641,8 +653,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
   double get _trackInnerLength => widget.size.width - _kSwitchMinSize;
 
   void _handleDragStart(DragStartDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       reactionController.forward();
+    }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -795,8 +808,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get activeThumbImage => _activeThumbImage;
   ImageProvider? _activeThumbImage;
   set activeThumbImage(ImageProvider? value) {
-    if (value == _activeThumbImage)
+    if (value == _activeThumbImage) {
       return;
+    }
     _activeThumbImage = value;
     notifyListeners();
   }
@@ -814,8 +828,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageProvider? get inactiveThumbImage => _inactiveThumbImage;
   ImageProvider? _inactiveThumbImage;
   set inactiveThumbImage(ImageProvider? value) {
-    if (value == _inactiveThumbImage)
+    if (value == _inactiveThumbImage) {
       return;
+    }
     _inactiveThumbImage = value;
     notifyListeners();
   }
@@ -834,8 +849,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _activeTrackColor;
   set activeTrackColor(Color value) {
     assert(value != null);
-    if (value == _activeTrackColor)
+    if (value == _activeTrackColor) {
       return;
+    }
     _activeTrackColor = value;
     notifyListeners();
   }
@@ -844,8 +860,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _inactiveTrackColor;
   set inactiveTrackColor(Color value) {
     assert(value != null);
-    if (value == _inactiveTrackColor)
+    if (value == _inactiveTrackColor) {
       return;
+    }
     _inactiveTrackColor = value;
     notifyListeners();
   }
@@ -854,8 +871,9 @@ class _SwitchPainter extends ToggleablePainter {
   ImageConfiguration? _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     notifyListeners();
   }
@@ -864,8 +882,9 @@ class _SwitchPainter extends ToggleablePainter {
   TextDirection? _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     notifyListeners();
   }
@@ -874,8 +893,9 @@ class _SwitchPainter extends ToggleablePainter {
   Color? _surfaceColor;
   set surfaceColor(Color value) {
     assert(value != null);
-    if (value == _surfaceColor)
+    if (value == _surfaceColor) {
       return;
+    }
     _surfaceColor = value;
     notifyListeners();
   }
@@ -921,8 +941,9 @@ class _SwitchPainter extends ToggleablePainter {
     // during paint. There's no reason to mark ourselves as needing paint if we
     // are already in the middle of painting. (In fact, doing so would trigger
     // an assert).
-    if (!_isPainting)
+    if (!_isPainting) {
       notifyListeners();
+    }
   }
 
   @override

@@ -90,15 +90,13 @@ void main() {
     testWithoutContext('Flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
       'Enable or disable support for desktop on macOS. '
-      'This setting will take effect on the master, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
       'Enable or disable support for desktop on Linux. '
-      'This setting will take effect on the master, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
@@ -367,14 +365,41 @@ void main() {
       expect(featureFlags.isWindowsEnabled, true);
     });
 
-    // Windows UWP desktop
+    for (final Feature feature in <Feature>[
+      flutterWindowsDesktopFeature,
+      flutterMacOSDesktopFeature,
+      flutterLinuxDesktopFeature,
+    ]) {
+      test('${feature.name} available and enabled by default on master', () {
+        expect(feature.master.enabledByDefault, true);
+        expect(feature.master.available, true);
+      });
+      test('${feature.name} available and enabled by default on beta', () {
+        expect(feature.beta.enabledByDefault, true);
+        expect(feature.beta.available, true);
+      });
+      test('${feature.name} available and enabled by default on stable', () {
+        expect(feature.stable.enabledByDefault, true);
+        expect(feature.stable.available, true);
+      });
+    }
 
-    testWithoutContext('Flutter Windows UWP desktop off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
+    // Custom devices on all channels
+    for (final String channel in <String>['master', 'beta', 'stable']) {
+      testWithoutContext('Custom devices are enabled with flag on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        testConfig.setValue('enable-custom-devices', true);
+        expect(featureFlags.areCustomDevicesEnabled, true);
+      });
 
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
+      testWithoutContext('Custom devices are enabled with environment variable on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        platform.environment = <String, String>{'FLUTTER_CUSTOM_DEVICES': 'true'};
+        expect(featureFlags.areCustomDevicesEnabled, true);
+      });
+    }
 
+<<<<<<< HEAD
     testWithoutContext('Flutter Windows UWP desktop enabled with config on master', () {
       final FeatureFlags featureFlags = createFlags('master');
       testConfig.setValue('enable-windows-uwp-desktop', true);
@@ -417,5 +442,7 @@ void main() {
         expect(feature.stable.available, true);
       });
     }
+=======
+>>>>>>> ffccd96b62ee8cec7740dab303538c5fc26ac543
   });
 }

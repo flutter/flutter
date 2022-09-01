@@ -10,6 +10,8 @@ import 'package:meta/meta.dart';
 import 'constants.dart';
 import 'isolates.dart' as isolates;
 
+export 'isolates.dart' show ComputeCallback;
+
 /// The dart:io implementation of [isolate.compute].
 Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String? debugLabel }) async {
   debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
@@ -19,7 +21,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   final RawReceivePort port = RawReceivePort();
   Timeline.finishSync();
 
-  void _timeEndAndCleanup() {
+  void timeEndAndCleanup() {
     Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
     port.close();
     Timeline.finishSync();
@@ -27,7 +29,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
 
   final Completer<dynamic> completer = Completer<dynamic>();
   port.handler = (dynamic msg) {
-    _timeEndAndCleanup();
+    timeEndAndCleanup();
     completer.complete(msg);
   };
 
@@ -41,13 +43,12 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
         debugLabel,
         flow.id,
       ),
-      errorsAreFatal: true,
       onExit: port.sendPort,
       onError: port.sendPort,
       debugName: debugLabel,
     );
   } on Object {
-    _timeEndAndCleanup();
+    timeEndAndCleanup();
     rethrow;
   }
 

@@ -11,7 +11,6 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import '../common.dart';
 import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
@@ -754,11 +753,18 @@ void checkDirectoryNotExists(String directory) {
   }
 }
 
+/// Checks that the symlink exists, otherwise throws a [FileSystemException].
+void checkSymlinkExists(String file) {
+  if (!exists(Link(file))) {
+    throw FileSystemException('Expected symlink to exist.', file);
+  }
+}
+
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (final T value in values) {
     if (!collection.contains(value)) {
-      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
+      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
     }
   }
 }

@@ -474,6 +474,31 @@ void main() {
       ),
     );
   });
+
+  testWidgets('BottomAppBar does not apply custom clipper without FAB', (WidgetTester tester) async {
+    Widget buildWidget({Widget? fab}) {
+      return MaterialApp(
+        home: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: fab,
+          bottomNavigationBar: BottomAppBar(
+            color: Colors.green,
+            shape: const CircularNotchedRectangle(),
+            child: Container(height: 50),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildWidget(fab: FloatingActionButton(onPressed: () { })));
+
+    PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
+    expect(physicalShape.clipper.toString(), '_BottomAppBarClipper');
+
+    await tester.pumpWidget(buildWidget());
+
+    physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
+    expect(physicalShape.clipper.toString(), 'ShapeBorderClipper');
+  });
 }
 
 // The bottom app bar clip path computation is only available at paint time.
@@ -513,7 +538,7 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child, { Key? key }) : super(key: key);
+  const ShapeListener(this.child, { super.key });
 
   final Widget child;
 
@@ -546,8 +571,9 @@ class RectangularNotch extends NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (guest == null)
+    if (guest == null) {
       return Path()..addRect(host);
+    }
     return Path()
       ..moveTo(host.left, host.top)
       ..lineTo(guest.left, host.top)

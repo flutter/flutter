@@ -302,6 +302,24 @@ void main() {
 
       await dap.client.terminate();
     });
+
+    testWithoutContext('provides appStarted events to the client', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to send a 'flutter.appStarted' event.
+      await Future.wait(<Future<void>>[
+        dap.client.event('flutter.appStarted'),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
+        ),
+      ], eagerError: true);
+
+      await dap.client.terminate();
+    });
   });
 
   group('attach', () {
@@ -380,13 +398,35 @@ void main() {
         stoppedFuture,
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
       ], eagerError: true);
-      final int threadId = (await stoppedFuture).threadId!;
+    });
 
-      // Remove the breakpoint and resume.
-      await dap.client.clearBreakpoints(breakpointFilePath);
-      await dap.client.continue_(threadId);
+    testWithoutContext('resumes and removes breakpoints on detach', () async {
+      final Uri vmServiceUri = await testProcess.vmServiceUri;
 
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.start(
+          launch: () => dap.client.attach(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            vmServiceUri: vmServiceUri.toString(),
+          ),
+        ),
+      ], eagerError: true);
+
+      // Set a breakpoint and expect to hit it.
+      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((StoppedEventBody e) => e.reason == 'breakpoint');
+      await Future.wait(<Future<void>>[
+        stoppedFuture,
+        dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
+      ], eagerError: true);
+
+      // Detach.
       await dap.client.terminate();
+
+      // Ensure we get additional output (confirming the process resumed).
+      await testProcess.output.first;
     });
   });
 }

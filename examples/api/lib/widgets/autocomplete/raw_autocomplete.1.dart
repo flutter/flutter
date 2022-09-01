@@ -5,12 +5,11 @@
 // Flutter code sample for RawAutocomplete
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
-  const AutocompleteExampleApp({Key? key}) : super(key: key);
+  const AutocompleteExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,7 @@ class User {
 }
 
 class AutocompleteCustomTypeExample extends StatelessWidget {
-  const AutocompleteCustomTypeExample({Key? key}) : super(key: key);
+  const AutocompleteCustomTypeExample({super.key});
 
   static const List<User> _userOptions = <User>[
     User(name: 'Alice', email: 'alice@example.com'),
