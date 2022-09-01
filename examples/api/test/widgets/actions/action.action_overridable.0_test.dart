@@ -11,7 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final _MockClipboard mockClipboard = _MockClipboard();
 
-  testWidgets('has two containers when wide', (WidgetTester tester) async {
+  testWidgets('Copies text on Ctrl-C', (WidgetTester tester) async {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
