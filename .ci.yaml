@@ -155,6 +155,7 @@ targets:
 
   - name: Linux packages_autoroller
     presubmit: false
+    bringup: true
     recipe: pub_autoroller/pub_autoroller
     timeout: 30
     enabled_branches:
