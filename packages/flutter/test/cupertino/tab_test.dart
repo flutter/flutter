@@ -100,8 +100,6 @@ void main() {
     // Work-around for https://github.com/flutter/flutter/issues/65655.
     await tester.pumpWidget(Container());
     expect(tester.takeException(), isAssertionError);
-
-    SchedulerBinding.instance.resetPerformanceModeRequests();
   });
 
   testWidgets('Can use navigatorKey to navigate', (WidgetTester tester) async {
