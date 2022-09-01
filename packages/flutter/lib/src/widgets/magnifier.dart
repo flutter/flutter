@@ -246,7 +246,7 @@ class MagnifierController {
         overlayEntry!.remove();
     }
 
-    final OverlayState? overlayState = Overlay.of(
+    final OverlayState overlayState = Overlay.of(
       context,
       rootOverlay: true,
       debugRequiredFor: debugRequiredFor,
@@ -260,7 +260,7 @@ class MagnifierController {
    _overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
-    overlayState!.insert(overlayEntry!, below: below);
+    overlayState.insert(overlayEntry!, below: below);
 
     if (animationController != null) {
       await animationController?.forward();
@@ -389,7 +389,7 @@ class MagnifierDecoration extends ShapeDecoration {
 /// gesture, on an image or text.
 /// {@endtemplate}
 ///
-/// A magnifier can be convienently managed by [MagnifierController], which handles
+/// A magnifier can be conveniently managed by [MagnifierController], which handles
 /// showing and hiding the magnifier, with an optional entry / exit animation.
 ///
 /// See:
@@ -402,7 +402,7 @@ class RawMagnifier extends StatelessWidget {
   /// the focal point is directly under the magnifier, and there is no magnification:
   /// This means that a default magnifier will be entirely invisible to the naked eye,
   /// since it is painting exactly what is under it, exactly where it was painted
-  /// orignally.
+  /// originally.
   /// {@endtemplate}
   const RawMagnifier({
       super.key,
@@ -414,7 +414,7 @@ class RawMagnifier extends StatelessWidget {
       }) : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
-  /// An optional widget to posiiton inside the len of the [RawMagnifier].
+  /// An optional widget to position inside the len of the [RawMagnifier].
   ///
   /// This is positioned over the [RawMagnifier] - it may be useful for tinting the
   /// [RawMagnifier], or drawing a crosshair like UI.
