@@ -10,14 +10,23 @@ import 'diagnostics.dart';
 /// List of the Flutter Framework and SDK libraries with instrumented
 /// classes.
 class FlutterLibraries {
+  /// Name for `dart:ui`.
   static const String dartUi = 'dart:ui';
+  /// Name for `package:flutter/foundation.dart`.
   static const String flutterFoundation = 'package:flutter/foundation.dart';
 }
 
 /// List of field names for dart form of [ObjectEvent].
 class FieldNames {
+  /// Type of event.
+  ///
+  /// Can be 'created' or 'disposed'.
   static const String eventType = 'eventType';
+
+  /// Name of the library that dispatched the event.
   static const String labraryName = 'labraryName';
+
+  /// Name of the class that dispatched the event.
   static const String className = 'className';
 }
 
@@ -222,7 +231,7 @@ class MemoryAllocations {
   }
 
   void _subscribeToSdkObjects() {
-    // Uncomment and test cover
+    // Uncomment and test cover before merging this PR,
     // when https://github.com/flutter/engine/pull/35274 lands:
     // assert(ui.Image.onCreate == null);
     // assert(ui.Image.onDispose == null);
@@ -235,7 +244,7 @@ class MemoryAllocations {
   }
 
   void _unSubscribeFromSdkObjects() {
-    // Uncomment and test cover
+    // Uncomment and test cover before merging this PR,
     // when https://github.com/flutter/engine/pull/35274 lands:
     // assert(ui.Image.onCreate == _imageOnCreate);
     // assert(ui.Image.onDispose == _imageOnDispose);
@@ -247,23 +256,23 @@ class MemoryAllocations {
     // ui.Picture.onDispose = null;
   }
 
-  void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
-    library: FlutterLibraries.dartUi,
-    className: 'Image',
-    object: image,
-  ));
+  // void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
+  //   library: FlutterLibraries.dartUi,
+  //   className: 'Image',
+  //   object: image,
+  // ));
 
-  void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
-    library: FlutterLibraries.dartUi,
-    className: 'Picture',
-    object: picture,
-  ));
+  // void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
+  //   library: FlutterLibraries.dartUi,
+  //   className: 'Picture',
+  //   object: picture,
+  // ));
 
-  void _imageOnDispose(ui.Image image) => dispatchObjectEvent(ObjectDisposed(
-    object: image,
-  ));
+  // void _imageOnDispose(ui.Image image) => dispatchObjectEvent(ObjectDisposed(
+  //   object: image,
+  // ));
 
-  void _pictureOnDispose(ui.Picture picture) => dispatchObjectEvent(ObjectDisposed(
-    object: picture,
-  ));
+  // void _pictureOnDispose(ui.Picture picture) => dispatchObjectEvent(ObjectDisposed(
+  //   object: picture,
+  // ));
 }

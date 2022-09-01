@@ -123,4 +123,13 @@ void main() {
 
     expect(ma.hasListeners, isFalse);
   });
+
+  test('addListener subscribes to Flutter SDK events', () {
+    // TODO(polina-c): add test
+  });
+
+  test('last removeListener unsubscribes from Flutter SDK events', () {
+    // TODO(polina-c): add test
+  });
+
 }
