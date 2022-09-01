@@ -30,7 +30,6 @@ void main() {
     Cache.flutterRoot = getFlutterRoot();
   });
 
-  AnalysisServer? server;
   late Directory tempDir;
   late FileSystem fileSystem;
   late Platform platform;
@@ -49,7 +48,6 @@ void main() {
 
   tearDown(() {
     tryToDelete(tempDir);
-    return server?.dispose();
   });
 
 
@@ -88,7 +86,7 @@ void main() {
         directory: tempDir.path,
       );
 
-      server = AnalysisServer(
+      AnalysisServer server = AnalysisServer(
         globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
@@ -99,13 +97,15 @@ void main() {
       );
 
       int errorCount = 0;
-      final Future<bool> onDone = server!.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-      server!.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
+      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+      server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
-      await server!.start();
+      await server.start();
       await onDone;
 
       expect(errorCount, 0);
+
+      await server.dispose();
     });
   });
 
@@ -125,7 +125,7 @@ void main() {
       directory: tempDir.path,
     );
 
-      server = AnalysisServer(
+      AnalysisServer server = AnalysisServer(
         globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
@@ -136,21 +136,23 @@ void main() {
       );
 
     int errorCount = 0;
-    final Future<bool> onDone = server!.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server!.onErrors.listen((FileAnalysisErrors errors) {
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
 
-    await server!.start();
+    await server.start();
     await onDone;
 
     expect(errorCount, greaterThan(0));
+
+    await server.dispose();
   });
 
   testUsingContext('Returns no errors when source is error-free', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = AnalysisServer(
+    AnalysisServer server = AnalysisServer(
       globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
       <String>[tempDir.path],
       fileSystem: fileSystem,
@@ -161,13 +163,14 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server!.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server!.onErrors.listen((FileAnalysisErrors errors) {
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
-    await server!.start();
+    await server.start();
     await onDone;
     expect(errorCount, 0);
+    await server.dispose();
   });
 
   testUsingContext('Can run AnalysisService with customized cache location', () async {
