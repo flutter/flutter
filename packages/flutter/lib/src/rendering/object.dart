@@ -1768,10 +1768,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// throw a [StateError] exception.
   @protected
   Constraints get constraints {
-    if (_constraints == null) {
+    final Constraints constraints = _constraints;
+    if (constraints == null) {
       throw StateError('A RenderObject does not have any constraints before it has been laid out.');
     }
-    return _constraints!;
+    return constraints;
   }
   Constraints? _constraints;
 
