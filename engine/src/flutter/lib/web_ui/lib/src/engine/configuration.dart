@@ -32,7 +32,7 @@ import 'package:js/js.dart';
 /// The version of CanvasKit used by the web engine by default.
 // DO NOT EDIT THE NEXT LINE OF CODE MANUALLY
 // See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
-const String _canvaskitVersion = '0.36.1';
+const String _canvaskitVersion = '0.35.0';
 
 /// The Web Engine configuration for the current application.
 FlutterConfiguration get configuration => _configuration ??= FlutterConfiguration(_jsConfiguration);

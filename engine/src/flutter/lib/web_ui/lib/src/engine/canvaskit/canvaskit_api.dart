@@ -1853,6 +1853,11 @@ extension SkPictureExtension on SkPicture {
 class SkParagraphBuilderNamespace {}
 
 extension SkParagraphBuilderNamespaceExtension on SkParagraphBuilderNamespace {
+  external SkParagraphBuilder Make(
+    SkParagraphStyle paragraphStyle,
+    SkFontMgr? fontManager,
+  );
+
   external SkParagraphBuilder MakeFromFontProvider(
     SkParagraphStyle paragraphStyle,
     TypefaceFontProvider? fontManager,
