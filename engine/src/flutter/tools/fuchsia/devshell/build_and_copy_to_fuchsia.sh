@@ -92,7 +92,7 @@ then
   engine-warning "If you have already checked out Fuchsia's Flutter Engine commit and then committed some additional changes, please ignore the above warning."
 fi
 
-all_gn_args="--fuchsia --no-lto --fuchsia-cpu="${fuchsia_cpu}" --runtime-mode="${runtime_mode}" ${goma_flags} ${unoptimized_flags} ${extra_gn_args[@]}"
+all_gn_args="--fuchsia --fuchsia-cpu="${fuchsia_cpu}" --runtime-mode="${runtime_mode}" ${goma_flags} ${unoptimized_flags} ${extra_gn_args[@]}"
 engine-info "GN args: ${all_gn_args}"
 
 "$ENGINE_DIR"/flutter/tools/gn ${all_gn_args}
@@ -115,19 +115,19 @@ if [[ "${runtime_mode}" == release ]]
 then
   flutter_runner_pkg="flutter_jit_product_runner-0.far"
   engine-info "Copying the Flutter JIT product runner (${flutter_runner_pkg}) to Fuchsia..."
-  cp "${fuchsia_out_dir}"/"${flutter_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/"${runtime_mode}"/jit/"${flutter_runner_pkg}"
+  cp "${fuchsia_out_dir}"/"${flutter_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/release/jit/"${flutter_runner_pkg}"
 
   flutter_runner_pkg="flutter_aot_product_runner-0.far"
   engine-info "Copying the Flutter AOT product runner (${flutter_runner_pkg}) to Fuchsia..."
-  cp "${fuchsia_out_dir}"/"${flutter_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/"${runtime_mode}"/aot/"${flutter_runner_pkg}"
+  cp "${fuchsia_out_dir}"/"${flutter_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/release/aot/"${flutter_runner_pkg}"
 
   dart_runner_pkg="dart_jit_product_runner-0.far"
   engine-info "Copying the Dart JIT product runner (${dart_runner_pkg}) to Fuchsia..."
-  cp "${fuchsia_out_dir}"/"${dart_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/"${runtime_mode}"/jit/"${dart_runner_pkg}"
+  cp "${fuchsia_out_dir}"/"${dart_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/release/jit/"${dart_runner_pkg}"
 
   dart_runner_pkg="dart_aot_product_runner-0.far"
   engine-info "Copying the Dart AOT product runner (${dart_runner_pkg}) to Fuchsia..."
-  cp "${fuchsia_out_dir}"/"${dart_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/"${runtime_mode}"/aot/"${dart_runner_pkg}"
+  cp "${fuchsia_out_dir}"/"${dart_runner_pkg}" "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/release/aot/"${dart_runner_pkg}"
 else
   flutter_runner_pkg="flutter_${compilation_mode}_runner-0.far"
   engine-info "Copying the Flutter runner (${flutter_runner_pkg}) to Fuchsia..."
