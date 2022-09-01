@@ -378,7 +378,7 @@ void testMain() {
     // should've been correctly set to "/bar".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
     expect(window.browserHistory.urlStrategy!.getPath(), '/bar');
-  }, skip: true); // https://github.com/flutter/flutter/issues/50836
+  }, skip: isSafari); // https://github.com/flutter/flutter/issues/50836
 
   test('initialize browser history with default url strategy (multiple)', () async {
     // On purpose, we don't initialize history on the window. We want to let the
@@ -406,7 +406,7 @@ void testMain() {
     // should've been correctly set to "/baz".
     expect(window.browserHistory.urlStrategy, isNot(isNull));
     expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
-  }, skip: true); // https://github.com/flutter/flutter/issues/50836
+  }, skip: isSafari); // https://github.com/flutter/flutter/issues/50836
 
   test('can disable location strategy', () async {
     // Disable URL strategy.
@@ -422,7 +422,7 @@ void testMain() {
     await routeInformationUpdated('/foo/bar', null);
     // Path should not be updated because URL strategy is disabled.
     expect(window.browserHistory.currentPath, '/');
-  }, skip: true);
+  });
 
   test('js interop throws on wrong type', () {
     expect(() => jsSetUrlStrategy(123), throwsA(anything));
