@@ -1,4 +1,4 @@
-Signature: 2f2ef9beb15ed5699e28af37dbb596a2
+Signature: f3a8aefadd55c396c5eb6e73ab933d17
 
 UNUSED LICENSES:
 
@@ -5584,6 +5584,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/ResourceCache.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ResourceCache.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Sampler.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Sampler.h
+FILE: ../../../third_party/skia/src/gpu/graphite/SpecialImage_Graphite.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/SpecialSurface_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/SynchronizeToCpuTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/SynchronizeToCpuTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/TextureProxyView.h
