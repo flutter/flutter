@@ -5235,6 +5235,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         child: AbsorbPointer(
           absorbing: false, // it's mutated directly by _cancelActivePointers above
           child: FocusTraversalGroup(
+            policy: FocusTraversalGroup.maybeOf(context),
             child: Focus(
               focusNode: focusNode,
               autofocus: true,
