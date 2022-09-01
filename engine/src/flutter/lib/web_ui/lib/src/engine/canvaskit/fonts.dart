@@ -20,6 +20,9 @@ import 'font_fallbacks.dart';
 const String _robotoUrl =
     'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
 
+// URL for the Ahem font, only used in tests.
+const String _ahemUrl = '/assets/fonts/ahem.ttf';
+
 /// Manages the fonts used in the Skia-based backend.
 class SkiaFontCollection implements FontCollection {
   final Set<String> _registeredFontFamilies = <String>{};
@@ -167,19 +170,13 @@ class SkiaFontCollection implements FontCollection {
   /// different URLs.
   @override
   void debugRegisterTestFonts() {
-    if (!_isFontFamilyRegistered(ahemFontFamily)) {
-      _registerFont(ahemFontUrl, ahemFontFamily);
-    }
-    if (!_isFontFamilyRegistered(robotoFontFamily)) {
-      _registerFont(robotoTestFontUrl, robotoFontFamily);
-    }
-    if (!_isFontFamilyRegistered(robotoVariableFontFamily)) {
-      _registerFont(robotoVariableTestFontUrl, robotoVariableFontFamily);
+    if (!_isFontFamilyRegistered('Ahem')) {
+      _registerFont(_ahemUrl, 'Ahem');
     }
 
     // Ahem must be added to font fallbacks list regardless of where it was
     // downloaded from.
-    FontFallbackData.instance.globalFontFallbacks.add(ahemFontFamily);
+    FontFallbackData.instance.globalFontFallbacks.add('Ahem');
   }
 
   void _registerFont(String url, String family) {
@@ -224,6 +221,7 @@ class SkiaFontCollection implements FontCollection {
         .then<ByteBuffer>((dynamic x) => x as ByteBuffer);
   }
 
+  SkFontMgr? skFontMgr;
   TypefaceFontProvider? fontProvider;
 
   @override
