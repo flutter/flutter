@@ -12,6 +12,10 @@ config("libcxxabi_config") {
   cflags_objcc = common_cc_flags
 
   include_dirs = [ "include" ]
+
+  if (is_ios) {
+    ldflags = [ "-Wl,-unexported_symbols_list," + rebase_path("lib/new-delete.exp", root_build_dir) ]
+  }
 }
 
 source_set("libcxxabi") {
