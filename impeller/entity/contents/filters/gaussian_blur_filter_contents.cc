@@ -226,7 +226,10 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   };
 
   Vector2 scale;
-  auto scale_curve = [](Scalar radius) { return std::min(1.0, 2.0 / radius); };
+  auto scale_curve = [](Scalar radius) {
+    const Scalar d = 4.0;
+    return std::min(1.0, d / (std::max(1.0f, radius) + d - 1.0));
+  };
   {
     scale.x = scale_curve(transformed_blur_radius_length);
 
