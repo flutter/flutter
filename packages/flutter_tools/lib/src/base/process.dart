@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../convert.dart';
@@ -29,6 +30,9 @@ abstract class ShutdownHooks {
     ShutdownHook shutdownHook
   );
 
+  @visibleForTesting
+  List<ShutdownHook> get registeredHooks;
+
   /// Runs all registered shutdown hooks and returns a future that completes when
   /// all such hooks have finished.
   ///
@@ -36,13 +40,17 @@ abstract class ShutdownHooks {
   /// hooks within a given stage will be started in parallel and will be
   /// guaranteed to run to completion before shutdown hooks in the next stage are
   /// started.
+  ///
+  /// This class is constructed before the [Logger], so it cannot be direct
+  /// injected in the constructor.
   Future<void> runShutdownHooks(Logger logger);
 }
 
 class _DefaultShutdownHooks implements ShutdownHooks {
   _DefaultShutdownHooks();
 
-  final List<ShutdownHook> _shutdownHooks = <ShutdownHook>[];
+  @override
+  final List<ShutdownHook> registeredHooks = <ShutdownHook>[];
 
   bool _shutdownHooksRunning = false;
 
@@ -51,18 +59,18 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     ShutdownHook shutdownHook
   ) {
     assert(!_shutdownHooksRunning);
-    _shutdownHooks.add(shutdownHook);
+    registeredHooks.add(shutdownHook);
   }
 
   @override
   Future<void> runShutdownHooks(Logger logger) async {
     logger.printTrace(
-      'Running ${_shutdownHooks.length} shutdown hook${_shutdownHooks.length == 1 ? '' : 's'}',
+      'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
     );
     _shutdownHooksRunning = true;
     try {
       final List<Future<dynamic>> futures = <Future<dynamic>>[];
-      for (final ShutdownHook shutdownHook in _shutdownHooks) {
+      for (final ShutdownHook shutdownHook in registeredHooks) {
         final FutureOr<dynamic> result = shutdownHook();
         if (result is Future<dynamic>) {
           futures.add(result);
