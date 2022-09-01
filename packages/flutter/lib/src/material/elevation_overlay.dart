@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 
 /// A utility class for dealing with the overlay color needed
@@ -28,7 +29,7 @@ class ElevationOverlay {
   /// [surfaceTint] of the appropriate opacity applied to it. Otherwise it will
   /// just return [color] unmodified.
   static Color applySurfaceTint(Color color, Color? surfaceTint, double elevation) {
-    if (surfaceTint != null && surfaceTint.alpha != 0) {
+    if (surfaceTint != null && surfaceTint != Colors.transparent) {
       return Color.alphaBlend(surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)), color);
     }
     return color;

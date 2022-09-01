@@ -263,7 +263,7 @@ class Material extends StatefulWidget {
   /// then [ThemeData.shadowColor] will be used.
   ///
   /// To remove the drop shadow when [elevation] is greater than 0, set
-  /// [shadowColor] to a transparent color (i.e. [Color.alpha] is 0).
+  /// [shadowColor] to [Colors.transparent].
   ///
   /// See also:
   ///  * [ThemeData.useMaterial3], which determines the default value for this
@@ -282,9 +282,9 @@ class Material extends StatefulWidget {
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is not used.
   ///
-  /// If [ThemeData.useMaterial3] is true and [surfaceTintColor] is not null,
-  /// and not transparent ([Color.alpha] is 0), then it will be used to overlay
-  /// the base [color] with an opacity based on the [elevation].
+  /// If [ThemeData.useMaterial3] is true and [surfaceTintColor] is not null and
+  /// not [Colors.transparent], then it will be used to overlay the base [color]
+  /// with an opacity based on the [elevation].
   ///
   /// Otherwise, no surface tint will be applied.
   ///

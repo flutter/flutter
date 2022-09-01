@@ -89,7 +89,8 @@ class Dialog extends StatelessWidget {
   final double? elevation;
 
   /// {@template flutter.material.dialog.shadowColor}
-  /// The color to paint the [elevation] shadow under the dialog's [Material].
+  /// The color used to paint a drop shadow under the dialog's [Material],
+  /// which reflects the dialog's [elevation].
   ///
   /// If null and [ThemeData.useMaterial3] is true then no drop shadow will
   /// be rendered.
@@ -99,9 +100,9 @@ class Dialog extends StatelessWidget {
   ///
   /// See also:
   ///   * [Material.shadowColor], which describes how the drop shadow is painted.
-  ///   * [elevation], effects how the drop shadow is painted.
-  ///   * [surfaceTintColor], if non-null will also provide a surface tint
-  ///     overlay on the background color to indicate elevation.
+  ///   * [elevation], which affects how the drop shadow is painted.
+  ///   * [surfaceTintColor], which can be used to indicate elevation through
+  ///     tinting the background color.
   /// {@endtemplate}
   final Color? shadowColor;
 
@@ -120,9 +121,9 @@ class Dialog extends StatelessWidget {
   /// See also:
   ///   * [Material.surfaceTintColor], which describes how the surface tint will
   ///     be applied to the background color of the dialog.
-  ///   * [elevation], effects the opacity of the surface tint.
-  ///   * [shadowColor], if non-null will also provide a drop shadow to
-  ///     indicate elevation.
+  ///   * [elevation], which affects the opacity of the surface tint.
+  ///   * [shadowColor], which can be used to indicate elevation through
+  ///     a drop shadow.
   /// {@endtemplate}
   final Color? surfaceTintColor;
 

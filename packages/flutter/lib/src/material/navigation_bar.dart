@@ -117,7 +117,6 @@ class NavigationBar extends StatelessWidget {
   /// be 3.0 otherwise 0.0.
   final double? elevation;
 
-
   /// The color used for the drop shadow to indicate elevation.
   ///
   /// If null, [NavigationBarThemeData.shadowColor] is used. If that
