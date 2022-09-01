@@ -645,6 +645,14 @@ mixin SchedulerBinding on BindingBase {
     return true;
   }
 
+  /// Ensure that in tests were routes are not complete and hence do not get disposed
+  /// will not corrupt the state for the following tests.
+  @visibleForTesting
+  void resetPerformanceModeRequests() {
+    _performanceModes.clear();
+    PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
+  }
+
   /// Prints the stack for where the current transient callback was registered.
   ///
   /// A transient frame callback is one that was registered with

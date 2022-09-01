@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -99,6 +100,8 @@ void main() {
     // Work-around for https://github.com/flutter/flutter/issues/65655.
     await tester.pumpWidget(Container());
     expect(tester.takeException(), isAssertionError);
+
+    SchedulerBinding.instance.resetPerformanceModeRequests();
   });
 
   testWidgets('Can use navigatorKey to navigate', (WidgetTester tester) async {
