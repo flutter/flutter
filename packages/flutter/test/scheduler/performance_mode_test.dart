@@ -17,8 +17,7 @@ void main() {
   });
 
   test('PerformanceModeHandler make one request', () async {
-    const int handle1 = 1;
-    final PerformanceModeRequestHandle? requestHandle = binding.requestPerformanceMode(handle1, DartPerformanceMode.latency);
+    final PerformanceModeRequestHandle? requestHandle = binding.requestPerformanceMode(DartPerformanceMode.latency);
     expect(requestHandle, isNotNull);
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
     requestHandle?.dispose();
@@ -26,12 +25,10 @@ void main() {
   });
 
   test('PerformanceModeHandler make conflicting requests', () async {
-    const int handle1 = 1;
-    final PerformanceModeRequestHandle? requestHandle1 = binding.requestPerformanceMode(handle1, DartPerformanceMode.latency);
+    final PerformanceModeRequestHandle? requestHandle1 = binding.requestPerformanceMode(DartPerformanceMode.latency);
     expect(requestHandle1, isNotNull);
 
-    const int handle2 = 2;
-    final PerformanceModeRequestHandle? requestHandle2 = binding.requestPerformanceMode(handle2, DartPerformanceMode.throughput);
+    final PerformanceModeRequestHandle? requestHandle2 = binding.requestPerformanceMode(DartPerformanceMode.throughput);
     expect(requestHandle2, isNull);
 
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
@@ -42,14 +39,12 @@ void main() {
 
   test('PerformanceModeHandler revert only after last requestor disposed',
       () async {
-    const int handle1 = 1;
-    final PerformanceModeRequestHandle? requestHandle1 = binding.requestPerformanceMode(handle1, DartPerformanceMode.latency);
+    final PerformanceModeRequestHandle? requestHandle1 = binding.requestPerformanceMode(DartPerformanceMode.latency);
     expect(requestHandle1, isNotNull);
 
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
 
-    const int handle2 = 2;
-    final PerformanceModeRequestHandle? requestHandle2 = binding.requestPerformanceMode(handle2, DartPerformanceMode.latency);
+    final PerformanceModeRequestHandle? requestHandle2 = binding.requestPerformanceMode(DartPerformanceMode.latency);
     expect(requestHandle2, isNotNull);
 
     expect(binding.getRequestedPerformanceMode(), equals(DartPerformanceMode.latency));

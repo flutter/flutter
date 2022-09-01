@@ -638,7 +638,7 @@ mixin SchedulerBinding on BindingBase {
   /// performance mode requests.
   bool debugAssertNoPendingPerformanceModeRequests(String reason) {
     assert(() {
-      if (_performanceModes.isNotEmpty) {
+      if (_performanceMode != null) {
         throw FlutterError(reason);
       }
       return true;
@@ -1126,33 +1126,41 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
-  final Map<Object, DartPerformanceMode> _performanceModes = <Object, DartPerformanceMode>{};
+  DartPerformanceMode? _performanceMode;
+  int _numPerformanceModeRequests = 0;
 
   /// Request a specific [DartPerformanceMode].
   ///
-  /// Requestor passes a handle (`requestor`) when making the request, this is typically
-  /// the component itself. Returns `null` if the request was not successful due to
-  /// conflicting performance mode requests. Requestor is responsible for calling
-  /// [PerformanceModeRequestHandle.dispose] when it no longer requires the performance mode.
-  PerformanceModeRequestHandle? requestPerformanceMode(Object requestor, DartPerformanceMode mode) {
-    if (_performanceModes.isNotEmpty) {
-      final DartPerformanceMode oldRequest = _performanceModes.entries.first.value;
-      if (oldRequest != mode) {
-        return null;
-      }
+  /// Returns `null` if the request was not successful due to conflicting performance mode requests.
+  /// Two requests are said to be in conflict if they are not of the same [DartPerformanceMode] type,
+  /// and an explicit request for a performance mode has been made prior.
+  ///
+  /// Requestor is responsible for calling [PerformanceModeRequestHandle.dispose] when it no longer
+  /// requires the performance mode.
+  PerformanceModeRequestHandle? requestPerformanceMode(DartPerformanceMode mode) {
+    // conflicting requests are not allowed.
+    if (_performanceMode != null && _performanceMode != mode) {
+      return null;
     }
-    _performanceModes[requestor] = mode;
-    PlatformDispatcher.instance.requestDartPerformanceMode(mode);
-    return PerformanceModeRequestHandle._(() => _disposePerformanceModeRequest(requestor));
+
+    if (_performanceMode == mode) {
+      _numPerformanceModeRequests++;
+    } else if (_performanceMode == null) {
+      _performanceMode = mode;
+      _numPerformanceModeRequests = 1;
+    }
+
+    return PerformanceModeRequestHandle._(() => _disposePerformanceModeRequest());
   }
 
   /// Remove a request for a specific [DartPerformanceMode].
   ///
   /// If all the pending requests have been disposed, the engine will revert to the
   /// [DartPerformanceMode.balanced] performance mode.
-  void _disposePerformanceModeRequest(Object requestor) {
-    _performanceModes.remove(requestor);
-    if (_performanceModes.isEmpty) {
+  void _disposePerformanceModeRequest() {
+    _numPerformanceModeRequests--;
+    if (_numPerformanceModeRequests == 0) {
+      _performanceMode = null;
       PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
     }
   }
@@ -1161,10 +1169,7 @@ mixin SchedulerBinding on BindingBase {
   /// been made, returns `null`.
   @visibleForTesting
   DartPerformanceMode? getRequestedPerformanceMode() {
-    if (_performanceModes.isEmpty) {
-      return null;
-    }
-    return _performanceModes.entries.first.value;
+    return _performanceMode;
   }
 
   /// Called by the engine to produce a new frame.

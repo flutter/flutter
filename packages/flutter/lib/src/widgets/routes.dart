@@ -262,7 +262,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       ..addStatusListener(_handleStatusChanged);
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
     _performanceModeRequestHandle =
-      SchedulerBinding.instance.requestPerformanceMode(this, ui.DartPerformanceMode.latency);
+      SchedulerBinding.instance.requestPerformanceMode(ui.DartPerformanceMode.latency);
     super.install();
     if (_animation!.isCompleted && overlayEntries.isNotEmpty) {
       overlayEntries.first.opaque = opaque;
