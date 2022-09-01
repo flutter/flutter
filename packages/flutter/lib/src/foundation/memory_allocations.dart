@@ -111,7 +111,7 @@ class MemoryAllocations {
   /// Listeners can be removed with [removeListener].
   void addListener(ObjectEventListener listener){
     if (_listeners == null) {
-      _listeners = <ObjectEventListener>[];
+      _listeners = <ObjectEventListener?>[];
       _subscribeToSdkObjects();
     }
     _listeners!.add(listener);
@@ -137,22 +137,16 @@ class MemoryAllocations {
     }
 
     if (_activeDispatchLoops > 0) {
-      print('remove11 $listeners');
       // If there are active dispatch loops, listeners.remove
       // should not be invoked, as it will
       // break the dispatch loops correctness.
       for (int i = 0; i < listeners.length; i++) {
-        print('111');
         if (listeners[i] == listener) {
-          print('112');
           listeners[i] = null;
-          print('113');
           _listenersContainNulls = true;
         }
       }
-      print('remove12 $listeners');
     } else {
-      print('remove2');
       listeners.removeWhere((ObjectEventListener? l) => l == listener);
       _checkListenersForEmptiness();
     }
