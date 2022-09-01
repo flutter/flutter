@@ -286,6 +286,7 @@ class ListTile extends StatelessWidget {
     this.selected = false,
     this.focusColor,
     this.hoverColor,
+    this.splashColor,
     this.focusNode,
     this.autofocus = false,
     this.tileColor,
@@ -494,6 +495,9 @@ class ListTile extends StatelessWidget {
 
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
+
+  /// The color of splash for the tile's [Material].
+  final Color? splashColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -733,6 +737,7 @@ class ListTile extends StatelessWidget {
       focusNode: focusNode,
       focusColor: focusColor,
       hoverColor: hoverColor,
+      splashColor: splashColor,
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(

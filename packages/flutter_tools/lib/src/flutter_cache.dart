@@ -234,12 +234,12 @@ class FlutterSdk extends EngineCachedArtifact {
       if (cache.includeAllPlatforms) ...<List<String>>[
         <String>['windows-x64', 'windows-x64/artifacts.zip'],
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+        <String>['darwin-x64', 'darwin-$arch/artifacts.zip'],
       ]
       else if (_platform.isWindows)
         <String>['windows-x64', 'windows-x64/artifacts.zip']
       else if (_platform.isMacOS)
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip']
+        <String>['darwin-x64', 'darwin-$arch/artifacts.zip']
       else if (_platform.isLinux)
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
     ];
@@ -729,7 +729,7 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
     // Currently only Linux supports both arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
     final Map<String, List<String>> artifacts = <String, List<String>> {
-      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
+      'macos': <String>['darwin-x64', 'darwin-$arch/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
       'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };

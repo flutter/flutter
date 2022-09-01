@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -117,16 +116,17 @@ class InkSparkle extends InteractiveInkFeature {
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
-       _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
+       _targetRadius = (radius ?? _getTargetRadius(
+                                    referenceBox,
+                                    containedInkWell,
+                                    rectCallback,
+                                    position,
+                                  )
+                       ) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback) {
     // InkSparkle will not be painted until the async compilation completes.
-    _InkSparkleFactory.compileShaderIfNecessary();
+    _InkSparkleFactory.initializeShader();
     controller.addInkFeature(this);
-
-    // All animation values are derived from Android 12 source code. See:
-    // - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
-    // - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
-    // - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
 
     // Immediately begin animating the ink.
     _animationController = AnimationController(
@@ -241,6 +241,9 @@ class InkSparkle extends InteractiveInkFeature {
   final RectCallback? _clipCallback;
   final TextDirection _textDirection;
 
+  late final ui.FragmentShader _fragmentShader;
+  bool _fragmentShaderInitialized = false;
+
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
   ///
@@ -259,6 +262,9 @@ class InkSparkle extends InteractiveInkFeature {
   void dispose() {
     _animationController.stop();
     _animationController.dispose();
+    if (_fragmentShaderInitialized) {
+      _fragmentShader.dispose();
+    }
     super.dispose();
   }
 
@@ -267,11 +273,16 @@ class InkSparkle extends InteractiveInkFeature {
     assert(_animationController.isAnimating);
 
     // InkSparkle can only paint if its shader has been compiled.
-    if (_InkSparkleFactory._shaderManager == null) {
+    if (_InkSparkleFactory._program == null) {
       // Skipping paintFeature because the shader it relies on is not ready to
-      // be used. InkSparkleFactory.compileShaderIfNecessary must complete
+      // be used. InkSparkleFactory.initializeShader must complete
       // before InkSparkle can paint.
       return;
+    }
+
+    if (!_fragmentShaderInitialized) {
+      _fragmentShader = _InkSparkleFactory._program!.fragmentShader();
+      _fragmentShaderInitialized = true;
     }
 
     canvas.save();
@@ -286,7 +297,9 @@ class InkSparkle extends InteractiveInkFeature {
       );
     }
 
-    final Paint paint = Paint()..shader = _createRippleShader();
+    _updateFragmentShader();
+
+    final Paint paint = Paint()..shader = _fragmentShader;
     if (_clipCallback != null) {
       canvas.drawRect(_clipCallback!(), paint);
     } else {
@@ -298,12 +311,13 @@ class InkSparkle extends InteractiveInkFeature {
   double get _width => referenceBox.size.width;
   double get _height => referenceBox.size.height;
 
+
   /// All double values for uniforms come from the Android 12 ripple
   /// implementation from the following files:
   /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
   /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
   /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
-  Shader _createRippleShader() {
+  void _updateFragmentShader() {
     const double turbulenceScale = 1.5;
     final double turbulencePhase = _turbulenceSeed + _radiusScale.value;
     final double noisePhase = turbulencePhase;
@@ -311,55 +325,56 @@ class InkSparkle extends InteractiveInkFeature {
     final double rotation2 = turbulencePhase * _rotateLeft + 2.0 * math.pi;
     final double rotation3 = turbulencePhase * _rotateRight + 2.75 * math.pi;
 
-    return _InkSparkleFactory._shaderManager!.shader(
-      // The following uniforms are the same throughout the animation.
-      uColor: _colorToVector4(_color),
-      uSparkleColor: Vector4(1.0, 1.0, 1.0, 1.0),
-      uBlur: 1.0,
-      uMaxRadius: _targetRadius,
-      uResolutionScale: Vector2(1.0 / _width, 1.0 / _height),
-      uNoiseScale: Vector2(_noiseDensity / _width, _noiseDensity / _height),
-
-      // The following uniforms update each frame of the animation.
-      uCenter: _center.value,
-      uRadiusScale: _radiusScale.value,
-      uAlpha: _alpha.value,
-      uSparkleAlpha: _sparkleAlpha.value,
-
-      // The following uniforms are driven by the turbulence phase and change
-      // each frame of the animation. These uniforms are uses to modify the
-      // default (if these fields are unset or 0) circular outer ring to a
-      // non-uniform shape that is more like an actual ink splash. In addition
-      // to the positional based triangular noise created in the shader, these
-      // uniforms also vary the appearance of the sparkles even when the same
-      // location is tapped.
-      uTurbulencePhase: turbulencePhase,
-      uNoisePhase: noisePhase / 1000.0,
-      uCircle1: Vector2(
-        turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.cos(turbulenceScale * 0.55)),
-        turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.sin(turbulenceScale * 0.55)),
-      ),
-      uCircle2: Vector2(
-        turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.45)),
-        turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.45)),
-      ),
-      uCircle3: Vector2(
-        turbulenceScale + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.35)),
-        turbulenceScale + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.35)),
-      ),
-      uRotation1: Vector2(math.cos(rotation1), math.sin(rotation1)),
-      uRotation2: Vector2(math.cos(rotation2), math.sin(rotation2)),
-      uRotation3: Vector2(math.cos(rotation3), math.sin(rotation3)),
-    );
-  }
-
-  Vector4 _colorToVector4(Color color) {
-    return Vector4(
-        color.red / 255.0,
-        color.blue / 255.0,
-        color.green / 255.0,
-        color.alpha / 255.0,
-      );
+    _fragmentShader
+      // uColor
+      ..setFloat(0, _color.red / 255.0)
+      ..setFloat(1, _color.green / 255.0)
+      ..setFloat(2, _color.blue / 255.0)
+      ..setFloat(3, _color.alpha / 255.0)
+      // uAlpha
+      ..setFloat(4, _alpha.value)
+      // uSparkleColor
+      ..setFloat(5, 1.0)
+      ..setFloat(6, 1.0)
+      ..setFloat(7, 1.0)
+      ..setFloat(8, 1.0)
+      // uSparkleAlpha
+      ..setFloat(9, _sparkleAlpha.value)
+      // uBlur
+      ..setFloat(10, 1.0)
+      // uCenter
+      ..setFloat(11, _center.value.x)
+      ..setFloat(12, _center.value.y)
+      // uRadiusScale
+      ..setFloat(13, _radiusScale.value)
+      // uMaxRadius
+      ..setFloat(14, _targetRadius)
+      // uResolutionScale
+      ..setFloat(15, 1.0 / _width)
+      ..setFloat(16, 1.0 / _height)
+      // uNoiseScale
+      ..setFloat(17, _noiseDensity / _width)
+      ..setFloat(18, _noiseDensity / _height)
+      // uNoisePhase
+      ..setFloat(19, noisePhase / 1000.0)
+      // uCircle1
+      ..setFloat(20, turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.cos(turbulenceScale * 0.55)))
+      ..setFloat(21, turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.sin(turbulenceScale * 0.55)))
+      // uCircle2
+      ..setFloat(22, turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.45)))
+      ..setFloat(23, turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.45)))
+      // uCircle3
+      ..setFloat(24, turbulenceScale + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.35)))
+      ..setFloat(25, turbulenceScale + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.35)))
+      // uRotation1
+      ..setFloat(26, math.cos(rotation1))
+      ..setFloat(27, math.sin(rotation1))
+      // uRotation2
+      ..setFloat(28, math.cos(rotation2))
+      ..setFloat(29, math.sin(rotation2))
+      // uRotation3
+      ..setFloat(30, math.cos(rotation3))
+      ..setFloat(31, math.sin(rotation3));
   }
 
   /// Transforms the canvas for an ink feature to be painted on the [canvas].
@@ -429,17 +444,19 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
 
   const _InkSparkleFactory.constantTurbulenceSeed() : turbulenceSeed = 1337.0;
 
-  static void compileShaderIfNecessary() {
+  static void initializeShader() {
     if (!_initCalled) {
-      FragmentShaderManager.inkSparkle().then((FragmentShaderManager manager) {
-        _shaderManager = manager;
-      });
+      ui.FragmentProgram.fromAsset('shaders/ink_sparkle.frag').then(
+        (ui.FragmentProgram program) {
+          _program = program;
+        },
+      );
       _initCalled = true;
     }
   }
 
   static bool _initCalled = false;
-  static FragmentShaderManager? _shaderManager;
+  static ui.FragmentProgram? _program;
 
   final double? turbulenceSeed;
 
@@ -499,75 +516,4 @@ double _getTargetRadius(
   final double d1 = size.bottomRight(Offset.zero).distance;
   final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
   return math.max(d1, d2) / 2.0;
-}
-
-// The code below is generated by the package: fragment_shader_manager.
-// It is hand modified to update for flutter/flutter style and asset loading.
-
-/// A generated class for managing [FragmentProgram] that includes a
-/// pre-transpiled shader program into SPIR-V.
-///
-/// See:
-/// - https://github.com/material-components/material-components-flutter-experimental/tree/fragment-shader-manager/fragment_shader_manager
-///
-/// GLSL source for this shader is under `shaders/ink_sparkle.frag`.
-class FragmentShaderManager {
-  FragmentShaderManager._();
-
-  static late ui.FragmentProgram _program;
-
-  /// Creates an [FragmentShaderManager] with an [InkSparkle] effect.
-  static Future<FragmentShaderManager> inkSparkle() async {
-    final FragmentShaderManager manager = FragmentShaderManager._();
-    _program = await ui.FragmentProgram.fromAsset(
-      'shaders/ink_sparkle.frag',
-    );
-    return manager;
-  }
-
-  /// Creates a shader with the original program and optional uniforms.
-  ///
-  /// A new shader must be made whenever the uniforms are updated.
-  Shader shader({
-    Vector4? uColor,
-    double? uAlpha,
-    Vector4? uSparkleColor,
-    double? uSparkleAlpha,
-    double? uBlur,
-    Vector2? uCenter,
-    double? uRadiusScale,
-    double? uMaxRadius,
-    Vector2? uResolutionScale,
-    Vector2? uNoiseScale,
-    double? uNoisePhase,
-    double? uTurbulencePhase,
-    Vector2? uCircle1,
-    Vector2? uCircle2,
-    Vector2? uCircle3,
-    Vector2? uRotation1,
-    Vector2? uRotation2,
-    Vector2? uRotation3,
-  }) {
-    return _program.shader(
-      floatUniforms: Float32List.fromList(<double>[
-        ...uColor != null ? uColor.storage : <double>[0, 0, 0, 0],
-        ...uAlpha != null ? <double>[uAlpha] : <double>[0],
-        ...uSparkleColor != null ? uSparkleColor.storage : <double>[0, 0, 0, 0],
-        ...uSparkleAlpha != null ? <double>[uSparkleAlpha] : <double>[0],
-        ...uBlur != null ? <double>[uBlur] : <double>[0],
-        ...uCenter != null ? uCenter.storage : <double>[0, 0],
-        ...uRadiusScale != null ? <double>[uRadiusScale] : <double>[0],
-        ...uMaxRadius != null ? <double>[uMaxRadius] : <double>[0],
-        ...uResolutionScale != null ? uResolutionScale.storage : <double>[0, 0],
-        ...uNoiseScale != null ? uNoiseScale.storage : <double>[0, 0],
-        ...uNoisePhase != null ? <double>[uNoisePhase] : <double>[0],
-        ...uCircle1 != null ? uCircle1.storage : <double>[0, 0],
-        ...uCircle2 != null ? uCircle2.storage : <double>[0, 0],
-        ...uCircle3 != null ? uCircle3.storage : <double>[0, 0],
-        ...uRotation1 != null ? uRotation1.storage : <double>[0, 0],
-        ...uRotation2 != null ? uRotation2.storage : <double>[0, 0],
-        ...uRotation3 != null ? uRotation3.storage : <double>[0, 0],
-      ]),
-    );
-  }
 }

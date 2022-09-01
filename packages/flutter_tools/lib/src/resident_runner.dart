@@ -934,7 +934,7 @@ abstract class ResidentHandlers {
       viewId: views.first.id,
     );
     final Device device = flutterDevice.device!;
-    return sharedSkSlWriter(device, data!);
+    return sharedSkSlWriter(device, data);
   }
 
   /// Take a screenshot on the provided [device].

@@ -732,6 +732,8 @@ abstract class LocalEngineArtifacts implements Artifacts {
   }) = CachedLocalEngineArtifacts;
 
   String get engineOutPath;
+
+  String get localEngineName;
 }
 
 /// Manages the artifacts of a locally built engine.
@@ -745,6 +747,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
     required Platform platform,
     required OperatingSystemUtils operatingSystemUtils,
   }) : _fileSystem = fileSystem,
+       localEngineName = fileSystem.path.basename(engineOutPath),
        _cache = cache,
        _processManager = processManager,
        _platform = platform,
@@ -752,6 +755,9 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
 
   @override
   final String engineOutPath;
+
+  @override
+  final String localEngineName;
 
   final String _hostEngineOutPath;
   final FileSystem _fileSystem;
@@ -1063,4 +1069,7 @@ class _TestLocalEngine extends _TestArtifacts implements LocalEngineArtifacts {
 
   @override
   final String engineOutPath;
+
+  @override
+  String get localEngineName => fileSystem.path.basename(engineOutPath);
 }

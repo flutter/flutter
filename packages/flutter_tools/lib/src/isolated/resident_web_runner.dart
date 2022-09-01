@@ -280,6 +280,7 @@ class ResidentWebRunner extends ResidentRunner {
         );
         final Uri url = await device!.devFS!.create();
         if (debuggingOptions.buildInfo.isDebug) {
+          await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
             _logger!.printError('Failed to compile application.');
