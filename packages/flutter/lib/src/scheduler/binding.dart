@@ -183,16 +183,18 @@ enum SchedulerPhase {
   postFrameCallbacks,
 }
 
-/// This callback invoked when a request for [DartPerformanceMode] is disposed.
+/// This callback is invoked when a request for [DartPerformanceMode] is disposed.
 ///
-/// See: [PerformanceModeRequestHandle].
+/// See also:
+///
+/// * [PerformanceModeRequestHandle] for more information on the lifecycle of the handle.
 typedef PerformanceModeCleaupCallback = void Function();
 
 /// An opaque handle that keeps a request for [DartPerformanceMode] active until
 /// disposed.
 ///
-/// To create a [PerformanceModeRequestHandle], use `createPerformanceModeRequest`. The
-/// component that makes the request is responsible for disposing the handle.
+/// To create a [PerformanceModeRequestHandle], use [SchedulerBinding.requestPerformanceMode].
+/// The component that makes the request is responsible for disposing the handle.
 class PerformanceModeRequestHandle {
   PerformanceModeRequestHandle._(PerformanceModeCleaupCallback this._cleanup);
 
@@ -207,7 +209,6 @@ class PerformanceModeRequestHandle {
     _cleanup!();
     _cleanup = null;
   }
-
 }
 
 /// Scheduler for running the following:
