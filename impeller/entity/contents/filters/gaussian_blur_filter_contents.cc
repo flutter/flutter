@@ -226,14 +226,13 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   };
 
   Vector2 scale;
+  auto scale_curve = [](Scalar radius) { return std::min(1.0, 2.0 / radius); };
   {
-    scale.x =
-        1.0 /
-        std::ceil(std::log2(std::max(2.0f, transformed_blur_radius_length)));
+    scale.x = scale_curve(transformed_blur_radius_length);
 
     Scalar y_radius = std::abs(pass_transform.GetDirectionScale(Vector2(
         0, source_override_ ? Radius{secondary_blur_sigma_}.radius : 1)));
-    scale.y = 1.0 / std::ceil(std::log2(std::max(2.0f, y_radius)));
+    scale.y = scale_curve(y_radius);
   }
 
   Vector2 scaled_size = pass_texture_rect.size * scale;
