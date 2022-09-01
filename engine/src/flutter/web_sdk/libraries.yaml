@@ -7,7 +7,7 @@
 # Note: if you edit this file, you must also edit libraries.json in this
 # directory:
 #
-#.    python third_party/dart/tools/yaml2json.py flutter/web_sdk/libraries.yaml flutter/web_sdk/libraries.json
+#.    dart third_party/dart/tools/yaml2json.dart flutter/web_sdk/libraries.yaml flutter/web_sdk/libraries.json
 #
 # We currently have several different files that needs to be updated when
 # changing libraries, sources, and patch files.  See
@@ -24,6 +24,9 @@ dartdevc:
     _engine:
       uri: "lib/_engine/engine.dart"
 
+    _skwasm_stub:
+      uri: "lib/_skwasm_stub/skwasm_stub.dart"
+
 dart2js:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: dart2js}
@@ -35,6 +38,9 @@ dart2js:
     _engine:
       uri: "lib/_engine/engine.dart"
 
+    _skwasm_stub:
+      uri: "lib/_skwasm_stub/skwasm_stub.dart"
+
 wasm:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: wasm}
@@ -45,3 +51,6 @@ wasm:
 
     _engine:
       uri: "lib/_engine/engine.dart"
+
+    _skwasm_impl:
+      uri: "lib/_skwasm_impl/skwasm_impl.dart"
