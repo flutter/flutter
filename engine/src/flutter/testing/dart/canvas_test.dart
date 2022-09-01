@@ -929,6 +929,47 @@ void main() {
     expect(canvas.getLocalClipBounds(), initialLocalBounds);
     expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
   });
+
+  test('RestoreToCount can work', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    expect(canvas.getSaveCount(), equals(6));
+    canvas.restoreToCount(2);
+    expect(canvas.getSaveCount(), equals(2));
+    canvas.restore();
+    expect(canvas.getSaveCount(), equals(1));
+  });
+
+  test('RestoreToCount count less than 1, the stack should be reset', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    expect(canvas.getSaveCount(), equals(6));
+    canvas.restoreToCount(0);
+    expect(canvas.getSaveCount(), equals(1));
+  });
+
+  test('RestoreToCount count greater than current [getSaveCount], nothing would happend', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    canvas.save();
+    expect(canvas.getSaveCount(), equals(6));
+    canvas.restoreToCount(canvas.getSaveCount() + 1);
+    expect(canvas.getSaveCount(), equals(6));
+  });
 }
 
 Matcher listEquals(ByteData expected) => (dynamic v) {
