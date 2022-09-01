@@ -118,10 +118,7 @@ class SymbolizeCommand extends FlutterCommand {
         .childDirectory('Resources')
         .childDirectory('DWARF');
 
-      final List<FileSystemEntity> dwarfFiles =
-        debugInfoDir.listSync().where(
-          (FileSystemEntity f) => f.statSync().type == FileSystemEntityType.file
-        ).toList();
+      final List<FileSystemEntity> dwarfFiles = debugInfoDir.listSync().whereType<File>().toList();
       if (dwarfFiles.length == 1) {
         debugInfoPath = dwarfFiles.first.path;
       } else {

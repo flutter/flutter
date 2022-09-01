@@ -114,15 +114,21 @@ abstract class AotAssemblyBase extends Target {
     }
 
     // Combine the app lib into a fat framework.
-    await Lipo.create(environment, darwinArchs, 'App.framework/App', buildOutputPath);
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework/App',
+      inputDir: buildOutputPath,
+    );
 
     // And combine the dSYM for each architecture too, if it was created.
     await Lipo.create(
       environment,
       darwinArchs,
-      'App.framework.dSYM/Contents/Resources/DWARF/App',
-      buildOutputPath,
-      skipMissingInputs: true
+      relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
+      inputDir: buildOutputPath,
+      // Don't fail if the dSYM wasn't created (i.e. during a debug build).
+      skipMissingInputs: true,
     );
   }
 }
@@ -571,13 +577,15 @@ abstract class _IosAssetBundleWithDSYM extends IosAssetBundle {
   const _IosAssetBundleWithDSYM();
 
   @override
-  List<Source> get inputs => super.inputs + const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 
   @override
-  List<Source> get outputs => super.outputs + const <Source>[
-    Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 }
 

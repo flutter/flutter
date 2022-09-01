@@ -177,7 +177,7 @@ class AOTSnapshotter {
 
     // When buiding for iOS and splitting out debug info, we want to strip
     // manually after the dSYM export, instead of in the `gen_snapshot`.
-    late final bool stripAfterBuild;
+    final bool stripAfterBuild;
     if (targetingApplePlatform) {
       stripAfterBuild = shouldStrip;
       if (stripAfterBuild) {
@@ -238,7 +238,7 @@ class AOTSnapshotter {
     // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (targetingApplePlatform) {
-      final RunResult result = await _buildFramework(
+      return _buildFramework(
         appleArch: darwinArch!,
         isIOS: platform == TargetPlatform.ios,
         sdkRoot: sdkRoot,
@@ -249,16 +249,14 @@ class AOTSnapshotter {
         stripAfterBuild: stripAfterBuild,
         extractAppleDebugSymbols: extractAppleDebugSymbols
       );
-      if (result.exitCode != 0) {
-        return result.exitCode;
-      }
+    } else {
+      return 0;
     }
-    return 0;
   }
 
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
-  Future<RunResult> _buildFramework({
+  Future<int> _buildFramework({
     required DarwinArch appleArch,
     required bool isIOS,
     String? sdkRoot,
@@ -291,7 +289,7 @@ class AOTSnapshotter {
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
 
-    RunResult result = await _xcode.cc(<String>[
+    final RunResult compileResult = await _xcode.cc(<String>[
       ...commonBuildOptions,
       if (bitcode) embedBitcodeArg,
       '-c',
@@ -299,9 +297,9 @@ class AOTSnapshotter {
       '-o',
       assemblyO,
     ]);
-    if (result.exitCode != 0) {
-      _logger.printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${result.exitCode}');
-      return result;
+    if (compileResult.exitCode != 0) {
+      _logger.printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
+      return compileResult.exitCode;
     }
 
     final String frameworkDir = _fileSystem.path.join(outputPath, 'App.framework');
@@ -318,29 +316,32 @@ class AOTSnapshotter {
       assemblyO,
     ];
 
-    result = await _xcode.clang(linkArgs);
-    if (result.exitCode != 0) {
-      _logger.printError('Failed to link AOT snapshot. Linker terminated with exit code ${result.exitCode}');
+    final RunResult linkResult = await _xcode.clang(linkArgs);
+    if (linkResult.exitCode != 0) {
+      _logger.printError('Failed to link AOT snapshot. Linker terminated with exit code ${linkResult.exitCode}');
+      return linkResult.exitCode;
     }
 
     if (extractAppleDebugSymbols) {
-      result = await _xcode.dsymutil(<String>['-o', '$frameworkDir.dSYM', appLib]);
-      if (result.exitCode != 0) {
-        _logger.printError('Failed to generate dSYM - dsymutil terminated with exit code ${result.exitCode}');
+      final RunResult dsymResult = await _xcode.dsymutil(<String>['-o', '$frameworkDir.dSYM', appLib]);
+      if (dsymResult.exitCode != 0) {
+        _logger.printError('Failed to generate dSYM - dsymutil terminated with exit code ${dsymResult.exitCode}');
+        return dsymResult.exitCode;
       }
 
       if (stripAfterBuild) {
         // See https://www.unix.com/man-page/osx/1/strip/ for arguments
-        result = await _xcode.strip(<String>['-S', appLib, '-o', appLib]);
-        if (result.exitCode != 0) {
-          _logger.printError('Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${result.exitCode}');
+        final RunResult stripResult = await _xcode.strip(<String>['-S', appLib, '-o', appLib]);
+        if (stripResult.exitCode != 0) {
+          _logger.printError('Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${stripResult.exitCode}');
+          return stripResult.exitCode;
         }
       }
     } else {
       assert(stripAfterBuild == false);
     }
 
-    return result;
+    return 0;
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
