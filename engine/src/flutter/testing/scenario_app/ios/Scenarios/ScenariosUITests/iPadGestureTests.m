@@ -236,6 +236,12 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
   [invocation setArgument:&deltaY atIndex:3];
   [invocation invokeWithTarget:flutterView];
 
+  // Hover immediately following the scroll to cause an inertia cancel event.
+  SEL hover = @selector(hover:);
+  XCTAssertTrue([flutterView respondsToSelector:hover],
+                @"If supportsPointerInteraction is true, this should be true too.");
+  [flutterView performSelector:hover];
+
   // The hover pointer is observed to be removed by the system after ~3.5 seconds of inactivity.
   // While this is not a documented behavior, it is the only way to test for the removal of the
   // hover pointer. Waiting for 5 seconds will ensure that all events are received before
@@ -265,21 +271,24 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
     [messageSequenceNumberList addObject:@(messageSequenceNumber)];
   }
   // The number of hover events is not consistent, there could be one or many.
-  int hoverAddedSequenceNumber =
-      assertOneMessageAndGetSequenceNumber(messages, @"PointerChange.add,device=0,buttons=0");
+  int hoverAddedSequenceNumber = assertOneMessageAndGetSequenceNumber(
+      messages, @"PointerChange.add,device=0,buttons=0,signalKind=PointerSignalKind.none");
   NSMutableArray<NSNumber*>* hoverSequenceNumbers =
-      messages[@"PointerChange.hover,device=0,buttons=0"];
-  int hoverRemovedSequenceNumber =
-      assertOneMessageAndGetSequenceNumber(messages, @"PointerChange.remove,device=0,buttons=0");
-  int panZoomAddedSequenceNumber =
-      assertOneMessageAndGetSequenceNumber(messages, @"PointerChange.add,device=1,buttons=0");
+      messages[@"PointerChange.hover,device=0,buttons=0,signalKind=PointerSignalKind.none"];
+  int hoverRemovedSequenceNumber = assertOneMessageAndGetSequenceNumber(
+      messages, @"PointerChange.remove,device=0,buttons=0,signalKind=PointerSignalKind.none");
+  int panZoomAddedSequenceNumber = assertOneMessageAndGetSequenceNumber(
+      messages, @"PointerChange.add,device=1,buttons=0,signalKind=PointerSignalKind.none");
   int panZoomStartSequenceNumber = assertOneMessageAndGetSequenceNumber(
-      messages, @"PointerChange.panZoomStart,device=1,buttons=0");
+      messages, @"PointerChange.panZoomStart,device=1,buttons=0,signalKind=PointerSignalKind.none");
   // The number of pan/zoom update events is not consistent, there could be one or many.
   NSMutableArray<NSNumber*>* panZoomUpdateSequenceNumbers =
-      messages[@"PointerChange.panZoomUpdate,device=1,buttons=0"];
+      messages[@"PointerChange.panZoomUpdate,device=1,buttons=0,signalKind=PointerSignalKind.none"];
   int panZoomEndSequenceNumber = assertOneMessageAndGetSequenceNumber(
-      messages, @"PointerChange.panZoomEnd,device=1,buttons=0");
+      messages, @"PointerChange.panZoomEnd,device=1,buttons=0,signalKind=PointerSignalKind.none");
+  int inertiaCancelSequenceNumber = assertOneMessageAndGetSequenceNumber(
+      messages,
+      @"PointerChange.cancel,device=2,buttons=0,signalKind=PointerSignalKind.scrollInertiaCancel");
 
   XCTAssertGreaterThan(panZoomStartSequenceNumber, panZoomAddedSequenceNumber,
                        @"PanZoomStart occured before pointer was added");
@@ -287,7 +296,9 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
                        panZoomStartSequenceNumber, @"PanZoomUpdate occured before PanZoomStart");
   XCTAssertGreaterThan(panZoomEndSequenceNumber,
                        [[panZoomUpdateSequenceNumbers lastObject] intValue],
-                       @"PanZoomUpdate occured after PanZoomUpdate");
+                       @"PanZoomUpdate occured after PanZoomEnd");
+  XCTAssertGreaterThan(inertiaCancelSequenceNumber, panZoomEndSequenceNumber,
+                       @"ScrollInertiaCancel occured before PanZoomEnd");
 
   XCTAssertGreaterThan([[hoverSequenceNumbers firstObject] intValue], hoverAddedSequenceNumber,
                        @"Hover occured before pointer was added");
