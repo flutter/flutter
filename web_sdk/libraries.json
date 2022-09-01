@@ -14,6 +14,9 @@
       },
       "_engine": {
         "uri": "lib/_engine/engine.dart"
+      },
+      "_skwasm_stub": {
+        "uri": "lib/_skwasm_stub/skwasm_stub.dart"
       }
     }
   },
@@ -30,6 +33,9 @@
       },
       "_engine": {
         "uri": "lib/_engine/engine.dart"
+      },
+      "_skwasm_stub": {
+        "uri": "lib/_skwasm_stub/skwasm_stub.dart"
       }
     }
   },
@@ -46,6 +52,9 @@
       },
       "_engine": {
         "uri": "lib/_engine/engine.dart"
+      },
+      "_skwasm_impl": {
+        "uri": "lib/_skwasm_impl/skwasm_impl.dart"
       }
     }
   }

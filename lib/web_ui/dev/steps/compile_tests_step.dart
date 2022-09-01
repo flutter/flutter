@@ -186,11 +186,16 @@ Future<void> compileTests(List<FilePath> testFiles) async {
   // different dart2js options.
   final List<FilePath> htmlTargets = <FilePath>[];
   final List<FilePath> canvasKitTargets = <FilePath>[];
+  final List<FilePath> skwasmTargets = <FilePath>[];
   final String canvasKitTestDirectory =
       pathlib.join(environment.webUiTestDir.path, 'canvaskit');
+  final String skwasmTestDirectory =
+      pathlib.join(environment.webUiTestDir.path, 'skwasm');
   for (final FilePath testFile in testFiles) {
     if (pathlib.isWithin(canvasKitTestDirectory, testFile.absolute)) {
       canvasKitTargets.add(testFile);
+    } else if (pathlib.isWithin(skwasmTestDirectory, testFile.absolute)) {
+      skwasmTargets.add(testFile);
     } else {
       htmlTargets.add(testFile);
     }
@@ -198,9 +203,11 @@ Future<void> compileTests(List<FilePath> testFiles) async {
 
   await Future.wait(<Future<void>>[
     if (htmlTargets.isNotEmpty)
-      _compileTestsInParallel(targets: htmlTargets, forCanvasKit: false),
+      _compileTestsInParallel(targets: htmlTargets),
     if (canvasKitTargets.isNotEmpty)
       _compileTestsInParallel(targets: canvasKitTargets, forCanvasKit: true),
+    if (skwasmTargets.isNotEmpty)
+      _compileTestsInParallel(targets: skwasmTargets, forSkwasm: true),
   ]);
 
   stopwatch.stop();
@@ -220,11 +227,12 @@ final Pool _dart2jsPool = Pool(_dart2jsConcurrency);
 /// Spawns multiple dart2js processes to compile [targets] in parallel.
 Future<void> _compileTestsInParallel({
   required List<FilePath> targets,
-  required bool forCanvasKit,
+  bool forCanvasKit = false,
+  bool forSkwasm = false,
 }) async {
   final Stream<bool> results = _dart2jsPool.forEach(
     targets,
-    (FilePath file) => compileUnitTest(file, forCanvasKit: forCanvasKit),
+    (FilePath file) => compileUnitTest(file, forCanvasKit: forCanvasKit, forSkwasm: forSkwasm),
   );
   await for (final bool isSuccess in results) {
     if (!isSuccess) {
@@ -250,7 +258,7 @@ Future<void> _compileTestsInParallel({
 /// directory before test are build. See [_copyFilesFromTestToBuild].
 ///
 /// Later the extra files will be deleted in [_cleanupExtraFilesUnderTestDir].
-Future<bool> compileUnitTest(FilePath input, {required bool forCanvasKit}) async {
+Future<bool> compileUnitTest(FilePath input, {required bool forCanvasKit, required bool forSkwasm}) async {
   final String targetFileName = pathlib.join(
     environment.webUiBuildDir.path,
     '${input.relativeToWebUi}.browser_test.dart.js',
@@ -277,6 +285,7 @@ Future<bool> compileUnitTest(FilePath input, {required bool forCanvasKit}) async
     // renderer explicitly.
     '-DFLUTTER_WEB_AUTO_DETECT=false',
     '-DFLUTTER_WEB_USE_SKIA=$forCanvasKit',
+    '-DFLUTTER_WEB_USE_SKWASM=$forSkwasm',
 
     '-O2',
     '-o',
