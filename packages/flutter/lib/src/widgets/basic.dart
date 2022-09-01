@@ -6878,6 +6878,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool excludeSemantics = false,
     bool? enabled,
     bool? checked,
+    bool? mixedCheck,
     bool? selected,
     bool? toggled,
     bool? button,
@@ -6943,6 +6944,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     properties: SemanticsProperties(
       enabled: enabled,
       checked: checked,
+      mixedCheck: mixedCheck,
       toggled: toggled,
       selected: selected,
       button: button,

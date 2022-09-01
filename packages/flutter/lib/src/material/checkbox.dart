@@ -474,6 +474,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
     return Semantics(
       checked: widget.value ?? false,
+      mixedCheck: widget.value == null && tristate,
       child: buildToggleable(
         mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
