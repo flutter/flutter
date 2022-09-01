@@ -1,4 +1,4 @@
-Signature: 7ec33eb529c44cdc45c16c6b8a9e7eee
+Signature: 65d6cae090ae0b51b51a44970ac44923
 
 UNUSED LICENSES:
 
@@ -3612,14 +3612,14 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/StrokeRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrAtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/GrAtlasManager.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkAMDMemoryAllocator.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkCommandPool.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkCommandPool.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkImageLayout.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkSamplerYcbcrConversion.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkSamplerYcbcrConversion.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkTypesPriv.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanAMDMemoryAllocator.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanAMDMemoryAllocator.h
 FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.h
 FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.cpp
@@ -7158,6 +7158,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h
+FILE: ../../../third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanTypes.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h
