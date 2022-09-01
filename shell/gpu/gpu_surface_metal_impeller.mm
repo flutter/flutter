@@ -120,4 +120,9 @@ bool GPUSurfaceMetalImpeller::EnableRasterCache() const {
   return false;
 }
 
+// |Surface|
+impeller::AiksContext* GPUSurfaceMetalImpeller::GetAiksContext() const {
+  return aiks_context_.get();
+}
+
 }  // namespace flutter

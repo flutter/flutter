@@ -34,6 +34,8 @@ Rasterizer::Rasterizer(Delegate& delegate,
       gpu_image_behavior_(gpu_image_behavior),
       compositor_context_(std::make_unique<flutter::CompositorContext>(*this)),
       user_override_resource_cache_bytes_(false),
+      snapshot_controller_(
+          SnapshotController::Make(*this, delegate.GetSettings())),
       weak_factory_(this) {
   FML_DCHECK(compositor_context_);
 }
@@ -343,147 +345,14 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> Rasterizer::MakeGpuImage(
   return result;
 }
 
-namespace {
-sk_sp<SkImage> DrawSnapshot(
-    sk_sp<SkSurface> surface,
-    const std::function<void(SkCanvas*)>& draw_callback) {
-  if (surface == nullptr || surface->getCanvas() == nullptr) {
-    return nullptr;
-  }
-
-  draw_callback(surface->getCanvas());
-  surface->getCanvas()->flush();
-
-  sk_sp<SkImage> device_snapshot;
-  {
-    TRACE_EVENT0("flutter", "MakeDeviceSnpashot");
-    device_snapshot = surface->makeImageSnapshot();
-  }
-
-  if (device_snapshot == nullptr) {
-    return nullptr;
-  }
-
-  {
-    TRACE_EVENT0("flutter", "DeviceHostTransfer");
-    if (auto raster_image = device_snapshot->makeRasterImage()) {
-      return raster_image;
-    }
-  }
-
-  return nullptr;
-}
-}  // namespace
-
-sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
-    SkISize size,
-    std::function<void(SkCanvas*)> draw_callback) {
-  TRACE_EVENT0("flutter", __FUNCTION__);
-  sk_sp<SkImage> result;
-  SkImageInfo image_info = SkImageInfo::MakeN32Premul(
-      size.width(), size.height(), SkColorSpace::MakeSRGB());
-
-  std::unique_ptr<Surface> pbuffer_surface;
-  Surface* snapshot_surface = nullptr;
-  if (surface_ && surface_->GetContext()) {
-    snapshot_surface = surface_.get();
-  } else if (snapshot_surface_producer_) {
-    pbuffer_surface = snapshot_surface_producer_->CreateSnapshotSurface();
-    if (pbuffer_surface && pbuffer_surface->GetContext()) {
-      snapshot_surface = pbuffer_surface.get();
-    }
-  }
-
-  if (!snapshot_surface) {
-    // Raster surface is fine if there is no on screen surface. This might
-    // happen in case of software rendering.
-    sk_sp<SkSurface> sk_surface = SkSurface::MakeRaster(image_info);
-    result = DrawSnapshot(sk_surface, draw_callback);
-  } else {
-    delegate_.GetIsGpuDisabledSyncSwitch()->Execute(
-        fml::SyncSwitch::Handlers()
-            .SetIfTrue([&] {
-              sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
-              result = DrawSnapshot(surface, draw_callback);
-            })
-            .SetIfFalse([&] {
-              FML_DCHECK(snapshot_surface);
-              auto context_switch =
-                  snapshot_surface->MakeRenderContextCurrent();
-              if (!context_switch->GetResult()) {
-                return;
-              }
-
-              GrRecordingContext* context = snapshot_surface->GetContext();
-              auto max_size = context->maxRenderTargetSize();
-              double scale_factor = std::min(
-                  1.0, static_cast<double>(max_size) /
-                           static_cast<double>(std::max(image_info.width(),
-                                                        image_info.height())));
-
-              // Scale down the render target size to the max supported by the
-              // GPU if necessary. Exceeding the max would otherwise cause a
-              // null result.
-              if (scale_factor < 1.0) {
-                image_info = image_info.makeWH(
-                    static_cast<double>(image_info.width()) * scale_factor,
-                    static_cast<double>(image_info.height()) * scale_factor);
-              }
-
-              // When there is an on screen surface, we need a render target
-              // SkSurface because we want to access texture backed images.
-              sk_sp<SkSurface> sk_surface =
-                  SkSurface::MakeRenderTarget(context,          // context
-                                              SkBudgeted::kNo,  // budgeted
-                                              image_info        // image info
-                  );
-              if (!sk_surface) {
-                FML_LOG(ERROR)
-                    << "DoMakeRasterSnapshot can not create GPU render target";
-                return;
-              }
-
-              sk_surface->getCanvas()->scale(scale_factor, scale_factor);
-              result = DrawSnapshot(sk_surface, draw_callback);
-            }));
-  }
-
-  return result;
-}
-
-sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(
-    std::function<void(SkCanvas*)> draw_callback,
-    SkISize picture_size) {
-  return DoMakeRasterSnapshot(picture_size, draw_callback);
-}
-
-sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
+sk_sp<DlImage> Rasterizer::MakeRasterSnapshot(sk_sp<DisplayList> display_list,
                                               SkISize picture_size) {
-  return DoMakeRasterSnapshot(picture_size,
-                              [picture = std::move(picture)](SkCanvas* canvas) {
-                                canvas->drawPicture(picture);
-                              });
+  return snapshot_controller_->MakeRasterSnapshot(display_list, picture_size);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
   TRACE_EVENT0("flutter", __FUNCTION__);
-
-  // If the rasterizer does not have a surface with a GrContext, then it will
-  // be unable to render a cross-context SkImage.  The caller will need to
-  // create the raster image on the IO thread.
-  if (surface_ == nullptr || surface_->GetContext() == nullptr) {
-    return nullptr;
-  }
-
-  if (image == nullptr) {
-    return nullptr;
-  }
-
-  SkISize image_size = image->dimensions();
-  return DoMakeRasterSnapshot(image_size,
-                              [image = std::move(image)](SkCanvas* canvas) {
-                                canvas->drawImage(image, 0, 0);
-                              });
+  return snapshot_controller_->ConvertToRasterImage(image);
 }
 
 fml::Milliseconds Rasterizer::GetFrameBudget() const {

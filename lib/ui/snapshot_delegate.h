@@ -17,6 +17,8 @@
 
 namespace flutter {
 
+class DlImage;
+
 class SnapshotDelegate {
  public:
   struct GpuImageResult {
@@ -59,11 +61,7 @@ class SnapshotDelegate {
       sk_sp<DisplayList> display_list,
       const SkImageInfo& image_info) = 0;
 
-  virtual sk_sp<SkImage> MakeRasterSnapshot(
-      std::function<void(SkCanvas*)> draw_callback,
-      SkISize picture_size) = 0;
-
-  virtual sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
+  virtual sk_sp<DlImage> MakeRasterSnapshot(sk_sp<DisplayList> display_list,
                                             SkISize picture_size) = 0;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;

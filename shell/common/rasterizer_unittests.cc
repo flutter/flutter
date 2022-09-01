@@ -36,6 +36,7 @@ class MockDelegate : public Rasterizer::Delegate {
   MOCK_CONST_METHOD0(GetIsGpuDisabledSyncSwitch,
                      std::shared_ptr<const fml::SyncSwitch>());
   MOCK_METHOD0(CreateSnapshotSurface, std::unique_ptr<Surface>());
+  MOCK_CONST_METHOD0(GetSettings, const Settings&());
 };
 
 class MockSurface : public Surface {
@@ -80,6 +81,8 @@ class MockExternalViewEmbedder : public ExternalViewEmbedder {
 
 TEST(RasterizerTest, create) {
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   EXPECT_TRUE(rasterizer != nullptr);
 }
@@ -109,6 +112,8 @@ TEST(RasterizerTest, drawEmptyPipeline) {
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<NiceMock<MockSurface>>();
@@ -136,6 +141,8 @@ TEST(RasterizerTest,
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_));
@@ -203,6 +210,8 @@ TEST(
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_));
@@ -268,6 +277,8 @@ TEST(
                            thread_host.io_thread->GetTaskRunner());
 
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_));
@@ -332,6 +343,8 @@ TEST(RasterizerTest,
                            thread_host.io_thread->GetTaskRunner());
 
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_));
@@ -405,6 +418,8 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNoSurfaceIsSet) {
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
@@ -448,6 +463,8 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNotUsedThisFrame) {
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
 
@@ -503,6 +520,8 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenPipelineIsEmpty) {
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
 
@@ -546,6 +565,8 @@ TEST(RasterizerTest,
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_));
@@ -600,6 +621,8 @@ TEST(
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_));
@@ -655,6 +678,8 @@ TEST(
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_));
@@ -709,6 +734,8 @@ TEST(
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
   EXPECT_CALL(delegate, OnFrameRasterized(_)).Times(0);
@@ -761,6 +788,8 @@ TEST(RasterizerTest,
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
 
   fml::AutoResetWaitableEvent latch;
@@ -845,6 +874,8 @@ TEST(RasterizerTest, TeardownFreesResourceCache) {
                            thread_host.io_thread->GetTaskRunner());
 
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
 
@@ -906,6 +937,8 @@ TEST(RasterizerTest, TeardownNoSurface) {
                            thread_host.io_thread->GetTaskRunner());
 
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   EXPECT_CALL(delegate, GetTaskRunners())
       .WillRepeatedly(ReturnRef(task_runners));
 
@@ -927,6 +960,8 @@ TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
                            thread_host.io_thread->GetTaskRunner());
 
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
 
   fml::AutoResetWaitableEvent latch;
@@ -1007,6 +1042,8 @@ TEST(RasterizerTest, presentationTimeNotSetWhenVsyncTargetInPast) {
                            thread_host.io_thread->GetTaskRunner());
 
   NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
   ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
 
   fml::AutoResetWaitableEvent latch;
