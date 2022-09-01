@@ -16,17 +16,9 @@ class FlutterLibraries {
   static const String flutterFoundation = 'package:flutter/foundation.dart';
 }
 
-/// List of field names for dart form of [ObjectEvent].
-class FieldNames {
-  /// Type of event.
-  ///
-  /// Can be 'created' or 'disposed'.
+class _FieldNames {
   static const String eventType = 'eventType';
-
-  /// Name of the library that dispatched the event.
   static const String labraryName = 'labraryName';
-
-  /// Name of the class that dispatched the event.
   static const String className = 'className';
 }
 
@@ -46,10 +38,12 @@ abstract class ObjectEvent{
   /// The representation of the event in a form, acceptible by a
   /// pure dart library, that cannot depend on Flutter.
   ///
-  /// The method enables the code like:
+  /// The method enables code like:
+  /// ```
   /// MemoryAllocations.instance
-  ///   .addListener((event) => dartMethod(event.toDart()));
-  Map<Object, Map<String, dynamic>> toDart();
+  ///   .addListener((event) => dartMethod(event.toMap()));
+  /// ```
+  Map<Object, Map<String, Object>> toMap();
 }
 
 /// A listener of [ObjectEvent].
@@ -71,12 +65,13 @@ class ObjectCreated extends ObjectEvent {
   final String className;
 
   @override
-  Map<Object, Map<String, dynamic>> toDart() =>
-    <Object, Map<String, dynamic>>{object: <String, dynamic>{
-      FieldNames.labraryName: library,
-      FieldNames.className: className,
-      FieldNames.eventType: 'created',
+  Map<Object, Map<String, Object>> toMap() {
+    return <Object, Map<String, Object>>{object: <String, Object>{
+      _FieldNames.labraryName: library,
+      _FieldNames.className: className,
+      _FieldNames.eventType: 'created',
     }};
+  }
 }
 
 /// An event that describes disposal of an object.
@@ -87,17 +82,18 @@ class ObjectDisposed extends ObjectEvent {
   });
 
   @override
-  Map<Object, Map<String, dynamic>> toDart() =>
-    <Object, Map<String, dynamic>>{object: <String, dynamic>{
+  Map<Object, Map<String, Object>> toMap() {
+    return <Object, Map<String, Object>>{object: <String, Object>{
       FieldNames.eventType: 'disposed',
     }};
+  }
 }
 
-/// An interface for listening to object lyfecycle events.
+/// An interface for listening to object lifecycle events.
 ///
 /// [MemoryAllocations] already listens to creation and disposal events
 /// for disposable objects in Flutter Framework.
-/// You can dispatch events for other objects by invoking
+/// Dispatch events for other objects by invoking
 /// [MemoryAllocations.dispatchObjectEvent].
 ///
 /// The class is optimized for massive event flow and small number of
