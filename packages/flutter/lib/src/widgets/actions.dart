@@ -153,7 +153,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// package, you can enable that by making the corresponding [Action]
   /// overridable. In the second part of the code sample, three `CopyableText`
   /// widgets are used to build a verification code widget which overrides the
-  /// "copy" action to copying the combined numbers from all 3 `CopyableText`
+  /// "copy" action by copying the combined numbers from all three `CopyableText`
   /// widgets.
   ///
   /// ** See code in examples/api/lib/widgets/actions/action.action_overridable.0.dart **
