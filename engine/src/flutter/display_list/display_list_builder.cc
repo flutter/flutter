@@ -476,7 +476,7 @@ void DisplayListBuilder::restore() {
 }
 void DisplayListBuilder::restoreToCount(int restore_count) {
   FML_DCHECK(restore_count <= getSaveCount());
-  while (restore_count < getSaveCount()) {
+  while (restore_count < getSaveCount() && getSaveCount() > 1) {
     restore();
   }
 }

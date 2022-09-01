@@ -59,6 +59,11 @@ class SurfaceCanvas implements ui.Canvas {
   }
 
   @override
+  void restoreToCount(int count) {
+    _canvas.restoreToCount(count);
+  }
+
+  @override
   int getSaveCount() => _canvas.saveCount;
 
   @override

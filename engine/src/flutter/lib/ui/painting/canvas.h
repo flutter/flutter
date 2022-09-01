@@ -48,6 +48,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
 
   void restore();
   int getSaveCount();
+  void restoreToCount(int count);
 
   void translate(double dx, double dy);
   void scale(double sx, double sy);
