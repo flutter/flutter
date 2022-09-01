@@ -440,9 +440,9 @@ void main() {
     GitTagVersion gitTagVersion;
 
     // Master channel
-    gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.3.0-0.0.pre.13');
-    expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
+    gitTagVersion = GitTagVersion.parse('1.2.0-4.5.pre-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.0-5.0.pre.13');
+    expect(gitTagVersion.gitTag, '1.2.0-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
 
@@ -543,7 +543,7 @@ void main() {
   });
 
   testUsingContext('determine reports correct git describe version if HEAD is not at a tag', () {
-    const String devTag = '1.2.3-2.0.pre';
+    const String devTag = '1.2.0-2.0.pre';
     const String headRevision = 'abcd1234';
     const String commitsAhead = '12';
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
@@ -565,8 +565,8 @@ void main() {
     final FakePlatform platform = FakePlatform();
 
     final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, platform, workingDirectory: '.');
-    // reported version should increment the y
-    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.3.0-0.0.pre.12');
+    // reported version should increment the m
+    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.0-3.0.pre.12');
   });
 
   testUsingContext('determine does not call fetch --tags', () {
