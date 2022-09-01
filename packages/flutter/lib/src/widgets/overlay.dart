@@ -359,6 +359,11 @@ class Overlay extends StatefulWidget {
   /// all subsequent instances of [Overlay].
   ///
   /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  /// * [Overlay.maybeOf] for a similar function that returns null if an
+  ///   [Overlay] is not found.
   static OverlayState of(
     BuildContext context, {
     bool rootOverlay = false,
@@ -369,7 +374,7 @@ class Overlay extends StatefulWidget {
       if (result == null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
           ErrorSummary('No Overlay widget found.'),
-          ErrorDescription('${debugRequiredFor?.runtimeType ?? 'some'} widgets require an Overlay widget ancestor for correct operation.'),
+          ErrorDescription('${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.'),
           ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.'),
           if (debugRequiredFor != null) DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
           if (context.widget != debugRequiredFor)
@@ -397,6 +402,12 @@ class Overlay extends StatefulWidget {
   /// all subsequent instances of [Overlay].
   ///
   /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  ///  * [Overlay.of] for a similar function that returns a non-nullable result
+  ///    and throws if an [Overlay] is not found.
+
   static OverlayState? maybeOf(
     BuildContext context, {
     bool rootOverlay = false,
