@@ -19,17 +19,6 @@ web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
                              ],
                              "list lines")
 
-web_engine_sources =
-    exec_script("//third_party/dart/tools/list_dart_files.py",
-                [
-                  "absolute",
-                  rebase_path("//flutter/lib/web_ui/lib/src/engine"),
-                ],
-                "list lines")
-
-web_engine_sources +=
-    [ rebase_path("//flutter/lib/web_ui/lib/src/engine.dart") ]
-
 group("web_sdk") {
   deps = [
     ":flutter_dartdevc_canvaskit_html_kernel_sdk",
@@ -43,60 +32,100 @@ group("web_sdk") {
   ]
 }
 
-prebuilt_dart_action("web_ui_sources") {
-  inputs = web_ui_sources + [ "sdk_rewriter.dart" ]
+template("sdk_rewriter") {
+  ui = defined(invoker.ui) && invoker.ui
+  if (!ui) {
+    assert(defined(invoker.library_name), "Must pass 'library_name'")
+    assert(defined(invoker.api_file), "Must pass 'api_file'")
+  }
+  assert(defined(invoker.input_dir), "Must pass 'input_dir'")
+  assert(defined(invoker.output_dir), "Must pass 'output_dir'")
 
-  packages = dart_sdk_package_config
-  script = "sdk_rewriter.dart"
-  output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/ui/")
-  input_dir = rebase_path("//flutter/lib/web_ui/lib/")
-  pool = "//flutter/build/dart:dart_pool"
+  source_dart_files = exec_script("//third_party/dart/tools/list_dart_files.py",
+                                  [
+                                    "absolute",
+                                    rebase_path(invoker.input_dir),
+                                  ],
+                                  "list lines")
 
-  outputs = [
-    "$target_gen_dir/$target_name.stamp",
-    "$root_out_dir/flutter_web_sdk/lib/ui/",
-  ]
+  if (defined(invoker.exclude_patterns)) {
+    filtered_files = filter_exclude(source_dart_files, invoker.exclude_patterns)
+    source_dart_files = []
+    source_dart_files = filtered_files
+  }
 
-  args = [
-    "--output-dir=$output_dir",
-    "--input-dir=$input_dir",
-    "--ui",
-    "--stamp",
-    rebase_path(outputs[0], root_build_dir),
-  ]
+  prebuilt_dart_action(target_name) {
+    packages = dart_sdk_package_config
+    pool = "//flutter/build/dart:dart_pool"
 
-  foreach(source_file, web_ui_sources) {
-    path = rebase_path(source_file)
-    args += [ "--input=$path" ]
+    script = "sdk_rewriter.dart"
+    inputs = source_dart_files + [ "sdk_rewriter.dart" ]
+
+    stamp_location = "$target_gen_dir/$target_name.stamp"
+    outputs = [
+      stamp_location,
+      invoker.output_dir,
+    ]
+
+    input_dir = rebase_path(invoker.input_dir)
+    output_dir = rebase_path(invoker.output_dir)
+
+    args = [
+      "--output-dir=$output_dir",
+      "--input-dir=$input_dir",
+      "--stamp",
+      rebase_path(stamp_location, root_build_dir),
+    ]
+    if (ui) {
+      args += [ "--ui" ]
+    } else {
+      library_name = invoker.library_name
+      api_file = rebase_path(invoker.api_file)
+      args += [
+        "--library-name=$library_name",
+        "--api-file=$api_file",
+      ]
+    }
+
+    foreach(source_file, source_dart_files) {
+      path = rebase_path(source_file)
+      args += [ "--source-file=$path" ]
+    }
   }
 }
 
-prebuilt_dart_action("web_engine_sources") {
-  inputs = web_engine_sources + [ "sdk_rewriter.dart" ]
+sdk_rewriter("web_ui_library_sources") {
+  ui = true
+  input_dir = "//flutter/lib/web_ui/lib/"
+  output_dir = "$root_out_dir/flutter_web_sdk/lib/ui/"
 
-  packages = dart_sdk_package_config
-  script = "sdk_rewriter.dart"
-  output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/_engine/")
-  input_dir = rebase_path("//flutter/lib/web_ui/lib/src/")
-  pool = "//flutter/build/dart:dart_pool"
+  # exclude everything in the engine directory, it will be a separate internal library
+  exclude_patterns = [ rebase_path("//flutter/lib/web_ui/lib/src/*") ]
+}
 
-  outputs = [
-    "$target_gen_dir/$target_name.stamp",
-    "$root_out_dir/flutter_web_sdk/lib/_engine/",
-  ]
+sdk_rewriter("web_engine_library") {
+  library_name = "engine"
+  api_file = "//flutter/lib/web_ui/lib/src/engine.dart"
+  input_dir = "//flutter/lib/web_ui/lib/src/engine/"
+  output_dir = "$root_out_dir/flutter_web_sdk/lib/_engine/"
 
-  args = [
-    "--output-dir=$output_dir",
-    "--input-dir=$input_dir",
-    "--engine",
-    "--stamp",
-    rebase_path(outputs[0], root_build_dir),
-  ]
+  # exclude skwasm, it will be a separate internal library
+  exclude_patterns =
+      [ rebase_path("//flutter/lib/web_ui/lib/src/engine/skwasm/*") ]
+}
 
-  foreach(source_file, web_engine_sources) {
-    path = rebase_path(source_file)
-    args += [ "--input=$path" ]
-  }
+sdk_rewriter("skwasm_stub_library") {
+  library_name = "skwasm_stub"
+  api_file = "//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub.dart"
+  input_dir = "//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub/"
+  output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_stub/"
+}
+
+sdk_rewriter("skwasm_impl_library") {
+  library_name = "skwasm_impl"
+  api_file = "//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl.dart"
+  input_dir = "//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/"
+  output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_impl/"
 }
 
 copy("web_ui_library") {
@@ -119,9 +148,11 @@ template("_dartdevc") {
     action(target_name) {
       not_needed(invoker, [ "packages" ])
       deps = [
-        ":web_engine_sources",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
         ":web_ui_library",
-        ":web_ui_sources",
+        ":web_ui_library_sources",
         "//flutter:dart_sdk",
       ]
       script = "//build/gn_run_binary.py"
@@ -148,9 +179,11 @@ template("_dartdevc") {
       forward_variables_from(invoker, "*")
 
       deps = [
-        ":web_engine_sources",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
         ":web_ui_library",
-        ":web_ui_sources",
+        ":web_ui_library_sources",
         "//flutter:dart_sdk",
         "//third_party/dart/pkg:pkg_files_stamp",
         "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
@@ -177,9 +210,11 @@ template("_kernel_worker") {
   if (flutter_prebuilt_dart_sdk) {
     action(target_name) {
       deps = [
-        ":web_engine_sources",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
         ":web_ui_library",
-        ":web_ui_sources",
+        ":web_ui_library_sources",
         "//flutter:dart_sdk",
       ]
       script = "//build/gn_run_binary.py"
@@ -207,9 +242,11 @@ template("_kernel_worker") {
       forward_variables_from(invoker, "*")
 
       deps = [
-        ":web_engine_sources",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
         ":web_ui_library",
-        ":web_ui_sources",
+        ":web_ui_library_sources",
         "//flutter:dart_sdk",
         "//third_party/dart/pkg:pkg_files_stamp",
         "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
@@ -225,7 +262,7 @@ template("_kernel_worker") {
 
 # Compile the unsound DDC SDK's summary.
 _kernel_worker("flutter_dartdevc_kernel_sdk_outline") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   outputs = [ sdk_dill ]
 
@@ -257,7 +294,7 @@ _kernel_worker("flutter_dartdevc_kernel_sdk_outline") {
 
 # Compiles the unsound html only renderer.
 _dartdevc("flutter_dartdevc_kernel_sdk") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   packages = dart_sdk_package_config
 
@@ -303,7 +340,7 @@ _dartdevc("flutter_dartdevc_kernel_sdk") {
 
 # Compiles the unsound canvaskit only renderer.
 _dartdevc("flutter_dartdevc_canvaskit_kernel_sdk") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   packages = dart_sdk_package_config
 
@@ -351,7 +388,7 @@ _dartdevc("flutter_dartdevc_canvaskit_kernel_sdk") {
 
 # Compiles the unsound autodetect renderer.
 _dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   packages = dart_sdk_package_config
 
@@ -399,7 +436,7 @@ _dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk") {
 
 # Compiles the sound html only renderer.
 _dartdevc("flutter_dartdevc_kernel_sdk_sound") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   packages = dart_sdk_package_config
 
@@ -446,7 +483,7 @@ _dartdevc("flutter_dartdevc_kernel_sdk_sound") {
 
 # Compiles the sound canvaskit only renderer.
 _dartdevc("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   packages = dart_sdk_package_config
 
@@ -494,7 +531,7 @@ _dartdevc("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
 
 # Compiles the sound autodetect renderer.
 _dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   packages = dart_sdk_package_config
 
@@ -542,7 +579,7 @@ _dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
 
 # Compile the sound DDC SDK's summary.
 _kernel_worker("flutter_dartdevc_kernel_sdk_outline_sound") {
-  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
   outputs = [ sdk_dill_sound ]
 
@@ -585,9 +622,11 @@ if (!is_fuchsia) {
       ":flutter_dartdevc_kernel_sdk_outline",
       ":flutter_dartdevc_kernel_sdk_outline_sound",
       ":flutter_dartdevc_kernel_sdk_sound",
-      ":web_engine_sources",
+      ":skwasm_impl_library",
+      ":skwasm_stub_library",
+      ":web_engine_library",
       ":web_ui_library",
-      ":web_ui_sources",
+      ":web_ui_library_sources",
     ]
     sources = get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk")
     sources +=
@@ -600,8 +639,10 @@ if (!is_fuchsia) {
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_sound")
     sources += get_target_outputs(":web_ui_library")
-    sources += get_target_outputs(":web_ui_sources")
-    sources += get_target_outputs(":web_engine_sources")
+    sources += get_target_outputs(":web_ui_library_sources")
+    sources += get_target_outputs(":skwasm_stub_library")
+    sources += get_target_outputs(":skwasm_impl_library")
+    sources += get_target_outputs(":web_engine_library")
     tmp_files = []
     foreach(source, sources) {
       tmp_files += [
