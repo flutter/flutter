@@ -149,7 +149,6 @@ Future<void> main() async {
 
     await tester.enterText(find.byType(EditableText), 'Hey cfabiueqqocnakoef! Hey!');
     await tester.pumpAndSettle();
-    await tester.pumpAndSettle();
 
     final RenderEditable renderEditable = findRenderEditable(tester, EditableText);
     final TextSpan textSpanTree = renderEditable.text! as TextSpan;
