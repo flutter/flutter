@@ -19,12 +19,14 @@ import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -39,6 +41,7 @@ void main() {
   ProcessManager processManager;
   AnsiTerminal terminal;
   Logger logger;
+  FakeStdio mockStdio;
 
   setUp(() {
     fileSystem = globals.localFileSystem;
@@ -47,6 +50,7 @@ void main() {
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
+    mockStdio = FakeStdio();
   });
 
   tearDown(() {
@@ -84,11 +88,11 @@ void main() {
         platform: const LocalPlatform(),
         botDetector: globals.botDetector,
         usage: globals.flutterUsage,
+        stdio: mockStdio,
       );
       await pub.get(
         context: PubContext.flutterTests,
-        directory: tempDir.path,
-        generateSyntheticPackage: false,
+        project: FlutterProject.fromDirectoryTest(tempDir),
       );
 
       server = AnalysisServer(
@@ -122,11 +126,11 @@ void main() {
       platform: const LocalPlatform(),
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
+      stdio: mockStdio,
     );
     await pub.get(
       context: PubContext.flutterTests,
-      directory: tempDir.path,
-      generateSyntheticPackage: false,
+      project: FlutterProject.fromDirectoryTest(tempDir),
     );
 
       server = AnalysisServer(

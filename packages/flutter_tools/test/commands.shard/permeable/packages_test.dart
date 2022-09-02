@@ -32,6 +32,12 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  FakeStdio mockStdio;
+
+  setUp(() {
+    mockStdio = FakeStdio()..stdout.terminalColumns = 80;
+  });
+
   Cache.disableLocking();
   group('packages get/upgrade', () {
     Directory tempDir;
@@ -197,16 +203,25 @@ void main() {
       }
     }
 
-    testUsingContext('get fetches packages', () async {
+    testUsingContext('get fetches packages and has output from pub', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
 
+      expect(mockStdio.stdout.writes.map(utf8.decode),
+        allOf(
+          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project\.\.\.'))),
+          contains('+ flutter 0.0.0 from sdk flutter\n'),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project!'))),
+        ),
+      );
+
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -214,6 +229,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -227,6 +243,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -234,6 +251,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -247,6 +265,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -254,6 +273,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -269,6 +289,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -276,6 +297,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -289,6 +311,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -296,6 +319,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -309,6 +333,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -316,6 +341,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -338,6 +364,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -345,6 +372,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -358,6 +386,7 @@ void main() {
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -365,6 +394,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -378,7 +408,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
-      Stdio: () => FakeStdio()..stdout.terminalColumns = 80,
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -386,6 +416,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -399,6 +430,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectModulePluginInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -406,6 +438,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -427,6 +460,7 @@ void main() {
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -434,17 +468,17 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
   });
 
   group('packages test/pub', () {
     FakeProcessManager processManager;
-    FakeStdio mockStdio;
+
 
     setUp(() {
       processManager = FakeProcessManager.empty();
-      mockStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('test without bot', () async {
@@ -470,6 +504,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -495,6 +530,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -525,6 +561,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -555,6 +592,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -583,6 +621,7 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
   });

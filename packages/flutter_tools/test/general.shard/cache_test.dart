@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -908,6 +909,7 @@ void main() {
       flutterRoot: () => '',
       logger: logger,
       pub: () => FakePub(),
+      projectFactory: FakeFlutterProjectFactory(),
     );
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // no package config
@@ -950,6 +952,7 @@ void main() {
       flutterRoot: () => '',
       logger: logger,
       pub: () => pub,
+      projectFactory: FakeFlutterProjectFactory()
     );
 
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
@@ -1155,7 +1158,7 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     PubContext? context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
