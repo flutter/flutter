@@ -737,7 +737,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _hoverShowDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultHoverShowDuration;
     _triggerMode = widget.triggerMode ?? tooltipTheme.triggerMode ?? _defaultTriggerMode;
     _enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
-
     Widget result = Semantics(
       tooltip: _excludeFromSemantics
           ? null

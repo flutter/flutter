@@ -192,7 +192,6 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
-    this.excludeToolTipSemantics = false,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -201,8 +200,7 @@ class IconButton extends StatelessWidget {
     required this.icon,
   }) : assert(splashRadius == null || splashRadius > 0),
        assert(autofocus != null),
-       assert(icon != null),
-       assert(excludeToolTipSemantics != null);
+       assert(icon != null);
 
   /// The size of the icon inside the button.
   ///
@@ -393,13 +391,6 @@ class IconButton extends StatelessWidget {
   /// This text is displayed when the user long-presses on the button and is
   /// used for accessibility.
   final String? tooltip;
-
-  /// Whether the [tooltip] should be excluded from the semantics tree.
-  ///
-  /// Defaults to false. the [tooltip] will add a [Semantics] tooltip if
-  /// non-null. Set this property to true if the app is going to provide its own
-  /// custom semantics label or tooltip.
-  final bool excludeToolTipSemantics;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -616,7 +607,6 @@ class IconButton extends StatelessWidget {
       if (tooltip != null) {
         iconButton = Tooltip(
           message: tooltip,
-          excludeFromSemantics: excludeToolTipSemantics,
           child: effectiveIcon,
         );
       }

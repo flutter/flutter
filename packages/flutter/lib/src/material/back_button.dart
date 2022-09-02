@@ -103,24 +103,9 @@ class BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final bool shouldExcludeTooltipSemantics;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-        // Android uses semantics label to annotate the back button.
-        shouldExcludeTooltipSemantics = true;
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        shouldExcludeTooltipSemantics = false;
-        break;
-    }
     return IconButton(
       icon: const BackButtonIcon(),
       color: color,
-      excludeToolTipSemantics: shouldExcludeTooltipSemantics,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
         if (onPressed != null) {
@@ -172,12 +157,10 @@ class CloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final bool shouldExcludeTooltipSemantics;
     final String? semanticsLabel;
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
         // Android uses semantics label to annotate the close button.
-        shouldExcludeTooltipSemantics = true;
         semanticsLabel = MaterialLocalizations.of(context).closeButtonTooltip;
         break;
       case TargetPlatform.fuchsia:
@@ -185,7 +168,6 @@ class CloseButton extends StatelessWidget {
       case TargetPlatform.windows:
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        shouldExcludeTooltipSemantics = false;
         semanticsLabel = null;
         break;
     }
@@ -193,7 +175,6 @@ class CloseButton extends StatelessWidget {
       icon: Icon(Icons.close, semanticLabel: semanticsLabel),
       color: color,
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-      excludeToolTipSemantics: shouldExcludeTooltipSemantics,
       onPressed: () {
         if (onPressed != null) {
           onPressed!();
