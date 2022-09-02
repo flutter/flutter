@@ -424,8 +424,8 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
   /// Creates a notification that the extent of a [DraggableScrollableSheet] has
   /// changed.
   ///
-  /// All parameters are required. The [minExtent] must be >= 0.  The [maxExtent]
-  /// must be <= 1.0.  The [extent] must be between [minExtent] and [maxExtent].
+  /// All parameters are required. The [minExtent] must be >= 0. The [maxExtent]
+  /// must be <= 1.0. The [extent] must be between [minExtent] and [maxExtent].
   DraggableScrollableNotification({
     required this.extent,
     required this.minExtent,
@@ -538,8 +538,6 @@ class _DraggableSheetExtent {
   double get currentSize => _currentSize.value;
   double get currentPixels => sizeToPixels(_currentSize.value);
 
-  double get additionalMinSize => isAtMin ? 0.0 : 1.0;
-  double get additionalMaxSize => isAtMax ? 0.0 : 1.0;
   List<double> get pixelSnapSizes => snapSizes.map(sizeToPixels).toList();
 
   /// Start an activity that affects the sheet and register a cancel call back
@@ -795,7 +793,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     ScrollPosition? oldPosition,
   ) {
     return _DraggableScrollableSheetScrollPosition(
-      physics: physics,
+      physics: const AlwaysScrollableScrollPhysics().applyTo(physics),
       context: context,
       oldPosition: oldPosition,
       getExtent: () => extent,
@@ -885,17 +883,6 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       ballisticController.stop();
     }
     super.beginActivity(newActivity);
-  }
-
-  @override
-  bool applyContentDimensions(double minScrollSize, double maxScrollSize) {
-    // We need to provide some extra size if we haven't yet reached the max or
-    // min sizes. Otherwise, a list with fewer children than the size of
-    // the available space will get stuck.
-    return super.applyContentDimensions(
-      minScrollSize - extent.additionalMinSize,
-      maxScrollSize + extent.additionalMaxSize,
-    );
   }
 
   @override

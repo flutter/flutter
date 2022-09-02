@@ -12,6 +12,9 @@ import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
 
+// Examples can assume:
+// late TextSpan myTextSpan;
+
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property. The style will
@@ -214,7 +217,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// text value:
   ///
   /// ```dart
-  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// const TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
   /// ```
   final String? semanticsLabel;
 

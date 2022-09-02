@@ -357,9 +357,7 @@ const double _kDefaultFontSize = 14.0;
 /// the app can use these selectively when declaring a font. Suppose a package
 /// named `my_package` has:
 ///
-/// ```
-/// lib/fonts/Raleway-Medium.ttf
-/// ```
+///     lib/fonts/Raleway-Medium.ttf
 ///
 /// Then the app can declare a font like in the example below:
 ///
@@ -774,25 +772,25 @@ class TextStyle with Diagnosticable {
   /// A list of [FontFeature]s that affect how the font selects glyphs.
   ///
   /// Some fonts support multiple variants of how a given character can be
-  /// rendered.  For example, a font might provide both proportional and
+  /// rendered. For example, a font might provide both proportional and
   /// tabular numbers, or it might offer versions of the zero digit with
-  /// and without slashes.  [FontFeature]s can be used to select which of
+  /// and without slashes. [FontFeature]s can be used to select which of
   /// these variants will be used for rendering.
   final List<ui.FontFeature>? fontFeatures;
 
   /// A list of [FontVariation]s that affect how a variable font is rendered.
   ///
   /// Some fonts are variable fonts that can generate multiple font faces based
-  /// on the values of customizable attributes.  For example, a variable font
+  /// on the values of customizable attributes. For example, a variable font
   /// may have a weight axis that can be set to a value between 1 and 1000.
   /// [FontVariation]s can be used to select the values of these design axes.
   ///
   /// For example, to control the weight axis of the Roboto Slab variable font
   /// (https://fonts.google.com/specimen/Roboto+Slab):
   /// ```dart
-  /// TextStyle(
+  /// const TextStyle(
   ///   fontFamily: 'RobotoSlab',
-  ///   fontVariations: <FontVariation>[FontVariation('wght', 900.0)]
+  ///   fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 900.0)]
   /// )
   /// ```
   final List<ui.FontVariation>? fontVariations;

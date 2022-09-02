@@ -292,10 +292,13 @@ Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTo
   return _IsWithinDistance<Offset>(_offsetDistance, value, epsilon);
 }
 
-/// Asserts that two [String]s are equal after normalizing likely hash codes.
+/// Asserts that two [String]s or `Iterable<String>`s are equal after
+/// normalizing likely hash codes.
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
 /// and is normalized to `#00000`.
+///
+/// Only [String] or `Iterable<String>` are allowed types for `value`.
 ///
 /// See Also:
 ///
@@ -305,7 +308,8 @@ Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTo
 ///    [String] based on [Object.hashCode].
 ///  * [DiagnosticableTree.toStringDeep], a method that returns a [String]
 ///    typically containing multiple hash codes.
-Matcher equalsIgnoringHashCodes(String value) {
+Matcher equalsIgnoringHashCodes(Object value) {
+  assert(value is String || value is Iterable<String>, "Only String or Iterable<String> are allowed types for equalsIgnoringHashCodes, it doesn't accept ${value.runtimeType}");
   return _EqualsIgnoringHashCodes(value);
 }
 
@@ -496,7 +500,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// Asserts that a [SemanticsNode] contains the specified information.
 ///
 /// If either the label, hint, value, textDirection, or rect fields are not
-/// provided, then they are not part of the comparison.  All of the boolean
+/// provided, then they are not part of the comparison. All of the boolean
 /// flag and action fields must match, and default to false.
 ///
 /// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
@@ -1056,21 +1060,33 @@ class _HasOneLineDescription extends Matcher {
 }
 
 class _EqualsIgnoringHashCodes extends Matcher {
-  _EqualsIgnoringHashCodes(String v) : _value = _normalize(v);
+  _EqualsIgnoringHashCodes(Object v) : _value = _normalize(v);
 
-  final String _value;
+  final Object _value;
 
   static final Object _mismatchedValueKey = Object();
 
-  static String _normalize(String s) {
-    return s.replaceAll(RegExp(r'#[0-9a-fA-F]{5}'), '#00000');
+  static String _normalizeString(String value) {
+    return value.replaceAll(RegExp(r'#[\da-fA-F]{5}'), '#00000');
+  }
+
+  static Object _normalize(Object value, {bool expected = true}) {
+    if (value is String) {
+      return _normalizeString(value);
+    }
+    if (value is Iterable<String>) {
+      return value.map<String>((dynamic item) => _normalizeString(item.toString()));
+    }
+    throw ArgumentError('The specified ${expected ? 'expected' : 'comparison'} value for '
+        'equalsIgnoringHashCodes must be a String or an Iterable<String>, '
+        'not a ${value.runtimeType}');
   }
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object as String);
-    if (_value != description) {
-      matchState[_mismatchedValueKey] = description;
+    final Object normalized = _normalize(object as Object, expected: false);
+    if (!equals(_value).matches(normalized, matchState)) {
+      matchState[_mismatchedValueKey] = normalized;
       return false;
     }
     return true;
@@ -1078,7 +1094,10 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add('multi line description equals $_value');
+    if (_value is String) {
+      return description.add('normalized value matches $_value');
+    }
+    return description.add('normalized value matches\n').addDescriptionOf(_value);
   }
 
   @override
@@ -1089,14 +1108,14 @@ class _EqualsIgnoringHashCodes extends Matcher {
     bool verbose,
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
-      final String actualValue = matchState[_mismatchedValueKey] as String;
+      final Object actualValue = matchState[_mismatchedValueKey] as Object;
       // Leading whitespace is added so that lines in the multiline
       // description returned by addDescriptionOf are all indented equally
       // which makes the output easier to read for this case.
       return mismatchDescription
-          .add('expected normalized value\n  ')
+          .add('was expected to be normalized value\n')
           .addDescriptionOf(_value)
-          .add('\nbut got\n  ')
+          .add('\nbut got\n')
           .addDescriptionOf(actualValue);
     }
     return mismatchDescription;
@@ -1164,11 +1183,11 @@ class _HasGoodToStringDeep extends Matcher {
     for (int i = 0; i < lines.length; ++i) {
       final String line = lines[i];
       if (line.isEmpty) {
-        issues.add('Line ${i+1} is empty.');
+        issues.add('Line ${i + 1} is empty.');
       }
 
       if (line.trimRight() != line) {
-        issues.add('Line ${i+1} has trailing whitespace.');
+        issues.add('Line ${i + 1} has trailing whitespace.');
       }
     }
 
@@ -1179,11 +1198,11 @@ class _HasGoodToStringDeep extends Matcher {
     // If a toStringDeep method doesn't properly handle nested values that
     // contain line breaks it can fail to add the required prefixes to all
     // lined when toStringDeep is called specifying prefixes.
-    const String prefixLineOne    = 'PREFIX_LINE_ONE____';
+    const String prefixLineOne = 'PREFIX_LINE_ONE____';
     const String prefixOtherLines = 'PREFIX_OTHER_LINES_';
     final List<String> prefixIssues = <String>[];
-    String descriptionWithPrefixes =
-      object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines) as String; // ignore: avoid_dynamic_calls
+    // ignore: avoid_dynamic_calls
+    String descriptionWithPrefixes = object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines) as String;
     if (descriptionWithPrefixes.endsWith('\n')) {
       // Trim off trailing \n as the remaining calculations assume
       // the description does not end with a trailing \n.
@@ -1197,7 +1216,7 @@ class _HasGoodToStringDeep extends Matcher {
 
     for (int i = 1; i < linesWithPrefixes.length; ++i) {
       if (!linesWithPrefixes[i].startsWith(prefixOtherLines)) {
-        prefixIssues.add('Line ${i+1} does not contain the expected prefix.');
+        prefixIssues.add('Line ${i + 1} does not contain the expected prefix.');
       }
     }
 
@@ -1979,9 +1998,9 @@ int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
   int delta = 0;
   for (int i = 0; i < imageA.length; i+=4) {
     if (imageA[i] != imageB[i] ||
-      imageA[i+1] != imageB[i+1] ||
-      imageA[i+2] != imageB[i+2] ||
-      imageA[i+3] != imageB[i+3]) {
+        imageA[i + 1] != imageB[i + 1] ||
+        imageA[i + 2] != imageB[i + 2] ||
+        imageA[i + 3] != imageB[i + 3]) {
       delta++;
     }
   }
@@ -2011,7 +2030,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       imageFuture = captureImage(elements.single);
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
       final ByteData? bytes = await image.toByteData();

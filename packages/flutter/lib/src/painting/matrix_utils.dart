@@ -235,17 +235,17 @@ class MatrixUtils {
     // First, consider that a full point transform using the vector math
     // package involves expanding it out into a vector3 with a Z coordinate
     // of 0.0 and then performing 3 multiplies and 3 adds per coordinate:
-    // ```
-    // xt = x*m00 + y*m10 + z*m20 + m30;
-    // yt = x*m01 + y*m11 + z*m21 + m31;
-    // zt = x*m02 + y*m12 + z*m22 + m32;
-    // wt = x*m03 + y*m13 + z*m23 + m33;
-    // ```
+    //
+    //     xt = x*m00 + y*m10 + z*m20 + m30;
+    //     yt = x*m01 + y*m11 + z*m21 + m31;
+    //     zt = x*m02 + y*m12 + z*m22 + m32;
+    //     wt = x*m03 + y*m13 + z*m23 + m33;
+    //
     // Immediately we see that we can get rid of the 3rd column of multiplies
     // since we know that Z=0.0. We can also get rid of the 3rd row because
     // we ignore the resulting Z coordinate. Finally we can get rid of the
     // last row if we don't have a perspective transform since we can verify
-    // that the results are 1.0 for all points.  This gets us down to 16
+    // that the results are 1.0 for all points. This gets us down to 16
     // multiplies and 16 adds in the non-perspective case and 24 of each for
     // the perspective case. (Plus the 12 comparisons to turn them back into
     // a bounding box.)
@@ -282,7 +282,7 @@ class MatrixUtils {
     // continue to hold with respect to the non-normalized coordinates so
     // we can still save a lot of multiplications by computing the 4
     // non-normalized coordinates using relative additions before we normalize
-    // them and they lose their "pseudo-parallelogram" relationships.  We still
+    // them and they lose their "pseudo-parallelogram" relationships. We still
     // have to do the normalization divisions and min/max all 4 points to
     // get the resulting transformed bounding box, but we save a lot of
     // calculations over blindly transforming all 4 coordinates independently.
@@ -307,26 +307,26 @@ class MatrixUtils {
     // you combine both of them, the resulting "opposite corner" will
     // actually be between the limits they established by pushing the walls
     // away from each other, as below:
-    // ```
-    //         +---------(originx,originy)--------------+
-    //         |            -----^----                  |
-    //         |       -----          ----              |
-    //         |  -----                   ----          |
-    // (+hx,+hy)<                             ----      |
-    //         |  ----                            ----  |
-    //         |      ----                             >(+wx,+wy)
-    //         |          ----                   -----  |
-    //         |              ----          -----       |
-    //         |                  ---- -----            |
-    //         |                      v                 |
-    //         +---------------(+wx+hx,+wy+hy)----------+
-    // ```
+    //
+    //             +---------(originx,originy)--------------+
+    //             |            -----^----                  |
+    //             |       -----          ----              |
+    //             |  -----                   ----          |
+    //     (+hx,+hy)<                             ----      |
+    //             |  ----                            ----  |
+    //             |      ----                             >(+wx,+wy)
+    //             |          ----                   -----  |
+    //             |              ----          -----       |
+    //             |                  ---- -----            |
+    //             |                      v                 |
+    //             +---------------(+wx+hx,+wy+hy)----------+
+    //
     // In this diagram, consider that:
-    // ```
-    // wx would be a positive number
-    // hx would be a negative number
-    // wy and hy would both be positive numbers
-    // ```
+    //
+    //  * wx would be a positive number
+    //  * hx would be a negative number
+    //  * wy and hy would both be positive numbers
+    //
     // As a result, wx pushes out the right wall, hx pushes out the left wall,
     // and both wy and hy push down the bottom wall of the bounding box. The
     // wx,hx pair (of opposite signs) worked on opposite walls and the final
@@ -344,8 +344,8 @@ class MatrixUtils {
     // for a total of 8 multiplies, 8 adds, and 4 comparisons.
     //
     // An astute observer will note that we do need to do 2 subtractions at
-    // the top of the method to compute the width and height.  Add those to
-    // all of the relative solutions listed above.  The test for perspective
+    // the top of the method to compute the width and height. Add those to
+    // all of the relative solutions listed above. The test for perspective
     // also adds 3 compares to the affine case and up to 3 compares to the
     // perspective case (depending on which test fails, the rest are omitted).
     //

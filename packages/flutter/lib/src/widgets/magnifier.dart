@@ -15,6 +15,122 @@ import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 
+/// {@template flutter.widgets.magnifier.MagnifierBuilder}
+/// Signature for a builder that builds a [Widget] with a [MagnifierController].
+///
+/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
+/// required, although if a Widget intends to have entry or exit animations, it should take
+/// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
+/// can wait before removing it from the overlay.
+/// {@endtemplate}
+///
+/// See also:
+///
+/// - [MagnifierOverlayInfoBearer], the data class that updates the
+///   magnifier.
+typedef MagnifierBuilder = Widget? Function(
+    BuildContext context,
+    MagnifierController controller,
+    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
+);
+
+/// A data class that contains the geometry information of text layouts
+/// and selection gestures, used to position magnifiers.
+@immutable
+class MagnifierOverlayInfoBearer {
+  /// Constructs a [MagnifierOverlayInfoBearer] from provided geometry values.
+  const MagnifierOverlayInfoBearer({
+    required this.globalGesturePosition,
+    required this.caretRect,
+    required this.fieldBounds,
+    required this.currentLineBoundaries,
+  });
+
+  /// Const [MagnifierOverlayInfoBearer] with all values set to 0.
+  static const MagnifierOverlayInfoBearer empty = MagnifierOverlayInfoBearer(
+    globalGesturePosition: Offset.zero,
+    caretRect: Rect.zero,
+    currentLineBoundaries: Rect.zero,
+    fieldBounds: Rect.zero,
+  );
+
+  /// The offset of the gesture position that the magnifier should be shown at.
+  final Offset globalGesturePosition;
+
+  /// The rect of the current line the magnifier should be shown at,
+  /// without taking into account any padding of the field; only the position
+  /// of the first and last character.
+  final Rect currentLineBoundaries;
+
+  /// The rect of the handle that the magnifier should follow.
+  final Rect caretRect;
+
+  /// The bounds of the entire text field that the magnifier is bound to.
+  final Rect fieldBounds;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is MagnifierOverlayInfoBearer
+        && other.globalGesturePosition == globalGesturePosition
+        && other.caretRect == caretRect
+        && other.currentLineBoundaries == currentLineBoundaries
+        && other.fieldBounds == fieldBounds;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    globalGesturePosition,
+    caretRect,
+    fieldBounds,
+    currentLineBoundaries,
+  );
+}
+
+/// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+/// A configuration object for a magnifier.
+/// {@endtemplate}
+///
+/// {@macro flutter.widgets.magnifier.intro}
+///
+/// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+/// In general, most features of the magnifier can be configured through
+/// [MagnifierBuilder]. [TextMagnifierConfiguration] is used to configure
+/// the magnifier's behavior through the [SelectionOverlay].
+/// {@endtemplate}
+class TextMagnifierConfiguration {
+  /// Constructs a [TextMagnifierConfiguration] from parts.
+  ///
+  /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
+  /// that never builds a magnifier.
+  const TextMagnifierConfiguration({
+    MagnifierBuilder? magnifierBuilder,
+    this.shouldDisplayHandlesInMagnifier = true
+  }) : _magnifierBuilder = magnifierBuilder;
+
+  /// The passed in [MagnifierBuilder].
+  ///
+  /// This is nullable because [disabled] needs to be static const,
+  /// so that it can be used as a default parameter. If left null,
+  /// the [magnifierBuilder] getter will be a function that always returns
+  /// null.
+  final MagnifierBuilder? _magnifierBuilder;
+
+  /// {@macro flutter.widgets.magnifier.MagnifierBuilder}
+  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
+
+  /// Determines whether a magnifier should show the text editing handles or not.
+  final bool shouldDisplayHandlesInMagnifier;
+
+  /// A constant for a [TextMagnifierConfiguration] that is disabled.
+  ///
+  /// In particular, this [TextMagnifierConfiguration] is considered disabled
+  /// because it never builds anything, regardless of platform.
+  static const TextMagnifierConfiguration disabled = TextMagnifierConfiguration();
+}
+
 /// [MagnifierController]'s main benefit over holding a raw [OverlayEntry] is that
 /// [MagnifierController] will handle logic around waiting for a magnifier to animate in or out.
 ///
@@ -52,7 +168,7 @@ class MagnifierController {
   ///   final MagnifierController myMagnifierController = MagnifierController();
   ///
   ///   // Placed below the magnifier, so it will show.
-  ///   Overlay.of(context)!.insert(OverlayEntry(
+  ///   Overlay.of(context).insert(OverlayEntry(
   ///       builder: (BuildContext context) => const Text('I WILL display in the magnifier')));
   ///
   ///   // Will display in the magnifier, since this entry was passed to show.
@@ -60,7 +176,7 @@ class MagnifierController {
   ///       builder: (BuildContext context) =>
   ///           const Text('I WILL display in the magnifier'));
   ///
-  ///   Overlay.of(context)!
+  ///   Overlay.of(context)
   ///       .insert(displayInMagnifier);
   ///   myMagnifierController.show(
   ///       context: context,
@@ -70,10 +186,10 @@ class MagnifierController {
   ///           ));
   ///
   ///   // By default, new entries will be placed over the top entry.
-  ///   Overlay.of(context)!.insert(OverlayEntry(
+  ///   Overlay.of(context).insert(OverlayEntry(
   ///       builder: (BuildContext context) => const Text('I WILL NOT display in the magnifier')));
   ///
-  ///   Overlay.of(context)!.insert(
+  ///   Overlay.of(context).insert(
   ///       below:
   ///           myMagnifierController.overlayEntry, // Explicitly placed below the magnifier.
   ///       OverlayEntry(
@@ -130,7 +246,7 @@ class MagnifierController {
         overlayEntry!.remove();
     }
 
-    final OverlayState? overlayState = Overlay.of(
+    final OverlayState overlayState = Overlay.of(
       context,
       rootOverlay: true,
       debugRequiredFor: debugRequiredFor,
@@ -144,7 +260,7 @@ class MagnifierController {
    _overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
-    overlayState!.insert(overlayEntry!, below: below);
+    overlayState.insert(overlayEntry!, below: below);
 
     if (animationController != null) {
       await animationController?.forward();
@@ -273,7 +389,7 @@ class MagnifierDecoration extends ShapeDecoration {
 /// gesture, on an image or text.
 /// {@endtemplate}
 ///
-/// A magnifier can be convienently managed by [MagnifierController], which handles
+/// A magnifier can be conveniently managed by [MagnifierController], which handles
 /// showing and hiding the magnifier, with an optional entry / exit animation.
 ///
 /// See:
@@ -286,7 +402,7 @@ class RawMagnifier extends StatelessWidget {
   /// the focal point is directly under the magnifier, and there is no magnification:
   /// This means that a default magnifier will be entirely invisible to the naked eye,
   /// since it is painting exactly what is under it, exactly where it was painted
-  /// orignally.
+  /// originally.
   /// {@endtemplate}
   const RawMagnifier({
       super.key,
@@ -298,7 +414,7 @@ class RawMagnifier extends StatelessWidget {
       }) : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
-  /// An optional widget to posiiton inside the len of the [RawMagnifier].
+  /// An optional widget to position inside the len of the [RawMagnifier].
   ///
   /// This is positioned over the [RawMagnifier] - it may be useful for tinting the
   /// [RawMagnifier], or drawing a crosshair like UI.
@@ -429,29 +545,24 @@ class _DonutClip extends CustomClipper<Path> {
 }
 
 class _Magnifier extends SingleChildRenderObjectWidget {
-  /// Construct a [_Magnifier].
   const _Magnifier({
-      super.child,
-      required this.shape,
-      this.magnificationScale = 1,
-      this.focalPointOffset = Offset.zero,
+    super.child,
+    required this.shape,
+    this.magnificationScale = 1,
+    this.focalPointOffset = Offset.zero,
   });
 
-  /// [focalPointOffset] is the area the center of the
-  /// [_Magnifier] points to, relative to the center of the magnifier.
-  ///
-  /// {@macro flutter.widgets.magnifier.offset}
+  // The Offset that the center of the _Magnifier points to, relative
+  // to the center of the magnifier.
   final Offset focalPointOffset;
 
-  /// The scale of the magnification.
-  ///
-  /// A [magnificationScale] of 1 means that the content in the magnifier
-  /// is true to it's real size. Anything greater than one will appear bigger
-  /// in the magnifier, and anything less than one will appear smaller in
-  /// the magnifier.
+  // The enlarge multiplier of the magnification.
+  //
+  // If equal to 1.0, the content in the magnifier is true to its real size.
+  // If greater than 1.0, the content appears bigger in the magnifier.
   final double magnificationScale;
 
-  /// The shape of the magnifier is dictated by [shape.getOuterPath].
+  // Shape of the magnifier.
   final ShapeBorder shape;
 
   @override

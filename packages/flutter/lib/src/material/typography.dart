@@ -8,6 +8,9 @@ import 'package:flutter/painting.dart';
 import 'colors.dart';
 import 'text_theme.dart';
 
+// Examples can assume:
+// late TargetPlatform platform;
+
 /// A characterization of the of a [TextTheme]'s glyphs that is used to define
 /// its localized [TextStyle] geometry for [ThemeData.textTheme].
 ///
@@ -46,7 +49,7 @@ enum ScriptCategory {
 /// [MaterialLocalizations.scriptCategory] and is created
 /// by merging a color text theme - [black] for
 /// [Brightness.light] themes and [white] for [Brightness.dark]
-/// themes -  and a geometry text theme, one of [englishLike], [dense],
+/// themes - and a geometry text theme, one of [englishLike], [dense],
 /// or [tall], depending on the locale.
 ///
 /// To lookup the localized text theme use
