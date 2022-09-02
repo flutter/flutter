@@ -97,8 +97,8 @@ TEST_F(LayerTreeTest, Multiple) {
   const SkPath child_path2 = SkPath().addRect(8.0f, 2.0f, 16.5f, 14.5f);
   const SkPaint child_paint1(SkColors::kGray);
   const SkPaint child_paint2(SkColors::kGreen);
-  auto mock_layer1 = std::make_shared<MockLayer>(
-      child_path1, child_paint1, true /* fake_has_platform_view */);
+  auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
+  mock_layer1->set_fake_has_platform_view(true);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer = std::make_shared<ContainerLayer>();
   layer->Add(mock_layer1);
@@ -163,8 +163,7 @@ TEST_F(LayerTreeTest, NeedsSystemComposite) {
   const SkPath child_path2 = SkPath().addRect(8.0f, 2.0f, 16.5f, 14.5f);
   const SkPaint child_paint1(SkColors::kGray);
   const SkPaint child_paint2(SkColors::kGreen);
-  auto mock_layer1 = std::make_shared<MockLayer>(
-      child_path1, child_paint1, false /* fake_has_platform_view */);
+  auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer = std::make_shared<ContainerLayer>();
   layer->Add(mock_layer1);

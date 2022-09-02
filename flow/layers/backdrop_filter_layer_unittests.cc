@@ -269,8 +269,8 @@ TEST_F(BackdropFilterLayerTest, Readback) {
   EXPECT_TRUE(preroll_context()->surface_needs_readback);
 
   // BDF with no filter blocks child with readback
-  auto mock_layer =
-      std::make_shared<MockLayer>(SkPath(), SkPaint(), false, true);
+  auto mock_layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
+  mock_layer->set_fake_reads_surface(true);
   layer2->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
   layer2->Preroll(preroll_context(), initial_transform);
