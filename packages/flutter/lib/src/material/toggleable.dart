@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
-import 'feedback.dart';
 import 'material_state.dart';
 
 // Duration of the animation that moves the toggle from one state to another.
