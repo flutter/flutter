@@ -1059,7 +1059,7 @@ class TextStyle with Diagnosticable {
       decorationThickness: other.decorationThickness,
       debugLabel: mergedDebugLabel,
       fontFamily: other._fontFamily,
-      fontFamilyFallback: other.fontFamilyFallback,
+      fontFamilyFallback: other._fontFamilyFallback,
       package: other._package,
       overflow: other.overflow,
     );
@@ -1116,7 +1116,7 @@ class TextStyle with Diagnosticable {
         decorationThickness: t < 0.5 ? null : b.decorationThickness,
         debugLabel: lerpDebugLabel,
         fontFamily: t < 0.5 ? null : b._fontFamily,
-        fontFamilyFallback: t < 0.5 ? null : b.fontFamilyFallback,
+        fontFamilyFallback: t < 0.5 ? null : b._fontFamilyFallback,
         package: t < 0.5 ? null : b._package,
         overflow: t < 0.5 ? null : b.overflow,
       );
@@ -1147,7 +1147,7 @@ class TextStyle with Diagnosticable {
         decorationThickness: t < 0.5 ? a.decorationThickness : null,
         debugLabel: lerpDebugLabel,
         fontFamily: t < 0.5 ? a._fontFamily : null,
-        fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : null,
+        fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : null,
         package: t < 0.5 ? a._package : null,
         overflow: t < 0.5 ? a.overflow : null,
       );
@@ -1185,7 +1185,7 @@ class TextStyle with Diagnosticable {
       decorationThickness: ui.lerpDouble(a.decorationThickness ?? b.decorationThickness, b.decorationThickness ?? a.decorationThickness, t),
       debugLabel: lerpDebugLabel,
       fontFamily: t < 0.5 ? a._fontFamily : b._fontFamily,
-      fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : b.fontFamilyFallback,
+      fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : b._fontFamilyFallback,
       package: t < 0.5 ? a._package : b._package,
       overflow: t < 0.5 ? a.overflow : b.overflow,
     );
