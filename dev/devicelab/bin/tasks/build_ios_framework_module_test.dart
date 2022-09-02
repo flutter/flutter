@@ -822,10 +822,10 @@ Future<void> _checkDylib(String pathToLibrary) async {
   }
 }
 
-Future<void> _checkDsym(String pathToLibrary) async {
-  final String binaryFileType = await fileType(pathToLibrary);
+Future<void> _checkDsym(String pathToSymbolFile) async {
+  final String binaryFileType = await fileType(pathToSymbolFile);
   if (!binaryFileType.contains('dSYM companion file')) {
-    throw TaskResult.failure('$pathToLibrary is not a dSYM, found: $binaryFileType');
+    throw TaskResult.failure('$pathToSymbolFile is not a dSYM, found: $binaryFileType');
   }
 }
 
