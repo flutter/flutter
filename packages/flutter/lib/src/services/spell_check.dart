@@ -211,9 +211,8 @@ class DefaultSpellCheckService implements SpellCheckService {
       if (textHasNotChanged && spansHaveChanged) {
         suggestionSpans = mergeResults(lastSavedResults!.suggestionSpans, suggestionSpans);
       }
-
-      lastSavedResults = SpellCheckResults(text, suggestionSpans);
     }
+    lastSavedResults = SpellCheckResults(text, suggestionSpans);
 
     return suggestionSpans;
   }
