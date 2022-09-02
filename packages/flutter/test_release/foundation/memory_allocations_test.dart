@@ -14,6 +14,10 @@ void main() {
     assert(!ma.hasListeners);
   });
 
+  test('kFlutterMemoryAllocationsEnabled is false in release mode.', () {
+    expect(kFlutterMemoryAllocationsEnabled, isFalse);
+  });
+
   test(
     'Publishers in Flutter respect kFlutterMemoryAllocationsEnabled.',
     () async {
