@@ -131,4 +131,8 @@ void main() {
   test('last removeListener unsubscribes from Flutter SDK events', () {
     // TODO(polina-c): add test
   });
+
+  test('publishers in Flutter respect kFlutterMemoryAllocationsEnabled', () {
+    // TODO(polina-c): add test
+  });
 }
