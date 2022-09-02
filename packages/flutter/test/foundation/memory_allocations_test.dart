@@ -142,6 +142,7 @@ void main() {
   });
 }
 
+/// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
   // TODO(polina-c): uncomment count increase for SDK events

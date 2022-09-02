@@ -34,6 +34,7 @@ void main() {
   );
 }
 
+/// Create and dispose Flutter objects to fire memory allocation events.
 Future<void> _activateFlutterObjects() async {
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {});
