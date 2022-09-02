@@ -8,8 +8,7 @@ import 'colors.dart';
 import 'theme.dart';
 
 // Content padding determined via SwiftUI's `Form` view in the iOS 14.2 SDK.
-const EdgeInsetsGeometry _kDefaultPadding =
-    EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 6.0, 6.0);
+const EdgeInsetsGeometry _kDefaultPadding = EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 6.0, 6.0);
 
 /// An iOS-style form row.
 ///
@@ -112,9 +111,8 @@ class CupertinoFormRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
-    final TextStyle textStyle = theme.textTheme.textStyle.copyWith(
-      color: CupertinoDynamicColor.maybeResolve(theme.textTheme.textStyle.color, context)
-    );
+    final TextStyle textStyle = theme.textTheme.textStyle
+        .copyWith(color: CupertinoDynamicColor.maybeResolve(theme.textTheme.textStyle.color, context));
 
     return Padding(
       padding: padding ?? _kDefaultPadding,

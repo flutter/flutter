@@ -180,13 +180,13 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  List<E> toList({ bool growable = true }) {
+  List<E> toList({bool growable = true}) {
     _precacheEntireList();
     return List<E>.of(_results, growable: growable);
   }
 
   void _precacheEntireList() {
-    while (_fillNext()) { }
+    while (_fillNext()) {}
   }
 
   bool _fillNext() {

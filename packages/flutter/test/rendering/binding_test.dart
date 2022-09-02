@@ -28,11 +28,10 @@ void main() {
     debugDumpSemanticsTree();
     expect(log, hasLength(1));
     expect(
-      log.single,
-      'Semantics not generated.\n'
+        log.single,
+        'Semantics not generated.\n'
         'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
         'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
-    );
+        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.');
   });
 }

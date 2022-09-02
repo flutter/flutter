@@ -13,8 +13,8 @@ class MockOnEndFunction {
   }
 }
 
-const Duration animationDuration = Duration(milliseconds:1000);
-const Duration additionalDelay = Duration(milliseconds:1);
+const Duration animationDuration = Duration(milliseconds: 1000);
+const Duration additionalDelay = Duration(milliseconds: 1);
 
 void main() {
   late MockOnEndFunction mockOnEndFunction;
@@ -181,7 +181,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-   testWidgets('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
+  testWidgets('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
         callback: mockOnEndFunction.handler,
@@ -211,15 +211,16 @@ void main() {
       ),
     ));
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-      find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state =
+        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SlideTransition slideWidget = tester.widget<SlideTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(SlideTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(SlideTransition),
+          )
+          .first,
     );
 
     expect(state.builds, equals(1));
@@ -231,13 +232,13 @@ void main() {
     expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(slideWidget.position.value, equals(const Offset(0.5,0.5)));
+    expect(slideWidget.position.value, equals(const Offset(0.5, 0.5)));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(slideWidget.position.value, equals(const Offset(0.75,0.75)));
+    expect(slideWidget.position.value, equals(const Offset(0.75, 0.75)));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(slideWidget.position.value, equals(const Offset(1,1)));
+    expect(slideWidget.position.value, equals(const Offset(1, 1)));
     expect(state.builds, equals(2));
   });
 
@@ -271,15 +272,16 @@ void main() {
       ),
     ));
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-      find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state =
+        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(ScaleTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(ScaleTransition),
+          )
+          .first,
     );
 
     expect(state.builds, equals(1));
@@ -331,15 +333,16 @@ void main() {
       ),
     ));
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-        find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state =
+        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final RotationTransition rotationWidget = tester.widget<RotationTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(RotationTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(RotationTransition),
+          )
+          .first,
     );
 
     expect(state.builds, equals(1));
@@ -391,15 +394,16 @@ void main() {
       ),
     ));
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-        find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state =
+        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(FadeTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
     );
 
     expect(state.builds, equals(1));
@@ -472,15 +476,16 @@ void main() {
       ),
     ));
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-        find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state =
+        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(SliverFadeTransition),
-      ).first,
+      find
+          .ancestor(
+            of: find.byType(Placeholder),
+            matching: find.byType(SliverFadeTransition),
+          )
+          .first,
     );
 
     expect(state.builds, equals(1));
@@ -594,8 +599,7 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgets('Ensure CurvedAnimations are disposed on widget change',
-      (WidgetTester tester) async {
+  testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
     final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
         GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
     final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
@@ -617,8 +621,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final CurvedAnimation firstCurvedAnimation =
-        firstAnimation as CurvedAnimation;
+    final CurvedAnimation firstCurvedAnimation = firstAnimation as CurvedAnimation;
 
     expect(firstCurvedAnimation.isDisposed, isFalse);
 
@@ -650,8 +653,7 @@ void main() {
   });
 }
 
-Future<void> tapTest2and3(WidgetTester tester, Finder widgetFinder,
-    MockOnEndFunction mockOnEndFunction) async {
+Future<void> tapTest2and3(WidgetTester tester, Finder widgetFinder, MockOnEndFunction mockOnEndFunction) async {
   await tester.tap(widgetFinder);
 
   await tester.pump();
@@ -690,7 +692,7 @@ class TestAnimatedWidget extends StatefulWidget {
   final State<StatefulWidget> state;
 
   RebuildCountingState<StatefulWidget>? get rebuildState =>
-    state is RebuildCountingState<StatefulWidget> ? state as RebuildCountingState<StatefulWidget> : null;
+      state is RebuildCountingState<StatefulWidget> ? state as RebuildCountingState<StatefulWidget> : null;
 
   @override
   State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
@@ -742,8 +744,7 @@ class _TestAnimatedPaddingWidgetState extends _TestAnimatedWidgetState {
     return AnimatedPadding(
       duration: duration,
       onEnd: widget.callback,
-      padding:
-      toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
+      padding: toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
       child: child,
     );
   }
@@ -791,7 +792,7 @@ class _TestAnimatedSlideWidgetState extends _TestAnimatedWidgetState {
     return AnimatedSlide(
       duration: duration,
       onEnd: widget.callback,
-      offset: toggle ? const Offset(1,1) : Offset.zero,
+      offset: toggle ? const Offset(1, 1) : Offset.zero,
       child: child,
     );
   }
@@ -888,9 +889,7 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
     return AnimatedDefaultTextStyle(
       duration: duration,
       onEnd: widget.callback,
-      style: toggle
-        ? const TextStyle(fontStyle: FontStyle.italic)
-        : const TextStyle(fontStyle: FontStyle.normal),
+      style: toggle ? const TextStyle(fontStyle: FontStyle.italic) : const TextStyle(fontStyle: FontStyle.normal),
       child: child,
     );
   }

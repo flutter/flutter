@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_test_utils.dart';
 
 void main() {
-
   late ui.Image testImage;
 
   setUpAll(() async {
@@ -56,7 +55,8 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling',
+      (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -92,7 +92,8 @@ void main() {
     expect(findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly',
+      (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(Directionality(
@@ -216,7 +217,8 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed',
+      (WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(Directionality(
@@ -285,7 +287,8 @@ void main() {
     expect(imageCache.currentSize, 0);
   });
 
-  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice',
+      (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(Directionality(
@@ -322,7 +325,10 @@ void main() {
     // If we miss the early return, we will fail.
     testImageProvider.complete();
 
-    imageCache.putIfAbsent(testImageProvider, () => testImageProvider.loadBuffer(testImageProvider, PaintingBinding.instance.instantiateImageCodecFromBuffer));
+    imageCache.putIfAbsent(
+        testImageProvider,
+        () =>
+            testImageProvider.loadBuffer(testImageProvider, PaintingBinding.instance.instantiateImageCodecFromBuffer));
     // We've stopped scrolling fast.
     physics.recommendDeferredLoadingValue = false;
     await tester.idle();
@@ -377,7 +383,8 @@ void main() {
 
     // Complete the original image while we're still scrolling fast.
     testImageProvider.complete();
-    stream.setCompleter(testImageProvider.loadBuffer(testImageProvider, PaintingBinding.instance.instantiateImageCodecFromBuffer));
+    stream.setCompleter(
+        testImageProvider.loadBuffer(testImageProvider, PaintingBinding.instance.instantiateImageCodecFromBuffer));
 
     // Verify that this hasn't changed the cache state yet
     expect(imageCache.containsKey(testImageProvider), false);
@@ -411,7 +418,7 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 class RecordingPhysics extends ScrollPhysics {
-  RecordingPhysics({ super.parent });
+  RecordingPhysics({super.parent});
 
   final List<double> velocities = <double>[];
 
@@ -431,7 +438,7 @@ class RecordingPhysics extends ScrollPhysics {
 // times without worrying about actual scrolling mechanics.
 // ignore: must_be_immutable
 class ControllablePhysics extends ScrollPhysics {
-  ControllablePhysics({ super.parent });
+  ControllablePhysics({super.parent});
 
   bool recommendDeferredLoadingValue = false;
 

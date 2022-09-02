@@ -17,8 +17,7 @@ void runTests() {
     debugRestoreHttpRequestFactory();
   });
 
-  testWidgets('loads an image from the network with headers',
-      (WidgetTester tester) async {
+  testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
       ..onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
@@ -45,8 +44,7 @@ void runTests() {
     assert(mapEquals(testHttpRequest.responseHeaders, headers), true);
   });
 
-  testWidgets('loads an image from the network with unsuccessful HTTP code',
-      (WidgetTester tester) async {
+  testWidgets('loads an image from the network with unsuccessful HTTP code', (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
       ..onError = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
@@ -71,8 +69,7 @@ void runTests() {
     expect((tester.takeException() as html.ProgressEvent).type, 'test error');
   });
 
-  testWidgets('loads an image from the network with empty response',
-      (WidgetTester tester) async {
+  testWidgets('loads an image from the network with empty response', (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
       ..onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
@@ -117,8 +114,7 @@ class TestHttpRequest implements html.HttpRequest {
   }
 
   @override
-  void addEventListener(String type, html.EventListener? listener,
-      [bool? useCapture]) {
+  void addEventListener(String type, html.EventListener? listener, [bool? useCapture]) {
     throw UnimplementedError();
   }
 
@@ -144,12 +140,10 @@ class TestHttpRequest implements html.HttpRequest {
   Stream<html.ProgressEvent> get onAbort => throw UnimplementedError();
 
   @override
-  Stream<html.ProgressEvent> onError =
-      Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[]);
+  Stream<html.ProgressEvent> onError = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[]);
 
   @override
-  Stream<html.ProgressEvent> onLoad =
-      Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[]);
+  Stream<html.ProgressEvent> onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[]);
 
   @override
   Stream<html.ProgressEvent> get onLoadEnd => throw UnimplementedError();
@@ -167,8 +161,7 @@ class TestHttpRequest implements html.HttpRequest {
   Stream<html.ProgressEvent> get onTimeout => throw UnimplementedError();
 
   @override
-  void open(String method, String url,
-      {bool? async, String? user, String? password}) {}
+  void open(String method, String url, {bool? async, String? user, String? password}) {}
 
   @override
   void overrideMimeType(String mime) {
@@ -179,8 +172,7 @@ class TestHttpRequest implements html.HttpRequest {
   int get readyState => throw UnimplementedError();
 
   @override
-  void removeEventListener(String type, html.EventListener? listener,
-      [bool? useCapture]) {
+  void removeEventListener(String type, html.EventListener? listener, [bool? useCapture]) {
     throw UnimplementedError();
   }
 

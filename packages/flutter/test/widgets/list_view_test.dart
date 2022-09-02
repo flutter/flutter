@@ -21,7 +21,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { super.key });
+  const Alive(this.alive, this.index, {super.key});
   final bool alive;
   final int index;
 
@@ -29,7 +29,7 @@ class Alive extends StatefulWidget {
   AliveState createState() => AliveState();
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => '$index $alive';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) => '$index $alive';
 }
 
 class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
@@ -44,6 +44,7 @@ class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
 }
 
 typedef WhetherToKeepAlive = bool Function(int);
+
 class _StatefulListView extends StatefulWidget {
   const _StatefulListView(this.aliveCallback);
 
@@ -82,27 +83,25 @@ void main() {
     int itemCount = 7;
     late StateSetter stateSetter;
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            stateSetter = setState;
-            return ListView.builder(
-              itemCount: itemCount,
-              itemBuilder: (BuildContext _, int index) => Container(
-                key: Key('$index'),
-                height: 2000.0,
-              ),
-              findChildIndexCallback: (Key key) {
-                finderCalled = true;
-                return null;
-              },
-            );
-          },
-        ),
-      )
-    );
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return ListView.builder(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext _, int index) => Container(
+              key: Key('$index'),
+              height: 2000.0,
+            ),
+            findChildIndexCallback: (Key key) {
+              finderCalled = true;
+              return null;
+            },
+          );
+        },
+      ),
+    ));
     expect(finderCalled, false);
 
     // Trigger update.
@@ -118,28 +117,26 @@ void main() {
     int itemCount = 7;
     late StateSetter stateSetter;
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            stateSetter = setState;
-            return ListView.separated(
-              itemCount: itemCount,
-              itemBuilder: (BuildContext _, int index) => Container(
-                key: Key('$index'),
-                height: 2000.0,
-              ),
-              findChildIndexCallback: (Key key) {
-                finderCalled = true;
-                return null;
-              },
-              separatorBuilder: (BuildContext _, int __) => const Divider(),
-            );
-          },
-        ),
-      )
-    );
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return ListView.separated(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext _, int index) => Container(
+              key: Key('$index'),
+              height: 2000.0,
+            ),
+            findChildIndexCallback: (Key key) {
+              finderCalled = true;
+              return null;
+            },
+            separatorBuilder: (BuildContext _, int __) => const Divider(),
+          );
+        },
+      ),
+    ));
     expect(finderCalled, false);
 
     // Trigger update.
@@ -250,7 +247,7 @@ void main() {
   });
 
   testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
-    Future<void> checkAndScroll([ String zero = '0:false' ]) async {
+    Future<void> checkAndScroll([String zero = '0:false']) async {
       expect(find.text(zero), findsOneWidget);
       expect(find.text('1:false'), findsOneWidget);
       expect(find.text('2:false'), findsOneWidget);
@@ -647,15 +644,17 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSemantics(find.byType(Scrollable)), matchesSemantics(
-      children: <Matcher>[
+    expect(
+        tester.getSemantics(find.byType(Scrollable)),
         matchesSemantics(
           children: <Matcher>[
-            matchesSemantics(hasImplicitScrolling: true),
+            matchesSemantics(
+              children: <Matcher>[
+                matchesSemantics(hasImplicitScrolling: true),
+              ],
+            ),
           ],
-        ),
-      ],
-    ));
+        ));
     handle.dispose();
   });
 
@@ -663,7 +662,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
 
-    Widget buildListView({ required Axis scrollDirection }) {
+    Widget buildListView({required Axis scrollDirection}) {
       assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,

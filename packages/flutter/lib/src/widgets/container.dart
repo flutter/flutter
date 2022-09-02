@@ -62,8 +62,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     required this.decoration,
     this.position = DecorationPosition.background,
     super.child,
-  }) : assert(decoration != null),
-       assert(position != null);
+  })  : assert(decoration != null),
+        assert(position != null);
 
   /// What decoration to paint.
   ///
@@ -264,21 +264,21 @@ class Container extends StatelessWidget {
     this.transformAlignment,
     this.child,
     this.clipBehavior = Clip.none,
-  }) : assert(margin == null || margin.isNonNegative),
-       assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(clipBehavior != null),
-       assert(decoration != null || clipBehavior == Clip.none),
-       assert(color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(color: color)".',
-       ),
-       constraints =
-        (width != null || height != null)
-          ? constraints?.tighten(width: width, height: height)
-            ?? BoxConstraints.tightFor(width: width, height: height)
-          : constraints;
+  })  : assert(margin == null || margin.isNonNegative),
+        assert(padding == null || padding.isNonNegative),
+        assert(decoration == null || decoration.debugAssertIsValid()),
+        assert(constraints == null || constraints.debugAssertIsValid()),
+        assert(clipBehavior != null),
+        assert(decoration != null || clipBehavior == Clip.none),
+        assert(
+          color == null || decoration == null,
+          'Cannot provide both a color and a decoration\n'
+          'To provide both, use "decoration: BoxDecoration(color: color)".',
+        ),
+        constraints = (width != null || height != null)
+            ? constraints?.tighten(width: width, height: height) ??
+                BoxConstraints.tightFor(width: width, height: height)
+            : constraints;
 
   /// The [child] contained by the container.
   ///
@@ -464,8 +464,8 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
     required this.decoration,
-  }) : assert(decoration != null),
-       textDirection = textDirection ?? TextDirection.ltr;
+  })  : assert(decoration != null),
+        textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;
   final Decoration decoration;
@@ -477,7 +477,6 @@ class _DecorationClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(_DecorationClipper oldClipper) {
-    return oldClipper.decoration != decoration
-        || oldClipper.textDirection != textDirection;
+    return oldClipper.decoration != decoration || oldClipper.textDirection != textDirection;
   }
 }

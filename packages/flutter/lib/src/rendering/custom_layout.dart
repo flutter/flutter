@@ -118,7 +118,7 @@ abstract class MultiChildLayoutDelegate {
   /// Creates a layout delegate.
   ///
   /// The layout will update whenever [relayout] notifies its listeners.
-  MultiChildLayoutDelegate({ Listenable? relayout }) : _relayout = relayout;
+  MultiChildLayoutDelegate({Listenable? relayout}) : _relayout = relayout;
 
   final Listenable? _relayout;
 
@@ -157,7 +157,8 @@ abstract class MultiChildLayoutDelegate {
         assert(constraints.debugAssertIsValid(isAppliedConstraint: true));
       } on AssertionError catch (exception) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId".'),
+          ErrorSummary(
+              'The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId".'),
           DiagnosticsProperty<AssertionError>('Exception', exception, showName: false),
           ErrorDescription(
             'The minimum width and height must be greater than or equal to zero.\n'
@@ -241,12 +242,11 @@ abstract class MultiChildLayoutDelegate {
       assert(() {
         if (_debugChildrenNeedingLayout!.isNotEmpty) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Each child must be laid out exactly once.'),
+            ErrorSummary('Each child must be laid out exactly once.'),
             DiagnosticsBlock(
-              name:
-                'The $this custom multichild layout delegate forgot '
-                'to lay out the following '
-                '${_debugChildrenNeedingLayout!.length > 1 ? 'children' : 'child'}',
+              name: 'The $this custom multichild layout delegate forgot '
+                  'to lay out the following '
+                  '${_debugChildrenNeedingLayout!.length > 1 ? 'children' : 'child'}',
               properties: _debugChildrenNeedingLayout!.map<DiagnosticsNode>(_debugDescribeChild).toList(),
             ),
           ]);
@@ -303,16 +303,17 @@ abstract class MultiChildLayoutDelegate {
 /// size of the parent, but the size of the parent cannot depend on the sizes of
 /// the children.
 class RenderCustomMultiChildLayoutBox extends RenderBox
-  with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
-       RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
+    with
+        ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   /// Creates a render object that customizes the layout of multiple children.
   ///
   /// The [delegate] argument must not be null.
   RenderCustomMultiChildLayoutBox({
     List<RenderBox>? children,
     required MultiChildLayoutDelegate delegate,
-  }) : assert(delegate != null),
-       _delegate = delegate {
+  })  : assert(delegate != null),
+        _delegate = delegate {
     addAll(children);
   }
 
@@ -416,7 +417,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 }

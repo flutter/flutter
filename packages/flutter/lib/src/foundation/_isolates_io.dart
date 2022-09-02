@@ -13,7 +13,7 @@ import 'isolates.dart' as isolates;
 export 'isolates.dart' show ComputeCallback;
 
 /// The dart:io implementation of [isolate.compute].
-Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String? debugLabel }) async {
+Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, {String? debugLabel}) async {
   debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
 
   final Flow flow = Flow.begin();
@@ -53,7 +53,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   }
 
   final dynamic response = await completer.future;
-  if(response == null) {
+  if (response == null) {
     throw RemoteError('Isolate exited without result or error.', '');
   }
 

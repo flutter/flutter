@@ -288,8 +288,7 @@ void main() {
     final TestNotifier source2 = TestNotifier();
     final List<String> log = <String>[];
 
-    final Listenable merged =
-        Listenable.merge(<Listenable?>[null, source1, null, source2, null]);
+    final Listenable merged = Listenable.merge(<Listenable?>[null, source1, null, source2, null]);
     void listener() {
       log.add('listener');
     }
@@ -351,7 +350,7 @@ void main() {
 
   test('Can check hasListener on a disposed ChangeNotifier', () {
     final HasListenersTester<int> source = HasListenersTester<int>(0);
-    source.addListener(() { });
+    source.addListener(() {});
     expect(source.testHasListeners, isTrue);
     FlutterError? error;
     try {
@@ -417,8 +416,7 @@ void main() {
     final TestNotifier source2 = TestNotifier();
     void fakeListener() {}
 
-    final Listenable listenableUnderTest =
-        Listenable.merge(<Listenable>[source1, source2]);
+    final Listenable listenableUnderTest = Listenable.merge(<Listenable>[source1, source2]);
     expect(source1.isListenedTo, isFalse);
     expect(source2.isListenedTo, isFalse);
     listenableUnderTest.addListener(fakeListener);
@@ -574,8 +572,7 @@ void main() {
       10,
       11,
     ];
-    final List<String> expectedLog =
-        remainingListenerIndexes.map((int i) => 'listener$i').toList();
+    final List<String> expectedLog = remainingListenerIndexes.map((int i) => 'listener$i').toList();
 
     test.notify();
     expect(log, expectedLog);

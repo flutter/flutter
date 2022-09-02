@@ -63,7 +63,7 @@ class PlatformViewsService {
   static final PlatformViewsService _instance = PlatformViewsService._();
 
   Future<void> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'viewFocused':
         final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
@@ -252,8 +252,8 @@ class AndroidPointerProperties {
   const AndroidPointerProperties({
     required this.id,
     required this.toolType,
-  }) : assert(id != null),
-       assert(toolType != null);
+  })  : assert(id != null),
+        assert(toolType != null);
 
   /// See Android's [MotionEvent.PointerProperties#id](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#id).
   final int id;
@@ -302,15 +302,15 @@ class AndroidPointerCoords {
     required this.touchMinor,
     required this.x,
     required this.y,
-  }) : assert(orientation != null),
-       assert(pressure != null),
-       assert(size != null),
-       assert(toolMajor != null),
-       assert(toolMinor != null),
-       assert(touchMajor != null),
-       assert(touchMinor != null),
-       assert(x != null),
-       assert(y != null);
+  })  : assert(orientation != null),
+        assert(pressure != null),
+        assert(size != null),
+        assert(toolMajor != null),
+        assert(toolMinor != null),
+        assert(touchMajor != null),
+        assert(touchMinor != null),
+        assert(x != null),
+        assert(y != null);
 
   /// The orientation of the touch area and tool area in radians clockwise from vertical.
   ///
@@ -398,22 +398,22 @@ class AndroidMotionEvent {
     required this.source,
     required this.flags,
     required this.motionEventId,
-  }) : assert(downTime != null),
-       assert(eventTime != null),
-       assert(action != null),
-       assert(pointerCount != null),
-       assert(pointerProperties != null),
-       assert(pointerCoords != null),
-       assert(metaState != null),
-       assert(buttonState != null),
-       assert(xPrecision != null),
-       assert(yPrecision != null),
-       assert(deviceId != null),
-       assert(edgeFlags != null),
-       assert(source != null),
-       assert(flags != null),
-       assert(pointerProperties.length == pointerCount),
-       assert(pointerCoords.length == pointerCount);
+  })  : assert(downTime != null),
+        assert(eventTime != null),
+        assert(action != null),
+        assert(pointerCount != null),
+        assert(pointerProperties != null),
+        assert(pointerCoords != null),
+        assert(metaState != null),
+        assert(buttonState != null),
+        assert(xPrecision != null),
+        assert(yPrecision != null),
+        assert(deviceId != null),
+        assert(edgeFlags != null),
+        assert(source != null),
+        assert(flags != null),
+        assert(pointerProperties.length == pointerCount),
+        assert(pointerCoords.length == pointerCount);
 
   /// The time (in ms) when the user originally pressed down to start a stream of position events,
   /// relative to an arbitrary timeline.
@@ -520,10 +520,8 @@ enum _AndroidViewState {
 class _AndroidMotionEventConverter {
   _AndroidMotionEventConverter();
 
-  final Map<int, AndroidPointerCoords> pointerPositions =
-      <int, AndroidPointerCoords>{};
-  final Map<int, AndroidPointerProperties> pointerProperties =
-      <int, AndroidPointerProperties>{};
+  final Map<int, AndroidPointerCoords> pointerPositions = <int, AndroidPointerCoords>{};
+  final Map<int, AndroidPointerProperties> pointerProperties = <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
 
   PointTransformer get pointTransformer => _pointTransformer;
@@ -623,12 +621,8 @@ class _AndroidMotionEventConverter {
       eventTime: event.timeStamp.inMilliseconds,
       action: action,
       pointerCount: pointerPositions.length,
-      pointerProperties: pointers
-          .map<AndroidPointerProperties>((int i) => pointerProperties[i]!)
-          .toList(),
-      pointerCoords: pointers
-          .map<AndroidPointerCoords>((int i) => pointerPositions[i]!)
-          .toList(),
+      pointerProperties: pointers.map<AndroidPointerProperties>((int i) => pointerProperties[i]!).toList(),
+      pointerCoords: pointers.map<AndroidPointerCoords>((int i) => pointerPositions[i]!).toList(),
       metaState: 0,
       buttonState: 0,
       xPrecision: 1.0,
@@ -664,8 +658,7 @@ class _AndroidMotionEventConverter {
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
-  bool isSinglePointerAction(PointerEvent event) =>
-      event is! PointerDownEvent && event is! PointerUpEvent;
+  bool isSinglePointerAction(PointerEvent event) => event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
 /// Controls an Android view that is composed using a GL texture.
@@ -731,8 +724,7 @@ abstract class AndroidViewController extends PlatformViewController {
   final String _viewType;
 
   // Helps convert PointerEvents to AndroidMotionEvents.
-  final _AndroidMotionEventConverter _motionEventConverter =
-      _AndroidMotionEventConverter();
+  final _AndroidMotionEventConverter _motionEventConverter = _AndroidMotionEventConverter();
 
   TextDirection _layoutDirection;
 
@@ -742,8 +734,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
   final MessageCodec<dynamic>? _creationParamsCodec;
 
-  final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks =
-      <PlatformViewCreatedCallback>[];
+  final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
 
   static int _getAndroidDirection(TextDirection direction) {
     assert(direction != null);
@@ -907,8 +898,7 @@ abstract class AndroidViewController extends PlatformViewController {
       return;
     }
 
-    await SystemChannels.platform_views
-        .invokeMethod<void>('setDirection', <String, dynamic>{
+    await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic>{
       'id': viewId,
       'direction': _getAndroidDirection(layoutDirection),
     });
@@ -937,8 +927,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
     _motionEventConverter.updatePointerPositions(event);
 
-    final AndroidMotionEvent? androidEvent =
-        _motionEventConverter.toAndroidMotionEvent(event);
+    final AndroidMotionEvent? androidEvent = _motionEventConverter.toAndroidMotionEvent(event);
 
     if (event is PointerUpEvent) {
       _motionEventConverter.handlePointerUpEvent(event);
@@ -979,14 +968,14 @@ abstract class AndroidViewController extends PlatformViewController {
 /// Controls an Android view that is composed using a GL texture.
 /// This controller is created from the [PlatformViewsService.initSurfaceAndroidView] factory,
 /// and is defined for backward compatibility.
-class SurfaceAndroidViewController extends TextureAndroidViewController{
-    SurfaceAndroidViewController._({
+class SurfaceAndroidViewController extends TextureAndroidViewController {
+  SurfaceAndroidViewController._({
     required super.viewId,
     required super.viewType,
     required super.layoutDirection,
     super.creationParams,
     super.creationParamsCodec,
-  })  : super._();
+  }) : super._();
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
@@ -998,7 +987,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
     required super.layoutDirection,
     super.creationParams,
     super.creationParamsCodec,
-  })  : super._();
+  }) : super._();
 
   @override
   bool get _createRequiresSize => false;
@@ -1012,8 +1001,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
       'hybrid': true,
     };
     if (_creationParams != null) {
-      final ByteData paramsByteData =
-          _creationParamsCodec!.encodeMessage(_creationParams)!;
+      final ByteData paramsByteData = _creationParamsCodec!.encodeMessage(_creationParams)!;
       args['params'] = Uint8List.view(
         paramsByteData.buffer,
         0,
@@ -1148,8 +1136,7 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendDisposeMessage() {
-    return SystemChannels
-        .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+    return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': false,
     });
@@ -1163,10 +1150,9 @@ class UiKitViewController {
   UiKitViewController._(
     this.id,
     TextDirection layoutDirection,
-  ) : assert(id != null),
-      assert(layoutDirection != null),
-      _layoutDirection = layoutDirection;
-
+  )   : assert(id != null),
+        assert(layoutDirection != null),
+        _layoutDirection = layoutDirection;
 
   /// The unique identifier of the iOS view controlled by this controller.
   ///

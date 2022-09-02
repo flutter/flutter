@@ -129,7 +129,7 @@ abstract class RawKeyEventData with Diagnosticable {
   /// side of the keyboard. Defaults to checking for the key being down on
   /// either side of the keyboard. If there is only one instance of the key on
   /// the keyboard, then [side] is ignored.
-  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any });
+  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
@@ -390,6 +390,7 @@ abstract class RawKeyEvent with Diagnosticable {
           data = dataFromWeb();
           break;
         default:
+
           /// This exception would only be hit on platforms that haven't yet
           /// implemented raw key events, but will only be triggered if the
           /// engine for those platforms sends raw key event messages in the
@@ -637,30 +638,32 @@ class RawKeyboard {
   RawKeyEventHandler? get keyEventHandler {
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler != _cachedKeyMessageHandler) {
       _cachedKeyMessageHandler = ServicesBinding.instance.keyEventManager.keyMessageHandler;
-      _cachedKeyEventHandler = _cachedKeyMessageHandler == null ?
-        null :
-        (RawKeyEvent event) {
-          assert(false,
-              'The RawKeyboard.instance.keyEventHandler assigned by Flutter is a dummy '
-              'callback kept for compatibility and should not be directly called. Use '
-              'ServicesBinding.instance!.keyMessageHandler instead.');
-          return true;
-        };
+      _cachedKeyEventHandler = _cachedKeyMessageHandler == null
+          ? null
+          : (RawKeyEvent event) {
+              assert(
+                  false,
+                  'The RawKeyboard.instance.keyEventHandler assigned by Flutter is a dummy '
+                  'callback kept for compatibility and should not be directly called. Use '
+                  'ServicesBinding.instance!.keyMessageHandler instead.');
+              return true;
+            };
     }
     return _cachedKeyEventHandler;
   }
+
   RawKeyEventHandler? _cachedKeyEventHandler;
   KeyMessageHandler? _cachedKeyMessageHandler;
   set keyEventHandler(RawKeyEventHandler? handler) {
     _cachedKeyEventHandler = handler;
-    _cachedKeyMessageHandler = handler == null ?
-      null :
-      (KeyMessage message) {
-        if (message.rawEvent != null) {
-          return handler(message.rawEvent!);
-        }
-        return false;
-      };
+    _cachedKeyMessageHandler = handler == null
+        ? null
+        : (KeyMessage message) {
+            if (message.rawEvent != null) {
+              return handler(message.rawEvent!);
+            }
+            return false;
+          };
     ServicesBinding.instance.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
   }
 
@@ -695,8 +698,8 @@ class RawKeyboard {
         InformationCollector? collector;
         assert(() {
           collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<RawKeyEvent>('Event', event),
-          ];
+                DiagnosticsProperty<RawKeyEvent>('Event', event),
+              ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(
@@ -712,34 +715,80 @@ class RawKeyboard {
     return false;
   }
 
-  static final Map<_ModifierSidePair, Set<PhysicalKeyboardKey>> _modifierKeyMap = <_ModifierSidePair, Set<PhysicalKeyboardKey>>{
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altLeft},
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altRight},
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altLeft, PhysicalKeyboardKey.altRight},
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altLeft},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftRight},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft, PhysicalKeyboardKey.shiftRight},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlRight},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft, PhysicalKeyboardKey.controlRight},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaLeft},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaRight},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaLeft, PhysicalKeyboardKey.metaRight},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaLeft},
-    const _ModifierSidePair(ModifierKey.capsLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.capsLock},
-    const _ModifierSidePair(ModifierKey.numLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock},
-    const _ModifierSidePair(ModifierKey.scrollLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.scrollLock},
-    const _ModifierSidePair(ModifierKey.functionModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.fn},
+  static final Map<_ModifierSidePair, Set<PhysicalKeyboardKey>> _modifierKeyMap =
+      <_ModifierSidePair, Set<PhysicalKeyboardKey>>{
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.left): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.altLeft
+    },
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.right): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.altRight
+    },
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.altLeft,
+      PhysicalKeyboardKey.altRight
+    },
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.any): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.altLeft
+    },
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.left): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.shiftLeft
+    },
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.right): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.shiftRight
+    },
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.shiftLeft,
+      PhysicalKeyboardKey.shiftRight
+    },
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.any): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.shiftLeft
+    },
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.left): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.controlLeft
+    },
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.right): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.controlRight
+    },
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.controlLeft,
+      PhysicalKeyboardKey.controlRight
+    },
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.any): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.controlLeft
+    },
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.left): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.metaLeft
+    },
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.right): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.metaRight
+    },
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.metaLeft,
+      PhysicalKeyboardKey.metaRight
+    },
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.any): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.metaLeft
+    },
+    const _ModifierSidePair(ModifierKey.capsLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.capsLock
+    },
+    const _ModifierSidePair(ModifierKey.numLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.numLock
+    },
+    const _ModifierSidePair(ModifierKey.scrollLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.scrollLock
+    },
+    const _ModifierSidePair(ModifierKey.functionModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
+      PhysicalKeyboardKey.fn
+    },
     // The symbolModifier doesn't have a key representation on any of the
     // platforms, so don't map it here.
   };
 
   // The map of all modifier keys except Fn, since that is treated differently
   // on some platforms.
-  static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiersExceptFn = <PhysicalKeyboardKey, LogicalKeyboardKey>{
+  static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiersExceptFn =
+      <PhysicalKeyboardKey, LogicalKeyboardKey>{
     PhysicalKeyboardKey.altLeft: LogicalKeyboardKey.altLeft,
     PhysicalKeyboardKey.altRight: LogicalKeyboardKey.altRight,
     PhysicalKeyboardKey.shiftLeft: LogicalKeyboardKey.shiftLeft,
@@ -801,8 +850,9 @@ class RawKeyboard {
           continue;
         }
       }
-      final Set<PhysicalKeyboardKey>? mappedKeys = modifiersPressed[key] == null ?
-        <PhysicalKeyboardKey>{} : _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      final Set<PhysicalKeyboardKey>? mappedKeys = modifiersPressed[key] == null
+          ? <PhysicalKeyboardKey>{}
+          : _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert(() {
         if (mappedKeys == null) {
           debugPrint(
@@ -824,8 +874,8 @@ class RawKeyboard {
       }
     }
     _allModifiersExceptFn.keys
-      .where((PhysicalKeyboardKey key) => !anySideKeys.contains(key))
-      .forEach(_keysPressed.remove);
+        .where((PhysicalKeyboardKey key) => !anySideKeys.contains(key))
+        .forEach(_keysPressed.remove);
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
       _keysPressed.remove(PhysicalKeyboardKey.fn);
@@ -833,8 +883,7 @@ class RawKeyboard {
     _keysPressed.addAll(modifierKeys);
     // In rare cases, the event presses a modifier key but the key does not
     // exist in the modifier list. Enforce the pressing state.
-    if (event is RawKeyDownEvent && thisKeyModifier != null
-        && !_keysPressed.containsKey(event.physicalKey)) {
+    if (event is RawKeyDownEvent && thisKeyModifier != null && !_keysPressed.containsKey(event.physicalKey)) {
       // So far this inconsistancy is only found on Linux GTK for AltRight in a
       // rare case. (See https://github.com/flutter/flutter/issues/93278 .) In
       // other cases, this inconsistancy will be caught by an assertion later.
@@ -879,9 +928,7 @@ class _ModifierSidePair {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _ModifierSidePair
-        && other.modifier == modifier
-        && other.side == side;
+    return other is _ModifierSidePair && other.modifier == modifier && other.side == side;
   }
 
   @override

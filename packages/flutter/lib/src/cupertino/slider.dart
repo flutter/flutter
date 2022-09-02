@@ -71,12 +71,12 @@ class CupertinoSlider extends StatefulWidget {
     this.divisions,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
-  }) : assert(value != null),
-       assert(min != null),
-       assert(max != null),
-       assert(value >= min && value <= max),
-       assert(divisions == null || divisions > 0),
-       assert(thumbColor != null);
+  })  : assert(value != null),
+        assert(min != null),
+        assert(max != null),
+        assert(value >= min && value <= max),
+        assert(divisions == null || divisions > 0),
+        assert(thumbColor != null);
 
   /// The currently selected value for this slider.
   ///
@@ -337,18 +337,18 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     required TickerProvider vsync,
     required TextDirection textDirection,
     MouseCursor cursor = MouseCursor.defer,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
-       assert(textDirection != null),
-       assert(cursor != null),
-       _cursor = cursor,
-       _value = value,
-       _divisions = divisions,
-       _activeColor = activeColor,
-       _thumbColor = thumbColor,
-       _trackColor = trackColor,
-       _onChanged = onChanged,
-       _textDirection = textDirection,
-       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
+  })  : assert(value != null && value >= 0.0 && value <= 1.0),
+        assert(textDirection != null),
+        assert(cursor != null),
+        _cursor = cursor,
+        _value = value,
+        _divisions = divisions,
+        _activeColor = activeColor,
+        _thumbColor = thumbColor,
+        _trackColor = trackColor,
+        _onChanged = onChanged,
+        _textDirection = textDirection,
+        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
@@ -468,7 +468,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
         visualPosition = _value;
         break;
     }
-    return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
+    return lerpDouble(
+        _trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
 
   bool get isInteractive => onChanged != null;
@@ -557,7 +558,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     }
 
     final Offset thumbCenter = Offset(trackActive, trackCenter);
-    CupertinoThumbPainter(color: thumbColor).paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
+    CupertinoThumbPainter(color: thumbColor)
+        .paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override

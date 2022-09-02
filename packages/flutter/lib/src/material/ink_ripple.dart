@@ -119,16 +119,16 @@ class InkRipple extends InteractiveInkFeature {
     ShapeBorder? customBorder,
     double? radius,
     super.onRemoved,
-  }) : assert(color != null),
-       assert(position != null),
-       assert(textDirection != null),
-       _position = position,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
-       _customBorder = customBorder,
-       _textDirection = textDirection,
-       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
-       _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-       super(controller: controller, color: color) {
+  })  : assert(color != null),
+        assert(position != null),
+        assert(textDirection != null),
+        _position = position,
+        _borderRadius = borderRadius ?? BorderRadius.zero,
+        _customBorder = customBorder,
+        _textDirection = textDirection,
+        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
+        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
+        super(controller: controller, color: color) {
     assert(_borderRadius != null);
 
     // Immediately begin fading-in the initial splash.
@@ -144,8 +144,8 @@ class InkRipple extends InteractiveInkFeature {
     _radiusController = AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-     // Initial splash diameter is 60% of the target diameter, final
-     // diameter is 10dps larger than the target diameter.
+    // Initial splash diameter is 60% of the target diameter, final
+    // diameter is 10dps larger than the target diameter.
     _radius = _radiusController.drive(
       Tween<double>(
         begin: _targetRadius * 0.30,
@@ -189,7 +189,8 @@ class InkRipple extends InteractiveInkFeature {
   static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
 
   static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
-  static final Animatable<double> _fadeOutIntervalTween = CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
+  static final Animatable<double> _fadeOutIntervalTween =
+      CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
 
   @override
   void confirm() {

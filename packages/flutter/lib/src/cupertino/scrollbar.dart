@@ -86,25 +86,24 @@ class CupertinoScrollbar extends RawScrollbar {
       'Use thumbVisibility instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
-    bool? isAlwaysShown,
-  }) : assert(thickness != null),
-       assert(thickness < double.infinity),
-       assert(thicknessWhileDragging != null),
-       assert(thicknessWhileDragging < double.infinity),
-       assert(radius != null),
-       assert(radiusWhileDragging != null),
-       assert(
-         isAlwaysShown == null || thumbVisibility == null,
-         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
-         'isAlwaysShown is deprecated.'
-       ),
-       super(
-         thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
-         fadeDuration: _kScrollbarFadeDuration,
-         timeToFade: _kScrollbarTimeToFade,
-         pressDuration: const Duration(milliseconds: 100),
-         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
-       );
+        bool? isAlwaysShown,
+  })  : assert(thickness != null),
+        assert(thickness < double.infinity),
+        assert(thicknessWhileDragging != null),
+        assert(thicknessWhileDragging < double.infinity),
+        assert(radius != null),
+        assert(radiusWhileDragging != null),
+        assert(
+            isAlwaysShown == null || thumbVisibility == null,
+            'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+            'isAlwaysShown is deprecated.'),
+        super(
+          thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
+          fadeDuration: _kScrollbarFadeDuration,
+          timeToFade: _kScrollbarTimeToFade,
+          pressDuration: const Duration(milliseconds: 100),
+          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
   static const double defaultThickness = 3;
@@ -143,7 +142,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   late AnimationController _thicknessAnimationController;
 
   double get _thickness {
-    return widget.thickness! + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
+    return widget.thickness! +
+        _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
   }
 
   Radius get _radius {
@@ -204,7 +204,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     super.handleThumbPress();
     _thicknessAnimationController.forward().then<void>(
           (_) => HapticFeedback.mediumImpact(),
-    );
+        );
   }
 
   @override
@@ -215,16 +215,14 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     }
     _thicknessAnimationController.reverse();
     super.handleThumbPressEnd(localPosition, velocity);
-    switch(direction) {
+    switch (direction) {
       case Axis.vertical:
-        if (velocity.pixelsPerSecond.dy.abs() < 10 &&
-          (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
+        if (velocity.pixelsPerSecond.dy.abs() < 10 && (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
         break;
       case Axis.horizontal:
-        if (velocity.pixelsPerSecond.dx.abs() < 10 &&
-          (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
+        if (velocity.pixelsPerSecond.dx.abs() < 10 && (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
         break;

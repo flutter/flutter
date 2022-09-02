@@ -66,9 +66,9 @@ class ButtonBar extends StatelessWidget {
     this.overflowDirection,
     this.overflowButtonSpacing,
     this.children = const <Widget>[],
-  }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
-       assert(buttonHeight == null || buttonHeight >= 0.0),
-       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0.0);
+  })  : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
+        assert(buttonHeight == null || buttonHeight >= 0.0),
+        assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0.0);
 
   /// How the children should be placed along the horizontal axis.
   ///
@@ -240,9 +240,9 @@ class _ButtonBarRow extends Flex {
     VerticalDirection overflowDirection = VerticalDirection.down,
     this.overflowButtonSpacing,
   }) : super(
-    direction: Axis.horizontal,
-    verticalDirection: overflowDirection,
-  );
+          direction: Axis.horizontal,
+          verticalDirection: overflowDirection,
+        );
 
   final double? overflowButtonSpacing;
 
@@ -300,8 +300,8 @@ class _RenderButtonBarRow extends RenderFlex {
     super.verticalDirection,
     super.textBaseline,
     this.overflowButtonSpacing,
-  }) : assert(textDirection != null),
-       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0);
+  })  : assert(textDirection != null),
+        assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0);
 
   bool _hasCheckedLayoutWidth = false;
   double? overflowButtonSpacing;

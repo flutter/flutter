@@ -51,8 +51,10 @@ void main() {
         onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
       ),
     ));
-    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 4), kind: PointerDeviceKind.mouse);
+    final RenderParagraph paragraph = tester
+        .renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+    final TestGesture gesture =
+        await tester.startGesture(textOffsetToPosition(paragraph, 4), kind: PointerDeviceKind.mouse);
     expect(content, isNull);
     addTearDown(gesture.removePointer);
     await tester.pump();

@@ -111,14 +111,15 @@ class InkSparkle extends InteractiveInkFeature {
     double? radius,
     super.onRemoved,
     double? turbulenceSeed,
-  }) : assert(containedInkWell || rectCallback == null),
-       _color = color,
-       _position = position,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
-       _customBorder = customBorder,
-       _textDirection = textDirection,
-       _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
-       _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback) {
+  })  : assert(containedInkWell || rectCallback == null),
+        _color = color,
+        _position = position,
+        _borderRadius = borderRadius ?? BorderRadius.zero,
+        _customBorder = customBorder,
+        _textDirection = textDirection,
+        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) *
+            _targetRadiusMultiplier,
+        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback) {
     // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNecessary();
     controller.addInkFeature(this);
@@ -132,9 +133,10 @@ class InkSparkle extends InteractiveInkFeature {
     _animationController = AnimationController(
       duration: _animationDuration,
       vsync: controller.vsync,
-    )..addListener(controller.markNeedsPaint)
-     ..addStatusListener(_handleStatusChanged)
-     ..forward();
+    )
+      ..addListener(controller.markNeedsPaint)
+      ..addStatusListener(_handleStatusChanged)
+      ..forward();
 
     _radiusScale = TweenSequence<double>(
       <TweenSequenceItem<double>>[
@@ -253,7 +255,8 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// Since a [turbulenceSeed] is passed, the effect will not be random for
   /// subsequent presses in the same position. This can be used for testing.
-  static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory = _InkSparkleFactory.constantTurbulenceSeed();
+  static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory =
+      _InkSparkleFactory.constantTurbulenceSeed();
 
   @override
   void dispose() {
@@ -355,11 +358,11 @@ class InkSparkle extends InteractiveInkFeature {
 
   Vector4 _colorToVector4(Color color) {
     return Vector4(
-        color.red / 255.0,
-        color.blue / 255.0,
-        color.green / 255.0,
-        color.alpha / 255.0,
-      );
+      color.red / 255.0,
+      color.blue / 255.0,
+      color.green / 255.0,
+      color.alpha / 255.0,
+    );
   }
 
   /// Transforms the canvas for an ink feature to be painted on the [canvas].
@@ -408,8 +411,7 @@ class InkSparkle extends InteractiveInkFeature {
   }) {
     final Rect rect = clipCallback();
     if (customBorder != null) {
-      canvas.clipPath(
-          customBorder.getOuterPath(rect, textDirection: textDirection));
+      canvas.clipPath(customBorder.getOuterPath(rect, textDirection: textDirection));
     } else if (borderRadius != BorderRadius.zero) {
       canvas.clipRRect(RRect.fromRectAndCorners(
         rect,

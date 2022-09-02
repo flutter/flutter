@@ -95,7 +95,8 @@ class TickerMode extends StatefulWidget {
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueNotifier], whose [ValueNotifier.value] is always true.
   static ValueNotifier<bool> getNotifier(BuildContext context) {
-    final _EffectiveTickerMode? widget = context.getElementForInheritedWidgetOfExactType<_EffectiveTickerMode>()?.widget as _EffectiveTickerMode?;
+    final _EffectiveTickerMode? widget =
+        context.getElementForInheritedWidgetOfExactType<_EffectiveTickerMode>()?.widget as _EffectiveTickerMode?;
     return widget?.notifier ?? ValueNotifier<bool>(true);
   }
 
@@ -142,7 +143,8 @@ class _TickerModeState extends State<TickerMode> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('requested mode', value: widget.enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
+    properties.add(
+        FlagProperty('requested mode', value: widget.enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
   }
 }
 
@@ -162,7 +164,8 @@ class _EffectiveTickerMode extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('effective mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
+    properties
+        .add(FlagProperty('effective mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
   }
 }
 
@@ -269,7 +272,8 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
         tickerDescription = 'inactive';
       }
     }
-    properties.add(DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
+    properties.add(DiagnosticsProperty<Ticker>('ticker', _ticker,
+        description: tickerDescription, showSeparator: false, defaultValue: null));
   }
 }
 
@@ -295,8 +299,9 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     }
     assert(_tickerModeNotifier != null);
     _tickers ??= <_WidgetTicker>{};
-    final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null)
-      ..muted = !_tickerModeNotifier!.value;
+    final _WidgetTicker result =
+        _WidgetTicker(onTick, this, debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null)
+          ..muted = !_tickerModeNotifier!.value;
     _tickers!.add(result);
     return result;
   }
@@ -372,9 +377,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     properties.add(DiagnosticsProperty<Set<Ticker>>(
       'tickers',
       _tickers,
-      description: _tickers != null ?
-        'tracking ${_tickers!.length} ticker${_tickers!.length == 1 ? "" : "s"}' :
-        null,
+      description: _tickers != null ? 'tracking ${_tickers!.length} ticker${_tickers!.length == 1 ? "" : "s"}' : null,
       defaultValue: null,
     ));
   }
@@ -385,7 +388,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _WidgetTicker extends Ticker {
-  _WidgetTicker(super.onTick, this._creator, { super.debugLabel });
+  _WidgetTicker(super.onTick, this._creator, {super.debugLabel});
 
   final TickerProviderStateMixin _creator;
 

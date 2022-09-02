@@ -49,17 +49,16 @@ class ScrollbarThemeData with Diagnosticable {
       'Use thumbVisibility instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
-    this.isAlwaysShown,
+        this.isAlwaysShown,
     @Deprecated(
       'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
-    this.showTrackOnHover,
+        this.showTrackOnHover,
   }) : assert(
-         isAlwaysShown == null || thumbVisibility == null,
-         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
-         'isAlwaysShown is deprecated.'
-       );
+            isAlwaysShown == null || thumbVisibility == null,
+            'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+            'isAlwaysShown is deprecated.');
 
   /// Overrides the default value of [Scrollbar.thumbVisibility] in all
   /// descendant [Scrollbar] widgets.
@@ -174,7 +173,7 @@ class ScrollbarThemeData with Diagnosticable {
       'Use thumbVisibility instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
-    bool? isAlwaysShown,
+        bool? isAlwaysShown,
   }) {
     return ScrollbarThemeData(
       thumbVisibility: thumbVisibility ?? this.thumbVisibility,
@@ -219,20 +218,20 @@ class ScrollbarThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    thumbVisibility,
-    thickness,
-    trackVisibility,
-    showTrackOnHover,
-    isAlwaysShown,
-    interactive,
-    radius,
-    thumbColor,
-    trackColor,
-    trackBorderColor,
-    crossAxisMargin,
-    mainAxisMargin,
-    minThumbLength,
-  );
+        thumbVisibility,
+        thickness,
+        trackVisibility,
+        showTrackOnHover,
+        isAlwaysShown,
+        interactive,
+        radius,
+        thumbColor,
+        trackColor,
+        trackBorderColor,
+        crossAxisMargin,
+        mainAxisMargin,
+        minThumbLength,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -242,35 +241,38 @@ class ScrollbarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ScrollbarThemeData
-      && other.thumbVisibility == thumbVisibility
-      && other.thickness == thickness
-      && other.trackVisibility == trackVisibility
-      && other.showTrackOnHover == showTrackOnHover
-      && other.isAlwaysShown == isAlwaysShown
-      && other.interactive == interactive
-      && other.radius == radius
-      && other.thumbColor == thumbColor
-      && other.trackColor == trackColor
-      && other.trackBorderColor == trackBorderColor
-      && other.crossAxisMargin == crossAxisMargin
-      && other.mainAxisMargin == mainAxisMargin
-      && other.minThumbLength == minThumbLength;
+    return other is ScrollbarThemeData &&
+        other.thumbVisibility == thumbVisibility &&
+        other.thickness == thickness &&
+        other.trackVisibility == trackVisibility &&
+        other.showTrackOnHover == showTrackOnHover &&
+        other.isAlwaysShown == isAlwaysShown &&
+        other.interactive == interactive &&
+        other.radius == radius &&
+        other.thumbColor == thumbColor &&
+        other.trackColor == trackColor &&
+        other.trackBorderColor == trackBorderColor &&
+        other.crossAxisMargin == crossAxisMargin &&
+        other.mainAxisMargin == mainAxisMargin &&
+        other.minThumbLength == minThumbLength;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('thumbVisibility', thumbVisibility, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<bool?>>('thumbVisibility', thumbVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('radius', radius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackBorderColor', trackBorderColor, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialStateProperty<Color?>>('trackBorderColor', trackBorderColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('crossAxisMargin', crossAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('mainAxisMargin', mainAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('minThumbLength', minThumbLength, defaultValue: null));

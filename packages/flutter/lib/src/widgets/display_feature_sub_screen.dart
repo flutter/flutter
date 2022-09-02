@@ -87,11 +87,12 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(anchorPoint != null || debugCheckHasDirectionality(
-        context,
-        why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
-        alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
-    ));
+    assert(anchorPoint != null ||
+        debugCheckHasDirectionality(
+          context,
+          why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
+          alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
+        ));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Size parentSize = mediaQuery.size;
     final Rect wantedBounds = Offset.zero & parentSize;
@@ -129,8 +130,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   /// not 0 or the `state` is [DisplayFeatureState.postureHalfOpened].
   static Iterable<Rect> avoidBounds(MediaQueryData mediaQuery) {
     return mediaQuery.displayFeatures
-        .where((DisplayFeature d) => d.bounds.shortestSide > 0 ||
-            d.state == DisplayFeatureState.postureHalfOpened)
+        .where((DisplayFeature d) => d.bounds.shortestSide > 0 || d.state == DisplayFeatureState.postureHalfOpened)
         .map((DisplayFeature d) => d.bounds);
   }
 
@@ -246,8 +246,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Offset _capOffset(Offset offset, Size maximum) {
-    if (offset.dx >= 0 && offset.dx <= maximum.width
-        && offset.dy >=0 && offset.dy <= maximum.height) {
+    if (offset.dx >= 0 && offset.dx <= maximum.width && offset.dy >= 0 && offset.dy <= maximum.height) {
       return offset;
     } else {
       return Offset(

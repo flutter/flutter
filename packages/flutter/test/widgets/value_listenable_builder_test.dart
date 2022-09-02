@@ -66,8 +66,7 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String?> differentListenable =
-        SpyStringValueNotifier('Hendricks');
+    final ValueListenable<String?> differentListenable = SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 
@@ -82,8 +81,7 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String?> differentListenable =
-       SpyStringValueNotifier('Hendricks');
+    final ValueListenable<String?> differentListenable = SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 

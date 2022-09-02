@@ -154,25 +154,24 @@ class NavigationRailThemeData with Diagnosticable {
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       minWidth: lerpDouble(a?.minWidth, b?.minWidth, t),
       minExtendedWidth: lerpDouble(a?.minExtendedWidth, b?.minExtendedWidth, t),
-
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    elevation,
-    unselectedLabelTextStyle,
-    selectedLabelTextStyle,
-    unselectedIconTheme,
-    selectedIconTheme,
-    groupAlignment,
-    labelType,
-    useIndicator,
-    indicatorColor,
-    minWidth,
-    minExtendedWidth,
-  );
+        backgroundColor,
+        elevation,
+        unselectedLabelTextStyle,
+        selectedLabelTextStyle,
+        unselectedIconTheme,
+        selectedIconTheme,
+        groupAlignment,
+        labelType,
+        useIndicator,
+        indicatorColor,
+        minWidth,
+        minExtendedWidth,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -182,19 +181,19 @@ class NavigationRailThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NavigationRailThemeData
-        && other.backgroundColor == backgroundColor
-        && other.elevation == elevation
-        && other.unselectedLabelTextStyle == unselectedLabelTextStyle
-        && other.selectedLabelTextStyle == selectedLabelTextStyle
-        && other.unselectedIconTheme == unselectedIconTheme
-        && other.selectedIconTheme == selectedIconTheme
-        && other.groupAlignment == groupAlignment
-        && other.labelType == labelType
-        && other.useIndicator == useIndicator
-        && other.indicatorColor == indicatorColor
-        && other.minWidth == minWidth
-        && other.minExtendedWidth == minExtendedWidth;
+    return other is NavigationRailThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.elevation == elevation &&
+        other.unselectedLabelTextStyle == unselectedLabelTextStyle &&
+        other.selectedLabelTextStyle == selectedLabelTextStyle &&
+        other.unselectedIconTheme == unselectedIconTheme &&
+        other.selectedIconTheme == selectedIconTheme &&
+        other.groupAlignment == groupAlignment &&
+        other.labelType == labelType &&
+        other.useIndicator == useIndicator &&
+        other.indicatorColor == indicatorColor &&
+        other.minWidth == minWidth &&
+        other.minExtendedWidth == minExtendedWidth;
   }
 
   @override
@@ -204,12 +203,17 @@ class NavigationRailThemeData with Diagnosticable {
 
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: defaultData.elevation));
-    properties.add(DiagnosticsProperty<TextStyle>('unselectedLabelTextStyle', unselectedLabelTextStyle, defaultValue: defaultData.unselectedLabelTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('selectedLabelTextStyle', selectedLabelTextStyle, defaultValue: defaultData.selectedLabelTextStyle));
-    properties.add(DiagnosticsProperty<IconThemeData>('unselectedIconTheme', unselectedIconTheme, defaultValue: defaultData.unselectedIconTheme));
-    properties.add(DiagnosticsProperty<IconThemeData>('selectedIconTheme', selectedIconTheme, defaultValue: defaultData.selectedIconTheme));
+    properties.add(DiagnosticsProperty<TextStyle>('unselectedLabelTextStyle', unselectedLabelTextStyle,
+        defaultValue: defaultData.unselectedLabelTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('selectedLabelTextStyle', selectedLabelTextStyle,
+        defaultValue: defaultData.selectedLabelTextStyle));
+    properties.add(DiagnosticsProperty<IconThemeData>('unselectedIconTheme', unselectedIconTheme,
+        defaultValue: defaultData.unselectedIconTheme));
+    properties.add(DiagnosticsProperty<IconThemeData>('selectedIconTheme', selectedIconTheme,
+        defaultValue: defaultData.selectedIconTheme));
     properties.add(DoubleProperty('groupAlignment', groupAlignment, defaultValue: defaultData.groupAlignment));
-    properties.add(DiagnosticsProperty<NavigationRailLabelType>('labelType', labelType, defaultValue: defaultData.labelType));
+    properties
+        .add(DiagnosticsProperty<NavigationRailLabelType>('labelType', labelType, defaultValue: defaultData.labelType));
     properties.add(DiagnosticsProperty<bool>('useIndicator', useIndicator, defaultValue: defaultData.useIndicator));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
     properties.add(DoubleProperty('minWidth', minWidth, defaultValue: defaultData.minWidth));

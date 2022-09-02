@@ -29,28 +29,28 @@ void main() {
 
   testWidgets('hourOfPeriod returns correct value', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59158.
-    expect(const TimeOfDay(minute: 0, hour:  0).hourOfPeriod, 12);
-    expect(const TimeOfDay(minute: 0, hour:  1).hourOfPeriod,  1);
-    expect(const TimeOfDay(minute: 0, hour:  2).hourOfPeriod,  2);
-    expect(const TimeOfDay(minute: 0, hour:  3).hourOfPeriod,  3);
-    expect(const TimeOfDay(minute: 0, hour:  4).hourOfPeriod,  4);
-    expect(const TimeOfDay(minute: 0, hour:  5).hourOfPeriod,  5);
-    expect(const TimeOfDay(minute: 0, hour:  6).hourOfPeriod,  6);
-    expect(const TimeOfDay(minute: 0, hour:  7).hourOfPeriod,  7);
-    expect(const TimeOfDay(minute: 0, hour:  8).hourOfPeriod,  8);
-    expect(const TimeOfDay(minute: 0, hour:  9).hourOfPeriod,  9);
+    expect(const TimeOfDay(minute: 0, hour: 0).hourOfPeriod, 12);
+    expect(const TimeOfDay(minute: 0, hour: 1).hourOfPeriod, 1);
+    expect(const TimeOfDay(minute: 0, hour: 2).hourOfPeriod, 2);
+    expect(const TimeOfDay(minute: 0, hour: 3).hourOfPeriod, 3);
+    expect(const TimeOfDay(minute: 0, hour: 4).hourOfPeriod, 4);
+    expect(const TimeOfDay(minute: 0, hour: 5).hourOfPeriod, 5);
+    expect(const TimeOfDay(minute: 0, hour: 6).hourOfPeriod, 6);
+    expect(const TimeOfDay(minute: 0, hour: 7).hourOfPeriod, 7);
+    expect(const TimeOfDay(minute: 0, hour: 8).hourOfPeriod, 8);
+    expect(const TimeOfDay(minute: 0, hour: 9).hourOfPeriod, 9);
     expect(const TimeOfDay(minute: 0, hour: 10).hourOfPeriod, 10);
     expect(const TimeOfDay(minute: 0, hour: 11).hourOfPeriod, 11);
     expect(const TimeOfDay(minute: 0, hour: 12).hourOfPeriod, 12);
-    expect(const TimeOfDay(minute: 0, hour: 13).hourOfPeriod,  1);
-    expect(const TimeOfDay(minute: 0, hour: 14).hourOfPeriod,  2);
-    expect(const TimeOfDay(minute: 0, hour: 15).hourOfPeriod,  3);
-    expect(const TimeOfDay(minute: 0, hour: 16).hourOfPeriod,  4);
-    expect(const TimeOfDay(minute: 0, hour: 17).hourOfPeriod,  5);
-    expect(const TimeOfDay(minute: 0, hour: 18).hourOfPeriod,  6);
-    expect(const TimeOfDay(minute: 0, hour: 19).hourOfPeriod,  7);
-    expect(const TimeOfDay(minute: 0, hour: 20).hourOfPeriod,  8);
-    expect(const TimeOfDay(minute: 0, hour: 21).hourOfPeriod,  9);
+    expect(const TimeOfDay(minute: 0, hour: 13).hourOfPeriod, 1);
+    expect(const TimeOfDay(minute: 0, hour: 14).hourOfPeriod, 2);
+    expect(const TimeOfDay(minute: 0, hour: 15).hourOfPeriod, 3);
+    expect(const TimeOfDay(minute: 0, hour: 16).hourOfPeriod, 4);
+    expect(const TimeOfDay(minute: 0, hour: 17).hourOfPeriod, 5);
+    expect(const TimeOfDay(minute: 0, hour: 18).hourOfPeriod, 6);
+    expect(const TimeOfDay(minute: 0, hour: 19).hourOfPeriod, 7);
+    expect(const TimeOfDay(minute: 0, hour: 20).hourOfPeriod, 8);
+    expect(const TimeOfDay(minute: 0, hour: 21).hourOfPeriod, 9);
     expect(const TimeOfDay(minute: 0, hour: 22).hourOfPeriod, 10);
     expect(const TimeOfDay(minute: 0, hour: 23).hourOfPeriod, 11);
   });

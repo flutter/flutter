@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ super.key, this.stable, this.swapper });
+  const Swapper({super.key, this.stable, this.swapper});
 
   final Widget? stable;
   final Widget? swapper;
@@ -246,7 +246,8 @@ class RenderSwapper extends RenderBox {
 BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
 
 void main() {
-  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
+  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments',
+      (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {
@@ -290,7 +291,8 @@ void main() {
     expect(swapper.removeSlots, contains(false));
   });
 
-  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message', (WidgetTester tester) async {
+  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message',
+      (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {

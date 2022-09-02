@@ -36,7 +36,7 @@ class IconButtonThemeData with Diagnosticable {
   /// Creates a [IconButtonThemeData].
   ///
   /// The [style] may be null.
-  const IconButtonThemeData({ this.style });
+  const IconButtonThemeData({this.style});
 
   /// Overrides for [IconButton]'s default style if [ThemeData.useMaterial3]
   /// is set to true.
@@ -49,7 +49,7 @@ class IconButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two icon button themes.
   static IconButtonThemeData? lerp(IconButtonThemeData? a, IconButtonThemeData? b, double t) {
-    assert (t != null);
+    assert(t != null);
     if (a == null && b == null) {
       return null;
     }

@@ -70,15 +70,15 @@ class GravitySimulation extends Simulation {
     double distance,
     double endDistance,
     double velocity,
-  ) : assert(acceleration != null),
-      assert(distance != null),
-      assert(velocity != null),
-      assert(endDistance != null),
-      assert(endDistance >= 0),
-      _a = acceleration,
-      _x = distance,
-      _v = velocity,
-      _end = endDistance;
+  )   : assert(acceleration != null),
+        assert(distance != null),
+        assert(velocity != null),
+        assert(endDistance != null),
+        assert(endDistance >= 0),
+        _a = acceleration,
+        _x = distance,
+        _v = velocity,
+        _end = endDistance;
 
   final double _x;
   final double _v;
@@ -95,5 +95,6 @@ class GravitySimulation extends Simulation {
   bool isDone(double time) => x(time).abs() >= _end;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'GravitySimulation')}(g: ${_a.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, xₘₐₓ: ±${_end.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'GravitySimulation')}(g: ${_a.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, xₘₐₓ: ±${_end.toStringAsFixed(1)})';
 }

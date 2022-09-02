@@ -28,7 +28,8 @@ import 'tap_region.dart';
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(
+    TextEditingValue textEditingValue);
 
 /// The type of the callback used by the [RawAutocomplete] widget to indicate
 /// that the user has selected an option.
@@ -134,19 +135,18 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
-  }) : assert(displayStringForOption != null),
-       assert(
-         fieldViewBuilder != null
-            || (key != null && focusNode != null && textEditingController != null),
-         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
+  })  : assert(displayStringForOption != null),
+        assert(
+          fieldViewBuilder != null || (key != null && focusNode != null && textEditingController != null),
+          'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
         ),
-       assert(optionsBuilder != null),
-       assert(optionsViewBuilder != null),
-       assert((focusNode == null) == (textEditingController == null)),
-       assert(
-         !(textEditingController != null && initialValue != null),
-         'textEditingController and initialValue cannot be simultaneously defined.',
-       );
+        assert(optionsBuilder != null),
+        assert(optionsViewBuilder != null),
+        assert((focusNode == null) == (textEditingController == null)),
+        assert(
+          !(textEditingController != null && initialValue != null),
+          'textEditingController and initialValue cannot be simultaneously defined.',
+        );
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
@@ -308,8 +308,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     );
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
-    if (_selection != null
-        && value.text != widget.displayStringForOption(_selection!)) {
+    if (_selection != null && value.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
     }
 
@@ -427,13 +426,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             targetAnchor: Alignment.bottomLeft,
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
-                highlightIndexNotifier: _highlightedOptionIndex,
-                child: Builder(
-                  builder: (BuildContext context) {
+                  highlightIndexNotifier: _highlightedOptionIndex,
+                  child: Builder(builder: (BuildContext context) {
                     return widget.optionsViewBuilder(context, _select, _options);
-                  }
-                )
-              ),
+                  })),
             ),
           );
         },
@@ -492,10 +488,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _textEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
-    _previousOptionAction = _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
+    _previousOptionAction =
+        _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
     _nextOptionAction = _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(onInvoke: _highlightNextOption);
     _hideOptionsAction = _AutocompleteCallbackAction<DismissIntent>(onInvoke: _hideOptions);
-    _actionMap = <Type, Action<Intent>> {
+    _actionMap = <Type, Action<Intent>>{
       AutocompletePreviousOptionIntent: _previousOptionAction,
       AutocompleteNextOptionIntent: _nextOptionAction,
       DismissIntent: _hideOptionsAction,
@@ -543,13 +540,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             child: CompositedTransformTarget(
               link: _optionsLayerLink,
               child: widget.fieldViewBuilder == null
-                ? const SizedBox.shrink()
-                : widget.fieldViewBuilder!(
-                    context,
-                    _textEditingController,
-                    _focusNode,
-                    _onFieldSubmitted,
-                  ),
+                  ? const SizedBox.shrink()
+                  : widget.fieldViewBuilder!(
+                      context,
+                      _textEditingController,
+                      _focusNode,
+                      _onFieldSubmitted,
+                    ),
             ),
           ),
         ),

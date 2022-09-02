@@ -17,12 +17,14 @@ void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
@@ -109,7 +111,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     await tester.pumpAndSettle();
 
     expect(selectedResults, <String?>[null]);
@@ -547,7 +549,8 @@ void main() {
     const String searchHintText = 'Enter search terms';
     const TextStyle searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText, searchFieldStyle: searchFieldStyle);
+    final _TestSearchDelegate delegate =
+        _TestSearchDelegate(searchHint: searchHintText, searchFieldStyle: searchFieldStyle);
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
@@ -560,7 +563,6 @@ void main() {
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
     expect(textField.style?.color, delegate.searchFieldStyle?.color);
     expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
-
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
@@ -590,7 +592,7 @@ void main() {
   });
 
   group('contributes semantics', () {
-    TestSemantics buildExpected({ required String routeName }) {
+    TestSemantics buildExpected({required String routeName}) {
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -631,11 +633,12 @@ void main() {
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
                               if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                                debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                                  debugDefaultTargetPlatformOverride != TargetPlatform.macOS)
+                                SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
                               if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
+                                  debugDefaultTargetPlatformOverride == TargetPlatform.windows)
                                 SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,
@@ -685,12 +688,14 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(
-        buildExpected(routeName: 'Search'),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ));
+      expect(
+          semantics,
+          hasSemantics(
+            buildExpected(routeName: 'Search'),
+            ignoreId: true,
+            ignoreRect: true,
+            ignoreTransform: true,
+          ));
 
       semantics.dispose();
     });
@@ -705,15 +710,17 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(
-        buildExpected(routeName: ''),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ));
+      expect(
+          semantics,
+          hasSemantics(
+            buildExpected(routeName: ''),
+            ignoreId: true,
+            ignoreRect: true,
+            ignoreTransform: true,
+          ));
 
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
   });
 
   testWidgets('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {

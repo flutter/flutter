@@ -103,7 +103,6 @@ bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
   return true;
 }
 
-
 /// Returns the position of `value` in the `sortedList`, if it exists.
 ///
 /// Returns `-1` if the `value` is not in the list. Requires the list items

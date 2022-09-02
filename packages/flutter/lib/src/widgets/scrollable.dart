@@ -100,11 +100,11 @@ class Scrollable extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(axisDirection != null),
-       assert(dragStartBehavior != null),
-       assert(viewportBuilder != null),
-       assert(excludeFromSemantics != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0);
+  })  : assert(axisDirection != null),
+        assert(dragStartBehavior != null),
+        assert(viewportBuilder != null),
+        assert(excludeFromSemantics != null),
+        assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -318,7 +318,8 @@ class Scrollable extends StatefulWidget {
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context) {
-    final _ScrollableScope? widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope?;
+    final _ScrollableScope? widget =
+        context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope?;
     if (widget == null) {
       return false;
     }
@@ -376,8 +377,8 @@ class _ScrollableScope extends InheritedWidget {
     required this.scrollable,
     required this.position,
     required super.child,
-  }) : assert(scrollable != null),
-       assert(child != null);
+  })  : assert(scrollable != null),
+        assert(child != null);
 
   final ScrollableState scrollable;
   final ScrollPosition position;
@@ -398,7 +399,8 @@ class _ScrollableScope extends InheritedWidget {
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
-class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, RestorationMixin
+class ScrollableState extends State<Scrollable>
+    with TickerProviderStateMixin, RestorationMixin
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
   ///
@@ -498,7 +500,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (oldWidget.controller == null) {
         // The old controller was null, meaning the fallback cannot be null.
         // Dispose of the fallback.
-        assert(_fallbackScrollController !=  null);
+        assert(_fallbackScrollController != null);
         assert(widget.controller != null);
         _fallbackScrollController!.detach(position);
         _fallbackScrollController!.dispose();
@@ -534,7 +536,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     _persistedScrollOffset.dispose();
     super.dispose();
   }
-
 
   // SEMANTICS
 
@@ -636,7 +637,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
+      final RenderIgnorePointer renderBox =
+          _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -713,9 +715,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // Returns the delta that should result from applying [event] with axis and
   // direction taken into account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    double delta = widget.axis == Axis.horizontal
-      ? event.scrollDelta.dx
-      : event.scrollDelta.dy;
+    double delta = widget.axis == Axis.horizontal ? event.scrollDelta.dx : event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
@@ -798,15 +798,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
     if (!widget.excludeFromSemantics) {
       result = NotificationListener<ScrollMetricsNotification>(
-        onNotification: _handleScrollMetricsNotification,
-        child: _ScrollSemantics(
-          key: _scrollSemanticsKey,
-          position: position,
-          allowImplicitScrolling: _physics!.allowImplicitScrolling,
-          semanticChildCount: widget.semanticChildCount,
-          child: result,
-        )
-      );
+          onNotification: _handleScrollMetricsNotification,
+          child: _ScrollSemantics(
+            key: _scrollSemanticsKey,
+            position: position,
+            allowImplicitScrolling: _physics!.allowImplicitScrolling,
+            semanticChildCount: widget.semanticChildCount,
+            child: result,
+          ));
     }
 
     final ScrollableDetails details = ScrollableDetails(
@@ -911,7 +910,8 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 /// velocity = <distance of overscroll> * [velocityScalar].
 class EdgeDraggingAutoScroller {
   /// Creates a auto scroller that scrolls the [scrollable].
-  EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
+  EdgeDraggingAutoScroller(this.scrollable,
+      {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
 
   // An eyeballed value for a smooth scrolling experience.
   static const double _kDefaultAutoScrollVelocityScalar = 7;
@@ -985,10 +985,8 @@ class EdgeDraggingAutoScroller {
 
   Future<void> _scroll() async {
     final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
-    final Rect globalRect = MatrixUtils.transformRect(
-        scrollRenderBox.getTransformTo(null),
-        Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height)
-    );
+    final Rect globalRect = MatrixUtils.transformRect(scrollRenderBox.getTransformTo(null),
+        Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height));
     _scrolling = true;
     double? newOffset;
     const double overDragMax = 20.0;
@@ -1012,7 +1010,7 @@ class EdgeDraggingAutoScroller {
     } else {
       if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
         overDrag = math.max(viewportStart - proxyStart, overDragMax);
-        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
+        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
       } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
         overDrag = math.max(proxyEnd - viewportEnd, overDragMax);
         newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
@@ -1047,11 +1045,9 @@ class EdgeDraggingAutoScroller {
 /// date with the scroll position when it sends the drag update event to a
 /// selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _ScrollableSelectionContainerDelegate({
-    required this.state,
-    required ScrollPosition position
-  }) : _position = position,
-       _autoScroller = EdgeDraggingAutoScroller(state, velocityScalar: _kDefaultSelectToScrollVelocityScalar) {
+  _ScrollableSelectionContainerDelegate({required this.state, required ScrollPosition position})
+      : _position = position,
+        _autoScroller = EdgeDraggingAutoScroller(state, velocityScalar: _kDefaultSelectToScrollVelocityScalar) {
     _position.addListener(_scheduleLayoutChange);
   }
 
@@ -1202,7 +1198,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Matrix4 childTransform = selectables[currentSelectionStartIndex].getTransformTo(box);
       final Offset localDragStart = MatrixUtils.transformPoint(
         childTransform,
-        start.localPosition + Offset(0, - start.lineHeight / 2),
+        start.localPosition + Offset(0, -start.lineHeight / 2),
       );
       _currentDragStartRelatedToOrigin = MatrixUtils.transformPoint(transform, localDragStart + deltaToOrigin);
     }
@@ -1213,7 +1209,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Matrix4 childTransform = selectables[currentSelectionEndIndex].getTransformTo(box);
       final Offset localDragEnd = MatrixUtils.transformPoint(
         childTransform,
-        end.localPosition + Offset(0, - end.lineHeight / 2),
+        end.localPosition + Offset(0, -end.lineHeight / 2),
       );
       _currentDragEndRelatedToOrigin = MatrixUtils.transformPoint(transform, localDragEnd + deltaToOrigin);
     }
@@ -1246,7 +1242,8 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   Rect _dragTargetFromEvent(SelectionEdgeUpdateEvent event) {
-    return Rect.fromCenter(center: event.globalPosition, width: _kDefaultDragTargetSize, height: _kDefaultDragTargetSize);
+    return Rect.fromCenter(
+        center: event.globalPosition, width: _kDefaultDragTargetSize, height: _kDefaultDragTargetSize);
   }
 
   @override
@@ -1373,8 +1370,8 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
     super.child,
-  }) : assert(position != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0);
+  })  : assert(position != null),
+        assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
@@ -1404,11 +1401,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
     required bool allowImplicitScrolling,
     required int? semanticChildCount,
     RenderBox? child,
-  }) : _position = position,
-       _allowImplicitScrolling = allowImplicitScrolling,
-       _semanticChildCount = semanticChildCount,
-       assert(position != null),
-       super(child) {
+  })  : _position = position,
+        _allowImplicitScrolling = allowImplicitScrolling,
+        _semanticChildCount = semanticChildCount,
+        assert(position != null),
+        super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 
@@ -1453,11 +1450,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
     config.isSemanticBoundary = true;
     if (position.haveDimensions) {
       config
-          ..hasImplicitScrolling = allowImplicitScrolling
-          ..scrollPosition = _position.pixels
-          ..scrollExtentMax = _position.maxScrollExtent
-          ..scrollExtentMin = _position.minScrollExtent
-          ..scrollChildCount = semanticChildCount;
+        ..hasImplicitScrolling = allowImplicitScrolling
+        ..scrollPosition = _position.pixels
+        ..scrollExtentMax = _position.maxScrollExtent
+        ..scrollExtentMin = _position.minScrollExtent
+        ..scrollChildCount = semanticChildCount;
     }
   }
 
@@ -1623,7 +1620,7 @@ class ScrollAction extends Action<ScrollIntent> {
   // metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
   // null. The type and state arguments must not be null, and the widget must
   // have already been laid out so that the position fields are valid.
-  double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
+  double _calculateScrollIncrement(ScrollableState state, {ScrollIncrementType type = ScrollIncrementType.line}) {
     assert(type != null);
     assert(state.position != null);
     assert(state.position.hasPixels);
@@ -1700,7 +1697,7 @@ class ScrollAction extends Action<ScrollIntent> {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
       final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
-      assert (() {
+      assert(() {
         if (primaryScrollController!.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
@@ -1723,8 +1720,8 @@ class ScrollAction extends Action<ScrollIntent> {
         return true;
       }());
 
-      if (primaryScrollController!.position.context.notificationContext == null
-          && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
+      if (primaryScrollController!.position.context.notificationContext == null &&
+          Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
         return;
       }
       state = Scrollable.of(primaryScrollController.position.context.notificationContext!);

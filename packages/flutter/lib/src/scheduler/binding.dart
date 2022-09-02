@@ -21,6 +21,7 @@ export 'priority.dart' show Priority;
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
 double _timeDilation = 1.0;
+
 /// If the [SchedulerBinding] has been initialized, setting the time dilation
 /// automatically calls [SchedulerBinding.resetEpoch] to ensure that time stamps
 /// seen by consumers of the scheduler binding are always increasing.
@@ -61,7 +62,7 @@ typedef TaskCallback<T> = T Function();
 /// See also:
 ///
 ///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
-typedef SchedulingStrategy = bool Function({ required int priority, required SchedulerBinding scheduler });
+typedef SchedulingStrategy = bool Function({required int priority, required SchedulerBinding scheduler});
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
@@ -94,7 +95,7 @@ class _TaskEntry<T> {
 }
 
 class _FrameCallbackEntry {
-  _FrameCallbackEntry(this.callback, { bool rescheduling = false }) {
+  _FrameCallbackEntry(this.callback, {bool rescheduling = false}) {
     assert(() {
       if (rescheduling) {
         assert(() {
@@ -292,8 +293,7 @@ mixin SchedulerBinding on BindingBase {
 
   @pragma('vm:notify-debugger-on-exception')
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
-    final List<TimingsCallback> clonedCallbacks =
-        List<TimingsCallback>.of(_timingsCallbacks);
+    final List<TimingsCallback> clonedCallbacks = List<TimingsCallback>.of(_timingsCallbacks);
     for (final TimingsCallback callback in clonedCallbacks) {
       try {
         if (_timingsCallbacks.contains(callback)) {
@@ -303,12 +303,12 @@ mixin SchedulerBinding on BindingBase {
         InformationCollector? collector;
         assert(() {
           collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<TimingsCallback>(
-              'The TimingsCallback that gets executed was',
-              callback,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ];
+                DiagnosticsProperty<TimingsCallback>(
+                  'The TimingsCallback that gets executed was',
+                  callback,
+                  style: DiagnosticsTreeStyle.errorProperty,
+                ),
+              ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(
@@ -375,9 +375,10 @@ mixin SchedulerBinding on BindingBase {
   /// Defaults to [defaultSchedulingStrategy].
   SchedulingStrategy schedulingStrategy = defaultSchedulingStrategy;
 
-  static int _taskSorter (_TaskEntry<dynamic> e1, _TaskEntry<dynamic> e2) {
+  static int _taskSorter(_TaskEntry<dynamic> e1, _TaskEntry<dynamic> e2) {
     return -e1.priority.compareTo(e2.priority);
   }
+
   final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
 
   /// Schedules the given `task` with the given `priority` and returns a
@@ -482,16 +483,18 @@ mixin SchedulerBinding on BindingBase {
           stack: exceptionStack,
           library: 'scheduler library',
           context: ErrorDescription('during a task callback'),
-          informationCollector: (callbackStack == null) ? null : () {
-            return <DiagnosticsNode>[
-              DiagnosticsStackTrace(
-                '\nThis exception was thrown in the context of a scheduler callback. '
-                'When the scheduler callback was _registered_ (as opposed to when the '
-                'exception was thrown), this was the stack',
-                callbackStack,
-              ),
-            ];
-          },
+          informationCollector: (callbackStack == null)
+              ? null
+              : () {
+                  return <DiagnosticsNode>[
+                    DiagnosticsStackTrace(
+                      '\nThis exception was thrown in the context of a scheduler callback. '
+                      'When the scheduler callback was _registered_ (as opposed to when the '
+                      'exception was thrown), this was the stack',
+                      callbackStack,
+                    ),
+                  ];
+                },
         ));
       }
       return _taskQueue.isNotEmpty;
@@ -532,7 +535,7 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
-  int scheduleFrameCallback(FrameCallback callback, { bool rescheduling = false }) {
+  int scheduleFrameCallback(FrameCallback callback, {bool rescheduling = false}) {
     scheduleFrame();
     _nextFrameCallbackId += 1;
     _transientCallbacks[_nextFrameCallbackId] = _FrameCallbackEntry(callback, rescheduling: rescheduling);
@@ -937,8 +940,10 @@ mixin SchedulerBinding on BindingBase {
   /// These mechanisms together combine to ensure that the durations we give
   /// during frame callbacks are monotonically increasing.
   Duration _adjustForEpoch(Duration rawTimeStamp) {
-    final Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null ? Duration.zero : rawTimeStamp - _firstRawTimeStampInEpoch!;
-    return Duration(microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
+    final Duration rawDurationSinceEpoch =
+        _firstRawTimeStampInEpoch == null ? Duration.zero : rawTimeStamp - _firstRawTimeStampInEpoch!;
+    return Duration(
+        microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
   }
 
   /// The time stamp for the frame currently being processed.
@@ -950,6 +955,7 @@ mixin SchedulerBinding on BindingBase {
     assert(_currentFrameTimeStamp != null);
     return _currentFrameTimeStamp!;
   }
+
   Duration? _currentFrameTimeStamp;
 
   /// The raw time stamp as provided by the engine to
@@ -1058,7 +1064,8 @@ mixin SchedulerBinding on BindingBase {
         } else {
           frameTimeStampDescription.write('(warm-up frame)');
         }
-        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
+        _debugBanner =
+            '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
         if (debugPrintBeginFrameBanner) {
           debugPrint(_debugBanner);
         }
@@ -1106,8 +1113,7 @@ mixin SchedulerBinding on BindingBase {
 
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
-      final List<FrameCallback> localPostFrameCallbacks =
-          List<FrameCallback>.of(_postFrameCallbacks);
+      final List<FrameCallback> localPostFrameCallbacks = List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
       for (final FrameCallback callback in localPostFrameCallbacks) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
@@ -1164,7 +1170,7 @@ mixin SchedulerBinding on BindingBase {
   // [debugSchedulerExceptionHandler], if set. If not set, then simply prints
   // the error.
   @pragma('vm:notify-debugger-on-exception')
-  void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace? callbackStack ]) {
+  void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [StackTrace? callbackStack]) {
     assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
     assert(() {
@@ -1179,16 +1185,18 @@ mixin SchedulerBinding on BindingBase {
         stack: exceptionStack,
         library: 'scheduler library',
         context: ErrorDescription('during a scheduler callback'),
-        informationCollector: (callbackStack == null) ? null : () {
-          return <DiagnosticsNode>[
-            DiagnosticsStackTrace(
-              '\nThis exception was thrown in the context of a scheduler callback. '
-              'When the scheduler callback was _registered_ (as opposed to when the '
-              'exception was thrown), this was the stack',
-              callbackStack,
-            ),
-          ];
-        },
+        informationCollector: (callbackStack == null)
+            ? null
+            : () {
+                return <DiagnosticsNode>[
+                  DiagnosticsStackTrace(
+                    '\nThis exception was thrown in the context of a scheduler callback. '
+                    'When the scheduler callback was _registered_ (as opposed to when the '
+                    'exception was thrown), this was the stack',
+                    callbackStack,
+                  ),
+                ];
+              },
       ));
     }
     assert(() {
@@ -1203,7 +1211,7 @@ mixin SchedulerBinding on BindingBase {
 /// If there are any frame callbacks registered, only runs tasks with
 /// a [Priority] of [Priority.animation] or higher. Otherwise, runs
 /// all tasks.
-bool defaultSchedulingStrategy({ required int priority, required SchedulerBinding scheduler }) {
+bool defaultSchedulingStrategy({required int priority, required SchedulerBinding scheduler}) {
   if (scheduler.transientCallbackCount > 0) {
     return priority >= Priority.animation.value;
   }

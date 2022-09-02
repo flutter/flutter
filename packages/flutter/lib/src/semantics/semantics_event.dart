@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -46,7 +45,7 @@ abstract class SemanticsEvent {
   ///
   /// [nodeId] is the unique identifier of the semantics node associated with
   /// the event, or null if the event is not associated with a semantics node.
-  Map<String, dynamic> toMap({ int? nodeId }) {
+  Map<String, dynamic> toMap({int? nodeId}) {
     final Map<String, dynamic> event = <String, dynamic>{
       'type': type,
       'data': getDataMap(),
@@ -84,12 +83,11 @@ abstract class SemanticsEvent {
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
 class AnnounceSemanticsEvent extends SemanticsEvent {
-
   /// Constructs an event that triggers an announcement by the platform.
   const AnnounceSemanticsEvent(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite})
-    : assert(message != null),
-      assert(textDirection != null),
-      super('announce');
+      : assert(message != null),
+        assert(textDirection != null),
+        super('announce');
 
   /// The message to announce.
   ///
@@ -111,11 +109,10 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 
   @override
   Map<String, dynamic> getDataMap() {
-    return <String, dynamic> {
+    return <String, dynamic>{
       'message': message,
       'textDirection': textDirection.index,
-      if (assertiveness != Assertiveness.polite)
-        'assertiveness': assertiveness.index,
+      if (assertiveness != Assertiveness.polite) 'assertiveness': assertiveness.index,
     };
   }
 }

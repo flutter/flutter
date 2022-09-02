@@ -111,7 +111,7 @@ void main() {
   testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
     await tester.pumpWidget(getApp());
     expect(getTextStyle(tester).color, CupertinoColors.label);
-    expect(getIcon(tester).color,  CupertinoColors.label);
+    expect(getIcon(tester).color, CupertinoColors.label);
   });
 
   testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
@@ -125,28 +125,27 @@ void main() {
     expect(getTextStyle(tester).fontWeight, kDefaultActionWeight);
   });
 
-  testWidgets(
-    'Hovering over Cupertino context menu action updates cursor to clickable on Web',
-    (WidgetTester tester) async {
-      /// Cupertino context menu action without "onPressed" callback.
-      await tester.pumpWidget(getApp());
-      final Offset contextMenuAction = tester.getCenter(find.text('I am a CupertinoContextMenuAction'));
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-      await gesture.addPointer(location: contextMenuAction);
-      await tester.pumpAndSettle();
-      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  testWidgets('Hovering over Cupertino context menu action updates cursor to clickable on Web',
+      (WidgetTester tester) async {
+    /// Cupertino context menu action without "onPressed" callback.
+    await tester.pumpWidget(getApp());
+    final Offset contextMenuAction = tester.getCenter(find.text('I am a CupertinoContextMenuAction'));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: contextMenuAction);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-      // / Cupertino context menu action with "onPressed" callback.
-      await tester.pumpWidget(getApp(onPressed: (){}));
-      await gesture.moveTo(const Offset(10, 10));
-      await tester.pumpAndSettle();
-      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    // / Cupertino context menu action with "onPressed" callback.
+    await tester.pumpWidget(getApp(onPressed: () {}));
+    await gesture.moveTo(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-      await gesture.moveTo(contextMenuAction);
-      await tester.pumpAndSettle();
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      );
+    await gesture.moveTo(contextMenuAction);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }

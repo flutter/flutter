@@ -71,8 +71,8 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null);
+  })  : assert(elevation == null || elevation >= 0.0),
+        assert(borderOnForeground != null);
 
   /// The card's background color.
   ///
@@ -189,14 +189,13 @@ class Card extends StatelessWidget {
 // Hand coded defaults based on Material Design 2.
 class _CardDefaultsM2 extends CardTheme {
   const _CardDefaultsM2(this.context)
-    : super(
-        clipBehavior: Clip.none,
-        elevation: 1.0,
-        margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        )
-    );
+      : super(
+            clipBehavior: Clip.none,
+            elevation: 1.0,
+            margin: const EdgeInsets.all(4.0),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            ));
 
   final BuildContext context;
 
@@ -219,12 +218,17 @@ class _CardDefaultsM2 extends CardTheme {
 // Generated version v0_101
 class _CardDefaultsM3 extends CardTheme {
   const _CardDefaultsM3(this.context)
-    : super(
-        clipBehavior: Clip.none,
-        elevation: 1.0,
-        margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0))),
-      );
+      : super(
+          clipBehavior: Clip.none,
+          elevation: 1.0,
+          margin: const EdgeInsets.all(4.0),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12.0),
+                  topRight: Radius.circular(12.0),
+                  bottomLeft: Radius.circular(12.0),
+                  bottomRight: Radius.circular(12.0))),
+        );
 
   final BuildContext context;
 

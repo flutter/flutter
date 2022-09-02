@@ -29,7 +29,8 @@ void main() {
     expect(lerped.opticalSize, 45.75);
     expect(lerped.color, const Color(0xBF7F7F7F));
     expect(lerped.opacity, 0.625);
-    expect(lerped.shadows, const <Shadow>[Shadow(color: Color(0xAAAAAAAA), blurRadius: 0.75, offset: Offset(0.75, 0.75))]);
+    expect(
+        lerped.shadows, const <Shadow>[Shadow(color: Color(0xAAAAAAAA), blurRadius: 0.75, offset: Offset(0.75, 0.75))]);
   });
 
   group('IconThemeData lerp', () {
@@ -54,7 +55,8 @@ void main() {
       expect(lerped.opticalSize, 11.25);
       expect(lerped.color, const Color(0x40FFFFFF));
       expect(lerped.opacity, 0.25);
-      expect(lerped.shadows, const <Shadow>[Shadow(color: Color(0xFFFFFFFF), blurRadius: 0.25, offset: Offset(0.25, 0.25))]);
+      expect(lerped.shadows,
+          const <Shadow>[Shadow(color: Color(0xFFFFFFFF), blurRadius: 0.25, offset: Offset(0.25, 0.25))]);
     });
 
     test('with second null', () {
@@ -67,7 +69,8 @@ void main() {
       expect(lerped.opticalSize, 33.75);
       expect(lerped.color, const Color(0xBFFFFFFF));
       expect(lerped.opacity, 0.75);
-      expect(lerped.shadows, const <Shadow>[Shadow(color: Color(0xFFFFFFFF), blurRadius: 0.75, offset: Offset(0.75, 0.75))]);
+      expect(lerped.shadows,
+          const <Shadow>[Shadow(color: Color(0xFFFFFFFF), blurRadius: 0.75, offset: Offset(0.75, 0.75))]);
     });
 
     test('with both null', () {

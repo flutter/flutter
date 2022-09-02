@@ -82,27 +82,28 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     required Widget this.child,
-  }) : assert(alignPanAxis != null),
-       assert(child != null),
-       assert(constrained != null),
-       assert(minScale != null),
-       assert(minScale > 0),
-       assert(minScale.isFinite),
-       assert(maxScale != null),
-       assert(maxScale > 0),
-       assert(!maxScale.isNaN),
-       assert(maxScale >= minScale),
-       assert(panEnabled != null),
-       assert(scaleEnabled != null),
-       // boundaryMargin must be either fully infinite or fully finite, but not
-       // a mix of both.
-       assert(
-         (boundaryMargin.horizontal.isInfinite
-           && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
-           && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
-           && boundaryMargin.left.isFinite),
-       ),
-       builder = null;
+  })  : assert(alignPanAxis != null),
+        assert(child != null),
+        assert(constrained != null),
+        assert(minScale != null),
+        assert(minScale > 0),
+        assert(minScale.isFinite),
+        assert(maxScale != null),
+        assert(maxScale > 0),
+        assert(!maxScale.isNaN),
+        assert(maxScale >= minScale),
+        assert(panEnabled != null),
+        assert(scaleEnabled != null),
+        // boundaryMargin must be either fully infinite or fully finite, but not
+        // a mix of both.
+        assert(
+          (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
+              (boundaryMargin.top.isFinite &&
+                  boundaryMargin.right.isFinite &&
+                  boundaryMargin.bottom.isFinite &&
+                  boundaryMargin.left.isFinite),
+        ),
+        builder = null;
 
   /// Creates an InteractiveViewer for a child that is created on demand.
   ///
@@ -128,28 +129,28 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     required InteractiveViewerWidgetBuilder this.builder,
-  }) : assert(alignPanAxis != null),
-       assert(builder != null),
-       assert(minScale != null),
-       assert(minScale > 0),
-       assert(minScale.isFinite),
-       assert(maxScale != null),
-       assert(maxScale > 0),
-       assert(!maxScale.isNaN),
-       assert(maxScale >= minScale),
-       assert(panEnabled != null),
-       assert(scaleEnabled != null),
-       // boundaryMargin must be either fully infinite or fully finite, but not
-       // a mix of both.
-       assert(
-         (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
-             (boundaryMargin.top.isFinite &&
-                 boundaryMargin.right.isFinite &&
-                 boundaryMargin.bottom.isFinite &&
-                 boundaryMargin.left.isFinite),
-       ),
-       constrained = false,
-       child = null;
+  })  : assert(alignPanAxis != null),
+        assert(builder != null),
+        assert(minScale != null),
+        assert(minScale > 0),
+        assert(minScale.isFinite),
+        assert(maxScale != null),
+        assert(maxScale > 0),
+        assert(!maxScale.isNaN),
+        assert(maxScale >= minScale),
+        assert(panEnabled != null),
+        assert(scaleEnabled != null),
+        // boundaryMargin must be either fully infinite or fully finite, but not
+        // a mix of both.
+        assert(
+          (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
+              (boundaryMargin.top.isFinite &&
+                  boundaryMargin.right.isFinite &&
+                  boundaryMargin.bottom.isFinite &&
+                  boundaryMargin.left.isFinite),
+        ),
+        constrained = false,
+        child = null;
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
   /// but it will not receive gestures in these areas.
@@ -381,8 +382,7 @@ class InteractiveViewer extends StatefulWidget {
   /// Returns the closest point to the given point on the given line segment.
   @visibleForTesting
   static Vector3 getNearestPointOnLine(Vector3 point, Vector3 l1, Vector3 l2) {
-    final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble()
-        + math.pow(l2.y - l1.y, 2.0).toDouble();
+    final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble() + math.pow(l2.y - l1.y, 2.0).toDouble();
 
     // In this case, l1 == l2.
     if (lengthSquared == 0) {
@@ -543,10 +543,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // rotation and translation methods don't handle infinites well.
     assert(
       boundaryRect.isFinite ||
-        (boundaryRect.left.isInfinite
-        && boundaryRect.top.isInfinite
-        && boundaryRect.right.isInfinite
-        && boundaryRect.bottom.isInfinite),
+          (boundaryRect.left.isInfinite &&
+              boundaryRect.top.isInfinite &&
+              boundaryRect.right.isInfinite &&
+              boundaryRect.bottom.isInfinite),
       'boundaryRect must either be infinite in all directions or finite in all directions.',
     );
     return boundaryRect;
@@ -566,14 +566,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix.clone();
     }
 
-    final Offset alignedTranslation = widget.alignPanAxis && _panAxis != null
-      ? _alignAxis(translation, _panAxis!)
-      : translation;
+    final Offset alignedTranslation =
+        widget.alignPanAxis && _panAxis != null ? _alignAxis(translation, _panAxis!) : translation;
 
-    final Matrix4 nextMatrix = matrix.clone()..translate(
-      alignedTranslation.dx,
-      alignedTranslation.dy,
-    );
+    final Matrix4 nextMatrix = matrix.clone()
+      ..translate(
+        alignedTranslation.dx,
+        alignedTranslation.dy,
+      );
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
@@ -612,12 +612,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // idea is that the boundaries are axis aligned (boundariesAabbQuad), but
     // calculating the translation to put the viewport inside that Quad is more
     // complicated than this when rotated.
-     // https://github.com/flutter/flutter/issues/57698
-    final Matrix4 correctedMatrix = matrix.clone()..setTranslation(Vector3(
-      correctedTotalTranslation.dx,
-      correctedTotalTranslation.dy,
-      0.0,
-    ));
+    // https://github.com/flutter/flutter/issues/57698
+    final Matrix4 correctedMatrix = matrix.clone()
+      ..setTranslation(Vector3(
+        correctedTotalTranslation.dx,
+        correctedTotalTranslation.dy,
+        0.0,
+      ));
 
     // Double check that the corrected translation fits.
     final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
@@ -639,11 +640,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       offendingCorrectedDistance.dx == 0.0 ? correctedTotalTranslation.dx : 0.0,
       offendingCorrectedDistance.dy == 0.0 ? correctedTotalTranslation.dy : 0.0,
     );
-    return matrix.clone()..setTranslation(Vector3(
-      unidirectionalCorrectedTotalTranslation.dx,
-      unidirectionalCorrectedTotalTranslation.dy,
-      0.0,
-    ));
+    return matrix.clone()
+      ..setTranslation(Vector3(
+        unidirectionalCorrectedTotalTranslation.dx,
+        unidirectionalCorrectedTotalTranslation.dy,
+        0.0,
+      ));
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -666,7 +668,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _viewport.height / _boundaryRect.height,
       ),
     );
-    final double clampedTotalScale = clampDouble(totalScale,
+    final double clampedTotalScale = clampDouble(
+      totalScale,
       widget.minScale,
       widget.maxScale,
     );
@@ -683,8 +686,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController!.toScene(
       focalPoint,
     );
-    return matrix
-      .clone()
+    return matrix.clone()
       ..translate(focalPointScene.dx, focalPointScene.dy)
       ..rotateZ(-rotation)
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
@@ -979,8 +981,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   void initState() {
     super.initState();
 
-    _transformationController = widget.transformationController
-        ?? TransformationController();
+    _transformationController = widget.transformationController ?? TransformationController();
     _transformationController!.addListener(_onTransformationControllerChange);
     _controller = AnimationController(
       vsync: this,
@@ -1229,9 +1230,9 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 // the given amount.
 Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
   final Matrix4 rotationMatrix = Matrix4.identity()
-      ..translate(rect.size.width / 2, rect.size.height / 2)
-      ..rotateZ(rotation)
-      ..translate(-rect.size.width / 2, -rect.size.height / 2);
+    ..translate(rect.size.width / 2, rect.size.height / 2)
+    ..rotateZ(rotation)
+    ..translate(-rect.size.width / 2, -rect.size.height / 2);
   final Quad boundariesRotated = Quad.points(
     rotationMatrix.transform3(Vector3(rect.left, rect.top, 0.0)),
     rotationMatrix.transform3(Vector3(rect.right, rect.top, 0.0)),
@@ -1246,7 +1247,10 @@ Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
 // Offset.zero.
 Offset _exceedsBy(Quad boundary, Quad viewport) {
   final List<Vector3> viewportPoints = <Vector3>[
-    viewport.point0, viewport.point1, viewport.point2, viewport.point3,
+    viewport.point0,
+    viewport.point1,
+    viewport.point2,
+    viewport.point3,
   ];
   Offset largestExcess = Offset.zero;
   for (final Vector3 point in viewportPoints) {

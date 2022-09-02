@@ -47,8 +47,8 @@ class ChipTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  })  : assert(child != null),
+        assert(data != null);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -538,27 +538,27 @@ class ChipThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
-    backgroundColor,
-    deleteIconColor,
-    disabledColor,
-    selectedColor,
-    secondarySelectedColor,
-    shadowColor,
-    surfaceTintColor,
-    selectedShadowColor,
-    showCheckmark,
-    checkmarkColor,
-    labelPadding,
-    padding,
-    side,
-    shape,
-    labelStyle,
-    secondaryLabelStyle,
-    brightness,
-    elevation,
-    pressElevation,
-    iconTheme,
-  ]);
+        backgroundColor,
+        deleteIconColor,
+        disabledColor,
+        selectedColor,
+        secondarySelectedColor,
+        shadowColor,
+        surfaceTintColor,
+        selectedShadowColor,
+        showCheckmark,
+        checkmarkColor,
+        labelPadding,
+        padding,
+        side,
+        shape,
+        labelStyle,
+        secondaryLabelStyle,
+        brightness,
+        elevation,
+        pressElevation,
+        iconTheme,
+      ]);
 
   @override
   bool operator ==(Object other) {
@@ -568,27 +568,27 @@ class ChipThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ChipThemeData
-        && other.backgroundColor == backgroundColor
-        && other.deleteIconColor == deleteIconColor
-        && other.disabledColor == disabledColor
-        && other.selectedColor == selectedColor
-        && other.secondarySelectedColor == secondarySelectedColor
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.selectedShadowColor == selectedShadowColor
-        && other.showCheckmark == showCheckmark
-        && other.checkmarkColor == checkmarkColor
-        && other.labelPadding == labelPadding
-        && other.padding == padding
-        && other.side == side
-        && other.shape == shape
-        && other.labelStyle == labelStyle
-        && other.secondaryLabelStyle == secondaryLabelStyle
-        && other.brightness == brightness
-        && other.elevation == elevation
-        && other.pressElevation == pressElevation
-        && other.iconTheme == iconTheme;
+    return other is ChipThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.deleteIconColor == deleteIconColor &&
+        other.disabledColor == disabledColor &&
+        other.selectedColor == selectedColor &&
+        other.secondarySelectedColor == secondarySelectedColor &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.selectedShadowColor == selectedShadowColor &&
+        other.showCheckmark == showCheckmark &&
+        other.checkmarkColor == checkmarkColor &&
+        other.labelPadding == labelPadding &&
+        other.padding == padding &&
+        other.side == side &&
+        other.shape == shape &&
+        other.labelStyle == labelStyle &&
+        other.secondaryLabelStyle == secondaryLabelStyle &&
+        other.brightness == brightness &&
+        other.elevation == elevation &&
+        other.pressElevation == pressElevation &&
+        other.iconTheme == iconTheme;
   }
 
   @override

@@ -91,7 +91,8 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough
     // space at the bottom in this case.
-    final double anchorX = clampDouble(widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
+    final double anchorX = clampDouble(
+      widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
@@ -114,8 +115,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
 
     final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    final Widget onePhysicalPixelVerticalDivider = SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
     void addToolbarButton(
       String text,
@@ -137,8 +137,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     if (widget.handleCopy != null) {
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
-    if (widget.handlePaste != null
-        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
+    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
@@ -181,7 +180,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
     );
     final Path path = Path()
       ..addOval(circle)
-    // Draw line so it slightly overlaps the circle.
+      // Draw line so it slightly overlaps the circle.
       ..addRect(line);
     canvas.drawPath(path, paint);
   }

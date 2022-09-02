@@ -90,7 +90,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   late Animation<double> _animation;
   late AnimationController _controller;
   @override
-  void initState () {
+  void initState() {
     super.initState();
     _controller = AnimationController(
       value: widget.isOpen ? 1.0 : 0.0,
@@ -101,10 +101,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       parent: _controller,
       curve: Curves.fastOutSlowIn,
       reverseCurve: Curves.fastOutSlowIn.flipped,
-    )
-      ..addListener(() => setState(() {
-        // [animation]'s value has changed here.
-      }));
+    )..addListener(() => setState(() {
+          // [animation]'s value has changed here.
+        }));
   }
 
   @override
@@ -114,7 +113,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   }
 
   @override
-  void didUpdateWidget (_AccountDetails oldWidget) {
+  void didUpdateWidget(_AccountDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the state of the arrow did not change, there is no need to trigger the animation
     if (oldWidget.isOpen == widget.isOpen) {
@@ -182,9 +181,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
                     child: Icon(
                       Icons.arrow_drop_down,
                       color: widget.arrowColor,
-                      semanticLabel: widget.isOpen
-                          ? localizations.hideAccountsLabel
-                          : localizations.showAccountsLabel,
+                      semanticLabel: widget.isOpen ? localizations.hideAccountsLabel : localizations.showAccountsLabel,
                     ),
                   ),
                 ),
@@ -212,8 +209,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
 const double _kAccountDetailsHeight = 56.0;
 
 class _AccountDetailsLayout extends MultiChildLayoutDelegate {
-
-  _AccountDetailsLayout({ required this.textDirection });
+  _AccountDetailsLayout({required this.textDirection});
 
   static const String accountName = 'accountName';
   static const String accountEmail = 'accountEmail';

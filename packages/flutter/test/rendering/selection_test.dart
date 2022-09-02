@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   const Rect rect = Rect.fromLTWH(100, 100, 200, 500);
   const Offset outsideTopLeft = Offset(50, 50);

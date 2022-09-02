@@ -17,7 +17,7 @@ void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ int? sortColumnIndex, bool sortAscending = true }) {
+    Widget buildTable({int? sortColumnIndex, bool sortAscending = true}) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
@@ -126,7 +126,7 @@ void main() {
     // Then, the cancel is triggered when the gesture arena
     // recognizes that the long press overrides the tap event
     // so it triggers a tap cancel, followed by the long press.
-    expect(log,<String>['cell-tapDown: 375' ,'cell-tapCancel: 375', 'cell-longPress: 375']);
+    expect(log, <String>['cell-tapDown: 375', 'cell-tapCancel: 375', 'cell-longPress: 375']);
     log.clear();
 
     TestGesture gesture = await tester.startGesture(
@@ -176,9 +176,11 @@ void main() {
           (int index) => DataRow(
             cells: <DataCell>[DataCell(Text('Row $index'))],
             selected: selected[index],
-            onSelectChanged: index == disabledIndex ? null : (bool? value) {
-              log.add('row-selected: $index');
-            },
+            onSelectChanged: index == disabledIndex
+                ? null
+                : (bool? value) {
+                    log.add('row-selected: $index');
+                  },
           ),
         ),
       );
@@ -230,7 +232,7 @@ void main() {
   testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ bool checkboxes = false }) {
+    Widget buildTable({bool checkboxes = false}) {
       return DataTable(
         showCheckboxColumn: checkboxes,
         onSelectAll: (bool? value) {
@@ -439,7 +441,7 @@ void main() {
   });
 
   testWidgets('DataTable sort indicator orientation', (WidgetTester tester) async {
-    Widget buildTable({ bool sortAscending = true }) {
+    Widget buildTable({bool sortAscending = true}) {
       return DataTable(
         sortColumnIndex: 0,
         sortAscending: sortAscending,
@@ -542,7 +544,8 @@ void main() {
     );
   });
 
-  testWidgets('DataTable sort indicator orientation does not change on state update - reverse', (WidgetTester tester) async {
+  testWidgets('DataTable sort indicator orientation does not change on state update - reverse',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43724
     Widget buildTable({String title = 'Name1'}) {
       return DataTable(
@@ -902,7 +905,8 @@ void main() {
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(
+      home: Material(
+          child: buildCustomTable(
         horizontalMargin: customHorizontalMargin,
         columnSpacing: customColumnSpacing,
       )),
@@ -1108,7 +1112,8 @@ void main() {
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(
+      home: Material(
+          child: buildCustomTable(
         horizontalMargin: customHorizontalMargin,
         columnSpacing: customColumnSpacing,
       )),
@@ -1185,7 +1190,7 @@ void main() {
     BoxDecoration boxDecoration = tableRow.decoration! as BoxDecoration;
     expect(boxDecoration.border!.top.width, 1.0);
 
-    const double thickness =  4.2;
+    const double thickness = 4.2;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1253,7 +1258,7 @@ void main() {
   });
 
   testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
-    Widget buildTable({ int? sortColumnIndex, bool sortEnabled = true }) {
+    Widget buildTable({int? sortColumnIndex, bool sortEnabled = true}) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         columns: <DataColumn>[
@@ -1275,7 +1280,8 @@ void main() {
 
     // Start with without sorting
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(
+      home: Material(
+          child: buildTable(
         sortEnabled: false,
       )),
     ));
@@ -1302,7 +1308,8 @@ void main() {
 
     // Turn off sorting again
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(
+      home: Material(
+          child: buildTable(
         sortEnabled: false,
       )),
     ));
@@ -1320,7 +1327,7 @@ void main() {
     // Regression test for a bug described in
     // https://github.com/flutter/flutter/pull/43735#issuecomment-589459947
     // Filed at https://github.com/flutter/flutter/issues/51152
-    Widget buildTable({ int? sortColumnIndex }) {
+    Widget buildTable({int? sortColumnIndex}) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         columns: <DataColumn>[
@@ -1467,7 +1474,7 @@ void main() {
             DataRow(
               selected: selected,
               color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
+                (Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return selectedColor;
                   }
@@ -1521,7 +1528,7 @@ void main() {
             ),
             DataRow(
               color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
+                (Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return disabledColor;
                   }
@@ -1646,10 +1653,11 @@ void main() {
 
     expect(
       find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
-      paints..rect(
-        rect: const Rect.fromLTRB(0.0, 0.0, width, height),
-        color: backgroundColor,
-      ),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, width, height),
+          color: backgroundColor,
+        ),
     );
     expect(
       find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
@@ -1731,7 +1739,8 @@ void main() {
     }
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(
+      home: Material(
+          child: buildCustomTable(
         checkboxHorizontalMargin: customCheckboxHorizontalMargin,
         horizontalMargin: customHorizontalMargin,
       )),
@@ -1768,11 +1777,12 @@ void main() {
               DataColumn(label: Text('Col2')),
             ],
             rows: <DataRow>[
-              DataRow(cells: const <DataCell>[
-                DataCell(Text('Hello')),
-                DataCell(Text('world')),
-              ],
-              onSelectChanged: (bool? value) {},
+              DataRow(
+                cells: const <DataCell>[
+                  DataCell(Text('Hello')),
+                  DataCell(Text('world')),
+                ],
+                onSelectChanged: (bool? value) {},
               ),
               const DataRow(cells: <DataCell>[
                 DataCell(Text('Bug')),
@@ -1893,6 +1903,5 @@ void main() {
     );
 
     // Go without crashes.
-
   });
 }

@@ -20,7 +20,7 @@ RenderBox getRenderSegmentedControl(WidgetTester tester) {
   ) as RenderBox;
 }
 
-Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
+Rect currentUnscaledThumbRect(WidgetTester tester, {bool useGlobalCoordinate = false}) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
   // Using dynamic to access private class in test.
   // ignore: avoid_dynamic_calls
@@ -71,10 +71,12 @@ Widget setupSimpleSegmentedControl() {
 StateSetter? setState;
 int? groupValue = 0;
 void defaultCallback(int? newValue) {
-  setState!(() { groupValue = newValue; });
+  setState!(() {
+    groupValue = newValue;
+  });
 }
 
-Widget boilerplate({ required WidgetBuilder builder }) {
+Widget boilerplate({required WidgetBuilder builder}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
@@ -87,7 +89,6 @@ Widget boilerplate({ required WidgetBuilder builder }) {
 }
 
 void main() {
-
   setUp(() {
     setState = null;
     groupValue = 0;
@@ -154,7 +155,7 @@ void main() {
       1: Text('Child 2'),
     };
 
-    Future<void> verifyPadding({ EdgeInsets? padding }) async {
+    Future<void> verifyPadding({EdgeInsets? padding}) async {
       final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
 
@@ -324,22 +325,27 @@ void main() {
       ),
     );
 
-    final BoxDecoration decoration = tester.widget<Container>(find.descendant(
-      of: find.byType(UnconstrainedBox),
-      matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
+    final BoxDecoration decoration = tester
+        .widget<Container>(find.descendant(
+          of: find.byType(UnconstrainedBox),
+          matching: find.byType(Container),
+        ))
+        .decoration! as BoxDecoration;
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color!.value, CupertinoColors.systemRed.color.value);
 
-    setState(() { brightness = Brightness.dark; });
+    setState(() {
+      brightness = Brightness.dark;
+    });
     await tester.pump();
 
-    final BoxDecoration decorationDark = tester.widget<Container>(find.descendant(
-      of: find.byType(UnconstrainedBox),
-      matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
-
+    final BoxDecoration decorationDark = tester
+        .widget<Container>(find.descendant(
+          of: find.byType(UnconstrainedBox),
+          matching: find.byType(Container),
+        ))
+        .decoration! as BoxDecoration;
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.darkColor.value);
     expect(decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);
@@ -347,7 +353,7 @@ void main() {
 
   testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '
-        'a Container or Placeholder widget)',
+    'a Container or Placeholder widget)',
     (WidgetTester tester) async {
       const Map<int, Widget> children = <int, Widget>{
         0: Text('Child 1'),
@@ -426,9 +432,12 @@ void main() {
     );
 
     double getChildOpacityByName(String childName) {
-      return tester.renderObject<RenderAnimatedOpacity>(
-        find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
-      ).opacity.value;
+      return tester
+          .renderObject<RenderAnimatedOpacity>(
+            find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
+          )
+          .opacity
+          .value;
     }
 
     // Opacity 1 with no interaction.
@@ -467,9 +476,12 @@ void main() {
 
   testWidgets('Long press does not change the opacity of currently-selected child', (WidgetTester tester) async {
     double getChildOpacityByName(String childName) {
-      return tester.renderObject<RenderAnimatedOpacity>(
-        find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
-      ).opacity.value;
+      return tester
+          .renderObject<RenderAnimatedOpacity>(
+            find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
+          )
+          .opacity
+          .value;
     }
 
     await tester.pumpWidget(setupSimpleSegmentedControl());
@@ -766,7 +778,9 @@ void main() {
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
+      onTapDown: (TapDownDetails details) {
+        tapDownDetails = details;
+      },
       child: const SizedBox(width: 200, height: 200),
     );
     children[1] = const Text('Child 2');
@@ -896,7 +910,9 @@ void main() {
       final Rect initialThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
 
       // Starts animating towards 1.
-      setState!(() { groupValue = 1; });
+      setState!(() {
+        groupValue = 1;
+      });
       await tester.pump(const Duration(milliseconds: 10));
 
       const Map<int, Widget> newChildren = <int, Widget>{
@@ -1059,7 +1075,9 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Change selection programmatically.
-    setState!(() { groupValue = 1; });
+    setState!(() {
+      groupValue = 1;
+    });
     await tester.pump();
     await tester.pumpAndSettle();
 
@@ -1239,7 +1257,9 @@ void main() {
     final Size size = renderBox.size;
 
     for (final int value in children.keys) {
-      setState!(() { groupValue = value; });
+      setState!(() {
+        groupValue = value;
+      });
       await tester.pump();
       await tester.pumpAndSettle();
 
@@ -1333,7 +1353,8 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Hovering over Cupertino sliding segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino sliding segmented control updates cursor to clickable on Web',
+      (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('BB'),

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
+import 'dart:ui'
+    show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -23,7 +24,7 @@ void main() {
     expect(tested, isTrue);
     final dynamic exception = tester.takeException();
     expect(exception, isNotNull);
-    expect(exception ,isFlutterError);
+    expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 5);
     expect(error.diagnostics.last, isA<ErrorHint>());
@@ -104,7 +105,8 @@ void main() {
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
+    expect(data.size,
+        equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -720,13 +722,11 @@ void main() {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          hasMediaQueryAsParentOutside =
-              context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+          hasMediaQueryAsParentOutside = context.findAncestorWidgetOfExactType<MediaQuery>() != null;
           return MediaQuery.fromWindow(
             child: Builder(
               builder: (BuildContext context) {
-                hasMediaQueryAsParentInside =
-                    context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+                hasMediaQueryAsParentInside = context.findAncestorWidgetOfExactType<MediaQuery>() != null;
                 return const SizedBox();
               },
             ),
@@ -775,7 +775,8 @@ void main() {
     expect(settingsA, isNot(settingsB));
   });
 
-  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding',
+      (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -847,7 +848,8 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removePadding only removes specified display features and padding',
+      (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -934,7 +936,8 @@ void main() {
       gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );
 
-    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
+    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop,
+        closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
   });
 }

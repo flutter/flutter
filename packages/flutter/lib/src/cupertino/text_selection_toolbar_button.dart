@@ -37,12 +37,12 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     this.onPressed,
     required String text,
   }) : child = Text(
-         text,
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
-         ),
-       );
+          text,
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle.copyWith(
+            color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
+          ),
+        );
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
   /// The child of this button.

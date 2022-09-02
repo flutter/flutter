@@ -69,13 +69,13 @@ class ExpansionTile extends StatefulWidget {
     this.iconColor,
     this.collapsedIconColor,
     this.controlAffinity,
-  }) : assert(initiallyExpanded != null),
-       assert(maintainState != null),
-       assert(
-       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
-       'CrossAxisAlignment.baseline is not supported since the expanded children '
-           'are aligned in a column, not a row. Try to use another constant.',
-       );
+  })  : assert(initiallyExpanded != null),
+        assert(maintainState != null),
+        assert(
+          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+          'CrossAxisAlignment.baseline is not supported since the expanded children '
+          'are aligned in a column, not a row. Try to use another constant.',
+        );
 
   /// A widget to display before the title.
   ///
@@ -226,7 +226,6 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Used to override to the [ListTileThemeData.iconColor].
   final Color? collapsedIconColor;
-
 
   /// The color of the tile's titles when the sublist is expanded.
   ///
@@ -388,9 +387,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
           ClipRect(
             child: Align(
-              alignment: widget.expandedAlignment
-                ?? expansionTileTheme.expandedAlignment
-                ?? Alignment.center,
+              alignment: widget.expandedAlignment ?? expansionTileTheme.expandedAlignment ?? Alignment.center,
               heightFactor: _heightFactor.value,
               child: child,
             ),
@@ -407,14 +404,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ColorScheme colorScheme = theme.colorScheme;
     _borderColorTween.end = theme.dividerColor;
     _headerColorTween
-      ..begin = widget.collapsedTextColor
-        ?? expansionTileTheme.collapsedTextColor
-        ?? theme.textTheme.titleMedium!.color
+      ..begin = widget.collapsedTextColor ?? expansionTileTheme.collapsedTextColor ?? theme.textTheme.titleMedium!.color
       ..end = widget.textColor ?? expansionTileTheme.textColor ?? colorScheme.primary;
     _iconColorTween
-      ..begin = widget.collapsedIconColor
-        ?? expansionTileTheme.collapsedIconColor
-        ?? theme.unselectedWidgetColor
+      ..begin = widget.collapsedIconColor ?? expansionTileTheme.collapsedIconColor ?? theme.unselectedWidgetColor
       ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? colorScheme.primary;
     _backgroundColorTween
       ..begin = widget.collapsedBackgroundColor ?? expansionTileTheme.collapsedBackgroundColor

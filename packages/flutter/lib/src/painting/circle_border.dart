@@ -32,7 +32,7 @@ class CircleBorder extends OutlinedBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder({ super.side, this.eccentricity = 0.0 })
+  const CircleBorder({super.side, this.eccentricity = 0.0})
       : assert(side != null),
         assert(eccentricity != null),
         assert(eccentricity >= 0.0, 'The eccentricity argument $eccentricity is not greater than or equal to zero.'),
@@ -70,17 +70,17 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return Path()..addOval(_adjustRect(rect).deflate(side.strokeInset));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path()..addOval(_adjustRect(rect));
   }
 
   @override
-  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     if (eccentricity == 0.0) {
       canvas.drawCircle(rect.center, rect.shortestSide / 2.0, paint);
     } else {
@@ -92,12 +92,12 @@ class CircleBorder extends OutlinedBorder {
   bool get preferPaintInterior => true;
 
   @override
-  CircleBorder copyWith({ BorderSide? side, double? eccentricity }) {
+  CircleBorder copyWith({BorderSide? side, double? eccentricity}) {
     return CircleBorder(side: side ?? this.side, eccentricity: eccentricity ?? this.eccentricity);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -139,9 +139,7 @@ class CircleBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is CircleBorder
-        && other.side == side
-        && other.eccentricity == eccentricity;
+    return other is CircleBorder && other.side == side && other.eccentricity == eccentricity;
   }
 
   @override

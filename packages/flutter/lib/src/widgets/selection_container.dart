@@ -48,8 +48,8 @@ class SelectionContainer extends StatefulWidget {
     this.registrar,
     required SelectionContainerDelegate this.delegate,
     required this.child,
-  }) : assert(delegate != null),
-       assert(child != null);
+  })  : assert(delegate != null),
+        assert(child != null);
 
   /// Creates a selection container that disables selection for the
   /// subtree.
@@ -58,8 +58,8 @@ class SelectionContainer extends StatefulWidget {
   const SelectionContainer.disabled({
     super.key,
     required this.child,
-  }) : registrar = null,
-       delegate = null;
+  })  : registrar = null,
+        delegate = null;
 
   /// The [SelectionRegistrar] this container is registered to.
   ///

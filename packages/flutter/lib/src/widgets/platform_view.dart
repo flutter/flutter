@@ -77,10 +77,10 @@ class AndroidView extends StatefulWidget {
     this.creationParams,
     this.creationParamsCodec,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(viewType != null),
-       assert(hitTestBehavior != null),
-       assert(creationParams == null || creationParamsCodec != null),
-       assert(clipBehavior != null);
+  })  : assert(viewType != null),
+        assert(hitTestBehavior != null),
+        assert(creationParams == null || creationParamsCodec != null),
+        assert(clipBehavior != null);
 
   /// The unique identifier for Android view type to be embedded by this widget.
   ///
@@ -229,9 +229,9 @@ class UiKitView extends StatefulWidget {
     this.creationParams,
     this.creationParamsCodec,
     this.gestureRecognizers,
-  }) : assert(viewType != null),
-       assert(hitTestBehavior != null),
-       assert(creationParams == null || creationParamsCodec != null);
+  })  : assert(viewType != null),
+        assert(hitTestBehavior != null),
+        assert(creationParams == null || creationParamsCodec != null);
 
   // TODO(amirh): reference the iOS API doc once available.
   /// The unique identifier for iOS view type to be embedded by this widget.
@@ -349,8 +349,8 @@ class HtmlElementView extends StatelessWidget {
     super.key,
     required this.viewType,
     this.onPlatformViewCreated,
-  }) : assert(viewType != null),
-       assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
+  })  : assert(viewType != null),
+        assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
   ///
@@ -441,7 +441,7 @@ class _AndroidViewState extends State<AndroidView> {
   FocusNode? _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    <Factory<OneSequenceGestureRecognizer>>{};
+      <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -570,7 +570,7 @@ class _UiKitViewState extends State<UiKitView> {
   late FocusNode _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    <Factory<OneSequenceGestureRecognizer>>{};
+      <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -645,15 +645,14 @@ class _UiKitViewState extends State<UiKitView> {
   Future<void> _createNewUiKitView() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
     final UiKitViewController controller = await PlatformViewsService.initUiKitView(
-      id: id,
-      viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
-      creationParams: widget.creationParams,
-      creationParamsCodec: widget.creationParamsCodec,
-      onFocus: () {
-        _focusNode.requestFocus();
-      }
-    );
+        id: id,
+        viewType: widget.viewType,
+        layoutDirection: _layoutDirection!,
+        creationParams: widget.creationParams,
+        creationParamsCodec: widget.creationParamsCodec,
+        onFocus: () {
+          _focusNode.requestFocus();
+        });
     if (!mounted) {
       controller.dispose();
       return;
@@ -685,10 +684,10 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     required this.hitTestBehavior,
     required this.gestureRecognizers,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null),
-       assert(clipBehavior != null);
+  })  : assert(controller != null),
+        assert(hitTestBehavior != null),
+        assert(gestureRecognizers != null),
+        assert(clipBehavior != null);
 
   final AndroidViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
@@ -696,8 +695,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      RenderAndroidView(
+  RenderObject createRenderObject(BuildContext context) => RenderAndroidView(
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,
@@ -718,9 +716,9 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+  })  : assert(controller != null),
+        assert(hitTestBehavior != null),
+        assert(gestureRecognizers != null);
 
   final UiKitViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
@@ -749,14 +747,13 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 ///
 ///  * [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
-
   const PlatformViewCreationParams._({
     required this.id,
     required this.viewType,
     required this.onPlatformViewCreated,
     required this.onFocusChanged,
-  }) : assert(id != null),
-       assert(onPlatformViewCreated != null);
+  })  : assert(id != null),
+        assert(onPlatformViewCreated != null);
 
   /// The unique identifier for the new platform view.
   ///
@@ -843,12 +840,11 @@ class PlatformViewLink extends StatefulWidget {
     required PlatformViewSurfaceFactory surfaceFactory,
     required CreatePlatformViewCallback onCreatePlatformView,
     required this.viewType,
-    }) : assert(surfaceFactory != null),
-         assert(onCreatePlatformView != null),
-         assert(viewType != null),
-         _surfaceFactory = surfaceFactory,
-         _onCreatePlatformView = onCreatePlatformView;
-
+  })  : assert(surfaceFactory != null),
+        assert(onCreatePlatformView != null),
+        assert(viewType != null),
+        _surfaceFactory = surfaceFactory,
+        _onCreatePlatformView = onCreatePlatformView;
 
   final PlatformViewSurfaceFactory _surfaceFactory;
   final CreatePlatformViewCallback _onCreatePlatformView;
@@ -972,7 +968,6 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 ///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
-
   /// Construct a `PlatformViewSurface`.
   ///
   /// The [controller] must not be null.
@@ -981,9 +976,9 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+  })  : assert(controller != null),
+        assert(hitTestBehavior != null),
+        assert(gestureRecognizers != null);
 
   /// The controller for the platform view integrated by this [PlatformViewSurface].
   ///
@@ -1042,7 +1037,8 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return PlatformViewRenderBox(controller: controller, gestureRecognizers: gestureRecognizers, hitTestBehavior: hitTestBehavior);
+    return PlatformViewRenderBox(
+        controller: controller, gestureRecognizers: gestureRecognizers, hitTestBehavior: hitTestBehavior);
   }
 
   @override
@@ -1076,9 +1072,9 @@ class AndroidViewSurface extends PlatformViewSurface {
     required AndroidViewController super.controller,
     required super.hitTestBehavior,
     required super.gestureRecognizers,
-  }) : assert(controller != null),
-       assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+  })  : assert(controller != null),
+        assert(hitTestBehavior != null),
+        assert(gestureRecognizers != null);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -1087,10 +1083,8 @@ class AndroidViewSurface extends PlatformViewSurface {
     // This is useful when embedding a SurfaceView into a Flutter app.
     // SurfaceViews cannot be composed using GL textures.
     if (viewController is ExpensiveAndroidViewController) {
-      final PlatformViewRenderBox renderBox =
-          super.createRenderObject(context) as PlatformViewRenderBox;
-      viewController.pointTransformer =
-          (Offset position) => renderBox.globalToLocal(position);
+      final PlatformViewRenderBox renderBox = super.createRenderObject(context) as PlatformViewRenderBox;
+      viewController.pointTransformer = (Offset position) => renderBox.globalToLocal(position);
       return renderBox;
     }
     // Use GL texture based composition.
@@ -1100,8 +1094,7 @@ class AndroidViewSurface extends PlatformViewSurface {
       gestureRecognizers: gestureRecognizers,
       hitTestBehavior: hitTestBehavior,
     );
-    viewController.pointTransformer =
-        (Offset position) => renderBox.globalToLocal(position);
+    viewController.pointTransformer = (Offset position) => renderBox.globalToLocal(position);
     return renderBox;
   }
 }
@@ -1114,10 +1107,11 @@ typedef _OnLayoutCallback = void Function(Size size);
 class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
   _PlatformViewPlaceholderBox({
     required this.onLayout,
-  }) : super(additionalConstraints: const BoxConstraints.tightFor(
-      width: double.infinity,
-      height: double.infinity,
-    ));
+  }) : super(
+            additionalConstraints: const BoxConstraints.tightFor(
+          width: double.infinity,
+          height: double.infinity,
+        ));
 
   _OnLayoutCallback onLayout;
 

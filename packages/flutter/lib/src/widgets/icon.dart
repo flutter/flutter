@@ -80,9 +80,9 @@ class Icon extends StatelessWidget {
     this.shadows,
     this.semanticLabel,
     this.textDirection,
-  }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
-       assert(weight == null || (0.0 < weight)),
-       assert(opticalSize == null || (0.0 < opticalSize));
+  })  : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
+        assert(weight == null || (0.0 < weight)),
+        assert(opticalSize == null || (0.0 < opticalSize));
 
   /// The icon to display. The available icons are described in [Icons].
   ///

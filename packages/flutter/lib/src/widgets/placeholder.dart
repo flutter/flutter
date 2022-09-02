@@ -32,8 +32,7 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_PlaceholderPainter oldPainter) {
-    return oldPainter.color != color
-        || oldPainter.strokeWidth != strokeWidth;
+    return oldPainter.color != color || oldPainter.strokeWidth != strokeWidth;
   }
 
   @override
@@ -53,14 +52,13 @@ class _PlaceholderPainter extends CustomPainter {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=LPe56fezmoo}
 class Placeholder extends StatelessWidget {
   /// Creates a widget which draws a box.
-  const Placeholder({
-    super.key,
-    this.color = const Color(0xFF455A64), // Blue Grey 700
-    this.strokeWidth = 2.0,
-    this.fallbackWidth = 400.0,
-    this.fallbackHeight = 400.0,
-    this.child
-  });
+  const Placeholder(
+      {super.key,
+      this.color = const Color(0xFF455A64), // Blue Grey 700
+      this.strokeWidth = 2.0,
+      this.fallbackWidth = 400.0,
+      this.fallbackHeight = 400.0,
+      this.child});
 
   /// The color to draw the placeholder box.
   final Color color;

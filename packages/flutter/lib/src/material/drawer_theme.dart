@@ -96,12 +96,12 @@ class DrawerThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    scrimColor,
-    elevation,
-    shape,
-    width,
-  );
+        backgroundColor,
+        scrimColor,
+        elevation,
+        shape,
+        width,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -111,12 +111,12 @@ class DrawerThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DrawerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.scrimColor == scrimColor
-        && other.elevation == elevation
-        && other.shape == shape
-        && other.width == width;
+    return other is DrawerThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.scrimColor == scrimColor &&
+        other.elevation == elevation &&
+        other.shape == shape &&
+        other.width == width;
   }
 
   @override

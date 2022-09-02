@@ -43,8 +43,8 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     required this.child,
-  }) : assert(autofocus != null),
-       assert(clipBehavior != null);
+  })  : assert(autofocus != null),
+        assert(clipBehavior != null);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -206,7 +206,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
   void handleStatesControllerChange() {
     // Force a rebuild to resolve MaterialStateProperty properties
-    setState(() { });
+    setState(() {});
   }
 
   MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
@@ -261,8 +261,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     assert(defaultStyle != null);
 
     T? effectiveValue<T>(T? Function(ButtonStyle? style) getProperty) {
-      final T? widgetValue  = getProperty(widgetStyle);
-      final T? themeValue   = getProperty(themeStyle);
+      final T? widgetValue = getProperty(widgetStyle);
+      final T? themeValue = getProperty(themeStyle);
       final T? defaultValue = getProperty(defaultStyle);
       return widgetValue ?? themeValue ?? defaultValue;
     }
@@ -303,7 +303,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
-    final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+    final InteractiveInkFeatureFactory? resolvedSplashFactory =
+        effectiveValue((ButtonStyle? style) => style?.splashFactory);
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -336,32 +337,31 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final double dy = densityAdjustment.dy;
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry padding = resolvedPadding!
-      .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly
     // animates its elevation but not its color. SKIA renders non-zero
     // elevations as a shadow colored fill behind the Material's background.
-    if (resolvedAnimationDuration! > Duration.zero
-        && elevation != null
-        && backgroundColor != null
-        && elevation != resolvedElevation
-        && backgroundColor!.value != resolvedBackgroundColor!.value
-        && backgroundColor!.opacity == 1
-        && resolvedBackgroundColor.opacity < 1
-        && resolvedElevation == 0) {
+    if (resolvedAnimationDuration! > Duration.zero &&
+        elevation != null &&
+        backgroundColor != null &&
+        elevation != resolvedElevation &&
+        backgroundColor!.value != resolvedBackgroundColor!.value &&
+        backgroundColor!.opacity == 1 &&
+        resolvedBackgroundColor.opacity < 1 &&
+        resolvedElevation == 0) {
       if (controller?.duration != resolvedAnimationDuration) {
         controller?.dispose();
         controller = AnimationController(
           duration: resolvedAnimationDuration,
           vsync: this,
-        )
-        ..addStatusListener((AnimationStatus status) {
-          if (status == AnimationStatus.completed) {
-            setState(() { }); // Rebuild with the final background color.
-          }
-        });
+        )..addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              setState(() {}); // Rebuild with the final background color.
+            }
+          });
       }
       resolvedBackgroundColor = backgroundColor; // Defer changing the background color.
       controller!.value = 0;
@@ -552,7 +552,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (super.hitTest(result, position: position)) {
       return true;
     }

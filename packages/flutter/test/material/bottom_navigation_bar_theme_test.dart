@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
-
 void main() {
   test('BottomNavigationBarThemeData copyWith, ==, hashCode basics', () {
     expect(const BottomNavigationBarThemeData(), const BottomNavigationBarThemeData().copyWith());
@@ -31,7 +30,8 @@ void main() {
     expect(themeData.landscapeLayout, null);
     expect(themeData.mouseCursor, null);
 
-    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
+    const BottomNavigationBarTheme theme =
+        BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
     expect(theme.data.elevation, null);
     expect(theme.data.selectedIconTheme, null);
@@ -289,14 +289,16 @@ void main() {
     expect(selectedFontStyle.fontSize, selectedFontStyle.fontSize);
     // Unselected label has a font size of 22 but is scaled down to be font size 21.
     expect(
-      tester.firstWidget<Transform>(
-        findDescendantOfBottomNavigationBar(
-          find.ancestor(
-            of: find.text('Alarm'),
-            matching: find.byType(Transform),
-          ),
-        ),
-      ).transform,
+      tester
+          .firstWidget<Transform>(
+            findDescendantOfBottomNavigationBar(
+              find.ancestor(
+                of: find.text('Alarm'),
+                matching: find.byType(Transform),
+              ),
+            ),
+          )
+          .transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
     );
     expect(selectedIcon.color, equals(selectedItemColor));
@@ -358,7 +360,6 @@ void main() {
       ),
     );
 
-
     final Finder findOpacity = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(Opacity),
@@ -396,7 +397,6 @@ void main() {
       ),
     );
 
-
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(FadeTransition),
@@ -432,7 +432,6 @@ void main() {
         ),
       ),
     );
-
 
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),

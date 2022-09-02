@@ -109,13 +109,13 @@ class PopupMenuThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    color,
-    shape,
-    elevation,
-    textStyle,
-    enableFeedback,
-    mouseCursor,
-  );
+        color,
+        shape,
+        elevation,
+        textStyle,
+        enableFeedback,
+        mouseCursor,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -125,13 +125,13 @@ class PopupMenuThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is PopupMenuThemeData
-        && other.elevation == elevation
-        && other.color == color
-        && other.shape == shape
-        && other.textStyle == textStyle
-        && other.enableFeedback == enableFeedback
-        && other.mouseCursor == mouseCursor;
+    return other is PopupMenuThemeData &&
+        other.elevation == elevation &&
+        other.color == color &&
+        other.shape == shape &&
+        other.textStyle == textStyle &&
+        other.enableFeedback == enableFeedback &&
+        other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -142,7 +142,8 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 

@@ -268,10 +268,10 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-  }) : assert(child != null),
-       assert(dragStartBehavior != null),
-       assert(alignment != null),
-       super(key: key);
+  })  : assert(child != null),
+        assert(dragStartBehavior != null),
+        assert(alignment != null),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -381,7 +381,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       _scrimColorTween = _buildScrimColorTween();
     }
     if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
-      switch(_controller.status) {
+      switch (_controller.status) {
         case AnimationStatus.completed:
         case AnimationStatus.dismissed:
           _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
@@ -539,9 +539,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   ColorTween _buildScrimColorTween() {
     return ColorTween(
       begin: Colors.transparent,
-      end: widget.scrimColor
-          ?? DrawerTheme.of(context).scrimColor
-          ?? Colors.black54,
+      end: widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54,
     );
   }
 
@@ -587,12 +585,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (widget.edgeDragWidth == null) {
       switch (textDirection) {
         case TextDirection.ltr:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.left : padding.right);
+          dragAreaWidth = _kEdgeDragWidth + (drawerIsStart ? padding.left : padding.right);
           break;
         case TextDirection.rtl:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.right : padding.left);
+          dragAreaWidth = _kEdgeDragWidth + (drawerIsStart ? padding.right : padding.left);
           break;
       }
     }
@@ -630,7 +626,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
       assert(platformHasBackButton != null);
 
-      final Widget child =  RepaintBoundary(
+      final Widget child = RepaintBoundary(
         child: Stack(
           children: <Widget>[
             BlockSemantics(
@@ -641,7 +637,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                    child: Container( // The drawer's "scrim"
+                    child: Container(
+                      // The drawer's "scrim"
                       color: _scrimColorTween.evaluate(_controller),
                     ),
                   ),

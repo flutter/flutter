@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({ super.key });
+  const TestIcon({super.key});
 
   @override
   TestIconState createState() => TestIconState();
@@ -27,7 +27,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, { super.key });
+  const TestText(this.text, {super.key});
 
   final String text;
 
@@ -75,9 +75,9 @@ void main() {
     const ListTileThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -103,9 +103,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -243,7 +243,9 @@ void main() {
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
-    ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder!;
+    ShapeBorder inkWellBorder() => tester
+        .widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)))
+        .customBorder!;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -384,7 +386,7 @@ void main() {
                   return ListTile(
                     selected: isSelected,
                     onTap: () {
-                      setState(()=> isSelected = !isSelected);
+                      setState(() => isSelected = !isSelected);
                     },
                     title: const Text('Title'),
                   );
@@ -405,7 +407,8 @@ void main() {
     expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
   });
 
-  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
+  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties",
+      (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;
@@ -426,7 +429,7 @@ void main() {
                     selectedTileColor: selectedTileColor,
                     selected: isSelected,
                     onTap: () {
-                      setState(()=> isSelected = !isSelected);
+                      setState(() => isSelected = !isSelected);
                     },
                     title: const Text('Title'),
                   );
@@ -451,7 +454,7 @@ void main() {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ShapeBorder shapeBorder =  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0));
+    final ShapeBorder shapeBorder = RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0));
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -471,11 +474,12 @@ void main() {
     // Start drawer animation.
     await tester.pump();
 
-    final ShapeBorder? inkWellBorder = tester.widget<InkWell>(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.byType(InkWell),
-    )).customBorder;
+    final ShapeBorder? inkWellBorder = tester
+        .widget<InkWell>(find.descendant(
+          of: find.byType(ListTile),
+          matching: find.byType(InkWell),
+        ))
+        .customBorder;
     // Test shape.
     expect(inkWellBorder, shapeBorder);
   });

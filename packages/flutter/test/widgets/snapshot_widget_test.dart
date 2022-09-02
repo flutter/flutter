@@ -181,7 +181,8 @@ void main() {
     expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
+  testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size',
+      (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
@@ -196,7 +197,6 @@ void main() {
 
     expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-
 
   testWidgets('RenderSnapshotWidget throws assertion if platform view is encountered', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
@@ -215,8 +215,10 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isA<FlutterError>()
-      .having((FlutterError error) => error.message, 'message', contains('SnapshotWidget used with a child that contains a PlatformView')));
+    expect(
+        tester.takeException(),
+        isA<FlutterError>().having((FlutterError error) => error.message, 'message',
+            contains('SnapshotWidget used with a child that contains a PlatformView')));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced', (WidgetTester tester) async {
@@ -240,7 +242,9 @@ void main() {
     expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encounted with SnapshotMode.permissive', (WidgetTester tester) async {
+  testWidgets(
+      'RenderSnapshotWidget does not take a snapshot if a platform view is encounted with SnapshotMode.permissive',
+      (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
@@ -351,8 +355,7 @@ class TestDependencies extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window)
-          .copyWith(devicePixelRatio: devicePixelRatio),
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(devicePixelRatio: devicePixelRatio),
         child: child,
       ),
     );

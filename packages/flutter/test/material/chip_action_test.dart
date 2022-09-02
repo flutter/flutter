@@ -39,7 +39,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: ActionChip(
-            onPressed: () { },
+            onPressed: () {},
             label: const Text('action chip'),
           ),
         ),
@@ -52,10 +52,11 @@ void main() {
 
   testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, onPressed: () { })));
+    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, onPressed: () {})));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () { })));
+    await tester
+        .pumpWidget(wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () {})));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 }

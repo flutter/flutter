@@ -82,13 +82,13 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.enableFeedback = true,
     this.child,
-  }) : assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(elevation == null || elevation >= 0.0),
-       assert(focusElevation == null || focusElevation >= 0.0),
-       assert(hoverElevation == null || hoverElevation >= 0.0),
-       assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(disabledElevation == null || disabledElevation >= 0.0);
+  })  : assert(clipBehavior != null),
+        assert(autofocus != null),
+        assert(elevation == null || elevation >= 0.0),
+        assert(focusElevation == null || focusElevation >= 0.0),
+        assert(hoverElevation == null || hoverElevation >= 0.0),
+        assert(highlightElevation == null || highlightElevation >= 0.0),
+        assert(disabledElevation == null || disabledElevation >= 0.0);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -407,9 +407,9 @@ class MaterialButton extends StatelessWidget {
       padding: buttonTheme.getPadding(this),
       visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this).copyWith(
-        minWidth: minWidth,
-        minHeight: height,
-      ),
+            minWidth: minWidth,
+            minHeight: height,
+          ),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -439,7 +439,8 @@ class MaterialButton extends StatelessWidget {
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }
 
@@ -455,4 +456,4 @@ class MaterialButton extends StatelessWidget {
   'Use one of these button classes instead. '
   'This feature was deprecated after v2.11.0-0.0.pre.',
 )
-mixin MaterialButtonWithIconMixin { }
+mixin MaterialButtonWithIconMixin {}

@@ -112,7 +112,6 @@ void main() {
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
-
   testWidgets('Icon with custom font', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -209,7 +208,6 @@ void main() {
     expect(const IconData(123).hashCode, isNot(const IconData(123, fontPackage: 'p').hashCode));
     expect(const IconData(123).toString(), 'IconData(U+0007B)');
   });
-
 
   testWidgets('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
     await tester.pumpWidget(

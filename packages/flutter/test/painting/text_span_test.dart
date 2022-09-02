@@ -13,8 +13,8 @@ void main() {
   test('TextSpan equals', () {
     const TextSpan a1 = TextSpan(text: 'a');
     const TextSpan a2 = TextSpan(text: 'a');
-    const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
-    const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
+    const TextSpan b1 = TextSpan(children: <TextSpan>[a1]);
+    const TextSpan b2 = TextSpan(children: <TextSpan>[a2]);
     const TextSpan c1 = TextSpan();
     const TextSpan c2 = TextSpan();
 
@@ -64,28 +64,32 @@ void main() {
         ),
       ],
     );
-    expect(test.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  inherit: true\n'
-      '  size: 10.0\n'
-      '  "a"\n'
-      '  TextSpan:\n'
-      '    "b"\n'
-      '    TextSpan:\n'
-      '      (empty)\n'
-      '  TextSpan:\n'
-      '    "c"\n',
-    ));
+    expect(
+        test.toStringDeep(),
+        equals(
+          'TextSpan:\n'
+          '  inherit: true\n'
+          '  size: 10.0\n'
+          '  "a"\n'
+          '  TextSpan:\n'
+          '    "b"\n'
+          '    TextSpan:\n'
+          '      (empty)\n'
+          '  TextSpan:\n'
+          '    "c"\n',
+        ));
   });
 
   test('TextSpan toStringDeep for mouse', () {
     const TextSpan test1 = TextSpan(
       text: 'a',
     );
-    expect(test1.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  "a"\n',
-    ));
+    expect(
+        test1.toStringDeep(),
+        equals(
+          'TextSpan:\n'
+          '  "a"\n',
+        ));
 
     final TextSpan test2 = TextSpan(
       text: 'a',
@@ -93,14 +97,15 @@ void main() {
       onExit: (_) {},
       mouseCursor: SystemMouseCursors.forbidden,
     );
-    expect(test2.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  "a"\n'
-      '  callbacks: enter, exit\n'
-      '  mouseCursor: SystemMouseCursor(forbidden)\n',
-    ));
+    expect(
+        test2.toStringDeep(),
+        equals(
+          'TextSpan:\n'
+          '  "a"\n'
+          '  callbacks: enter, exit\n'
+          '  mouseCursor: SystemMouseCursor(forbidden)\n',
+        ));
   });
-
 
   test('TextSpan toPlainText', () {
     const TextSpan textSpan = TextSpan(
@@ -370,14 +375,10 @@ void main() {
       spellOut: true,
       children: <InlineSpan>[
         TextSpan(text: 'yyyyy', locale: Locale('es', 'MX')),
-        TextSpan(
-          text: 'xxxxx',
-          spellOut: false,
-          children: <InlineSpan>[
-            TextSpan(text: 'zzzzz'),
-            TextSpan(text: 'bbbbb', spellOut: true),
-          ]
-        ),
+        TextSpan(text: 'xxxxx', spellOut: false, children: <InlineSpan>[
+          TextSpan(text: 'zzzzz'),
+          TextSpan(text: 'bbbbb', spellOut: true),
+        ]),
       ],
     );
     final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
@@ -408,7 +409,8 @@ void main() {
     expect(combined[0].stringAttributes[1].range, const TextRange(start: 5, end: 10));
     expect(combined[0].stringAttributes[2], isA<LocaleStringAttribute>());
     expect(combined[0].stringAttributes[2].range, const TextRange(start: 5, end: 10));
-    final LocaleStringAttribute combinedLocaleStringAttribute = combined[0].stringAttributes[2] as LocaleStringAttribute;
+    final LocaleStringAttribute combinedLocaleStringAttribute =
+        combined[0].stringAttributes[2] as LocaleStringAttribute;
     expect(combinedLocaleStringAttribute.locale, const Locale('es', 'MX'));
     expect(combined[0].stringAttributes[3], isA<SpellOutStringAttribute>());
     expect(combined[0].stringAttributes[3].range, const TextRange(start: 20, end: 25));

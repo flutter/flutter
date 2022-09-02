@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -86,7 +85,10 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('foo'), 44);
     manager.doSerialization();
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['foo'], 44);
+    expect(
+        (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['foo'],
+        44);
     expect(manager.updateScheduled, isFalse);
 
     // Can add a new value.
@@ -94,7 +96,10 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<bool>('value3'), true);
     manager.doSerialization();
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['value3'], true);
+    expect(
+        (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['value3'],
+        true);
     expect(manager.updateScheduled, isFalse);
 
     // Can remove existing value.
@@ -102,7 +107,8 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('foo'), isNull); // Does not exist anymore.
     manager.doSerialization();
-    expect(((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>).containsKey('foo'), isFalse);
+    expect(((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>).containsKey('foo'),
+        isFalse);
     expect(manager.updateScheduled, isFalse);
 
     // Removing non-existing value is no-op.
@@ -114,8 +120,15 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('value4'), null);
     manager.doSerialization();
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>).containsKey('value4'), isTrue);
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['value4'], null);
+    expect(
+        (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+                as Map<String, dynamic>)
+            .containsKey('value4'),
+        isTrue);
+    expect(
+        (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['value4'],
+        null);
     expect(manager.updateScheduled, isFalse);
   });
 
@@ -135,7 +148,10 @@ void main() {
     child.write('bar', 44);
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['bar'], 44);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['bar'],
+        44);
     expect(manager.updateScheduled, isFalse);
   });
 
@@ -159,7 +175,10 @@ void main() {
 
     expect(manager.updateScheduled, isFalse);
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child2'), isTrue);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 55);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<Object?, Object?>)['foo'],
+        55);
   });
 
   test('claim child that is already claimed throws if not given up', () {
@@ -220,8 +239,15 @@ void main() {
     child1.dispose();
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>).containsKey('foo'), isFalse);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['bar'], 55);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+                as Map<Object?, Object?>)
+            .containsKey('foo'),
+        isFalse);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<Object?, Object?>)['bar'],
+        55);
   });
 
   test('claiming a claimed child twice and only giving it up once throws', () {
@@ -443,7 +469,10 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('fresh-child'), isTrue);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['fresh-child'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['value'], 22);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['fresh-child'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<Object?, Object?>)['value'],
+        22);
 
     child.write('bar', 'blabla');
     expect(manager.updateScheduled, isTrue);
@@ -462,7 +491,8 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    final Object childOfChildData = (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>)['childOfChild']!;
+    final Object childOfChildData = (((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+        as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>)['childOfChild']!;
     expect(childOfChildData, isNotEmpty);
 
     root.adoptChild(childOfChild);
@@ -470,7 +500,10 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    expect(((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>).containsKey(childrenMapKey), isFalse); // child1 has no children anymore.
+    expect(
+        ((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)
+            .containsKey(childrenMapKey),
+        isFalse); // child1 has no children anymore.
     expect((rawData[childrenMapKey] as Map<String, dynamic>)['childOfChild'], childOfChildData);
   });
 
@@ -497,7 +530,8 @@ void main() {
     final RestorationBucket childOfChild = child.claimChild('child1', debugOwner: 'owner2');
     childOfChild.write<String>('foo', 'bar');
 
-    final Object childOfChildData = (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>)['child1']!;
+    final Object childOfChildData = (((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+        as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>)['child1']!;
     expect(childOfChildData, isNotEmpty);
 
     expect(manager.updateScheduled, isTrue);
@@ -537,13 +571,15 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 'bar');
-    expect((((((rawData[childrenMapKey] as Map<String, dynamic>)
-      ['child1'] as Map<String, dynamic>)
-        [childrenMapKey] as Map<Object?, Object?>)
-          ['child2']! as Map<String, dynamic>)
-            [valuesMapKey] as Map<Object?, Object?>)
-              ['hello'], 'world');
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<Object?, Object?>)['foo'],
+        'bar');
+    expect(
+        (((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[childrenMapKey]
+                as Map<Object?, Object?>)['child2']! as Map<String, dynamic>)[valuesMapKey]
+            as Map<Object?, Object?>)['hello'],
+        'world');
   });
 
   test('throws when used after dispose', () {
@@ -567,12 +603,12 @@ void main() {
 Map<String, dynamic> _createRawDataSet() {
   return <String, dynamic>{
     valuesMapKey: <String, dynamic>{
-      'value1' : 10,
-      'value2' : 'Hello',
+      'value1': 10,
+      'value2': 'Hello',
     },
     childrenMapKey: <String, dynamic>{
-      'child1' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
+      'child1': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{
           'foo': 22,
         },
       },

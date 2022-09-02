@@ -26,10 +26,10 @@ class FrictionSimulation extends Simulation {
     double position,
     double velocity, {
     super.tolerance,
-  }) : _drag = drag,
-       _dragLog = math.log(drag),
-       _x = position,
-       _v = velocity;
+  })  : _drag = drag,
+        _dragLog = math.log(drag),
+        _x = position,
+        _v = velocity;
 
   /// Creates a new friction simulation with its fluid drag coefficient (_cₓ_) set so
   /// as to ensure that the simulation starts and ends at the specified
@@ -42,7 +42,8 @@ class FrictionSimulation extends Simulation {
   /// of the start velocity must be greater than the magnitude of the end
   /// velocity, and the velocities must be in the direction appropriate for the
   /// particle to start from the start position and reach the end position.
-  factory FrictionSimulation.through(double startPosition, double endPosition, double startVelocity, double endVelocity) {
+  factory FrictionSimulation.through(
+      double startPosition, double endPosition, double startVelocity, double endVelocity) {
     assert(startVelocity == 0.0 || endVelocity == 0.0 || startVelocity.sign == endVelocity.sign);
     assert(startVelocity.abs() >= endVelocity.abs());
     assert((endPosition - startPosition).sign == startVelocity.sign);
@@ -96,7 +97,8 @@ class FrictionSimulation extends Simulation {
   bool isDone(double time) => dx(time).abs() < tolerance.velocity;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'FrictionSimulation')}(cₓ: ${_drag.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'FrictionSimulation')}(cₓ: ${_drag.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)})';
 }
 
 /// A [FrictionSimulation] that clamps the modeled particle to a specific range
@@ -131,10 +133,11 @@ class BoundedFrictionSimulation extends FrictionSimulation {
   @override
   bool isDone(double time) {
     return super.isDone(time) ||
-      (x(time) - _minX).abs() < tolerance.distance ||
-      (x(time) - _maxX).abs() < tolerance.distance;
+        (x(time) - _minX).abs() < tolerance.distance ||
+        (x(time) - _maxX).abs() < tolerance.distance;
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'BoundedFrictionSimulation')}(cₓ: ${_drag.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, x: ${_minX.toStringAsFixed(1)}..${_maxX.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'BoundedFrictionSimulation')}(cₓ: ${_drag.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, x: ${_minX.toStringAsFixed(1)}..${_maxX.toStringAsFixed(1)})';
 }

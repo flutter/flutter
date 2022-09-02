@@ -116,7 +116,7 @@ void main() {
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
-  const BaselineDetector(this.callback, { super.key });
+  const BaselineDetector(this.callback, {super.key});
 
   final VoidCallback callback;
 
@@ -167,5 +167,5 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) { }
+  void paint(PaintingContext context, Offset offset) {}
 }

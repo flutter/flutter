@@ -36,7 +36,7 @@ class FilledButtonThemeData with Diagnosticable {
   /// Creates an [FilledButtonThemeData].
   ///
   /// The [style] may be null.
-  const FilledButtonThemeData({ this.style });
+  const FilledButtonThemeData({this.style});
 
   /// Overrides for [FilledButton]'s default style.
   ///
@@ -49,7 +49,7 @@ class FilledButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two filled button themes.
   static FilledButtonThemeData? lerp(FilledButtonThemeData? a, FilledButtonThemeData? b, double t) {
-    assert (t != null);
+    assert(t != null);
     if (a == null && b == null) {
       return null;
     }

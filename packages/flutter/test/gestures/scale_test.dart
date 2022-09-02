@@ -281,7 +281,8 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices', (GestureTester tester) {
+  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices',
+      (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartScale = false;
@@ -350,12 +351,22 @@ void main() {
 
     final List<String> log = <String>[];
 
-    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
-    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
-    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
+    scale.onStart = (ScaleStartDetails details) {
+      log.add('scale-start');
+    };
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      log.add('scale-update');
+    };
+    scale.onEnd = (ScaleEndDetails details) {
+      log.add('scale-end');
+    };
 
-    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
-    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
+    drag.onStart = (DragStartDetails details) {
+      log.add('drag-start');
+    };
+    drag.onEnd = (DragEndDetails details) {
+      log.add('drag-end');
+    };
 
     final TestPointer pointer1 = TestPointer();
 
@@ -591,7 +602,7 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedDelta, const Offset(10.0, 10.0));
     updatedDelta = null;
-    expect(updatedRotation, - math.pi);
+    expect(updatedRotation, -math.pi);
     updatedRotation = null;
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
@@ -919,7 +930,8 @@ void main() {
     // Change the scale and angle of the pan/zoom to test combining.
     // Scale should be multiplied together.
     // Rotation angle should be added together.
-    tester.route(panZoomPointer.panZoomUpdate(Offset.zero, pan: const Offset(40, 40), scale: math.sqrt(2), rotation: math.pi / 3));
+    tester.route(panZoomPointer.panZoomUpdate(Offset.zero,
+        pan: const Offset(40, 40), scale: math.sqrt(2), rotation: math.pi / 3));
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, const Offset(30, 30));
     updatedFocalPoint = null;
@@ -936,7 +948,8 @@ void main() {
     expect(didEndScale, isFalse);
 
     // Move the pan/zoom origin to test combining.
-    tester.route(panZoomPointer.panZoomUpdate(const Offset(15, 15), pan: const Offset(55, 55), scale: math.sqrt(2), rotation: math.pi / 3));
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(15, 15),
+        pan: const Offset(55, 55), scale: math.sqrt(2), rotation: math.pi / 3));
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, const Offset(40, 40));
     updatedFocalPoint = null;
@@ -978,12 +991,22 @@ void main() {
 
     final List<String> log = <String>[];
 
-    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
-    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
-    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
+    scale.onStart = (ScaleStartDetails details) {
+      log.add('scale-start');
+    };
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      log.add('scale-update');
+    };
+    scale.onEnd = (ScaleEndDetails details) {
+      log.add('scale-end');
+    };
 
-    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
-    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
+    drag.onStart = (DragStartDetails details) {
+      log.add('drag-start');
+    };
+    drag.onEnd = (DragEndDetails details) {
+      log.add('drag-end');
+    };
 
     final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
@@ -1000,7 +1023,8 @@ void main() {
 
     // Scale will win if focal point delta exceeds 18.0*2.
 
-    tester.route(pointer1.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(10.0, 40.0))); // delta of 40.0 exceeds 18.0*2.
+    tester.route(pointer1.panZoomUpdate(const Offset(10.0, 10.0),
+        pan: const Offset(10.0, 40.0))); // delta of 40.0 exceeds 18.0*2.
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -1159,17 +1183,18 @@ void main() {
     scale.dispose();
   });
 
-  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set',
+      (WidgetTester tester) async {
     expect(
       () {
         ScaleGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+          kind: PointerDeviceKind.touch,
+          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(), 'description',
+            contains('kind == null || supportedDevices == null')),
       ),
     );
   });

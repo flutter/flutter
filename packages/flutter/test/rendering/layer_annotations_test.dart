@@ -884,9 +884,9 @@ Matcher _equalToAnnotationResult<T>(
   return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(
     list,
     (AnnotationEntry<int> a, AnnotationEntry<int> b) {
-      return a.annotation == b.annotation
-          && _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff)
-          && _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
+      return a.annotation == b.annotation &&
+          _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff) &&
+          _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
     },
     'equal to',
   );

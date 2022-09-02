@@ -64,19 +64,16 @@ class CupertinoTextMagnifier extends StatefulWidget {
 
   /// [CupertinoTextMagnifier] will determine its own positioning
   /// based on the [MagnifierOverlayInfoBearer] of this notifier.
-  final ValueNotifier<MagnifierOverlayInfoBearer>
-      magnifierOverlayInfoBearer;
+  final ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer;
 
   /// The duration that the magnifier drags behind its final position.
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
 
   @override
-  State<CupertinoTextMagnifier> createState() =>
-      _CupertinoTextMagnifierState();
+  State<CupertinoTextMagnifier> createState() => _CupertinoTextMagnifierState();
 }
 
-class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
-    with SingleTickerProviderStateMixin {
+class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier> with SingleTickerProviderStateMixin {
   // Initalize to dummy values for the event that the inital call to
   // _determineMagnifierPositionAndFocalPoint calls hide, and thus does not
   // set these values.
@@ -95,8 +92,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     )..addListener(() => setState(() {}));
 
     widget.controller.animationController = _ioAnimationController;
-    widget.magnifierOverlayInfoBearer
-        .addListener(_determineMagnifierPositionAndFocalPoint);
+    widget.magnifierOverlayInfoBearer.addListener(_determineMagnifierPositionAndFocalPoint);
 
     _ioAnimation = Tween<double>(
       begin: 0.0,
@@ -111,8 +107,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   void dispose() {
     widget.controller.animationController = null;
     _ioAnimationController.dispose();
-    widget.magnifierOverlayInfoBearer
-        .removeListener(_determineMagnifierPositionAndFocalPoint);
+    widget.magnifierOverlayInfoBearer.removeListener(_determineMagnifierPositionAndFocalPoint);
     super.dispose();
   }
 
@@ -132,18 +127,14 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   }
 
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierOverlayInfoBearer textEditingContext =
-        widget.magnifierOverlayInfoBearer.value;
+    final MagnifierOverlayInfoBearer textEditingContext = widget.magnifierOverlayInfoBearer.value;
 
     // The exact Y of the center of the current line.
-    final double verticalCenterOfCurrentLine =
-        textEditingContext.caretRect.center.dy;
+    final double verticalCenterOfCurrentLine = textEditingContext.caretRect.center.dy;
 
     // If the magnifier is currently showing, but we have dragged out of threshold,
     // we should hide it.
-    if (verticalCenterOfCurrentLine -
-            textEditingContext.globalGesturePosition.dy <
-        -widget.hideBelowThreshold) {
+    if (verticalCenterOfCurrentLine - textEditingContext.globalGesturePosition.dy < -widget.hideBelowThreshold) {
       // Only signal a hide if we are currently showing.
       if (widget.controller.shown) {
         widget.controller.hide(removeFromOverlay: false);
@@ -161,17 +152,12 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     final double verticalPositionOfLens = math.max(
         verticalCenterOfCurrentLine,
         verticalCenterOfCurrentLine -
-            (verticalCenterOfCurrentLine -
-                    textEditingContext.globalGesturePosition.dy) /
-                widget.dragResistance);
+            (verticalCenterOfCurrentLine - textEditingContext.globalGesturePosition.dy) / widget.dragResistance);
 
     // The raw position, tracking the gesture directly.
     final Offset rawMagnifierPosition = Offset(
-      textEditingContext.globalGesturePosition.dx -
-          CupertinoMagnifier.kDefaultSize.width / 2,
-      verticalPositionOfLens -
-          (CupertinoMagnifier.kDefaultSize.height -
-              CupertinoMagnifier.kMagnifierAboveFocalPoint),
+      textEditingContext.globalGesturePosition.dx - CupertinoMagnifier.kDefaultSize.width / 2,
+      verticalPositionOfLens - (CupertinoMagnifier.kDefaultSize.height - CupertinoMagnifier.kMagnifierAboveFocalPoint),
     );
 
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
@@ -183,21 +169,16 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
           screenRect.left + widget.horizontalScreenEdgePadding,
           // iOS doesn't reposition for Y, so we should expand the threshold
           // so we can send the whole magnifier out of bounds if need be.
-          screenRect.top -
-              (CupertinoMagnifier.kDefaultSize.height +
-                  CupertinoMagnifier.kMagnifierAboveFocalPoint),
+          screenRect.top - (CupertinoMagnifier.kDefaultSize.height + CupertinoMagnifier.kMagnifierAboveFocalPoint),
           screenRect.right - widget.horizontalScreenEdgePadding,
-          screenRect.bottom +
-              (CupertinoMagnifier.kDefaultSize.height +
-                  CupertinoMagnifier.kMagnifierAboveFocalPoint)),
+          screenRect.bottom + (CupertinoMagnifier.kDefaultSize.height + CupertinoMagnifier.kMagnifierAboveFocalPoint)),
       rect: rawMagnifierPosition & CupertinoMagnifier.kDefaultSize,
     ).topLeft;
 
     setState(() {
       _currentAdjustedMagnifierPosition = adjustedMagnifierPosition;
       // The lens should always point to the center of the line.
-      _verticalFocalPointAdjustment =
-          verticalCenterOfCurrentLine - verticalPositionOfLens;
+      _verticalFocalPointAdjustment = verticalCenterOfCurrentLine - verticalPositionOfLens;
     });
   }
 
@@ -247,8 +228,7 @@ class CupertinoMagnifier extends StatelessWidget {
         spreadRadius: 0.2,
       ),
     ],
-    this.borderSide =
-        const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
+    this.borderSide = const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
     this.inOutAnimation,
   });
 
@@ -295,8 +275,7 @@ class CupertinoMagnifier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Offset focalPointOffset =
-        Offset(0, (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint);
+    Offset focalPointOffset = Offset(0, (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint);
     focalPointOffset.scale(1, inOutAnimation?.value ?? 1);
     focalPointOffset += additionalFocalPointOffset;
 

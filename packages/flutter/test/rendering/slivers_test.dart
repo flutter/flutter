@@ -715,7 +715,7 @@ void main() {
     const double height = 150.0;
 
     final RenderSliver sliver = RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(400.0, height)),
+      child: RenderSizedBox(const Size(400.0, height)),
     );
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
@@ -832,8 +832,7 @@ void main() {
       final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
       final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
 
-      final HitTestResult wrapped = MyHitTestResult()
-        ..publicPushTransform(transform);
+      final HitTestResult wrapped = MyHitTestResult()..publicPushTransform(transform);
       wrapped.add(entry1);
       expect(wrapped.path, equals(<HitTestEntry>[entry1]));
       expect(entry1.transform, transform);
@@ -865,7 +864,7 @@ void main() {
         crossAxisOffset: 0.0,
         mainAxisPosition: 0.0,
         crossAxisPosition: 0.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return true;
@@ -883,7 +882,7 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -901,7 +900,7 @@ void main() {
         crossAxisOffset: -6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -927,7 +926,7 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
           recordedMainAxisPosition = mainAxisPosition;
           recordedCrossAxisPosition = crossAxisPosition;
           result.add(entry);

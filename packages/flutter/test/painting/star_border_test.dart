@@ -126,10 +126,16 @@ void main() {
     await testBorder(tester, 'poly_side_1', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000))));
     await testBorder(
         tester, 'poly_side_10', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), width: 10)));
-    await testBorder(tester, 'poly_side_align_center',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
-    await testBorder(tester, 'poly_side_align_outside',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
+    await testBorder(
+        tester,
+        'poly_side_align_center',
+        const StarBorder.polygon(
+            side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
+    await testBorder(
+        tester,
+        'poly_side_align_outside',
+        const StarBorder.polygon(
+            side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
   testWidgets("StarBorder doesn't try to scale an infinite scale matrix", (WidgetTester tester) async {
@@ -141,7 +147,7 @@ void main() {
             width: 100,
             height: 100,
             child: Stack(
-              children: <Widget> [
+              children: <Widget>[
                 Positioned.fromRelativeRect(
                   rect: const RelativeRect.fromLTRB(100, 100, 100, 100),
                   child: Container(

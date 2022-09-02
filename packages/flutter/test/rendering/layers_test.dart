@@ -169,7 +169,8 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view =
+        RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
@@ -182,7 +183,8 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
     final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view =
+        RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -247,8 +249,7 @@ void main() {
   test('LeaderLayer.applyTransform can be called after retained rendering', () {
     void expectTransform(RenderObject leader) {
       final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
-      final Matrix4 expected = Matrix4.identity()
-        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final Matrix4 expected = Matrix4.identity()..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
       final Matrix4 transformed = Matrix4.identity();
       leaderLayer.applyTransform(null, transformed);
       expect(transformed, expected);
@@ -257,7 +258,7 @@ void main() {
     final LayerLink link = LayerLink();
     late RenderLeaderLayer leader;
     final RenderRepaintBoundary root = RenderRepaintBoundary(
-      child:RenderRepaintBoundary(
+      child: RenderRepaintBoundary(
         child: leader = RenderLeaderLayer(link: link),
       ),
     );
@@ -338,7 +339,8 @@ void main() {
     layer.debugFillProperties(builder);
     return builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
@@ -369,7 +371,11 @@ void main() {
     final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
     final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = getDebugInfo(layer);
-    expect(info, contains(isBrowser ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)' : 'filter: ImageFilter.blur(1.0, 1.0, repeated)'));
+    expect(
+        info,
+        contains(isBrowser
+            ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)'
+            : 'filter: ImageFilter.blur(1.0, 1.0, repeated)'));
     expect(info, contains('blendMode: clear'));
   });
 
@@ -551,7 +557,9 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+  },
+      skip:
+          isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
 
   test('ContainerLayer.toImageSync can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
@@ -569,7 +577,9 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+  },
+      skip:
+          isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
@@ -809,7 +819,7 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a2.subtreeHasCompositionCallbacks, false);
 
-    b1.addCompositionCallback((_) { });
+    b1.addCompositionCallback((_) {});
 
     expect(b1.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -967,8 +977,8 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a1.subtreeHasCompositionCallbacks, false);
 
-    final VoidCallback remover1 = a1.addCompositionCallback((_) { });
-    final VoidCallback remover2 = a1.addCompositionCallback((_) { });
+    final VoidCallback remover1 = a1.addCompositionCallback((_) {});
+    final VoidCallback remover2 = a1.addCompositionCallback((_) {});
 
     expect(root.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -986,7 +996,7 @@ void main() {
 
   test('Double removing a observe callback throws', () {
     final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final VoidCallback callback = root.addCompositionCallback((_) {});
     callback();
 
     expect(() => callback(), throwsAssertionError);
@@ -994,7 +1004,7 @@ void main() {
 
   test('Removing an observe callback on a disposed layer does not throw', () {
     final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final VoidCallback callback = root.addCompositionCallback((_) {});
     root.dispose();
     expect(() => callback(), returnsNormally);
   });

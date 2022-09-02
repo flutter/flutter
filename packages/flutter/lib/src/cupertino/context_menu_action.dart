@@ -20,9 +20,9 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.isDestructiveAction = false,
     this.onPressed,
     this.trailingIcon,
-  }) : assert(child != null),
-       assert(isDefaultAction != null),
-       assert(isDestructiveAction != null);
+  })  : assert(child != null),
+        assert(isDefaultAction != null),
+        assert(isDestructiveAction != null);
 
   /// The widget that will be placed inside the action.
   final Widget child;
@@ -99,9 +99,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
         color: CupertinoColors.destructiveRed,
       );
     }
-    return _kActionSheetActionStyle.copyWith(
-      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
-    );
+    return _kActionSheetActionStyle.copyWith(color: CupertinoDynamicColor.resolve(CupertinoColors.label, context));
   }
 
   @override
@@ -124,8 +122,8 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
             child: Container(
               decoration: BoxDecoration(
                 color: _isPressed
-                  ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
-                  : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+                    ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
+                    : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
               ),
               padding: const EdgeInsets.symmetric(
                 vertical: 16.0,

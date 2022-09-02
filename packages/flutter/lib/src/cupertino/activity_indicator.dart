@@ -86,8 +86,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   State<CupertinoActivityIndicator> createState() => _CupertinoActivityIndicatorState();
 }
 
-class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
-    with SingleTickerProviderStateMixin {
+class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -191,8 +190,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
     for (int i = 0; i < tickCount * progress; ++i) {
       final int t = (i - activeTick) % tickCount;
-      paint.color = activeColor
-          .withAlpha(progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t]);
+      paint.color = activeColor.withAlpha(progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(_kTwoPI / tickCount);
     }
@@ -202,8 +200,6 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CupertinoActivityIndicatorPainter oldPainter) {
-    return oldPainter.position != position ||
-        oldPainter.activeColor != activeColor ||
-        oldPainter.progress != progress;
+    return oldPainter.position != position || oldPainter.activeColor != activeColor || oldPainter.progress != progress;
   }
 }

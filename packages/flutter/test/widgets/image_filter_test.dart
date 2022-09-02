@@ -79,10 +79,10 @@ void main() {
                 title: const Text('Matrix ImageFilter Test'),
               ),
               body: const Center(
-                child:Text('Hooray!'),
+                child: Text('Hooray!'),
               ),
               floatingActionButton: FloatingActionButton(
-                onPressed: () { },
+                onPressed: () {},
                 tooltip: 'Increment',
                 child: const Icon(Icons.add),
               ),
@@ -133,7 +133,6 @@ void main() {
 
     await pumpWithEnabledStaet(false);
     expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
-
 
     await pumpWithEnabledStaet(true);
     expect(tester.layers, contains(isA<ImageFilterLayer>()));

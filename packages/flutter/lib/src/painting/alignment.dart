@@ -134,10 +134,7 @@ abstract class AlignmentGeometry {
 
   @override
   bool operator ==(Object other) {
-    return other is AlignmentGeometry
-        && other._x == _x
-        && other._start == _start
-        && other._y == _y;
+    return other is AlignmentGeometry && other._x == _x && other._start == _start && other._y == _y;
   }
 
   @override
@@ -189,8 +186,8 @@ class Alignment extends AlignmentGeometry {
   ///
   /// The [x] and [y] arguments must not be null.
   const Alignment(this.x, this.y)
-    : assert(x != null),
-      assert(y != null);
+      : assert(x != null),
+        assert(y != null);
 
   /// The distance fraction in the horizontal direction.
   ///
@@ -385,7 +382,7 @@ class Alignment extends AlignmentGeometry {
       return 'Alignment.bottomRight';
     }
     return 'Alignment(${x.toStringAsFixed(1)}, '
-                     '${y.toStringAsFixed(1)})';
+        '${y.toStringAsFixed(1)})';
   }
 
   @override
@@ -408,8 +405,8 @@ class AlignmentDirectional extends AlignmentGeometry {
   ///
   /// The [start] and [y] arguments must not be null.
   const AlignmentDirectional(this.start, this.y)
-    : assert(start != null),
-      assert(y != null);
+      : assert(start != null),
+        assert(y != null);
 
   /// The distance fraction in the horizontal direction.
   ///
@@ -587,7 +584,7 @@ class AlignmentDirectional extends AlignmentGeometry {
       return 'AlignmentDirectional.bottomEnd';
     }
     return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
-                                '${y.toStringAsFixed(1)})';
+        '${y.toStringAsFixed(1)})';
   }
 
   @override
@@ -682,8 +679,8 @@ class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
   const TextAlignVertical({
     required this.y,
-  }) : assert(y != null),
-       assert(y >= -1.0 && y <= 1.0);
+  })  : assert(y != null),
+        assert(y >= -1.0 && y <= 1.0);
 
   /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
   /// locations of the top and bottom of the input box.
@@ -692,8 +689,10 @@ class TextAlignVertical {
   /// Aligns a TextField's input Text with the topmost location within a
   /// TextField's input box.
   static const TextAlignVertical top = TextAlignVertical(y: -1.0);
+
   /// Aligns a TextField's input Text to the center of the TextField.
   static const TextAlignVertical center = TextAlignVertical(y: 0.0);
+
   /// Aligns a TextField's input Text with the bottommost location within a
   /// TextField.
   static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);

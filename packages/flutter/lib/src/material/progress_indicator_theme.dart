@@ -13,6 +13,7 @@ import 'theme.dart';
 // late BuildContext context;
 
 @immutable
+
 /// Defines the visual properties of [ProgressIndicator] widgets.
 ///
 /// Used by [ProgressIndicatorTheme] to control the visual properties of
@@ -73,10 +74,10 @@ class ProgressIndicatorThemeData with Diagnosticable {
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
-      linearTrackColor : linearTrackColor ?? this.linearTrackColor,
-      linearMinHeight : linearMinHeight ?? this.linearMinHeight,
-      circularTrackColor : circularTrackColor ?? this.circularTrackColor,
-      refreshBackgroundColor : refreshBackgroundColor ?? this.refreshBackgroundColor,
+      linearTrackColor: linearTrackColor ?? this.linearTrackColor,
+      linearMinHeight: linearMinHeight ?? this.linearMinHeight,
+      circularTrackColor: circularTrackColor ?? this.circularTrackColor,
+      refreshBackgroundColor: refreshBackgroundColor ?? this.refreshBackgroundColor,
     );
   }
 
@@ -90,36 +91,36 @@ class ProgressIndicatorThemeData with Diagnosticable {
     assert(t != null);
     return ProgressIndicatorThemeData(
       color: Color.lerp(a?.color, b?.color, t),
-      linearTrackColor : Color.lerp(a?.linearTrackColor, b?.linearTrackColor, t),
-      linearMinHeight : lerpDouble(a?.linearMinHeight, b?.linearMinHeight, t),
-      circularTrackColor : Color.lerp(a?.circularTrackColor, b?.circularTrackColor, t),
-      refreshBackgroundColor : Color.lerp(a?.refreshBackgroundColor, b?.refreshBackgroundColor, t),
+      linearTrackColor: Color.lerp(a?.linearTrackColor, b?.linearTrackColor, t),
+      linearMinHeight: lerpDouble(a?.linearMinHeight, b?.linearMinHeight, t),
+      circularTrackColor: Color.lerp(a?.circularTrackColor, b?.circularTrackColor, t),
+      refreshBackgroundColor: Color.lerp(a?.refreshBackgroundColor, b?.refreshBackgroundColor, t),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    color,
-    linearTrackColor,
-    linearMinHeight,
-    circularTrackColor,
-    refreshBackgroundColor,
-  );
+        color,
+        linearTrackColor,
+        linearMinHeight,
+        circularTrackColor,
+        refreshBackgroundColor,
+      );
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ProgressIndicatorThemeData
-      && other.color == color
-      && other.linearTrackColor == linearTrackColor
-      && other.linearMinHeight == linearMinHeight
-      && other.circularTrackColor == circularTrackColor
-      && other.refreshBackgroundColor == refreshBackgroundColor;
+    return other is ProgressIndicatorThemeData &&
+        other.color == color &&
+        other.linearTrackColor == linearTrackColor &&
+        other.linearMinHeight == linearMinHeight &&
+        other.circularTrackColor == circularTrackColor &&
+        other.refreshBackgroundColor == refreshBackgroundColor;
   }
 
   @override
@@ -174,7 +175,8 @@ class ProgressIndicatorTheme extends InheritedTheme {
   /// ProgressIndicatorThemeData theme = ProgressIndicatorTheme.of(context);
   /// ```
   static ProgressIndicatorThemeData of(BuildContext context) {
-    final ProgressIndicatorTheme? progressIndicatorTheme = context.dependOnInheritedWidgetOfExactType<ProgressIndicatorTheme>();
+    final ProgressIndicatorTheme? progressIndicatorTheme =
+        context.dependOnInheritedWidgetOfExactType<ProgressIndicatorTheme>();
     return progressIndicatorTheme?.data ?? Theme.of(context).progressIndicatorTheme;
   }
 

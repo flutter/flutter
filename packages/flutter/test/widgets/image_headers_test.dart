@@ -21,7 +21,6 @@ void main() {
       ));
 
       expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
-
     }, createHttpClient: (SecurityContext? _) {
       return client;
     });
@@ -59,7 +58,8 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
   HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.decompressed;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData,
+      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(
       onData,
       onDone: onDone,
@@ -73,7 +73,7 @@ class MockHttpHeaders extends Fake implements HttpHeaders {
   static final Map<String, List<String>> headers = <String, List<String>>{};
 
   @override
-  void add(String key, Object value, { bool preserveHeaderCase = false }) {
+  void add(String key, Object value, {bool preserveHeaderCase = false}) {
     headers[key] ??= <String>[];
     headers[key]!.add(value.toString());
   }

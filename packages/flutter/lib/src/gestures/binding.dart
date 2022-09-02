@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
@@ -359,8 +358,12 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
-      assert(!_hitTests.containsKey(event.pointer), 'Pointer of $event unexpectedly has a HitTestResult associated with it.');
+    if (event is PointerDownEvent ||
+        event is PointerSignalEvent ||
+        event is PointerHoverEvent ||
+        event is PointerPanZoomStartEvent) {
+      assert(!_hitTests.containsKey(event.pointer),
+          'Pointer of $event unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
@@ -388,9 +391,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }
       return true;
     }());
-    if (hitTestResult != null ||
-        event is PointerAddedEvent ||
-        event is PointerRemovedEvent) {
+    if (hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent) {
       assert(event.position != null);
       dispatchEvent(event, hitTestResult);
     }
@@ -487,8 +488,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     if (!locked) {
       if (resamplingEnabled) {
         _resampler.sample(samplingOffset, _samplingClock);
-      }
-      else {
+      } else {
         _resampler.stop();
       }
     }

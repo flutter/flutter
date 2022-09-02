@@ -106,13 +106,12 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   /// Create a new [SnapshotWidget].
   ///
   /// The [controller] and [child] arguments are required.
-  const SnapshotWidget({
-    super.key,
-    this.mode = SnapshotMode.normal,
-    this.painter = const _DefaultSnapshotPainter(),
-    required this.controller,
-    required super.child
-  });
+  const SnapshotWidget(
+      {super.key,
+      this.mode = SnapshotMode.normal,
+      this.painter = const _DefaultSnapshotPainter(),
+      required this.controller,
+      required super.child});
 
   /// The controller that determines when to display the children as a snapshot.
   final SnapshotController controller;
@@ -159,10 +158,10 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     required SnapshotController controller,
     required SnapshotMode mode,
     required SnapshotPainter painter,
-  }) : _devicePixelRatio = devicePixelRatio,
-       _controller = controller,
-       _mode = mode,
-       _painter = painter;
+  })  : _devicePixelRatio = devicePixelRatio,
+        _controller = controller,
+        _mode = mode,
+        _painter = painter;
 
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
@@ -191,8 +190,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     final SnapshotPainter oldPainter = painter;
     oldPainter.removeListener(markNeedsPaint);
     _painter = value;
-    if (oldPainter.runtimeType != painter.runtimeType ||
-        painter.shouldRepaint(oldPainter)) {
+    if (oldPainter.runtimeType != painter.runtimeType || painter.shouldRepaint(oldPainter)) {
       markNeedsPaint();
     }
     if (attached) {
@@ -345,7 +343,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
 /// }
 /// ```
 /// {@end-tool}
-abstract class SnapshotPainter extends ChangeNotifier  {
+abstract class SnapshotPainter extends ChangeNotifier {
   /// Called whenever the [image] that represents a [SnapshotWidget]s child should be painted.
   ///
   /// The image is rasterized at the physical pixel resolution and should be scaled down by
@@ -411,16 +409,16 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
   const _DefaultSnapshotPainter();
 
   @override
-  void addListener(ui.VoidCallback listener) { }
+  void addListener(ui.VoidCallback listener) {}
 
   @override
-  void dispose() { }
+  void dispose() {}
 
   @override
   bool get hasListeners => false;
 
   @override
-  void notifyListeners() { }
+  void notifyListeners() {}
 
   @override
   void paint(PaintingContext context, ui.Offset offset, ui.Size size, PaintingContextCallback painter) {
@@ -431,13 +429,12 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
   void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, double pixelRatio) {
     final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
-    final Paint paint = Paint()
-      ..filterQuality = FilterQuality.low;
+    final Paint paint = Paint()..filterQuality = FilterQuality.low;
     context.canvas.drawImageRect(image, src, dst, paint);
   }
 
   @override
-  void removeListener(ui.VoidCallback listener) { }
+  void removeListener(ui.VoidCallback listener) {}
 
   @override
   bool shouldRepaint(covariant _DefaultSnapshotPainter oldPainter) => false;

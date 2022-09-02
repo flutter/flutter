@@ -25,7 +25,7 @@ class _FakeEditableTextState with TextSelectionDelegate {
   TextSelection? selection;
 
   @override
-  void hideToolbar([bool hideHandles = true]) { }
+  void hideToolbar([bool hideHandles = true]) {}
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
@@ -33,10 +33,10 @@ class _FakeEditableTextState with TextSelectionDelegate {
   }
 
   @override
-  void bringIntoView(TextPosition position) { }
+  void bringIntoView(TextPosition position) {}
 
   @override
-  void cutSelection(SelectionChangedCause cause) { }
+  void cutSelection(SelectionChangedCause cause) {}
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) {
@@ -44,10 +44,10 @@ class _FakeEditableTextState with TextSelectionDelegate {
   }
 
   @override
-  void selectAll(SelectionChangedCause cause) { }
+  void selectAll(SelectionChangedCause cause) {}
 
   @override
-  void copySelection(SelectionChangedCause cause) { }
+  void copySelection(SelectionChangedCause cause) {}
 }
 
 void main() {
@@ -239,7 +239,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -265,10 +267,13 @@ void main() {
     editable.showCursor = showCursor;
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rect(
-      color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: const Rect.fromLTWH(40, 0, 1, 10),
-    ));
+    expect(
+        editable,
+        paints
+          ..rect(
+            color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+            rect: const Rect.fromLTWH(40, 0, 1, 10),
+          ));
 
     // Now change to a rounded caret.
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
@@ -276,25 +281,31 @@ void main() {
     editable.cursorRadius = const Radius.circular(3);
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(40, 0, 4, 10),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+        editable,
+        paints
+          ..rrect(
+            color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(40, 0, 4, 10),
+              const Radius.circular(3),
+            ),
+          ));
 
     editable.textScaleFactor = 2;
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(80, 0, 4, 20),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+        editable,
+        paints
+          ..rrect(
+            color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(80, 0, 4, 20),
+              const Radius.circular(3),
+            ),
+          ));
 
     // Can turn off caret.
     showCursor.value = false;
@@ -340,7 +351,9 @@ void main() {
       text: const TextSpan(
         text: '中文测试文本是否正确',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -362,10 +375,13 @@ void main() {
     editable.showCursor = showCursor;
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rect(
-      color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: const Rect.fromLTWH(40, 0, 1, 10),
-    ));
+    expect(
+        editable,
+        paints
+          ..rect(
+            color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+            rect: const Rect.fromLTWH(40, 0, 1, 10),
+          ));
 
     // Now change to a rounded caret.
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
@@ -373,25 +389,31 @@ void main() {
     editable.cursorRadius = const Radius.circular(3);
     pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(40, 0, 4, 10),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+        editable,
+        paints
+          ..rrect(
+            color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(40, 0, 4, 10),
+              const Radius.circular(3),
+            ),
+          ));
 
     editable.textScaleFactor = 2;
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
-    expect(editable, paints..rrect(
-      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(80, 0, 4, 20),
-        const Radius.circular(3),
-      ),
-    ));
+    expect(
+        editable,
+        paints
+          ..rrect(
+            color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(80, 0, 4, 20),
+              const Radius.circular(3),
+            ),
+          ));
 
     // Can turn off caret.
     showCursor.value = false;
@@ -415,7 +437,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -456,7 +480,9 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -512,7 +538,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -553,14 +581,14 @@ void main() {
     // Move over by one character.
     editable.handleTapDown(TapDownDetails(globalPosition: const Offset(10, 2)));
     pumpFrame();
-    editable.selectPosition(cause:SelectionChangedCause.tap);
+    editable.selectPosition(cause: SelectionChangedCause.tap);
     pumpFrame();
     expect(delegate.selection!.isCollapsed, true);
     expect(delegate.selection!.baseOffset, 6);
 
     editable.handleTapDown(TapDownDetails(globalPosition: const Offset(20, 2)));
     pumpFrame();
-    editable.selectWord(cause:SelectionChangedCause.longPress);
+    editable.selectWord(cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(delegate.selection!.isCollapsed, false);
     expect(delegate.selection!.baseOffset, 5);
@@ -568,7 +596,7 @@ void main() {
 
     // Select one more character down but since it's still part of the same
     // word, the same word is selected.
-    editable.selectWordsInRange(from: const Offset(30, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(30, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(delegate.selection!.isCollapsed, false);
     expect(delegate.selection!.baseOffset, 5);
@@ -596,7 +624,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -607,7 +637,7 @@ void main() {
     layout(editable);
 
     // Select the second white space, where the text position = 1.
-    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(10, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(delegate.selection!.isCollapsed, false);
     expect(delegate.selection!.baseOffset, 1);
@@ -635,7 +665,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -646,7 +678,7 @@ void main() {
     layout(editable);
 
     // Select the second white space, where the text position = 1.
-    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(10, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(delegate.selection!.isCollapsed, false);
     expect(delegate.selection!.baseOffset, 1);
@@ -674,7 +706,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       selection: const TextSelection.collapsed(
@@ -685,7 +719,7 @@ void main() {
     layout(editable);
 
     // Select the second white space, where the text position = 1.
-    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    editable.selectWordsInRange(from: const Offset(10, 2), cause: SelectionChangedCause.longPress);
     pumpFrame();
     expect(delegate.selection!.isCollapsed, true);
     expect(delegate.selection!.baseOffset, 1);
@@ -708,7 +742,9 @@ void main() {
       text: const TextSpan(
         text: text,
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -799,7 +835,9 @@ void main() {
       text: const TextSpan(
         text: '撒地方加咖啡哈金凤凰卡号方式剪坏算法发挥福建垃\nasfjafjajfjaslfjaskjflasjfksajf撒分开建安路口附近拉设\n计费可使肌肤撒附近埃里克圾房卡设计费"',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Roboto',
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Roboto',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -925,7 +963,9 @@ void main() {
       ),
     );
 
-    setUp(() { EditableText.debugDeterministicCursor = true; });
+    setUp(() {
+      EditableText.debugDeterministicCursor = true;
+    });
     tearDown(() {
       EditableText.debugDeterministicCursor = false;
       _TestRenderEditablePainter.paintHistory.clear();
@@ -1046,9 +1086,11 @@ void main() {
       FlutterErrorDetails? errorDetails;
       editable.painter = painter;
       editable.foregroundPainter = painter;
-      pumpFrame(phase: EnginePhase.paint, onErrors: () {
-        errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
-      });
+      pumpFrame(
+          phase: EnginePhase.paint,
+          onErrors: () {
+            errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
+          });
       expect(errorDetails, isNull);
 
       expect(
@@ -1246,9 +1288,9 @@ void main() {
     test('able to render basic WidgetSpan', () async {
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
       ];
@@ -1264,7 +1306,9 @@ void main() {
         endHandleLayerLink: LayerLink(),
         text: TextSpan(
           style: const TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
           children: <InlineSpan>[
             const TextSpan(text: 'test'),
@@ -1286,9 +1330,9 @@ void main() {
     test('able to render multiple WidgetSpans', () async {
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
         RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
@@ -1306,7 +1350,9 @@ void main() {
         endHandleLayerLink: LayerLink(),
         text: TextSpan(
           style: const TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
           children: <InlineSpan>[
             const TextSpan(text: 'test'),
@@ -1330,9 +1376,9 @@ void main() {
     test('able to render WidgetSpans with line wrap', () async {
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
         RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
@@ -1350,7 +1396,9 @@ void main() {
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
@@ -1379,9 +1427,9 @@ void main() {
     test('able to render WidgetSpans with line wrap alternating spans', () async {
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
         RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
@@ -1400,7 +1448,9 @@ void main() {
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
@@ -1437,9 +1487,9 @@ void main() {
     test('able to render WidgetSpans nested spans', () async {
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
         RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
@@ -1457,12 +1507,15 @@ void main() {
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
             WidgetSpan(child: Text('a')),
-            TextSpan(children: <InlineSpan>[
+            TextSpan(
+              children: <InlineSpan>[
                 WidgetSpan(child: Text('b')),
                 WidgetSpan(child: Text('c')),
               ],
@@ -1497,9 +1550,9 @@ void main() {
       const String sentence = 'one two';
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
       ];
@@ -1515,7 +1568,9 @@ void main() {
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
           style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+            height: 1.0,
+            fontSize: 10.0,
+            fontFamily: 'Ahem',
           ),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
@@ -1539,9 +1594,9 @@ void main() {
     test('hits correct WidgetSpan when not scrolled', () {
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
-            text: 'test',
-            selection: TextSelection.collapsed(offset: 3),
-          );
+          text: 'test',
+          selection: TextSelection.collapsed(offset: 3),
+        );
       final List<RenderBox> renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
         RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
@@ -1553,7 +1608,8 @@ void main() {
           children: <InlineSpan>[
             TextSpan(text: 'test'),
             WidgetSpan(child: Text('a')),
-            TextSpan(children: <InlineSpan>[
+            TextSpan(
+              children: <InlineSpan>[
                 WidgetSpan(child: Text('b')),
                 WidgetSpan(child: Text('c')),
               ],

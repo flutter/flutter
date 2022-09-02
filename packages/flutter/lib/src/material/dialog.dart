@@ -553,7 +553,11 @@ class AlertDialog extends StatelessWidget {
         left: 24.0,
         top: 24.0,
         right: 24.0,
-        bottom: belowIsTitle ? 16.0 : belowIsContent ? 0.0 : 24.0,
+        bottom: belowIsTitle
+            ? 16.0
+            : belowIsContent
+                ? 0.0
+                : 24.0,
       );
       final EdgeInsets effectiveIconPadding = iconPadding?.resolve(textDirection) ?? defaultIconPadding;
       iconWidget = Padding(
@@ -614,8 +618,8 @@ class AlertDialog extends StatelessWidget {
           left: effectiveContentPadding.left * paddingScaleFactor,
           right: effectiveContentPadding.right * paddingScaleFactor,
           top: title == null && icon == null
-            ? effectiveContentPadding.top * paddingScaleFactor
-            : effectiveContentPadding.top,
+              ? effectiveContentPadding.top * paddingScaleFactor
+              : effectiveContentPadding.top,
           bottom: effectiveContentPadding.bottom,
         ),
         child: DefaultTextStyle(
@@ -631,9 +635,9 @@ class AlertDialog extends StatelessWidget {
     if (actions != null) {
       final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
-        padding: actionsPadding ?? dialogTheme.actionsPadding ?? (
-          theme.useMaterial3 ? defaults.actionsPadding! : defaults.actionsPadding!.add(EdgeInsets.all(spacing))
-        ),
+        padding: actionsPadding ??
+            dialogTheme.actionsPadding ??
+            (theme.useMaterial3 ? defaults.actionsPadding! : defaults.actionsPadding!.add(EdgeInsets.all(spacing))),
         child: OverflowBar(
           alignment: actionsAlignment ?? MainAxisAlignment.end,
           spacing: spacing,
@@ -662,8 +666,7 @@ class AlertDialog extends StatelessWidget {
               ),
             ),
           ),
-        if (actions != null)
-          actionsWidget!,
+        if (actions != null) actionsWidget!,
       ];
     } else {
       columnChildren = <Widget>[
@@ -865,8 +868,8 @@ class SimpleDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
-  }) : assert(titlePadding != null),
-       assert(contentPadding != null);
+  })  : assert(titlePadding != null),
+        assert(contentPadding != null);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -1040,7 +1043,8 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
-Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+Widget _buildMaterialDialogTransitions(
+    BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   return FadeTransition(
     opacity: CurvedAnimation(
       parent: animation,
@@ -1181,9 +1185,7 @@ bool _debugIsActive(BuildContext context) {
   if (context is Element && !context.debugIsActive) {
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('This BuildContext is no longer valid.'),
-      ErrorDescription(
-        'The showDialog function context parameter is a BuildContext that is no longer valid.'
-      ),
+      ErrorDescription('The showDialog function context parameter is a BuildContext that is no longer valid.'),
       ErrorHint(
         'This can commonly occur when the showDialog function is called after awaiting a Future. '
         'In this situation the BuildContext might refer to a widget that has already been disposed during the await. '
@@ -1252,20 +1254,20 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     bool useSafeArea = true,
     super.settings,
     super.anchorPoint,
-  }) : assert(barrierDismissible != null),
-       super(
-         pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-           final Widget pageChild = Builder(builder: builder);
-           Widget dialog = themes?.wrap(pageChild) ?? pageChild;
-           if (useSafeArea) {
-             dialog = SafeArea(child: dialog);
-           }
-           return dialog;
-         },
-         barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: const Duration(milliseconds: 150),
-         transitionBuilder: _buildMaterialDialogTransitions,
-       );
+  })  : assert(barrierDismissible != null),
+        super(
+          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+            final Widget pageChild = Builder(builder: builder);
+            Widget dialog = themes?.wrap(pageChild) ?? pageChild;
+            if (useSafeArea) {
+              dialog = SafeArea(child: dialog);
+            }
+            return dialog;
+          },
+          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
+          transitionDuration: const Duration(milliseconds: 150),
+          transitionBuilder: _buildMaterialDialogTransitions,
+        );
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
@@ -1278,13 +1280,13 @@ double _paddingScaleFactor(double textScaleFactor) {
 // Hand coded defaults based on Material Design 2.
 class _DialogDefaultsM2 extends DialogTheme {
   _DialogDefaultsM2(this.context)
-    : _textTheme = Theme.of(context).textTheme,
-      _iconTheme = Theme.of(context).iconTheme,
-      super(
-        alignment: Alignment.center,
-        elevation: 24.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
-      );
+      : _textTheme = Theme.of(context).textTheme,
+        _iconTheme = Theme.of(context).iconTheme,
+        super(
+          alignment: Alignment.center,
+          elevation: 24.0,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+        );
 
   final BuildContext context;
   final TextTheme _textTheme;
@@ -1317,11 +1319,16 @@ class _DialogDefaultsM2 extends DialogTheme {
 
 class _DialogDefaultsM3 extends DialogTheme {
   _DialogDefaultsM3(this.context)
-    : super(
-        alignment: Alignment.center,
-        elevation: 6.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0))),
-      );
+      : super(
+          alignment: Alignment.center,
+          elevation: 6.0,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(28.0),
+                  topRight: Radius.circular(28.0),
+                  bottomLeft: Radius.circular(28.0),
+                  bottomRight: Radius.circular(28.0))),
+        );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;

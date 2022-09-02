@@ -118,10 +118,10 @@ class PageController extends ScrollController {
     this.initialPage = 0,
     this.keepPage = true,
     this.viewportFraction = 1.0,
-  }) : assert(initialPage != null),
-       assert(keepPage != null),
-       assert(viewportFraction != null),
-       assert(viewportFraction > 0.0);
+  })  : assert(initialPage != null),
+        assert(keepPage != null),
+        assert(viewportFraction != null),
+        assert(viewportFraction > 0.0);
 
   /// The page to show when first creating the [PageView].
   final int initialPage;
@@ -226,7 +226,7 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<void> nextPage({ required Duration duration, required Curve curve }) {
+  Future<void> nextPage({required Duration duration, required Curve curve}) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
   }
 
@@ -236,7 +236,7 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<void> previousPage({ required Duration duration, required Curve curve }) {
+  Future<void> previousPage({required Duration duration, required Curve curve}) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
   }
 
@@ -297,7 +297,7 @@ class PageMetrics extends FixedScrollMetrics {
   /// The current page displayed in the [PageView].
   double? get page {
     return math.max(0.0, clampDouble(pixels, minScrollExtent, maxScrollExtent)) /
-           math.max(1.0, viewportDimension * viewportFraction);
+        math.max(1.0, viewportDimension * viewportFraction);
   }
 
   /// The fraction of the viewport that each page occupies.
@@ -314,16 +314,16 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     bool keepPage = true,
     double viewportFraction = 1.0,
     super.oldPosition,
-  }) : assert(initialPage != null),
-       assert(keepPage != null),
-       assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
-       _viewportFraction = viewportFraction,
-       _pageToUseOnStartup = initialPage.toDouble(),
-       super(
-         initialPixels: null,
-         keepScrollOffset: keepPage,
-       );
+  })  : assert(initialPage != null),
+        assert(keepPage != null),
+        assert(viewportFraction != null),
+        assert(viewportFraction > 0.0),
+        _viewportFraction = viewportFraction,
+        _pageToUseOnStartup = initialPage.toDouble(),
+        super(
+          initialPixels: null,
+          keepScrollOffset: keepPage,
+        );
 
   final int initialPage;
   double _pageToUseOnStartup;
@@ -397,13 +397,14 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       'Page value is only available after content dimensions are established.',
     );
     return !hasPixels || !hasContentDimensions
-      ? null
-      : _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension);
+        ? null
+        : _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
+    PageStorage.of(context.storageContext)
+        ?.writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
   }
 
   @override
@@ -534,7 +535,7 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 ///  * [PageView.physics], which can override the physics used by a page view.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
-  const PageScrollPhysics({ super.parent });
+  const PageScrollPhysics({super.parent});
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -657,10 +658,10 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(allowImplicitScrolling != null),
-       assert(clipBehavior != null),
-       controller = controller ?? _defaultPageController,
-       childrenDelegate = SliverChildListDelegate(children);
+  })  : assert(allowImplicitScrolling != null),
+        assert(clipBehavior != null),
+        controller = controller ?? _defaultPageController,
+        childrenDelegate = SliverChildListDelegate(children);
 
   /// Creates a scrollable list that works page by page using widgets that are
   /// created on demand.
@@ -702,14 +703,14 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(allowImplicitScrolling != null),
-       assert(clipBehavior != null),
-       controller = controller ?? _defaultPageController,
-       childrenDelegate = SliverChildBuilderDelegate(
-         itemBuilder,
-         findChildIndexCallback: findChildIndexCallback,
-         childCount: itemCount,
-       );
+  })  : assert(allowImplicitScrolling != null),
+        assert(clipBehavior != null),
+        controller = controller ?? _defaultPageController,
+        childrenDelegate = SliverChildBuilderDelegate(
+          itemBuilder,
+          findChildIndexCallback: findChildIndexCallback,
+          childCount: itemCount,
+        );
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
@@ -810,10 +811,10 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(childrenDelegate != null),
-       assert(allowImplicitScrolling != null),
-       assert(clipBehavior != null),
-       controller = controller ?? _defaultPageController;
+  })  : assert(childrenDelegate != null),
+        assert(allowImplicitScrolling != null),
+        assert(clipBehavior != null),
+        controller = controller ?? _defaultPageController;
 
   /// Controls whether the widget's pages will respond to
   /// [RenderObject.showOnScreen], which will allow for implicit accessibility
@@ -949,8 +950,8 @@ class _PageViewState extends State<PageView> {
       allowImplicitScrolling: widget.allowImplicitScrolling,
     ).applyTo(
       widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
-        : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+          ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
+          : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
     );
 
     return NotificationListener<ScrollNotification>(
@@ -1003,6 +1004,7 @@ class _PageViewState extends State<PageView> {
     description.add(DiagnosticsProperty<PageController>('controller', widget.controller, showName: false));
     description.add(DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
     description.add(FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'snapping disabled'));
-    description.add(FlagProperty('allowImplicitScrolling', value: widget.allowImplicitScrolling, ifTrue: 'allow implicit scrolling'));
+    description.add(FlagProperty('allowImplicitScrolling',
+        value: widget.allowImplicitScrolling, ifTrue: 'allow implicit scrolling'));
   }
 }

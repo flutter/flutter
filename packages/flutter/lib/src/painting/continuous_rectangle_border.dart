@@ -37,8 +37,8 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   const ContinuousRectangleBorder({
     super.side,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null);
+  })  : assert(side != null),
+        assert(borderRadius != null);
 
   /// The radius for each corner.
   ///
@@ -92,22 +92,14 @@ class ContinuousRectangleBorder extends OutlinedBorder {
     final double bottom = rrect.bottom;
     //  Radii will be clamped to the value of the shortest side
     // of rrect to avoid strange tie-fighter shapes.
-    final double tlRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
-    final double tlRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
-    final double trRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
-    final double trRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
-    final double blRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
-    final double blRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
-    final double brRadiusX =
-      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
-    final double brRadiusY =
-      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
+    final double tlRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
+    final double tlRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
+    final double trRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
+    final double trRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
+    final double blRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
+    final double blRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
+    final double brRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
+    final double brRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
 
     return Path()
       ..moveTo(left, top + tlRadiusX)
@@ -122,17 +114,17 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
+  ContinuousRectangleBorder copyWith({BorderSide? side, BorderRadiusGeometry? borderRadius}) {
     return ContinuousRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -140,7 +132,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     if (rect.isEmpty) {
       return;
     }
@@ -161,9 +153,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ContinuousRectangleBorder
-        && other.side == side
-        && other.borderRadius == borderRadius;
+    return other is ContinuousRectangleBorder && other.side == side && other.borderRadius == borderRadius;
   }
 
   @override

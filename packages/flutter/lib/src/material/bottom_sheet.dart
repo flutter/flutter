@@ -83,10 +83,10 @@ class BottomSheet extends StatefulWidget {
     this.constraints,
     required this.onClosing,
     required this.builder,
-  }) : assert(enableDrag != null),
-       assert(onClosing != null),
-       assert(builder != null),
-       assert(elevation == null || elevation >= 0.0);
+  })  : assert(enableDrag != null),
+        assert(onClosing != null),
+        assert(builder != null),
+        assert(elevation == null || elevation >= 0.0);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -201,7 +201,6 @@ class BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<BottomSheet> {
-
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
@@ -303,20 +302,21 @@ class _BottomSheetState extends State<BottomSheet> {
       );
     }
 
-    return !widget.enableDrag ? bottomSheet : GestureDetector(
-      onVerticalDragStart: _handleDragStart,
-      onVerticalDragUpdate: _handleDragUpdate,
-      onVerticalDragEnd: _handleDragEnd,
-      excludeFromSemantics: true,
-      child: bottomSheet,
-    );
+    return !widget.enableDrag
+        ? bottomSheet
+        : GestureDetector(
+            onVerticalDragStart: _handleDragStart,
+            onVerticalDragUpdate: _handleDragUpdate,
+            onVerticalDragEnd: _handleDragEnd,
+            excludeFromSemantics: true,
+            child: bottomSheet,
+          );
   }
 }
 
 // PERSISTENT BOTTOM SHEETS
 
 // See scaffold.dart
-
 
 // MODAL BOTTOM SHEETS
 class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
@@ -330,9 +330,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      maxHeight: isScrollControlled
-        ? constraints.maxHeight
-        : constraints.maxHeight * 9.0 / 16.0,
+      maxHeight: isScrollControlled ? constraints.maxHeight : constraints.maxHeight * 9.0 / 16.0,
     );
   }
 
@@ -358,8 +356,8 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.constraints,
     this.isScrollControlled = false,
     this.enableDrag = true,
-  }) : assert(isScrollControlled != null),
-       assert(enableDrag != null);
+  })  : assert(isScrollControlled != null),
+        assert(enableDrag != null);
 
   final _ModalBottomSheetRoute<T>? route;
   final bool isScrollControlled;
@@ -434,7 +432,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
+          mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
         );
         return Semantics(
           scopesRoute: true,
@@ -471,9 +469,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.transitionAnimationController,
     this.anchorPoint,
     this.useSafeArea = false,
-  }) : assert(isScrollControlled != null),
-       assert(isDismissible != null),
-       assert(enableDrag != null);
+  })  : assert(isScrollControlled != null),
+        assert(isDismissible != null),
+        assert(enableDrag != null);
 
   final WidgetBuilder? builder;
   final CapturedThemes capturedThemes;
@@ -544,12 +542,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     final Widget bottomSheet = useSafeArea
-      ? SafeArea(child: content)
-      : MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          child: content,
-        );
+        ? SafeArea(child: content)
+        : MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: content,
+          );
 
     return capturedThemes.wrap(bottomSheet);
   }
@@ -578,8 +576,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   const _BottomSheetSuspendedCurve(
     this.startingPoint, {
     this.curve = Curves.easeOutCubic,
-  }) : assert(startingPoint != null),
-       assert(curve != null);
+  })  : assert(startingPoint != null),
+        assert(curve != null);
 
   /// The progress value at which [curve] should begin.
   ///

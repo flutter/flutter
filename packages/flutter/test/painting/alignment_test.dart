@@ -155,7 +155,7 @@ void main() {
       null,
     ];
 
-    final List<double> times = <double>[ 0.25, 0.5, 0.75 ];
+    final List<double> times = <double>[0.25, 0.5, 0.75];
 
     for (final TextDirection direction in TextDirection.values) {
       final Alignment defaultValue = AlignmentDirectional.center.resolve(direction);
@@ -199,10 +199,14 @@ void main() {
     expect(const AlignmentDirectional(1.0, 2.0) % 2.0, AlignmentDirectional.centerEnd);
     expect(const AlignmentDirectional(1.0, 2.0) ~/ 2.0, AlignmentDirectional.bottomCenter);
     for (final TextDirection direction in TextDirection.values) {
-      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) * 2.0).resolve(direction), const AlignmentDirectional(2.0, 4.0).resolve(direction));
-      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) / 2.0).resolve(direction), const AlignmentDirectional(0.5, 1.0).resolve(direction));
-      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) % 2.0).resolve(direction), AlignmentDirectional.centerEnd.resolve(direction));
-      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) ~/ 2.0).resolve(direction), AlignmentDirectional.bottomCenter.resolve(direction));
+      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) * 2.0).resolve(direction),
+          const AlignmentDirectional(2.0, 4.0).resolve(direction));
+      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) / 2.0).resolve(direction),
+          const AlignmentDirectional(0.5, 1.0).resolve(direction));
+      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) % 2.0).resolve(direction),
+          AlignmentDirectional.centerEnd.resolve(direction));
+      expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) ~/ 2.0).resolve(direction),
+          AlignmentDirectional.bottomCenter.resolve(direction));
     }
     expect(const Alignment(1.0, 2.0) * 2.0, const Alignment(2.0, 4.0));
     expect(const Alignment(1.0, 2.0) / 2.0, const Alignment(0.5, 1.0));
@@ -213,17 +217,21 @@ void main() {
   test('AlignmentGeometry operators', () {
     expect(const Alignment(1.0, 2.0) + const Alignment(3.0, 5.0), const Alignment(4.0, 7.0));
     expect(const Alignment(1.0, 2.0) - const Alignment(3.0, 5.0), const Alignment(-2.0, -3.0));
-    expect(const AlignmentDirectional(1.0, 2.0) + const AlignmentDirectional(3.0, 5.0), const AlignmentDirectional(4.0, 7.0));
-    expect(const AlignmentDirectional(1.0, 2.0) - const AlignmentDirectional(3.0, 5.0), const AlignmentDirectional(-2.0, -3.0));
+    expect(const AlignmentDirectional(1.0, 2.0) + const AlignmentDirectional(3.0, 5.0),
+        const AlignmentDirectional(4.0, 7.0));
+    expect(const AlignmentDirectional(1.0, 2.0) - const AlignmentDirectional(3.0, 5.0),
+        const AlignmentDirectional(-2.0, -3.0));
   });
 
   test('AlignmentGeometry toString', () {
     expect(const Alignment(1.0001, 2.0001).toString(), 'Alignment(1.0, 2.0)');
     expect(Alignment.center.toString(), 'Alignment.center');
-    expect(Alignment.bottomLeft.add(AlignmentDirectional.centerEnd).toString(), 'Alignment.bottomLeft + AlignmentDirectional.centerEnd');
+    expect(Alignment.bottomLeft.add(AlignmentDirectional.centerEnd).toString(),
+        'Alignment.bottomLeft + AlignmentDirectional.centerEnd');
     expect(const Alignment(0.0001, 0.0001).toString(), 'Alignment(0.0, 0.0)');
     expect(Alignment.center.toString(), 'Alignment.center');
     expect(AlignmentDirectional.center.toString(), 'AlignmentDirectional.center');
-    expect(Alignment.bottomRight.add(AlignmentDirectional.bottomEnd).toString(), 'Alignment(1.0, 2.0) + AlignmentDirectional.centerEnd');
+    expect(Alignment.bottomRight.add(AlignmentDirectional.bottomEnd).toString(),
+        'Alignment(1.0, 2.0) + AlignmentDirectional.centerEnd');
   });
 }

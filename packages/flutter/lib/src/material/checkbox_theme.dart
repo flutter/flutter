@@ -145,16 +145,16 @@ class CheckboxThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    mouseCursor,
-    fillColor,
-    checkColor,
-    overlayColor,
-    splashRadius,
-    materialTapTargetSize,
-    visualDensity,
-    shape,
-    side,
-  );
+        mouseCursor,
+        fillColor,
+        checkColor,
+        overlayColor,
+        splashRadius,
+        materialTapTargetSize,
+        visualDensity,
+        shape,
+        side,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -164,27 +164,30 @@ class CheckboxThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is CheckboxThemeData
-      && other.mouseCursor == mouseCursor
-      && other.fillColor == fillColor
-      && other.checkColor == checkColor
-      && other.overlayColor == overlayColor
-      && other.splashRadius == splashRadius
-      && other.materialTapTargetSize == materialTapTargetSize
-      && other.visualDensity == visualDensity
-      && other.shape == shape
-      && other.side == side;
+    return other is CheckboxThemeData &&
+        other.mouseCursor == mouseCursor &&
+        other.fillColor == fillColor &&
+        other.checkColor == checkColor &&
+        other.overlayColor == overlayColor &&
+        other.splashRadius == splashRadius &&
+        other.materialTapTargetSize == materialTapTargetSize &&
+        other.visualDensity == visualDensity &&
+        other.shape == shape &&
+        other.side == side;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('checkColor', checkColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<OutlinedBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));

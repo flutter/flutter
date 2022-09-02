@@ -23,7 +23,9 @@ class TestTree {
             child: RenderRepaintBoundary(
               child: RenderCustomPaint(
                 painter: TestCallbackPainter(
-                  onPaint: () { painted = true; },
+                  onPaint: () {
+                    painted = true;
+                  },
                 ),
                 child: RenderPositionedBox(
                   child: child = RenderConstrainedBox(
@@ -47,7 +49,7 @@ class TestTree {
 }
 
 class MutableCompositor extends RenderProxyBox {
-  MutableCompositor({ required RenderBox child }) : super(child);
+  MutableCompositor({required RenderBox child}) : super(child);
   bool _alwaysComposite = false;
   @override
   bool get alwaysNeedsCompositing => _alwaysComposite;
@@ -66,7 +68,9 @@ class TestCompositingBitsTree {
           child: compositor = MutableCompositor(
             child: RenderCustomPaint(
               painter: TestCallbackPainter(
-                onPaint: () { painted = true; },
+                onPaint: () {
+                  painted = true;
+                },
               ),
               child: child = RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
@@ -95,8 +99,7 @@ void main() {
     TestRenderingFlutterBinding.instance.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
-    testTree.child.additionalConstraints =
-      const BoxConstraints.tightFor(height: 5.0, width: 5.0);
+    testTree.child.additionalConstraints = const BoxConstraints.tightFor(height: 5.0, width: 5.0);
     // Lay out again
     layout(testTree.root);
     expect(testTree.child.size, equals(const Size(5.0, 5.0)));

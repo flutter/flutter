@@ -48,8 +48,7 @@ void main() {
     });
 
     testWidgets('decoration test', (WidgetTester tester) async {
-      final DecoratedBoxTransition transitionUnderTest =
-      DecoratedBoxTransition(
+      final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
         decoration: decorationTween.animate(controller),
         child: const Text(
           "Doesn't matter",
@@ -96,8 +95,7 @@ void main() {
     });
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
-      final Animation<Decoration> curvedDecorationAnimation =
-        decorationTween.animate(CurvedAnimation(
+      final Animation<Decoration> curvedDecorationAnimation = decorationTween.animate(CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,
       ));
@@ -239,7 +237,7 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget =  Directionality(
+    final Widget widget = Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         sizeFactor: animation,
@@ -269,7 +267,7 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget =  Directionality(
+    final Widget widget = Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         axis: Axis.horizontal,
@@ -316,23 +314,53 @@ void main() {
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.fromList(<double>[
-     -1.0,  0.0, 0.0, 0.0,
-      0.0, -1.0, 0.0, 0.0,
-      0.0,  0.0, 1.0, 0.0,
-      0.0,  0.0, 0.0, 1.0,
-    ])..transpose());
+    expect(
+        actualTurns,
+        Matrix4.fromList(<double>[
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+        ])
+          ..transpose());
 
     controller.value = 0.75;
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.fromList(<double>[
-      0.0, 1.0, 0.0, 0.0,
-     -1.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      0.0, 0.0, 0.0, 1.0,
-    ])..transpose());
+    expect(
+        actualTurns,
+        Matrix4.fromList(<double>[
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+        ])
+          ..transpose());
   });
 
   testWidgets('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
@@ -358,17 +386,20 @@ void main() {
   group('FadeTransition', () {
     double getOpacity(WidgetTester tester, String textValue) {
       final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-        find.ancestor(
-          of: find.text(textValue),
-          matching: find.byType(FadeTransition),
-        ).first,
+        find
+            .ancestor(
+              of: find.text(textValue),
+              matching: find.byType(FadeTransition),
+            )
+            .first,
       );
       return opacityWidget.opacity.value;
     }
+
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-      final Widget widget =  Directionality(
+      final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: FadeTransition(
           opacity: animation,
@@ -401,13 +432,16 @@ void main() {
   group('SliverFadeTransition', () {
     double getOpacity(WidgetTester tester, String textValue) {
       final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
-        find.ancestor(
-          of: find.text(textValue),
-          matching: find.byType(SliverFadeTransition),
-        ).first,
+        find
+            .ancestor(
+              of: find.text(textValue),
+              matching: find.byType(SliverFadeTransition),
+            )
+            .first,
       );
       return opacityWidget.opacity.value;
     }
+
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
@@ -461,7 +495,7 @@ void main() {
     testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-      final Widget widget =  Directionality(
+      final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: ScaleTransition(
           scale: animation,
@@ -478,29 +512,35 @@ void main() {
       controller.value = 0.25;
       await tester.pump();
 
-      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
-        'image filter',
-        startsWith('ImageFilter.matrix('),
-      )));
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
 
       controller.value = 0.5;
       await tester.pump();
 
-      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
-        'image filter',
-        startsWith('ImageFilter.matrix('),
-      )));
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
 
       controller.value = 0.75;
       await tester.pump();
 
-      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
-        'image filter',
-        startsWith('ImageFilter.matrix('),
-      )));
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
 
       controller.value = 1;
       await tester.pump();
@@ -514,7 +554,7 @@ void main() {
     testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-      final Widget widget =  Directionality(
+      final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: RotationTransition(
           turns: animation,
@@ -531,29 +571,35 @@ void main() {
       controller.value = 0.25;
       await tester.pump();
 
-      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
-        'image filter',
-        startsWith('ImageFilter.matrix('),
-      )));
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
 
       controller.value = 0.5;
       await tester.pump();
 
-      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
-        'image filter',
-        startsWith('ImageFilter.matrix('),
-      )));
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
 
       controller.value = 0.75;
       await tester.pump();
 
-      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
-        'image filter',
-        startsWith('ImageFilter.matrix('),
-      )));
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
 
       controller.value = 1;
       await tester.pump();

@@ -95,9 +95,11 @@ void main() {
     ]));
     addTearDown(() => dispatchRemoveDevice());
 
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
+        ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
     listenerLogs.clear();
@@ -106,9 +108,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 101.0))),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 101.0))),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     expect(listenerLogs, isEmpty);
     events.clear();
@@ -117,9 +121,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(1.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 101.0))),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 101.0))),
+        ]));
     expect(listenerLogs, <bool>[false]);
     events.clear();
     listenerLogs.clear();
@@ -128,9 +134,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 301.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 301.0))),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 301.0))),
+        ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
     listenerLogs.clear();
@@ -157,10 +165,12 @@ void main() {
       _pointerData(PointerChange.add, Offset.zero),
       _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 1.0))),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
+          EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 1.0))),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
@@ -169,10 +179,12 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 401.0), device: 1),
       _pointerData(PointerChange.hover, const Offset(1.0, 401.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 401.0), device: 1)),
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 401.0), device: 1)),
+          EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1)),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
@@ -180,9 +192,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 101.0))),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 101.0))),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
@@ -190,9 +204,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 501.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 501.0), device: 1)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 501.0), device: 1)),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
@@ -200,9 +216,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 101.0)),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 101.0))),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 101.0))),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
@@ -210,9 +228,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 601.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 601.0), device: 1)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 601.0), device: 1)),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
@@ -220,9 +240,11 @@ void main() {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(1.0, 601.0), device: 1),
     ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 601.0), device: 1)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 601.0), device: 1)),
+        ]));
     expect(_mouseTracker.mouseIsConnected, isFalse);
     events.clear();
   });
@@ -236,11 +258,13 @@ void main() {
       _pointerData(PointerChange.down, const Offset(0.0, 101.0)),
     ]));
     addTearDown(() => dispatchRemoveDevice());
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      // This Enter event is triggered by the [PointerAddedEvent] The
-      // [PointerDownEvent] is ignored by [MouseTracker].
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 101.0))),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          // This Enter event is triggered by the [PointerAddedEvent] The
+          // [PointerDownEvent] is ignored by [MouseTracker].
+          EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 101.0))),
+        ]));
     events.clear();
 
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -287,9 +311,12 @@ void main() {
     expect(binding.postFrameCallbacks, hasLength(1));
 
     binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0, 100)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(
+              const PointerEnterEvent(position: Offset(0, 100)).transformed(translate10by20)),
+        ]));
     events.clear();
 
     // Removing an annotation should trigger events.
@@ -298,9 +325,12 @@ void main() {
     expect(binding.postFrameCallbacks, hasLength(1));
 
     binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerExitEvent>(
+              const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+        ]));
     expect(binding.postFrameCallbacks, hasLength(0));
   });
 
@@ -334,9 +364,12 @@ void main() {
     expect(binding.postFrameCallbacks, hasLength(1));
 
     binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(
+              const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+        ]));
     events.clear();
 
     expect(binding.postFrameCallbacks, hasLength(0));
@@ -348,9 +381,12 @@ void main() {
     expect(binding.postFrameCallbacks, hasLength(1));
 
     binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerExitEvent>(
+              const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+        ]));
     expect(binding.postFrameCallbacks, hasLength(0));
   });
 
@@ -377,9 +413,12 @@ void main() {
     ]));
 
     expect(binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(
+              const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+        ]));
     events.clear();
 
     // Disconnect the mouse from the region. Should trigger Exit.
@@ -387,9 +426,12 @@ void main() {
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
     ]));
     expect(binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerExitEvent>(
+              const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+        ]));
   });
 
   test('should correctly handle when the pointer moves in or out of the annotation', () {
@@ -421,10 +463,14 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(0.0, 100.0)),
     ]));
     expect(binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerEnterEvent>(
+              const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+          EventMatcher<PointerHoverEvent>(
+              const PointerHoverEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
+        ]));
     events.clear();
 
     // Moves the mouse out of the region. Should trigger Exit.
@@ -433,14 +479,16 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(200.0, 100.0)),
     ]));
     expect(binding.postFrameCallbacks, hasLength(0));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(200.0, 100.0)).transformed(translate10by20)),
-    ]));
+    expect(
+        events,
+        _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+          EventMatcher<PointerExitEvent>(
+              const PointerExitEvent(position: Offset(200.0, 100.0)).transformed(translate10by20)),
+        ]));
   });
 
   test('should not schedule post-frame callbacks when no mouse is connected', () {
-    setUpMouseAnnotationFinder((Offset position) sync* {
-    });
+    setUpMouseAnnotationFinder((Offset position) sync* {});
 
     // Connect a touch device, which should not be recognized by MouseTracker
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -608,8 +656,7 @@ ui.PointerData _pointerData(
 }
 
 class BaseEventMatcher extends Matcher {
-  BaseEventMatcher(this.expected)
-    : assert(expected != null);
+  BaseEventMatcher(this.expected) : assert(expected != null);
 
   final PointerEvent expected;
 
@@ -628,12 +675,10 @@ class BaseEventMatcher extends Matcher {
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
     final PointerEvent actual = untypedItem as PointerEvent;
-    if (!(
-      _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
-      _matchesField(matchState, 'position', actual.position, expected.position) &&
-      _matchesField(matchState, 'device', actual.device, expected.device) &&
-      _matchesField(matchState, 'localPosition', actual.localPosition, expected.localPosition)
-    )) {
+    if (!(_matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
+        _matchesField(matchState, 'position', actual.position, expected.position) &&
+        _matchesField(matchState, 'device', actual.device, expected.device) &&
+        _matchesField(matchState, 'localPosition', actual.localPosition, expected.localPosition))) {
       return false;
     }
     return true;
@@ -641,9 +686,7 @@ class BaseEventMatcher extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description
-      .add('event (critical fields only) ')
-      .addDescriptionOf(expected);
+    return description.add('event (critical fields only) ').addDescriptionOf(expected);
   }
 
   @override
@@ -654,10 +697,10 @@ class BaseEventMatcher extends Matcher {
     bool verbose,
   ) {
     return mismatchDescription
-      .add('has ')
-      .addDescriptionOf(matchState['actual'])
-      .add(" at field `${matchState['field']}`, which doesn't match the expected ")
-      .addDescriptionOf(matchState['expected']);
+        .add('has ')
+        .addDescriptionOf(matchState['actual'])
+        .add(" at field `${matchState['field']}`, which doesn't match the expected ")
+        .addDescriptionOf(matchState['expected']);
   }
 }
 
@@ -682,10 +725,10 @@ class EventMatcher<T extends PointerEvent> extends BaseEventMatcher {
   ) {
     if (item is! T) {
       return mismatchDescription
-        .add('is ')
-        .addDescriptionOf(item.runtimeType)
-        .add(' and is not a subtype of ')
-        .addDescriptionOf(T);
+          .add('is ')
+          .addDescriptionOf(item.runtimeType)
+          .add(' and is not a subtype of ')
+          .addDescriptionOf(T);
     }
     return super.describeMismatch(item, mismatchDescription, matchState, verbose);
   }
@@ -728,9 +771,7 @@ class _EventListCriticalFieldsMatcher extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description
-      .add('event list (critical fields only) ')
-      .addDescriptionOf(_expected);
+    return description.add('event list (critical fields only) ').addDescriptionOf(_expected);
   }
 
   @override
@@ -741,21 +782,18 @@ class _EventListCriticalFieldsMatcher extends Matcher {
     bool verbose,
   ) {
     if (item is! Iterable<PointerEvent>) {
-      return mismatchDescription
-        .add('is type ${item.runtimeType} instead of Iterable<PointerEvent>');
+      return mismatchDescription.add('is type ${item.runtimeType} instead of Iterable<PointerEvent>');
     } else if (item.length != _expected.length) {
-      return mismatchDescription
-        .add('has length ${item.length} instead of ${_expected.length}');
+      return mismatchDescription.add('has length ${item.length} instead of ${_expected.length}');
     } else if (matchState['matcher'] == null) {
-      return mismatchDescription
-        .add('met unexpected fatal error');
+      return mismatchDescription.add('met unexpected fatal error');
     } else {
       mismatchDescription
-        .add('has\n  ')
-        .addDescriptionOf(matchState['actual'])
-        .add("\nat index ${matchState['index']}, which doesn't match\n  ")
-        .addDescriptionOf(matchState['expected'])
-        .add('\nsince it ');
+          .add('has\n  ')
+          .addDescriptionOf(matchState['actual'])
+          .add("\nat index ${matchState['index']}, which doesn't match\n  ")
+          .addDescriptionOf(matchState['expected'])
+          .add('\nsince it ');
       final Description subDescription = StringDescription();
       final Matcher matcher = matchState['matcher'] as Matcher;
       matcher.describeMismatch(

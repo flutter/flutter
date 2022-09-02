@@ -18,10 +18,10 @@ void main() {
         MaterialApp(
           theme: ThemeData.light(),
           home: Center(
-              child: FloatingActionButton(
-                onPressed: () { }, // button.enabled == true
-                child: const Icon(Icons.add),
-              ),
+            child: FloatingActionButton(
+              onPressed: () {}, // button.enabled == true
+              child: const Icon(Icons.add),
+            ),
           ),
         ),
       );
@@ -45,10 +45,10 @@ void main() {
         MaterialApp(
           theme: ThemeData.light(),
           home: const Center(
-              child: FloatingActionButton(
-                onPressed: null, // button.enabled == false
-                child: Icon(Icons.add),
-              ),
+            child: FloatingActionButton(
+              onPressed: null, // button.enabled == false
+              child: Icon(Icons.add),
+            ),
           ),
         ),
       );

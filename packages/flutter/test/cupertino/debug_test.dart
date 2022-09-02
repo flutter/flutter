@@ -21,11 +21,13 @@ void main() {
       ),
     );
 
-    expect(() => debugCheckHasCupertinoLocalizations(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No CupertinoLocalizations found'),
-    )));
+    expect(
+        () => debugCheckHasCupertinoLocalizations(noLocalizationsAvailable.currentContext!),
+        throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+          'message',
+          contains('No CupertinoLocalizations found'),
+        )));
 
     expect(debugCheckHasCupertinoLocalizations(localizationsAvailable.currentContext!), isTrue);
   });

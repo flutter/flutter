@@ -234,12 +234,16 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   List<S>? _debugPreviousSlots;
 
   void _updateChildren() {
-    final SlottedMultiChildRenderObjectWidgetMixin<S> slottedMultiChildRenderObjectWidgetMixin = widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
+    final SlottedMultiChildRenderObjectWidgetMixin<S> slottedMultiChildRenderObjectWidgetMixin =
+        widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
     assert(() {
       _debugPreviousSlots ??= slottedMultiChildRenderObjectWidgetMixin.slots.toList();
       return listEquals(_debugPreviousSlots, slottedMultiChildRenderObjectWidgetMixin.slots.toList());
     }(), '${widget.runtimeType}.slots must not change.');
-    assert(slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length == slottedMultiChildRenderObjectWidgetMixin.slots.length, 'slots must be unique');
+    assert(
+        slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length ==
+            slottedMultiChildRenderObjectWidgetMixin.slots.length,
+        'slots must be unique');
 
     final Map<Key, Element> oldKeyedElements = _keyedChildren;
     _keyedChildren = <Key, Element>{};
@@ -277,8 +281,8 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
             final Element? existingElement = _keyedChildren[newWidgetKey];
             if (existingElement != null) {
               (debugDuplicateKeys ??= <Key, List<Element>>{})
-                .putIfAbsent(newWidgetKey, () => <Element>[existingElement])
-                .add(newChild);
+                  .putIfAbsent(newWidgetKey, () => <Element>[existingElement])
+                  .add(newChild);
             }
             return true;
           }());
@@ -288,7 +292,8 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     }
     oldSlotToChild.values.forEach(deactivateChild);
     assert(_debugDuplicateKeys(debugDuplicateKeys));
-    assert(_keyedChildren.values.every(_slotToChild.values.contains), '_keyedChildren ${_keyedChildren.values} should be a subset of ${_slotToChild.values}');
+    assert(_keyedChildren.values.every(_slotToChild.values.contains),
+        '_keyedChildren ${_keyedChildren.values} should be a subset of ${_slotToChild.values}');
   }
 
   bool _debugDuplicateKeys(Map<Key, List<Element>>? debugDuplicateKeys) {
@@ -298,9 +303,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     for (final MapEntry<Key, List<Element>> duplicateKey in debugDuplicateKeys.entries) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Multiple widgets used the same key in ${widget.runtimeType}.'),
-        ErrorDescription(
-          'The key ${duplicateKey.key} was used by multiple widgets. The offending widgets were:\n'
-        ),
+        ErrorDescription('The key ${duplicateKey.key} was used by multiple widgets. The offending widgets were:\n'),
         for (final Element element in duplicateKey.value) ErrorDescription('  - $element\n'),
         ErrorDescription(
           'A key can only be specified on one widget at a time in the same parent widget.',

@@ -33,7 +33,8 @@ const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin = EdgeInsetsDirectio
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMarginWithHeader = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMarginWithHeader =
+    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
 // iOS 14.2 SDK.
@@ -211,10 +212,9 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin = _kMarginTop,
     bool hasLeading = true,
-  }) : assert((children != null && children.length > 0) || header != null),
-       type = CupertinoListSectionType.base,
-       additionalDividerMargin = additionalDividerMargin ??
-           (hasLeading ? _kBaseAdditionalDividerMargin : 0.0);
+  })  : assert((children != null && children.length > 0) || header != null),
+        type = CupertinoListSectionType.base,
+        additionalDividerMargin = additionalDividerMargin ?? (hasLeading ? _kBaseAdditionalDividerMargin : 0.0);
 
   /// Creates a section that mimicks standard "Inset Grouped" iOS list section.
   ///
@@ -274,13 +274,12 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin,
     bool hasLeading = true,
-  }) : assert((children != null && children.length > 0) || header != null),
-       type = CupertinoListSectionType.insetGrouped,
-       additionalDividerMargin = additionalDividerMargin ??
-           (hasLeading
-               ? _kInsetAdditionalDividerMargin
-               : _kInsetAdditionalDividerMarginWithoutLeading),
-       margin = margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader);
+  })  : assert((children != null && children.length > 0) || header != null),
+        type = CupertinoListSectionType.insetGrouped,
+        additionalDividerMargin = additionalDividerMargin ??
+            (hasLeading ? _kInsetAdditionalDividerMargin : _kInsetAdditionalDividerMarginWithoutLeading),
+        margin =
+            margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader);
 
   /// The type of list section, either base or inset grouped.
   ///
@@ -358,8 +357,7 @@ class CupertinoListSection extends StatelessWidget {
 
     // Short divider is used between rows.
     final Widget shortDivider = Container(
-      margin: EdgeInsetsDirectional.only(
-          start: dividerMargin + additionalDividerMargin),
+      margin: EdgeInsetsDirectional.only(start: dividerMargin + additionalDividerMargin),
       color: dividerColor,
       height: dividerHeight,
     );
@@ -369,12 +367,8 @@ class CupertinoListSection extends StatelessWidget {
       headerWidget = DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle.merge(
               type == CupertinoListSectionType.base
-                  ? TextStyle(
-                      fontSize: 13.0,
-                      color: CupertinoDynamicColor.resolve(
-                          _kHeaderFooterColor, context))
-                  : const TextStyle(
-                      fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ? TextStyle(fontSize: 13.0, color: CupertinoDynamicColor.resolve(_kHeaderFooterColor, context))
+                  : const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
         child: header!,
       );
@@ -386,8 +380,7 @@ class CupertinoListSection extends StatelessWidget {
         style: type == CupertinoListSectionType.base
             ? CupertinoTheme.of(context).textTheme.textStyle.merge(TextStyle(
                   fontSize: 13.0,
-                  color: CupertinoDynamicColor.resolve(
-                      _kHeaderFooterColor, context),
+                  color: CupertinoDynamicColor.resolve(_kHeaderFooterColor, context),
                 ))
             : CupertinoTheme.of(context).textTheme.textStyle,
         child: footer!,
@@ -432,9 +425,7 @@ class CupertinoListSection extends StatelessWidget {
         decoration: decoration ??
             BoxDecoration(
               color: CupertinoDynamicColor.resolve(
-                  decoration?.color ??
-                      CupertinoColors.secondarySystemGroupedBackground,
-                  context),
+                  decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground, context),
               borderRadius: childrenGroupBorderRadius,
             ),
         child: Column(children: childrenWithDividers),
@@ -442,19 +433,16 @@ class CupertinoListSection extends StatelessWidget {
     }
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(backgroundColor, context)),
+      decoration: BoxDecoration(color: CupertinoDynamicColor.resolve(backgroundColor, context)),
       child: Column(
         children: <Widget>[
-          if (type == CupertinoListSectionType.base)
-            SizedBox(height: topMargin),
+          if (type == CupertinoListSectionType.base) SizedBox(height: topMargin),
           if (headerWidget != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: type == CupertinoListSectionType.base
-                    ? _kDefaultHeaderMargin
-                    : _kInsetGroupedDefaultHeaderMargin,
+                padding:
+                    type == CupertinoListSectionType.base ? _kDefaultHeaderMargin : _kInsetGroupedDefaultHeaderMargin,
                 child: headerWidget,
               ),
             ),
@@ -473,9 +461,8 @@ class CupertinoListSection extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: type == CupertinoListSectionType.base
-                    ? _kDefaultFooterMargin
-                    : _kInsetGroupedDefaultFooterMargin,
+                padding:
+                    type == CupertinoListSectionType.base ? _kDefaultFooterMargin : _kInsetGroupedDefaultFooterMargin,
                 child: footerWidget,
               ),
             ),

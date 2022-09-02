@@ -125,15 +125,15 @@ class InkSplash extends InteractiveInkFeature {
     ShapeBorder? customBorder,
     double? radius,
     super.onRemoved,
-  }) : assert(textDirection != null),
-       _position = position,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
-       _customBorder = customBorder,
-       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
-       _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-       _repositionToReferenceBox = !containedInkWell,
-       _textDirection = textDirection,
-       super(controller: controller, color: color) {
+  })  : assert(textDirection != null),
+        _position = position,
+        _borderRadius = borderRadius ?? BorderRadius.zero,
+        _customBorder = customBorder,
+        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
+        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
+        _repositionToReferenceBox = !containedInkWell,
+        _textDirection = textDirection,
+        super(controller: controller, color: color) {
     assert(_borderRadius != null);
     _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)

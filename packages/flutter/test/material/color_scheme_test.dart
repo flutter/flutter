@@ -211,40 +211,39 @@ void main() {
 
   test('copyWith overrides given colors', () {
     final ColorScheme scheme = const ColorScheme.light().copyWith(
-        brightness: Brightness.dark,
-        primary: const Color(0x00000001),
-        onPrimary: const Color(0x00000002),
-        primaryContainer: const Color(0x00000003),
-        onPrimaryContainer: const Color(0x00000004),
-        secondary: const Color(0x00000005),
-        onSecondary: const Color(0x00000006),
-        secondaryContainer: const Color(0x00000007),
-        onSecondaryContainer: const Color(0x00000008),
-        tertiary: const Color(0x00000009),
-        onTertiary: const Color(0x0000000A),
-        tertiaryContainer: const Color(0x0000000B),
-        onTertiaryContainer: const Color(0x0000000C),
-        error: const Color(0x0000000D),
-        onError: const Color(0x0000000E),
-        errorContainer: const Color(0x0000000F),
-        onErrorContainer: const Color(0x00000010),
-        background: const Color(0x00000011),
-        onBackground: const Color(0x00000012),
-        surface: const Color(0x00000013),
-        onSurface: const Color(0x00000014),
-        surfaceVariant: const Color(0x00000015),
-        onSurfaceVariant: const Color(0x00000016),
-        outline: const Color(0x00000017),
-        outlineVariant: const Color(0x00000117),
-        shadow: const Color(0x00000018),
-        scrim: const Color(0x00000118),
-        inverseSurface: const Color(0x00000019),
-        onInverseSurface: const Color(0x0000001A),
-        inversePrimary: const Color(0x0000001B),
-        surfaceTint: const Color(0x0000001C),
-
-        primaryVariant: const Color(0x0000001D),
-        secondaryVariant: const Color(0x0000001F),
+      brightness: Brightness.dark,
+      primary: const Color(0x00000001),
+      onPrimary: const Color(0x00000002),
+      primaryContainer: const Color(0x00000003),
+      onPrimaryContainer: const Color(0x00000004),
+      secondary: const Color(0x00000005),
+      onSecondary: const Color(0x00000006),
+      secondaryContainer: const Color(0x00000007),
+      onSecondaryContainer: const Color(0x00000008),
+      tertiary: const Color(0x00000009),
+      onTertiary: const Color(0x0000000A),
+      tertiaryContainer: const Color(0x0000000B),
+      onTertiaryContainer: const Color(0x0000000C),
+      error: const Color(0x0000000D),
+      onError: const Color(0x0000000E),
+      errorContainer: const Color(0x0000000F),
+      onErrorContainer: const Color(0x00000010),
+      background: const Color(0x00000011),
+      onBackground: const Color(0x00000012),
+      surface: const Color(0x00000013),
+      onSurface: const Color(0x00000014),
+      surfaceVariant: const Color(0x00000015),
+      onSurfaceVariant: const Color(0x00000016),
+      outline: const Color(0x00000017),
+      outlineVariant: const Color(0x00000117),
+      shadow: const Color(0x00000018),
+      scrim: const Color(0x00000118),
+      inverseSurface: const Color(0x00000019),
+      onInverseSurface: const Color(0x0000001A),
+      inversePrimary: const Color(0x0000001B),
+      surfaceTint: const Color(0x0000001C),
+      primaryVariant: const Color(0x0000001D),
+      secondaryVariant: const Color(0x0000001F),
     );
 
     expect(scheme.brightness, Brightness.dark);
@@ -359,36 +358,38 @@ void main() {
     expect(scheme.brightness, baseScheme.brightness);
   });
 
-  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
-    final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
+  testWidgets(
+    'generated scheme "on" colors meet a11y contrast guidelines',
+    (WidgetTester tester) async {
+      final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
-    Widget label(String text, Color textColor, Color background) {
-      return Container(
-        color: background,
-        padding: const EdgeInsets.all(8),
-        child: Text(text, style: TextStyle(color: textColor)),
-      );
-    }
+      Widget label(String text, Color textColor, Color background) {
+        return Container(
+          color: background,
+          padding: const EdgeInsets.all(8),
+          child: Text(text, style: TextStyle(color: textColor)),
+        );
+      }
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.from(colorScheme: colors),
-        home: Scaffold(
-          body: Column(
-            children: <Widget>[
-              label('primary', colors.onPrimary, colors.primary),
-              label('secondary', colors.onSecondary, colors.secondary),
-              label('tertiary', colors.onTertiary, colors.tertiary),
-              label('error', colors.onError, colors.error),
-              label('background', colors.onBackground, colors.background),
-              label('surface', colors.onSurface, colors.surface),
-            ],
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(colorScheme: colors),
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                label('primary', colors.onPrimary, colors.primary),
+                label('secondary', colors.onSecondary, colors.secondary),
+                label('tertiary', colors.onTertiary, colors.tertiary),
+                label('error', colors.onError, colors.error),
+                label('background', colors.onBackground, colors.background),
+                label('surface', colors.onSurface, colors.surface),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
-  },
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 }

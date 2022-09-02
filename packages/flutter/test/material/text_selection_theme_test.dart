@@ -274,21 +274,20 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: DefaultSelectionStyle(
-          selectionColor: defaultSelectionColor,
-          cursorColor: defaultCursorColor,
-          child: Container(
-            key: defaultSelectionStyle,
-            child: TextSelectionTheme(
-              data: const TextSelectionThemeData(
-                selectionColor: themeSelectionColor,
-                cursorColor: themeCursorColor,
+            selectionColor: defaultSelectionColor,
+            cursorColor: defaultCursorColor,
+            child: Container(
+              key: defaultSelectionStyle,
+              child: TextSelectionTheme(
+                data: const TextSelectionThemeData(
+                  selectionColor: themeSelectionColor,
+                  cursorColor: themeCursorColor,
+                ),
+                child: Placeholder(
+                  key: themeStyle,
+                ),
               ),
-              child: Placeholder(
-                key: themeStyle,
-              ),
-            ),
-          )
-        ),
+            )),
       ),
     );
     final BuildContext defaultSelectionStyleContext = tester.element(find.byKey(defaultSelectionStyle));

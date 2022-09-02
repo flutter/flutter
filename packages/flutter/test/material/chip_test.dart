@@ -46,10 +46,12 @@ IconThemeData getIconData(WidgetTester tester) {
 
 DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   return tester.widget(
-    find.ancestor(
-      of: find.text(labelText),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
+    find
+        .ancestor(
+          of: find.text(labelText),
+          matching: find.byType(DefaultTextStyle),
+        )
+        .first,
   );
 }
 
@@ -155,9 +157,7 @@ Widget chipWithOptionalDeleteButton({
           useDeleteButtonTooltip: useDeleteButtonTooltip,
           deleteButtonTooltipMessage: deleteButtonTooltipMessage,
           label: Text(
-            deletable
-              ? 'Chip with Delete Button'
-              : 'Chip without Delete Button',
+            deletable ? 'Chip with Delete Button' : 'Chip without Delete Button',
             key: labelKey,
           ),
         ),
@@ -175,14 +175,13 @@ bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle) {
-          return false;
-        }
-        final Offset center = arguments[0] as Offset;
-        final double radius = arguments[1] as double;
-        return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
+      if (method != #drawCircle) {
+        return false;
       }
-    );
+      final Offset center = arguments[0] as Offset;
+      final double radius = arguments[1] as double;
+      return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
+    });
 }
 
 // Unique ripple pattern matches if there does not exist ripples
@@ -191,19 +190,18 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
 PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..everything((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle) {
-          return true;
-        }
-        final Offset center = arguments[0] as Offset;
-        final double radius = arguments[1] as double;
-        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius)) {
-          return true;
-        }
-        throw '''
+      if (method != #drawCircle) {
+        return true;
+      }
+      final Offset center = arguments[0] as Offset;
+      final double radius = arguments[1] as double;
+      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius)) {
+        return true;
+      }
+      throw '''
               Expected: center == $expectedCenter, radius == $expectedRadius
               Found: center == $center radius == $radius''';
-      }
-    );
+    });
 }
 
 // Finds any container of a tooltip.
@@ -229,7 +227,7 @@ void main() {
                 return Chip(
                   avatar: const CircleAvatar(child: Text('A')),
                   label: const Text('Chip A'),
-                  onDeleted: () { },
+                  onDeleted: () {},
                 );
               },
             ),
@@ -239,7 +237,11 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(Brightness.light));
-    expect(getMaterialBox(tester), paints..rrect()..circle(color: const Color(0xff1976d2)));
+    expect(
+        getMaterialBox(tester),
+        paints
+          ..rrect()
+          ..circle(color: const Color(0xff1976d2)));
     expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
@@ -402,7 +404,7 @@ void main() {
     (WidgetTester tester) async {
       await testConstrainedLabel(
         tester,
-        onDeleted: () { },
+        onDeleted: () {},
       );
     },
   );
@@ -414,7 +416,7 @@ void main() {
       await testConstrainedLabel(
         tester,
         avatar: const CircleAvatar(child: Text('A')),
-        onDeleted: () { },
+        onDeleted: () {},
       );
     },
   );
@@ -424,7 +426,7 @@ void main() {
     'the chip when it exceeds the available space',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/11523
-      Widget chipBuilder (String text, {Widget? avatar, VoidCallback? onDeleted}) {
+      Widget chipBuilder(String text, {Widget? avatar, VoidCallback? onDeleted}) {
         return MaterialApp(
           home: Scaffold(
             body: SizedBox(
@@ -531,7 +533,9 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
   });
 
-  testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets(
+    'Chip responds to materialTapTargetSize',
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapForChip(
           child: Column(
@@ -621,7 +625,7 @@ void main() {
             return Material(
               child: Chip(
                 deleteIcon: Icon(Icons.delete, key: iconKey),
-                onDeleted: () { },
+                onDeleted: () {},
                 label: const Text('ABC'),
               ),
             );
@@ -793,7 +797,7 @@ void main() {
             Chip(
               deleteIcon: SizedBox(key: keyA, width: 20.0, height: 20.0),
               label: const Text('Chip A'),
-              onDeleted: () { },
+              onDeleted: () {},
             ),
           ],
         ),
@@ -821,7 +825,7 @@ void main() {
                         width: 40.0,
                         height: 40.0,
                       ),
-                      onDeleted: () { },
+                      onDeleted: () {},
                     ),
                   ),
                 );
@@ -858,7 +862,7 @@ void main() {
                         width: 40.0,
                         height: 40.0,
                       ),
-                      onDeleted: () { },
+                      onDeleted: () {},
                     ),
                   ),
                 );
@@ -879,7 +883,7 @@ void main() {
 
   testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
     final GlobalKey labelKey = GlobalKey();
-    Future<void> pushChip({ Widget? avatar }) async {
+    Future<void> pushChip({Widget? avatar}) async {
       return tester.pumpWidget(
         wrapForChip(
           child: Wrap(
@@ -993,7 +997,7 @@ void main() {
     const Key labelKey = Key('label');
     const Key deleteButtonKey = Key('delete');
     bool wasDeleted = false;
-    Future<void> pushChip({ bool deletable = false }) async {
+    Future<void> pushChip({bool deletable = false}) async {
       return tester.pumpWidget(
         wrapForChip(
           child: Wrap(
@@ -1001,12 +1005,12 @@ void main() {
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return RawChip(
                   onDeleted: deletable
-                    ? () {
-                        setState(() {
-                          wasDeleted = true;
-                        });
-                      }
-                    : null,
+                      ? () {
+                          setState(() {
+                            wasDeleted = true;
+                          });
+                        }
+                      : null,
                   deleteIcon: Container(width: 40.0, height: 40.0, color: Colors.blue, key: deleteButtonKey),
                   label: const Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1123,7 +1127,7 @@ void main() {
                 deletePressed = true;
               },
               label: const Text(''),
-              ),
+            ),
           ],
         ),
       ),
@@ -1417,7 +1421,7 @@ void main() {
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
+    Future<void> pushChip({Widget? avatar, bool selectable = false}) async {
       return tester.pumpWidget(
         wrapForChip(
           child: Wrap(
@@ -1426,12 +1430,12 @@ void main() {
                 return RawChip(
                   avatar: avatar,
                   onSelected: selectable != null
-                    ? (bool value) {
-                        setState(() {
-                          selected = value;
-                        });
-                      }
-                    : null,
+                      ? (bool value) {
+                          setState(() {
+                            selected = value;
+                          });
+                        }
+                      : null,
                   selected: selected,
                   label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1497,7 +1501,7 @@ void main() {
   testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ bool selectable = false }) async {
+    Future<void> pushChip({bool selectable = false}) async {
       return tester.pumpWidget(
         wrapForChip(
           child: Wrap(
@@ -1505,12 +1509,12 @@ void main() {
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return RawChip(
                   onSelected: selectable != null
-                    ? (bool value) {
-                        setState(() {
-                          selected = value;
-                        });
-                      }
-                    : null,
+                      ? (bool value) {
+                          setState(() {
+                            selected = value;
+                          });
+                        }
+                      : null,
                   selected: selected,
                   label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1570,7 +1574,7 @@ void main() {
   testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
+    Future<void> pushChip({Widget? avatar, bool selectable = false}) async {
       return tester.pumpWidget(
         wrapForChip(
           child: Wrap(
@@ -1579,12 +1583,12 @@ void main() {
                 return RawChip(
                   avatar: avatar,
                   onSelected: selectable != null
-                    ? (bool value) {
-                        setState(() {
-                          selected = value;
-                        });
-                      }
-                    : null,
+                      ? (bool value) {
+                          setState(() {
+                            selected = value;
+                          });
+                        }
+                      : null,
                   selected: selected,
                   label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1788,7 +1792,7 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return RawChip(
                 showCheckmark: showCheckmark,
-                onDeleted: isDeletable ? () { } : null,
+                onDeleted: isDeletable ? () {} : null,
                 avatar: avatar,
                 deleteIcon: deleteIcon,
                 isEnabled: isSelectable || isPressable,
@@ -1796,19 +1800,19 @@ void main() {
                 selected: isSelectable && value,
                 label: Text('$value'),
                 onSelected: isSelectable
-                  ? (bool newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    }
-                  : null,
+                    ? (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 onPressed: isPressable
-                  ? () {
-                      setState(() {
-                        value = true;
-                      });
-                    }
-                  : null,
+                    ? () {
+                        setState(() {
+                          value = true;
+                        });
+                      }
+                    : null,
               );
             }),
           ),
@@ -1938,7 +1942,7 @@ void main() {
         home: Material(
           child: RawChip(
             label: const Text('test'),
-            onDeleted: () { },
+            onDeleted: () {},
           ),
         ),
       ));
@@ -1998,7 +2002,7 @@ void main() {
         home: Material(
           child: RawChip(
             label: const Text('test'),
-            onPressed: () { },
+            onPressed: () {},
           ),
         ),
       ));
@@ -2012,7 +2016,7 @@ void main() {
                 textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
-                    children: <TestSemantics> [
+                    children: <TestSemantics>[
                       TestSemantics(
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
@@ -2043,7 +2047,6 @@ void main() {
 
       semanticsTester.dispose();
     });
-
 
     testWidgets('with onSelected', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -2162,7 +2165,7 @@ void main() {
         home: Material(
           child: RawChip(
             isEnabled: false,
-            onPressed: () { },
+            onPressed: () {},
             label: const Text('test'),
           ),
         ),
@@ -2311,8 +2314,8 @@ void main() {
 
     testWidgets('disabled when tapEnabled but not canTap', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
-        // These settings make a Chip which _could_ be tapped, but not currently (ensures `canTap == false`).
-        await tester.pumpWidget(const MaterialApp(
+      // These settings make a Chip which _could_ be tapped, but not currently (ensures `canTap == false`).
+      await tester.pumpWidget(const MaterialApp(
         home: Material(
           child: RawChip(
             label: Text('test'),
@@ -2482,7 +2485,7 @@ void main() {
           shape: const RoundedRectangleBorder(),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
-          onPressed: () { },
+          onPressed: () {},
         ),
       ),
     );
@@ -2506,7 +2509,8 @@ void main() {
   });
 
   testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
-    await tester.pumpWidget(wrapForChip(child: const FilterChip(
+    await tester.pumpWidget(wrapForChip(
+        child: const FilterChip(
       avatar: CircleAvatar(child: Text('t')),
       label: Text('test'),
       selected: true,
@@ -2521,11 +2525,14 @@ void main() {
       ),
     );
     const Color selectScrimColor = Color(0x60191919);
-    expect(rawChip, paints..path(color: selectScrimColor, includes: <Offset>[
-      const Offset(10, 10),
-    ], excludes: <Offset>[
-      const Offset(4, 4),
-    ]));
+    expect(
+        rawChip,
+        paints
+          ..path(color: selectScrimColor, includes: <Offset>[
+            const Offset(10, 10),
+          ], excludes: <Offset>[
+            const Offset(4, 4),
+          ]));
   });
 
   testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
@@ -2534,7 +2541,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: ActionChip(
-            onPressed: () { },
+            onPressed: () {},
             label: const Text('action chip'),
           ),
         ),
@@ -2577,7 +2584,7 @@ void main() {
       return defaultColor;
     }
 
-    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+    Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         home: Scaffold(
           body: Focus(
@@ -2592,6 +2599,7 @@ void main() {
         ),
       );
     }
+
     Color textColor() {
       return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color!;
     }
@@ -2659,7 +2667,7 @@ void main() {
       return BorderSide(color: sideColor);
     }
 
-    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+    Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         home: Scaffold(
           body: Focus(
@@ -2677,17 +2685,29 @@ void main() {
 
     // Default, not disabled.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: selectedColor));
 
     // Focused.
     final FocusNode chipFocusNode = focusNode.children.first;
     chipFocusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: focusedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: focusedColor));
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(ChoiceChip));
@@ -2697,17 +2717,29 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: hoverColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: hoverColor));
 
     // Pressed.
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: pressedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: pressedColor));
 
     // Disabled.
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: disabledColor));
   });
 
   testWidgets('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
@@ -2738,7 +2770,7 @@ void main() {
       return BorderSide(color: sideColor);
     }
 
-    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+    Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         home: Scaffold(
           body: Focus(
@@ -2756,17 +2788,29 @@ void main() {
 
     // Default, not disabled.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: selectedColor));
 
     // Focused.
     final FocusNode chipFocusNode = focusNode.children.first;
     chipFocusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: focusedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: focusedColor));
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(ChoiceChip));
@@ -2776,18 +2820,29 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: hoverColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: hoverColor));
 
     // Pressed.
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: pressedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: pressedColor));
 
     // Disabled.
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
-
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: disabledColor));
   });
 
   testWidgets('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
@@ -2820,15 +2875,15 @@ void main() {
       return BorderSide(color: sideColor);
     }
 
-    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+    Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
             child: ChipTheme(
               data: ThemeData.light().chipTheme.copyWith(
-                side: defaultBorderSide,
-              ),
+                    side: defaultBorderSide,
+                  ),
               child: ChoiceChip(
                 label: const Text('Chip'),
                 selected: selected,
@@ -2843,19 +2898,31 @@ void main() {
 
     // Default, not disabled.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
     // Because the resolver returns `null` for this value, we should fall back
     // to the theme
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: fallbackThemeColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: fallbackThemeColor));
 
     // Focused.
     final FocusNode chipFocusNode = focusNode.children.first;
     chipFocusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: focusedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: focusedColor));
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(ChoiceChip));
@@ -2865,23 +2932,34 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: hoverColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: hoverColor));
 
     // Pressed.
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: pressedColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: pressedColor));
 
     // Disabled.
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: disabledColor));
   });
 
   testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     OutlinedBorder? getShape(Set<MaterialState> states) {
-
       if (states.contains(MaterialState.disabled)) {
         return const BeveledRectangleBorder();
       } else if (states.contains(MaterialState.pressed)) {
@@ -2897,7 +2975,7 @@ void main() {
       return null;
     }
 
-    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+    Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         home: Scaffold(
           body: Focus(
@@ -2968,13 +3046,13 @@ void main() {
       return null;
     }
 
-    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+    Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ThemeData.light().chipTheme.copyWith(
-            shape: themeShape,
-            side: themeBorderSide,
-          ),
+                shape: themeShape,
+                side: themeBorderSide,
+              ),
         ),
         home: Scaffold(
           body: ChoiceChip(
@@ -2991,12 +3069,20 @@ void main() {
     // Default, not disabled. Defer to theme.
     await tester.pumpWidget(chipWidget());
     expect(getMaterial(tester).shape, isA<StadiumBorder>());
-    expect(find.byType(RawChip), paints..rrect()..rrect(color: themeBorderSide.color));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rrect()
+          ..rrect(color: themeBorderSide.color));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
     expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
-    expect(find.byType(RawChip), paints..rect()..drrect(color: selectedBorderSide.color));
+    expect(
+        find.byType(RawChip),
+        paints
+          ..rect()
+          ..drrect(color: selectedBorderSide.color));
   });
 
   testWidgets('Chip responds to density changes.', (WidgetTester tester) async {
@@ -3129,7 +3215,8 @@ void main() {
     await tapGesture.up();
   });
 
-  testWidgets('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty', (WidgetTester tester) async {
+  testWidgets('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty',
+      (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(

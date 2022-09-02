@@ -28,8 +28,7 @@ class DeviceGestureSettings {
   factory DeviceGestureSettings.fromWindow(ui.FlutterView window) {
     final double? physicalTouchSlop = window.viewConfiguration.gestureSettings.physicalTouchSlop;
     return DeviceGestureSettings(
-      touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / window.devicePixelRatio
-    );
+        touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / window.devicePixelRatio);
   }
 
   /// The touch slop value in logical pixels, or `null` if it was not set.
@@ -47,8 +46,7 @@ class DeviceGestureSettings {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DeviceGestureSettings
-      && other.touchSlop == touchSlop;
+    return other is DeviceGestureSettings && other.touchSlop == touchSlop;
   }
 
   @override

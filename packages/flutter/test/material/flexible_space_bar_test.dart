@@ -31,7 +31,7 @@ void main() {
     Size size = tester.getSize(title);
     expect(center.dx, lessThan(400.0 - size.width / 2.0));
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       // Clear the widget tree to avoid animating between platforms.
       await tester.pumpWidget(Container(key: UniqueKey()));
 
@@ -69,7 +69,7 @@ void main() {
       child: AppBar(
         flexibleSpace: const FlexibleSpaceBar(
           title: Text('title'),
-          background:  Text('X2'),
+          background: Text('X2'),
           collapseMode: CollapseMode.pin,
         ),
       ),
@@ -130,7 +130,8 @@ void main() {
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80451
     await tester.pumpWidget(
       MaterialApp(
@@ -139,7 +140,7 @@ void main() {
             toolbarHeight: 300,
             flexibleSpace: const FlexibleSpaceBar(
               title: Text('Title'),
-              background:  Text('Background'),
+              background: Text('Background'),
               collapseMode: CollapseMode.pin,
             ),
           ),
@@ -280,7 +281,6 @@ void main() {
                               label: 'Item 3',
                               textDirection: TextDirection.ltr,
                             ),
-
                           ],
                         ),
                       ],
@@ -408,8 +408,6 @@ void main() {
                               label: 'Item 6',
                               textDirection: TextDirection.ltr,
                             ),
-
-
                           ],
                         ),
                       ],
@@ -479,7 +477,8 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale',
+      (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -499,7 +498,9 @@ void main() {
                     'X' * 41,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: titleFontSize,),
+                    style: const TextStyle(
+                      fontSize: titleFontSize,
+                    ),
                   ),
                   centerTitle: false,
                 ),
@@ -567,7 +568,9 @@ void main() {
                   child: FlexibleSpaceBar(
                     title: Text(
                       'X',
-                      style: TextStyle(fontSize: titleFontSize,),
+                      style: TextStyle(
+                        fontSize: titleFontSize,
+                      ),
                     ),
                     centerTitle: false,
                   ),
@@ -594,20 +597,17 @@ void main() {
     await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
     await tester.pumpAndSettle();
 
-    final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
+    final Finder flexibleSpaceBar =
+        find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
-    );
+        flexibleSpaceBar, matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png'));
 
     // We drag down to fully expand the space bar.
     await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
     await tester.pumpAndSettle();
 
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.expanded.png')
-    );
+        flexibleSpaceBar, matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.expanded.png'));
   });
 
   testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
@@ -627,7 +627,9 @@ void main() {
                   child: FlexibleSpaceBar(
                     title: Text(
                       'X',
-                      style: TextStyle(fontSize: titleFontSize,),
+                      style: TextStyle(
+                        fontSize: titleFontSize,
+                      ),
                     ),
                     centerTitle: false,
                     expandedTitleScale: expandedTitleScale,
@@ -655,21 +657,18 @@ void main() {
     await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
     await tester.pumpAndSettle();
 
-    final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
+    final Finder flexibleSpaceBar =
+        find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
     // This should match the default behavior
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
-    );
+        flexibleSpaceBar, matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png'));
 
     // We drag down to fully expand the space bar.
     await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
     await tester.pumpAndSettle();
 
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.expanded.png')
-    );
+        flexibleSpaceBar, matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.expanded.png'));
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
@@ -719,7 +718,6 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
-
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
@@ -792,7 +790,6 @@ void main() {
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
-
   const TestDelegate({
     required this.settings,
   });

@@ -56,9 +56,9 @@ class FractionalOffset extends Alignment {
   ///
   /// The [dx] and [dy] arguments must not be null.
   const FractionalOffset(double dx, double dy)
-    : assert(dx != null),
-      assert(dy != null),
-      super(dx * 2.0 - 1.0, dy * 2.0 - 1.0);
+      : assert(dx != null),
+        assert(dy != null),
+        super(dx * 2.0 - 1.0, dy * 2.0 - 1.0);
 
   /// Creates a fractional offset from a specific offset and size.
   ///
@@ -196,6 +196,6 @@ class FractionalOffset extends Alignment {
   @override
   String toString() {
     return 'FractionalOffset(${dx.toStringAsFixed(1)}, '
-                            '${dy.toStringAsFixed(1)})';
+        '${dy.toStringAsFixed(1)})';
   }
 }

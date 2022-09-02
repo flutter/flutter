@@ -25,7 +25,7 @@ export 'print.dart' show DebugPrintCallback;
 ///
 /// See [the foundation library](foundation/foundation-library.html)
 /// for a complete list.
-bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
+bool debugAssertAllFoundationVarsUnset(String reason, {DebugPrintCallback debugPrintOverride = debugPrintThrottled}) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||

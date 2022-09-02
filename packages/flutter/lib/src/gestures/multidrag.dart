@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -35,8 +34,8 @@ abstract class MultiDragPointerState {
   ///
   /// The [initialPosition] argument must not be null.
   MultiDragPointerState(this.initialPosition, this.kind, this.gestureSettings)
-    : assert(initialPosition != null),
-      _velocityTracker = VelocityTracker.withKind(kind);
+      : assert(initialPosition != null),
+        _velocityTracker = VelocityTracker.withKind(kind);
 
   /// Device specific gesture configuration that should be preferred over
   /// framework constants.
@@ -107,7 +106,7 @@ abstract class MultiDragPointerState {
   /// This is called when a pointer movement is received, but only if the gesture
   /// has not yet been resolved.
   @protected
-  void checkForResolutionAfterMove() { }
+  void checkForResolutionAfterMove() {}
 
   /// Called when the gesture was accepted.
   ///
@@ -221,7 +220,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
   });
 
@@ -284,7 +283,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(_pointers != null);
     final MultiDragPointerState? state = _pointers![pointer];
     if (state == null) {
-      return;  // We might already have canceled this drag if the up comes before the accept.
+      return; // We might already have canceled this drag if the up comes before the accept.
     }
     state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
   }
@@ -380,7 +379,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
   });
 
@@ -392,7 +391,6 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   @override
   String get debugDescription => 'multidrag';
 }
-
 
 class _HorizontalPointerState extends MultiDragPointerState {
   _HorizontalPointerState(super.initialPosition, super.kind, super.deviceGestureSettings);
@@ -437,7 +435,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
   });
 
@@ -449,7 +447,6 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   @override
   String get debugDescription => 'horizontal multidrag';
 }
-
 
 class _VerticalPointerState extends MultiDragPointerState {
   _VerticalPointerState(super.initialPosition, super.kind, super.deviceGestureSettings);
@@ -494,7 +491,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
   });
 
@@ -604,7 +601,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
   }) : assert(delay != null);
 

@@ -107,7 +107,8 @@ void main() {
     ]);
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -167,7 +168,8 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -225,7 +227,8 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -296,7 +299,8 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -365,7 +369,8 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -424,7 +429,8 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -515,7 +521,8 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
+    final RenderBox tip =
+        tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
     final RenderBox tooltipContent = tester.renderObject(find.text(tooltipText));
 
     final Offset topLeftTipInGlobal = tip.localToGlobal(tip.size.topLeft(Offset.zero));
@@ -524,17 +531,20 @@ void main() {
     expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customPaddingValue);
 
     final Offset topRightTipInGlobal = tip.localToGlobal(tip.size.topRight(Offset.zero));
-    final Offset topRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topRight(Offset.zero));
+    final Offset topRightTooltipContentInGlobal =
+        tooltipContent.localToGlobal(tooltipContent.size.topRight(Offset.zero));
     expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customPaddingValue);
     expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customPaddingValue);
 
     final Offset bottomLeftTipInGlobal = tip.localToGlobal(tip.size.bottomLeft(Offset.zero));
-    final Offset bottomLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomLeft(Offset.zero));
+    final Offset bottomLeftTooltipContentInGlobal =
+        tooltipContent.localToGlobal(tooltipContent.size.bottomLeft(Offset.zero));
     expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customPaddingValue);
     expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customPaddingValue);
 
     final Offset bottomRightTipInGlobal = tip.localToGlobal(tip.size.bottomRight(Offset.zero));
-    final Offset bottomRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomRight(Offset.zero));
+    final Offset bottomRightTooltipContentInGlobal =
+        tooltipContent.localToGlobal(tooltipContent.size.bottomRight(Offset.zero));
     expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customPaddingValue);
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
   });
@@ -571,7 +581,8 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
+    final RenderBox tip =
+        tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
     final RenderBox tooltipContent = tester.renderObject(find.text(tooltipText));
 
     final Offset topLeftTipInGlobal = tip.localToGlobal(tip.size.topLeft(Offset.zero));
@@ -580,17 +591,20 @@ void main() {
     expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customPaddingValue);
 
     final Offset topRightTipInGlobal = tip.localToGlobal(tip.size.topRight(Offset.zero));
-    final Offset topRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topRight(Offset.zero));
+    final Offset topRightTooltipContentInGlobal =
+        tooltipContent.localToGlobal(tooltipContent.size.topRight(Offset.zero));
     expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customPaddingValue);
     expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customPaddingValue);
 
     final Offset bottomLeftTipInGlobal = tip.localToGlobal(tip.size.bottomLeft(Offset.zero));
-    final Offset bottomLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomLeft(Offset.zero));
+    final Offset bottomLeftTooltipContentInGlobal =
+        tooltipContent.localToGlobal(tooltipContent.size.bottomLeft(Offset.zero));
     expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customPaddingValue);
     expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customPaddingValue);
 
     final Offset bottomRightTipInGlobal = tip.localToGlobal(tip.size.bottomRight(Offset.zero));
-    final Offset bottomRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomRight(Offset.zero));
+    final Offset bottomRightTooltipContentInGlobal =
+        tooltipContent.localToGlobal(tooltipContent.size.bottomRight(Offset.zero));
     expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customPaddingValue);
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
   });
@@ -1092,28 +1106,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          children: <TestSemantics>[
-            TestSemantics(
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
               children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                TestSemantics.rootChild(
                   children: <TestSemantics>[
                     TestSemantics(
-                      tooltip: 'Foo',
-                      label: 'Bar',
-                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              tooltip: 'Foo',
+                              label: 'Bar',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+            ignoreRect: true,
+            ignoreId: true,
+            ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -1135,28 +1155,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          children: <TestSemantics>[
-            TestSemantics(
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
               children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                TestSemantics.rootChild(
                   children: <TestSemantics>[
                     TestSemantics(
-                      tooltip: 'Foo',
-                      label: 'Bar',
-                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              tooltip: 'Foo',
+                              label: 'Bar',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+            ignoreRect: true,
+            ignoreId: true,
+            ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -1180,27 +1206,33 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          children: <TestSemantics>[
-            TestSemantics(
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
               children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                TestSemantics.rootChild(
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Bar',
-                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'Bar',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+            ignoreRect: true,
+            ignoreId: true,
+            ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -1222,34 +1254,41 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          children: <TestSemantics>[
-            TestSemantics(
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
               children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                TestSemantics.rootChild(
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Bar',
-                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'Bar',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
-      ],
-    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+            ignoreRect: true,
+            ignoreId: true,
+            ignoreTransform: true));
 
     semantics.dispose();
   });
 
   testWidgets('has semantic events by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility,
+        (dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1273,26 +1312,29 @@ void main() {
     await tester.longPress(find.byType(Tooltip));
     final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
 
-    expect(semanticEvents, unorderedEquals(<dynamic>[
-      <String, dynamic>{
-        'type': 'longPress',
-        'nodeId': findDebugSemantics(object).id,
-        'data': <String, dynamic>{},
-      },
-      <String, dynamic>{
-        'type': 'tooltip',
-        'data': <String, dynamic>{
-          'message': 'Foo',
-        },
-      },
-    ]));
+    expect(
+        semanticEvents,
+        unorderedEquals(<dynamic>[
+          <String, dynamic>{
+            'type': 'longPress',
+            'nodeId': findDebugSemantics(object).id,
+            'data': <String, dynamic>{},
+          },
+          <String, dynamic>{
+            'type': 'tooltip',
+            'data': <String, dynamic>{
+              'message': 'Foo',
+            },
+          },
+        ]));
     semantics.dispose();
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('has semantic events by default - TooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility,
+        (dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1318,19 +1360,21 @@ void main() {
     await tester.longPress(find.byType(Tooltip));
     final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
 
-    expect(semanticEvents, unorderedEquals(<dynamic>[
-      <String, dynamic>{
-        'type': 'longPress',
-        'nodeId': findDebugSemantics(object).id,
-        'data': <String, dynamic>{},
-      },
-      <String, dynamic>{
-        'type': 'tooltip',
-        'data': <String, dynamic>{
-          'message': 'Foo',
-        },
-      },
-    ]));
+    expect(
+        semanticEvents,
+        unorderedEquals(<dynamic>[
+          <String, dynamic>{
+            'type': 'longPress',
+            'nodeId': findDebugSemantics(object).id,
+            'data': <String, dynamic>{},
+          },
+          <String, dynamic>{
+            'type': 'tooltip',
+            'data': <String, dynamic>{
+              'message': 'Foo',
+            },
+          },
+        ]));
     semantics.dispose();
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
@@ -1341,8 +1385,9 @@ void main() {
     const Tooltip(message: 'message').debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       '"message"',

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'tween.dart';
@@ -108,7 +107,8 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// }
   /// ```
   /// {@end-tool}
-  factory Animation.fromValueListenable(ValueListenable<T> listenable, {
+  factory Animation.fromValueListenable(
+    ValueListenable<T> listenable, {
     ValueListenableTransformer<T>? transformer,
   }) = _ValueListenableDelegateAnimation<T>;
 
@@ -285,7 +285,8 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
 // An implementation of an animation that delegates to a value listenable with a fixed direction.
 class _ValueListenableDelegateAnimation<T> extends Animation<T> {
-  _ValueListenableDelegateAnimation(this._listenable, {
+  _ValueListenableDelegateAnimation(
+    this._listenable, {
     ValueListenableTransformer<T>? transformer,
   }) : _transformer = transformer;
 

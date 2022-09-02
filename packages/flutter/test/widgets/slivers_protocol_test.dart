@@ -34,7 +34,9 @@ void main() {
       ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    const double max = RenderBigSliver.height * 3.0 + (RenderOverlappingSliver.totalHeight) * 2.0 - 600.0; // 600 is the height of the test viewport
+    const double max = RenderBigSliver.height * 3.0 +
+        (RenderOverlappingSliver.totalHeight) * 2.0 -
+        600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);
     expect(position.pixels, 0.0);
@@ -68,7 +70,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  const BigSliver({ super.key });
+  const BigSliver({super.key});
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
     return RenderBigSliver();
@@ -81,12 +83,12 @@ class RenderOverlappingSliver extends RenderSliver {
 
   double get paintExtent {
     return math.min(
-             math.max(
-               fixedHeight,
-               totalHeight - constraints.scrollOffset,
-             ),
-             constraints.remainingPaintExtent,
-           );
+      math.max(
+        fixedHeight,
+        totalHeight - constraints.scrollOffset,
+      ),
+      constraints.remainingPaintExtent,
+    );
   }
 
   double get layoutExtent {
@@ -105,7 +107,7 @@ class RenderOverlappingSliver extends RenderSliver {
 }
 
 class OverlappingSliver extends LeafRenderObjectWidget {
-  const OverlappingSliver({ super.key });
+  const OverlappingSliver({super.key});
   @override
   RenderOverlappingSliver createRenderObject(BuildContext context) {
     return RenderOverlappingSliver();

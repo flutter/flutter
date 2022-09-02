@@ -9,7 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo extends ImageInfo {
-  const TestImageInfo(this.value, {
+  const TestImageInfo(
+    this.value, {
     required super.image,
     super.scale,
     super.debugLabel,
@@ -33,17 +34,16 @@ class TestImageInfo extends ImageInfo {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TestImageInfo
-        && other.value == value
-        && other.image.isCloneOf(image)
-        && other.scale == scale
-        && other.debugLabel == debugLabel;
+    return other is TestImageInfo &&
+        other.value == value &&
+        other.image.isCloneOf(image) &&
+        other.scale == scale &&
+        other.debugLabel == debugLabel;
   }
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { required this.image })
-      : assert(image != null);
+  const TestImageProvider(this.key, this.imageValue, {required this.image}) : assert(image != null);
 
   final int key;
   final int imageValue;
@@ -66,7 +66,7 @@ class TestImageProvider extends ImageProvider<int> {
 }
 
 class FailingTestImageProvider extends TestImageProvider {
-  const FailingTestImageProvider(super.key, super.imageValue, { required super.image });
+  const FailingTestImageProvider(super.key, super.imageValue, {required super.image});
 
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {

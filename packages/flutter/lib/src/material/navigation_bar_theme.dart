@@ -138,16 +138,16 @@ class NavigationBarThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    height,
-    backgroundColor,
-    surfaceTintColor,
-    elevation,
-    indicatorColor,
-    indicatorShape,
-    labelTextStyle,
-    iconTheme,
-    labelBehavior,
-  );
+        height,
+        backgroundColor,
+        surfaceTintColor,
+        elevation,
+        indicatorColor,
+        indicatorShape,
+        labelTextStyle,
+        iconTheme,
+        labelBehavior,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -157,16 +157,16 @@ class NavigationBarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NavigationBarThemeData
-        && other.height == height
-        && other.backgroundColor == backgroundColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.elevation == elevation
-        && other.indicatorColor == indicatorColor
-        && other.indicatorShape == indicatorShape
-        && other.labelTextStyle == labelTextStyle
-        && other.iconTheme == iconTheme
-        && other.labelBehavior == labelBehavior;
+    return other is NavigationBarThemeData &&
+        other.height == height &&
+        other.backgroundColor == backgroundColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.elevation == elevation &&
+        other.indicatorColor == indicatorColor &&
+        other.indicatorShape == indicatorShape &&
+        other.labelTextStyle == labelTextStyle &&
+        other.iconTheme == iconTheme &&
+        other.labelBehavior == labelBehavior;
   }
 
   @override
@@ -178,9 +178,12 @@ class NavigationBarThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
   }
 }
 

@@ -80,6 +80,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
     assert(isRegistered);
     return _value as T;
   }
+
   T? _value;
   set value(T newValue) {
     assert(isRegistered);
@@ -111,8 +112,8 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
 // See [_RestorablePrimitiveValue] for the non-nullable version of this class.
 class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
   _RestorablePrimitiveValueN(this._defaultValue)
-    : assert(debugIsSerializableForRestoration(_defaultValue)),
-      super();
+      : assert(debugIsSerializableForRestoration(_defaultValue)),
+        super();
 
   final T _defaultValue;
 
@@ -136,8 +137,8 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
 // See [_RestorablePrimitiveValueN] for the nullable version of this class.
 class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
   _RestorablePrimitiveValue(super.defaultValue)
-    : assert(defaultValue != null),
-      assert(debugIsSerializableForRestoration(defaultValue));
+      : assert(defaultValue != null),
+        assert(debugIsSerializableForRestoration(defaultValue));
 
   @override
   set value(T value) {
@@ -402,6 +403,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
     assert(isRegistered);
     return _value!;
   }
+
   T? _value;
 
   @override
@@ -469,8 +471,8 @@ class RestorableTextEditingController extends RestorableChangeNotifier<TextEditi
   /// This constructor treats a null `text` argument as if it were the empty
   /// string.
   factory RestorableTextEditingController({String? text}) => RestorableTextEditingController.fromValue(
-    text == null ? TextEditingValue.empty : TextEditingValue(text: text),
-  );
+        text == null ? TextEditingValue.empty : TextEditingValue(text: text),
+      );
 
   /// Creates a [RestorableTextEditingController] from an initial
   /// [TextEditingValue].

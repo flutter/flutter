@@ -31,8 +31,8 @@ class SemanticsDebugger extends StatefulWidget {
       fontSize: 10.0,
       height: 0.8,
     ),
-  }) : assert(child != null),
-       assert(labelStyle != null);
+  })  : assert(child != null),
+        assert(labelStyle != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -56,8 +56,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     // static here because we might not be in a tree that's attached to that
     // binding. Instead, we should find a way to get to the PipelineOwner from
     // the BuildContext.
-    _client = _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
-      ..addListener(_update);
+    _client = _SemanticsClient(WidgetsBinding.instance.pipelineOwner)..addListener(_update);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -167,7 +166,8 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         onTap: _handleTap,
         onLongPress: _handleLongPress,
         onPanEnd: _handlePanEnd,
-        excludeFromSemantics: true, // otherwise if you don't hit anything, we end up receiving it, which causes an infinite loop...
+        excludeFromSemantics:
+            true, // otherwise if you don't hit anything, we end up receiving it, which causes an infinite loop...
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
@@ -206,7 +206,8 @@ class _SemanticsClient extends ChangeNotifier {
 }
 
 class _SemanticsDebuggerPainter extends CustomPainter {
-  const _SemanticsDebuggerPainter(this.owner, this.generation, this.pointerPosition, this.devicePixelRatio, this.labelStyle);
+  const _SemanticsDebuggerPainter(
+      this.owner, this.generation, this.pointerPosition, this.devicePixelRatio, this.labelStyle);
 
   final PipelineOwner owner;
   final int generation;
@@ -236,9 +237,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SemanticsDebuggerPainter oldDelegate) {
-    return owner != oldDelegate.owner
-        || generation != oldDelegate.generation
-        || pointerPosition != oldDelegate.pointerPosition;
+    return owner != oldDelegate.owner ||
+        generation != oldDelegate.generation ||
+        pointerPosition != oldDelegate.pointerPosition;
   }
 
   @visibleForTesting
@@ -270,13 +271,12 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       annotations.add('long-pressable');
     }
 
-    final bool isScrollable = data.hasAction(SemanticsAction.scrollLeft)
-        || data.hasAction(SemanticsAction.scrollRight)
-        || data.hasAction(SemanticsAction.scrollUp)
-        || data.hasAction(SemanticsAction.scrollDown);
+    final bool isScrollable = data.hasAction(SemanticsAction.scrollLeft) ||
+        data.hasAction(SemanticsAction.scrollRight) ||
+        data.hasAction(SemanticsAction.scrollUp) ||
+        data.hasAction(SemanticsAction.scrollDown);
 
-    final bool isAdjustable = data.hasAction(SemanticsAction.increase)
-        || data.hasAction(SemanticsAction.decrease);
+    final bool isAdjustable = data.hasAction(SemanticsAction.increase) || data.hasAction(SemanticsAction.decrease);
 
     if (isScrollable) {
       annotations.add('scrollable');
@@ -289,10 +289,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     assert(data.attributedLabel != null);
     final String message;
     final String tooltipAndLabel = <String>[
-      if (data.tooltip.isNotEmpty)
-        data.tooltip,
-      if (data.attributedLabel.string.isNotEmpty)
-        data.attributedLabel.string,
+      if (data.tooltip.isNotEmpty) data.tooltip,
+      if (data.attributedLabel.string.isNotEmpty) data.attributedLabel.string,
     ].join('\n');
     if (tooltipAndLabel.isEmpty) {
       message = annotations.join('; ');

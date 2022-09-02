@@ -93,15 +93,15 @@ class CalendarDatePicker extends StatefulWidget {
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
     this.selectableDayPredicate,
-  }) : assert(initialDate != null),
-       assert(firstDate != null),
-       assert(lastDate != null),
-       initialDate = DateUtils.dateOnly(initialDate),
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
-       assert(onDateChanged != null),
-       assert(initialCalendarMode != null) {
+  })  : assert(initialDate != null),
+        assert(firstDate != null),
+        assert(lastDate != null),
+        initialDate = DateUtils.dateOnly(initialDate),
+        firstDate = DateUtils.dateOnly(firstDate),
+        lastDate = DateUtils.dateOnly(lastDate),
+        currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
+        assert(onDateChanged != null),
+        assert(initialCalendarMode != null) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -440,14 +440,14 @@ class _MonthPicker extends StatefulWidget {
     required this.onChanged,
     required this.onDisplayedMonthChanged,
     this.selectableDayPredicate,
-  }) : assert(selectedDate != null),
-       assert(currentDate != null),
-       assert(onChanged != null),
-       assert(firstDate != null),
-       assert(lastDate != null),
-       assert(!firstDate.isAfter(lastDate)),
-       assert(!selectedDate.isBefore(firstDate)),
-       assert(!selectedDate.isAfter(lastDate));
+  })  : assert(selectedDate != null),
+        assert(currentDate != null),
+        assert(onChanged != null),
+        assert(firstDate != null),
+        assert(lastDate != null),
+        assert(!firstDate.isAfter(lastDate)),
+        assert(!selectedDate.isBefore(firstDate)),
+        assert(!selectedDate.isAfter(lastDate));
 
   /// The initial month to display.
   final DateTime initialMonth;
@@ -612,7 +612,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   }
 
   /// Navigate to the given month.
-  void _showMonth(DateTime month, { bool jump = false}) {
+  void _showMonth(DateTime month, {bool jump = false}) {
     final int monthPage = DateUtils.monthDelta(widget.firstDate, month);
     if (jump) {
       _pageController.jumpToPage(monthPage);
@@ -827,15 +827,15 @@ class _DayPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.selectableDayPredicate,
-  }) : assert(currentDate != null),
-       assert(displayedMonth != null),
-       assert(firstDate != null),
-       assert(lastDate != null),
-       assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
-       assert(!selectedDate.isBefore(firstDate)),
-       assert(!selectedDate.isAfter(lastDate));
+  })  : assert(currentDate != null),
+        assert(displayedMonth != null),
+        assert(firstDate != null),
+        assert(lastDate != null),
+        assert(selectedDate != null),
+        assert(onChanged != null),
+        assert(!firstDate.isAfter(lastDate)),
+        assert(!selectedDate.isBefore(firstDate)),
+        assert(!selectedDate.isAfter(lastDate));
 
   /// The currently selected date.
   ///
@@ -869,7 +869,6 @@ class _DayPicker extends StatefulWidget {
 }
 
 class _DayPickerState extends State<_DayPicker> {
-
   /// List of [FocusNode]s, one for each day of the month.
   late List<FocusNode> _dayFocusNodes;
 
@@ -1097,13 +1096,13 @@ class YearPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
-       initialDate = DateUtils.dateOnly(initialDate ?? selectedDate);
+  })  : assert(firstDate != null),
+        assert(lastDate != null),
+        assert(selectedDate != null),
+        assert(onChanged != null),
+        assert(!firstDate.isAfter(lastDate)),
+        currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
+        initialDate = DateUtils.dateOnly(initialDate ?? selectedDate);
 
   /// The current date.
   ///
@@ -1264,7 +1263,7 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     final double tileWidth =
-      (constraints.crossAxisExtent - (_yearPickerColumnCount - 1) * _yearPickerRowSpacing) / _yearPickerColumnCount;
+        (constraints.crossAxisExtent - (_yearPickerColumnCount - 1) * _yearPickerRowSpacing) / _yearPickerColumnCount;
     return SliverGridRegularTileLayout(
       childCrossAxisExtent: tileWidth,
       childMainAxisExtent: _yearPickerRowHeight,

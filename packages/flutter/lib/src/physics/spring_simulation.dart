@@ -58,7 +58,8 @@ class SpringDescription {
   final double damping;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'SpringDescription')}(mass: ${mass.toStringAsFixed(1)}, stiffness: ${stiffness.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'SpringDescription')}(mass: ${mass.toStringAsFixed(1)}, stiffness: ${stiffness.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
 }
 
 /// The kind of spring solution that the [SpringSimulation] is using to simulate the spring.
@@ -96,8 +97,8 @@ class SpringSimulation extends Simulation {
     double end,
     double velocity, {
     super.tolerance,
-  }) : _endPosition = end,
-       _solution = _SpringSolution(spring, start - end, velocity);
+  })  : _endPosition = end,
+        _solution = _SpringSolution(spring, start - end, velocity);
 
   final double _endPosition;
   final _SpringSolution _solution;
@@ -116,8 +117,7 @@ class SpringSimulation extends Simulation {
 
   @override
   bool isDone(double time) {
-    return nearZero(_solution.x(time), tolerance.distance) &&
-           nearZero(_solution.dx(time), tolerance.velocity);
+    return nearZero(_solution.x(time), tolerance.distance) && nearZero(_solution.dx(time), tolerance.velocity);
   }
 
   @override
@@ -143,7 +143,6 @@ class ScrollSpringSimulation extends SpringSimulation {
   @override
   double x(double time) => isDone(time) ? _endPosition : super.x(time);
 }
-
 
 // SPRING IMPLEMENTATIONS
 
@@ -187,9 +186,9 @@ class _CriticalSolution implements _SpringSolution {
   }
 
   _CriticalSolution.withArgs(double r, double c1, double c2)
-    : _r = r,
-      _c1 = c1,
-      _c2 = c2;
+      : _r = r,
+        _c1 = c1,
+        _c2 = c2;
 
   final double _r, _c1, _c2;
 
@@ -223,23 +222,21 @@ class _OverdampedSolution implements _SpringSolution {
   }
 
   _OverdampedSolution.withArgs(double r1, double r2, double c1, double c2)
-    : _r1 = r1,
-      _r2 = r2,
-      _c1 = c1,
-      _c2 = c2;
+      : _r1 = r1,
+        _r2 = r2,
+        _c1 = c1,
+        _c2 = c2;
 
   final double _r1, _r2, _c1, _c2;
 
   @override
   double x(double time) {
-    return _c1 * math.pow(math.e, _r1 * time) +
-           _c2 * math.pow(math.e, _r2 * time);
+    return _c1 * math.pow(math.e, _r1 * time) + _c2 * math.pow(math.e, _r2 * time);
   }
 
   @override
   double dx(double time) {
-    return _c1 * _r1 * math.pow(math.e, _r1 * time) +
-           _c2 * _r2 * math.pow(math.e, _r2 * time);
+    return _c1 * _r1 * math.pow(math.e, _r1 * time) + _c2 * _r2 * math.pow(math.e, _r2 * time);
   }
 
   @override
@@ -252,8 +249,8 @@ class _UnderdampedSolution implements _SpringSolution {
     double distance,
     double velocity,
   ) {
-    final double w = math.sqrt(4.0 * spring.mass * spring.stiffness - spring.damping * spring.damping) /
-        (2.0 * spring.mass);
+    final double w =
+        math.sqrt(4.0 * spring.mass * spring.stiffness - spring.damping * spring.damping) / (2.0 * spring.mass);
     final double r = -(spring.damping / 2.0 * spring.mass);
     final double c1 = distance;
     final double c2 = (velocity - r * distance) / w;
@@ -261,17 +258,16 @@ class _UnderdampedSolution implements _SpringSolution {
   }
 
   _UnderdampedSolution.withArgs(double w, double r, double c1, double c2)
-    : _w = w,
-      _r = r,
-      _c1 = c1,
-      _c2 = c2;
+      : _w = w,
+        _r = r,
+        _c1 = c1,
+        _c2 = c2;
 
   final double _w, _r, _c1, _c2;
 
   @override
   double x(double time) {
-    return (math.pow(math.e, _r * time) as double) *
-           (_c1 * math.cos(_w * time) + _c2 * math.sin(_w * time));
+    return (math.pow(math.e, _r * time) as double) * (_c1 * math.cos(_w * time) + _c2 * math.sin(_w * time));
   }
 
   @override
@@ -279,8 +275,7 @@ class _UnderdampedSolution implements _SpringSolution {
     final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);
-    return power * (_c2 * _w * cosine - _c1 * _w * sine) +
-           _r * power * (_c2 *      sine   + _c1 *      cosine);
+    return power * (_c2 * _w * cosine - _c1 * _w * sine) + _r * power * (_c2 * sine + _c1 * cosine);
   }
 
   @override

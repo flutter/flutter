@@ -36,7 +36,7 @@ class OutlinedButtonThemeData with Diagnosticable {
   /// Creates a [OutlinedButtonThemeData].
   ///
   /// The [style] may be null.
-  const OutlinedButtonThemeData({ this.style });
+  const OutlinedButtonThemeData({this.style});
 
   /// Overrides for [OutlinedButton]'s default style.
   ///
@@ -49,7 +49,7 @@ class OutlinedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two outlined button themes.
   static OutlinedButtonThemeData? lerp(OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
-    assert (t != null);
+    assert(t != null);
     if (a == null && b == null) {
       return null;
     }

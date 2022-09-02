@@ -40,9 +40,9 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
-  }) : assert(builder != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null) {
+  })  : assert(builder != null),
+        assert(maintainState != null),
+        assert(fullscreenDialog != null) {
     assert(opaque);
   }
 
@@ -58,7 +58,6 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
   @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';
 }
-
 
 /// A mixin that provides platform-adaptive transitions for a [PageRoute].
 ///
@@ -98,8 +97,8 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
+    return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog) ||
+        (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
   }
 
   @override
@@ -126,7 +125,8 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
@@ -163,9 +163,9 @@ class MaterialPage<T> extends Page<T> {
     super.name,
     super.arguments,
     super.restorationId,
-  }) : assert(child != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null);
+  })  : assert(child != null),
+        assert(maintainState != null),
+        assert(fullscreenDialog != null);
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
@@ -193,8 +193,8 @@ class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTran
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
     super.allowSnapshotting,
-  }) : assert(page != null),
-       super(settings: page) {
+  })  : assert(page != null),
+        super(settings: page) {
     assert(opaque);
   }
 

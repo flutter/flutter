@@ -111,23 +111,23 @@ class MediaQueryData {
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
-  }) : assert(size != null),
-       assert(devicePixelRatio != null),
-       assert(textScaleFactor != null),
-       assert(platformBrightness != null),
-       assert(padding != null),
-       assert(viewInsets != null),
-       assert(systemGestureInsets != null),
-       assert(viewPadding != null),
-       assert(alwaysUse24HourFormat != null),
-       assert(accessibleNavigation != null),
-       assert(invertColors != null),
-       assert(highContrast != null),
-       assert(disableAnimations != null),
-       assert(boldText != null),
-       assert(navigationMode != null),
-       assert(gestureSettings != null),
-       assert(displayFeatures != null);
+  })  : assert(size != null),
+        assert(devicePixelRatio != null),
+        assert(textScaleFactor != null),
+        assert(platformBrightness != null),
+        assert(padding != null),
+        assert(viewInsets != null),
+        assert(systemGestureInsets != null),
+        assert(viewPadding != null),
+        assert(alwaysUse24HourFormat != null),
+        assert(accessibleNavigation != null),
+        assert(invertColors != null),
+        assert(highContrast != null),
+        assert(disableAnimations != null),
+        assert(boldText != null),
+        assert(navigationMode != null),
+        assert(gestureSettings != null),
+        assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -137,23 +137,23 @@ class MediaQueryData {
   /// [WidgetsBindingObserver.didChangeMetrics] or
   /// [dart:ui.PlatformDispatcher.onMetricsChanged].
   MediaQueryData.fromWindow(ui.FlutterView window)
-    : size = window.physicalSize / window.devicePixelRatio,
-      devicePixelRatio = window.devicePixelRatio,
-      textScaleFactor = window.platformDispatcher.textScaleFactor,
-      platformBrightness = window.platformDispatcher.platformBrightness,
-      padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
-      viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
-      viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
-      systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      accessibleNavigation = window.platformDispatcher.accessibilityFeatures.accessibleNavigation,
-      invertColors = window.platformDispatcher.accessibilityFeatures.invertColors,
-      disableAnimations = window.platformDispatcher.accessibilityFeatures.disableAnimations,
-      boldText = window.platformDispatcher.accessibilityFeatures.boldText,
-      highContrast = window.platformDispatcher.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
-      navigationMode = NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromWindow(window),
-      displayFeatures = window.displayFeatures;
+      : size = window.physicalSize / window.devicePixelRatio,
+        devicePixelRatio = window.devicePixelRatio,
+        textScaleFactor = window.platformDispatcher.textScaleFactor,
+        platformBrightness = window.platformDispatcher.platformBrightness,
+        padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+        viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
+        viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+        systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
+        accessibleNavigation = window.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+        invertColors = window.platformDispatcher.accessibilityFeatures.invertColors,
+        disableAnimations = window.platformDispatcher.accessibilityFeatures.disableAnimations,
+        boldText = window.platformDispatcher.accessibilityFeatures.boldText,
+        highContrast = window.platformDispatcher.accessibilityFeatures.highContrast,
+        alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
+        navigationMode = NavigationMode.traditional,
+        gestureSettings = DeviceGestureSettings.fromWindow(window),
+        displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -567,8 +567,11 @@ class MediaQueryData {
   ///    split the screen, from the [MediaQuery] and adds a [Padding] widget to
   ///    position the child to match the selected sub-screen.
   MediaQueryData removeDisplayFeatures(Rect subScreen) {
-    assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
-        subScreen.right <= size.width && subScreen.bottom <= size.height,
+    assert(
+        subScreen.left >= 0.0 &&
+            subScreen.top >= 0.0 &&
+            subScreen.right <= size.width &&
+            subScreen.bottom <= size.height,
         "'subScreen' argument cannot be outside the bounds of the screen");
     if (subScreen.size == size && subScreen.topLeft == Offset.zero) {
       return this;
@@ -594,9 +597,9 @@ class MediaQueryData {
         right: math.max(0.0, viewInsets.right - rightInset),
         bottom: math.max(0.0, viewInsets.bottom - bottomInset),
       ),
-      displayFeatures: displayFeatures.where(
-        (ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds)
-      ).toList(),
+      displayFeatures: displayFeatures
+          .where((ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds))
+          .toList(),
     );
   }
 
@@ -605,44 +608,44 @@ class MediaQueryData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MediaQueryData
-        && other.size == size
-        && other.devicePixelRatio == devicePixelRatio
-        && other.textScaleFactor == textScaleFactor
-        && other.platformBrightness == platformBrightness
-        && other.padding == padding
-        && other.viewPadding == viewPadding
-        && other.viewInsets == viewInsets
-        && other.alwaysUse24HourFormat == alwaysUse24HourFormat
-        && other.highContrast == highContrast
-        && other.disableAnimations == disableAnimations
-        && other.invertColors == invertColors
-        && other.accessibleNavigation == accessibleNavigation
-        && other.boldText == boldText
-        && other.navigationMode == navigationMode
-        && other.gestureSettings == gestureSettings
-        && listEquals(other.displayFeatures, displayFeatures);
+    return other is MediaQueryData &&
+        other.size == size &&
+        other.devicePixelRatio == devicePixelRatio &&
+        other.textScaleFactor == textScaleFactor &&
+        other.platformBrightness == platformBrightness &&
+        other.padding == padding &&
+        other.viewPadding == viewPadding &&
+        other.viewInsets == viewInsets &&
+        other.alwaysUse24HourFormat == alwaysUse24HourFormat &&
+        other.highContrast == highContrast &&
+        other.disableAnimations == disableAnimations &&
+        other.invertColors == invertColors &&
+        other.accessibleNavigation == accessibleNavigation &&
+        other.boldText == boldText &&
+        other.navigationMode == navigationMode &&
+        other.gestureSettings == gestureSettings &&
+        listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
   int get hashCode => Object.hash(
-    size,
-    devicePixelRatio,
-    textScaleFactor,
-    platformBrightness,
-    padding,
-    viewPadding,
-    viewInsets,
-    alwaysUse24HourFormat,
-    highContrast,
-    disableAnimations,
-    invertColors,
-    accessibleNavigation,
-    boldText,
-    navigationMode,
-    gestureSettings,
-    Object.hashAll(displayFeatures),
-  );
+        size,
+        devicePixelRatio,
+        textScaleFactor,
+        platformBrightness,
+        padding,
+        viewPadding,
+        viewInsets,
+        alwaysUse24HourFormat,
+        highContrast,
+        disableAnimations,
+        invertColors,
+        accessibleNavigation,
+        boldText,
+        navigationMode,
+        gestureSettings,
+        Object.hashAll(displayFeatures),
+      );
 
   @override
   String toString() {
@@ -698,8 +701,8 @@ class MediaQuery extends InheritedWidget {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  })  : assert(child != null),
+        assert(data != null);
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.

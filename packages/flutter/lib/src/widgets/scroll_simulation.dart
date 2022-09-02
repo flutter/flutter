@@ -35,12 +35,12 @@ class BouncingScrollSimulation extends Simulation {
     required this.trailingExtent,
     required this.spring,
     super.tolerance,
-  }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null) {
+  })  : assert(position != null),
+        assert(velocity != null),
+        assert(leadingExtent != null),
+        assert(trailingExtent != null),
+        assert(leadingExtent <= trailingExtent),
+        assert(spring != null) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -174,17 +174,15 @@ class ClampingScrollSimulation extends Simulation {
   // See computeDeceleration().
   static double _decelerationForFriction(double friction) {
     return 9.80665 *
-      39.37 *
-      friction *
-      1.0 * // Flutter operates on logical pixels so the DPI should be 1.0.
-      160.0;
+        39.37 *
+        friction *
+        1.0 * // Flutter operates on logical pixels so the DPI should be 1.0.
+        160.0;
   }
 
   // See getSplineDeceleration().
   double _splineDeceleration(double velocity) {
-    return math.log(_inflexion *
-      velocity.abs() /
-      (friction * _decelerationForFriction(0.84)));
+    return math.log(_inflexion * velocity.abs() / (friction * _decelerationForFriction(0.84)));
   }
 
   // See getSplineFlingDuration().
@@ -197,9 +195,7 @@ class ClampingScrollSimulation extends Simulation {
   double _splineFlingDistance(double velocity) {
     final double l = _splineDeceleration(velocity);
     final double decelMinusOne = _kDecelerationRate - 1.0;
-    return friction *
-      _decelerationForFriction(0.84) *
-      math.exp(_kDecelerationRate / decelMinusOne * l);
+    return friction * _decelerationForFriction(0.84) * math.exp(_kDecelerationRate / decelMinusOne * l);
   }
 
   @override

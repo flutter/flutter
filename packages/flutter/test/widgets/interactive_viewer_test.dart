@@ -223,7 +223,7 @@ void main() {
         childOffset.dy + 20.0,
       );
       final TestGesture gesture = await tester.startGesture(childOffset);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
       await gesture.up();
@@ -327,7 +327,8 @@ void main() {
       expect(translation.y, childOffset.dy - childInterior.dy);
     });
 
-    testWidgets('alignPanAxis allows panning in one direction only for horizontal leaning gesture', (WidgetTester tester) async {
+    testWidgets('alignPanAxis allows panning in one direction only for horizontal leaning gesture',
+        (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
@@ -510,7 +511,8 @@ void main() {
       expect(newSceneFocalPoint.dy, moreOrLessEquals(sceneFocalPoint.dy, epsilon: 1.0));
     });
 
-    testWidgets('Scaling automatically causes a centering translation even when alignPanAxis is set', (WidgetTester tester) async {
+    testWidgets('Scaling automatically causes a centering translation even when alignPanAxis is set',
+        (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;
       const double minScale = 0.1;
@@ -647,7 +649,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
     });
 
-    testWidgets('Scale with mouse returns onInteraction properties', (WidgetTester tester) async{
+    testWidgets('Scale with mouse returns onInteraction properties', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       late Offset focalPoint;
       late Offset localFocalPoint;
@@ -699,7 +701,7 @@ void main() {
       expect(scenePoint, const Offset(100, 100));
     });
 
-     testWidgets('Scaling amount is equal forth and back with a mouse scroll', (WidgetTester tester) async {
+    testWidgets('Scaling amount is equal forth and back with a mouse scroll', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
@@ -731,7 +733,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
     });
 
-    testWidgets('onInteraction can be used to get scene point', (WidgetTester tester) async{
+    testWidgets('onInteraction can be used to get scene point', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       late Offset focalPoint;
       late Offset localFocalPoint;
@@ -855,7 +857,7 @@ void main() {
       expect(calledStart, isTrue);
       expect(calledUpdate, isTrue);
       expect(calledEnd, isTrue);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android, TargetPlatform.iOS}));
 
     testWidgets('onInteraction is called even when disabled (mouse)', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
@@ -915,7 +917,9 @@ void main() {
       expect(calledStart, isTrue);
       expect(calledUpdate, isTrue);
       expect(calledEnd, isTrue);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows }));
+    },
+        variant: const TargetPlatformVariant(
+            <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
@@ -1201,8 +1205,8 @@ void main() {
                     for (int i = 0; i < 10; i++) {
                       final double childTop = i * childHeight;
                       final double childBottom = childTop + childHeight;
-                      final bool visible = (childBottom >= viewport.top && childBottom <= viewport.bottom)
-                          || (childTop >= viewport.top && childTop <= viewport.bottom);
+                      final bool visible = (childBottom >= viewport.top && childBottom <= viewport.bottom) ||
+                          (childTop >= viewport.top && childTop <= viewport.bottom);
                       children.add(Container(
                         height: childHeight,
                         color: visible ? Colors.green : Colors.red,
@@ -1385,7 +1389,7 @@ void main() {
       final Vector3 a = Vector3(0.0, 0.0, 0.0);
       final Vector3 b = Vector3(10.0, 0.0, 0.0);
 
-      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
+      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a, b);
 
       expect(closestPoint, Vector3(5.0, 0.0, 0.0));
       expect(point, Vector3(5.0, 5.0, 0.0));
@@ -1430,7 +1434,7 @@ void main() {
       final Vector3 a = Vector3(-1114.0, -60.3, 0.0);
       final Vector3 b = Vector3(288.8, 432.7, 0.0);
 
-      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
+      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a, b);
 
       expect(closestPoint.x, moreOrLessEquals(-356.8, epsilon: 0.1));
       expect(closestPoint.y, moreOrLessEquals(205.8, epsilon: 0.1));

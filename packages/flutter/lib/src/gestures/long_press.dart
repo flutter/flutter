@@ -115,8 +115,8 @@ class LongPressDownDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  })  : assert(globalPosition != null),
+        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -142,8 +142,8 @@ class LongPressStartDetails {
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  })  : assert(globalPosition != null),
+        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer initially contacted the screen.
   final Offset globalPosition;
@@ -168,10 +168,10 @@ class LongPressMoveUpdateDetails {
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
-  }) : assert(globalPosition != null),
-       assert(offsetFromOrigin != null),
-       localPosition = localPosition ?? globalPosition,
-       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+  })  : assert(globalPosition != null),
+        assert(offsetFromOrigin != null),
+        localPosition = localPosition ?? globalPosition,
+        localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
   /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
@@ -205,8 +205,8 @@ class LongPressEndDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  })  : assert(globalPosition != null),
+        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
@@ -255,12 +255,12 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
     super.debugOwner,
   }) : super(
-         deadline: duration ?? kLongPressTimeout,
-       );
+          deadline: duration ?? kLongPressTimeout,
+        );
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
@@ -782,9 +782,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   void _checkLongPressEnd(PointerEvent event) {
     final VelocityEstimate? estimate = _velocityTracker!.getVelocityEstimate();
-    final Velocity velocity = estimate == null
-        ? Velocity.zero
-        : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+    final Velocity velocity = estimate == null ? Velocity.zero : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
     final LongPressEndDetails details = LongPressEndDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,

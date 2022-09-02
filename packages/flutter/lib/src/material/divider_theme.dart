@@ -31,7 +31,6 @@ import 'theme.dart';
 ///    application.
 @immutable
 class DividerThemeData with Diagnosticable {
-
   /// Creates a theme that can be used for [DividerTheme] or
   /// [ThemeData.dividerTheme].
   const DividerThemeData({
@@ -99,12 +98,12 @@ class DividerThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    color,
-    space,
-    thickness,
-    indent,
-    endIndent,
-  );
+        color,
+        space,
+        thickness,
+        indent,
+        endIndent,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -114,12 +113,12 @@ class DividerThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DividerThemeData
-        && other.color == color
-        && other.space == space
-        && other.thickness == thickness
-        && other.indent == indent
-        && other.endIndent == endIndent;
+    return other is DividerThemeData &&
+        other.color == color &&
+        other.space == space &&
+        other.thickness == thickness &&
+        other.indent == indent &&
+        other.endIndent == endIndent;
   }
 
   @override

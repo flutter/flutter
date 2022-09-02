@@ -58,10 +58,9 @@ void main() {
   const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
-
     final GlobalKey insideKey = GlobalKey();
 
-    String state({ bool skipOffstage = true }) {
+    String state({bool skipOffstage = true}) {
       String result = '';
       if (tester.any(find.text('A', skipOffstage: skipOffstage))) {
         result += 'A';
@@ -115,9 +114,12 @@ void main() {
                   },
                 ),
               );
-            case '/2': return TestRoute<void>(settings: settings, child: const Text('E'));
-            case '/3': return TestRoute<void>(settings: settings, child: const Text('F'));
-            case '/4': return TestRoute<void>(settings: settings, child: const Text('G'));
+            case '/2':
+              return TestRoute<void>(settings: settings, child: const Text('E'));
+            case '/3':
+              return TestRoute<void>(settings: settings, child: const Text('F'));
+            case '/4':
+              return TestRoute<void>(settings: settings, child: const Text('G'));
           }
           return null;
         },
@@ -193,7 +195,6 @@ void main() {
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('G')); // transition 1->4 is done
     expect(state(skipOffstage: false), equals('G')); // route 1 is not around any more
-
   });
 
   testWidgets('Check onstage/offstage handling of barriers around transitions', (WidgetTester tester) async {
@@ -201,8 +202,10 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
-            case '/': return TestRoute<void>(settings: settings, child: const Text('A'));
-            case '/1': return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
+            case '/':
+              return TestRoute<void>(settings: settings, child: const Text('A'));
+            case '/1':
+              return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
           }
           return null;
         },
@@ -221,6 +224,5 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(ModalBarrier), findsOneWidget);
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier)).color, const Color(0xFFFFFF00));
-
   });
 }

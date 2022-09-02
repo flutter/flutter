@@ -172,12 +172,12 @@ class RadioListTile<T> extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
-  }) : assert(toggleable != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null);
+  })  : assert(toggleable != null),
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        assert(controlAffinity != null),
+        assert(autofocus != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -355,9 +355,8 @@ class RadioListTile<T> extends StatelessWidget {
     final Set<MaterialState> states = <MaterialState>{
       if (selected) MaterialState.selected,
     };
-    final Color effectiveActiveColor = activeColor
-      ?? radioThemeData.fillColor?.resolve(states)
-      ?? theme.colorScheme.secondary;
+    final Color effectiveActiveColor =
+        activeColor ?? radioThemeData.fillColor?.resolve(states) ?? theme.colorScheme.secondary;
     return MergeSemantics(
       child: ListTile(
         selectedColor: effectiveActiveColor,
@@ -371,15 +370,17 @@ class RadioListTile<T> extends StatelessWidget {
         shape: shape,
         tileColor: tileColor,
         selectedTileColor: selectedTileColor,
-        onTap: onChanged != null ? () {
-          if (toggleable && checked) {
-            onChanged!(null);
-            return;
-          }
-          if (!checked) {
-            onChanged!(value);
-          }
-        } : null,
+        onTap: onChanged != null
+            ? () {
+                if (toggleable && checked) {
+                  onChanged!(null);
+                  return;
+                }
+                if (!checked) {
+                  onChanged!(value);
+                }
+              }
+            : null,
         selected: selected,
         autofocus: autofocus,
         contentPadding: contentPadding,

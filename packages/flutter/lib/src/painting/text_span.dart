@@ -78,9 +78,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     this.semanticsLabel,
     this.locale,
     this.spellOut,
-  }) : mouseCursor = mouseCursor ??
-         (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
-       assert(!(text == null && semanticsLabel != null));
+  })  : mouseCursor = mouseCursor ?? (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
+        assert(!(text == null && semanticsLabel != null));
 
   /// The text contained in this span.
   ///
@@ -358,7 +357,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        child.computeToPlainText(buffer,
+        child.computeToPlainText(
+          buffer,
           includeSemanticsLabels: includeSemanticsLabels,
           includePlaceholders: includePlaceholders,
         );
@@ -427,10 +427,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (
-      recognizer != null &&
-      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
-    ) {
+    if (recognizer != null && (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)) {
       final int length = semanticsLabel?.length ?? text!.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -486,9 +483,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         (style == null) != (textSpan.style == null)) {
       return RenderComparison.layout;
     }
-    RenderComparison result = recognizer == textSpan.recognizer ?
-      RenderComparison.identical :
-      RenderComparison.metadata;
+    RenderComparison result =
+        recognizer == textSpan.recognizer ? RenderComparison.identical : RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
       if (candidate.index > result.index) {
@@ -523,27 +519,27 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (super != other) {
       return false;
     }
-    return other is TextSpan
-        && other.text == text
-        && other.recognizer == recognizer
-        && other.semanticsLabel == semanticsLabel
-        && onEnter == other.onEnter
-        && onExit == other.onExit
-        && mouseCursor == other.mouseCursor
-        && listEquals<InlineSpan>(other.children, children);
+    return other is TextSpan &&
+        other.text == text &&
+        other.recognizer == recognizer &&
+        other.semanticsLabel == semanticsLabel &&
+        onEnter == other.onEnter &&
+        onExit == other.onExit &&
+        mouseCursor == other.mouseCursor &&
+        listEquals<InlineSpan>(other.children, children);
   }
 
   @override
   int get hashCode => Object.hash(
-    super.hashCode,
-    text,
-    recognizer,
-    semanticsLabel,
-    onEnter,
-    onExit,
-    mouseCursor,
-    children == null ? null : Object.hashAll(children!),
-  );
+        super.hashCode,
+        text,
+        recognizer,
+        semanticsLabel,
+        onEnter,
+        onExit,
+        mouseCursor,
+        children == null ? null : Object.hashAll(children!),
+      );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'TextSpan');
@@ -565,14 +561,15 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
 
     properties.add(DiagnosticsProperty<GestureRecognizer>(
-      'recognizer', recognizer,
+      'recognizer',
+      recognizer,
       description: recognizer?.runtimeType.toString(),
       defaultValue: null,
     ));
 
     properties.add(FlagsSummary<Function?>(
       'callbacks',
-      <String, Function?> {
+      <String, Function?>{
         'enter': onEnter,
         'exit': onExit,
       },

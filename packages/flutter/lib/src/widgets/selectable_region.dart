@@ -252,8 +252,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
-  bool get _hasSelectionOverlayGeometry => _selectionDelegate.value.startSelectionPoint != null
-                                        || _selectionDelegate.value.endSelectionPoint != null;
+  bool get _hasSelectionOverlayGeometry =>
+      _selectionDelegate.value.startSelectionPoint != null || _selectionDelegate.value.endSelectionPoint != null;
 
   Orientation? _lastOrientation;
   SelectedContent? _lastSelectedContent;
@@ -266,8 +266,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _initTouchGestureRecognizer();
     // Taps and right clicks.
     _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-          () => TapGestureRecognizer(debugOwner: this),
-          (TapGestureRecognizer instance) {
+      () => TapGestureRecognizer(debugOwner: this),
+      (TapGestureRecognizer instance) {
         instance.onTap = _clearSelection;
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
@@ -332,7 +332,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   void _updateSelectionStatus() {
     final TextSelection selection;
     final SelectionGeometry geometry = _selectionDelegate.value;
-    switch(geometry.status) {
+    switch (geometry.status) {
       case SelectionStatus.uncollapsed:
       case SelectionStatus.collapsed:
         selection = const TextSelection(baseOffset: 0, extentOffset: 1);
@@ -354,8 +354,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _initMouseGestureRecognizer() {
     _gestureRecognizers[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-          () => PanGestureRecognizer(debugOwner:this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
-          (PanGestureRecognizer instance) {
+      () => PanGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse}),
+      (PanGestureRecognizer instance) {
         instance
           ..onDown = _startNewMouseSelectionGesture
           ..onStart = _handleMouseDragStart
@@ -369,8 +369,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _initTouchGestureRecognizer() {
     _gestureRecognizers[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-          () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: _kLongPressSelectionDevices),
-          (LongPressGestureRecognizer instance) {
+      () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: _kLongPressSelectionDevices),
+      (LongPressGestureRecognizer instance) {
         instance
           ..onLongPressStart = _handleTouchLongPressStart
           ..onLongPressMoveUpdate = _handleTouchLongPressMoveUpdate
@@ -450,8 +450,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (_scheduledSelectionEndEdgeUpdate || !_userDraggingSelectionEnd) {
       return;
     }
-    if (_selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!)) == SelectionResult.pending) {
+    if (_selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!)) ==
+        SelectionResult.pending) {
       _scheduledSelectionEndEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectionEndEdgeUpdate) {
@@ -462,13 +462,13 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       });
       return;
     }
- }
+  }
 
- void _onAnyDragEnd(DragEndDetails details) {
-  _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
-  _stopSelectionEndEdgeUpdate();
-  _updateSelectedContentIfNeeded();
- }
+  void _onAnyDragEnd(DragEndDetails details) {
+    _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
+    _stopSelectionEndEdgeUpdate();
+    _updateSelectedContentIfNeeded();
+  }
 
   void _stopSelectionEndEdgeUpdate() {
     _scheduledSelectionEndEdgeUpdate = false;
@@ -492,8 +492,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     if (_scheduledSelectionStartEdgeUpdate || !_userDraggingSelectionStart) {
       return;
     }
-    if (_selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forStart(globalPosition: _selectionStartPosition!)) == SelectionResult.pending) {
+    if (_selectable
+            ?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: _selectionStartPosition!)) ==
+        SelectionResult.pending) {
       _scheduledSelectionStartEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectionStartEdgeUpdate) {
@@ -535,7 +536,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionStartHandleDragPosition = _selectionStartHandleDragPosition + details.delta;
     // The value corresponds to the paint origin of the selection handle.
     // Offset it to the center of the line to make it feel more natural.
-    _selectionStartPosition = _selectionStartHandleDragPosition - Offset(0, _selectionDelegate.value.startSelectionPoint!.lineHeight / 2);
+    _selectionStartPosition =
+        _selectionStartHandleDragPosition - Offset(0, _selectionDelegate.value.startSelectionPoint!.lineHeight / 2);
     _triggerSelectionStartEdgeUpdate();
 
     _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
@@ -560,7 +562,8 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionEndHandleDragPosition = _selectionEndHandleDragPosition + details.delta;
     // The value corresponds to the paint origin of the selection handle.
     // Offset it to the center of the line to make it feel more natural.
-    _selectionEndPosition = _selectionEndHandleDragPosition - Offset(0, _selectionDelegate.value.endSelectionPoint!.lineHeight / 2);
+    _selectionEndPosition =
+        _selectionEndHandleDragPosition - Offset(0, _selectionDelegate.value.endSelectionPoint!.lineHeight / 2);
     _triggerSelectionEndEdgeUpdate();
 
     _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
@@ -570,22 +573,18 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   }
 
   MagnifierOverlayInfoBearer _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
-      final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
-      final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
-      final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
-      final Rect caretRect = Rect.fromLTWH(
-        globalSelectionPointPosition.dx,
-        globalSelectionPointPosition.dy - selectionPoint.lineHeight,
-        0,
-        selectionPoint.lineHeight
-      );
+    final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
+    final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
+    final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
+    final Rect caretRect = Rect.fromLTWH(globalSelectionPointPosition.dx,
+        globalSelectionPointPosition.dy - selectionPoint.lineHeight, 0, selectionPoint.lineHeight);
 
-      return MagnifierOverlayInfoBearer(
-        globalGesturePosition: globalGesturePosition,
-        caretRect: caretRect,
-        fieldBounds: globalTransformAsOffset & _selectable!.size,
-        currentLineBoundaries: globalTransformAsOffset & _selectable!.size,
-      );
+    return MagnifierOverlayInfoBearer(
+      globalGesturePosition: globalGesturePosition,
+      caretRect: caretRect,
+      fieldBounds: globalTransformAsOffset & _selectable!.size,
+      currentLineBoundaries: globalTransformAsOffset & _selectable!.size,
+    );
   }
 
   void _createSelectionOverlay() {
@@ -609,27 +608,26 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       ];
     }
     _selectionOverlay = SelectionOverlay(
-      context: context,
-      debugRequiredFor: widget,
-      startHandleType: start?.handleType ?? TextSelectionHandleType.left,
-      lineHeightAtStart: start?.lineHeight ?? end!.lineHeight,
-      onStartHandleDragStart: _handleSelectionStartHandleDragStart,
-      onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
-      onStartHandleDragEnd: _onAnyDragEnd,
-      endHandleType: end?.handleType ?? TextSelectionHandleType.right,
-      lineHeightAtEnd: end?.lineHeight ?? start!.lineHeight,
-      onEndHandleDragStart: _handleSelectionEndHandleDragStart,
-      onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
-      onEndHandleDragEnd: _onAnyDragEnd,
-      selectionEndpoints: points,
-      selectionControls: widget.selectionControls,
-      selectionDelegate: this,
-      clipboardStatus: null,
-      startHandleLayerLink: _startHandleLayerLink,
-      endHandleLayerLink: _endHandleLayerLink,
-      toolbarLayerLink: _toolbarLayerLink,
-      magnifierConfiguration: widget.magnifierConfiguration
-    );
+        context: context,
+        debugRequiredFor: widget,
+        startHandleType: start?.handleType ?? TextSelectionHandleType.left,
+        lineHeightAtStart: start?.lineHeight ?? end!.lineHeight,
+        onStartHandleDragStart: _handleSelectionStartHandleDragStart,
+        onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
+        onStartHandleDragEnd: _onAnyDragEnd,
+        endHandleType: end?.handleType ?? TextSelectionHandleType.right,
+        lineHeightAtEnd: end?.lineHeight ?? start!.lineHeight,
+        onEndHandleDragStart: _handleSelectionEndHandleDragStart,
+        onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
+        onEndHandleDragEnd: _onAnyDragEnd,
+        selectionEndpoints: points,
+        selectionControls: widget.selectionControls,
+        selectionDelegate: this,
+        clipboardStatus: null,
+        startHandleLayerLink: _startHandleLayerLink,
+        endHandleLayerLink: _endHandleLayerLink,
+        toolbarLayerLink: _toolbarLayerLink,
+        magnifierConfiguration: widget.magnifierConfiguration);
   }
 
   void _updateSelectionOverlay() {
@@ -877,7 +875,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   }
 
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
+    /* SelectableRegion maintains its own state */
+  }
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
@@ -1003,14 +1003,14 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   void _updateLastEdgeEventsFromGeometries() {
     if (currentSelectionStartIndex != -1) {
       final Selectable start = selectables[currentSelectionStartIndex];
-      final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
-          Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
+      final Offset localStartEdge =
+          start.value.startSelectionPoint!.localPosition + Offset(0, -start.value.startSelectionPoint!.lineHeight / 2);
       _lastStartEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge);
     }
     if (currentSelectionEndIndex != -1) {
       final Selectable end = selectables[currentSelectionEndIndex];
-      final Offset localEndEdge = end.value.endSelectionPoint!.localPosition +
-          Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
+      final Offset localEndEdge =
+          end.value.endSelectionPoint!.localPosition + Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
       _lastEndEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge);
     }
   }
@@ -1104,7 +1104,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
     }
     if (_lastStartEdgeUpdateGlobalPosition != null && _hasReceivedStartEvent.add(selectable)) {
       final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
-          globalPosition: _lastStartEdgeUpdateGlobalPosition!,
+        globalPosition: _lastStartEdgeUpdateGlobalPosition!,
       );
       if (currentSelectionStartIndex == -1) {
         handleSelectionEdgeUpdate(synthesizedEvent);
@@ -1335,8 +1335,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
   static int _compareVertically(Rect a, Rect b) {
-    if ((a.top - b.top < precisionErrorTolerance && a.bottom - b.bottom > - precisionErrorTolerance) ||
-        (b.top - a.top < precisionErrorTolerance && b.bottom - a.bottom > - precisionErrorTolerance)) {
+    if ((a.top - b.top < precisionErrorTolerance && a.bottom - b.bottom > -precisionErrorTolerance) ||
+        (b.top - a.top < precisionErrorTolerance && b.bottom - a.bottom > -precisionErrorTolerance)) {
       return 0;
     }
     if ((a.top - b.top).abs() > precisionErrorTolerance) {
@@ -1350,11 +1350,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   ///
   /// Returns positive if a is lower, negative if a is higher.
   static int _compareHorizontally(Rect a, Rect b) {
-    if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
+    if (a.left - b.left < precisionErrorTolerance && a.right - b.right > -precisionErrorTolerance) {
       // a encloses b.
       return -1;
     }
-    if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
+    if (b.left - a.left < precisionErrorTolerance && b.right - a.right > -precisionErrorTolerance) {
       // b encloses a.
       return 1;
     }
@@ -1377,9 +1377,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Gets the combined selection geometry for child selectables.
   @protected
   SelectionGeometry getSelectionGeometry() {
-    if (currentSelectionEndIndex == -1 ||
-        currentSelectionStartIndex == -1 ||
-        selectables.isEmpty) {
+    if (currentSelectionEndIndex == -1 || currentSelectionStartIndex == -1 || selectables.isEmpty) {
       // There is no valid selection.
       return SelectionGeometry(
         status: SelectionStatus.none,
@@ -1407,7 +1405,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
     SelectionPoint? startPoint;
     if (startGeometry.startSelectionPoint != null) {
-      final Matrix4 startTransform =  getTransformFrom(selectables[startIndexWalker]);
+      final Matrix4 startTransform = getTransformFrom(selectables[startIndexWalker]);
       final Offset start = MatrixUtils.transformPoint(startTransform, startGeometry.startSelectionPoint!.localPosition);
       // It can be NaN if it is detached or off-screen.
       if (start.isFinite) {
@@ -1428,7 +1426,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     SelectionPoint? endPoint;
     if (endGeometry.endSelectionPoint != null) {
-      final Matrix4 endTransform =  getTransformFrom(selectables[endIndexWalker]);
+      final Matrix4 endTransform = getTransformFrom(selectables[endIndexWalker]);
       final Offset end = MatrixUtils.transformPoint(endTransform, endGeometry.endSelectionPoint!.localPosition);
       // It can be NaN if it is detached or off-screen.
       if (end.isFinite) {
@@ -1443,9 +1441,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionGeometry(
       startSelectionPoint: startPoint,
       endSelectionPoint: endPoint,
-      status: startGeometry != endGeometry
-        ? SelectionStatus.uncollapsed
-        : startGeometry.status,
+      status: startGeometry != endGeometry ? SelectionStatus.uncollapsed : startGeometry.status,
       // Would have at least one selectable child.
       hasContent: true,
     );
@@ -1461,8 +1457,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   // This method adjusts the index to point to selectable with valid selection.
   int _adjustSelectionIndexBasedOnSelectionGeometry(int currentIndex, int towardIndex) {
     final bool forward = towardIndex > currentIndex;
-    while (currentIndex != towardIndex &&
-           selectables[currentIndex].value.status != SelectionStatus.uncollapsed) {
+    while (currentIndex != towardIndex && selectables[currentIndex].value.status != SelectionStatus.uncollapsed) {
       currentIndex += forward ? 1 : -1;
     }
     return currentIndex;
@@ -1488,11 +1483,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect drawableArea = Rect
-        .fromLTWH(0, 0, containerSize.width, containerSize.height)
-        .inflate(_kSelectionHandleDrawableAreaPadding);
-      final bool hideStartHandle = value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
-      final bool hideEndHandle = value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
+      final Rect drawableArea =
+          Rect.fromLTWH(0, 0, containerSize.width, containerSize.height).inflate(_kSelectionHandleDrawableAreaPadding);
+      final bool hideStartHandle =
+          value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
+      final bool hideEndHandle =
+          value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;
       effectiveEndHandle = hideEndHandle ? null : _endHandleLayer;
     }
@@ -1578,8 +1574,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           // Geometry has changed as a result of select word, need to clear the
           // selection of other selectables to keep selection in sync.
           selectables
-            .where((Selectable target) => target != selectables[index])
-            .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
+              .where((Selectable target) => target != selectables[index])
+              .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
         return SelectionResult.end;
@@ -1605,7 +1601,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (event.type == SelectionEventType.endEdgeUpdate) {
       return currentSelectionEndIndex == -1 ? _initSelection(event, isEnd: true) : _adjustSelection(event, isEnd: true);
     }
-    return currentSelectionStartIndex == -1 ? _initSelection(event, isEnd: false) : _adjustSelection(event, isEnd: false);
+    return currentSelectionStartIndex == -1
+        ? _initSelection(event, isEnd: false)
+        : _adjustSelection(event, isEnd: false);
   }
 
   @override
@@ -1684,7 +1682,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     bool hasFoundEdgeIndex = false;
     SelectionResult? result;
     for (int index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
-      final Selectable child =  selectables[index];
+      final Selectable child = selectables[index];
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
         case SelectionResult.next:

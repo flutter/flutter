@@ -12,7 +12,8 @@ void main() {
   test('Mock binary message handler control test', () async {
     final List<ByteData?> log = <ByteData>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('test1', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('test1',
+        (ByteData? message) async {
       log.add(message);
       return null;
     });

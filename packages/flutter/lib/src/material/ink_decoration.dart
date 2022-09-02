@@ -153,13 +153,14 @@ class Ink extends StatefulWidget {
     this.width,
     this.height,
     this.child,
-  }) : assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
-       ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null);
+  })  : assert(padding == null || padding.isNonNegative),
+        assert(decoration == null || decoration.debugAssertIsValid()),
+        assert(
+          color == null || decoration == null,
+          'Cannot provide both a color and a decoration\n'
+          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
+        ),
+        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
   /// a [Material].
@@ -192,23 +193,23 @@ class Ink extends StatefulWidget {
     this.width,
     this.height,
     this.child,
-  }) : assert(padding == null || padding.isNonNegative),
-       assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       decoration = BoxDecoration(
-         image: DecorationImage(
-           image: image,
-           onError: onImageError,
-           colorFilter: colorFilter,
-           fit: fit,
-           alignment: alignment,
-           centerSlice: centerSlice,
-           repeat: repeat,
-           matchTextDirection: matchTextDirection,
-         ),
-       );
+  })  : assert(padding == null || padding.isNonNegative),
+        assert(image != null),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        decoration = BoxDecoration(
+          image: DecorationImage(
+            image: image,
+            onError: onImageError,
+            colorFilter: colorFilter,
+            fit: fit,
+            alignment: alignment,
+            centerSlice: centerSlice,
+            repeat: repeat,
+            matchTextDirection: matchTextDirection,
+          ),
+        );
 
   /// The [child] contained by the container.
   ///
@@ -337,8 +338,8 @@ class InkDecoration extends InkFeature {
     required super.controller,
     required super.referenceBox,
     super.onRemoved,
-  }) : assert(configuration != null),
-       _configuration = configuration {
+  })  : assert(configuration != null),
+        _configuration = configuration {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }

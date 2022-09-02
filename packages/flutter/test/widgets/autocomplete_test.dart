@@ -62,7 +62,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextField(
@@ -71,7 +72,8 @@ void main() {
                 controller: textEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
@@ -145,7 +147,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextField(
@@ -154,7 +157,8 @@ void main() {
                 controller: textEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               return Material(
                 elevation: 4.0,
@@ -220,7 +224,8 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextField(
@@ -229,7 +234,8 @@ void main() {
                 controller: fieldTextEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
               lastOptions = options;
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
@@ -293,16 +299,15 @@ void main() {
           body: RawAutocomplete<User>(
             optionsBuilder: (TextEditingValue textEditingValue) {
               return kOptionsUsers.where((User option) {
-                return option
-                    .toString()
-                    .contains(textEditingValue.text.toLowerCase());
+                return option.toString().contains(textEditingValue.text.toLowerCase());
               });
             },
             displayStringForOption: displayStringForOption,
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               textEditingController = fieldTextEditingController;
               focusNode = fieldFocusNode;
               return TextField(
@@ -311,7 +316,8 @@ void main() {
                 controller: fieldTextEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
               lastOptions = options;
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
@@ -377,7 +383,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               textEditingController = fieldTextEditingController;
               focusNode = fieldFocusNode;
               lastOnFieldSubmitted = onFieldSubmitted;
@@ -387,7 +394,8 @@ void main() {
                 controller: fieldTextEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -443,7 +451,8 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                  fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
                     focusNode = fieldFocusNode;
                     textEditingController = fieldTextEditingController;
                     return TextFormField(
@@ -452,7 +461,8 @@ void main() {
                       key: fieldKey,
                     );
                   },
-                  optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                  optionsViewBuilder:
+                      (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
                     return Container(key: optionsKey);
                   },
                 ),
@@ -514,7 +524,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextField(
@@ -523,7 +534,8 @@ void main() {
                 controller: fieldTextEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -589,7 +601,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -643,7 +656,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextField(
@@ -652,7 +666,8 @@ void main() {
                 controller: textEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
@@ -701,10 +716,12 @@ void main() {
               return option.contains(textEditingValue.text.toLowerCase());
             });
           },
-          optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+          optionsViewBuilder:
+              (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
             return Container();
           },
-          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
             return TextField(
               focusNode: focusNode,
               controller: textEditingController,
@@ -724,36 +741,36 @@ void main() {
     Iterable<String>? lastOptions;
     Duration? delay;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) async {
-              final Iterable<String> options = kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-              if (delay == null) {
-                return options;
-              }
-              return Future<Iterable<String>>.delayed(delay, () => options);
-            },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
-          ),
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            final Iterable<String> options = kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+            if (delay == null) {
+              return options;
+            }
+            return Future<Iterable<String>>.delayed(delay, () => options);
+          },
+          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            focusNode = fieldFocusNode;
+            textEditingController = fieldTextEditingController;
+            return TextField(
+              key: fieldKey,
+              focusNode: focusNode,
+              controller: textEditingController,
+            );
+          },
+          optionsViewBuilder:
+              (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            lastOptions = options;
+            return Container(key: optionsKey);
+          },
         ),
-      )
-    );
+      ),
+    ));
 
     // Enter text to build the options with delay.
     focusNode.requestFocus();
@@ -792,7 +809,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextFormField(
@@ -804,7 +822,8 @@ void main() {
                 },
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -878,7 +897,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextFormField(
@@ -890,7 +910,8 @@ void main() {
                 },
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -973,7 +994,8 @@ void main() {
                   return option.contains(textEditingValue.text.toLowerCase());
                 });
               },
-              fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
                 focusNode = fieldFocusNode;
                 return TextFormField(
                   key: fieldKey,
@@ -984,7 +1006,8 @@ void main() {
                   },
                 );
               },
-              optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              optionsViewBuilder:
+                  (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
                 return Container(key: optionsKey);
               },
             ),
@@ -1012,7 +1035,8 @@ void main() {
     expect(wrappingActionInvoked, true);
   });
 
-  testWidgets('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option', (WidgetTester tester) async {
+  testWidgets('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option',
+      (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -1028,7 +1052,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextFormField(
@@ -1040,7 +1065,8 @@ void main() {
                 },
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOptions = options;
               lastHighlighted = AutocompleteHighlightedOption.of(context);
               return Container(key: optionsKey);
@@ -1110,7 +1136,8 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextField(
@@ -1119,7 +1146,8 @@ void main() {
                 controller: textEditingController,
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               lastOnSelected = onSelected;
               return Container(key: optionsKey);
             },

@@ -40,7 +40,8 @@ void main() {
     await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
   });
 
-  testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
+  testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     int buildCount = 0;
 
@@ -62,7 +63,7 @@ void main() {
 
     await tester.pump();
     expect(buildCount, equals(1));
-    bottomSheet.setState!(() { });
+    bottomSheet.setState!(() {});
     await tester.pump();
     expect(buildCount, equals(2));
   });

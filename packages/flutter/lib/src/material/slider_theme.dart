@@ -54,8 +54,8 @@ class SliderTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  })  : assert(child != null),
+        assert(data != null);
 
   /// Specifies the color and shape values for descendant slider widgets.
   final SliderThemeData data;
@@ -428,7 +428,6 @@ class SliderThemeData with Diagnosticable {
   /// The color given to the [valueIndicatorShape] to draw itself with.
   final Color? valueIndicatorColor;
 
-
   /// The shape that will be used to draw the [Slider]'s overlay.
   ///
   /// Both the [overlayColor] and a non default [overlayShape] may be specified.
@@ -665,7 +664,8 @@ class SliderThemeData with Diagnosticable {
       secondaryActiveTrackColor: Color.lerp(a.secondaryActiveTrackColor, b.secondaryActiveTrackColor, t),
       disabledActiveTrackColor: Color.lerp(a.disabledActiveTrackColor, b.disabledActiveTrackColor, t),
       disabledInactiveTrackColor: Color.lerp(a.disabledInactiveTrackColor, b.disabledInactiveTrackColor, t),
-      disabledSecondaryActiveTrackColor: Color.lerp(a.disabledSecondaryActiveTrackColor, b.disabledSecondaryActiveTrackColor, t),
+      disabledSecondaryActiveTrackColor:
+          Color.lerp(a.disabledSecondaryActiveTrackColor, b.disabledSecondaryActiveTrackColor, t),
       activeTickMarkColor: Color.lerp(a.activeTickMarkColor, b.activeTickMarkColor, t),
       inactiveTickMarkColor: Color.lerp(a.inactiveTickMarkColor, b.inactiveTickMarkColor, t),
       disabledActiveTickMarkColor: Color.lerp(a.disabledActiveTickMarkColor, b.disabledActiveTickMarkColor, t),
@@ -694,39 +694,39 @@ class SliderThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    trackHeight,
-    activeTrackColor,
-    inactiveTrackColor,
-    secondaryActiveTrackColor,
-    disabledActiveTrackColor,
-    disabledInactiveTrackColor,
-    disabledSecondaryActiveTrackColor,
-    activeTickMarkColor,
-    inactiveTickMarkColor,
-    disabledActiveTickMarkColor,
-    disabledInactiveTickMarkColor,
-    thumbColor,
-    overlappingShapeStrokeColor,
-    disabledThumbColor,
-    overlayColor,
-    valueIndicatorColor,
-    overlayShape,
-    tickMarkShape,
-    thumbShape,
-    Object.hash(
-      trackShape,
-      valueIndicatorShape,
-      rangeTickMarkShape,
-      rangeThumbShape,
-      rangeTrackShape,
-      rangeValueIndicatorShape,
-      showValueIndicator,
-      valueIndicatorTextStyle,
-      minThumbSeparation,
-      thumbSelector,
-      mouseCursor,
-    ),
-  );
+        trackHeight,
+        activeTrackColor,
+        inactiveTrackColor,
+        secondaryActiveTrackColor,
+        disabledActiveTrackColor,
+        disabledInactiveTrackColor,
+        disabledSecondaryActiveTrackColor,
+        activeTickMarkColor,
+        inactiveTickMarkColor,
+        disabledActiveTickMarkColor,
+        disabledInactiveTickMarkColor,
+        thumbColor,
+        overlappingShapeStrokeColor,
+        disabledThumbColor,
+        overlayColor,
+        valueIndicatorColor,
+        overlayShape,
+        tickMarkShape,
+        thumbShape,
+        Object.hash(
+          trackShape,
+          valueIndicatorShape,
+          rangeTickMarkShape,
+          rangeThumbShape,
+          rangeTrackShape,
+          rangeValueIndicatorShape,
+          showValueIndicator,
+          valueIndicatorTextStyle,
+          minThumbSeparation,
+          thumbSelector,
+          mouseCursor,
+        ),
+      );
 
   @override
   bool operator ==(Object other) {
@@ -736,37 +736,37 @@ class SliderThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SliderThemeData
-        && other.trackHeight == trackHeight
-        && other.activeTrackColor == activeTrackColor
-        && other.inactiveTrackColor == inactiveTrackColor
-        && other.secondaryActiveTrackColor == secondaryActiveTrackColor
-        && other.disabledActiveTrackColor == disabledActiveTrackColor
-        && other.disabledInactiveTrackColor == disabledInactiveTrackColor
-        && other.disabledSecondaryActiveTrackColor == disabledSecondaryActiveTrackColor
-        && other.activeTickMarkColor == activeTickMarkColor
-        && other.inactiveTickMarkColor == inactiveTickMarkColor
-        && other.disabledActiveTickMarkColor == disabledActiveTickMarkColor
-        && other.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor
-        && other.thumbColor == thumbColor
-        && other.overlappingShapeStrokeColor == overlappingShapeStrokeColor
-        && other.disabledThumbColor == disabledThumbColor
-        && other.overlayColor == overlayColor
-        && other.valueIndicatorColor == valueIndicatorColor
-        && other.overlayShape == overlayShape
-        && other.tickMarkShape == tickMarkShape
-        && other.thumbShape == thumbShape
-        && other.trackShape == trackShape
-        && other.valueIndicatorShape == valueIndicatorShape
-        && other.rangeTickMarkShape == rangeTickMarkShape
-        && other.rangeThumbShape == rangeThumbShape
-        && other.rangeTrackShape == rangeTrackShape
-        && other.rangeValueIndicatorShape == rangeValueIndicatorShape
-        && other.showValueIndicator == showValueIndicator
-        && other.valueIndicatorTextStyle == valueIndicatorTextStyle
-        && other.minThumbSeparation == minThumbSeparation
-        && other.thumbSelector == thumbSelector
-        && other.mouseCursor == mouseCursor;
+    return other is SliderThemeData &&
+        other.trackHeight == trackHeight &&
+        other.activeTrackColor == activeTrackColor &&
+        other.inactiveTrackColor == inactiveTrackColor &&
+        other.secondaryActiveTrackColor == secondaryActiveTrackColor &&
+        other.disabledActiveTrackColor == disabledActiveTrackColor &&
+        other.disabledInactiveTrackColor == disabledInactiveTrackColor &&
+        other.disabledSecondaryActiveTrackColor == disabledSecondaryActiveTrackColor &&
+        other.activeTickMarkColor == activeTickMarkColor &&
+        other.inactiveTickMarkColor == inactiveTickMarkColor &&
+        other.disabledActiveTickMarkColor == disabledActiveTickMarkColor &&
+        other.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor &&
+        other.thumbColor == thumbColor &&
+        other.overlappingShapeStrokeColor == overlappingShapeStrokeColor &&
+        other.disabledThumbColor == disabledThumbColor &&
+        other.overlayColor == overlayColor &&
+        other.valueIndicatorColor == valueIndicatorColor &&
+        other.overlayShape == overlayShape &&
+        other.tickMarkShape == tickMarkShape &&
+        other.thumbShape == thumbShape &&
+        other.trackShape == trackShape &&
+        other.valueIndicatorShape == valueIndicatorShape &&
+        other.rangeTickMarkShape == rangeTickMarkShape &&
+        other.rangeThumbShape == rangeThumbShape &&
+        other.rangeTrackShape == rangeTrackShape &&
+        other.rangeValueIndicatorShape == rangeValueIndicatorShape &&
+        other.showValueIndicator == showValueIndicator &&
+        other.valueIndicatorTextStyle == valueIndicatorTextStyle &&
+        other.minThumbSeparation == minThumbSeparation &&
+        other.thumbSelector == thumbSelector &&
+        other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -775,34 +775,61 @@ class SliderThemeData with Diagnosticable {
     const SliderThemeData defaultData = SliderThemeData();
     properties.add(DoubleProperty('trackHeight', trackHeight, defaultValue: defaultData.trackHeight));
     properties.add(ColorProperty('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
-    properties.add(ColorProperty('inactiveTrackColor', inactiveTrackColor, defaultValue: defaultData.inactiveTrackColor));
-    properties.add(ColorProperty('secondaryActiveTrackColor', secondaryActiveTrackColor, defaultValue: defaultData.secondaryActiveTrackColor));
-    properties.add(ColorProperty('disabledActiveTrackColor', disabledActiveTrackColor, defaultValue: defaultData.disabledActiveTrackColor));
-    properties.add(ColorProperty('disabledInactiveTrackColor', disabledInactiveTrackColor, defaultValue: defaultData.disabledInactiveTrackColor));
-    properties.add(ColorProperty('disabledSecondaryActiveTrackColor', disabledSecondaryActiveTrackColor, defaultValue: defaultData.disabledSecondaryActiveTrackColor));
-    properties.add(ColorProperty('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor));
-    properties.add(ColorProperty('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor));
-    properties.add(ColorProperty('disabledActiveTickMarkColor', disabledActiveTickMarkColor, defaultValue: defaultData.disabledActiveTickMarkColor));
-    properties.add(ColorProperty('disabledInactiveTickMarkColor', disabledInactiveTickMarkColor, defaultValue: defaultData.disabledInactiveTickMarkColor));
+    properties
+        .add(ColorProperty('inactiveTrackColor', inactiveTrackColor, defaultValue: defaultData.inactiveTrackColor));
+    properties.add(ColorProperty('secondaryActiveTrackColor', secondaryActiveTrackColor,
+        defaultValue: defaultData.secondaryActiveTrackColor));
+    properties.add(ColorProperty('disabledActiveTrackColor', disabledActiveTrackColor,
+        defaultValue: defaultData.disabledActiveTrackColor));
+    properties.add(ColorProperty('disabledInactiveTrackColor', disabledInactiveTrackColor,
+        defaultValue: defaultData.disabledInactiveTrackColor));
+    properties.add(ColorProperty('disabledSecondaryActiveTrackColor', disabledSecondaryActiveTrackColor,
+        defaultValue: defaultData.disabledSecondaryActiveTrackColor));
+    properties
+        .add(ColorProperty('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor));
+    properties.add(
+        ColorProperty('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor));
+    properties.add(ColorProperty('disabledActiveTickMarkColor', disabledActiveTickMarkColor,
+        defaultValue: defaultData.disabledActiveTickMarkColor));
+    properties.add(ColorProperty('disabledInactiveTickMarkColor', disabledInactiveTickMarkColor,
+        defaultValue: defaultData.disabledInactiveTickMarkColor));
     properties.add(ColorProperty('thumbColor', thumbColor, defaultValue: defaultData.thumbColor));
-    properties.add(ColorProperty('overlappingShapeStrokeColor', overlappingShapeStrokeColor, defaultValue: defaultData.overlappingShapeStrokeColor));
-    properties.add(ColorProperty('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor));
+    properties.add(ColorProperty('overlappingShapeStrokeColor', overlappingShapeStrokeColor,
+        defaultValue: defaultData.overlappingShapeStrokeColor));
+    properties
+        .add(ColorProperty('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor));
     properties.add(ColorProperty('overlayColor', overlayColor, defaultValue: defaultData.overlayColor));
-    properties.add(ColorProperty('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
-    properties.add(DiagnosticsProperty<SliderComponentShape>('overlayShape', overlayShape, defaultValue: defaultData.overlayShape));
-    properties.add(DiagnosticsProperty<SliderTickMarkShape>('tickMarkShape', tickMarkShape, defaultValue: defaultData.tickMarkShape));
-    properties.add(DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape));
-    properties.add(DiagnosticsProperty<SliderTrackShape>('trackShape', trackShape, defaultValue: defaultData.trackShape));
-    properties.add(DiagnosticsProperty<SliderComponentShape>('valueIndicatorShape', valueIndicatorShape, defaultValue: defaultData.valueIndicatorShape));
-    properties.add(DiagnosticsProperty<RangeSliderTickMarkShape>('rangeTickMarkShape', rangeTickMarkShape, defaultValue: defaultData.rangeTickMarkShape));
-    properties.add(DiagnosticsProperty<RangeSliderThumbShape>('rangeThumbShape', rangeThumbShape, defaultValue: defaultData.rangeThumbShape));
-    properties.add(DiagnosticsProperty<RangeSliderTrackShape>('rangeTrackShape', rangeTrackShape, defaultValue: defaultData.rangeTrackShape));
-    properties.add(DiagnosticsProperty<RangeSliderValueIndicatorShape>('rangeValueIndicatorShape', rangeValueIndicatorShape, defaultValue: defaultData.rangeValueIndicatorShape));
-    properties.add(EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator, defaultValue: defaultData.showValueIndicator));
-    properties.add(DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle, defaultValue: defaultData.valueIndicatorTextStyle));
-    properties.add(DoubleProperty('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
-    properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: defaultData.mouseCursor));
+    properties
+        .add(ColorProperty('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
+    properties.add(DiagnosticsProperty<SliderComponentShape>('overlayShape', overlayShape,
+        defaultValue: defaultData.overlayShape));
+    properties.add(DiagnosticsProperty<SliderTickMarkShape>('tickMarkShape', tickMarkShape,
+        defaultValue: defaultData.tickMarkShape));
+    properties
+        .add(DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape));
+    properties
+        .add(DiagnosticsProperty<SliderTrackShape>('trackShape', trackShape, defaultValue: defaultData.trackShape));
+    properties.add(DiagnosticsProperty<SliderComponentShape>('valueIndicatorShape', valueIndicatorShape,
+        defaultValue: defaultData.valueIndicatorShape));
+    properties.add(DiagnosticsProperty<RangeSliderTickMarkShape>('rangeTickMarkShape', rangeTickMarkShape,
+        defaultValue: defaultData.rangeTickMarkShape));
+    properties.add(DiagnosticsProperty<RangeSliderThumbShape>('rangeThumbShape', rangeThumbShape,
+        defaultValue: defaultData.rangeThumbShape));
+    properties.add(DiagnosticsProperty<RangeSliderTrackShape>('rangeTrackShape', rangeTrackShape,
+        defaultValue: defaultData.rangeTrackShape));
+    properties.add(DiagnosticsProperty<RangeSliderValueIndicatorShape>(
+        'rangeValueIndicatorShape', rangeValueIndicatorShape,
+        defaultValue: defaultData.rangeValueIndicatorShape));
+    properties.add(EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator,
+        defaultValue: defaultData.showValueIndicator));
+    properties.add(DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle,
+        defaultValue: defaultData.valueIndicatorTextStyle));
+    properties
+        .add(DoubleProperty('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
+    properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector,
+        defaultValue: defaultData.thumbSelector));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor,
+        defaultValue: defaultData.mouseCursor));
   }
 }
 
@@ -1593,8 +1620,10 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
+    final ColorTween activeTrackColorTween =
+        ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween =
+        ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
     final Paint leftTrackPaint;
@@ -1633,7 +1662,8 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
             : (secondaryOffset.dx < thumbCenter.dx));
 
     if (showSecondaryTrack) {
-      final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
+      final ColorTween secondaryTrackColorTween =
+          ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
       final Rect secondaryTrackSegment = Rect.fromLTRB(
         (textDirection == TextDirection.ltr) ? thumbCenter.dx : secondaryOffset.dx,
@@ -1713,8 +1743,10 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
     // Assign the track segment paints, which are leading: active and
     // trailing: inactive.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
+    final ColorTween activeTrackColorTween =
+        ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween =
+        ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
     final Paint leftTrackPaint;
@@ -1743,11 +1775,11 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     context.canvas.drawRRect(
       RRect.fromLTRBAndCorners(
         trackRect.left,
-        (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
+        (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
         thumbCenter.dx,
         (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
         topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
-        bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
+        bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
       ),
       leftTrackPaint,
     );
@@ -1769,7 +1801,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
             : (secondaryOffset.dx < thumbCenter.dx));
 
     if (showSecondaryTrack) {
-      final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
+      final ColorTween secondaryTrackColorTween =
+          ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
       if (textDirection == TextDirection.ltr) {
         context.canvas.drawRRect(
@@ -1891,8 +1924,10 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
     assert(textDirection != null);
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
+    final ColorTween activeTrackColorTween =
+        ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween =
+        ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
@@ -1920,7 +1955,8 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
     if (!leftTrackSegment.isEmpty) {
       context.canvas.drawRect(leftTrackSegment, inactivePaint);
     }
-    final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx, trackRect.top, rightThumbOffset.dx, trackRect.bottom);
+    final Rect middleTrackSegment =
+        Rect.fromLTRB(leftThumbOffset.dx, trackRect.top, rightThumbOffset.dx, trackRect.bottom);
     if (!middleTrackSegment.isEmpty) {
       context.canvas.drawRect(middleTrackSegment, activePaint);
     }
@@ -2037,10 +2073,8 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
-    final Paint activePaint = Paint()
-      ..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final Paint inactivePaint = Paint()
-      ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
+    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
     final Offset leftThumbOffset;
     final Offset rightThumbOffset;
@@ -2178,12 +2212,15 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     switch (textDirection) {
       case TextDirection.ltr:
         final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
-        begin = isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
+        begin = isTickMarkRightOfThumb
+            ? sliderTheme.disabledInactiveTickMarkColor
+            : sliderTheme.disabledActiveTickMarkColor;
         end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
         break;
       case TextDirection.rtl:
         final bool isTickMarkLeftOfThumb = center.dx < thumbCenter.dx;
-        begin = isTickMarkLeftOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
+        begin =
+            isTickMarkLeftOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
         end = isTickMarkLeftOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
         break;
     }
@@ -2191,9 +2228,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius = getPreferredSize(
-       isEnabled: isEnabled,
-       sliderTheme: sliderTheme,
-     ).width / 2;
+          isEnabled: isEnabled,
+          sliderTheme: sliderTheme,
+        ).width /
+        2;
     if (tickMarkRadius > 0) {
       context.canvas.drawCircle(center, tickMarkRadius, paint);
     }
@@ -2278,15 +2316,17 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
         isBetweenThumbs = endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx;
         break;
     }
-    final Color? begin = isBetweenThumbs ? sliderTheme.disabledActiveTickMarkColor : sliderTheme.disabledInactiveTickMarkColor;
+    final Color? begin =
+        isBetweenThumbs ? sliderTheme.disabledActiveTickMarkColor : sliderTheme.disabledInactiveTickMarkColor;
     final Color? end = isBetweenThumbs ? sliderTheme.activeTickMarkColor : sliderTheme.inactiveTickMarkColor;
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius = getPreferredSize(
-      isEnabled: isEnabled,
-      sliderTheme: sliderTheme,
-    ).width / 2;
+          isEnabled: isEnabled,
+          sliderTheme: sliderTheme,
+        ).width /
+        2;
     if (tickMarkRadius > 0) {
       context.canvas.drawCircle(center, tickMarkRadius, paint);
     }
@@ -2614,7 +2654,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 ///    sliders in a widget subtree.
 class RoundSliderOverlayShape extends SliderComponentShape {
   /// Create a slider thumb overlay that draws a circle.
-  const RoundSliderOverlayShape({ this.overlayRadius = 24.0 });
+  const RoundSliderOverlayShape({this.overlayRadius = 24.0});
 
   /// The preferred radius of the round thumb shape when enabled.
   ///
@@ -2734,8 +2774,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 ///  * [RangeSlider], which includes value indicators defined by this shape.
 ///  * [SliderTheme], which can be used to configure the range slider value
 ///    indicator of all sliders in a widget subtree.
-class RectangularRangeSliderValueIndicatorShape
-    extends RangeSliderValueIndicatorShape {
+class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShape {
   /// Create a range slider value indicator that resembles a rectangular tooltip.
   const RectangularRangeSliderValueIndicatorShape();
 
@@ -2839,6 +2878,7 @@ class _RectangularSliderValueIndicatorPathPainter {
 
     const double edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
+
     /// Value indicator draws on the Overlay and by using the global Offset
     /// we are making sure we use the bounds of the Overlay instead of the Slider.
     final Offset globalCenter = parentBox.localToGlobal(center);
@@ -2848,7 +2888,8 @@ class _RectangularSliderValueIndicatorPathPainter {
     // is negative, then the lobe is shifted from right to left, and if it is
     // positive, then the lobe is shifted from left to right.
     final double overflowLeft = math.max(0, rectangleWidth / 2 - globalCenter.dx + edgePadding);
-    final double overflowRight = math.max(0, rectangleWidth / 2 - (sizeWithOverflow.width - globalCenter.dx - edgePadding));
+    final double overflowRight =
+        math.max(0, rectangleWidth / 2 - (sizeWithOverflow.width - globalCenter.dx - edgePadding));
 
     if (rectangleWidth < sizeWithOverflow.width) {
       return overflowLeft - overflowRight;
@@ -3137,7 +3178,8 @@ class _PaddleSliderValueIndicatorPathPainter {
   ) {
     assert(labelPainter != null);
     assert(textScaleFactor != null && textScaleFactor >= 0);
-    final double width = math.max(_minLabelWidth * textScaleFactor, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
+    final double width =
+        math.max(_minLabelWidth * textScaleFactor, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
     return Size(width, _preferredHeight * textScaleFactor);
   }
 
@@ -3236,7 +3278,8 @@ class _PaddleSliderValueIndicatorPathPainter {
     canvas.scale(overallScale, overallScale);
 
     final double bottomNeckTriangleHypotenuse = _bottomNeckRadius + _bottomLobeRadius / overallScale;
-    final double rightBottomNeckCenterY = -math.sqrt(math.pow(bottomNeckTriangleHypotenuse, 2) - math.pow(_rightBottomNeckCenterX, 2));
+    final double rightBottomNeckCenterY =
+        -math.sqrt(math.pow(bottomNeckTriangleHypotenuse, 2) - math.pow(_rightBottomNeckCenterX, 2));
     final double rightBottomNeckAngleEnd = math.pi + math.atan(rightBottomNeckCenterY / _rightBottomNeckCenterX);
     final Path path = Path()..moveTo(_middleNeckWidth / 2, rightBottomNeckCenterY);
     _addArc(
@@ -3268,7 +3311,7 @@ class _PaddleSliderValueIndicatorPathPainter {
       inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
     );
 
-    final double shift = _getIdealOffset( halfWidthNeeded, overallScale, center, sizeWithOverflow.width);
+    final double shift = _getIdealOffset(halfWidthNeeded, overallScale, center, sizeWithOverflow.width);
     final double leftWidthNeeded = halfWidthNeeded - shift;
     final double rightWidthNeeded = halfWidthNeeded + shift;
 
@@ -3295,27 +3338,29 @@ class _PaddleSliderValueIndicatorPathPainter {
     // The distance between the end of the bottom neck arc and the beginning of
     // the top neck arc. We use this to shrink/expand it based on the scale
     // factor of the value indicator.
-    final double neckStretchBaseline = math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
+    final double neckStretchBaseline =
+        math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
     final double t = math.pow(inverseTextScale, 3.0) as double;
     final double stretch = clampDouble(neckStretchBaseline * t, 0.0, 10.0 * neckStretchBaseline);
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
-    assert(!_debuggingLabelLocation || () {
-      final Offset leftCenter = _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch;
-      final Offset rightCenter = _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch;
-      final Rect valueRect = Rect.fromLTRB(
-        leftCenter.dx - _topLobeRadius,
-        leftCenter.dy - _topLobeRadius,
-        rightCenter.dx + _topLobeRadius,
-        rightCenter.dy + _topLobeRadius,
-      );
-      final Paint outlinePaint = Paint()
-        ..color = const Color(0xffff0000)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0;
-      canvas.drawRect(valueRect, outlinePaint);
-      return true;
-    }());
+    assert(!_debuggingLabelLocation ||
+        () {
+          final Offset leftCenter = _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch;
+          final Offset rightCenter = _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch;
+          final Rect valueRect = Rect.fromLTRB(
+            leftCenter.dx - _topLobeRadius,
+            leftCenter.dy - _topLobeRadius,
+            rightCenter.dx + _topLobeRadius,
+            rightCenter.dy + _topLobeRadius,
+          );
+          final Paint outlinePaint = Paint()
+            ..color = const Color(0xffff0000)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0;
+          canvas.drawRect(valueRect, outlinePaint);
+          return true;
+        }());
 
     _addArc(
       path,
@@ -3417,9 +3462,7 @@ class RangeValues {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RangeValues
-        && other.start == start
-        && other.end == end;
+    return other is RangeValues && other.start == start && other.end == end;
   }
 
   @override
@@ -3458,9 +3501,7 @@ class RangeLabels {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RangeLabels
-        && other.start == start
-        && other.end == end;
+    return other is RangeLabels && other.start == start && other.end == end;
   }
 
   @override

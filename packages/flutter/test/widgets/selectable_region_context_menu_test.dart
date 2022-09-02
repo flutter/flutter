@@ -16,7 +16,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   html.Element? element;
   final RegisterViewFactory originalFactory = PlatformSelectableRegionContextMenu.registerViewFactory;
-  PlatformSelectableRegionContextMenu.registerViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
+  PlatformSelectableRegionContextMenu.registerViewFactory =
+      (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
     element = fn(0) as html.Element;
     // The element needs to be attached to the document body to receive mouse
     // events.
@@ -48,15 +49,13 @@ void main() {
   testWidgets('right click can trigger select word', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final UniqueKey spy = UniqueKey();
-    await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: focusNode,
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
-        )
-    );
+    await tester.pumpWidget(MaterialApp(
+      home: SelectableRegion(
+        focusNode: focusNode,
+        selectionControls: materialTextSelectionControls,
+        child: SelectionSpy(key: spy),
+      ),
+    ));
     expect(element, isNotNull);
 
     focusNode.requestFocus();
@@ -100,14 +99,13 @@ class SelectionSpy extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
 }
 
-class RenderSelectionSpy extends RenderProxyBox
-    with Selectable, SelectionRegistrant {
+class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
   RenderSelectionSpy(
-      SelectionRegistrar? registrar,
-      ) {
+    SelectionRegistrar? registrar,
+  ) {
     this.registrar = registrar;
   }
 
@@ -168,5 +166,5 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
 }

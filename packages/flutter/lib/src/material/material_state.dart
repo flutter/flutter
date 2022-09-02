@@ -409,7 +409,6 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
   OutlinedBorder? resolve(Set<MaterialState> states);
 }
 
-
 /// Defines a [TextStyle] that is also a [MaterialStateProperty].
 ///
 /// This class exists to enable widgets with [TextStyle] valued properties
@@ -498,7 +497,8 @@ class _MaterialStateTextStyle extends MaterialStateTextStyle {
 /// [MaterialStateOutlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements MaterialStateProperty<InputBorder> {
+abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder
+    implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateOutlineInputBorder();
@@ -561,7 +561,8 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
 /// [MaterialStateUnderlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements MaterialStateProperty<InputBorder> {
+abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder
+    implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateUnderlineInputBorder();
@@ -631,7 +632,6 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// {@macro flutter.material.MaterialStateProperty.implementations}
 abstract class MaterialStateProperty<T> {
-
   /// Returns a value of type `T` that depends on [states].
   ///
   /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
@@ -655,7 +655,8 @@ abstract class MaterialStateProperty<T> {
 
   /// Convenience method for creating a [MaterialStateProperty] from a
   /// [MaterialPropertyResolver] function alone.
-  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStatePropertyWith<T>(callback);
+  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) =>
+      _MaterialStatePropertyWith<T>(callback);
 
   /// Convenience method for creating a [MaterialStateProperty] that resolves
   /// to a single value for all states.
@@ -710,7 +711,6 @@ class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
 /// Convenience class for creating a [MaterialStateProperty] that
 /// resolves to the given value for all states.
 class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
-
   /// Constructs a [MaterialStateProperty] that always resolves to the given
   /// value.
   const MaterialStatePropertyAll(this.value);

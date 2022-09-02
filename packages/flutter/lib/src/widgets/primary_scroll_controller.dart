@@ -57,9 +57,9 @@ class PrimaryScrollController extends InheritedWidget {
   const PrimaryScrollController.none({
     super.key,
     required super.child,
-  }) : automaticallyInheritForPlatforms = const <TargetPlatform>{},
-       scrollDirection = null,
-       controller = null;
+  })  : automaticallyInheritForPlatforms = const <TargetPlatform>{},
+        scrollDirection = null,
+        controller = null;
 
   /// The [ScrollController] associated with the subtree.
   ///
@@ -136,6 +136,7 @@ class PrimaryScrollController extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
+    properties
+        .add(DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
   }
 }

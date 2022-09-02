@@ -50,7 +50,7 @@ void main() {
 }
 
 class TestSemanticsEvent extends SemanticsEvent {
-  TestSemanticsEvent({ this.text, this.number }) : super('TestEvent');
+  TestSemanticsEvent({this.text, this.number}) : super('TestEvent');
 
   final String? text;
   final int? number;

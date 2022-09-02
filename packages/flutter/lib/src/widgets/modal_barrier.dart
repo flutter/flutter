@@ -138,9 +138,11 @@ class ModalBarrier extends StatelessWidget {
               cursor: SystemMouseCursors.basic,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: color == null ? null : ColoredBox(
-                  color: color!,
-                ),
+                child: color == null
+                    ? null
+                    : ColoredBox(
+                        color: color!,
+                      ),
               ),
             ),
           ),
@@ -297,8 +299,8 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   const _ModalBarrierGestureDetector({
     required this.child,
     required this.onDismiss,
-  }) : assert(child != null),
-       assert(onDismiss != null);
+  })  : assert(child != null),
+        assert(onDismiss != null);
 
   /// The widget below this widget in the tree.
   /// See [RawGestureDetector.child].

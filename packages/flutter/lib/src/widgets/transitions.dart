@@ -174,8 +174,8 @@ class SlideTransition extends AnimatedWidget {
     this.transformHitTests = true,
     this.textDirection,
     this.child,
-  }) : assert(position != null),
-       super(listenable: position);
+  })  : assert(position != null),
+        super(listenable: position);
 
   /// The animation that controls the position of the child.
   ///
@@ -256,8 +256,8 @@ class ScaleTransition extends AnimatedWidget {
     this.alignment = Alignment.center,
     this.filterQuality,
     this.child,
-  }) : assert(scale != null),
-       super(listenable: scale);
+  })  : assert(scale != null),
+        super(listenable: scale);
 
   /// The animation that controls the scale of the child.
   ///
@@ -340,8 +340,8 @@ class RotationTransition extends AnimatedWidget {
     this.alignment = Alignment.center,
     this.filterQuality,
     this.child,
-  }) : assert(turns != null),
-       super(listenable: turns);
+  })  : assert(turns != null),
+        super(listenable: turns);
 
   /// The animation that controls the rotation of the child.
   ///
@@ -442,10 +442,10 @@ class SizeTransition extends AnimatedWidget {
     required Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
     this.child,
-  }) : assert(axis != null),
-       assert(sizeFactor != null),
-       assert(axisAlignment != null),
-       super(listenable: sizeFactor);
+  })  : assert(axis != null),
+        assert(sizeFactor != null),
+        assert(axisAlignment != null),
+        super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].
@@ -568,7 +568,8 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties
+        .add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -599,8 +600,8 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
     required this.opacity,
     this.alwaysIncludeSemantics = false,
     Widget? sliver,
-  }) : assert(opacity != null),
-      super(child: sliver);
+  })  : assert(opacity != null),
+        super(child: sliver);
 
   /// The animation that controls the opacity of the sliver child.
   ///
@@ -639,7 +640,8 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties
+        .add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -654,7 +656,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as [RelativeRect.fill].
-  RelativeRectTween({ super.begin, super.end });
+  RelativeRectTween({super.begin, super.end});
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -700,8 +702,8 @@ class PositionedTransition extends AnimatedWidget {
     super.key,
     required Animation<RelativeRect> rect,
     required this.child,
-  }) : assert(rect != null),
-       super(listenable: rect);
+  })  : assert(rect != null),
+        super(listenable: rect);
 
   /// The animation that controls the child's size and position.
   Animation<RelativeRect> get rect => listenable as Animation<RelativeRect>;
@@ -760,10 +762,10 @@ class RelativePositionedTransition extends AnimatedWidget {
     required Animation<Rect?> rect,
     required this.size,
     required this.child,
-  }) : assert(rect != null),
-       assert(size != null),
-       assert(child != null),
-       super(listenable: rect);
+  })  : assert(rect != null),
+        assert(size != null),
+        assert(child != null),
+        super(listenable: rect);
 
   /// The animation that controls the child's size and position.
   ///
@@ -830,9 +832,9 @@ class DecoratedBoxTransition extends AnimatedWidget {
     required this.decoration,
     this.position = DecorationPosition.background,
     required this.child,
-  }) : assert(decoration != null),
-       assert(child != null),
-       super(listenable: decoration);
+  })  : assert(decoration != null),
+        assert(child != null),
+        super(listenable: decoration);
 
   /// Animation of the decoration to paint.
   ///
@@ -898,9 +900,9 @@ class AlignTransition extends AnimatedWidget {
     required this.child,
     this.widthFactor,
     this.heightFactor,
-  }) : assert(alignment != null),
-       assert(child != null),
-       super(listenable: alignment);
+  })  : assert(alignment != null),
+        assert(child != null),
+        super(listenable: alignment);
 
   /// The animation that controls the child's alignment.
   Animation<AlignmentGeometry> get alignment => listenable as Animation<AlignmentGeometry>;
@@ -954,9 +956,9 @@ class DefaultTextStyleTransition extends AnimatedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
-  }) : assert(style != null),
-       assert(child != null),
-       super(listenable: style);
+  })  : assert(style != null),
+        assert(child != null),
+        super(listenable: style);
 
   /// The animation that controls the descendants' text style.
   Animation<TextStyle> get style => listenable as Animation<TextStyle>;
@@ -1060,9 +1062,9 @@ class AnimatedBuilder extends AnimatedWidget {
     required Listenable animation,
     required this.builder,
     this.child,
-  }) : assert(animation != null),
-       assert(builder != null),
-       super(listenable: animation);
+  })  : assert(animation != null),
+        assert(builder != null),
+        super(listenable: animation);
 
   /// Called every time the animation changes value.
   final TransitionBuilder builder;

@@ -92,8 +92,8 @@ class PointerSignalResolver {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
-          DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
-        ];
+              DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+            ];
         return true;
       }());
       FlutterError.reportError(FlutterErrorDetails(

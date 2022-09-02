@@ -33,7 +33,6 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 
 void main() {
   testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -114,11 +113,9 @@ void main() {
     );
 
     checkTree(tester, <BoxDecoration>[]);
-
   });
 
   testWidgets('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -348,7 +345,7 @@ void main() {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ super.key, required this.child });
+  const DummyWidget({super.key, required this.child});
 
   final Widget child;
 

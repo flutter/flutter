@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class ProbeWidget extends StatefulWidget {
-  const ProbeWidget({ super.key });
+  const ProbeWidget({super.key});
   @override
   ProbeWidgetState createState() => ProbeWidgetState();
 }
@@ -19,25 +19,25 @@ class ProbeWidgetState extends State<ProbeWidget> {
   @override
   void initState() {
     super.initState();
-    setState(() { });
+    setState(() {});
   }
 
   @override
   void didUpdateWidget(ProbeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setState(() { });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    setState(() { });
+    setState(() {});
     buildCount++;
     return Container();
   }
 }
 
 class BadWidget extends StatelessWidget {
-  const BadWidget(this.parentState, { super.key });
+  const BadWidget(this.parentState, {super.key});
 
   final BadWidgetParentState parentState;
 
@@ -49,7 +49,7 @@ class BadWidget extends StatelessWidget {
 }
 
 class BadWidgetParent extends StatefulWidget {
-  const BadWidgetParent({ super.key });
+  const BadWidgetParent({super.key});
   @override
   BadWidgetParentState createState() => BadWidgetParentState();
 }
@@ -69,7 +69,7 @@ class BadWidgetParentState extends State<BadWidgetParent> {
 }
 
 class BadDisposeWidget extends StatefulWidget {
-  const BadDisposeWidget({ super.key });
+  const BadDisposeWidget({super.key});
   @override
   BadDisposeWidgetState createState() => BadDisposeWidgetState();
 }
@@ -82,7 +82,7 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 
   @override
   void dispose() {
-    setState(() { /* This is invalid behavior. */ });
+    setState(() {/* This is invalid behavior. */});
     super.dispose();
   }
 }
@@ -100,9 +100,10 @@ class StatefulWrapper extends StatefulWidget {
 }
 
 class StatefulWrapperState extends State<StatefulWrapper> {
-
   void trigger() {
-    setState(() { built = null; });
+    setState(() {
+      built = null;
+    });
   }
 
   int? built;
@@ -190,6 +191,7 @@ void main() {
         ),
       );
     }
+
     final Widget part1 = Wrapper(
       child: KeyedSubtree(
         key: key1,
@@ -216,7 +218,7 @@ void main() {
       state.trigger();
     }
     for (final StateSetter setState in setStates) {
-      setState(() { });
+      setState(() {});
     }
 
     StatefulWrapperState.buildId = 0;
@@ -228,6 +230,5 @@ void main() {
       expect(state.built, isNotNull);
       expect(state.built, isNot(equals(state.oldBuilt)));
     }
-
   });
 }

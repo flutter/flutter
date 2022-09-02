@@ -121,8 +121,7 @@ class PointerEventResampler {
     int buttons,
   ) {
     return isDown
-        ? _toMoveEvent(
-            event, position, delta, pointerIdentifier, timeStamp, buttons)
+        ? _toMoveEvent(event, position, delta, pointerIdentifier, timeStamp, buttons)
         : _toHoverEvent(event, position, delta, timeStamp, buttons);
   }
 
@@ -245,8 +244,7 @@ class PointerEventResampler {
         // therefore never produce `hover` events.
         if (position != _position) {
           final Offset delta = position - _position;
-          callback(_toMoveOrHoverEvent(event, position, delta,
-              _pointerIdentifier, sampleTime, wasDown, hadButtons));
+          callback(_toMoveOrHoverEvent(event, position, delta, _pointerIdentifier, sampleTime, wasDown, hadButtons));
           _position = position;
         }
         callback(event.copyWith(
@@ -272,8 +270,7 @@ class PointerEventResampler {
     final PointerEvent? next = _next;
     if (position != _position && next != null) {
       final Offset delta = position - _position;
-      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier,
-          sampleTime, _isDown, _hasButtons));
+      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier, sampleTime, _isDown, _hasButtons));
       _position = position;
     }
   }

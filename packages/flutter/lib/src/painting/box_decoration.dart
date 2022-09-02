@@ -93,12 +93,12 @@ class BoxDecoration extends Decoration {
     this.gradient,
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  }) : assert(shape != null),
-       assert(
-         backgroundBlendMode == null || color != null || gradient != null,
-         "backgroundBlendMode applies to BoxDecoration's background color or "
-         'gradient, but no color or gradient was provided.',
-       );
+  })  : assert(shape != null),
+        assert(
+          backgroundBlendMode == null || color != null || gradient != null,
+          "backgroundBlendMode applies to BoxDecoration's background color or "
+          'gradient, but no color or gradient was provided.',
+        );
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -324,28 +324,28 @@ class BoxDecoration extends Decoration {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BoxDecoration
-        && other.color == color
-        && other.image == image
-        && other.border == border
-        && other.borderRadius == borderRadius
-        && listEquals<BoxShadow>(other.boxShadow, boxShadow)
-        && other.gradient == gradient
-        && other.backgroundBlendMode == backgroundBlendMode
-        && other.shape == shape;
+    return other is BoxDecoration &&
+        other.color == color &&
+        other.image == image &&
+        other.border == border &&
+        other.borderRadius == borderRadius &&
+        listEquals<BoxShadow>(other.boxShadow, boxShadow) &&
+        other.gradient == gradient &&
+        other.backgroundBlendMode == backgroundBlendMode &&
+        other.shape == shape;
   }
 
   @override
   int get hashCode => Object.hash(
-    color,
-    image,
-    border,
-    borderRadius,
-    boxShadow == null ? null : Object.hashAll(boxShadow!),
-    gradient,
-    backgroundBlendMode,
-    shape,
-  );
+        color,
+        image,
+        border,
+        borderRadius,
+        boxShadow == null ? null : Object.hashAll(boxShadow!),
+        gradient,
+        backgroundBlendMode,
+        shape,
+      );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -358,13 +358,14 @@ class BoxDecoration extends Decoration {
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
-    properties.add(IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
+    properties.add(IterableProperty<BoxShadow>('boxShadow', boxShadow,
+        defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
   }
 
   @override
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
+  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) {
     assert(shape != null);
     assert((Offset.zero & size).contains(position));
     switch (shape) {
@@ -383,7 +384,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     assert(onChanged != null || image == null);
     return _BoxDecorationPainter(this, onChanged);
   }
@@ -391,8 +392,7 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, super.onChanged)
-    : assert(_decoration != null);
+  _BoxDecorationPainter(this._decoration, super.onChanged) : assert(_decoration != null);
 
   final BoxDecoration _decoration;
 
@@ -402,8 +402,7 @@ class _BoxDecorationPainter extends BoxPainter {
     assert(rect != null);
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
-    if (_cachedBackgroundPaint == null ||
-        (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
+    if (_cachedBackgroundPaint == null || (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = Paint();
       if (_decoration.backgroundBlendMode != null) {
         paint.blendMode = _decoration.backgroundBlendMode!;

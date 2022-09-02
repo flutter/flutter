@@ -125,7 +125,6 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
     return _viewType;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Stack(

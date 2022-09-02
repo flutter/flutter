@@ -87,7 +87,7 @@ abstract class InheritedTheme extends InheritedWidget {
   ///
   /// This method can be expensive if there are many widgets between `from` and
   /// `to` (it walks the element tree between those nodes).
-  static CapturedThemes capture({ required BuildContext from, required BuildContext? to }) {
+  static CapturedThemes capture({required BuildContext from, required BuildContext? to}) {
     assert(from != null);
 
     if (from == to) {
@@ -148,7 +148,8 @@ class _CaptureAll extends StatelessWidget {
   const _CaptureAll({
     required this.themes,
     required this.child,
-  }) : assert(themes != null), assert(child != null);
+  })  : assert(themes != null),
+        assert(child != null);
 
   final List<InheritedTheme> themes;
   final Widget child;

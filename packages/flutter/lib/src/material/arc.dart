@@ -99,6 +99,7 @@ class MaterialPointArcTween extends Tween<Offset> {
     }
     return _center;
   }
+
   Offset? _center;
 
   /// The radius of the circular arc, null if [begin] and [end] are horizontally or
@@ -112,6 +113,7 @@ class MaterialPointArcTween extends Tween<Offset> {
     }
     return _radius;
   }
+
   double? _radius;
 
   /// The beginning of the arc's sweep in radians, measured from the positive x
@@ -128,6 +130,7 @@ class MaterialPointArcTween extends Tween<Offset> {
     }
     return _beginAngle;
   }
+
   double? _beginAngle;
 
   /// The end of the arc's sweep in radians, measured from the positive x axis.
@@ -144,6 +147,7 @@ class MaterialPointArcTween extends Tween<Offset> {
     }
     return _beginAngle;
   }
+
   double? _endAngle;
 
   @override
@@ -188,12 +192,7 @@ class MaterialPointArcTween extends Tween<Offset> {
   }
 }
 
-enum _CornerId {
-  topLeft,
-  topRight,
-  bottomLeft,
-  bottomRight
-}
+enum _CornerId { topLeft, topRight, bottomLeft, bottomRight }
 
 class _Diagonal {
   const _Diagonal(this.beginId, this.endId);
@@ -280,10 +279,14 @@ class MaterialRectArcTween extends RectTween {
 
   Offset _cornerFor(Rect rect, _CornerId id) {
     switch (id) {
-      case _CornerId.topLeft: return rect.topLeft;
-      case _CornerId.topRight: return rect.topRight;
-      case _CornerId.bottomLeft: return rect.bottomLeft;
-      case _CornerId.bottomRight: return rect.bottomRight;
+      case _CornerId.topLeft:
+        return rect.topLeft;
+      case _CornerId.topRight:
+        return rect.topRight;
+      case _CornerId.bottomLeft:
+        return rect.bottomLeft;
+      case _CornerId.bottomRight:
+        return rect.bottomRight;
     }
   }
 
@@ -298,6 +301,7 @@ class MaterialRectArcTween extends RectTween {
     }
     return _beginArc;
   }
+
   late MaterialPointArcTween _beginArc;
 
   /// The path of the corresponding [begin], [end] rectangle corners that trail
@@ -311,6 +315,7 @@ class MaterialRectArcTween extends RectTween {
     }
     return _endArc;
   }
+
   late MaterialPointArcTween _endArc;
 
   @override
@@ -399,6 +404,7 @@ class MaterialRectCenterArcTween extends RectTween {
     }
     return _centerArc;
   }
+
   late MaterialPointArcTween _centerArc;
 
   @override

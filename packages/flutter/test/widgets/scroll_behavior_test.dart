@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 late GestureVelocityTrackerBuilder lastCreatedBuilder;
+
 class TestScrollBehavior extends ScrollBehavior {
   const TestScrollBehavior(this.flag);
 
@@ -14,9 +15,7 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
-    return flag
-      ? const ClampingScrollPhysics()
-      : const BouncingScrollPhysics();
+    return flag ? const ClampingScrollPhysics() : const BouncingScrollPhysics();
   }
 
   @override
@@ -24,10 +23,10 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-      lastCreatedBuilder = flag
+    lastCreatedBuilder = flag
         ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
         : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
-      return lastCreatedBuilder;
+    return lastCreatedBuilder;
   }
 }
 
@@ -186,32 +185,24 @@ void main() {
       await tester.pumpWidget(ScrollConfiguration(
         // Default ScrollBehavior
         behavior: const ScrollBehavior(),
-        child: Builder(
-          builder: (BuildContext context) {
-            final ScrollBehavior defaultBehavior = ScrollConfiguration.of(context);
-            // Copy once to change physics
-            defaultPhysics = defaultBehavior.getScrollPhysics(context);
-            return ScrollConfiguration(
+        child: Builder(builder: (BuildContext context) {
+          final ScrollBehavior defaultBehavior = ScrollConfiguration.of(context);
+          // Copy once to change physics
+          defaultPhysics = defaultBehavior.getScrollPhysics(context);
+          return ScrollConfiguration(
               behavior: defaultBehavior.copyWith(physics: const BouncingScrollPhysics()),
-              child: Builder(
-                builder: (BuildContext context) {
-                  final ScrollBehavior onceCopiedBehavior = ScrollConfiguration.of(context);
-                  onceCopiedPhysics = onceCopiedBehavior.getScrollPhysics(context);
-                  return ScrollConfiguration(
+              child: Builder(builder: (BuildContext context) {
+                final ScrollBehavior onceCopiedBehavior = ScrollConfiguration.of(context);
+                onceCopiedPhysics = onceCopiedBehavior.getScrollPhysics(context);
+                return ScrollConfiguration(
                     // Copy again, physics should follow
                     behavior: onceCopiedBehavior.copyWith(),
-                    child: Builder(
-                      builder: (BuildContext context) {
-                        twiceCopiedPhysics = ScrollConfiguration.of(context).getScrollPhysics(context);
-                        return SingleChildScrollView(child: Container(height: 1000));
-                      }
-                    )
-                  );
-                }
-              )
-            );
-          }
-        ),
+                    child: Builder(builder: (BuildContext context) {
+                      twiceCopiedPhysics = ScrollConfiguration.of(context).getScrollPhysics(context);
+                      return SingleChildScrollView(child: Container(height: 1000));
+                    }));
+              }));
+        }),
       ));
 
       expect(defaultPhysics, const ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics()));
@@ -228,32 +219,24 @@ void main() {
       await tester.pumpWidget(ScrollConfiguration(
         // Default ScrollBehavior
         behavior: const ScrollBehavior(),
-        child: Builder(
-            builder: (BuildContext context) {
-              final ScrollBehavior defaultBehavior = ScrollConfiguration.of(context);
-              // Copy once to change physics
-              defaultPlatform = defaultBehavior.getPlatform(context);
-              return ScrollConfiguration(
-                  behavior: defaultBehavior.copyWith(platform: TargetPlatform.fuchsia),
-                  child: Builder(
-                      builder: (BuildContext context) {
-                        final ScrollBehavior onceCopiedBehavior = ScrollConfiguration.of(context);
-                        onceCopiedPlatform = onceCopiedBehavior.getPlatform(context);
-                        return ScrollConfiguration(
-                          // Copy again, physics should follow
-                            behavior: onceCopiedBehavior.copyWith(),
-                            child: Builder(
-                                builder: (BuildContext context) {
-                                  twiceCopiedPlatform = ScrollConfiguration.of(context).getPlatform(context);
-                                  return SingleChildScrollView(child: Container(height: 1000));
-                                }
-                            )
-                        );
-                      }
-                  )
-              );
-            }
-        ),
+        child: Builder(builder: (BuildContext context) {
+          final ScrollBehavior defaultBehavior = ScrollConfiguration.of(context);
+          // Copy once to change physics
+          defaultPlatform = defaultBehavior.getPlatform(context);
+          return ScrollConfiguration(
+              behavior: defaultBehavior.copyWith(platform: TargetPlatform.fuchsia),
+              child: Builder(builder: (BuildContext context) {
+                final ScrollBehavior onceCopiedBehavior = ScrollConfiguration.of(context);
+                onceCopiedPlatform = onceCopiedBehavior.getPlatform(context);
+                return ScrollConfiguration(
+                    // Copy again, physics should follow
+                    behavior: onceCopiedBehavior.copyWith(),
+                    child: Builder(builder: (BuildContext context) {
+                      twiceCopiedPlatform = ScrollConfiguration.of(context).getPlatform(context);
+                      return SingleChildScrollView(child: Container(height: 1000));
+                    }));
+              }));
+        }),
       ));
 
       expect(defaultPlatform, TargetPlatform.android);
@@ -268,17 +251,14 @@ void main() {
             data: const MediaQueryData(size: Size(500, 500)),
             child: ScrollConfiguration(
                 behavior: behavior,
-                child: Builder(
-                    builder: (BuildContext context) => SingleChildScrollView(child: Container(height: 1000))
-                )
-            ),
-          )
-      );
+                child:
+                    Builder(builder: (BuildContext context) => SingleChildScrollView(child: Container(height: 1000)))),
+          ));
     }
 
     testWidgets('scrollbar', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
-      const  ScrollBehavior defaultBehavior = ScrollBehavior();
+      const ScrollBehavior defaultBehavior = ScrollBehavior();
       await tester.pumpWidget(wrap(defaultBehavior));
       // Default adds a scrollbar
       expect(find.byType(RawScrollbar), findsOneWidget);
@@ -298,7 +278,7 @@ void main() {
 
     testWidgets('overscroll', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
-      const  ScrollBehavior defaultBehavior = ScrollBehavior();
+      const ScrollBehavior defaultBehavior = ScrollBehavior();
       await tester.pumpWidget(wrap(defaultBehavior));
       // Default adds a glowing overscroll indicator
       expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);

@@ -177,13 +177,13 @@ class CheckboxListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
-  }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null);
+  })  : assert(tristate != null),
+        assert(tristate || value != null),
+        assert(isThreeLine != null),
+        assert(!isThreeLine || subtitle != null),
+        assert(selected != null),
+        assert(controlAffinity != null),
+        assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   final bool? value;
@@ -353,7 +353,7 @@ class CheckboxListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
       value: value,
-      onChanged: enabled ?? true ? onChanged : null ,
+      onChanged: enabled ?? true ? onChanged : null,
       activeColor: activeColor,
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -379,9 +379,8 @@ class CheckboxListTile extends StatelessWidget {
     final Set<MaterialState> states = <MaterialState>{
       if (selected) MaterialState.selected,
     };
-    final Color effectiveActiveColor = activeColor
-      ?? checkboxTheme.fillColor?.resolve(states)
-      ?? theme.colorScheme.secondary;
+    final Color effectiveActiveColor =
+        activeColor ?? checkboxTheme.fillColor?.resolve(states) ?? theme.colorScheme.secondary;
     return MergeSemantics(
       child: ListTile(
         selectedColor: effectiveActiveColor,

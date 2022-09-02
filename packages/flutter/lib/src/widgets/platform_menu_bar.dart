@@ -60,20 +60,21 @@ class ShortcutSerialization {
     bool shift = false,
     bool alt = false,
     bool meta = false,
-  })  : assert(trigger != LogicalKeyboardKey.shift &&
-               trigger != LogicalKeyboardKey.shiftLeft &&
-               trigger != LogicalKeyboardKey.shiftRight &&
-               trigger != LogicalKeyboardKey.alt &&
-               trigger != LogicalKeyboardKey.altLeft &&
-               trigger != LogicalKeyboardKey.altRight &&
-               trigger != LogicalKeyboardKey.control &&
-               trigger != LogicalKeyboardKey.controlLeft &&
-               trigger != LogicalKeyboardKey.controlRight &&
-               trigger != LogicalKeyboardKey.meta &&
-               trigger != LogicalKeyboardKey.metaLeft &&
-               trigger != LogicalKeyboardKey.metaRight,
-               'Specifying a modifier key as a trigger is not allowed. '
-               'Use provided boolean parameters instead.'),
+  })  : assert(
+            trigger != LogicalKeyboardKey.shift &&
+                trigger != LogicalKeyboardKey.shiftLeft &&
+                trigger != LogicalKeyboardKey.shiftRight &&
+                trigger != LogicalKeyboardKey.alt &&
+                trigger != LogicalKeyboardKey.altLeft &&
+                trigger != LogicalKeyboardKey.altRight &&
+                trigger != LogicalKeyboardKey.control &&
+                trigger != LogicalKeyboardKey.controlLeft &&
+                trigger != LogicalKeyboardKey.controlRight &&
+                trigger != LogicalKeyboardKey.meta &&
+                trigger != LogicalKeyboardKey.metaLeft &&
+                trigger != LogicalKeyboardKey.metaRight,
+            'Specifying a modifier key as a trigger is not allowed. '
+            'Use provided boolean parameters instead.'),
         _trigger = trigger,
         _control = control,
         _shift = shift,
@@ -361,7 +362,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     final PlatformMenuItem item = _idMap[id]!;
     if (call.method == _kMenuSelectedCallbackMethod) {
       assert(item.onSelected == null || item.onSelectedIntent == null,
-        'Only one of PlatformMenuItem.onSelected or PlatformMenuItem.onSelectedIntent may be specified');
+          'Only one of PlatformMenuItem.onSelected or PlatformMenuItem.onSelectedIntent may be specified');
       item.onSelected?.call();
       if (item.onSelectedIntent != null) {
         Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, item.onSelectedIntent!);
@@ -424,13 +425,11 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
     super.key,
     required this.menus,
     this.child,
-    @Deprecated(
-      'Use the child attribute instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.'
-    )
-    this.body,
+    @Deprecated('Use the child attribute instead. '
+        'This feature was deprecated after v3.1.0-0.0.pre.')
+        this.body,
   }) : assert(body == null || child == null,
-              'The body argument is deprecated, and only one of body or child may be used.');
+            'The body argument is deprecated, and only one of body or child may be used.');
 
   /// The widget below this widget in the tree.
   ///
@@ -440,10 +439,8 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// The widget below this widget in the tree.
   ///
   /// This attribute is deprecated, use [child] instead.
-  @Deprecated(
-    'Use the child attribute instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.'
-  )
+  @Deprecated('Use the child attribute instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.')
   final Widget? body;
 
   /// The list of menu items that are the top level children of the
@@ -711,7 +708,8 @@ class PlatformMenuItem with Diagnosticable {
     this.shortcut,
     this.onSelected,
     this.onSelectedIntent,
-  }) : assert(onSelected == null || onSelectedIntent == null, 'Only one of onSelected or onSelectedIntent may be specified');
+  }) : assert(onSelected == null || onSelectedIntent == null,
+            'Only one of onSelected or onSelectedIntent may be specified');
 
   /// The required label used for rendering the menu item.
   final String label;
@@ -792,7 +790,7 @@ class PlatformMenuItem with Diagnosticable {
       _kIdKey: getId(item),
       _kLabelKey: item.label,
       _kEnabledKey: item.onSelected != null,
-      if (shortcut != null)...shortcut.serializeForMenu().toChannelRepresentation(),
+      if (shortcut != null) ...shortcut.serializeForMenu().toChannelRepresentation(),
     };
   }
 

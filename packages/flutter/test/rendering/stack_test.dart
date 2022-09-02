@@ -70,7 +70,7 @@ void main() {
       final TestClipPaintingContext context = TestClipPaintingContext();
       final RenderBox child = box200x200;
       final RenderStack stack;
-      switch(clip){
+      switch (clip) {
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:
@@ -88,7 +88,8 @@ void main() {
           );
           break;
       }
-      { // Make sure that the child is positioned so the stack will consider it as overflowed.
+      {
+        // Make sure that the child is positioned so the stack will consider it as overflowed.
         final StackParentData parentData = child.parentData! as StackParentData;
         parentData.left = parentData.right = 0;
       }
@@ -187,24 +188,19 @@ void main() {
   test('Stack in Flex can layout with no children', () {
     // Render an empty Stack in a Flex
     final RenderFlex flex = RenderFlex(
-      textDirection: TextDirection.ltr,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <RenderBox>[
-        RenderStack(
-          textDirection: TextDirection.ltr,
-          children: <RenderBox>[],
-        ),
-      ]
-    );
+        textDirection: TextDirection.ltr,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <RenderBox>[
+          RenderStack(
+            textDirection: TextDirection.ltr,
+            children: <RenderBox>[],
+          ),
+        ]);
 
     bool stackFlutterErrorThrown = false;
-    layout(
-      flex,
-      constraints: BoxConstraints.tight(const Size(100.0, 100.0)),
-      onErrors: () {
-        stackFlutterErrorThrown = true;
-      }
-    );
+    layout(flex, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), onErrors: () {
+      stackFlutterErrorThrown = true;
+    });
 
     expect(stackFlutterErrorThrown, false);
   });

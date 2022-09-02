@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -64,8 +63,7 @@ class Velocity {
 
   @override
   bool operator ==(Object other) {
-    return other is Velocity
-        && other.pixelsPerSecond == pixelsPerSecond;
+    return other is Velocity && other.pixelsPerSecond == pixelsPerSecond;
   }
 
   @override
@@ -97,10 +95,10 @@ class VelocityEstimate {
     required this.confidence,
     required this.duration,
     required this.offset,
-  }) : assert(pixelsPerSecond != null),
-       assert(confidence != null),
-       assert(duration != null),
-       assert(offset != null);
+  })  : assert(pixelsPerSecond != null),
+        assert(confidence != null),
+        assert(duration != null),
+        assert(offset != null);
 
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
@@ -120,13 +118,14 @@ class VelocityEstimate {
   final Offset offset;
 
   @override
-  String toString() => 'VelocityEstimate(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)}; offset: $offset, duration: $duration, confidence: ${confidence.toStringAsFixed(1)})';
+  String toString() =>
+      'VelocityEstimate(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)}; offset: $offset, duration: $duration, confidence: ${confidence.toStringAsFixed(1)})';
 }
 
 class _PointAtTime {
   const _PointAtTime(this.point, this.time)
-    : assert(point != null),
-      assert(time != null);
+      : assert(point != null),
+        assert(time != null);
 
   final Duration time;
   final Offset point;
@@ -146,7 +145,6 @@ class _PointAtTime {
 /// The quality of the velocity estimation will be better if more data points
 /// have been received.
 class VelocityTracker {
-
   /// Create a new velocity tracker for a pointer [kind].
   VelocityTracker.withKind(this.kind);
 
@@ -226,7 +224,8 @@ class VelocityTracker {
         final LeastSquaresSolver ySolver = LeastSquaresSolver(time, y, w);
         final PolynomialFit? yFit = ySolver.solve(2);
         if (yFit != null) {
-          return VelocityEstimate( // convert from pixels/ms to pixels/s
+          return VelocityEstimate(
+            // convert from pixels/ms to pixels/s
             pixelsPerSecond: Offset(xFit.coefficients[1] * 1000, yFit.coefficients[1] * 1000),
             confidence: xFit.confidence * yFit.confidence,
             duration: newestSample.time - oldestSample.time,
@@ -328,9 +327,9 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
     assert(dt >= 0);
 
     return dt > 0
-      // Convert dt to milliseconds to preserve floating point precision.
-      ? (end.point - start.point) * 1000 / (dt.toDouble() / 1000)
-      : Offset.zero;
+        // Convert dt to milliseconds to preserve floating point precision.
+        ? (end.point - start.point) * 1000 / (dt.toDouble() / 1000)
+        : Offset.zero;
   }
 
   @override
@@ -341,9 +340,8 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
     // installed on the scroll view would report. Typically in an iOS scroll
     // view the velocity values are different between the two, because the
     // scroll view usually slows down when the touch is released.
-    final Offset estimatedVelocity = _previousVelocityAt(-2) * 0.6
-                                   + _previousVelocityAt(-1) * 0.35
-                                   + _previousVelocityAt(0) * 0.05;
+    final Offset estimatedVelocity =
+        _previousVelocityAt(-2) * 0.6 + _previousVelocityAt(-1) * 0.35 + _previousVelocityAt(0) * 0.05;
 
     final _PointAtTime? newestSample = _touchSamples[_index];
     _PointAtTime? oldestNonNullSample;

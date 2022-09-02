@@ -73,8 +73,8 @@ class DesktopTextSelectionControls extends TextSelectionControls {
     // already been selected. Same behavior as Android.
     final TextEditingValue value = delegate.textEditingValue;
     return delegate.selectAllEnabled &&
-           value.text.isNotEmpty &&
-           !(value.selection.start == 0 && value.selection.end == value.text.length);
+        value.text.isNotEmpty &&
+        !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 
   @override
@@ -85,8 +85,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that loosely follows Material design conventions.
-final TextSelectionControls desktopTextSelectionControls =
-    DesktopTextSelectionControls();
+final TextSelectionControls desktopTextSelectionControls = DesktopTextSelectionControls();
 
 // Generates the child that's passed into DesktopTextSelectionToolbar.
 class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
@@ -159,7 +158,8 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final Offset midpointAnchor = Offset(
-      clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
+      clampDouble(
+        widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         mediaQuery.padding.left,
         mediaQuery.size.width - mediaQuery.padding.right,
       ),
@@ -186,8 +186,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
     if (widget.handleCopy != null) {
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
-    if (widget.handlePaste != null
-        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
+    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
@@ -271,10 +270,12 @@ class _DesktopTextSelectionToolbar extends StatelessWidget {
         delegate: DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: _defaultToolbarBuilder(context, Column(
-          mainAxisSize: MainAxisSize.min,
-          children: children,
-        )),
+        child: _defaultToolbarBuilder(
+            context,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: children,
+            )),
       ),
     );
   }
@@ -309,14 +310,12 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
     required this.onPressed,
     required String text,
   }) : child = Text(
-         text,
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: Theme.of(context).colorScheme.brightness == Brightness.dark
-               ? Colors.white
-               : Colors.black87,
-         ),
-       );
+          text,
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle.copyWith(
+            color: Theme.of(context).colorScheme.brightness == Brightness.dark ? Colors.white : Colors.black87,
+          ),
+        );
 
   /// {@macro flutter.material.TextSelectionToolbarTextButton.onPressed}
   final VoidCallback onPressed;

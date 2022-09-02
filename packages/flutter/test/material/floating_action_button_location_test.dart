@@ -73,7 +73,6 @@ void main() {
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
       expect(tester.binding.transientCallbackCount, 0);
-
     });
 
     group('interrupts in-progress animations without jumps', () {
@@ -132,9 +131,12 @@ void main() {
           );
           final Iterable<double> currentRotations = rotationTransitions.map((RotationTransition t) => t.turns.value);
 
-          if (previousRotations != null && previousRotations!.isNotEmpty
-              && currentRotations != null && currentRotations.isNotEmpty
-              && previousRect != null && currentRect != null) {
+          if (previousRotations != null &&
+              previousRotations!.isNotEmpty &&
+              currentRotations != null &&
+              currentRotations.isNotEmpty &&
+              previousRect != null &&
+              currentRect != null) {
             final List<double> deltas = <double>[];
             for (final double currentRotation in currentRotations) {
               late double minDelta;
@@ -176,33 +178,40 @@ void main() {
 
       testWidgets('moving the fab to centerFloat', (WidgetTester tester) async {
         // Create a scaffold with the fab at endFloat
-        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester
+            .pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         setupListener(tester);
 
         // Move the fab to centerFloat'
-        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester
+            .pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
 
       testWidgets('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
-        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester
+            .pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
         // Move the fab to the top start after creating the fab.
-        await tester.pumpWidget(_buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
+        await tester.pumpWidget(
+            _buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Interrupt motion to move to the end float
-        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester
+            .pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         await tester.pumpAndSettle();
       });
 
       testWidgets('interrupting entrance to remove the fab.', (WidgetTester tester) async {
-        await tester.pumpWidget(_buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester.pumpWidget(
+            _buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
         // Animate the fab in.
-        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
+        await tester
+            .pumpWidget(_buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Remove the fab.
@@ -227,7 +236,8 @@ void main() {
         setupListener(tester);
 
         // Bring in a new fab.
-        await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
+        await tester
+            .pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         await tester.pump(kFloatingActionButtonSegue ~/ 2);
 
         // Interrupt motion to move the fab.
@@ -265,7 +275,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 500.0));
 
-
     await tester.pumpWidget(
       _buildFrame(
         location: FloatingActionButtonLocation.endDocked,
@@ -301,7 +310,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(),
-          floatingActionButton: FloatingActionButton(onPressed: () { }, mini: true),
+          floatingActionButton: FloatingActionButton(onPressed: () {}, mini: true),
           floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
           body: Column(
             children: const <Widget>[
@@ -327,7 +336,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
   });
 
   testWidgets('End-top floating action button location RTL', (WidgetTester tester) async {
@@ -343,7 +353,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
   });
 
   testWidgets('Start-top floating action button location RTL', (WidgetTester tester) async {
@@ -359,7 +370,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
   });
 
   testWidgets('End-top floating action button location LTR', (WidgetTester tester) async {
@@ -372,7 +384,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
   });
 
   group('New Floating Action Button Locations', () {
@@ -475,13 +488,15 @@ void main() {
     // Test a few RTL cases.
 
     testWidgets('endTop, RTL', (WidgetTester tester) async {
-      await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endTop, textDirection: TextDirection.rtl));
+      await tester
+          .pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endTop, textDirection: TextDirection.rtl));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _topOffsetY));
     });
 
     testWidgets('miniStartFloat, RTL', (WidgetTester tester) async {
-      await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.miniStartFloat, textDirection: TextDirection.rtl));
+      await tester.pumpWidget(
+          _singleFabScaffold(FloatingActionButtonLocation.miniStartFloat, textDirection: TextDirection.rtl));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniRightOffsetX, _miniFloatOffsetY));
     });
@@ -503,13 +518,15 @@ void main() {
     testWidgets('Quarter end top', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(_QuarterEndTopFabLocation()));
 
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX * 0.75 + _leftOffsetX * 0.25, _topOffsetY));
+      expect(tester.getCenter(find.byType(FloatingActionButton)),
+          const Offset(_rightOffsetX * 0.75 + _leftOffsetX * 0.25, _topOffsetY));
     });
 
     testWidgets('Quarter end top, RTL', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(_QuarterEndTopFabLocation(), textDirection: TextDirection.rtl));
 
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX * 0.75 + _rightOffsetX * 0.25, _topOffsetY));
+      expect(tester.getCenter(find.byType(FloatingActionButton)),
+          const Offset(_leftOffsetX * 0.75 + _rightOffsetX * 0.25, _topOffsetY));
     });
   });
 
@@ -677,23 +694,27 @@ void main() {
           data: data,
           child: Scaffold(
             resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-            bottomSheet: bottomSheet ? const SizedBox(
-              height: 100,
-              child: Center(child: Text('BottomSheet')),
-            ) : null,
+            bottomSheet: bottomSheet
+                ? const SizedBox(
+                    height: 100,
+                    child: Center(child: Text('BottomSheet')),
+                  )
+                : null,
             appBar: appBar ? AppBar(title: const Text('Demo')) : null,
-            bottomNavigationBar: bottomNavigationBar ? BottomNavigationBar(
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.star),
-                  label: '0',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.star_border),
-                  label: '1',
-                ),
-              ],
-            ) : null,
+            bottomNavigationBar: bottomNavigationBar
+                ? BottomNavigationBar(
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.star),
+                        label: '0',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.star_border),
+                        label: '1',
+                      ),
+                    ],
+                  )
+                : null,
             floatingActionButtonLocation: location,
             floatingActionButton: Builder(
               builder: (BuildContext context) {
@@ -732,7 +753,7 @@ void main() {
       required Rect bottomSheetRect,
       required Rect snackBarRect,
       bool mini = false,
-    }) async  {
+    }) async {
       const double keyboardHeight = 200.0;
       const double viewPadding = 50.0;
       final Key floatingActionButton = UniqueKey();
@@ -974,7 +995,7 @@ void main() {
       await tester.pumpAndSettle(); // Show SnackBar
       expect(
         tester.getRect(find.byKey(floatingActionButton)),
-        rectMoreOrLessEquals(snackBarRect.translate(0.0, -keyboardHeight + kFloatingActionButtonMargin/2)),
+        rectMoreOrLessEquals(snackBarRect.translate(0.0, -keyboardHeight + kFloatingActionButtonMargin / 2)),
       );
     }
 
@@ -1107,7 +1128,7 @@ void main() {
       required Rect bottomSheetRect,
       required Rect snackBarRect,
       bool mini = false,
-    }) async  {
+    }) async {
       const double keyboardHeight = 200.0;
       const double viewPadding = 50.0;
       const double bottomNavHeight = 106.0;
@@ -1461,7 +1482,7 @@ void main() {
       required Rect defaultRect,
       required Rect appBarRect,
       bool mini = false,
-    }) async  {
+    }) async {
       const double viewPadding = 50.0;
       final Key floatingActionButton = UniqueKey();
       // Default
@@ -1620,13 +1641,11 @@ const double _dockedOffsetY = 544.0;
 const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
 Widget _singleFabScaffold(
-  FloatingActionButtonLocation location,
-  {
-    FloatingActionButtonAnimator? animator,
-    bool mini = false,
-    TextDirection textDirection = TextDirection.ltr,
-  }
-) {
+  FloatingActionButtonLocation location, {
+  FloatingActionButtonAnimator? animator,
+  bool mini = false,
+  TextDirection textDirection = TextDirection.ltr,
+}) {
   return MaterialApp(
     home: Directionality(
       textDirection: textDirection,
@@ -1733,23 +1752,20 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
   }
 }
 
-class _AlmostEndFloatFabLocation extends StandardFabLocation
-    with FabEndOffsetX, FabFloatOffsetY {
+class _AlmostEndFloatFabLocation extends StandardFabLocation with FabEndOffsetX, FabFloatOffsetY {
   @override
-  double getOffsetX (ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    final double directionalAdjustment =
-        scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    final double directionalAdjustment = scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
     return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
   }
 }
 
-class _QuarterEndTopFabLocation extends StandardFabLocation
-    with FabEndOffsetX, FabTopOffsetY {
+class _QuarterEndTopFabLocation extends StandardFabLocation with FabEndOffsetX, FabTopOffsetY {
   @override
-  double getOffsetX (ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    return super.getOffsetX(scaffoldGeometry, adjustment) * 0.75
-        + (FloatingActionButtonLocation.startFloat as StandardFabLocation)
-            .getOffsetX(scaffoldGeometry, adjustment) * 0.25;
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    return super.getOffsetX(scaffoldGeometry, adjustment) * 0.75 +
+        (FloatingActionButtonLocation.startFloat as StandardFabLocation).getOffsetX(scaffoldGeometry, adjustment) *
+            0.25;
   }
 }
 

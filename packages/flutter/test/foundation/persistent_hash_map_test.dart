@@ -21,8 +21,7 @@ class _MockKey {
 
 void main() {
   test('PersistentHashMap - Simple Test', () {
-    final List<PersistentHashMap<String, int>> maps =
-        <PersistentHashMap<String, int>>[];
+    final List<PersistentHashMap<String, int>> maps = <PersistentHashMap<String, int>>[];
     maps.add(const PersistentHashMap<String, int>.empty());
     for (int i = 0; i < 50; i++) {
       maps.add(maps.last.put('key:$i', i));
@@ -42,10 +41,7 @@ void main() {
     const _MockKey key4 = _MockKey(hashCode: 1 | (1 << 5), payload: 'key:4');
 
     final PersistentHashMap<_MockKey, String> map =
-        const PersistentHashMap<_MockKey, String>.empty()
-            .put(key1, 'a')
-            .put(key2, 'b')
-            .put(key3, 'c');
+        const PersistentHashMap<_MockKey, String>.empty().put(key1, 'a').put(key2, 'b').put(key3, 'c');
 
     expect(map[key1], equals('a'));
     expect(map[key2], equals('b'));
@@ -54,11 +50,8 @@ void main() {
     final PersistentHashMap<_MockKey, String> map2 = map.put(key4, 'd');
     expect(map2[key4], equals('d'));
 
-    final PersistentHashMap<_MockKey, String> map3 = map2
-        .put(key1, 'updated(a)')
-        .put(key2, 'updated(b)')
-        .put(key3, 'updated(c)')
-        .put(key4, 'updated(d)');
+    final PersistentHashMap<_MockKey, String> map3 =
+        map2.put(key1, 'updated(a)').put(key2, 'updated(b)').put(key3, 'updated(c)').put(key4, 'updated(d)');
     expect(map3[key1], equals('updated(a)'));
     expect(map3[key2], equals('updated(b)'));
     expect(map3[key3], equals('updated(c)'));
@@ -66,8 +59,7 @@ void main() {
   });
 
   test('PersistentHashMap - inflation of nodes', () {
-    final List<PersistentHashMap<_MockKey, int>> maps =
-        <PersistentHashMap<_MockKey, int>>[];
+    final List<PersistentHashMap<_MockKey, int>> maps = <PersistentHashMap<_MockKey, int>>[];
     maps.add(const PersistentHashMap<_MockKey, int>.empty());
     for (int i = 0; i < 32 * 32; i++) {
       maps.add(maps.last.put(_MockKey(hashCode: i, payload: '$i'), i));

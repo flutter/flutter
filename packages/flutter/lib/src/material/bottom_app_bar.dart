@@ -62,9 +62,9 @@ class BottomAppBar extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.notchMargin = 4.0,
     this.child,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(notchMargin != null),
-       assert(clipBehavior != null);
+  })  : assert(elevation == null || elevation >= 0.0),
+        assert(notchMargin != null),
+        assert(clipBehavior != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -131,13 +131,13 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final bool hasFab = Scaffold.of(context).hasFloatingActionButton;
     final NotchedShape? notchedShape = widget.shape ?? babTheme.shape;
     final CustomClipper<Path> clipper = notchedShape != null && hasFab
-      ? _BottomAppBarClipper(
-          geometry: geometryListenable,
-          shape: notchedShape,
-          materialKey: materialKey,
-          notchMargin: widget.notchMargin,
-        )
-      : const ShapeBorderClipper(shape: RoundedRectangleBorder());
+        ? _BottomAppBarClipper(
+            geometry: geometryListenable,
+            shape: notchedShape,
+            materialKey: materialKey,
+            notchMargin: widget.notchMargin,
+          )
+        : const ShapeBorderClipper(shape: RoundedRectangleBorder());
     final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
     final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
     final Color effectiveColor = ElevationOverlay.applyOverlay(context, color, elevation);
@@ -149,9 +149,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: Material(
         key: materialKey,
         type: MaterialType.transparency,
-        child: widget.child == null
-          ? null
-          : SafeArea(child: widget.child!),
+        child: widget.child == null ? null : SafeArea(child: widget.child!),
       ),
     );
   }
@@ -163,10 +161,10 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     required this.shape,
     required this.materialKey,
     required this.notchMargin,
-  }) : assert(geometry != null),
-       assert(shape != null),
-       assert(notchMargin != null),
-       super(reclip: geometry);
+  })  : assert(geometry != null),
+        assert(shape != null),
+        assert(notchMargin != null),
+        super(reclip: geometry);
 
   final ValueListenable<ScaffoldGeometry> geometry;
   final NotchedShape shape;
@@ -198,8 +196,6 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(_BottomAppBarClipper oldClipper) {
-    return oldClipper.geometry != geometry
-        || oldClipper.shape != shape
-        || oldClipper.notchMargin != notchMargin;
+    return oldClipper.geometry != geometry || oldClipper.shape != shape || oldClipper.notchMargin != notchMargin;
   }
 }

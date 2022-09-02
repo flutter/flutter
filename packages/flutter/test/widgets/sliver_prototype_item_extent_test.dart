@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestItem extends StatelessWidget {
-  const TestItem({ super.key, required this.item, this.width, this.height });
+  const TestItem({super.key, required this.item, this.width, this.height});
   final int item;
   final double? width;
   final double? height;
@@ -22,7 +22,7 @@ class TestItem extends StatelessWidget {
   }
 }
 
-Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection, Key? prototypeKey }) {
+Widget buildFrame({int? count, double? width, double? height, Axis? scrollDirection, Key? prototypeKey}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CustomScrollView(

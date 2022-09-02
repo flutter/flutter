@@ -25,7 +25,13 @@ class _TestHitTester extends RenderBox {
 // A binding used to test MouseTracker, allowing the test to override hit test
 // searching.
 class TestMouseTrackerFlutterBinding extends BindingBase
-    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding, TestDefaultBinaryMessengerBinding {
+    with
+        SchedulerBinding,
+        ServicesBinding,
+        GestureBinding,
+        SemanticsBinding,
+        RendererBinding,
+        TestDefaultBinaryMessengerBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -71,7 +77,8 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
 // An object that mocks the behavior of a render object with [MouseTrackerAnnotation].
 class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget {
-  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
+  const TestAnnotationTarget(
+      {this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
 
   @override
   final PointerEnterEventListener? onEnter;
@@ -98,8 +105,7 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
 // A hit test entry that can be assigned with a [TestAnnotationTarget] and an
 // optional transform matrix.
 class TestAnnotationEntry extends HitTestEntry<TestAnnotationTarget> {
-  TestAnnotationEntry(super.target, [Matrix4? transform])
-    : transform = transform ?? Matrix4.identity();
+  TestAnnotationEntry(super.target, [Matrix4? transform]) : transform = transform ?? Matrix4.identity();
 
   @override
   final Matrix4 transform;

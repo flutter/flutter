@@ -4,7 +4,8 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Gradient, PlaceholderAlignment, Shader, TextBox, TextHeightBehavior;
+import 'dart:ui' as ui
+    show BoxHeightStyle, BoxWidthStyle, Gradient, PlaceholderAlignment, Shader, TextBox, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -53,8 +54,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 
   @override
   bool operator ==(Object other) {
-    return other is PlaceholderSpanIndexSemanticsTag
-        && other.index == index;
+    return other is PlaceholderSpanIndexSemanticsTag && other.index == index;
   }
 
   @override
@@ -63,9 +63,10 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, TextParentData>,
-             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
-                  RelayoutWhenSystemFontsChangeMixin {
+    with
+        ContainerRenderObjectMixin<RenderBox, TextParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
+        RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -73,7 +74,8 @@ class RenderParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderParagraph(InlineSpan text, {
+  RenderParagraph(
+    InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     required TextDirection textDirection,
     bool softWrap = true,
@@ -87,30 +89,30 @@ class RenderParagraph extends RenderBox
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
-  }) : assert(text != null),
-       assert(text.debugAssertIsValid()),
-       assert(textAlign != null),
-       assert(textDirection != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(textScaleFactor != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
-       _softWrap = softWrap,
-       _overflow = overflow,
-       _selectionColor = selectionColor,
-       _textPainter = TextPainter(
-         text: text,
-         textAlign: textAlign,
-         textDirection: textDirection,
-         textScaleFactor: textScaleFactor,
-         maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
-         locale: locale,
-         strutStyle: strutStyle,
-         textWidthBasis: textWidthBasis,
-         textHeightBehavior: textHeightBehavior,
-       ) {
+  })  : assert(text != null),
+        assert(text.debugAssertIsValid()),
+        assert(textAlign != null),
+        assert(textDirection != null),
+        assert(softWrap != null),
+        assert(overflow != null),
+        assert(textScaleFactor != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(textWidthBasis != null),
+        _softWrap = softWrap,
+        _overflow = overflow,
+        _selectionColor = selectionColor,
+        _textPainter = TextPainter(
+          text: text,
+          textAlign: textAlign,
+          textDirection: textDirection,
+          textScaleFactor: textScaleFactor,
+          maxLines: maxLines,
+          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+          locale: locale,
+          strutStyle: strutStyle,
+          textWidthBasis: textWidthBasis,
+          textHeightBehavior: textHeightBehavior,
+        ) {
     addAll(children);
     _extractPlaceholderSpans(text);
     this.registrar = registrar;
@@ -172,12 +174,8 @@ class RenderParagraph extends RenderBox
       if (fragment._textSelectionStart != null &&
           fragment._textSelectionEnd != null &&
           fragment._textSelectionStart!.offset != fragment._textSelectionEnd!.offset) {
-        results.add(
-          TextSelection(
-            baseOffset: fragment._textSelectionStart!.offset,
-            extentOffset: fragment._textSelectionEnd!.offset
-          )
-        );
+        results.add(TextSelection(
+            baseOffset: fragment._textSelectionStart!.offset, extentOffset: fragment._textSelectionEnd!.offset));
       }
     }
     return results;
@@ -354,6 +352,7 @@ class RenderParagraph extends RenderBox
   /// necessary. If the text exceeds the given number of lines, it will be
   /// truncated according to [overflow] and [softWrap].
   int? get maxLines => _textPainter.maxLines;
+
   /// The value may be null. If it is not null, then it must be greater than
   /// zero.
   set maxLines(int? value) {
@@ -374,6 +373,7 @@ class RenderParagraph extends RenderBox
   /// differently in the Chinese and Japanese locales. In these cases, the
   /// [locale] may be used to select a locale-specific font.
   Locale? get locale => _textPainter.locale;
+
   /// The value may be null.
   set locale(Locale? value) {
     if (_textPainter.locale == value) {
@@ -386,6 +386,7 @@ class RenderParagraph extends RenderBox
 
   /// {@macro flutter.painting.textPainter.strutStyle}
   StrutStyle? get strutStyle => _textPainter.strutStyle;
+
   /// The value may be null.
   set strutStyle(StrutStyle? value) {
     if (_textPainter.strutStyle == value) {
@@ -500,19 +501,21 @@ class RenderParagraph extends RenderBox
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline: {
-          assert(
-            RenderObject.debugCheckingIntrinsics,
-            'Intrinsics are not available for PlaceholderAlignment.baseline, '
-            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
-          );
-          return false;
-        }
+        case ui.PlaceholderAlignment.belowBaseline:
+          {
+            assert(
+              RenderObject.debugCheckingIntrinsics,
+              'Intrinsics are not available for PlaceholderAlignment.baseline, '
+              'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
+            );
+            return false;
+          }
         case ui.PlaceholderAlignment.top:
         case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom: {
-          continue;
-        }
+        case ui.PlaceholderAlignment.bottom:
+          {
+            continue;
+          }
       }
     }
     return true;
@@ -520,7 +523,8 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
+    final List<PlaceholderDimensions> placeholderDimensions =
+        List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
@@ -538,7 +542,8 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
+    final List<PlaceholderDimensions> placeholderDimensions =
+        List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     while (child != null) {
       // Height and baseline is irrelevant; only looking for the widest word or
@@ -556,7 +561,8 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
+    final List<PlaceholderDimensions> placeholderDimensions =
+        List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scaled up when it paints.
@@ -578,7 +584,7 @@ class RenderParagraph extends RenderBox
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     // Hit test text spans.
     bool hitText = false;
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
@@ -598,18 +604,18 @@ class RenderParagraph extends RenderBox
         textParentData.offset.dy,
         0.0,
       )..scale(
-        textParentData.scale,
-        textParentData.scale,
-        textParentData.scale,
-      );
+          textParentData.scale,
+          textParentData.scale,
+          textParentData.scale,
+        );
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
-              && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance &&
+                (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
           return child!.hitTest(result, position: transformed);
         },
@@ -633,13 +639,11 @@ class RenderParagraph extends RenderBox
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
-  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
+  void _layoutText({double minWidth = 0.0, double maxWidth = double.infinity}) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(
       minWidth: minWidth,
-      maxWidth: widthMatters ?
-        maxWidth :
-        double.infinity,
+      maxWidth: widthMatters ? maxWidth : double.infinity,
     );
   }
 
@@ -697,7 +701,8 @@ class RenderParagraph extends RenderBox
       return <PlaceholderDimensions>[];
     }
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
+    final List<PlaceholderDimensions> placeholderDimensions =
+        List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Only constrain the width to the maximum width of the paragraph.
     // Leave height unconstrained, which will overflow if expanded past.
@@ -888,8 +893,7 @@ class RenderParagraph extends RenderBox
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
-        final Paint paint = Paint()
-          ..color = debugCurrentRepaintColor.toColor();
+        final Paint paint = Paint()..color = debugCurrentRepaintColor.toColor();
         context.canvas.drawRect(offset & size, paint);
       }
       return true;
@@ -1062,9 +1066,7 @@ class RenderParagraph extends RenderBox
             final TextRange originalRange = infoAttribute.range;
             attributes.add(
               infoAttribute.copy(
-                  range: TextRange(start: offset + originalRange.start,
-                      end: offset + originalRange.end)
-              ),
+                  range: TextRange(start: offset + originalRange.start, end: offset + originalRange.end)),
             );
           }
           buffer.write(label);
@@ -1107,7 +1109,7 @@ class RenderParagraph extends RenderBox
         // A placeholder span may have 0 to multiple semantics nodes, we need
         // to annotate all of the semantics nodes belong to this span.
         while (children.length > childIndex &&
-               children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+            children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
           assert(parentData.scale != null || parentData.offset == Offset.zero);
@@ -1309,26 +1311,26 @@ class _SelectableFragment with Selectable, ChangeNotifier {
     final int selectionStart = _textSelectionStart!.offset;
     final int selectionEnd = _textSelectionEnd!.offset;
     final bool isReversed = selectionStart > selectionEnd;
-    final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(TextPosition(offset: selectionStart));
+    final Offset startOffsetInParagraphCoordinates =
+        paragraph._getOffsetForPosition(TextPosition(offset: selectionStart));
     final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
-      ? startOffsetInParagraphCoordinates
-      : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
+        ? startOffsetInParagraphCoordinates
+        : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
     final bool flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()..invert();
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
-        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
-        lineHeight: paragraph._textPainter.preferredLineHeight,
-        handleType: flipHandles ? TextSelectionHandleType.right : TextSelectionHandleType.left
-      ),
+          localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
+          lineHeight: paragraph._textPainter.preferredLineHeight,
+          handleType: flipHandles ? TextSelectionHandleType.right : TextSelectionHandleType.left),
       endSelectionPoint: SelectionPoint(
         localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, endOffsetInParagraphCoordinates),
         lineHeight: paragraph._textPainter.preferredLineHeight,
         handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
       ),
       status: _textSelectionStart!.offset == _textSelectionEnd!.offset
-        ? SelectionStatus.collapsed
-        : SelectionStatus.uncollapsed,
+          ? SelectionStatus.collapsed
+          : SelectionStatus.uncollapsed,
       hasContent: true,
     );
   }
@@ -1342,7 +1344,8 @@ class _SelectableFragment with Selectable, ChangeNotifier {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
         final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
-        result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+        result =
+            _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
         break;
       case SelectionEventType.clear:
         result = _handleClearSelection();
@@ -1356,8 +1359,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
         break;
     }
 
-    if (existingSelectionStart != _textSelectionStart ||
-        existingSelectionEnd != _textSelectionEnd) {
+    if (existingSelectionStart != _textSelectionStart || existingSelectionEnd != _textSelectionEnd) {
       _didChangeSelection();
     }
     return result;
@@ -1411,8 +1413,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
 
   TextPosition _clampTextPosition(TextPosition position) {
     // Affinity of range.end is upstream.
-    if (position.offset > range.end ||
-        (position.offset == range.end && position.affinity == TextAffinity.downstream)) {
+    if (position.offset > range.end || (position.offset == range.end && position.affinity == TextAffinity.downstream)) {
       return TextPosition(offset: range.end, affinity: TextAffinity.upstream);
     }
     if (position.offset < range.start) {
@@ -1494,7 +1495,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
       return 1;
     } else if (position.offset > otherPosition.offset) {
       return -1;
-    } else if (position.affinity == otherPosition.affinity){
+    } else if (position.affinity == otherPosition.affinity) {
       return 0;
     } else {
       return position.affinity == TextAffinity.upstream ? 1 : -1;
@@ -1539,11 +1540,12 @@ class _SelectableFragment with Selectable, ChangeNotifier {
         _cachedRect = result;
       } else {
         final Offset offset = paragraph._getOffsetForPosition(TextPosition(offset: range.start));
-        _cachedRect = Rect.fromPoints(offset, offset.translate(0, - paragraph._textPainter.preferredLineHeight));
+        _cachedRect = Rect.fromPoints(offset, offset.translate(0, -paragraph._textPainter.preferredLineHeight));
       }
     }
     return _cachedRect!;
   }
+
   Rect? _cachedRect;
 
   void didChangeParagraphLayout() {
@@ -1568,8 +1570,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
         ..style = PaintingStyle.fill
         ..color = paragraph.selectionColor!;
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
-        context.canvas.drawRect(
-            textBox.toRect().shift(offset), selectionPaint);
+        context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }
     }
     final Matrix4 transform = getTransformToParagraph();
@@ -1579,7 +1580,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
           link: _startHandleLayerLink!,
           offset: offset + MatrixUtils.transformPoint(transform, value.startSelectionPoint!.localPosition),
         ),
-        (PaintingContext context, Offset offset) { },
+        (PaintingContext context, Offset offset) {},
         Offset.zero,
       );
     }
@@ -1589,7 +1590,7 @@ class _SelectableFragment with Selectable, ChangeNotifier {
           link: _endHandleLayerLink!,
           offset: offset + MatrixUtils.transformPoint(transform, value.endSelectionPoint!.localPosition),
         ),
-        (PaintingContext context, Offset offset) { },
+        (PaintingContext context, Offset offset) {},
         Offset.zero,
       );
     }

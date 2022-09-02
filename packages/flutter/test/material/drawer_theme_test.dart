@@ -48,7 +48,8 @@ void main() {
     ]);
   });
 
-  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -103,7 +104,8 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('Drawer values take priority over DrawerThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('Drawer values take priority over DrawerThemeData values when both properties are specified',
+      (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -144,7 +146,8 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified',
+      (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -156,12 +159,11 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           drawerTheme: const DrawerThemeData(
-            backgroundColor: Color(0x00000003),
-            scrimColor: Color(0x00000004),
-            elevation: 13.0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(29.0))),
-            width: 400.0
-          ),
+              backgroundColor: Color(0x00000003),
+              scrimColor: Color(0x00000004),
+              elevation: 13.0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(29.0))),
+              width: 400.0),
         ),
         home: DrawerTheme(
           data: const DrawerThemeData(
@@ -206,8 +208,7 @@ Container _scrim(WidgetTester tester) {
       of: find.descendant(
         of: find.byType(DrawerController),
         matching: find.byWidgetPredicate((Widget widget) {
-          return widget is Semantics
-              && widget.properties.label == 'Dismiss';
+          return widget is Semantics && widget.properties.label == 'Dismiss';
         }),
       ),
       matching: find.byType(Container),

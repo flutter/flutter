@@ -191,9 +191,7 @@ void main() {
     await tester.pumpWidget(
       _buildWidget(
         MediaQuery(
-          data: const MediaQueryData(
-              padding: EdgeInsets.only(right: safeAreaPadding)
-          ),
+          data: const MediaQueryData(padding: EdgeInsets.only(right: safeAreaPadding)),
           child: navigationBar(),
         ),
       ),
@@ -213,12 +211,7 @@ void main() {
       _buildWidget(
         MediaQuery(
           data: const MediaQueryData(
-            padding: EdgeInsets.fromLTRB(
-                safeAreaPadding,
-                0,
-                safeAreaPadding,
-                safeAreaPadding
-            ),
+            padding: EdgeInsets.fromLTRB(safeAreaPadding, 0, safeAreaPadding, safeAreaPadding),
           ),
           child: navigationBar(),
         ),
@@ -296,7 +289,7 @@ void main() {
   testWidgets('NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({required double textScaleFactor}) {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Localizations(
@@ -390,7 +383,6 @@ void main() {
     await tester.longPress(find.text('C'));
     expect(find.byTooltip('C'), findsNothing);
   });
-
 
   testWidgets('Navigation bar semantics', (WidgetTester tester) async {
     Widget widget({int selectedIndex = 0}) {
@@ -573,10 +565,12 @@ Material _getMaterial(WidgetTester tester) {
 }
 
 ShapeDecoration? _indicator(WidgetTester tester) {
-  return tester.firstWidget<Container>(
-    find.descendant(
-      of: find.byType(FadeTransition),
-      matching: find.byType(Container),
-    ),
-  ).decoration as ShapeDecoration?;
+  return tester
+      .firstWidget<Container>(
+        find.descendant(
+          of: find.byType(FadeTransition),
+          matching: find.byType(Container),
+        ),
+      )
+      .decoration as ShapeDecoration?;
 }

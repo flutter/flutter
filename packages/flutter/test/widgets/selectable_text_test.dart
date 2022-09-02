@@ -5,7 +5,6 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 import 'dart:ui';
@@ -44,7 +43,7 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget overlay({ Widget? child }) {
+Widget overlay({Widget? child}) {
   final OverlayEntry entry = OverlayEntry(
     builder: (BuildContext context) {
       return Center(
@@ -78,7 +77,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({ Widget? child }) {
+Widget boilerplate({Widget? child}) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
@@ -108,12 +107,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
 
-  const String kThreeLines =
-      'First line of text is\n'
+  const String kThreeLines = 'First line of text is\n'
       'Second line goes until\n'
       'Third line of stuff';
-  const String kMoreThanFourLines =
-      '$kThreeLines\n'
+  const String kMoreThanFourLines = '$kThreeLines\n'
       "Fourth line won't display and ends at";
 
   // Returns the first RenderEditable.
@@ -129,6 +126,7 @@ void main() {
       }
       child.visitChildren(recursiveFinder);
     }
+
     root.visitChildren(recursiveFinder);
     expect(renderEditable, isNotNull);
     return renderEditable;
@@ -204,7 +202,7 @@ void main() {
     );
 
     await tester.pumpWidget(const SizedBox.shrink());
-    expect(tester.takeException(), isNotNull);  // side effect exception
+    expect(tester.takeException(), isNotNull); // side effect exception
   });
 
   testWidgets('Do not crash when remove SelectableText during handle drag', (WidgetTester tester) async {
@@ -278,7 +276,7 @@ void main() {
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
-          child: const SelectableText('selectable text'),
+        child: const SelectableText('selectable text'),
       ),
     );
 
@@ -298,36 +296,35 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: SelectableText.rich(
-              TextSpan(
-                text: 'First line!',
-                style: TextStyle(
+            TextSpan(
+              text: 'First line!',
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Roboto',
+              ),
+              children: <TextSpan>[
+                TextSpan(
+                  text: 'Second line!\n',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontFamily: 'Roboto',
+                  ),
+                ),
+                TextSpan(
+                  text: 'Third line!\n',
+                  style: TextStyle(
                     fontSize: 14,
                     fontFamily: 'Roboto',
+                  ),
                 ),
-                children: <TextSpan>[
-                  TextSpan(
-                    text: 'Second line!\n',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontFamily: 'Roboto',
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'Third line!\n',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Roboto',
-                    ),
-                  ),
-                ],
-              ),
+              ],
+            ),
           ),
         ),
       ),
     );
 
-    final SelectableText selectableText =
-    tester.firstWidget(find.byType(SelectableText));
+    final SelectableText selectableText = tester.firstWidget(find.byType(SelectableText));
     expect(selectableText.showCursor, false);
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
@@ -343,33 +340,33 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: SelectableText.rich(
-              TextSpan(
-                text: 'First line!',
-                style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Roboto',
-                ),
-                children: <InlineSpan>[
-                  WidgetSpan(
-                      child: SizedBox(
-                        width: 120,
-                        height: 50,
-                        child: Card(
-                            child: Center(
-                                child: Text('Hello World!'),
-                            ),
-                        ),
+            TextSpan(
+              text: 'First line!',
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Roboto',
+              ),
+              children: <InlineSpan>[
+                WidgetSpan(
+                  child: SizedBox(
+                    width: 120,
+                    height: 50,
+                    child: Card(
+                      child: Center(
+                        child: Text('Hello World!'),
                       ),
-                  ),
-                  TextSpan(
-                    text: 'Third line!\n',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Roboto',
                     ),
                   ),
-                ],
-              ),
+                ),
+                TextSpan(
+                  text: 'Third line!\n',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Roboto',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -379,9 +376,9 @@ void main() {
 
   testWidgets('no text keyboard when widget is focused', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText('selectable text'),
-        ),
+      overlay(
+        child: const SelectableText('selectable text'),
+      ),
     );
     await tester.tap(find.byType(SelectableText));
     await tester.idle();
@@ -411,9 +408,9 @@ void main() {
 
   testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
     await tester.pumpWidget(
-        boilerplate(
-          child: const SelectableText('s'),
-        ),
+      boilerplate(
+        child: const SelectableText('s'),
+      ),
     );
 
     RenderBox findSelectableTextBox() => tester.renderObject(find.byType(SelectableText));
@@ -422,9 +419,9 @@ void main() {
     expect(textBox.size, const Size(17.0, 14.0));
 
     await tester.pumpWidget(
-        boilerplate(
-          child: const SelectableText('very very long'),
-        ),
+      boilerplate(
+        child: const SelectableText('very very long'),
+      ),
     );
 
     final RenderBox longtextBox = findSelectableTextBox();
@@ -565,9 +562,9 @@ void main() {
 
   testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText('abc def ghi'),
-        ),
+      overlay(
+        child: const SelectableText('abc def ghi'),
+      ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -585,12 +582,12 @@ void main() {
 
   testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText(
-            'abc def ghi',
-            enableInteractiveSelection: false,
-          ),
+      overlay(
+        child: const SelectableText(
+          'abc def ghi',
+          enableInteractiveSelection: false,
         ),
+      ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -608,12 +605,12 @@ void main() {
 
   testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText(
-            'abc def ghi',
-            enableInteractiveSelection: false,
-          ),
+      overlay(
+        child: const SelectableText(
+          'abc def ghi',
+          enableInteractiveSelection: false,
         ),
+      ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -633,9 +630,9 @@ void main() {
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText('abc def ghi'),
-        ),
+      overlay(
+        child: const SelectableText('abc def ghi'),
+      ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -662,9 +659,9 @@ void main() {
 
   testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText('abc def ghi'),
-        ),
+      overlay(
+        child: const SelectableText('abc def ghi'),
+      ),
     );
     // Long press the 'e' to select 'def', but don't release the gesture.
     final Offset ePos = textOffsetToPosition(tester, 5);
@@ -689,9 +686,9 @@ void main() {
 
   testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText('abc def ghi'),
-        ),
+      overlay(
+        child: const SelectableText('abc def ghi'),
+      ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -711,9 +708,9 @@ void main() {
 
   testWidgets('selectable text basic', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText('selectable'),
-        ),
+      overlay(
+        child: const SelectableText('selectable'),
+      ),
     );
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText));
     // selectable text cannot open keyboard.
@@ -884,7 +881,7 @@ void main() {
     final TextEditingController controller = editableTextWidget.controller;
 
     final Offset ePos = textOffsetToPosition(tester, 5);
-    final Offset gPos = textOffsetToPosition(tester,8);
+    final Offset gPos = textOffsetToPosition(tester, 8);
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
     await tester.pump(const Duration(seconds: 2));
@@ -893,7 +890,7 @@ void main() {
     await gesture.up();
 
     expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset,8);
+    expect(controller.selection.extentOffset, 8);
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -1194,7 +1191,7 @@ void main() {
     expect(secondPos.dy, lessThan(thirdPos.dy));
 
     // Long press the 'n' in 'until' to select the word.
-    final Offset untilPos = textOffsetToPosition(tester, testValue.indexOf('until')+1);
+    final Offset untilPos = textOffsetToPosition(tester, testValue.indexOf('until') + 1);
     TestGesture gesture = await tester.startGesture(untilPos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
@@ -1503,7 +1500,7 @@ void main() {
         attributedValue: AttributedString(
           'some text',
           attributes: <StringAttribute>[
-            SpellOutStringAttribute(range: const TextRange(start: 0, end:9)),
+            SpellOutStringAttribute(range: const TextRange(start: 0, end: 9)),
           ],
         ),
         flags: <SemanticsFlag>[
@@ -1536,7 +1533,7 @@ void main() {
         attributedValue: AttributedString(
           'some text',
           attributes: <StringAttribute>[
-            LocaleStringAttribute(range: const TextRange(start: 0, end:9), locale: const Locale('es', 'MX')),
+            LocaleStringAttribute(range: const TextRange(start: 0, end: 9), locale: const Locale('es', 'MX')),
           ],
         ),
         flags: <SemanticsFlag>[
@@ -1560,8 +1557,7 @@ void main() {
               const TextSpan(text: 'text'),
               TextSpan(
                 text: 'link',
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () { },
+                recognizer: TapGestureRecognizer()..onTap = () {},
               ),
             ],
           ),
@@ -1569,34 +1565,39 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          actions: <SemanticsAction>[SemanticsAction.longPress],
-          textDirection: TextDirection.ltr,
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 2,
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
               children: <TestSemantics>[
-                TestSemantics(
-                  id: 3,
-                  label: 'text',
+                TestSemantics.rootChild(
+                  id: 1,
+                  actions: <SemanticsAction>[SemanticsAction.longPress],
                   textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 4,
-                  flags: <SemanticsFlag>[SemanticsFlag.isLink],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'link',
-                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 2,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 3,
+                          label: 'text',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[SemanticsFlag.isLink],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          label: 'link',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+            ignoreTransform: true,
+            ignoreRect: true));
 
     semantics.dispose();
   });
@@ -1731,7 +1732,8 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+        (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData') {
         clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
       } else if (methodCall.method == 'Clipboard.getData') {
@@ -1874,8 +1876,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home:
-        Material(
+        home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
             onKey: events.add,
@@ -1917,8 +1918,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home:
-        Material(
+        home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
             onKey: events.add,
@@ -1964,8 +1964,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home:
-        Material(
+        home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
             onKey: events.add,
@@ -2026,11 +2025,11 @@ void main() {
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const SelectableText(
-            'x',
-          ),
+      overlay(
+        child: const SelectableText(
+          'x',
         ),
+      ),
     );
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -2159,23 +2158,28 @@ void main() {
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          textDirection: TextDirection.ltr,
-          value: 'Guten Tag',
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isMultiline,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  textDirection: TextDirection.ltr,
+                  value: 'Guten Tag',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isMultiline,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     await tester.tap(find.byKey(key));
     await tester.pump();
@@ -2183,82 +2187,97 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 9);
     await tester.pump();
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          textDirection: TextDirection.ltr,
-          value: 'Guten Tag',
-          textSelection: const TextSelection.collapsed(offset: 9),
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.setSelection,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  textDirection: TextDirection.ltr,
+                  value: 'Guten Tag',
+                  textSelection: const TextSelection.collapsed(offset: 9),
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     controller.selection = const TextSelection.collapsed(offset: 4);
     await tester.pump();
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          textDirection: TextDirection.ltr,
-          textSelection: const TextSelection.collapsed(offset: 4),
-          value: 'Guten Tag',
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection.collapsed(offset: 4),
+                  value: 'Guten Tag',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorForwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.moveCursorForwardByWord,
+                    SemanticsAction.setSelection,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          textDirection: TextDirection.ltr,
-          textSelection: const TextSelection.collapsed(offset: 0),
-          value: 'Guten Tag',
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection.collapsed(offset: 0),
+                  value: 'Guten Tag',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    SemanticsAction.moveCursorForwardByCharacter,
+                    SemanticsAction.moveCursorForwardByWord,
+                    SemanticsAction.setSelection,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     semantics.dispose();
   });
@@ -2277,16 +2296,21 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          id: 1,
-          actions: <SemanticsAction>[SemanticsAction.longPress],
-          label: 'German greeting for good day',
-          textDirection: TextDirection.ltr,
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 1,
+                  actions: <SemanticsAction>[SemanticsAction.longPress],
+                  label: 'German greeting for good day',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
   });
 
   testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
@@ -2306,31 +2330,36 @@ void main() {
     await tester.tap(find.byKey(key));
     await tester.pump();
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          value: 'Guten Tag',
-          textDirection: TextDirection.ltr,
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            // Absent the following because enableInteractiveSelection: false
-            // SemanticsAction.moveCursorBackwardByCharacter,
-            // SemanticsAction.moveCursorBackwardByWord,
-            // SemanticsAction.setSelection,
-            // SemanticsAction.paste,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            // SelectableText act like a text widget when enableInteractiveSelection
-            // is false. It will not respond to any pointer event.
-            // SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  value: 'Guten Tag',
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    // Absent the following because enableInteractiveSelection: false
+                    // SemanticsAction.moveCursorBackwardByCharacter,
+                    // SemanticsAction.moveCursorBackwardByWord,
+                    // SemanticsAction.setSelection,
+                    // SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    // SelectableText act like a text widget when enableInteractiveSelection
+                    // is false. It will not respond to any pointer event.
+                    // SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     semantics.dispose();
   });
@@ -2351,23 +2380,28 @@ void main() {
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          value: 'Hello',
-          textDirection: TextDirection.ltr,
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  value: 'Hello',
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     // Focus the selectable text
     await tester.tap(find.byKey(key));
@@ -2376,57 +2410,67 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 5);
     await tester.pump();
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          value: 'Hello',
-          textSelection: const TextSelection.collapsed(offset: 5),
-          textDirection: TextDirection.ltr,
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.setSelection,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  value: 'Hello',
+                  textSelection: const TextSelection.collapsed(offset: 5),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     controller.selection = const TextSelection(baseOffset: 5, extentOffset: 3);
     await tester.pump();
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          value: 'Hello',
-          textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
-          textDirection: TextDirection.ltr,
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-            SemanticsAction.copy,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: 1,
+                  value: 'Hello',
+                  textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorForwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.moveCursorForwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.copy,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     semantics.dispose();
   });
@@ -2440,23 +2484,22 @@ void main() {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home: SingleChildScrollView(
-          controller: controller,
-          child: SelectableText.rich(
-            TextSpan(
-              children: <TextSpan>[
-                const TextSpan(text: onScreenText),
-                TextSpan(
-                  text: offScreenText,
-                  recognizer: TapGestureRecognizer()..onTap = () { },
-                ),
-              ],
-              style: textStyle,
-            ),
-            textDirection: TextDirection.ltr,
+          home: SingleChildScrollView(
+        controller: controller,
+        child: SelectableText.rich(
+          TextSpan(
+            children: <TextSpan>[
+              const TextSpan(text: onScreenText),
+              TextSpan(
+                text: offScreenText,
+                recognizer: TapGestureRecognizer()..onTap = () {},
+              ),
+            ],
+            style: textStyle,
           ),
-        )
-      ),
+          textDirection: TextDirection.ltr,
+        ),
+      )),
     );
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -2550,28 +2593,33 @@ void main() {
 
     const int inputFieldId = 1;
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: inputFieldId,
-          value: 'Hello',
-          textSelection: const TextSelection.collapsed(offset: 5),
-          textDirection: TextDirection.ltr,
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.setSelection,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: inputFieldId,
+                  value: 'Hello',
+                  textSelection: const TextSelection.collapsed(offset: 5),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     // move cursor back once
     semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <dynamic, dynamic>{
@@ -2596,29 +2644,34 @@ void main() {
     });
     await tester.pump();
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: inputFieldId,
-          value: 'Hello',
-          textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
-          textDirection: TextDirection.ltr,
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.setSelection,
-            SemanticsAction.copy,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isMultiline,
-            SemanticsFlag.isFocused,
-          ],
-        ),
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  id: inputFieldId,
+                  value: 'Hello',
+                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.longPress,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.copy,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isReadOnly,
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isMultiline,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true));
 
     semantics.dispose();
   });
@@ -2643,56 +2696,62 @@ void main() {
 
     const int inputFieldId = 1;
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: inputFieldId,
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isReadOnly,
-              SemanticsFlag.isTextField,
-              SemanticsFlag.isMultiline,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: inputFieldId,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isReadOnly,
+                  SemanticsFlag.isTextField,
+                  SemanticsFlag.isMultiline,
+                ],
+                actions: <SemanticsAction>[SemanticsAction.longPress],
+                value: testValue,
+                textDirection: TextDirection.ltr,
+              ),
             ],
-            actions: <SemanticsAction>[SemanticsAction.longPress],
-            value: testValue,
-            textDirection: TextDirection.ltr,
           ),
-        ],
-      ),
-      ignoreRect: true, ignoreTransform: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
 
     semanticsOwner.performAction(inputFieldId, SemanticsAction.longPress);
     await tester.pump();
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: inputFieldId,
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isReadOnly,
-              SemanticsFlag.isTextField,
-              SemanticsFlag.isMultiline,
-              SemanticsFlag.isFocused,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: inputFieldId,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isReadOnly,
+                  SemanticsFlag.isTextField,
+                  SemanticsFlag.isMultiline,
+                  SemanticsFlag.isFocused,
+                ],
+                actions: <SemanticsAction>[
+                  SemanticsAction.longPress,
+                  SemanticsAction.moveCursorBackwardByCharacter,
+                  SemanticsAction.moveCursorBackwardByWord,
+                  SemanticsAction.setSelection,
+                ],
+                value: testValue,
+                textDirection: TextDirection.ltr,
+                textSelection: const TextSelection(
+                  baseOffset: testValue.length,
+                  extentOffset: testValue.length,
+                ),
+              ),
             ],
-            actions: <SemanticsAction>[
-              SemanticsAction.longPress,
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.moveCursorBackwardByWord,
-              SemanticsAction.setSelection,
-            ],
-            value: testValue,
-            textDirection: TextDirection.ltr,
-            textSelection: const TextSelection(
-              baseOffset: testValue.length,
-              extentOffset: testValue.length,
-            ),
           ),
-        ],
-      ),
-      ignoreRect: true, ignoreTransform: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
 
     semantics.dispose();
   });
@@ -2702,7 +2761,10 @@ void main() {
     await tester.pumpWidget(selectableText);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
+    expect(
+        exception.toString(),
+        startsWith(
+            'No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
   });
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
@@ -2737,7 +2799,7 @@ void main() {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
         home: Material(
-          child: DefaultTextStyle (
+          child: DefaultTextStyle(
             style: defaultStyle,
             child: Center(
               child: SelectableText(
@@ -2837,7 +2899,7 @@ void main() {
       // But don't trigger the toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -2904,7 +2966,7 @@ void main() {
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -2950,7 +3012,7 @@ void main() {
       // Selected text shows 1 toolbar buttons.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -3064,8 +3126,7 @@ void main() {
 
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
-      final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+      final TestGesture gesture = await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -3091,7 +3152,7 @@ void main() {
       // The toolbar is still showing.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -3124,7 +3185,7 @@ void main() {
         const TextSelection(baseOffset: 13, extentOffset: 23),
       );
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -3171,7 +3232,7 @@ void main() {
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -3207,13 +3268,12 @@ void main() {
       // Toolbar shows one button.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
     'long press selects word and shows toolbar (Android)',
     (WidgetTester tester) async {
-
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3249,8 +3309,9 @@ void main() {
         MaterialApp(
           home: Material(
             child: Center(
-              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-              selectionControls: cupertinoTextSelectionControls,
+              child: SelectableText(
+                'Atwater Peel Sherbrooke Bonaventure',
+                selectionControls: cupertinoTextSelectionControls,
               ),
             ),
           ),
@@ -3283,13 +3344,13 @@ void main() {
   testWidgets(
     'long press selects word and shows custom toolbar (iOS)',
     (WidgetTester tester) async {
-
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
-              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-              selectionControls: materialTextSelectionControls,
+              child: SelectableText(
+                'Atwater Peel Sherbrooke Bonaventure',
+                selectionControls: materialTextSelectionControls,
               ),
             ),
           ),
@@ -3322,7 +3383,8 @@ void main() {
         MaterialApp(
           home: Material(
             child: Scaffold(
-              body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+              body: SelectableText(
+                'Atwater Peel Sherbrooke Bonaventure',
                 selectionControls: materialTextSelectionControls,
               ),
             ),
@@ -3368,7 +3430,7 @@ void main() {
 
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -3386,8 +3448,7 @@ void main() {
 
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
-      final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
+      final TestGesture gesture = await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3446,7 +3507,7 @@ void main() {
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
   testWidgets(
@@ -3464,8 +3525,7 @@ void main() {
 
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
-      final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
+      final TestGesture gesture = await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3524,110 +3584,111 @@ void main() {
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
   );
 
-  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: Center(
-            child: SelectableText(
-              'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
-              maxLines: 1,
+  testWidgets(
+    'long press drag can edge scroll',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText(
+                'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+                maxLines: 1,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    final RenderEditable renderEditable = findRenderEditable(tester);
+      final RenderEditable renderEditable = findRenderEditable(tester);
 
-    List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
-      const TextSelection.collapsed(offset: 66), // Last character's position.
-    );
+      List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
+        const TextSelection.collapsed(offset: 66), // Last character's position.
+      );
 
-    expect(lastCharEndpoint.length, 1);
-    // Just testing the test and making sure that the last character is off
-    // the right side of the screen.
-    expect(lastCharEndpoint[0].point.dx, 924.0);
+      expect(lastCharEndpoint.length, 1);
+      // Just testing the test and making sure that the last character is off
+      // the right side of the screen.
+      expect(lastCharEndpoint[0].point.dx, 924.0);
 
-    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
-    final TestGesture gesture =
-    await tester.startGesture(selectableTextStart + const Offset(300, 5));
-    await tester.pump(const Duration(milliseconds: 500));
+      final TestGesture gesture = await tester.startGesture(selectableTextStart + const Offset(300, 5));
+      await tester.pump(const Duration(milliseconds: 500));
 
-    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
-    final TextEditingController controller = editableTextWidget.controller;
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
 
-    expect(
-      controller.selection,
-      const TextSelection(baseOffset: 13, extentOffset: 23),
-    );
-    expect(find.byType(CupertinoButton), findsNothing);
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 13, extentOffset: 23),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
 
-    await gesture.moveBy(const Offset(600, 0));
-    // To the edge of the screen basically.
-    await tester.pump();
-    expect(
-      controller.selection,
-      const TextSelection(
-        baseOffset: 13,
-        extentOffset: 66,
-      ),
-    );
-    // Keep moving out.
-    await gesture.moveBy(const Offset(1, 0));
-    await tester.pump();
-    expect(
-      controller.selection,
-      const TextSelection(
-        baseOffset: 13,
-        extentOffset: 66,
-      ),
-    );
-    await gesture.moveBy(const Offset(1, 0));
-    await tester.pump();
-    expect(
-      controller.selection,
-      const TextSelection(
-        baseOffset: 13,
-        extentOffset: 66,
-      ),
-    );
-    expect(find.byType(CupertinoButton), findsNothing);
+      await gesture.moveBy(const Offset(600, 0));
+      // To the edge of the screen basically.
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 13,
+          extentOffset: 66,
+        ),
+      );
+      // Keep moving out.
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 13,
+          extentOffset: 66,
+        ),
+      );
+      await gesture.moveBy(const Offset(1, 0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 13,
+          extentOffset: 66,
+        ),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
 
-    await gesture.up();
-    await tester.pump();
+      await gesture.up();
+      await tester.pump();
 
-    // The selection isn't affected by the gesture lift.
-    expect(
-      controller.selection,
-      const TextSelection(
-        baseOffset: 13,
-        extentOffset: 66,
-      ),
-    );
-    // The toolbar now shows up.
-    expect(find.byType(CupertinoButton), findsNWidgets(1));
+      // The selection isn't affected by the gesture lift.
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 13,
+          extentOffset: 66,
+        ),
+      );
+      // The toolbar now shows up.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
 
-    lastCharEndpoint = renderEditable.getEndpointsForSelection(
-      const TextSelection.collapsed(offset: 66), // Last character's position.
-    );
+      lastCharEndpoint = renderEditable.getEndpointsForSelection(
+        const TextSelection.collapsed(offset: 66), // Last character's position.
+      );
 
-    expect(lastCharEndpoint.length, 1);
-    // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
+      expect(lastCharEndpoint.length, 1);
+      // The last character is now on screen near the right edge.
+      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
-    final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
-      const TextSelection.collapsed(offset: 0), // First character's position.
-    );
-    expect(firstCharEndpoint.length, 1);
-    // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-125, epsilon: 1));
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+      final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
+        const TextSelection.collapsed(offset: 0), // First character's position.
+      );
+      expect(firstCharEndpoint.length, 1);
+      // The first character is now offscreen to the left.
+      expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-125, epsilon: 1));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
     skip: true, // https://github.com/flutter/flutter/issues/64059
   );
 
@@ -3674,7 +3735,7 @@ void main() {
       // Long press toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
   testWidgets(
@@ -3718,7 +3779,7 @@ void main() {
       // Long press toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
   );
 //convert
   testWidgets(
@@ -3759,7 +3820,8 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets(
@@ -3826,7 +3888,7 @@ void main() {
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
@@ -3852,7 +3914,8 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+        pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0));
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
@@ -3890,7 +3953,11 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: selectableTextStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+        pointer: pointerValue,
+        position: selectableTextStart + const Offset(150.0, 5.0),
+        pressure: 0.5,
+        pressureMin: 0));
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
@@ -3904,7 +3971,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.byType(CupertinoButton), findsNWidgets(1));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
   testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3932,7 +3999,11 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: selectableTextStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+        pointer: pointerValue,
+        position: selectableTextStart + const Offset(150.0, 5.0),
+        pressure: 0.5,
+        pressureMin: 0));
     await gesture.up();
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3961,7 +4032,8 @@ void main() {
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>['data: something']);
   });
@@ -3991,7 +4063,8 @@ void main() {
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'data: something',
@@ -4320,18 +4393,22 @@ void main() {
       ),
     );
 
-    final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final RenderEditable renderEditable = state.renderEditable;
 
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<FadeTransition> transitions = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
-      matching: find.byType(FadeTransition),
-    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+    final List<FadeTransition> transitions = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+          matching: find.byType(FadeTransition),
+        )
+        .evaluate()
+        .map((Element e) => e.widget)
+        .cast<FadeTransition>()
+        .toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];
@@ -4351,22 +4428,20 @@ void main() {
       ),
     );
 
-    final RenderEditable renderEditable =
-        tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+    final RenderEditable renderEditable = tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
 
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<Widget> transitions =
-    find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    final List<Widget> transitions = find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0] as FadeTransition;
     final FadeTransition right = transitions[1] as FadeTransition;
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -4529,8 +4604,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Starts a long press.
-    final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+    final TestGesture gesture = await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
     await tester.pump();
@@ -4546,7 +4620,8 @@ void main() {
     expect(spyTaps, 1);
   });
 
-  testWidgets('text span with long press gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+  testWidgets('text span with long press gesture recognizer works in selectable rich text',
+      (WidgetTester tester) async {
     int spyLongPress = 0;
     final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
       ..onLongPress = () {
@@ -4579,8 +4654,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Starts a long press.
-    final TestGesture gesture =
-    await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+    final TestGesture gesture = await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
     await tester.pump();
@@ -4616,115 +4690,121 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: SelectableText('abc def ghi'),
+  testWidgets(
+    'The handles show after pressing Select All',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: SelectableText('abc def ghi'),
+          ),
         ),
-      ),
-    );
+      );
 
-    // Long press at 'e' in 'def'.
-    final Offset ePos = textOffsetToPosition(tester, 5);
-    await tester.longPressAt(ePos);
-    await tester.pumpAndSettle();
+      // Long press at 'e' in 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.longPressAt(ePos);
+      await tester.pumpAndSettle();
 
-    expect(find.text('Select all'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
-    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
+      expect(find.text('Select all'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
 
-    await tester.tap(find.text('Select all'));
-    await tester.pump();
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Select all'), findsNothing);
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
-  },
+      await tester.tap(find.text('Select all'));
+      await tester.pump();
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.fuchsia,
     }),
   );
 
-  testWidgets('The Select All calls on selection changed', (WidgetTester tester) async {
-    TextSelection? newSelection;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SelectableText(
-            'abc def ghi',
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-              expect(newSelection, isNull);
-              newSelection = selection;
-            },
+  testWidgets(
+    'The Select All calls on selection changed',
+    (WidgetTester tester) async {
+      TextSelection? newSelection;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SelectableText(
+              'abc def ghi',
+              onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+                expect(newSelection, isNull);
+                newSelection = selection;
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Long press at 'e' in 'def'.
-    final Offset ePos = textOffsetToPosition(tester, 5);
-    await tester.longPressAt(ePos);
-    await tester.pumpAndSettle();
+      // Long press at 'e' in 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.longPressAt(ePos);
+      await tester.pumpAndSettle();
 
-    expect(newSelection!.baseOffset, 4);
-    expect(newSelection!.extentOffset, 7);
-    newSelection = null;
+      expect(newSelection!.baseOffset, 4);
+      expect(newSelection!.extentOffset, 7);
+      newSelection = null;
 
-    await tester.tap(find.text('Select all'));
-    await tester.pump();
-    expect(newSelection!.baseOffset, 0);
-    expect(newSelection!.extentOffset, 11);
-  },
+      await tester.tap(find.text('Select all'));
+      await tester.pump();
+      expect(newSelection!.baseOffset, 0);
+      expect(newSelection!.extentOffset, 11);
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.fuchsia,
     }),
   );
 
-  testWidgets('The Select All calls on selection changed with a mouse on windows and linux', (WidgetTester tester) async {
-    const String string = 'abc def ghi';
-    TextSelection? newSelection;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SelectableText(
-            string,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-              expect(newSelection, isNull);
-              newSelection = selection;
-            },
+  testWidgets(
+    'The Select All calls on selection changed with a mouse on windows and linux',
+    (WidgetTester tester) async {
+      const String string = 'abc def ghi';
+      TextSelection? newSelection;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SelectableText(
+              string,
+              onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+                expect(newSelection, isNull);
+                newSelection = selection;
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Right-click on the 'e' in 'def'.
-    final Offset ePos = textOffsetToPosition(tester, 5);
-    final TestGesture gesture = await tester.startGesture(
-      ePos,
-      kind: PointerDeviceKind.mouse,
-      buttons: kSecondaryMouseButton,
-    );
-    await tester.pump();
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(newSelection!.isCollapsed, isTrue);
-    expect(newSelection!.baseOffset, 5);
-    newSelection = null;
+      // Right-click on the 'e' in 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      final TestGesture gesture = await tester.startGesture(
+        ePos,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(newSelection!.isCollapsed, isTrue);
+      expect(newSelection!.baseOffset, 5);
+      newSelection = null;
 
-    await tester.tap(find.text('Select all'));
-    await tester.pump();
-    expect(newSelection!.baseOffset, 0);
-    expect(newSelection!.extentOffset, 11);
-  },
+      await tester.tap(find.text('Select all'));
+      await tester.pump();
+      expect(newSelection!.baseOffset, 0);
+      expect(newSelection!.extentOffset, 11);
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.windows,
       TargetPlatform.linux,
@@ -4843,7 +4923,7 @@ void main() {
     expect(selection, isNotNull);
     expect(selection!.baseOffset, 0);
     expect(selection!.extentOffset, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('selecting a space selects the space on non-mobile platforms', (WidgetTester tester) async {
     TextSelection? selection;
@@ -4896,7 +4976,13 @@ void main() {
     expect(selection, isNotNull);
     expect(selection!.baseOffset, 0);
     expect(selection!.extentOffset, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+  },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+        TargetPlatform.linux,
+        TargetPlatform.fuchsia
+      }));
 
   testWidgets('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
     TextSelection? selection;
@@ -4960,7 +5046,7 @@ void main() {
     expect(selection, isNotNull);
     expect(selection!.baseOffset, 6);
     expect(selection!.extentOffset, 14);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5072,41 +5158,39 @@ void main() {
           length: 2,
           child: Scaffold(
             body: NestedScrollView(
-              headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
-                  return <Widget>[
-                    SliverToBoxAdapter(
-                      child: Container(
-                        height: 200,
-                        color: Colors.black12,
-                        child: const Center(child: Text('Sliver 1')),
-                      ),
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverToBoxAdapter(
+                    child: Container(
+                      height: 200,
+                      color: Colors.black12,
+                      child: const Center(child: Text('Sliver 1')),
                     ),
-                    const SliverToBoxAdapter(
+                  ),
+                  const SliverToBoxAdapter(
                       child: Center(
-                        child: TabBar(
-                          labelColor: Colors.black,
-                          tabs: <Tab>[
-                            Tab(text: 'Sliver Tab 1'),
-                            Tab(text: 'Sliver Tab 2'),
-                          ],
-                        ),
-                      )
+                    child: TabBar(
+                      labelColor: Colors.black,
+                      tabs: <Tab>[
+                        Tab(text: 'Sliver Tab 1'),
+                        Tab(text: 'Sliver Tab 2'),
+                      ],
                     ),
-                  ];
-                },
-                body: const TabBarView(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 100.0),
-                      child: Text('Regular Text'),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 100.0),
-                      child: SelectableText('Selectable Text'),
-                    ),
-                  ],
-                ),
+                  )),
+                ];
+              },
+              body: const TabBarView(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: 100.0),
+                    child: Text('Regular Text'),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 100.0),
+                    child: SelectableText('Selectable Text'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -5156,23 +5240,16 @@ void main() {
     late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
-    testWidgets(
-        'Can drag handles to show, unshow, and update magnifier',
-        (WidgetTester tester) async {
+    testWidgets('Can drag handles to show, unshow, and update magnifier', (WidgetTester tester) async {
       const String testValue = 'abc def ghi';
-      final SelectableText selectableText = SelectableText(
-            testValue,
-            magnifierConfiguration: TextMagnifierConfiguration(
-        magnifierBuilder: (
-          _,
-          MagnifierController controller,
-          ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
-        ) {
+      final SelectableText selectableText =
+          SelectableText(testValue, magnifierConfiguration: TextMagnifierConfiguration(
+        magnifierBuilder:
+            (_, MagnifierController controller, ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer) {
           infoBearer = localInfoBearer;
           return fakeMagnifier;
         },
-      )
-          );
+      ));
 
       await tester.pumpWidget(
         overlay(
@@ -5188,10 +5265,8 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
       await tester.pump(const Duration(milliseconds: 30));
 
-      final TextSelection selection = TextSelection(
-        baseOffset: testValue.indexOf('d'),
-        extentOffset: testValue.indexOf('f')
-      );
+      final TextSelection selection =
+          TextSelection(baseOffset: testValue.indexOf('d'), extentOffset: testValue.indexOf('f'));
 
       final RenderEditable renderEditable = findRenderEditable(tester);
       final List<TextSelectionPoint> endpoints = globalize(
@@ -5215,8 +5290,7 @@ void main() {
       await tester.pump();
 
       // Expect the position the magnifier gets to have moved.
-      expect(firstDragGesturePosition,
-          isNot(infoBearer.value.globalGesturePosition));
+      expect(firstDragGesturePosition, isNot(infoBearer.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();

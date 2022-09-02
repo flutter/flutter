@@ -33,9 +33,15 @@ void main() {
 
     hovered = false;
     hoverTarget = MouseRegion(
-      onHover: (_) { hovered = true; },
-      onEnter: (_) { hovered = true; },
-      onExit: (_) { hovered = true; },
+      onHover: (_) {
+        hovered = true;
+      },
+      onEnter: (_) {
+        hovered = true;
+      },
+      onExit: (_) {
+        hovered = true;
+      },
       child: const SizedBox(
         width: 10.0,
         height: 10.0,
@@ -160,8 +166,8 @@ void main() {
     testWidgets('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
       final List<String> playedSystemSounds = <String>[];
       try {
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-            SystemChannels.platform, (MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+            (MethodCall methodCall) async {
           if (methodCall.method == 'SystemSound.play') {
             playedSystemSounds.add(methodCall.arguments as String);
           }
@@ -285,8 +291,7 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
-            Stack(
+        '/modal': (BuildContext context) => Stack(
               children: <Widget>[
                 const SecondWidget(),
                 WillPopScope(
@@ -330,8 +335,7 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
-            Stack(
+        '/modal': (BuildContext context) => Stack(
               children: <Widget>[
                 const SecondWidget(),
                 WillPopScope(
@@ -375,8 +379,7 @@ void main() {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
-            SecondWidget(onDismiss: () {
+        '/modal': (BuildContext context) => SecondWidget(onDismiss: () {
               dismissCallbackCalled = true;
             }),
       };
@@ -422,7 +425,8 @@ void main() {
       expect(
         find.byKey(const ValueKey<String>('barrier')),
         findsOneWidget,
-        reason: 'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
+        reason:
+            'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
       );
     });
 
@@ -458,10 +462,10 @@ void main() {
       expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS}));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-    testWidgets(
-        'Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+    testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)',
+        (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(const ModalBarrier());
 
@@ -587,8 +591,8 @@ void main() {
     testWidgets('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
       final List<String> playedSystemSounds = <String>[];
       try {
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-            SystemChannels.platform, (MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+            (MethodCall methodCall) async {
           if (methodCall.method == 'SystemSound.play') {
             playedSystemSounds.add(methodCall.arguments as String);
           }
@@ -712,8 +716,7 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
-            Stack(
+        '/modal': (BuildContext context) => Stack(
               children: <Widget>[
                 const AnimatedSecondWidget(),
                 WillPopScope(
@@ -757,8 +760,7 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
-            Stack(
+        '/modal': (BuildContext context) => Stack(
               children: <Widget>[
                 const AnimatedSecondWidget(),
                 WillPopScope(
@@ -802,8 +804,7 @@ void main() {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
-            AnimatedSecondWidget(onDismiss: () {
+        '/modal': (BuildContext context) => AnimatedSecondWidget(onDismiss: () {
               dismissCallbackCalled = true;
             }),
       };
@@ -849,7 +850,8 @@ void main() {
       expect(
         find.byKey(const ValueKey<String>('barrier')),
         findsOneWidget,
-        reason: 'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
+        reason:
+            'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
       );
     });
 
@@ -863,7 +865,8 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
+    testWidgets('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS',
+        (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -886,10 +889,10 @@ void main() {
       expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS}));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-    testWidgets(
-        'Dismissible AnimatedModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+    testWidgets('Dismissible AnimatedModalBarrier is hidden on Android (back button is used to dismiss)',
+        (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(AnimatedModalBarrier(color: colorAnimation));
 
@@ -978,6 +981,7 @@ class SecondWidgetWithCompetence extends StatelessWidget {
     );
   }
 }
+
 class AnimatedSecondWidgetWithCompetence extends StatelessWidget {
   const AnimatedSecondWidgetWithCompetence({super.key});
   @override

@@ -473,7 +473,8 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 
   @override
   void dispose() {
-    assert(ChangeNotifier.debugAssertNotDisposed(this)); // FYI, This uses ChangeNotifier's _debugDisposed, not _disposed.
+    assert(
+        ChangeNotifier.debugAssertNotDisposed(this)); // FYI, This uses ChangeNotifier's _debugDisposed, not _disposed.
     _owner?._unregister(this);
     super.dispose();
     _disposed = true;
@@ -489,6 +490,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
     _restorationId = restorationId;
     _owner = owner;
   }
+
   void _unregister() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(_restorationId != null);
@@ -725,11 +727,14 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   void registerForRestoration(RestorableProperty<Object?> property, String restorationId) {
     assert(property != null);
     assert(restorationId != null);
-    assert(property._restorationId == null || (_debugDoingRestore && property._restorationId == restorationId),
-           'Property is already registered under ${property._restorationId}.',
+    assert(
+      property._restorationId == null || (_debugDoingRestore && property._restorationId == restorationId),
+      'Property is already registered under ${property._restorationId}.',
     );
-    assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
-           '"$restorationId" is already registered to another property.',
+    assert(
+      _debugDoingRestore ||
+          !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
+      '"$restorationId" is already registered to another property.',
     );
     final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
     final Object? initialValue = hasSerializedValue
@@ -744,14 +749,13 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
         }
         _updateProperty(property);
       }
+
       property.addListener(listener);
       _properties[property] = listener;
     }
 
     assert(
-      property._restorationId == restorationId &&
-      property._owner == this &&
-      _properties.containsKey(property),
+      property._restorationId == restorationId && property._owner == this && _properties.containsKey(property),
     );
 
     property.initWithValue(initialValue);
@@ -880,11 +884,11 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
           ),
           ErrorDescription(
             'The RestorableProperties with the following IDs were not re-registered to $this when '
-                '"restoreState" was called:',
+            '"restoreState" was called:',
           ),
           ..._debugPropertiesWaitingForReregistration!.map((RestorableProperty<Object?> property) => ErrorDescription(
-            ' * ${property._restorationId}',
-          )),
+                ' * ${property._restorationId}',
+              )),
         ]);
       }
       _debugPropertiesWaitingForReregistration = null;

@@ -27,8 +27,7 @@ class PageStorageKey<T> extends ValueKey<T> {
 
 @immutable
 class _StorageEntryIdentifier {
-  const _StorageEntryIdentifier(this.keys)
-    : assert(keys != null);
+  const _StorageEntryIdentifier(this.keys) : assert(keys != null);
 
   final List<PageStorageKey<dynamic>> keys;
 
@@ -39,8 +38,7 @@ class _StorageEntryIdentifier {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _StorageEntryIdentifier
-        && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
+    return other is _StorageEntryIdentifier && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override
@@ -90,7 +88,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, { Object? identifier }) {
+  void writeState(BuildContext context, dynamic data, {Object? identifier}) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
@@ -110,7 +108,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, { Object? identifier }) {
+  dynamic readState(BuildContext context, {Object? identifier}) {
     if (_storage == null) {
       return null;
     }

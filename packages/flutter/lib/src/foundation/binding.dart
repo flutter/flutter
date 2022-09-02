@@ -284,7 +284,8 @@ abstract class BindingBase {
       if (_debugInitializedType == null && instance == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Binding has not yet been initialized.'),
-          ErrorDescription('The "instance" getter on the $T binding mixin is only available once that binding has been initialized.'),
+          ErrorDescription(
+              'The "instance" getter on the $T binding mixin is only available once that binding has been initialized.'),
           ErrorHint(
             'Typically, this is done by calling "WidgetsFlutterBinding.ensureInitialized()" or "runApp()" (the '
             'latter calls the former). Typically this call is done in the "void main()" method. The "ensureInitialized" method '
@@ -319,9 +320,7 @@ abstract class BindingBase {
             'It is also possible that $T does not implement "initInstances()" to assign a value to "instance". See the '
             'documentation of the BaseBinding class for more details.',
           ),
-          ErrorHint(
-            'The binding that was initialized was of the type "$_debugInitializedType". '
-          ),
+          ErrorHint('The binding that was initialized was of the type "$_debugInitializedType". '),
         ]);
       }
       try {
@@ -345,7 +344,8 @@ abstract class BindingBase {
           // The state of _debugInitializedType doesn't matter in this failure mode.
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Binding did not complete initialization.'),
-            ErrorDescription('An instance of $T is non-null, but the BindingBase() constructor has not yet been called.'),
+            ErrorDescription(
+                'An instance of $T is non-null, but the BindingBase() constructor has not yet been called.'),
             ErrorHint(
               'This could also happen if some code was invoked that used the binding while the binding was initializing, '
               "for example if the binding's constructor itself invokes a callback. Bindings should not invoke callbacks "
@@ -489,9 +489,7 @@ abstract class BindingBase {
             await reassembleApplication();
           }
           return <String, dynamic>{
-            'value': defaultTargetPlatform
-                     .toString()
-                     .substring('$TargetPlatform.'.length),
+            'value': defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
           };
         },
       );
@@ -556,7 +554,8 @@ abstract class BindingBase {
     assert(callback != null);
     _lockCount += 1;
     final Future<void> future = callback();
-    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
+    assert(future != null,
+        'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {

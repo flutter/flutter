@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -100,10 +99,10 @@ class PointerRouter {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
-          DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
-          DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
-          DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
-        ];
+              DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
+              DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
+              DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
+            ];
         return true;
       }());
       FlutterError.reportError(FlutterErrorDetails(

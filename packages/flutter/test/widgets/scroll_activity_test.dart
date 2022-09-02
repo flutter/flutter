@@ -153,6 +153,7 @@ void main() {
     await tester.pumpAndSettle();
     final Set<double> checkSet = <double>{};
     checkSet.addAll(scrollSimulationXList);
+
     /// checkSet.length + 1 is because:
     /// simulation.x(0.0) will be called in _startSimulation.
     /// The first frame of the animation will also call simulation.x(0.0).
@@ -179,6 +180,7 @@ void main() {
     await tester.pumpAndSettle();
     final Set<double> checkSet = <double>{};
     checkSet.addAll(scrollSimulationXList);
+
     /// checkSet.length + 1 is because:
     /// simulation.x(0.0) will be call in _startSimulation.
     /// The first frame of the animation will also call simulation.x(0.0).
@@ -192,37 +194,32 @@ void main() {
     int? lastTapped;
     int? lastHovered;
     await tester.pumpWidget(MaterialApp(
-      home: ListView(
-        controller: controller,
-        children: List<Widget>.generate(30, (int i) {
-          return SizedBox(height: 100.0, child: MouseRegion(
-            onHover: (PointerHoverEvent event) {
-              lastHovered = i;
-            },
-            child: GestureDetector(
-              onTap: () {
-                lastTapped = i;
-              },
-              child: Text('$i')
-            )
-          ));
-        })
-      )
-    ));
-    final TestGesture touchGesture = await tester.createGesture(kind: PointerDeviceKind.touch); // ignore: avoid_redundant_argument_values
+        home: ListView(
+            controller: controller,
+            children: List<Widget>.generate(30, (int i) {
+              return SizedBox(
+                  height: 100.0,
+                  child: MouseRegion(
+                      onHover: (PointerHoverEvent event) {
+                        lastHovered = i;
+                      },
+                      child: GestureDetector(
+                          onTap: () {
+                            lastTapped = i;
+                          },
+                          child: Text('$i'))));
+            }))));
+    final TestGesture touchGesture =
+        await tester.createGesture(kind: PointerDeviceKind.touch); // ignore: avoid_redundant_argument_values
     // Try mouse hovering while scrolling by touch
     await touchGesture.down(tester.getCenter(find.byType(ListView)));
     await tester.pump();
     await touchGesture.moveBy(const Offset(0, 200));
     await tester.pump();
     final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await hoverGesture.addPointer(
-      location: tester.getCenter(find.text('3'))
-    );
+    await hoverGesture.addPointer(location: tester.getCenter(find.text('3')));
     await hoverGesture.moveBy(const Offset(1, 1));
-    await hoverGesture.removePointer(
-      location: tester.getCenter(find.text('3'))
-    );
+    await hoverGesture.removePointer(location: tester.getCenter(find.text('3')));
     await tester.pumpAndSettle();
     expect(controller.position.activity?.shouldIgnorePointer, isTrue); // Pointer is ignored for touch scrolling.
     expect(lastHovered, isNull);
@@ -245,15 +242,12 @@ void main() {
     await tester.pump();
     await trackpadGesture.panZoomUpdate(tester.getCenter(find.byType(ListView)), pan: const Offset(0, 200));
     await tester.pump();
-    await hoverGesture.addPointer(
-      location: tester.getCenter(find.text('3'))
-    );
+    await hoverGesture.addPointer(location: tester.getCenter(find.text('3')));
     await hoverGesture.moveBy(const Offset(1, 1));
-    await hoverGesture.removePointer(
-      location: tester.getCenter(find.text('3'))
-    );
+    await hoverGesture.removePointer(location: tester.getCenter(find.text('3')));
     await tester.pumpAndSettle();
-    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored for trackpad scrolling.
+    expect(
+        controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored for trackpad scrolling.
     expect(lastHovered, equals(3));
     await trackpadGesture.panZoomEnd();
     await tester.pump();
@@ -261,7 +255,8 @@ void main() {
     await tester.trackpadFling(find.byType(ListView), const Offset(0, -200), 1000);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored following trackpad scrolling.
+    expect(controller.position.activity?.shouldIgnorePointer,
+        isFalse); // Pointer is not ignored following trackpad scrolling.
     await tester.tap(find.text('3'));
     expect(lastTapped, equals(3));
     await tester.pumpAndSettle();
@@ -269,7 +264,7 @@ void main() {
 }
 
 class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics(this.scrollSimulationXList, { super.parent });
+  const TestScrollPhysics(this.scrollSimulationXList, {super.parent});
 
   final List<double> scrollSimulationXList;
 
@@ -301,8 +296,10 @@ class TestScrollPhysics extends ScrollPhysics {
 }
 
 class TestScrollScrollSimulation extends Simulation {
-  TestScrollScrollSimulation(this.innerScrollSimulation,
-      this.scrollSimulationXList,);
+  TestScrollScrollSimulation(
+    this.innerScrollSimulation,
+    this.scrollSimulationXList,
+  );
 
   final Simulation innerScrollSimulation;
 

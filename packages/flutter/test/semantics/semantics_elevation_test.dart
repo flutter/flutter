@@ -177,12 +177,12 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const MaterialApp(
-        home: Center(
-            child: Material(
-              elevation: 24.0,
-              child: Text('Hello'),
-            ),
+      home: Center(
+        child: Material(
+          elevation: 24.0,
+          child: Text('Hello'),
         ),
+      ),
     ));
 
     final SemanticsNode node = tester.getSemantics(find.text('Hello'));
@@ -197,33 +197,32 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
-        home: Card(
-          elevation: 10.0,
-          child: Column(
-            children: <Widget>[
-              const Text('abs. elevation: 10.0'),
-              MergeSemantics(
-                child: Semantics(
-                  explicitChildNodes: true, // just to be sure that it's going to be an explicit merge
-                  child: Column(
-                    children: const <Widget>[
-                      Card(
-                        elevation: 15.0,
-                        child: Text('abs. elevation 25.0'),
-                      ),
-                      Card(
-                        elevation: 5.0,
-                        child: Text('abs. elevation 15.0'),
-                      ),
-                    ],
-                  ),
+      home: Card(
+        elevation: 10.0,
+        child: Column(
+          children: <Widget>[
+            const Text('abs. elevation: 10.0'),
+            MergeSemantics(
+              child: Semantics(
+                explicitChildNodes: true, // just to be sure that it's going to be an explicit merge
+                child: Column(
+                  children: const <Widget>[
+                    Card(
+                      elevation: 15.0,
+                      child: Text('abs. elevation 25.0'),
+                    ),
+                    Card(
+                      elevation: 5.0,
+                      child: Text('abs. elevation 15.0'),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     ));
-
 
     final SemanticsNode elevation10 = tester.getSemantics(find.text('abs. elevation: 10.0'));
     expect(elevation10.thickness, 10.0);
@@ -251,34 +250,32 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
-        home: Card(
-            elevation: 10.0,
-            child: Column(
-              children: <Widget>[
-                const Text('abs. elevation: 10.0'),
-                MergeSemantics(
-                  child: Semantics(
-                    explicitChildNodes: true, // just to be sure that it's going to be an explicit merge
-                    child: Column(
-                      children: const <Widget>[
-                        Card(
-                          elevation: 5.0,
-                          child: Text('abs. elevation 15.0'),
-                        ),
-                        Card(
-                          elevation: 15.0,
-                          child: Text('abs. elevation 25.0'),
-                        ),
-                      ],
-
+      home: Card(
+        elevation: 10.0,
+        child: Column(
+          children: <Widget>[
+            const Text('abs. elevation: 10.0'),
+            MergeSemantics(
+              child: Semantics(
+                explicitChildNodes: true, // just to be sure that it's going to be an explicit merge
+                child: Column(
+                  children: const <Widget>[
+                    Card(
+                      elevation: 5.0,
+                      child: Text('abs. elevation 15.0'),
                     ),
-                  ),
+                    Card(
+                      elevation: 15.0,
+                      child: Text('abs. elevation 25.0'),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
+          ],
         ),
+      ),
     ));
-
 
     final SemanticsNode elevation10 = tester.getSemantics(find.text('abs. elevation: 10.0'));
     expect(elevation10.thickness, 10.0);

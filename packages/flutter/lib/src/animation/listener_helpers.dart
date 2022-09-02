@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
@@ -72,16 +71,16 @@ mixin AnimationLazyListenerMixin {
 mixin AnimationEagerListenerMixin {
   /// This implementation ignores listener registrations.
   @protected
-  void didRegisterListener() { }
+  void didRegisterListener() {}
 
   /// This implementation ignores listener registrations.
   @protected
-  void didUnregisterListener() { }
+  void didUnregisterListener() {}
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {}
 }
 
 /// A mixin that implements the [addListener]/[removeListener] protocol and notifies
@@ -148,12 +147,12 @@ mixin AnimationLocalListenersMixin {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
-          DiagnosticsProperty<AnimationLocalListenersMixin>(
-            'The $runtimeType notifying listeners was',
-            this,
-            style: DiagnosticsTreeStyle.errorProperty,
-          ),
-        ];
+              DiagnosticsProperty<AnimationLocalListenersMixin>(
+                'The $runtimeType notifying listeners was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ];
         return true;
       }());
       try {
@@ -243,12 +242,12 @@ mixin AnimationLocalStatusListenersMixin {
         InformationCollector? collector;
         assert(() {
           collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
-              'The $runtimeType notifying status listeners was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ];
+                DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+                  'The $runtimeType notifying status listeners was',
+                  this,
+                  style: DiagnosticsTreeStyle.errorProperty,
+                ),
+              ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

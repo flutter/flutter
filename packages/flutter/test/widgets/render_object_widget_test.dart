@@ -25,7 +25,7 @@ class TestWidget extends StatelessWidget {
 }
 
 class TestOrientedBox extends SingleChildRenderObjectWidget {
-  const TestOrientedBox({ super.key, super.child });
+  const TestOrientedBox({super.key, super.child});
 
   Decoration _getDecoration(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
@@ -38,7 +38,8 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  RenderDecoratedBox createRenderObject(BuildContext context) => RenderDecoratedBox(decoration: _getDecoration(context));
+  RenderDecoratedBox createRenderObject(BuildContext context) =>
+      RenderDecoratedBox(decoration: _getDecoration(context));
 
   @override
   void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
@@ -47,7 +48,7 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
 }
 
 class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
-  const TestNonVisitingWidget({ super.key, required Widget super.child });
+  const TestNonVisitingWidget({super.key, required Widget super.child});
 
   @override
   RenderObject createRenderObject(BuildContext context) => TestNonVisitingRenderObject();
@@ -79,8 +80,7 @@ class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMi
 void main() {
   testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationA));
-    SingleChildRenderObjectElement element =
-        tester.element(find.byElementType(SingleChildRenderObjectElement));
+    SingleChildRenderObjectElement element = tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element, isNotNull);
     expect(element.renderObject, isA<RenderDecoratedBox>());
     RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
@@ -97,7 +97,6 @@ void main() {
   });
 
   testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
-
     void checkFullTree() {
       final SingleChildRenderObjectElement element =
           tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
@@ -115,8 +114,7 @@ void main() {
     }
 
     void childBareTree() {
-      final SingleChildRenderObjectElement element =
-          tester.element(find.byElementType(SingleChildRenderObjectElement));
+      final SingleChildRenderObjectElement element = tester.element(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
       expect(element.renderObject, isA<RenderDecoratedBox>());
       final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
@@ -181,7 +179,6 @@ void main() {
   });
 
   testWidgets('Detached render tree is intact', (WidgetTester tester) async {
-
     await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
       child: DecoratedBox(
@@ -192,8 +189,7 @@ void main() {
       ),
     ));
 
-    SingleChildRenderObjectElement element =
-        tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
+    SingleChildRenderObjectElement element = tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
     expect(element.renderObject, isA<RenderDecoratedBox>());
     final RenderDecoratedBox parent = element.renderObject as RenderDecoratedBox;
     expect(parent.child, isA<RenderDecoratedBox>());
@@ -208,8 +204,7 @@ void main() {
       decoration: kBoxDecorationA,
     ));
 
-    element =
-        tester.element(find.byElementType(SingleChildRenderObjectElement));
+    element = tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element.renderObject, isA<RenderDecoratedBox>());
     expect(element.renderObject, equals(parent));
     expect(parent.child, isNull);

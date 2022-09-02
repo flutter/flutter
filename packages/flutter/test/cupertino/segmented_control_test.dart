@@ -47,7 +47,7 @@ StatefulBuilder setupSimpleSegmentedControl() {
   );
 }
 
-Widget boilerplate({ required Widget child }) {
+Widget boilerplate({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -55,22 +55,29 @@ Widget boilerplate({ required Widget child }) {
 }
 
 int getChildCount(WidgetTester tester) {
-  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
-      .getChildrenAsList().length;
+  return (getRenderSegmentedControl(tester)
+          as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()
+      .length;
 }
 
 ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
   // Using dynamic so the test can access private classes.
   // ignore: avoid_dynamic_calls
-  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
-      .getChildrenAsList()[child].parentData! as dynamic).surroundingRect as ui.RRect;
+  return ((getRenderSegmentedControl(tester)
+              as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+          .getChildrenAsList()[child]
+          .parentData! as dynamic)
+      .surroundingRect as ui.RRect;
 }
 
 Size getChildSize(WidgetTester tester, {int child = 0}) {
   // Using dynamic so the test can access private classes.
   // ignore: avoid_dynamic_calls
-  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
-      .getChildrenAsList()[child]).size;
+  return ((getRenderSegmentedControl(tester)
+              as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+          .getChildrenAsList()[child])
+      .size;
 }
 
 Color getBorderColor(WidgetTester tester) {
@@ -132,7 +139,7 @@ void main() {
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: const <int, Widget>{},
-            onValueChanged: (int newValue) { },
+            onValueChanged: (int newValue) {},
           ),
         ),
       ),
@@ -148,7 +155,7 @@ void main() {
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: const <int, Widget>{0: Text('Child 1')},
-            onValueChanged: (int newValue) { },
+            onValueChanged: (int newValue) {},
           ),
         ),
       ),
@@ -167,21 +174,21 @@ void main() {
     children[0] = const SizedBox(
       height: double.infinity,
       child: Text('Child 1'),
-    ) ;
+    );
     children[1] = const SizedBox(
       height: double.infinity,
       child: Text('Child 2'),
-    ) ;
+    );
 
-    Future<void> verifyPadding({ EdgeInsets? padding }) async {
+    Future<void> verifyPadding({EdgeInsets? padding}) async {
       final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
       expect(
-          tester.getTopLeft(find.byWidget(children[0]!)),
-          segmentedControlRect.topLeft.translate(
-            effectivePadding.topLeft.dx,
-            effectivePadding.topLeft.dy,
-          ),
+        tester.getTopLeft(find.byWidget(children[0]!)),
+        segmentedControlRect.topLeft.translate(
+          effectivePadding.topLeft.dx,
+          effectivePadding.topLeft.dy,
+        ),
       );
       expect(
         tester.getBottomLeft(find.byWidget(children[0]!)),
@@ -208,13 +215,13 @@ void main() {
     }
 
     await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            key: key,
-            children: children,
-            onValueChanged: (int newValue) { },
-          ),
+      boilerplate(
+        child: CupertinoSegmentedControl<int>(
+          key: key,
+          children: children,
+          onValueChanged: (int newValue) {},
         ),
+      ),
     );
 
     // Default padding works.
@@ -227,14 +234,14 @@ void main() {
     await verifyPadding();
 
     await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            key: key,
-            padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
-            children: children,
-            onValueChanged: (int newValue) { },
-          ),
+      boilerplate(
+        child: CupertinoSegmentedControl<int>(
+          key: key,
+          padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
+          children: children,
+          onValueChanged: (int newValue) {},
         ),
+      ),
     );
 
     // Custom padding works.
@@ -257,7 +264,7 @@ void main() {
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
-            onValueChanged: (int newValue) { },
+            onValueChanged: (int newValue) {},
             groupValue: 2,
           ),
         ),
@@ -270,7 +277,8 @@ void main() {
     );
   });
 
-  testWidgets('Widgets have correct default text/icon styles, change correctly on selection', (WidgetTester tester) async {
+  testWidgets('Widgets have correct default text/icon styles, change correctly on selection',
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
@@ -431,7 +439,7 @@ void main() {
             height: 200.0,
             child: CupertinoSegmentedControl<int>(
               children: children,
-              onValueChanged: (int newValue) { },
+              onValueChanged: (int newValue) {},
             ),
           ),
         ),
@@ -485,7 +493,7 @@ void main() {
           return boilerplate(
             child: CupertinoSegmentedControl<int>(
               children: children,
-              onValueChanged: (int newValue) { },
+              onValueChanged: (int newValue) {},
               groupValue: sharedValue,
             ),
           );
@@ -525,7 +533,7 @@ void main() {
 
   testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '
-        'a Container or Placeholder widget)',
+    'a Container or Placeholder widget)',
     (WidgetTester tester) async {
       final Map<int, Widget> children = <int, Widget>{};
       children[0] = const Text('Child 1');
@@ -643,7 +651,7 @@ void main() {
             child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
-              onValueChanged: (int newValue) { },
+              onValueChanged: (int newValue) {},
             ),
           );
         },
@@ -674,7 +682,7 @@ void main() {
             child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
-              onValueChanged: (int newValue) { },
+              onValueChanged: (int newValue) {},
             ),
           );
         },
@@ -708,7 +716,7 @@ void main() {
                 CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) { },
+                  onValueChanged: (int newValue) {},
                 ),
               ],
             ),
@@ -733,7 +741,7 @@ void main() {
         child: Center(
           child: CupertinoSegmentedControl<int>(
             children: children,
-            onValueChanged: (int newValue) { },
+            onValueChanged: (int newValue) {},
           ),
         ),
       ),
@@ -816,36 +824,36 @@ void main() {
 
     expect(
       semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                label: 'Child 1',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                  SemanticsFlag.isSelected,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-              TestSemantics.rootChild(
-                label: 'Child 2',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-            ],
-          ),
-          ignoreId: true,
-          ignoreRect: true,
-          ignoreTransform: true,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              label: 'Child 1',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+                SemanticsFlag.isSelected,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics.rootChild(
+              label: 'Child 2',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+          ],
         ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
     );
 
     await tester.tap(find.text('Child 2'));
@@ -935,7 +943,9 @@ void main() {
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
+      onTapDown: (TapDownDetails details) {
+        tapDownDetails = details;
+      },
       child: const SizedBox(width: 200, height: 200),
     );
     children[1] = const Text('Child 2');
@@ -1484,7 +1494,9 @@ void main() {
               key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {
-                setState(() { sharedValue = newValue; });
+                setState(() {
+                  sharedValue = newValue;
+                });
               },
               groupValue: sharedValue,
             ),
@@ -1526,7 +1538,7 @@ void main() {
                 child: CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) { },
+                  onValueChanged: (int newValue) {},
                   groupValue: currentValue,
                 ),
               ),
@@ -1560,7 +1572,7 @@ void main() {
                 child: CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) { },
+                  onValueChanged: (int newValue) {},
                   groupValue: currentValue,
                 ),
               ),
@@ -1580,7 +1592,8 @@ void main() {
     );
   });
 
-  testWidgets('Hovering over Cupertino segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino segmented control updates cursor to clickable on Web',
+      (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -1598,7 +1611,7 @@ void main() {
                 child: CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) { },
+                  onValueChanged: (int newValue) {},
                   groupValue: currentValue,
                 ),
               ),

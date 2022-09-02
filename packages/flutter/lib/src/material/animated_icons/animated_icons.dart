@@ -42,8 +42,8 @@ class AnimatedIcon extends StatelessWidget {
     this.size,
     this.semanticLabel,
     this.textDirection,
-  }) : assert(progress != null),
-       assert(icon != null);
+  })  : assert(progress != null),
+        assert(icon != null);
 
   /// The animation progress for the animated icon.
   ///
@@ -148,6 +148,7 @@ class _AnimatedIconPainter extends CustomPainter {
   final Animation<double> progress;
   final Color color;
   final double scale;
+
   /// If this is true the image will be mirrored horizontally.
   final bool shouldMirror;
   final _UiPathFactory uiPathFactory;
@@ -168,16 +169,16 @@ class _AnimatedIconPainter extends CustomPainter {
     }
   }
 
-
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
-    return oldDelegate.progress.value != progress.value
-        || oldDelegate.color != color
+    return oldDelegate.progress.value != progress.value ||
+        oldDelegate.color != color
         // We are comparing the paths list by reference, assuming the list is
         // treated as immutable to be more efficient.
-        || oldDelegate.paths != paths
-        || oldDelegate.scale != scale
-        || oldDelegate.uiPathFactory != uiPathFactory;
+        ||
+        oldDelegate.paths != paths ||
+        oldDelegate.scale != scale ||
+        oldDelegate.uiPathFactory != uiPathFactory;
   }
 
   @override
@@ -251,9 +252,12 @@ class _PathCubicTo extends _PathCommand {
     final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
     final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
     path.cubicTo(
-      controlPoint1.dx, controlPoint1.dy,
-      controlPoint2.dx, controlPoint2.dy,
-      targetPoint.dx, targetPoint.dy,
+      controlPoint1.dx,
+      controlPoint1.dy,
+      controlPoint2.dx,
+      controlPoint2.dy,
+      targetPoint.dx,
+      targetPoint.dy,
     );
   }
 }
@@ -297,7 +301,7 @@ T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator
   if (values.length == 1) {
     return values[0];
   }
-  final double targetIdx = lerpDouble(0, values.length -1, progress)!;
+  final double targetIdx = lerpDouble(0, values.length - 1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;

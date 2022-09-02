@@ -32,9 +32,9 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   RenderSliverFillViewport({
     required super.childManager,
     double viewportFraction = 1.0,
-  }) : assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
-       _viewportFraction = viewportFraction;
+  })  : assert(viewportFraction != null),
+        assert(viewportFraction > 0.0),
+        _viewportFraction = viewportFraction;
 
   @override
   double get itemExtent => constraints.viewportMainAxisExtent * viewportFraction;
@@ -80,7 +80,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
 class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a scrollable [RenderBox] which is
   /// sized to fit the remaining space in the viewport.
-  RenderSliverFillRemainingWithScrollable({ super.child });
+  RenderSliverFillRemainingWithScrollable({super.child});
 
   @override
   void performLayout() {
@@ -132,7 +132,7 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
 class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
   /// sized to fit the remaining space in the viewport.
-  RenderSliverFillRemaining({ super.child });
+  RenderSliverFillRemaining({super.child});
 
   @override
   void performLayout() {
@@ -162,7 +162,8 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       ));
     }
 
-    assert(extent.isFinite,
+    assert(
+      extent.isFinite,
       'The calculated extent for the child of SliverFillRemaining is not finite. '
       'This can happen if the child is a scrollable, in which case, the '
       'hasScrollBody property of SliverFillRemaining should not be set to '
@@ -206,7 +207,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
   /// sized to fit the remaining space plus any overscroll in the viewport.
-  RenderSliverFillRemainingAndOverscroll({ super.child });
+  RenderSliverFillRemainingAndOverscroll({super.child});
 
   @override
   void performLayout() {
@@ -240,7 +241,8 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       child!.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: maxExtent));
     }
 
-    assert(extent.isFinite,
+    assert(
+      extent.isFinite,
       'The calculated extent for the child of SliverFillRemaining is not finite. '
       'This can happen if the child is a scrollable, in which case, the '
       'hasScrollBody property of SliverFillRemaining should not be set to '

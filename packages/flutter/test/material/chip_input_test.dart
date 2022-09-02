@@ -26,7 +26,7 @@ Widget wrapForChip({
   );
 }
 
-Widget selectedInputChip({ Color? checkmarkColor }) {
+Widget selectedInputChip({Color? checkmarkColor}) {
   return InputChip(
     label: const Text('InputChip'),
     selected: true,
@@ -34,7 +34,6 @@ Widget selectedInputChip({ Color? checkmarkColor }) {
     checkmarkColor: checkmarkColor,
   );
 }
-
 
 Future<void> pumpCheckmarkChip(
   WidgetTester tester, {
@@ -49,9 +48,11 @@ Future<void> pumpCheckmarkChip(
         builder: (BuildContext context) {
           final ChipThemeData chipTheme = ChipTheme.of(context);
           return ChipTheme(
-            data: themeColor == null ? chipTheme : chipTheme.copyWith(
-              checkmarkColor: themeColor,
-            ),
+            data: themeColor == null
+                ? chipTheme
+                : chipTheme.copyWith(
+                    checkmarkColor: themeColor,
+                  ),
             child: chip,
           );
         },
@@ -110,7 +111,7 @@ void main() {
           shape: const RoundedRectangleBorder(),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
-          onPressed: () { },
+          onPressed: () {},
         ),
       ),
     );
@@ -143,7 +144,7 @@ void main() {
               focusNode: focusNode1,
               autofocus: true,
               label: const Text('Chip A'),
-              onPressed: () { },
+              onPressed: () {},
             ),
             InputChip(
               focusNode: focusNode2,
@@ -165,7 +166,8 @@ void main() {
     expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgets('Input chip check mark color is determined by platform brightness when light',
+      (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -177,7 +179,8 @@ void main() {
     );
   });
 
-  testWidgets('Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgets('Input chip check mark color is determined by platform brightness when dark',
+      (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -215,7 +218,8 @@ void main() {
     );
   });
 
-  testWidgets('Input chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+  testWidgets('Input chip check mark color is set by chip constructor even when a theme color is specified',
+      (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(checkmarkColor: const Color(0xffff0000)),

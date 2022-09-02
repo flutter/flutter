@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ super.key, this.child });
+  const StateMarker({super.key, this.child});
 
   final Widget? child;
 
@@ -27,7 +27,7 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({ required Key key, required this.log }) : super(key: key);
+  const DeactivateLogger({required Key key, required this.log}) : super(key: key);
 
   final List<String> log;
 
@@ -242,7 +242,7 @@ void main() {
       ],
     ));
 
-    final StateMarkerState keyState = key.currentState!as StateMarkerState;
+    final StateMarkerState keyState = key.currentState! as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(Stack(

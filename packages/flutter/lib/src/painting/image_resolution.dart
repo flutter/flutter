@@ -335,7 +335,7 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>> {
+    final Map<String, List<String>> parsedManifest = <String, List<String>>{
       for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
     // TODO(ianh): convert that data structure to the right types.
@@ -418,9 +418,7 @@ class AssetImage extends AssetBundleImageProvider {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is AssetImage
-        && other.keyName == keyName
-        && other.bundle == bundle;
+    return other is AssetImage && other.keyName == keyName && other.bundle == bundle;
   }
 
   @override

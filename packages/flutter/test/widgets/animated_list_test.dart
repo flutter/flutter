@@ -13,31 +13,29 @@ void main() {
     int itemCount = 7;
     late StateSetter stateSetter;
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            stateSetter = setState;
-            return CustomScrollView(
-              slivers: <Widget>[
-                SliverAnimatedList(
-                  initialItemCount: itemCount,
-                  itemBuilder: (BuildContext context, int index, Animation<double> animation) => Container(
-                    key: Key('$index'),
-                    height: 2000.0,
-                  ),
-                  findChildIndexCallback: (Key key) {
-                    finderCalled = true;
-                    return null;
-                  },
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                initialItemCount: itemCount,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) => Container(
+                  key: Key('$index'),
+                  height: 2000.0,
                 ),
-              ],
-            );
-          },
-        ),
-      )
-    );
+                findChildIndexCallback: (Key key) {
+                  finderCalled = true;
+                  return null;
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    ));
     expect(finderCalled, false);
 
     // Trigger update.
@@ -56,6 +54,7 @@ void main() {
         ),
       );
     }
+
     final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
@@ -70,9 +69,7 @@ void main() {
     );
 
     expect(find.byWidgetPredicate((Widget widget) {
-      return widget is SliverAnimatedList
-         && widget.initialItemCount == 2
-         && widget.itemBuilder == builder;
+      return widget is SliverAnimatedList && widget.initialItemCount == 2 && widget.itemBuilder == builder;
     }), findsOneWidget);
 
     listKey.currentState!.insertItem(0);
@@ -329,7 +326,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.text('item 3')).dy, 500);
 
-      listKey.currentState!.removeItem(0,
+      listKey.currentState!.removeItem(
+        0,
         (BuildContext context, Animation<double> animation) {
           return SizeTransition(
             sizeFactor: animation,
@@ -358,7 +356,8 @@ void main() {
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
     });
 
-    testWidgets('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
+    testWidgets('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate',
+        (WidgetTester tester) async {
       final List<int> items = <int>[0, 1, 2, 3];
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
@@ -395,7 +394,6 @@ void main() {
       expect(listEntries[2].data, equals('item 2'));
       expect(listEntries[3].data, equals('item 3'));
 
-
       // delete one item
       listKey.currentState?.removeItem(0, (BuildContext context, Animation<double> animation) {
         return Container();
@@ -411,7 +409,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // get all list entries in order
-      final List<Text> reorderedListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+      final List<Text> reorderedListEntries =
+          find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
 
       // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
       expect(reorderedListEntries[0].data, equals('item 3'));
@@ -489,7 +488,6 @@ void main() {
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
 }
-
 
 class _StatefulListItem extends StatefulWidget {
   const _StatefulListItem({

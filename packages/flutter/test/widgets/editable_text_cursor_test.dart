@@ -5,7 +5,6 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +82,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+        (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -139,7 +139,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+        (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -187,7 +188,7 @@ void main() {
     int walltimeMicrosecond = 0;
     double lastVerifiedOpacity = 1.0;
 
-    Future<void> verifyKeyFrame({ required double opacity, required int at }) async {
+    Future<void> verifyKeyFrame({required double opacity, required int at}) async {
       const int delta = 1;
       assert(at - delta > walltimeMicrosecond);
       await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
@@ -198,24 +199,24 @@ void main() {
       expect(
         renderEditable.cursorColor!.opacity,
         closeTo(lastVerifiedOpacity, 0.01),
-        reason: 'opacity at ${at-delta} microseconds',
+        reason: 'opacity at ${at - delta} microseconds',
       );
 
       walltimeMicrosecond = at - delta;
       lastVerifiedOpacity = opacity;
     }
 
-    await verifyKeyFrame(opacity: 1.0,  at: 500000);
+    await verifyKeyFrame(opacity: 1.0, at: 500000);
     await verifyKeyFrame(opacity: 0.75, at: 537500);
-    await verifyKeyFrame(opacity: 0.5,  at: 575000);
+    await verifyKeyFrame(opacity: 0.5, at: 575000);
     await verifyKeyFrame(opacity: 0.25, at: 612500);
-    await verifyKeyFrame(opacity: 0.0,  at: 650000);
-    await verifyKeyFrame(opacity: 0.0,  at: 850000);
+    await verifyKeyFrame(opacity: 0.0, at: 650000);
+    await verifyKeyFrame(opacity: 0.0, at: 850000);
     await verifyKeyFrame(opacity: 0.25, at: 887500);
-    await verifyKeyFrame(opacity: 0.5,  at: 925000);
+    await verifyKeyFrame(opacity: 0.5, at: 925000);
     await verifyKeyFrame(opacity: 0.75, at: 962500);
-    await verifyKeyFrame(opacity: 1.0,  at: 1000000);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    await verifyKeyFrame(opacity: 1.0, at: 1000000);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
   testWidgets('Cursor does not animate on non-iOS platforms', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -234,7 +235,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(tester.hasRunningAnimations, false);
     }
-  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
@@ -312,7 +313,7 @@ void main() {
     expect(renderEditable, paints..rrect(color: defaultCursorColor));
 
     EditableText.debugDeterministicCursor = false;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
@@ -503,7 +504,7 @@ void main() {
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -539,7 +540,8 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     expect(controller.selection.baseOffset, 29);
 
@@ -572,7 +574,8 @@ void main() {
     // Go in the other direction.
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
       state: FloatingCursorDragState.Update,
@@ -730,7 +733,7 @@ void main() {
 
     // Check that the cursor visibility toggles after each blink interval.
     // Or if it's not blinking at all, it stays on.
-    Future<void> checkCursorBlinking({ bool isBlinking = true }) async {
+    Future<void> checkCursorBlinking({bool isBlinking = true}) async {
       bool initialShowCursor = true;
       if (isBlinking) {
         initialShowCursor = editableText.cursorCurrentlyVisible;
@@ -822,7 +825,8 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     // Immediately start a new floating cursor, in the same way as happens when
     // the user tries to select text in trackpad mode.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
     await tester.pumpAndSettle();
 
     // Set and move the second cursor like a selection. Previously, the second
@@ -899,21 +903,23 @@ void main() {
     );
     await tester.pump();
 
-    expect(editable, paints
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
-          const Radius.circular(2.0),
+    expect(
+      editable,
+      paints
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
+            const Radius.circular(2.0),
+          ),
+          color: const Color(0xff999999),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(463.8333435058594, -0.916666666666668, 466.8333435058594, 19.083333969116211),
+            const Radius.circular(1.0),
+          ),
+          color: const Color(0xbf2196f3),
         ),
-        color: const Color(0xff999999),
-      )
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(463.8333435058594, -0.916666666666668, 466.8333435058594, 19.083333969116211),
-          const Radius.circular(1.0),
-        ),
-        color: const Color(0xbf2196f3),
-      ),
     );
 
     // Moves the cursor right a few characters.
@@ -924,27 +930,29 @@ void main() {
       ),
     );
 
-    expect(find.byType(EditableText), paints
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
-          const Radius.circular(2.0),
+    expect(
+      find.byType(EditableText),
+      paints
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
+            const Radius.circular(2.0),
+          ),
+          color: const Color(0xff999999),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),
+            const Radius.circular(1.0),
+          ),
+          color: const Color(0xbf2196f3),
         ),
-        color: const Color(0xff999999),
-      )
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),
-          const Radius.circular(1.0),
-        ),
-        color: const Color(0xbf2196f3),
-      ),
     );
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
     debugDefaultTargetPlatformOverride = null;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('cursor layout', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -979,7 +987,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+        (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -1005,7 +1014,7 @@ void main() {
       matchesGoldenFile('editable_text_test.2.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('cursor layout has correct height', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -1041,7 +1050,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+        (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -1067,7 +1077,7 @@ void main() {
       matchesGoldenFile('editable_text_test.3.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('password briefly does not show last character when disabled by system', (WidgetTester tester) async {
     final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;

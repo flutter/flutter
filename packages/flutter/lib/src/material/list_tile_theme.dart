@@ -44,7 +44,7 @@ import 'theme_data.dart';
 @immutable
 class ListTileThemeData with Diagnosticable {
   /// Creates a [ListTileThemeData].
-  const ListTileThemeData ({
+  const ListTileThemeData({
     this.dense,
     this.shape,
     this.style,
@@ -148,7 +148,7 @@ class ListTileThemeData with Diagnosticable {
 
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
-    assert (t != null);
+    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -173,22 +173,22 @@ class ListTileThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    dense,
-    shape,
-    style,
-    selectedColor,
-    iconColor,
-    textColor,
-    contentPadding,
-    tileColor,
-    selectedTileColor,
-    horizontalTitleGap,
-    minVerticalPadding,
-    minLeadingWidth,
-    enableFeedback,
-    mouseCursor,
-    visualDensity,
-  );
+        dense,
+        shape,
+        style,
+        selectedColor,
+        iconColor,
+        textColor,
+        contentPadding,
+        tileColor,
+        selectedTileColor,
+        horizontalTitleGap,
+        minVerticalPadding,
+        minLeadingWidth,
+        enableFeedback,
+        mouseCursor,
+        visualDensity,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -198,22 +198,22 @@ class ListTileThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ListTileThemeData
-      && other.dense == dense
-      && other.shape == shape
-      && other.style == style
-      && other.selectedColor == selectedColor
-      && other.iconColor == iconColor
-      && other.textColor == textColor
-      && other.contentPadding == contentPadding
-      && other.tileColor == tileColor
-      && other.selectedTileColor == selectedTileColor
-      && other.horizontalTitleGap == horizontalTitleGap
-      && other.minVerticalPadding == minVerticalPadding
-      && other.minLeadingWidth == minLeadingWidth
-      && other.enableFeedback == enableFeedback
-      && other.mouseCursor == mouseCursor
-      && other.visualDensity == visualDensity;
+    return other is ListTileThemeData &&
+        other.dense == dense &&
+        other.shape == shape &&
+        other.style == style &&
+        other.selectedColor == selectedColor &&
+        other.iconColor == iconColor &&
+        other.textColor == textColor &&
+        other.contentPadding == contentPadding &&
+        other.tileColor == tileColor &&
+        other.selectedTileColor == selectedTileColor &&
+        other.horizontalTitleGap == horizontalTitleGap &&
+        other.minVerticalPadding == minVerticalPadding &&
+        other.minLeadingWidth == minLeadingWidth &&
+        other.enableFeedback == enableFeedback &&
+        other.mouseCursor == mouseCursor &&
+        other.visualDensity == visualDensity;
   }
 
   @override
@@ -232,7 +232,8 @@ class ListTileThemeData with Diagnosticable {
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
   }
 }
@@ -269,35 +270,35 @@ class ListTileTheme extends InheritedTheme {
     double? minVerticalPadding,
     double? minLeadingWidth,
     required super.child,
-  }) : assert(
-         data == null ||
-         (shape ??
-          selectedColor ??
-          iconColor ??
-          textColor ??
-          contentPadding ??
-          tileColor ??
-          selectedTileColor ??
-          enableFeedback ??
-          mouseCursor ??
-          horizontalTitleGap ??
-          minVerticalPadding ??
-          minLeadingWidth) == null),
-       _data = data,
-       _dense = dense,
-       _shape = shape,
-       _style = style,
-       _selectedColor = selectedColor,
-       _iconColor = iconColor,
-       _textColor = textColor,
-       _contentPadding = contentPadding,
-       _tileColor = tileColor,
-       _selectedTileColor = selectedTileColor,
-       _enableFeedback = enableFeedback,
-       _mouseCursor = mouseCursor,
-       _horizontalTitleGap = horizontalTitleGap,
-       _minVerticalPadding = minVerticalPadding,
-       _minLeadingWidth = minLeadingWidth;
+  })  : assert(data == null ||
+            (shape ??
+                    selectedColor ??
+                    iconColor ??
+                    textColor ??
+                    contentPadding ??
+                    tileColor ??
+                    selectedTileColor ??
+                    enableFeedback ??
+                    mouseCursor ??
+                    horizontalTitleGap ??
+                    minVerticalPadding ??
+                    minLeadingWidth) ==
+                null),
+        _data = data,
+        _dense = dense,
+        _shape = shape,
+        _style = style,
+        _selectedColor = selectedColor,
+        _iconColor = iconColor,
+        _textColor = textColor,
+        _contentPadding = contentPadding,
+        _tileColor = tileColor,
+        _selectedTileColor = selectedTileColor,
+        _enableFeedback = enableFeedback,
+        _mouseCursor = mouseCursor,
+        _horizontalTitleGap = horizontalTitleGap,
+        _minVerticalPadding = minVerticalPadding,
+        _minLeadingWidth = minLeadingWidth;
 
   final ListTileThemeData? _data;
   final bool? _dense;
@@ -317,22 +318,23 @@ class ListTileTheme extends InheritedTheme {
 
   /// The configuration of this theme.
   ListTileThemeData get data {
-    return _data ?? ListTileThemeData(
-      dense: _dense,
-      shape: _shape,
-      style: _style,
-      selectedColor: _selectedColor,
-      iconColor: _iconColor,
-      textColor: _textColor,
-      contentPadding: _contentPadding,
-      tileColor: _tileColor,
-      selectedTileColor: _selectedTileColor,
-      enableFeedback: _enableFeedback,
-      mouseCursor: _mouseCursor,
-      horizontalTitleGap: _horizontalTitleGap,
-      minVerticalPadding: _minVerticalPadding,
-      minLeadingWidth: _minLeadingWidth,
-    );
+    return _data ??
+        ListTileThemeData(
+          dense: _dense,
+          shape: _shape,
+          style: _style,
+          selectedColor: _selectedColor,
+          iconColor: _iconColor,
+          textColor: _textColor,
+          contentPadding: _contentPadding,
+          tileColor: _tileColor,
+          selectedTileColor: _selectedTileColor,
+          enableFeedback: _enableFeedback,
+          mouseCursor: _mouseCursor,
+          horizontalTitleGap: _horizontalTitleGap,
+          minVerticalPadding: _minVerticalPadding,
+          minLeadingWidth: _minLeadingWidth,
+        );
   }
 
   /// Overrides the default value of [ListTile.dense].

@@ -45,15 +45,15 @@ class _DropdownMenuPainter extends CustomPainter {
     this.borderRadius,
     required this.resize,
     required this.getSelectedItemOffset,
-  }) : _painter = BoxDecoration(
-         // If you add an image here, you must provide a real
-         // configuration in the paint() function and you must provide some sort
-         // of onChanged callback here.
-         color: color,
-         borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(2.0)),
-         boxShadow: kElevationToShadow[elevation],
-       ).createBoxPainter(),
-       super(repaint: resize);
+  })  : _painter = BoxDecoration(
+          // If you add an image here, you must provide a real
+          // configuration in the paint() function and you must provide some sort
+          // of onChanged callback here.
+          color: color,
+          borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(2.0)),
+          boxShadow: kElevationToShadow[elevation],
+        ).createBoxPainter(),
+        super(repaint: resize);
 
   final Color? color;
   final int? elevation;
@@ -83,11 +83,11 @@ class _DropdownMenuPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DropdownMenuPainter oldPainter) {
-    return oldPainter.color != color
-        || oldPainter.elevation != elevation
-        || oldPainter.selectedIndex != selectedIndex
-        || oldPainter.borderRadius != borderRadius
-        || oldPainter.resize != resize;
+    return oldPainter.color != color ||
+        oldPainter.elevation != elevation ||
+        oldPainter.selectedIndex != selectedIndex ||
+        oldPainter.borderRadius != borderRadius ||
+        oldPainter.resize != resize;
   }
 }
 
@@ -266,7 +266,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           itemIndex: itemIndex,
           enableFeedback: widget.enableFeedback,
         ),
-      ];
+    ];
 
     return FadeTransition(
       opacity: _fadeOpacity,
@@ -288,9 +288,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           label: localizations.popupMenuLabel,
           child: ClipRRect(
             borderRadius: widget.borderRadius ?? BorderRadius.zero,
-            clipBehavior: widget.borderRadius != null
-              ? Clip.antiAlias
-              : Clip.none,
+            clipBehavior: widget.borderRadius != null ? Clip.antiAlias : Clip.none,
             child: Material(
               type: MaterialType.transparency,
               textStyle: route.style,
@@ -403,8 +401,7 @@ class _DropdownRouteResult<T> {
 
   @override
   bool operator ==(Object other) {
-    return other is _DropdownRouteResult<T>
-        && other.result == result;
+    return other is _DropdownRouteResult<T> && other.result == result;
   }
 
   @override
@@ -434,8 +431,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.menuMaxHeight,
     required this.enableFeedback,
     this.borderRadius,
-  }) : assert(style != null),
-       itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
+  })  : assert(style != null),
+        itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
   final List<_MenuItem<T>> items;
   final EdgeInsetsGeometry padding;
@@ -497,9 +494,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     double offset = kMaterialListPadding.top;
     if (items.isNotEmpty && index > 0) {
       assert(items.length == itemHeights.length);
-      offset += itemHeights
-        .sublist(0, index)
-        .reduce((double total, double height) => total + height);
+      offset += itemHeights.sublist(0, index).reduce((double total, double height) => total + height);
     }
     return offset;
   }
@@ -664,7 +659,8 @@ class _MenuItem<T> extends SingleChildRenderObjectWidget {
     super.key,
     required this.onLayout,
     required this.item,
-  }) : assert(onLayout != null), super(child: item);
+  })  : assert(onLayout != null),
+        super(child: item);
 
   final ValueChanged<Size> onLayout;
   final DropdownMenuItem<T>? item;
@@ -681,7 +677,9 @@ class _MenuItem<T> extends SingleChildRenderObjectWidget {
 }
 
 class _RenderMenuItem extends RenderProxyBox {
-  _RenderMenuItem(this.onLayout, [RenderBox? child]) : assert(onLayout != null), super(child);
+  _RenderMenuItem(this.onLayout, [RenderBox? child])
+      : assert(onLayout != null),
+        super(child);
 
   ValueChanged<Size> onLayout;
 
@@ -889,24 +887,28 @@ class DropdownButton<T> extends StatefulWidget {
     this.borderRadius,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
-  }) : assert(items == null || items.isEmpty || value == null ||
+  })  : assert(
+          items == null ||
+              items.isEmpty ||
+              value == null ||
               items.where((DropdownMenuItem<T> item) {
-                return item.value == value;
-              }).length == 1,
-                "There should be exactly one item with [DropdownButton]'s value: "
-                '$value. \n'
-                'Either zero or 2 or more [DropdownMenuItem]s were detected '
-                'with the same value',
-              ),
-       assert(elevation != null),
-       assert(iconSize != null),
-       assert(isDense != null),
-       assert(isExpanded != null),
-       assert(autofocus != null),
-       assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
-       _inputDecoration = null,
-       _isEmpty = false,
-       _isFocused = false;
+                    return item.value == value;
+                  }).length ==
+                  1,
+          "There should be exactly one item with [DropdownButton]'s value: "
+          '$value. \n'
+          'Either zero or 2 or more [DropdownMenuItem]s were detected '
+          'with the same value',
+        ),
+        assert(elevation != null),
+        assert(iconSize != null),
+        assert(isDense != null),
+        assert(isExpanded != null),
+        assert(autofocus != null),
+        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+        _inputDecoration = null,
+        _isEmpty = false,
+        _isFocused = false;
 
   DropdownButton._formField({
     super.key,
@@ -938,26 +940,30 @@ class DropdownButton<T> extends StatefulWidget {
     required InputDecoration inputDecoration,
     required bool isEmpty,
     required bool isFocused,
-  }) : assert(items == null || items.isEmpty || value == null ||
+  })  : assert(
+          items == null ||
+              items.isEmpty ||
+              value == null ||
               items.where((DropdownMenuItem<T> item) {
-                return item.value == value;
-              }).length == 1,
-                "There should be exactly one item with [DropdownButtonFormField]'s value: "
-                '$value. \n'
-                'Either zero or 2 or more [DropdownMenuItem]s were detected '
-                'with the same value',
-              ),
-       assert(elevation != null),
-       assert(iconSize != null),
-       assert(isDense != null),
-       assert(isExpanded != null),
-       assert(autofocus != null),
-       assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
-       assert(isEmpty != null),
-       assert(isFocused != null),
-       _inputDecoration = inputDecoration,
-       _isEmpty = isEmpty,
-       _isFocused = isFocused;
+                    return item.value == value;
+                  }).length ==
+                  1,
+          "There should be exactly one item with [DropdownButtonFormField]'s value: "
+          '$value. \n'
+          'Either zero or 2 or more [DropdownMenuItem]s were detected '
+          'with the same value',
+        ),
+        assert(elevation != null),
+        assert(iconSize != null),
+        assert(isDense != null),
+        assert(isExpanded != null),
+        assert(autofocus != null),
+        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+        assert(isEmpty != null),
+        assert(isFocused != null),
+        _inputDecoration = inputDecoration,
+        _isEmpty = isEmpty,
+        _isFocused = isFocused;
 
   /// The list of items the user can select.
   ///
@@ -1231,7 +1237,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1247,12 +1252,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   void _updateSelectedIndex() {
-    if (widget.items == null
-        || widget.items!.isEmpty
-        || (widget.value == null &&
-            widget.items!
-                .where((DropdownMenuItem<T> item) => item.enabled && item.value == widget.value)
-                .isEmpty)) {
+    if (widget.items == null ||
+        widget.items!.isEmpty ||
+        (widget.value == null &&
+            widget.items!.where((DropdownMenuItem<T> item) => item.enabled && item.value == widget.value).isEmpty)) {
       _selectedIndex = null;
       return;
     }
@@ -1270,36 +1273,36 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _handleTap() {
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
-      ? _kAlignedMenuMargin
-      : _kUnalignedMenuMargin;
+    final EdgeInsetsGeometry menuMargin =
+        ButtonTheme.of(context).alignedDropdown ? _kAlignedMenuMargin : _kUnalignedMenuMargin;
 
     final List<_MenuItem<T>> menuItems = <_MenuItem<T>>[
-    for (int index = 0; index < widget.items!.length; index += 1)
-      _MenuItem<T>(
-        item: widget.items![index],
-        onLayout: (Size size) {
-          // If [_dropdownRoute] is null and onLayout is called, this means
-          // that performLayout was called on a _DropdownRoute that has not
-          // left the widget tree but is already on its way out.
-          //
-          // Since onLayout is used primarily to collect the desired heights
-          // of each menu item before laying them out, not having the _DropdownRoute
-          // collect each item's height to lay out is fine since the route is
-          // already on its way out.
-          if (_dropdownRoute == null) {
-            return;
-          }
+      for (int index = 0; index < widget.items!.length; index += 1)
+        _MenuItem<T>(
+          item: widget.items![index],
+          onLayout: (Size size) {
+            // If [_dropdownRoute] is null and onLayout is called, this means
+            // that performLayout was called on a _DropdownRoute that has not
+            // left the widget tree but is already on its way out.
+            //
+            // Since onLayout is used primarily to collect the desired heights
+            // of each menu item before laying them out, not having the _DropdownRoute
+            // collect each item's height to lay out is fine since the route is
+            // already on its way out.
+            if (_dropdownRoute == null) {
+              return;
+            }
 
-          _dropdownRoute!.itemHeights[index] = size.height;
-        },
-      ),
+            _dropdownRoute!.itemHeights[index] = size.height;
+          },
+        ),
     ];
 
     final NavigatorState navigator = Navigator.of(context);
     assert(_dropdownRoute == null);
     final RenderBox itemBox = context.findRenderObject()! as RenderBox;
-    final Rect itemRect = itemBox.localToGlobal(Offset.zero, ancestor: navigator.context.findRenderObject()) & itemBox.size;
+    final Rect itemRect =
+        itemBox.localToGlobal(Offset.zero, ancestor: navigator.context.findRenderObject()) & itemBox.size;
     _dropdownRoute = _DropdownRoute<T>(
       items: menuItems,
       buttonRect: menuMargin.resolve(textDirection).inflateRect(itemRect),
@@ -1396,8 +1399,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // otherwise, no explicit type adding items maybe trigger a crash/failure
     // when hint and selectedItemBuilder are provided.
     final List<Widget> items = widget.selectedItemBuilder == null
-      ? (widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[])
-      : List<Widget>.of(widget.selectedItemBuilder!(context));
+        ? (widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[])
+        : List<Widget>.of(widget.selectedItemBuilder!(context));
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
@@ -1416,9 +1419,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ));
     }
 
-    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown
-      ? _kAlignedButtonPadding
-      : _kUnalignedButtonPadding;
+    final EdgeInsetsGeometry padding =
+        ButtonTheme.of(context).alignedDropdown ? _kAlignedButtonPadding : _kUnalignedButtonPadding;
 
     // If value is null (then _selectedIndex is null) then we
     // display the hint or nothing at all.
@@ -1429,11 +1431,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,
         alignment: widget.alignment,
-        children: widget.isDense ? items : items.map((Widget item) {
-          return widget.itemHeight != null
-            ? SizedBox(height: widget.itemHeight, child: item)
-            : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
-        }).toList(),
+        children: widget.isDense
+            ? items
+            : items.map((Widget item) {
+                return widget.itemHeight != null
+                    ? SizedBox(height: widget.itemHeight, child: item)
+                    : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
+              }).toList(),
       );
     }
 
@@ -1448,10 +1452,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            if (widget.isExpanded)
-              Expanded(child: innerItemsWidget)
-            else
-              innerItemsWidget,
+            if (widget.isExpanded) Expanded(child: innerItemsWidget) else innerItemsWidget,
             IconTheme(
               data: IconThemeData(
                 color: _iconColor,
@@ -1473,17 +1474,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             left: 0.0,
             right: 0.0,
             bottom: bottom,
-            child: widget.underline ?? Container(
-              height: 1.0,
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Color(0xFFBDBDBD),
-                    width: 0.0,
+            child: widget.underline ??
+                Container(
+                  height: 1.0,
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(0xFFBDBDBD),
+                        width: 0.0,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
           ),
         ],
       );
@@ -1581,84 +1583,90 @@ class DropdownButtonFormField<T> extends FormField<T> {
     BorderRadius? borderRadius,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
-  }) : assert(items == null || items.isEmpty || value == null ||
+  })  : assert(
+          items == null ||
+              items.isEmpty ||
+              value == null ||
               items.where((DropdownMenuItem<T> item) {
-                return item.value == value;
-              }).length == 1,
-                "There should be exactly one item with [DropdownButton]'s value: "
-                '$value. \n'
-                'Either zero or 2 or more [DropdownMenuItem]s were detected '
-                'with the same value',
-              ),
-       assert(elevation != null),
-       assert(iconSize != null),
-       assert(isDense != null),
-       assert(isExpanded != null),
-       assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
-       assert(autofocus != null),
-       decoration = decoration ?? InputDecoration(focusColor: focusColor),
-       super(
-         initialValue: value,
-         autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
-         builder: (FormFieldState<T> field) {
-           final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
-           final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
-           final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
-             Theme.of(field.context).inputDecorationTheme,
-           );
+                    return item.value == value;
+                  }).length ==
+                  1,
+          "There should be exactly one item with [DropdownButton]'s value: "
+          '$value. \n'
+          'Either zero or 2 or more [DropdownMenuItem]s were detected '
+          'with the same value',
+        ),
+        assert(elevation != null),
+        assert(iconSize != null),
+        assert(isDense != null),
+        assert(isExpanded != null),
+        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+        assert(autofocus != null),
+        decoration = decoration ?? InputDecoration(focusColor: focusColor),
+        super(
+          initialValue: value,
+          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
+          builder: (FormFieldState<T> field) {
+            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
+            final InputDecoration decorationArg = decoration ?? InputDecoration(focusColor: focusColor);
+            final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
+              Theme.of(field.context).inputDecorationTheme,
+            );
 
-           final bool showSelectedItem = items != null && items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
-           bool isHintOrDisabledHintAvailable() {
-             final bool isDropdownDisabled = onChanged == null || (items == null || items.isEmpty);
-             if (isDropdownDisabled) {
-               return hint != null || disabledHint != null;
-             } else {
-               return hint != null;
-             }
-           }
-           final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+            final bool showSelectedItem =
+                items != null && items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
+            bool isHintOrDisabledHintAvailable() {
+              final bool isDropdownDisabled = onChanged == null || (items == null || items.isEmpty);
+              if (isDropdownDisabled) {
+                return hint != null || disabledHint != null;
+              } else {
+                return hint != null;
+              }
+            }
 
-           // An unfocusable Focus widget so that this widget can detect if its
-           // descendants have focus or not.
-           return Focus(
-             canRequestFocus: false,
-             skipTraversal: true,
-             child: Builder(builder: (BuildContext context) {
-               return DropdownButtonHideUnderline(
-                 child: DropdownButton<T>._formField(
-                   items: items,
-                   selectedItemBuilder: selectedItemBuilder,
-                   value: state.value,
-                   hint: hint,
-                   disabledHint: disabledHint,
-                   onChanged: onChanged == null ? null : state.didChange,
-                   onTap: onTap,
-                   elevation: elevation,
-                   style: style,
-                   icon: icon,
-                   iconDisabledColor: iconDisabledColor,
-                   iconEnabledColor: iconEnabledColor,
-                   iconSize: iconSize,
-                   isDense: isDense,
-                   isExpanded: isExpanded,
-                   itemHeight: itemHeight,
-                   focusColor: focusColor,
-                   focusNode: focusNode,
-                   autofocus: autofocus,
-                   dropdownColor: dropdownColor,
-                   menuMaxHeight: menuMaxHeight,
-                   enableFeedback: enableFeedback,
-                   alignment: alignment,
-                   borderRadius: borderRadius,
-                   inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
-                   isEmpty: isEmpty,
-                   isFocused: Focus.of(context).hasFocus,
-                 ),
-               );
-             }),
-           );
-         },
-       );
+            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+
+            // An unfocusable Focus widget so that this widget can detect if its
+            // descendants have focus or not.
+            return Focus(
+              canRequestFocus: false,
+              skipTraversal: true,
+              child: Builder(builder: (BuildContext context) {
+                return DropdownButtonHideUnderline(
+                  child: DropdownButton<T>._formField(
+                    items: items,
+                    selectedItemBuilder: selectedItemBuilder,
+                    value: state.value,
+                    hint: hint,
+                    disabledHint: disabledHint,
+                    onChanged: onChanged == null ? null : state.didChange,
+                    onTap: onTap,
+                    elevation: elevation,
+                    style: style,
+                    icon: icon,
+                    iconDisabledColor: iconDisabledColor,
+                    iconEnabledColor: iconEnabledColor,
+                    iconSize: iconSize,
+                    isDense: isDense,
+                    isExpanded: isExpanded,
+                    itemHeight: itemHeight,
+                    focusColor: focusColor,
+                    focusNode: focusNode,
+                    autofocus: autofocus,
+                    dropdownColor: dropdownColor,
+                    menuMaxHeight: menuMaxHeight,
+                    enableFeedback: enableFeedback,
+                    alignment: alignment,
+                    borderRadius: borderRadius,
+                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                    isEmpty: isEmpty,
+                    isFocused: Focus.of(context).hasFocus,
+                  ),
+                );
+              }),
+            );
+          },
+        );
 
   /// {@macro flutter.material.dropdownButton.onChanged}
   final ValueChanged<T?>? onChanged;
@@ -1677,7 +1685,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
 }
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
-
   @override
   void didChange(T? value) {
     super.didChange(value);

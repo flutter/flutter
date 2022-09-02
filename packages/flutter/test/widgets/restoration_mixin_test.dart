@@ -29,7 +29,10 @@ void main() {
     expect(state.bucket?.restorationId, id);
     expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey(id), isTrue);
     expect(state.property.value, 10);
-    expect((((rawData[childrenMapKey] as Map<Object?, Object?>)[id]! as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 10);
+    expect(
+        (((rawData[childrenMapKey] as Map<Object?, Object?>)[id]! as Map<String, dynamic>)[valuesMapKey]
+            as Map<Object?, Object?>)['foo'],
+        10);
     expect(state.property.log, <String>['createDefaultValue', 'initWithValue', 'toPrimitives']);
     expect(state.toggleBucketLog, isEmpty);
     expect(state.restoreStateLog.single, isNull);
@@ -176,7 +179,10 @@ void main() {
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket, isNull);
     expect(state.property.value, 10); // Initialized to default.
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['foo'], 22);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['foo'],
+        22);
     expect(state.property.log, <String>['createDefaultValue', 'initWithValue']);
     state.property.log.clear();
     expect(state.restoreStateLog.single, isNull);
@@ -197,7 +203,10 @@ void main() {
     expect(state.bucket, isNotNull);
     expect(state.bucket!.restorationId, 'child1');
     expect(state.property.value, 10);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['foo'], 10);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['foo'],
+        10);
     expect(state.property.log, <String>['toPrimitives']);
     state.property.log.clear();
     expect(state.restoreStateLog, isEmpty);
@@ -237,7 +246,10 @@ void main() {
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket, isNull);
     expect(state.property.value, 10); // Initialized to default.
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['foo'], 22);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['foo'],
+        22);
     expect(state.property.log, <String>['createDefaultValue', 'initWithValue']);
     state.property.log.clear();
     expect(state.restoreStateLog.single, isNull);
@@ -259,7 +271,10 @@ void main() {
     expect(state.bucket, isNotNull);
     expect(state.bucket!.restorationId, 'child1');
     expect(state.property.value, 10);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['foo'], 10);
+    expect(
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey]
+            as Map<String, dynamic>)['foo'],
+        10);
     expect(state.property.log, <String>['toPrimitives']);
     state.property.log.clear();
     expect(state.restoreStateLog, isEmpty);
@@ -310,7 +325,11 @@ void main() {
     manager.doSerialization();
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket!.restorationId, 'moving-child');
-    expect((((rawData[childrenMapKey] as Map<Object?, Object?>)['fixed']! as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>).containsKey('moving-child'), isTrue);
+    expect(
+        (((rawData[childrenMapKey] as Map<Object?, Object?>)['fixed']! as Map<String, dynamic>)[childrenMapKey]
+                as Map<Object?, Object?>)
+            .containsKey('moving-child'),
+        isTrue);
     final RestorationBucket bucket = state.bucket!;
     state.property.log.clear();
     state.restoreStateLog.clear();
@@ -641,7 +660,6 @@ void _clearLogs(_TestRestorableWidgetState state) {
 }
 
 class _TestRestorableWidget extends StatefulWidget {
-
   const _TestRestorableWidget({super.key, this.restorationId});
 
   final String? restorationId;
@@ -714,17 +732,17 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
 Map<String, dynamic> _createRawDataSet() {
   return <String, dynamic>{
     valuesMapKey: <String, dynamic>{
-      'value1' : 10,
-      'value2' : 'Hello',
+      'value1': 10,
+      'value2': 'Hello',
     },
     childrenMapKey: <String, dynamic>{
-      'child1' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
+      'child1': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{
           'foo': 22,
         },
       },
-      'child2' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
+      'child2': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{
           'bar': 33,
         },
       },
@@ -761,6 +779,7 @@ class _TestRestorableProperty extends RestorableProperty<Object?> {
     assert(isRegistered);
     return _value;
   }
+
   Object? _value;
   set value(Object? value) {
     _value = value;

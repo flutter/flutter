@@ -38,9 +38,9 @@ void main() {
     const RadioThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -57,9 +57,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -295,6 +295,7 @@ void main() {
       }
       return null;
     }
+
     const double splashRadius = 24.0;
 
     Widget buildRadio({required bool active}) {
@@ -309,7 +310,7 @@ void main() {
           body: Radio<int>(
             value: active ? 1 : 0,
             groupValue: 1,
-            onChanged: (_) { },
+            onChanged: (_) {},
           ),
         ),
       );
@@ -363,7 +364,7 @@ void main() {
             child: Radio<int>(
               value: active ? 1 : 0,
               groupValue: 1,
-              onChanged: (_) { },
+              onChanged: (_) {},
             ),
           ),
         ),

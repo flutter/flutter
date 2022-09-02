@@ -14,14 +14,14 @@ const Key avatarD = Key('D');
 
 Future<void> pumpTestWidget(
   WidgetTester tester, {
-      bool withName = true,
-      bool withEmail = true,
-      bool withOnDetailsPressedHandler = true,
-      Size otherAccountsPictureSize = const Size.square(40.0),
-      Size currentAccountPictureSize  = const Size.square(72.0),
-      Color? primaryColor,
-      Color? colorSchemePrimary,
-    }) async {
+  bool withName = true,
+  bool withEmail = true,
+  bool withOnDetailsPressedHandler = true,
+  Size otherAccountsPictureSize = const Size.square(40.0),
+  Size currentAccountPictureSize = const Size.square(72.0),
+  Color? primaryColor,
+  Color? colorSchemePrimary,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(
@@ -40,7 +40,7 @@ Future<void> pumpTestWidget(
         child: Material(
           child: Center(
             child: UserAccountsDrawerHeader(
-              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
+              onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
               currentAccountPictureSize: currentAccountPictureSize,
               otherAccountsPicturesSize: otherAccountsPictureSize,
               currentAccountPicture: const ExcludeSemantics(
@@ -88,9 +88,11 @@ void main() {
 
     await pumpTestWidget(tester, primaryColor: primaryColor, colorSchemePrimary: colorSchemePrimary);
 
-    final BoxDecoration? boxDecoration = tester.widget<DrawerHeader>(
-      find.byType(DrawerHeader),
-    ).decoration as BoxDecoration?;
+    final BoxDecoration? boxDecoration = tester
+        .widget<DrawerHeader>(
+          find.byType(DrawerHeader),
+        )
+        .decoration as BoxDecoration?;
     expect(boxDecoration?.color == primaryColor, false);
     expect(boxDecoration?.color == colorSchemePrimary, true);
   });
@@ -194,7 +196,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             testSetState = setState;
             return UserAccountsDrawerHeader(
-              onDetailsPressed: () { },
+              onDetailsPressed: () {},
               accountName: const Text('name'),
               accountEmail: const Text('email'),
             );
@@ -209,7 +211,7 @@ void main() {
     expect(transformWidget.transform.getRotation()[0], 1.0);
     expect(transformWidget.transform.getRotation()[4], 1.0);
 
-    testSetState(() { });
+    testSetState(() {});
     await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isFalse);
 
@@ -281,7 +283,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(
-          onDetailsPressed: () { },
+          onDetailsPressed: () {},
           accountName: const Text('name'),
           accountEmail: const Text('email'),
           arrowColor: arrowColor,
@@ -324,13 +326,13 @@ void main() {
     expect(find.byType(Icon), findsNothing);
 
     await tester.pumpWidget(buildFrame(
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(find.byType(Icon), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
@@ -343,7 +345,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -357,7 +359,7 @@ void main() {
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -435,13 +437,13 @@ void main() {
     expect(find.byType(Icon), findsNothing);
 
     await tester.pumpWidget(buildFrame(
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(find.byType(Icon), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
@@ -454,7 +456,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -468,7 +470,7 @@ void main() {
     await tester.pumpWidget(buildFrame(
       accountName: const Text('accountName'),
       accountEmail: const Text('accountEmail'),
-      onDetailsPressed: () { },
+      onDetailsPressed: () {},
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
@@ -561,7 +563,9 @@ void main() {
             ),
           ],
         ),
-        ignoreId: true, ignoreTransform: true, ignoreRect: true,
+        ignoreId: true,
+        ignoreTransform: true,
+        ignoreRect: true,
       ),
     );
 
@@ -572,20 +576,26 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpTestWidget(tester);
 
-    expect(tester.getSemantics(find.text('B')), matchesSemantics(
-      label: 'B',
-      size: const Size(48.0, 48.0),
-    ));
+    expect(
+        tester.getSemantics(find.text('B')),
+        matchesSemantics(
+          label: 'B',
+          size: const Size(48.0, 48.0),
+        ));
 
-    expect(tester.getSemantics(find.text('C')), matchesSemantics(
-      label: 'C',
-      size: const Size(48.0, 48.0),
-    ));
+    expect(
+        tester.getSemantics(find.text('C')),
+        matchesSemantics(
+          label: 'C',
+          size: const Size(48.0, 48.0),
+        ));
 
-    expect(tester.getSemantics(find.text('D')), matchesSemantics(
-      label: 'D',
-      size: const Size(48.0, 48.0),
-    ));
+    expect(
+        tester.getSemantics(find.text('D')),
+        matchesSemantics(
+          label: 'D',
+          size: const Size(48.0, 48.0),
+        ));
     handle.dispose();
   });
 
@@ -636,7 +646,9 @@ void main() {
             ),
           ],
         ),
-        ignoreId: true, ignoreTransform: true, ignoreRect: true,
+        ignoreId: true,
+        ignoreTransform: true,
+        ignoreRect: true,
       ),
     );
 

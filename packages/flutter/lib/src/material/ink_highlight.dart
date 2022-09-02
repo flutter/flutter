@@ -48,16 +48,16 @@ class InkHighlight extends InteractiveInkFeature {
     RectCallback? rectCallback,
     super.onRemoved,
     Duration fadeDuration = _kDefaultHighlightFadeDuration,
-  }) : assert(color != null),
-       assert(shape != null),
-       assert(textDirection != null),
-       assert(fadeDuration != null),
-       _shape = shape,
-       _radius = radius,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
-       _customBorder = customBorder,
-       _textDirection = textDirection,
-       _rectCallback = rectCallback {
+  })  : assert(color != null),
+        assert(shape != null),
+        assert(textDirection != null),
+        assert(fadeDuration != null),
+        _shape = shape,
+        _radius = radius,
+        _borderRadius = borderRadius ?? BorderRadius.zero,
+        _customBorder = customBorder,
+        _textDirection = textDirection,
+        _rectCallback = rectCallback {
     _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
@@ -122,8 +122,10 @@ class InkHighlight extends InteractiveInkFeature {
         if (_borderRadius != BorderRadius.zero) {
           final RRect clipRRect = RRect.fromRectAndCorners(
             rect,
-            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+            topLeft: _borderRadius.topLeft,
+            topRight: _borderRadius.topRight,
+            bottomLeft: _borderRadius.bottomLeft,
+            bottomRight: _borderRadius.bottomRight,
           );
           canvas.drawRRect(clipRRect, paint);
         } else {

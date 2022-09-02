@@ -762,7 +762,7 @@ void main() {
             onVerticalDragStart: (DragStartDetails d) {
               verticalDragAcceptedByParent = true;
             },
-            onLongPress: () { },
+            onLongPress: () {},
             child: const SizedBox(
               width: 200.0,
               height: 100.0,
@@ -843,7 +843,7 @@ void main() {
         Align(
           alignment: Alignment.topLeft,
           child: GestureDetector(
-            onVerticalDragStart: (DragStartDetails d) { },
+            onVerticalDragStart: (DragStartDetails d) {},
             child: SizedBox(
               width: 200.0,
               height: 100.0,
@@ -1787,7 +1787,7 @@ void main() {
             onVerticalDragStart: (DragStartDetails d) {
               verticalDragAcceptedByParent = true;
             },
-            onLongPress: () { },
+            onLongPress: () {},
             child: const SizedBox(
               width: 200.0,
               height: 100.0,
@@ -1866,7 +1866,7 @@ void main() {
         Align(
           alignment: Alignment.topLeft,
           child: GestureDetector(
-            onVerticalDragStart: (DragStartDetails d) { },
+            onVerticalDragStart: (DragStartDetails d) {},
             child: SizedBox(
               width: 200.0,
               height: 100.0,
@@ -2066,14 +2066,11 @@ void main() {
     });
 
     testWidgets('UiKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
-
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
-      await tester.pumpWidget(
-        const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)
-      );
+      await tester.pumpWidget(const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr));
 
       // First frame is before the platform view was created so the render object
       // is not yet in the tree.
@@ -2135,7 +2132,7 @@ void main() {
         find.descendant(
           of: find.byType(UiKitView),
           matching: find.byWidgetPredicate(
-              (Widget widget) => widget.runtimeType.toString() == '_UiKitPlatformView',
+            (Widget widget) => widget.runtimeType.toString() == '_UiKitPlatformView',
           ),
         ),
       );
@@ -2253,7 +2250,7 @@ void main() {
             onVerticalDragStart: (DragStartDetails d) {
               verticalDragAcceptedByParent = true;
             },
-            onLongPress: () { },
+            onLongPress: () {},
             child: SizedBox(
               width: 200.0,
               height: 100.0,
@@ -2324,7 +2321,7 @@ void main() {
         Align(
           alignment: Alignment.topLeft,
           child: GestureDetector(
-            onVerticalDragStart: (DragStartDetails d) { },
+            onVerticalDragStart: (DragStartDetails d) {},
             child: SizedBox(
               width: 200.0,
               height: 100.0,
@@ -2867,8 +2864,12 @@ void main() {
             width: 600,
             height: 600,
             child: MouseRegion(
-              onEnter: (_) { logs.add('enter1'); },
-              onExit: (_) { logs.add('exit1'); },
+              onEnter: (_) {
+                logs.add('enter1');
+              },
+              onExit: (_) {
+                logs.add('exit1');
+              },
               cursor: SystemMouseCursors.forbidden,
               child: Stack(
                 children: <Widget>[
@@ -2877,8 +2878,12 @@ void main() {
                       width: 400,
                       height: 400,
                       child: MouseRegion(
-                        onEnter: (_) { logs.add('enter2'); },
-                        onExit: (_) { logs.add('exit2'); },
+                        onEnter: (_) {
+                          logs.add('enter2');
+                        },
+                        onExit: (_) {
+                          logs.add('exit2');
+                        },
                         cursor: SystemMouseCursors.text,
                       ),
                     ),

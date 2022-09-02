@@ -144,25 +144,25 @@ void main() {
     const TextStyle unselectedTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0);
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              selectedLabelStyle: selectedTextStyle,
-              unselectedLabelStyle: unselectedTextStyle,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.ac_unit),
-                  label: 'AC',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.access_alarm),
-                  label: 'Alarm',
-                ),
-              ],
-            ),
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: selectedTextStyle,
+            unselectedLabelStyle: unselectedTextStyle,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
           ),
         ),
+      ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
@@ -183,27 +183,27 @@ void main() {
     const double unselectedFontSize = 11.0;
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              selectedLabelStyle: selectedTextStyle,
-              unselectedLabelStyle: unselectedTextStyle,
-              selectedFontSize: selectedFontSize,
-              unselectedFontSize: unselectedFontSize,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.ac_unit),
-                  label: 'AC',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.access_alarm),
-                  label: 'Alarm',
-                ),
-              ],
-            ),
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: selectedTextStyle,
+            unselectedLabelStyle: unselectedTextStyle,
+            selectedFontSize: selectedFontSize,
+            unselectedFontSize: unselectedFontSize,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
           ),
         ),
+      ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
@@ -337,28 +337,28 @@ void main() {
     const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              showSelectedLabels: true,
-              showUnselectedLabels: false,
-              selectedFontSize: selectedFontSize,
-              selectedIconTheme: selectedIconTheme,
-              unselectedIconTheme: unselectedIconTheme,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.ac_unit),
-                  label: 'AC',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.access_alarm),
-                  label: 'Alarm',
-                ),
-              ],
-            ),
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            showSelectedLabels: true,
+            showUnselectedLabels: false,
+            selectedFontSize: selectedFontSize,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
           ),
         ),
+      ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -377,28 +377,28 @@ void main() {
     const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
 
     await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              selectedFontSize: selectedFontSize,
-              selectedIconTheme: selectedIconTheme,
-              unselectedIconTheme: unselectedIconTheme,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.ac_unit),
-                  label: 'AC',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.access_alarm),
-                  label: 'Alarm',
-                ),
-              ],
-            ),
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            selectedFontSize: selectedFontSize,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
           ),
         ),
+      ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -495,7 +495,6 @@ void main() {
     expect(findOpacity, findsNothing);
     expect(findFadeTransition, findsNothing);
   });
-
 
   testWidgets('Shifting BottomNavigationBar custom font size, color', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
@@ -642,7 +641,8 @@ void main() {
     );
   });
 
-  testWidgets('Fixed BottomNavigationBar uses fixedColor when selectedItemColor not provided', (WidgetTester tester) async {
+  testWidgets('Fixed BottomNavigationBar uses fixedColor when selectedItemColor not provided',
+      (WidgetTester tester) async {
     const Color fixedColor = Colors.black;
 
     await tester.pumpWidget(
@@ -1049,7 +1049,8 @@ void main() {
     expect(box.size.height, equals(56.0));
   });
 
-  testWidgets('BottomNavigationBar does not grow with textScaleFactor when labels are provided', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar does not grow with textScaleFactor when labels are provided',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1122,10 +1123,11 @@ void main() {
     expect(box.size.height, equals(kBottomNavigationBarHeight));
   });
 
-  testWidgets('BottomNavigationBar shows tool tips with text scaling on long press when labels are provided', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar shows tool tips with text scaling on long press when labels are provided',
+      (WidgetTester tester) async {
     const String label = 'Foo';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({required double textScaleFactor}) {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Localizations(
@@ -1278,7 +1280,12 @@ void main() {
     await tester.tap(find.text('B'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(box, paints..circle(x: 200.0)..translate(x: 400.0)..circle(x: 200.0));
+    expect(
+        box,
+        paints
+          ..circle(x: 200.0)
+          ..translate(x: 400.0)
+          ..circle(x: 200.0));
 
     // Now we flip the directionality and verify that the circles switch positions.
     await tester.pumpWidget(
@@ -1299,22 +1306,30 @@ void main() {
       ),
     );
 
-    expect(box, paints..translate()..save()..translate(x: 400.0)..circle(x: 200.0)..restore()..circle(x: 200.0));
+    expect(
+        box,
+        paints
+          ..translate()
+          ..save()
+          ..translate(x: 400.0)
+          ..circle(x: 200.0)
+          ..restore()
+          ..circle(x: 200.0));
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(
-        box,
-        paints
-          ..translate(x: 0.0, y: 0.0)
-          ..save()
-          ..translate(x: 400.0)
-          ..circle(x: 200.0)
-          ..restore()
-          ..circle(x: 200.0)
-          ..translate(x: 400.0)
-          ..circle(x: 200.0),
+      box,
+      paints
+        ..translate(x: 0.0, y: 0.0)
+        ..save()
+        ..translate(x: 400.0)
+        ..circle(x: 200.0)
+        ..restore()
+        ..circle(x: 200.0)
+        ..translate(x: 400.0)
+        ..circle(x: 200.0),
     );
   });
 
@@ -1328,7 +1343,7 @@ void main() {
         textDirection: TextDirection.ltr,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: selectedItem,
-          items:  const <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.favorite, key: filled),
               icon: Icon(Icons.favorite_border, key: stroked),
@@ -1352,7 +1367,7 @@ void main() {
         textDirection: TextDirection.ltr,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: selectedItem,
-          items:  const <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               activeIcon: Icon(Icons.favorite, key: filled),
               icon: Icon(Icons.favorite_border, key: stroked),
@@ -1611,6 +1626,7 @@ void main() {
         ),
       );
     }
+
     for (int pump = 1; pump < 9; pump++) {
       testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
@@ -1723,7 +1739,8 @@ void main() {
     },
   );
 
-  testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -1765,7 +1782,8 @@ void main() {
     );
   });
 
-  testWidgets('BottomNavigationBar.shifting [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar.shifting [showSelectedLabels]=false and [showUnselectedLabels]=false semantics',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -1915,7 +1933,8 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('BottomNavigationBar with disabled feedback using BottomNavigationBarTheme', (WidgetTester tester) async {
+    testWidgets('BottomNavigationBar with disabled feedback using BottomNavigationBarTheme',
+        (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
 
       await tester.pumpWidget(feedbackBoilerplate(enableFeedbackTheme: enableFeedbackTheme));
@@ -1926,7 +1945,8 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('BottomNavigationBar.enableFeedback overrides BottomNavigationBarTheme.enableFeedback', (WidgetTester tester) async {
+    testWidgets('BottomNavigationBar.enableFeedback overrides BottomNavigationBarTheme.enableFeedback',
+        (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
       const bool enableFeedback = true;
 
@@ -2040,7 +2060,8 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(BottomNavigationBar)), const Size(800, kBottomNavigationBarHeight));
-    expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
+    expect(tester.getRect(find.byType(BottomNavigationBar)),
+        const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
 
     // The height of the navigation bar is kBottomNavigationBarHeight = 56
     // The top of the navigation bar is 600 - 56 = 544
@@ -2089,7 +2110,8 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(BottomNavigationBar)), const Size(800, kBottomNavigationBarHeight));
-    expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
+    expect(tester.getRect(find.byType(BottomNavigationBar)),
+        const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
 
     // The items are laid out as in the default case, within width = 600
     // (the "portrait" width) and the result is centered with the
@@ -2134,7 +2156,8 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(BottomNavigationBar)), const Size(800, kBottomNavigationBarHeight));
-    expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
+    expect(tester.getRect(find.byType(BottomNavigationBar)),
+        const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
 
     // The items are laid out as in the default case except each
     // item's icon/label is arranged in a row, with 8 pixels in
@@ -2146,7 +2169,7 @@ void main() {
   });
 }
 
-Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
+Widget boilerplate({Widget? bottomNavigationBar, required TextDirection textDirection}) {
   assert(textDirection != null);
   return MaterialApp(
     home: Localizations(
@@ -2172,10 +2195,12 @@ Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDir
 
 double _getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.text(textValue),
-        matching: find.byType(FadeTransition),
-      ).first,
+    find
+        .ancestor(
+          of: find.text(textValue),
+          matching: find.byType(FadeTransition),
+        )
+        .first,
   );
   return opacityWidget.opacity.value;
 }
@@ -2188,16 +2213,21 @@ Material _getMaterial(WidgetTester tester) {
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
-      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
   );
   return iconRichText.text.style!;
 }
 
 EdgeInsets _itemPadding(WidgetTester tester, IconData icon) {
-  return tester.widget<Padding>(
-      find.descendant(
-        of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
-        matching: find.byType(Padding),
-      ).first,
-    ).padding.resolve(TextDirection.ltr);
+  return tester
+      .widget<Padding>(
+        find
+            .descendant(
+              of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
+              matching: find.byType(Padding),
+            )
+            .first,
+      )
+      .padding
+      .resolve(TextDirection.ltr);
 }

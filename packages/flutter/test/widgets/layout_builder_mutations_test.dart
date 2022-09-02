@@ -137,36 +137,34 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
-            setState = setter;
-            return MediaQuery(
-              data: updated
-                ? const MediaQueryData(platformBrightness: Brightness.dark)
-                : const MediaQueryData(),
-              child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  return Center(
-                    child: SizedBox.square(
-                      dimension: 20,
-                      child: Center(
-                        child: SizedBox.square(
-                          dimension: updated ? 10 : 20,
-                          child: widget,
-                        ),
+        child: StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MediaQuery(
+            data: updated ? const MediaQueryData(platformBrightness: Brightness.dark) : const MediaQueryData(),
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Center(
+                  child: SizedBox.square(
+                    dimension: 20,
+                    child: Center(
+                      child: SizedBox.square(
+                        dimension: updated ? 10 : 20,
+                        child: widget,
                       ),
                     ),
-                  );
-                },
-              ),
-            );
-          }
-        ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
       ),
     );
 
     assert(widget._renderObject.layoutCount == 1);
-    setState(() { updated = true; });
+    setState(() {
+      updated = true;
+    });
 
     await tester.pump();
     expect(widget._renderObject.layoutCount, 2);

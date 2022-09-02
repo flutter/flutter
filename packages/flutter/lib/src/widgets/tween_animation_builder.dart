@@ -108,9 +108,9 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
     required this.builder,
     super.onEnd,
     this.child,
-  }) : assert(tween != null),
-       assert(curve != null),
-       assert(builder != null);
+  })  : assert(tween != null),
+        assert(curve != null),
+        assert(builder != null);
 
   /// Defines the target value for the animation.
   ///

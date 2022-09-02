@@ -27,7 +27,7 @@ mixin ViewportNotificationMixin on Notification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
+    description.add('depth: $depth (${depth == 0 ? "local" : "remote"})');
   }
 }
 
@@ -37,7 +37,7 @@ mixin ViewportNotificationMixin on Notification {
 /// See also:
 ///   * [Viewport], which creates a custom [MultiChildRenderObjectElement] that mixes
 ///     this in.
-mixin ViewportElementMixin  on NotifiableElementMixin {
+mixin ViewportElementMixin on NotifiableElementMixin {
   @override
   bool onNotification(Notification notification) {
     if (notification is ViewportNotificationMixin) {
@@ -198,10 +198,10 @@ class OverscrollNotification extends ScrollNotification {
     this.dragDetails,
     required this.overscroll,
     this.velocity = 0.0,
-  }) : assert(overscroll != null),
-       assert(overscroll.isFinite),
-       assert(overscroll != 0.0),
-       assert(velocity != null);
+  })  : assert(overscroll != null),
+        assert(overscroll.isFinite),
+        assert(overscroll != 0.0),
+        assert(velocity != null);
 
   /// If the [Scrollable] overscrolled because of a drag, the details about that
   /// drag update.

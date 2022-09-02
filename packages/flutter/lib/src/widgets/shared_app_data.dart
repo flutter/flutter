@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'framework.dart';
 import 'inherited_model.dart';
 
@@ -74,7 +73,7 @@ class SharedAppData extends StatefulWidget {
   /// rebuilds with [SharedAppData.setValue].
   ///
   /// This widget is automatically created by the [WidgetsApp].
-  const SharedAppData({ super.key, required this.child });
+  const SharedAppData({super.key, required this.child});
 
   /// The widget below this widget in the tree.
   ///
@@ -121,7 +120,8 @@ class SharedAppData extends StatefulWidget {
   /// The type parameter `K` is the type of the value's keyword and `V`
   /// is the type of the value.
   static void setValue<K extends Object, V>(BuildContext context, K key, V value) {
-    final _SharedAppModel? model = context.getElementForInheritedWidgetOfExactType<_SharedAppModel>()?.widget as _SharedAppModel?;
+    final _SharedAppModel? model =
+        context.getElementForInheritedWidgetOfExactType<_SharedAppModel>()?.widget as _SharedAppModel?;
     assert(_debugHasSharedAppData(model, context, 'setValue'));
     model!.sharedAppDataState.setValue<K, V>(key, value);
   }
@@ -174,10 +174,7 @@ class _SharedAppDataState extends State<SharedAppData> {
 }
 
 class _SharedAppModel extends InheritedModel<Object> {
-  _SharedAppModel({
-    required this.sharedAppDataState,
-    required super.child
-  }) : data = sharedAppDataState.data;
+  _SharedAppModel({required this.sharedAppDataState, required super.child}) : data = sharedAppDataState.data;
 
   final _SharedAppDataState sharedAppDataState;
   final Map<Object, Object?> data;

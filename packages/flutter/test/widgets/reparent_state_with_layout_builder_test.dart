@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
 
 class Bar extends StatefulWidget {
-  const Bar({ super.key });
+  const Bar({super.key});
   @override
   BarState createState() => BarState();
 }
@@ -45,7 +45,7 @@ class BarState extends State<Bar> {
 }
 
 class StatefulCreationCounter extends StatefulWidget {
-  const StatefulCreationCounter({ super.key });
+  const StatefulCreationCounter({super.key});
 
   @override
   StatefulCreationCounterState createState() => StatefulCreationCounterState();
@@ -137,7 +137,7 @@ void main() {
     ));
     expect(layoutBuilderBuildCount, 1);
 
-    keyedSetState(() { /* Change nothing but add the element to the dirty list. */ });
+    keyedSetState(() {/* Change nothing but add the element to the dirty list. */});
 
     childSetState(() {
       // The deep child builds in the initial build phase. It takes the child

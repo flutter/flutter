@@ -17,7 +17,8 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-    return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+    return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes,
+        cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
   FlutterExceptionHandler? oldError;
@@ -75,7 +76,8 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
-      imageProvider, () => imageProvider.loadBuffer(imageProvider, basicDecoder),
+      imageProvider,
+      () => imageProvider.loadBuffer(imageProvider, basicDecoder),
     )!;
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();

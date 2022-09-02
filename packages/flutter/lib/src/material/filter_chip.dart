@@ -48,11 +48,7 @@ import 'theme_data.dart';
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
 class FilterChip extends StatelessWidget
-    implements
-        ChipAttributes,
-        SelectableChipAttributes,
-        CheckmarkableChipAttributes,
-        DisabledChipAttributes {
+    implements ChipAttributes, SelectableChipAttributes, CheckmarkableChipAttributes, DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
@@ -87,12 +83,12 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0);
+  })  : assert(selected != null),
+        assert(label != null),
+        assert(clipBehavior != null),
+        assert(autofocus != null),
+        assert(pressElevation == null || pressElevation >= 0.0),
+        assert(elevation == null || elevation >= 0.0);
 
   @override
   final Widget? avatar;
@@ -155,9 +151,8 @@ class FilterChip extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _FilterChipDefaultsM3(context, isEnabled, selected)
-      : null;
+    final ChipThemeData? defaults =
+        Theme.of(context).useMaterial3 ? _FilterChipDefaultsM3(context, isEnabled, selected) : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -202,11 +197,16 @@ class FilterChip extends StatelessWidget
 
 class _FilterChipDefaultsM3 extends ChipThemeData {
   const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
-    : super(
-        elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
-        showCheckmark: true,
-      );
+      : super(
+          elevation: 0.0,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  topRight: Radius.circular(8.0),
+                  bottomLeft: Radius.circular(8.0),
+                  bottomRight: Radius.circular(8.0))),
+          showCheckmark: true,
+        );
 
   final BuildContext context;
   final bool isEnabled;
@@ -222,38 +222,35 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Theme.of(context).colorScheme.shadow;
 
   @override
-  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get selectedColor => isEnabled
-    ? Theme.of(context).colorScheme.secondaryContainer
-    : Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
+      ? Theme.of(context).colorScheme.secondaryContainer
+      : Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
   @override
   Color? get checkmarkColor => Theme.of(context).colorScheme.onSecondaryContainer;
 
   @override
-  Color? get disabledColor => isSelected
-   ? Theme.of(context).colorScheme.onSurface.withOpacity(0.12)
-   : null;
+  Color? get disabledColor => isSelected ? Theme.of(context).colorScheme.onSurface.withOpacity(0.12) : null;
 
   @override
   Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
 
   @override
   BorderSide? get side => !isSelected
-    ? isEnabled
-      ? BorderSide(color: Theme.of(context).colorScheme.outline)
-      : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
-    : null;
+      ? isEnabled
+          ? BorderSide(color: Theme.of(context).colorScheme.outline)
+          : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
+      : null;
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? null
-      : Theme.of(context).colorScheme.onSurface,
-    size: 18.0,
-  );
+        color: isEnabled ? null : Theme.of(context).colorScheme.onSurface,
+        size: 18.0,
+      );
 
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
@@ -264,10 +261,10 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   /// remains 4px.
   @override
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+        const EdgeInsets.symmetric(horizontal: 8.0),
+        const EdgeInsets.symmetric(horizontal: 4.0),
+        clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+      )!;
 }
 
 // END GENERATED TOKEN PROPERTIES - FilterChip

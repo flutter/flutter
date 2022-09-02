@@ -76,7 +76,8 @@ void main() {
   }
 
   group('CupertinoContextMenu before and during opening', () {
-    testWidgets('An unopened CupertinoContextMenu renders child in the same place as without', (WidgetTester tester) async {
+    testWidgets('An unopened CupertinoContextMenu renders child in the same place as without',
+        (WidgetTester tester) async {
       // Measure the child in the scene with no CupertinoContextMenu.
       final Widget child = getChild();
       await tester.pumpWidget(
@@ -132,38 +133,28 @@ void main() {
       expect(findStatic(), findsOneWidget);
     });
 
-    testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator', (WidgetTester tester) async {
+    testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator',
+        (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: MediaQuery(
-            data: const MediaQueryData(size: Size(800, 600)),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: SizedBox(
-                width: 700,
-                height: 500,
-                child: Navigator(
-                  onGenerateRoute: (RouteSettings settings) {
-                    return CupertinoPageRoute<void>(
-                      builder: (BuildContext context) => Align(
-                        child: CupertinoContextMenu(
-                          actions: const <CupertinoContextMenuAction>[
-                            CupertinoContextMenuAction(
-                              child: Text('CupertinoContextMenuAction'),
-                            ),
-                          ],
-                          child: child
-                        ),
-                      )
-                    );
-                  }
-                )
-              )
-            )
-          )
-        )
-      ));
+          home: CupertinoPageScaffold(
+              child: MediaQuery(
+                  data: const MediaQueryData(size: Size(800, 600)),
+                  child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: SizedBox(
+                          width: 700,
+                          height: 500,
+                          child: Navigator(onGenerateRoute: (RouteSettings settings) {
+                            return CupertinoPageRoute<void>(
+                                builder: (BuildContext context) => Align(
+                                      child: CupertinoContextMenu(actions: const <CupertinoContextMenuAction>[
+                                        CupertinoContextMenuAction(
+                                          child: Text('CupertinoContextMenuAction'),
+                                        ),
+                                      ], child: child),
+                                    ));
+                          })))))));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
       expect(find.byType(ShaderMask), findsNothing);
@@ -198,7 +189,7 @@ void main() {
     });
 
     testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {
-      final Widget child  = getChild();
+      final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
           child: Center(
@@ -228,29 +219,23 @@ void main() {
       );
     });
 
-    testWidgets('CupertinoContextMenu is in the correct position when within a Transform.scale', (WidgetTester tester) async {
+    testWidgets('CupertinoContextMenu is in the correct position when within a Transform.scale',
+        (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: MediaQuery(
-            data: const MediaQueryData(size: Size(800, 600)),
-            child: Transform.scale(
-              scale: 0.5,
-              child: Align(
-                //alignment: Alignment.bottomRight,
-                child: CupertinoContextMenu(
-                  actions: const <CupertinoContextMenuAction>[
-                    CupertinoContextMenuAction(
-                      child: Text('CupertinoContextMenuAction'),
-                    ),
-                  ],
-                  child: child
-                ),
-              )
-            )
-          )
-        )
-      ));
+          home: CupertinoPageScaffold(
+              child: MediaQuery(
+                  data: const MediaQueryData(size: Size(800, 600)),
+                  child: Transform.scale(
+                      scale: 0.5,
+                      child: Align(
+                        //alignment: Alignment.bottomRight,
+                        child: CupertinoContextMenu(actions: const <CupertinoContextMenuAction>[
+                          CupertinoContextMenuAction(
+                            child: Text('CupertinoContextMenuAction'),
+                          ),
+                        ], child: child),
+                      ))))));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
       expect(find.byType(ShaderMask), findsNothing);
@@ -287,7 +272,7 @@ void main() {
 
   group('CupertinoContextMenu when open', () {
     testWidgets('Last action does not have border', (WidgetTester tester) async {
-      final Widget child  = getChild();
+      final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
           child: Center(

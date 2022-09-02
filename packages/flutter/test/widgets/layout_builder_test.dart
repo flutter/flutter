@@ -294,7 +294,8 @@ void main() {
     expect(built, 2);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited',
+      (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,
@@ -313,14 +314,14 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(MediaQuery(
-        data: const MediaQueryData(size: Size(400.0, 300.0)),
-        child: target,
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
+      child: target,
     ));
     expect(built, 1);
 
     await tester.pumpWidget(MediaQuery(
-        data: const MediaQueryData(size: Size(300.0, 400.0)),
-        child: target,
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
+      child: target,
     ));
     expect(built, 1);
   });
@@ -347,14 +348,14 @@ void main() {
       expect(built, 0);
 
       await tester.pumpWidget(MediaQuery(
-          data: const MediaQueryData(size: Size(400.0, 300.0)),
-          child: target,
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
       ));
       expect(built, 1);
 
       await tester.pumpWidget(MediaQuery(
-          data: const MediaQueryData(size: Size(300.0, 400.0)),
-          child: target,
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
       ));
       expect(built, 2);
     },
@@ -463,7 +464,7 @@ void main() {
 
   testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    List<int> hitCounts = <int> [0, 0, 0];
+    List<int> hitCounts = <int>[0, 0, 0];
 
     await tester.pumpWidget(
       Directionality(
@@ -502,57 +503,57 @@ void main() {
     // Tap item 1.
     await tester.tapAt(const Offset(300, 50.0 + 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 0, 0]);
+    expect(hitCounts, const <int>[1, 0, 0]);
 
     // Tap item 2.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 0]);
+    expect(hitCounts, const <int>[1, 1, 0]);
 
     // Tap item 3. Shift the touch point up to ensure the touch lands within the viewport.
     await tester.tapAt(const Offset(300, 50.0 + 200 + 200 + 10));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     // Scrolling doesn't break it.
-    hitCounts = <int> [0, 0, 0];
+    hitCounts = <int>[0, 0, 0];
     scrollController.jumpTo(100);
     await tester.pump();
 
     // Tap item 1.
     await tester.tapAt(const Offset(300, 50.0 + 100 - 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 0, 0]);
+    expect(hitCounts, const <int>[1, 0, 0]);
 
     // Tap item 2.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200 - 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 0]);
+    expect(hitCounts, const <int>[1, 1, 0]);
 
     // Tap item 3.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200 + 200 - 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     // Tapping outside of the viewport shouldn't do anything.
     await tester.tapAt(const Offset(300, 1));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     await tester.tapAt(const Offset(300, 599));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     await tester.tapAt(const Offset(1, 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     await tester.tapAt(const Offset(799, 100));
     await tester.pump();
-    expect(hitCounts, const <int> [1, 1, 1]);
+    expect(hitCounts, const <int>[1, 1, 1]);
 
     // Tap the no-content area in the viewport shouldn't do anything
-    hitCounts = <int> [0, 0, 0];
+    hitCounts = <int>[0, 0, 0];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -586,10 +587,11 @@ void main() {
 
     await tester.tapAt(const Offset(300, 301));
     await tester.pump();
-    expect(hitCounts, const <int> [0, 0, 0]);
+    expect(hitCounts, const <int>[0, 0, 0]);
   });
 
-  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change',
+      (WidgetTester tester) async {
     int builderInvocationCount = 0;
 
     Future<void> pumpTestWidget(Size size) async {
@@ -665,7 +667,8 @@ void main() {
     expect(spy.performResizeCount, 2);
   });
 
-  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout',
+      (WidgetTester tester) async {
     Size? childSize;
     int buildCount = 0;
 

@@ -29,8 +29,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'one') {
-      return ByteData(1)
-        ..setInt8(0, 49);
+      return ByteData(1)..setInt8(0, 49);
     }
     throw FlutterError('key not found');
   }
@@ -55,11 +54,10 @@ void main() {
       );
       const ImageConfiguration configuration = ImageConfiguration.empty;
 
-      assetImage.obtainKey(configuration)
-        .then(expectAsync1((AssetBundleImageKey bundleKey) {
-          expect(bundleKey.name, mainAssetPath);
-          expect(bundleKey.scale, 1.0);
-        }));
+      assetImage.obtainKey(configuration).then(expectAsync1((AssetBundleImageKey bundleKey) {
+        expect(bundleKey.name, mainAssetPath);
+        expect(bundleKey.scale, 1.0);
+      }));
     }
 
     test('When asset is main variant check scale is 1.0', () {
@@ -87,14 +85,12 @@ void main() {
     });
   });
 
-
   group('High-res device behavior tests', () {
     test('When asset is not main variant check scale is not 1.0', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
       const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
-      final Map<String, List<String>> assetBundleMap =
-      <String, List<String>>{};
+      final Map<String, List<String>> assetBundleMap = <String, List<String>>{};
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
 
@@ -106,17 +102,18 @@ void main() {
       );
 
       // we have the exact match for this scale, let's use it
-      assetImage.obtainKey(ImageConfiguration.empty)
-        .then(expectAsync1((AssetBundleImageKey bundleKey) {
-          expect(bundleKey.name, mainAssetPath);
-          expect(bundleKey.scale, 1.0);
-        }));
+      assetImage.obtainKey(ImageConfiguration.empty).then(expectAsync1((AssetBundleImageKey bundleKey) {
+        expect(bundleKey.name, mainAssetPath);
+        expect(bundleKey.scale, 1.0);
+      }));
 
       // we also have the exact match for this scale, let's use it
-      assetImage.obtainKey(ImageConfiguration(
+      assetImage
+          .obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: 3.0,
-      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
+      ))
+          .then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, variantPath);
         expect(bundleKey.scale, 3.0);
       }));
@@ -125,8 +122,7 @@ void main() {
     test('When high-res device and high-res asset not present in bundle then  return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
-      final Map<String, List<String>> assetBundleMap =
-      <String, List<String>>{};
+      final Map<String, List<String>> assetBundleMap = <String, List<String>>{};
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath];
 
@@ -137,17 +133,17 @@ void main() {
         bundle: TestAssetBundle(assetBundleMap),
       );
 
+      assetImage.obtainKey(ImageConfiguration.empty).then(expectAsync1((AssetBundleImageKey bundleKey) {
+        expect(bundleKey.name, mainAssetPath);
+        expect(bundleKey.scale, 1.0);
+      }));
 
-      assetImage.obtainKey(ImageConfiguration.empty)
-        .then(expectAsync1((AssetBundleImageKey bundleKey) {
-          expect(bundleKey.name, mainAssetPath);
-          expect(bundleKey.scale, 1.0);
-        }));
-
-      assetImage.obtainKey(ImageConfiguration(
+      assetImage
+          .obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: 3.0,
-      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
+      ))
+          .then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, mainAssetPath);
         expect(bundleKey.scale, 1.0);
       }));
@@ -158,14 +154,12 @@ void main() {
     const String mainAssetPath = 'assets/normalFolder/normalFile.png';
     const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
-
     void buildBundleAndTestVariantLogic(
       double deviceRatio,
       double chosenAssetRatio,
       String expectedAssetPath,
     ) {
-      final Map<String, List<String>> assetBundleMap =
-      <String, List<String>>{};
+      final Map<String, List<String>> assetBundleMap = <String, List<String>>{};
 
       assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
 
@@ -177,10 +171,12 @@ void main() {
       );
 
       // we have 1.0 and 3.0, asking for 1.5 should give
-      assetImage.obtainKey(ImageConfiguration(
+      assetImage
+          .obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: deviceRatio,
-      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
+      ))
+          .then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, expectedAssetPath);
         expect(bundleKey.scale, chosenAssetRatio);
       }));
@@ -209,5 +205,4 @@ void main() {
       buildBundleAndTestVariantLogic(4.0, 3.0, variantPath);
     });
   });
-
 }

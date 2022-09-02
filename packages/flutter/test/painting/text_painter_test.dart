@@ -8,13 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const bool isCanvasKit =
-    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 void main() {
   test('TextPainter caret test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     String text = 'A';
     painter.text = TextSpan(text: text);
@@ -39,8 +37,7 @@ void main() {
 
   test('TextPainter caret test with WidgetSpan', () {
     // Regression test for https://github.com/flutter/flutter/issues/98458.
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(children: <InlineSpan>[
       TextSpan(text: 'before'),
@@ -51,13 +48,13 @@ void main() {
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
     ]);
     painter.layout();
-    final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
+    final Offset caretOffset =
+        painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter null text test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     List<TextSpan> children = <TextSpan>[const TextSpan(text: 'B'), const TextSpan(text: 'C')];
     painter.text = TextSpan(children: children);
@@ -81,8 +78,7 @@ void main() {
   });
 
   test('TextPainter caret emoji test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧👏<modifier>'
     // One three-person family, one four-person family, one clapping hands (medium skin tone).
@@ -147,8 +143,7 @@ void main() {
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret center space test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     const String text = 'test text with space at end   ';
     painter.text = const TextSpan(text: text);
@@ -184,9 +179,13 @@ void main() {
 
   test('TextPainter requires textDirection', () {
     final TextPainter painter1 = TextPainter(text: const TextSpan(text: ''));
-    expect(() { painter1.layout(); }, throwsAssertionError);
+    expect(() {
+      painter1.layout();
+    }, throwsAssertionError);
     final TextPainter painter2 = TextPainter(text: const TextSpan(text: ''), textDirection: TextDirection.rtl);
-    expect(() { painter2.layout(); }, isNot(throwsException));
+    expect(() {
+      painter2.layout();
+    }, isNot(throwsException));
   });
 
   test('TextPainter size test', () {
@@ -341,8 +340,7 @@ void main() {
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
   test('TextPainter handles newlines properly', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     const double SIZE_OF_A = 14.0; // square size of "a" character
     String text = 'aaa';
@@ -658,7 +656,7 @@ void main() {
       ui.Rect.zero,
     );
     expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
-    expect(caretOffset.dy,moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
+    expect(caretOffset.dy, moreOrLessEquals(SIZE_OF_A, epsilon: 0.0001));
     caretOffset = painter.getOffsetForCaret(
       ui.TextPosition(offset: offset, affinity: TextAffinity.upstream),
       ui.Rect.zero,
@@ -682,8 +680,7 @@ void main() {
   });
 
   test('TextPainter widget span', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     const String text = 'test';
     painter.text = const TextSpan(
@@ -777,16 +774,14 @@ void main() {
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.textHeightBehavior = const TextHeightBehavior();
     painter.textHeightBehavior = null;
   });
 
   test('TextPainter line metrics', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     const String text = 'test1\nhello line two really long for soft break\nfinal line 4';
     painter.text = const TextSpan(
@@ -877,9 +872,12 @@ void main() {
         ..text = const TextSpan(text: 'A', style: style)
         ..layout();
 
-      final Rect glyphBox = painter.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 1),
-      ).first.toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 1),
+          )
+          .first
+          .toRect();
 
       final RelativeRect insets = RelativeRect.fromSize(glyphBox, painter.size);
       // The glyph box is centered.
@@ -900,9 +898,12 @@ void main() {
         ..text = const TextSpan(text: 'A', style: style)
         ..layout();
 
-      final Rect glyphBox = painter.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 1),
-      ).first.toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 1),
+          )
+          .first
+          .toRect();
 
       final RelativeRect insets = RelativeRect.fromSize(glyphBox, painter.size);
       // The glyph box is still centered.
@@ -923,14 +924,17 @@ void main() {
         ..textDirection = TextDirection.ltr
         ..text = const TextSpan(text: 'A', style: style)
         ..textHeightBehavior = const TextHeightBehavior(
-            applyHeightToFirstAscent: false,
-            applyHeightToLastDescent: false,
-          )
+          applyHeightToFirstAscent: false,
+          applyHeightToLastDescent: false,
+        )
         ..layout();
 
-      final Rect glyphBox = painter.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 1),
-      ).first.toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 1),
+          )
+          .first
+          .toRect();
 
       expect(painter.size, glyphBox.size);
       // The glyph box is still centered.
@@ -943,13 +947,16 @@ void main() {
         ..textDirection = TextDirection.ltr
         ..text = const TextSpan(text: 'A', style: style)
         ..textHeightBehavior = const TextHeightBehavior(
-            leadingDistribution: TextLeadingDistribution.even,
-          )
+          leadingDistribution: TextLeadingDistribution.even,
+        )
         ..layout();
 
-      final Rect glyphBox = painter.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 1),
-      ).first.toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 1),
+          )
+          .first
+          .toRect();
 
       // Still uses half-leading.
       final RelativeRect insets = RelativeRect.fromSize(glyphBox, painter.size);
@@ -963,20 +970,26 @@ void main() {
         ..textDirection = TextDirection.ltr
         ..text = const TextSpan(text: 'A', style: style)
         ..textHeightBehavior = const TextHeightBehavior(
-            leadingDistribution: TextLeadingDistribution.even,
-          )
+          leadingDistribution: TextLeadingDistribution.even,
+        )
         ..layout();
 
-      final Rect glyphBox = painter.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 1),
-      ).first.toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 1),
+          )
+          .first
+          .toRect();
 
       painter.textHeightBehavior = const TextHeightBehavior();
       painter.layout();
 
-      final Rect newGlyphBox = painter.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 1),
-      ).first.toRect();
+      final Rect newGlyphBox = painter
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 1),
+          )
+          .first
+          .toRect();
       expect(glyphBox, newGlyphBox);
     });
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87543
@@ -987,8 +1000,7 @@ void main() {
       exception = details.exception;
     };
 
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     const String text = 'Hello\uD83DWorld';
     const double fontSize = 20.0;
@@ -1000,8 +1012,7 @@ void main() {
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87544
 
   test('Diacritic', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     // Two letters followed by a diacritic
     const String text = 'ฟห้';
@@ -1009,15 +1020,12 @@ void main() {
     painter.layout();
 
     final ui.Offset caretOffset = painter.getOffsetForCaret(
-        const ui.TextPosition(
-            offset: text.length, affinity: TextAffinity.upstream),
-        ui.Rect.zero);
+        const ui.TextPosition(offset: text.length, affinity: TextAffinity.upstream), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
 
   test('TextPainter line metrics update after layout', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     const String text = 'word1 word2 word3';
     painter.text = const TextSpan(
@@ -1071,8 +1079,7 @@ void main() {
   });
 
   test('TextPainter requires layout after providing different placeholder dimensions', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(children: <InlineSpan>[
       TextSpan(text: 'before'),
@@ -1108,8 +1115,7 @@ void main() {
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter does not require layout after providing identical placeholder dimensions', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(children: <InlineSpan>[
       TextSpan(text: 'before'),
@@ -1146,6 +1152,4 @@ void main() {
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 }
 
-class MockCanvas extends Fake implements Canvas {
-
-}
+class MockCanvas extends Fake implements Canvas {}

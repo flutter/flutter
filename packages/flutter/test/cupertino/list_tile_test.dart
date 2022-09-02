@@ -163,7 +163,9 @@ void main() {
                 title: const Text('CupertinoListTile'),
                 backgroundColor: backgroundColor,
                 backgroundColorActivated: backgroundColorActivated,
-                onTap: () async { await Future<void>.delayed(const Duration(milliseconds: 1), () {}); },
+                onTap: () async {
+                  await Future<void>.delayed(const Duration(milliseconds: 1), () {});
+                },
               ),
             ],
           ),
@@ -238,7 +240,7 @@ void main() {
       CupertinoApp(
         home: Builder(
           builder: (BuildContext context) {
-             final Widget secondPage = Center(
+            final Widget secondPage = Center(
               child: CupertinoButton(
                 child: const Text('Go back'),
                 onPressed: () => Navigator.of(context).pop<void>(),
@@ -249,7 +251,7 @@ void main() {
                 textDirection: TextDirection.ltr,
                 child: MediaQuery(
                   data: const MediaQueryData(),
-                  child:CupertinoListTile(
+                  child: CupertinoListTile(
                     title: const Text('CupertinoListTile'),
                     backgroundColor: backgroundColor,
                     backgroundColorActivated: backgroundColorActivated,
@@ -504,7 +506,7 @@ void main() {
                     onTap: onTap,
                     title: title,
                   ),
-               ],
+              ],
             ),
           ),
         ),

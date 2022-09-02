@@ -42,21 +42,21 @@ abstract class InteractiveInkFeature extends InkFeature {
     required super.referenceBox,
     required Color color,
     super.onRemoved,
-  }) : assert(controller != null),
-       assert(referenceBox != null),
-       _color = color;
+  })  : assert(controller != null),
+        assert(referenceBox != null),
+        _color = color;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
   /// Typically causes the ink to propagate faster across the material. By default this
   /// method does nothing.
-  void confirm() { }
+  void confirm() {}
 
   /// Called when the user input that triggered this feature's appearance was canceled.
   ///
   /// Typically causes the ink to gradually disappear. By default this method does
   /// nothing.
-  void cancel() { }
+  void cancel() {}
 
   /// The ink's color.
   Color get color => _color;
@@ -132,8 +132,10 @@ abstract class InteractiveInkFeature extends InkFeature {
       } else if (borderRadius != BorderRadius.zero) {
         canvas.clipRRect(RRect.fromRectAndCorners(
           rect,
-          topLeft: borderRadius.topLeft, topRight: borderRadius.topRight,
-          bottomLeft: borderRadius.bottomLeft, bottomRight: borderRadius.bottomRight,
+          topLeft: borderRadius.topLeft,
+          topRight: borderRadius.topRight,
+          bottomLeft: borderRadius.bottomLeft,
+          bottomRight: borderRadius.bottomRight,
         ));
       } else {
         canvas.clipRect(rect);
@@ -323,12 +325,12 @@ class InkResponse extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+  })  : assert(containedInkWell != null),
+        assert(highlightShape != null),
+        assert(enableFeedback != null),
+        assert(excludeFromSemantics != null),
+        assert(autofocus != null),
+        assert(canRequestFocus != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -684,12 +686,12 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.getRectCallback,
     required this.debugCheckContext,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+  })  : assert(containedInkWell != null),
+        assert(highlightShape != null),
+        assert(enableFeedback != null),
+        assert(excludeFromSemantics != null),
+        assert(autofocus != null),
+        assert(canRequestFocus != null);
 
   final Widget? child;
   final GestureTapCallback? onTap;
@@ -758,9 +760,8 @@ enum _HighlightType {
 }
 
 class _InkResponseState extends State<_InkResponseStateWidget>
-  with AutomaticKeepAliveClientMixin<_InkResponseStateWidget>
-  implements _ParentInkResponseState
-{
+    with AutomaticKeepAliveClientMixin<_InkResponseStateWidget>
+    implements _ParentInkResponseState {
   Set<InteractiveInkFeature>? _splashes;
   InteractiveInkFeature? _currentSplash;
   bool _hovering = false;
@@ -789,6 +790,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.parentState?.markChildInkResponsePressed(this, nowAnyPressed);
     }
   }
+
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
 
   void simulateTap([Intent? intent]) {
@@ -803,7 +805,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   void handleStatesControllerChange() {
     // Force a rebuild to resolve widget.overlayColor, widget.mouseCursor
-    setState(() { });
+    setState(() {});
   }
 
   MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
@@ -883,7 +885,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  void updateHighlight(_HighlightType type, { required bool value, bool callOnHover = true }) {
+  void updateHighlight(_HighlightType type, {required bool value, bool callOnHover = true}) {
     final InkHighlight? highlight = _highlights[type];
     void handleInkRemoval() {
       assert(_highlights[type] != null);
@@ -954,7 +956,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     final MaterialInkController inkController = Material.of(context)!;
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
-    final Color color =  widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;
+    final Color color =
+        widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback? rectCallback = widget.containedInkWell ? widget.getRectCallback!(referenceBox) : null;
     final BorderRadius? borderRadius = widget.borderRadius;
     final ShapeBorder? customBorder = widget.customBorder;
@@ -1163,7 +1166,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _highlights[type]?.color = getHighlightColorForType(type);
     }
 
-    _currentSplash?.color = widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;
+    _currentSplash?.color =
+        widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
@@ -1319,8 +1323,8 @@ class InkWell extends InkResponse {
     super.autofocus,
     super.statesController,
   }) : super(
-    containedInkWell: true,
-    highlightShape: BoxShape.rectangle,
-    enableFeedback: enableFeedback ?? true,
-  );
+          containedInkWell: true,
+          highlightShape: BoxShape.rectangle,
+          enableFeedback: enableFeedback ?? true,
+        );
 }

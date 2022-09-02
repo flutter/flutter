@@ -126,7 +126,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   @protected
   void addMaterialState(MaterialState state) {
     if (materialStates.add(state)) {
-      setState((){});
+      setState(() {});
     }
   }
 
@@ -134,7 +134,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   @protected
   void removeMaterialState(MaterialState state) {
     if (materialStates.remove(state)) {
-      setState((){});
+      setState(() {});
     }
   }
 
@@ -165,6 +165,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Set<MaterialState>>('materialStates', materialStates, defaultValue: <MaterialState>{}));
+    properties.add(
+        DiagnosticsProperty<Set<MaterialState>>('materialStates', materialStates, defaultValue: <MaterialState>{}));
   }
 }

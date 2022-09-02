@@ -27,7 +27,7 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBi
 class TestStrategy {
   int allowedPriority = 10000;
 
-  bool shouldRunTaskWithPriority({ required int priority, required SchedulerBinding scheduler }) {
+  bool shouldRunTaskWithPriority({required int priority, required SchedulerBinding scheduler}) {
     return priority >= allowedPriority;
   }
 }
@@ -46,7 +46,9 @@ void main() {
     final List<int> executedTasks = <int>[];
 
     void scheduleAddingTask(int x) {
-      scheduler.scheduleTask(() { executedTasks.add(x); }, Priority.idle + x);
+      scheduler.scheduleTask(() {
+        executedTasks.add(x);
+      }, Priority.idle + x);
     }
 
     input.forEach(scheduleAddingTask);
@@ -119,7 +121,9 @@ void main() {
         // Run it twice without processing the queued tasks.
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleWarmUpFrame();
-        scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
+        scheduler.scheduleTask(() {
+          taskExecuted = true;
+        }, Priority.touch);
       },
       zoneSpecification: ZoneSpecification(
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {

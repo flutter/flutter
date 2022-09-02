@@ -15,13 +15,14 @@ import 'image_stream.dart';
 
 /// The dart:io implementation of [image_provider.NetworkImage].
 @immutable
-class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {
+class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage>
+    implements image_provider.NetworkImage {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
-    : assert(url != null),
-      assert(scale != null);
+  const NetworkImage(this.url, {this.scale = 1.0, this.headers})
+      : assert(url != null),
+        assert(scale != null);
 
   @override
   final String url;
@@ -155,9 +156,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NetworkImage
-        && other.url == url
-        && other.scale == scale;
+    return other is NetworkImage && other.url == url && other.scale == scale;
   }
 
   @override

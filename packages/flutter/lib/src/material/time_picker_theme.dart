@@ -31,7 +31,6 @@ import 'theme.dart';
 ///    picker theme.
 @immutable
 class TimePickerThemeData with Diagnosticable {
-
   /// Creates a theme that can be used for [TimePickerTheme] or
   /// [ThemeData.timePickerTheme].
   const TimePickerThemeData({
@@ -289,24 +288,24 @@ class TimePickerThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    hourMinuteTextColor,
-    hourMinuteColor,
-    dayPeriodTextColor,
-    dayPeriodColor,
-    dialHandColor,
-    dialBackgroundColor,
-    dialTextColor,
-    entryModeIconColor,
-    hourMinuteTextStyle,
-    dayPeriodTextStyle,
-    helpTextStyle,
-    shape,
-    hourMinuteShape,
-    dayPeriodShape,
-    dayPeriodBorderSide,
-    inputDecorationTheme,
-  );
+        backgroundColor,
+        hourMinuteTextColor,
+        hourMinuteColor,
+        dayPeriodTextColor,
+        dayPeriodColor,
+        dialHandColor,
+        dialBackgroundColor,
+        dialTextColor,
+        entryModeIconColor,
+        hourMinuteTextStyle,
+        dayPeriodTextStyle,
+        helpTextStyle,
+        shape,
+        hourMinuteShape,
+        dayPeriodShape,
+        dayPeriodBorderSide,
+        inputDecorationTheme,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -316,24 +315,24 @@ class TimePickerThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TimePickerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.hourMinuteTextColor == hourMinuteTextColor
-        && other.hourMinuteColor == hourMinuteColor
-        && other.dayPeriodTextColor == dayPeriodTextColor
-        && other.dayPeriodColor == dayPeriodColor
-        && other.dialHandColor == dialHandColor
-        && other.dialBackgroundColor == dialBackgroundColor
-        && other.dialTextColor == dialTextColor
-        && other.entryModeIconColor == entryModeIconColor
-        && other.hourMinuteTextStyle == hourMinuteTextStyle
-        && other.dayPeriodTextStyle == dayPeriodTextStyle
-        && other.helpTextStyle == helpTextStyle
-        && other.shape == shape
-        && other.hourMinuteShape == hourMinuteShape
-        && other.dayPeriodShape == dayPeriodShape
-        && other.dayPeriodBorderSide == dayPeriodBorderSide
-        && other.inputDecorationTheme == inputDecorationTheme;
+    return other is TimePickerThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.hourMinuteTextColor == hourMinuteTextColor &&
+        other.hourMinuteColor == hourMinuteColor &&
+        other.dayPeriodTextColor == dayPeriodTextColor &&
+        other.dayPeriodColor == dayPeriodColor &&
+        other.dialHandColor == dialHandColor &&
+        other.dialBackgroundColor == dialBackgroundColor &&
+        other.dialTextColor == dialTextColor &&
+        other.entryModeIconColor == entryModeIconColor &&
+        other.hourMinuteTextStyle == hourMinuteTextStyle &&
+        other.dayPeriodTextStyle == dayPeriodTextStyle &&
+        other.helpTextStyle == helpTextStyle &&
+        other.shape == shape &&
+        other.hourMinuteShape == hourMinuteShape &&
+        other.dayPeriodShape == dayPeriodShape &&
+        other.dayPeriodBorderSide == dayPeriodBorderSide &&
+        other.inputDecorationTheme == inputDecorationTheme;
   }
 
   @override
@@ -355,7 +354,8 @@ class TimePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('hourMinuteShape', hourMinuteShape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('dayPeriodShape', dayPeriodShape, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide>('dayPeriodBorderSide', dayPeriodBorderSide, defaultValue: null));
-    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
   }
 }
 

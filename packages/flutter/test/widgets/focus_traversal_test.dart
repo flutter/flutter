@@ -298,8 +298,7 @@ void main() {
     });
 
     testWidgets('Move focus to next/previous node while skipping nodes in policy', (WidgetTester tester) async {
-      final List<FocusNode> nodes =
-      List<FocusNode>.generate(7, (int index) => FocusNode(debugLabel: 'Node $index'));
+      final List<FocusNode> nodes = List<FocusNode>.generate(7, (int index) => FocusNode(debugLabel: 'Node $index'));
       await tester.pumpWidget(
         FocusTraversalGroup(
           policy: SkipAllButFirstAndLastPolicy(),
@@ -630,7 +629,8 @@ void main() {
     testWidgets('Focus order is correct in the presence of different directionalities.', (WidgetTester tester) async {
       const int nodeCount = 10;
       final FocusScopeNode scopeNode = FocusScopeNode();
-      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
       Widget buildTest(TextDirection topDirection) {
         return Directionality(
           textDirection: topDirection,
@@ -719,6 +719,7 @@ void main() {
           ),
         );
       }
+
       await tester.pumpWidget(buildTest(TextDirection.rtl));
 
       // The last four *are* correct: the Row is sensitive to the directionality
@@ -742,9 +743,11 @@ void main() {
       expect(order, orderedEquals(<int>[0, 1, 2, 4, 3, 5, 6, 8, 7, 9]));
     });
 
-    testWidgets('Focus order is reading order regardless of widget order, even when overlapping.', (WidgetTester tester) async {
+    testWidgets('Focus order is reading order regardless of widget order, even when overlapping.',
+        (WidgetTester tester) async {
       const int nodeCount = 10;
-      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -879,7 +882,8 @@ void main() {
 
     testWidgets('Fall back to the secondary sort if no FocusTraversalOrder exists.', (WidgetTester tester) async {
       const int nodeCount = 10;
-      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -918,7 +922,8 @@ void main() {
 
     testWidgets('Move focus to next/previous node using numerical order.', (WidgetTester tester) async {
       const int nodeCount = 10;
-      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -961,8 +966,10 @@ void main() {
       const int nodeCount = 10;
 
       /// Generate ['J' ... 'A'];
-      final List<String> keys = List<String>.generate(nodeCount, (int index) => String.fromCharCode('A'.codeUnits[0] + nodeCount - index - 1));
-      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node ${keys[index]}'));
+      final List<String> keys = List<String>.generate(
+          nodeCount, (int index) => String.fromCharCode('A'.codeUnits[0] + nodeCount - index - 1));
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node ${keys[index]}'));
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1004,7 +1011,8 @@ void main() {
     testWidgets('Focus order is correct in the presence of FocusTraversalPolicyGroups.', (WidgetTester tester) async {
       const int nodeCount = 10;
       final FocusScopeNode scopeNode = FocusScopeNode();
-      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1405,7 +1413,8 @@ void main() {
         focus = List<bool?>.generate(keys.length, (int _) => null);
       }
 
-      final List<FocusNode> nodes = keys.map<FocusNode>((GlobalKey key) => Focus.of(tester.element(find.byKey(key)))).toList();
+      final List<FocusNode> nodes =
+          keys.map<FocusNode>((GlobalKey key) => Focus.of(tester.element(find.byKey(key)))).toList();
       final FocusNode scope = nodes[0].enclosingScope!;
       nodes[4].requestFocus();
 
@@ -1677,11 +1686,14 @@ void main() {
       expect(Focus.of(lowerLeftKey.currentContext!).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext!).hasPrimaryFocus, isTrue);
-    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
+    },
+        skip: isBrowser,
+        variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
-      final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
       final FocusNode topNode = FocusNode(debugLabel: 'Header');
       final FocusNode bottomNode = FocusNode(debugLabel: 'Footer');
       final ScrollController controller = ScrollController();
@@ -1732,7 +1744,8 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
         await tester.pump();
         final double expectedOffset = 100.0 * (i - 5) + 200.0;
-        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
+        expect(controller.offset, equals(expectedOffset),
+            reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
       }
 
       // Now go one more, and see that the footer gets focused.
@@ -1774,11 +1787,14 @@ void main() {
       await tester.pump();
       expect(topNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
+    },
+        skip: isBrowser,
+        variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
-      final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+      final List<FocusNode> nodes =
+          List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
       final FocusNode leftNode = FocusNode(debugLabel: 'Left Side');
       final FocusNode rightNode = FocusNode(debugLabel: 'Right Side');
       final ScrollController controller = ScrollController();
@@ -1830,7 +1846,8 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pump();
         final double expectedOffset = 100.0 * (i - 5);
-        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
+        expect(controller.offset, equals(expectedOffset),
+            reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
       }
 
       // Now go one more, and see that the right edge gets focused.
@@ -1872,7 +1889,9 @@ void main() {
       await tester.pump();
       expect(leftNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
+    },
+        skip: isBrowser,
+        variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
@@ -1892,10 +1911,14 @@ void main() {
 
       Widget generateTestWidgets(bool ignoreTextFields) {
         final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
-          const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left, ignoreTextFields: ignoreTextFields),
-          const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right, ignoreTextFields: ignoreTextFields),
-          const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down, ignoreTextFields: ignoreTextFields),
-          const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up, ignoreTextFields: ignoreTextFields),
+          const SingleActivator(LogicalKeyboardKey.arrowLeft):
+              DirectionalFocusIntent(TraversalDirection.left, ignoreTextFields: ignoreTextFields),
+          const SingleActivator(LogicalKeyboardKey.arrowRight):
+              DirectionalFocusIntent(TraversalDirection.right, ignoreTextFields: ignoreTextFields),
+          const SingleActivator(LogicalKeyboardKey.arrowDown):
+              DirectionalFocusIntent(TraversalDirection.down, ignoreTextFields: ignoreTextFields),
+          const SingleActivator(LogicalKeyboardKey.arrowUp):
+              DirectionalFocusIntent(TraversalDirection.up, ignoreTextFields: ignoreTextFields),
         };
 
         return MaterialApp(
@@ -1997,7 +2020,8 @@ void main() {
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
+    testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp',
+        (WidgetTester tester) async {
       final List<Object> events = <Object>[];
 
       await tester.pumpWidget(MaterialApp(home: Container()));
@@ -2013,7 +2037,8 @@ void main() {
       expect(events.length, 2);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Focus traversal does not throw when no focusable is available in a group', (WidgetTester tester) async {
+    testWidgets('Focus traversal does not throw when no focusable is available in a group',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: ListTile(title: Text('title')))));
       final FocusNode? initialFocus = primaryFocus;
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -2021,7 +2046,8 @@ void main() {
       expect(primaryFocus, equals(initialFocus));
     });
 
-    testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (WidgetTester tester) async {
+    testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp',
+        (WidgetTester tester) async {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
 
       await tester.pumpWidget(
@@ -2055,7 +2081,8 @@ void main() {
       expect(semantics, hasSemantics(expectedSemantics));
     });
 
-    testWidgets("Descendants of FocusTraversalGroup aren't focusable if descendantsAreFocusable is false.", (WidgetTester tester) async {
+    testWidgets("Descendants of FocusTraversalGroup aren't focusable if descendantsAreFocusable is false.",
+        (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final FocusNode focusNode = FocusNode();
@@ -2094,7 +2121,8 @@ void main() {
       expect(unfocusableNode.hasFocus, isFalse);
     });
 
-    testWidgets("Descendants of FocusTraversalGroup aren't traversable if descendantsAreTraversable is false.", (WidgetTester tester) async {
+    testWidgets("Descendants of FocusTraversalGroup aren't traversable if descendantsAreTraversable is false.",
+        (WidgetTester tester) async {
       final FocusNode node1 = FocusNode();
       final FocusNode node2 = FocusNode();
 
@@ -2129,7 +2157,8 @@ void main() {
       expect(node2.hasPrimaryFocus, isFalse);
     });
 
-    testWidgets("FocusTraversalGroup with skipTraversal for all descendents set to true doesn't cause an exception.", (WidgetTester tester) async {
+    testWidgets("FocusTraversalGroup with skipTraversal for all descendents set to true doesn't cause an exception.",
+        (WidgetTester tester) async {
       final FocusNode node1 = FocusNode();
       final FocusNode node2 = FocusNode();
 
@@ -2263,23 +2292,25 @@ void main() {
           ),
         ],
       );
-      expect(semantics, hasSemantics(
-        expectedSemantics,
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ));
+      expect(
+          semantics,
+          hasSemantics(
+            expectedSemantics,
+            ignoreId: true,
+            ignoreRect: true,
+            ignoreTransform: true,
+          ));
     });
 
     testWidgets("Raw keyboard listener doesn't introduce a Semantics node when specified", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
-          RawKeyboardListener(
-              focusNode: focusNode,
-              includeSemantics: false,
-              child: Container(),
-          ),
+        RawKeyboardListener(
+          focusNode: focusNode,
+          includeSemantics: false,
+          child: Container(),
+        ),
       );
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));

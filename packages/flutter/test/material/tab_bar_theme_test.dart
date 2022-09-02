@@ -125,7 +125,10 @@ void main() {
     const double indicatorWeight = 2.0; // default value
 
     const EdgeInsetsGeometry labelPadding = EdgeInsets.fromLTRB(
-      leftPadding, topPadding, rightPadding, bottomPadding,
+      leftPadding,
+      topPadding,
+      rightPadding,
+      bottomPadding,
     );
 
     const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: labelPadding);
@@ -199,8 +202,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-          theme: ThemeData(tabBarTheme: tabBarTheme),
-          home: Scaffold(body: TabBar(
+        theme: ThemeData(tabBarTheme: tabBarTheme),
+        home: Scaffold(
+          body: TabBar(
             tabs: _tabs,
             controller: TabController(length: _tabs.length, vsync: const TestVSync()),
             labelStyle: labelStyle,
@@ -238,8 +242,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(tabBarTheme: tabBarTheme),
-        home: Scaffold(body:
-          RepaintBoundary(
+        home: Scaffold(
+          body: RepaintBoundary(
             key: _painterKey,
             child: TabBar(
               tabs: _sizedTabs,
@@ -310,7 +314,7 @@ void main() {
     await tester.pumpWidget(_withTheme(tabBarTheme));
 
     final Offset tabBar = tester.getCenter(
-      find.ancestor(of: find.text('tab 1'),matching: find.byType(TabBar)),
+      find.ancestor(of: find.text('tab 1'), matching: find.byType(TabBar)),
     );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();

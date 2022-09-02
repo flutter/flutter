@@ -194,13 +194,13 @@ class Material extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
-  }) : assert(type != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(!(shape != null && borderRadius != null)),
-       assert(animationDuration != null),
-       assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
-       assert(borderOnForeground != null),
-       assert(clipBehavior != null);
+  })  : assert(type != null),
+        assert(elevation != null && elevation >= 0.0),
+        assert(!(shape != null && borderRadius != null)),
+        assert(animationDuration != null),
+        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
+        assert(borderOnForeground != null),
+        assert(clipBehavior != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -424,7 +424,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext!.findRenderObject()! as _RenderInkFeatures;
+        final _RenderInkFeatures renderer =
+            _inkFeatureRenderer.currentContext!.findRenderObject()! as _RenderInkFeatures;
         renderer._didChangeLayout();
         return false;
       },
@@ -448,8 +449,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     // slow-path to be noticeable in the construction site of Material.
     if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
       final Color color = Theme.of(context).useMaterial3
-        ? ElevationOverlay.applySurfaceTint(backgroundColor!, widget.surfaceTintColor, widget.elevation)
-        : ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation);
+          ? ElevationOverlay.applySurfaceTint(backgroundColor!, widget.surfaceTintColor, widget.elevation)
+          : ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation);
 
       return AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
@@ -546,8 +547,8 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     required this.vsync,
     required this.absorbHitTest,
     this.color,
-  }) : assert(vsync != null),
-       super(child);
+  })  : assert(vsync != null),
+        super(child);
 
   // This class should exist in a 1:1 relationship with a MaterialState object,
   // since there's no current support for dynamically changing the ticker
@@ -570,6 +571,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     }
     return null;
   }
+
   List<InkFeature>? _inkFeatures;
 
   @override
@@ -642,8 +644,9 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderInkFeatures renderObject) {
-    renderObject..color = color
-                ..absorbHitTest = absorbHitTest;
+    renderObject
+      ..color = color
+      ..absorbHitTest = absorbHitTest;
     assert(vsync == renderObject.vsync);
   }
 }
@@ -659,9 +662,9 @@ abstract class InkFeature {
     required MaterialInkController controller,
     required this.referenceBox,
     this.onRemoved,
-  }) : assert(controller != null),
-       assert(referenceBox != null),
-       _controller = controller as _RenderInkFeatures;
+  })  : assert(controller != null),
+        assert(referenceBox != null),
+        _controller = controller as _RenderInkFeatures;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -766,11 +769,11 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     required this.surfaceTintColor,
     super.curve,
     required super.duration,
-  }) : assert(child != null),
-       assert(shape != null),
-       assert(clipBehavior != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(color != null);
+  })  : assert(child != null),
+        assert(shape != null),
+        assert(clipBehavior != null),
+        assert(elevation != null && elevation >= 0.0),
+        assert(color != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -835,20 +838,20 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       widget.elevation,
       (dynamic value) => Tween<double>(begin: value as double),
     ) as Tween<double>?;
-    _shadowColor =  widget.shadowColor != null
-      ? visitor(
-          _shadowColor,
-          widget.shadowColor,
-          (dynamic value) => ColorTween(begin: value as Color),
-        ) as ColorTween?
-      : null;
+    _shadowColor = widget.shadowColor != null
+        ? visitor(
+            _shadowColor,
+            widget.shadowColor,
+            (dynamic value) => ColorTween(begin: value as Color),
+          ) as ColorTween?
+        : null;
     _surfaceTintColor = widget.surfaceTintColor != null
-      ? visitor(
-          _surfaceTintColor,
-          widget.surfaceTintColor,
-              (dynamic value) => ColorTween(begin: value as Color),
-        ) as ColorTween?
-      : null;
+        ? visitor(
+            _surfaceTintColor,
+            widget.surfaceTintColor,
+            (dynamic value) => ColorTween(begin: value as Color),
+          ) as ColorTween?
+        : null;
     _border = visitor(
       _border,
       widget.shape,
@@ -861,8 +864,8 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
     final ShapeBorder shape = _border!.evaluate(animation)!;
     final double elevation = _elevation!.evaluate(animation);
     final Color color = Theme.of(context).useMaterial3
-      ? ElevationOverlay.applySurfaceTint(widget.color, _surfaceTintColor?.evaluate(animation), elevation)
-      : ElevationOverlay.applyOverlay(context, widget.color, elevation);
+        ? ElevationOverlay.applySurfaceTint(widget.color, _surfaceTintColor?.evaluate(animation), elevation)
+        : ElevationOverlay.applyOverlay(context, widget.color, elevation);
     // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
     final double modelElevation = widget.shadowColor != null ? elevation : 0;
     final Color shadowColor = _shadowColor?.evaluate(animation) ?? const Color(0x00000000);

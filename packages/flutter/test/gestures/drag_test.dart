@@ -79,8 +79,7 @@ void main() {
 
   testGesture('Should report most recent point to onStart by default', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
-    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
-      ..onStart = (_) {};
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(() => drag.dispose);
     addTearDown(() => competingDrag.dispose);
 
@@ -102,8 +101,7 @@ void main() {
 
   testGesture('Should report most recent point to onStart with a start configuration', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
-    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
-      ..onStart = (_) {};
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(() => drag.dispose);
     addTearDown(() => competingDrag.dispose);
 
@@ -130,7 +128,8 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     bool didStartDrag = false;
@@ -184,7 +183,8 @@ void main() {
   testGesture('Should reject mouse drag when configured to ignore mouse pointers - Horizontal', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{
       PointerDeviceKind.touch,
-    }) ..dragStartBehavior = DragStartBehavior.down;
+    })
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     bool didStartDrag = false;
@@ -234,7 +234,8 @@ void main() {
   testGesture('Should reject mouse drag when configured to ignore mouse pointers - Vertical', (GestureTester tester) {
     final VerticalDragGestureRecognizer drag = VerticalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{
       PointerDeviceKind.touch,
-    })..dragStartBehavior = DragStartBehavior.down;
+    })
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     bool didStartDrag = false;
@@ -352,8 +353,7 @@ void main() {
     updatedTimestamp = null;
     updateDelta = null;
 
-    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
-      ..onStart = (_) {};
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(() => competingDrag.dispose);
 
     down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 600));
@@ -401,7 +401,8 @@ void main() {
   });
 
   testGesture('Should report original timestamps', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     Duration? startTimestamp;
@@ -467,24 +468,44 @@ void main() {
   });
 
   testGesture('Drag with multiple pointers in down behavior', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag1 =
-      HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
-    final VerticalDragGestureRecognizer drag2 =
-      VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(() => drag1.dispose);
     addTearDown(() => drag2.dispose);
 
     final List<String> log = <String>[];
-    drag1.onDown = (_) { log.add('drag1-down'); };
-    drag1.onStart = (_) { log.add('drag1-start'); };
-    drag1.onUpdate = (_) { log.add('drag1-update'); };
-    drag1.onEnd = (_) { log.add('drag1-end'); };
-    drag1.onCancel = () { log.add('drag1-cancel'); };
-    drag2.onDown = (_) { log.add('drag2-down'); };
-    drag2.onStart = (_) { log.add('drag2-start'); };
-    drag2.onUpdate = (_) { log.add('drag2-update'); };
-    drag2.onEnd = (_) { log.add('drag2-end'); };
-    drag2.onCancel = () { log.add('drag2-cancel'); };
+    drag1.onDown = (_) {
+      log.add('drag1-down');
+    };
+    drag1.onStart = (_) {
+      log.add('drag1-start');
+    };
+    drag1.onUpdate = (_) {
+      log.add('drag1-update');
+    };
+    drag1.onEnd = (_) {
+      log.add('drag1-end');
+    };
+    drag1.onCancel = () {
+      log.add('drag1-cancel');
+    };
+    drag2.onDown = (_) {
+      log.add('drag2-down');
+    };
+    drag2.onStart = (_) {
+      log.add('drag2-start');
+    };
+    drag2.onUpdate = (_) {
+      log.add('drag2-update');
+    };
+    drag2.onEnd = (_) {
+      log.add('drag2-end');
+    };
+    drag2.onCancel = () {
+      log.add('drag2-cancel');
+    };
 
     final TestPointer pointer5 = TestPointer(5);
     final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
@@ -537,7 +558,8 @@ void main() {
   });
 
   testGesture('Clamp max velocity', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     late Velocity velocity;
@@ -570,7 +592,8 @@ void main() {
   });
 
   testGesture('Synthesized pointer events are ignored for velocity tracking', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     late Velocity velocity;
@@ -603,7 +626,8 @@ void main() {
   /// Checks that quick flick gestures with 1 down, 2 move and 1 up pointer
   /// events still have a velocity
   testGesture('Quick flicks have velocity', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     late Velocity velocity;
@@ -632,7 +656,8 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     bool didStartDrag = false;
@@ -694,7 +719,8 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     Offset? latestGlobalPosition;
@@ -728,11 +754,9 @@ void main() {
   });
 
   testGesture('Can filter drags based on device kind', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag =
-        HorizontalDragGestureRecognizer(
-            kind: PointerDeviceKind.mouse,
-        )
-        ..dragStartBehavior = DragStartBehavior.down;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer(
+      kind: PointerDeviceKind.mouse,
+    )..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     bool didStartDrag = false;
@@ -811,8 +835,7 @@ void main() {
     final List<String> logs = <String>[];
 
     setUp(() {
-      tap = TapGestureRecognizer()
-        ..onTap = () {}; // Need a callback to enable competition
+      tap = TapGestureRecognizer()..onTap = () {}; // Need a callback to enable competition
       pan = PanGestureRecognizer()
         ..onStart = (DragStartDetails details) {
           logs.add('start');
@@ -854,7 +877,8 @@ void main() {
     });
 
     testGesture('Button change before acceptance should not prevent the next drag', (GestureTester tester) {
-      { // First drag (which is canceled)
+      {
+        // First drag (which is canceled)
         final TestPointer pointer = TestPointer(5, PointerDeviceKind.mouse, kPrimaryButton);
         final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
         pan.addPointer(down);
@@ -905,7 +929,8 @@ void main() {
     });
 
     testGesture('Button change after acceptance should not prevent the next drag', (GestureTester tester) {
-      { // First drag (which is canceled)
+      {
+        // First drag (which is canceled)
         final TestPointer pointer = TestPointer(5, PointerDeviceKind.mouse, kPrimaryButton);
         final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
         pan.addPointer(down);
@@ -972,7 +997,8 @@ void main() {
       pan.dispose();
     });
 
-    testGesture('A primary pan recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
+    testGesture('A primary pan recognizer does not form competition with a secondary tap recognizer',
+        (GestureTester tester) {
       final TestPointer pointer = TestPointer(
         1,
         PointerDeviceKind.touch,
@@ -1009,8 +1035,7 @@ void main() {
 
   testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
     final List<String> recognized = <String>[];
-    final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTap = () {}; // Need a listener to enable competition.
+    final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () {}; // Need a listener to enable competition.
     final PanGestureRecognizer pan = PanGestureRecognizer()
       ..onDown = (DragDownDetails details) {
         recognized.add('primaryDown');
@@ -1051,8 +1076,7 @@ void main() {
 
   testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
     final List<String> recognized = <String>[];
-    final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTap = () {}; // Need a listener to enable competition.
+    final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () {}; // Need a listener to enable competition.
     final PanGestureRecognizer pan = PanGestureRecognizer()
       ..onDown = (DragDownDetails details) {
         recognized.add('primaryDown');
@@ -1101,15 +1125,29 @@ void main() {
       // P1 down, P2 down, P1 up, P2 up
       final List<String> logs = <String>[];
       final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
-        ..onDown = (DragDownDetails details) { logs.add('downH'); }
-        ..onStart = (DragStartDetails details) { logs.add('startH'); }
-        ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
-        ..onEnd = (DragEndDetails details) { logs.add('endH'); }
-        ..onCancel = () { logs.add('cancelH'); };
+        ..onDown = (DragDownDetails details) {
+          logs.add('downH');
+        }
+        ..onStart = (DragStartDetails details) {
+          logs.add('startH');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          logs.add('updateH');
+        }
+        ..onEnd = (DragEndDetails details) {
+          logs.add('endH');
+        }
+        ..onCancel = () {
+          logs.add('cancelH');
+        };
       // Competitor
       final TapGestureRecognizer vert = TapGestureRecognizer()
-        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
-        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapDown = (TapDownDetails details) {
+          logs.add('downT');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          logs.add('upT');
+        }
         ..onTapCancel = () {};
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
@@ -1154,15 +1192,29 @@ void main() {
       // P1 down, P2 down, P1 up, P2 up
       final List<String> logs = <String>[];
       final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
-        ..onDown = (DragDownDetails details) { logs.add('downH'); }
-        ..onStart = (DragStartDetails details) { logs.add('startH'); }
-        ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
-        ..onEnd = (DragEndDetails details) { logs.add('endH'); }
-        ..onCancel = () { logs.add('cancelH'); };
+        ..onDown = (DragDownDetails details) {
+          logs.add('downH');
+        }
+        ..onStart = (DragStartDetails details) {
+          logs.add('startH');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          logs.add('updateH');
+        }
+        ..onEnd = (DragEndDetails details) {
+          logs.add('endH');
+        }
+        ..onCancel = () {
+          logs.add('cancelH');
+        };
       // Competitor
       final TapGestureRecognizer vert = TapGestureRecognizer()
-        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
-        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapDown = (TapDownDetails details) {
+          logs.add('downT');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          logs.add('upT');
+        }
         ..onTapCancel = () {};
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
@@ -1208,15 +1260,29 @@ void main() {
       // P1 down, P2 down, P1 moves away, P2 up
       final List<String> logs = <String>[];
       final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
-        ..onDown = (DragDownDetails details) { logs.add('downH'); }
-        ..onStart = (DragStartDetails details) { logs.add('startH'); }
-        ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
-        ..onEnd = (DragEndDetails details) { logs.add('endH'); }
-        ..onCancel = () { logs.add('cancelH'); };
+        ..onDown = (DragDownDetails details) {
+          logs.add('downH');
+        }
+        ..onStart = (DragStartDetails details) {
+          logs.add('startH');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          logs.add('updateH');
+        }
+        ..onEnd = (DragEndDetails details) {
+          logs.add('endH');
+        }
+        ..onCancel = () {
+          logs.add('cancelH');
+        };
       // Competitor
       final TapGestureRecognizer vert = TapGestureRecognizer()
-        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
-        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapDown = (TapDownDetails details) {
+          logs.add('downT');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          logs.add('upT');
+        }
         ..onTapCancel = () {};
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
@@ -1265,15 +1331,29 @@ void main() {
       // P1 down, P2 down, P1 Up, P2 moves away
       final List<String> logs = <String>[];
       final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
-        ..onDown = (DragDownDetails details) { logs.add('downH'); }
-        ..onStart = (DragStartDetails details) { logs.add('startH'); }
-        ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
-        ..onEnd = (DragEndDetails details) { logs.add('endH'); }
-        ..onCancel = () { logs.add('cancelH'); };
+        ..onDown = (DragDownDetails details) {
+          logs.add('downH');
+        }
+        ..onStart = (DragStartDetails details) {
+          logs.add('startH');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          logs.add('updateH');
+        }
+        ..onEnd = (DragEndDetails details) {
+          logs.add('endH');
+        }
+        ..onCancel = () {
+          logs.add('cancelH');
+        };
       // Competitor
       final TapGestureRecognizer vert = TapGestureRecognizer()
-        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
-        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapDown = (TapDownDetails details) {
+          logs.add('downT');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          logs.add('upT');
+        }
         ..onTapCancel = () {};
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
@@ -1322,15 +1402,29 @@ void main() {
       // P1 down, P2 down, P1 change buttons, P2 moves away
       final List<String> logs = <String>[];
       final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
-        ..onDown = (DragDownDetails details) { logs.add('downH'); }
-        ..onStart = (DragStartDetails details) { logs.add('startH'); }
-        ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
-        ..onEnd = (DragEndDetails details) { logs.add('endH'); }
-        ..onCancel = () { logs.add('cancelH'); };
+        ..onDown = (DragDownDetails details) {
+          logs.add('downH');
+        }
+        ..onStart = (DragStartDetails details) {
+          logs.add('startH');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          logs.add('updateH');
+        }
+        ..onEnd = (DragEndDetails details) {
+          logs.add('endH');
+        }
+        ..onCancel = () {
+          logs.add('cancelH');
+        };
       // Competitor
       final TapGestureRecognizer vert = TapGestureRecognizer()
-        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
-        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapDown = (TapDownDetails details) {
+          logs.add('downT');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          logs.add('upT');
+        }
         ..onTapCancel = () {};
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
@@ -1377,15 +1471,29 @@ void main() {
       // Regressing test for https://github.com/flutter/flutter/issues/68373
       final List<String> logs = <String>[];
       final VerticalDragGestureRecognizer drag = VerticalDragGestureRecognizer()
-        ..onDown = (DragDownDetails details) { logs.add('downD'); }
-        ..onStart = (DragStartDetails details) { logs.add('startD'); }
-        ..onUpdate = (DragUpdateDetails details) { logs.add('updateD'); }
-        ..onEnd = (DragEndDetails details) { logs.add('endD'); }
-        ..onCancel = () { logs.add('cancelD'); };
+        ..onDown = (DragDownDetails details) {
+          logs.add('downD');
+        }
+        ..onStart = (DragStartDetails details) {
+          logs.add('startD');
+        }
+        ..onUpdate = (DragUpdateDetails details) {
+          logs.add('updateD');
+        }
+        ..onEnd = (DragEndDetails details) {
+          logs.add('endD');
+        }
+        ..onCancel = () {
+          logs.add('cancelD');
+        };
       // Competitor
       final TapGestureRecognizer tap = TapGestureRecognizer()
-        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
-        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapDown = (TapDownDetails details) {
+          logs.add('downT');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          logs.add('upT');
+        }
         ..onTapCancel = () {};
       addTearDown(tap.dispose);
       addTearDown(drag.dispose);
@@ -1446,7 +1554,9 @@ void main() {
 
     bool didStartDrag = false;
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
-      ..onStart = (_) { didStartDrag = true; }
+      ..onStart = (_) {
+        didStartDrag = true;
+      }
       ..onEnd = (DragEndDetails details) {} // Crash triggers at onEnd.
       ..dragStartBehavior = DragStartBehavior.down;
     final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () {};
@@ -1522,9 +1632,11 @@ void main() {
     expect(didEndPan, isFalse);
 
     // Gesture will be claimed when distance reaches kPanSlop, which was 36.0 when this test was last updated.
-    tester.route(pointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
+    tester.route(pointer.panZoomUpdate(const Offset(10.0, 10.0),
+        pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
     expect(didStartPan, isFalse); // 28 < 36
-    tester.route(pointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
+    tester.route(pointer.panZoomUpdate(const Offset(10.0, 10.0),
+        pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
     expect(didStartPan, isTrue); // 42 > 36
     didStartPan = false;
     expect(didEndPan, isFalse);
@@ -1580,9 +1692,11 @@ void main() {
     expect(didEndPan, isFalse);
 
     // Gesture will be claimed when distance reaches kPanSlop, which was 36.0 when this test was last updated.
-    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0),
+        pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
     expect(didStartPan, isFalse); // 28 < 36
-    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0),
+        pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
     expect(didStartPan, isTrue); // 42 > 36
     didStartPan = false;
     expect(didEndPan, isFalse);
@@ -1619,7 +1733,7 @@ void main() {
     didEndPan = false;
   });
 
-testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureTester tester) {
+  testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureTester tester) {
     final PanGestureRecognizer pan = PanGestureRecognizer();
     // We need a competing gesture recognizer so that the gesture is not immediately claimed.
     final PanGestureRecognizer competingPan = PanGestureRecognizer();
@@ -1677,12 +1791,14 @@ testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureT
     expect(didEndPan, isFalse);
 
     // Gesture will be claimed when distance reaches kPanSlop, which was 36.0 when this test was last updated.
-    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0),
+        pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, const Offset(20.0, 20.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
-    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0),
+        pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, const Offset(10.0, 10.0));
     updatedScrollDelta = null;

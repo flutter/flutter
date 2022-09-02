@@ -22,7 +22,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
   });
 
@@ -37,8 +37,8 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'eager';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
-  void handleEvent(PointerEvent event) { }
+  void handleEvent(PointerEvent event) {}
 }

@@ -37,7 +37,8 @@ typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> deta
 /// this [DragTarget] and that will not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
-typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
+typedef DragTargetBuilder<T> = Widget Function(
+    BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
 
 /// Signature for when a [Draggable] is dragged across the screen.
 ///
@@ -203,7 +204,7 @@ class Draggable<T extends Object> extends StatefulWidget {
       'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
       'This feature was deprecated after v2.1.0-10.0.pre.',
     )
-    this.dragAnchor = DragAnchor.child,
+        this.dragAnchor = DragAnchor.child,
     this.dragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
@@ -216,11 +217,11 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.ignoringFeedbackPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
-  }) : assert(child != null),
-       assert(feedback != null),
-       assert(ignoringFeedbackSemantics != null),
-       assert(ignoringFeedbackPointer != null),
-       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
+  })  : assert(child != null),
+        assert(feedback != null),
+        assert(ignoringFeedbackSemantics != null),
+        assert(ignoringFeedbackPointer != null),
+        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -453,7 +454,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
       'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
       'This feature was deprecated after v2.1.0-10.0.pre.',
     )
-    super.dragAnchor,
+        super.dragAnchor,
     super.dragAnchorStrategy,
     super.maxSimultaneousDrags,
     super.onDragStarted,
@@ -580,9 +581,9 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
         }
         if (mounted && widget.onDragEnd != null) {
           widget.onDragEnd!(DraggableDetails(
-              wasAccepted: wasAccepted,
-              velocity: velocity,
-              offset: offset,
+            wasAccepted: wasAccepted,
+            velocity: velocity,
+            offset: offset,
           ));
         }
         if (wasAccepted && widget.onDragCompleted != null) {
@@ -600,8 +601,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    final bool canDrag = widget.maxSimultaneousDrags == null ||
-                         _activeCount < widget.maxSimultaneousDrags!;
+    final bool canDrag = widget.maxSimultaneousDrags == null || _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
       behavior: widget.hitTestBehavior,
@@ -628,8 +628,8 @@ class DraggableDetails {
     this.wasAccepted = false,
     required this.velocity,
     required this.offset,
-  }) : assert(velocity != null),
-       assert(offset != null);
+  })  : assert(velocity != null),
+        assert(offset != null);
 
   /// Determines whether the [DragTarget] accepted this draggable.
   final bool wasAccepted;
@@ -800,12 +800,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     return MetaData(
       metaData: this,
       behavior: widget.hitTestBehavior,
-      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
+      child:
+          widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
     );
   }
 }
 
 enum _DragEndKind { dropped, canceled }
+
 typedef _OnDragEnd = void Function(Velocity velocity, Offset offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
@@ -825,12 +827,12 @@ class _DragAvatar<T extends Object> extends Drag {
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
     required this.ignoringFeedbackPointer,
-  }) : assert(overlayState != null),
-       assert(ignoringFeedbackSemantics != null),
-       assert(ignoringFeedbackPointer != null),
-       assert(dragStartPoint != null),
-       assert(feedbackOffset != null),
-       _position = initialPosition {
+  })  : assert(overlayState != null),
+        assert(ignoringFeedbackSemantics != null),
+        assert(ignoringFeedbackPointer != null),
+        assert(dragStartPoint != null),
+        assert(feedbackOffset != null),
+        _position = initialPosition {
     _entry = OverlayEntry(builder: _build);
     overlayState.insert(_entry!);
     updateDrag(initialPosition);
@@ -867,7 +869,6 @@ class _DragAvatar<T extends Object> extends Drag {
   void end(DragEndDetails details) {
     finishDrag(_DragEndKind.dropped, _restrictVelocityAxis(details.velocity));
   }
-
 
   @override
   void cancel() {
@@ -949,7 +950,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _enteredTargets.clear();
   }
 
-  void finishDrag(_DragEndKind endKind, [ Velocity? velocity ]) {
+  void finishDrag(_DragEndKind endKind, [Velocity? velocity]) {
     bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget!.didDrop(this);

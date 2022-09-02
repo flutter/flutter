@@ -112,13 +112,13 @@ class SwitchThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    thumbColor,
-    trackColor,
-    materialTapTargetSize,
-    mouseCursor,
-    overlayColor,
-    splashRadius,
-  );
+        thumbColor,
+        trackColor,
+        materialTapTargetSize,
+        mouseCursor,
+        overlayColor,
+        splashRadius,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -128,13 +128,13 @@ class SwitchThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SwitchThemeData
-      && other.thumbColor == thumbColor
-      && other.trackColor == trackColor
-      && other.materialTapTargetSize == materialTapTargetSize
-      && other.mouseCursor == mouseCursor
-      && other.overlayColor == overlayColor
-      && other.splashRadius == splashRadius;
+    return other is SwitchThemeData &&
+        other.thumbColor == thumbColor &&
+        other.trackColor == trackColor &&
+        other.materialTapTargetSize == materialTapTargetSize &&
+        other.mouseCursor == mouseCursor &&
+        other.overlayColor == overlayColor &&
+        other.splashRadius == splashRadius;
   }
 
   @override
@@ -142,9 +142,12 @@ class SwitchThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
   }
 }

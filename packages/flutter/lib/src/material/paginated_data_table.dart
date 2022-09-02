@@ -80,7 +80,12 @@ class PaginatedDataTable extends StatefulWidget {
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
-    this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
+    this.availableRowsPerPage = const <int>[
+      defaultRowsPerPage,
+      defaultRowsPerPage * 2,
+      defaultRowsPerPage * 5,
+      defaultRowsPerPage * 10
+    ],
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     this.arrowHeadColor,
@@ -88,31 +93,32 @@ class PaginatedDataTable extends StatefulWidget {
     this.checkboxHorizontalMargin,
     this.controller,
     this.primary,
-  }) : assert(actions == null || (actions != null && header != null)),
-       assert(columns != null),
-       assert(dragStartBehavior != null),
-       assert(columns.isNotEmpty),
-       assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(sortAscending != null),
-       assert(dataRowHeight != null),
-       assert(headingRowHeight != null),
-       assert(horizontalMargin != null),
-       assert(columnSpacing != null),
-       assert(showCheckboxColumn != null),
-       assert(showFirstLastButtons != null),
-       assert(rowsPerPage != null),
-       assert(rowsPerPage > 0),
-       assert(() {
-         if (onRowsPerPageChanged != null) {
-           assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
-         }
-         return true;
-       }()),
-       assert(source != null),
-       assert(!(controller != null && (primary ?? false)),
+  })  : assert(actions == null || (actions != null && header != null)),
+        assert(columns != null),
+        assert(dragStartBehavior != null),
+        assert(columns.isNotEmpty),
+        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
+        assert(sortAscending != null),
+        assert(dataRowHeight != null),
+        assert(headingRowHeight != null),
+        assert(horizontalMargin != null),
+        assert(columnSpacing != null),
+        assert(showCheckboxColumn != null),
+        assert(showFirstLastButtons != null),
+        assert(rowsPerPage != null),
+        assert(rowsPerPage > 0),
+        assert(() {
+          if (onRowsPerPageChanged != null) {
+            assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
+          }
+          return true;
+        }()),
+        assert(source != null),
+        assert(
+          !(controller != null && (primary ?? false)),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
-       );
+        );
 
   /// The table card's optional header.
   ///
@@ -304,8 +310,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       final int rowsPerPage = widget.rowsPerPage;
       _firstRowIndex = (rowIndex ~/ rowsPerPage) * rowsPerPage;
     });
-    if ((widget.onPageChanged != null) &&
-        (oldFirstRowIndex != _firstRowIndex)) {
+    if ((widget.onPageChanged != null) && (oldFirstRowIndex != _firstRowIndex)) {
       widget.onPageChanged!(_firstRowIndex);
     }
   }
@@ -371,8 +376,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     pageTo(((_rowCount - 1) / widget.rowsPerPage).floor() * widget.rowsPerPage);
   }
 
-  bool _isNextPageUnavailable() => !_rowCountApproximate &&
-      (_firstRowIndex + widget.rowsPerPage >= _rowCount);
+  bool _isNextPageUnavailable() => !_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount);
 
   final GlobalKey _tableKey = GlobalKey();
 
@@ -408,14 +412,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
-        .where((int value) => value <= _rowCount || value == widget.rowsPerPage)
-        .map<DropdownMenuItem<int>>((int value) {
-          return DropdownMenuItem<int>(
-            value: value,
-            child: Text('$value'),
-          );
-        })
-        .toList();
+          .where((int value) => value <= _rowCount || value == widget.rowsPerPage)
+          .map<DropdownMenuItem<int>>((int value) {
+        return DropdownMenuItem<int>(
+          value: value,
+          child: Text('$value'),
+        );
+      }).toList();
       footerWidgets.addAll(<Widget>[
         Container(width: 14.0), // to match trailing padding in case we overflow and end up scrolling
         Text(localizations.rowsPerPageTitle),
@@ -471,9 +474,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           icon: Icon(Icons.skip_next, color: widget.arrowHeadColor),
           padding: EdgeInsets.zero,
           tooltip: localizations.lastPageTooltip,
-          onPressed: _isNextPageUnavailable()
-              ? null
-              : _handleLast,
+          onPressed: _isNextPageUnavailable() ? null : _handleLast,
         ),
       Container(width: 14.0),
     ]);
@@ -493,8 +494,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
                     // list and then tweak them appropriately.
                     // See https://material.io/design/components/data-tables.html#tables-within-cards
-                    style: _selectedRowCount > 0 ? themeData.textTheme.titleMedium!.copyWith(color: themeData.colorScheme.secondary)
-                                                 : themeData.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w400),
+                    style: _selectedRowCount > 0
+                        ? themeData.textTheme.titleMedium!.copyWith(color: themeData.colorScheme.secondary)
+                        : themeData.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w400),
                     child: IconTheme.merge(
                       data: const IconThemeData(
                         opacity: 0.54,

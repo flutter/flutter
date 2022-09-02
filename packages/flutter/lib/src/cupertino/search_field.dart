@@ -322,17 +322,14 @@ class CupertinoSearchTextField extends StatefulWidget {
   State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
 }
 
-class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
-    with RestorationMixin {
+class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> with RestorationMixin {
   /// Default value for the border radius. Radius value was determined using the
   /// comparison tool in https://github.com/flutter/platform_tests/.
-  final BorderRadius _kDefaultBorderRadius =
-      const BorderRadius.all(Radius.circular(9.0));
+  final BorderRadius _kDefaultBorderRadius = const BorderRadius.all(Radius.circular(9.0));
 
   RestorableTextEditingController? _controller;
 
-  TextEditingController get _effectiveController =>
-      widget.controller ?? _controller!.value;
+  TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   @override
   void initState() {
@@ -368,9 +365,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+    _controller = value == null ? RestorableTextEditingController() : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -389,16 +384,13 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   @override
   Widget build(BuildContext context) {
-    final String placeholder = widget.placeholder ??
-        CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
+    final String placeholder = widget.placeholder ?? CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
 
-    final TextStyle placeholderStyle = widget.placeholderStyle ??
-        const TextStyle(color: CupertinoColors.systemGrey);
+    final TextStyle placeholderStyle = widget.placeholderStyle ?? const TextStyle(color: CupertinoColors.systemGrey);
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
-    final double scaledIconSize =
-        MediaQuery.textScaleFactorOf(context) * widget.itemSize;
+    final double scaledIconSize = MediaQuery.textScaleFactorOf(context) * widget.itemSize;
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.

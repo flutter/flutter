@@ -150,7 +150,7 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   /// Linearly interpolate between two toggle buttons themes.
   static ToggleButtonsThemeData? lerp(ToggleButtonsThemeData? a, ToggleButtonsThemeData? b, double t) {
-    assert (t != null);
+    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -175,22 +175,22 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    textStyle,
-    constraints,
-    color,
-    selectedColor,
-    disabledColor,
-    fillColor,
-    focusColor,
-    highlightColor,
-    hoverColor,
-    splashColor,
-    borderColor,
-    selectedBorderColor,
-    disabledBorderColor,
-    borderRadius,
-    borderWidth,
-  );
+        textStyle,
+        constraints,
+        color,
+        selectedColor,
+        disabledColor,
+        fillColor,
+        focusColor,
+        highlightColor,
+        hoverColor,
+        splashColor,
+        borderColor,
+        selectedBorderColor,
+        disabledBorderColor,
+        borderRadius,
+        borderWidth,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -200,22 +200,22 @@ class ToggleButtonsThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ToggleButtonsThemeData
-        && other.textStyle == textStyle
-        && other.constraints == constraints
-        && other.color == color
-        && other.selectedColor == selectedColor
-        && other.disabledColor == disabledColor
-        && other.fillColor == fillColor
-        && other.focusColor == focusColor
-        && other.highlightColor == highlightColor
-        && other.hoverColor == hoverColor
-        && other.splashColor == splashColor
-        && other.borderColor == borderColor
-        && other.selectedBorderColor == selectedBorderColor
-        && other.disabledBorderColor == disabledBorderColor
-        && other.borderRadius == borderRadius
-        && other.borderWidth == borderWidth;
+    return other is ToggleButtonsThemeData &&
+        other.textStyle == textStyle &&
+        other.constraints == constraints &&
+        other.color == color &&
+        other.selectedColor == selectedColor &&
+        other.disabledColor == disabledColor &&
+        other.fillColor == fillColor &&
+        other.focusColor == focusColor &&
+        other.highlightColor == highlightColor &&
+        other.hoverColor == hoverColor &&
+        other.splashColor == splashColor &&
+        other.borderColor == borderColor &&
+        other.selectedBorderColor == selectedBorderColor &&
+        other.disabledBorderColor == disabledBorderColor &&
+        other.borderRadius == borderRadius &&
+        other.borderWidth == borderWidth;
   }
 
   @override

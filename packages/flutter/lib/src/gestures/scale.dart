@@ -15,7 +15,6 @@ export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEve
 export 'recognizer.dart' show DragStartBehavior;
 export 'velocity_tracker.dart' show Velocity;
 
-
 /// The possible states of a [ScaleGestureRecognizer].
 enum _ScaleState {
   /// The recognizer is ready to start recognizing a gesture.
@@ -36,11 +35,7 @@ enum _ScaleState {
 }
 
 class _PointerPanZoomData {
-  _PointerPanZoomData({
-    required this.focalPoint,
-    required this.scale,
-    required this.rotation
-  });
+  _PointerPanZoomData({required this.focalPoint, required this.scale, required this.rotation});
   Offset focalPoint;
   double scale;
   double rotation;
@@ -54,8 +49,9 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint = Offset.zero, Offset? localFocalPoint, this.pointerCount = 0 })
-    : assert(focalPoint != null), localFocalPoint = localFocalPoint ?? focalPoint;
+  ScaleStartDetails({this.focalPoint = Offset.zero, Offset? localFocalPoint, this.pointerCount = 0})
+      : assert(focalPoint != null),
+        localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The initial focal point of the pointers in contact with the screen.
   ///
@@ -85,7 +81,8 @@ class ScaleStartDetails {
   final int pointerCount;
 
   @override
-  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
+  String toString() =>
+      'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
 }
 
 /// Details for [GestureScaleUpdateCallback].
@@ -104,13 +101,13 @@ class ScaleUpdateDetails {
     this.rotation = 0.0,
     this.pointerCount = 0,
     this.focalPointDelta = Offset.zero,
-  }) : assert(focalPoint != null),
-       assert(focalPointDelta != null),
-       assert(scale != null && scale >= 0.0),
-       assert(horizontalScale != null && horizontalScale >= 0.0),
-       assert(verticalScale != null && verticalScale >= 0.0),
-       assert(rotation != null),
-       localFocalPoint = localFocalPoint ?? focalPoint;
+  })  : assert(focalPoint != null),
+        assert(focalPointDelta != null),
+        assert(scale != null && scale >= 0.0),
+        assert(horizontalScale != null && horizontalScale >= 0.0),
+        assert(verticalScale != null && verticalScale >= 0.0),
+        assert(rotation != null),
+        localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The amount the gesture's focal point has moved in the coordinate space of
   /// the event receiver since the previous update.
@@ -186,14 +183,14 @@ class ScaleUpdateDetails {
 
   @override
   String toString() => 'ScaleUpdateDetails('
-    'focalPoint: $focalPoint,'
-    ' localFocalPoint: $localFocalPoint,'
-    ' scale: $scale,'
-    ' horizontalScale: $horizontalScale,'
-    ' verticalScale: $verticalScale,'
-    ' rotation: $rotation,'
-    ' pointerCount: $pointerCount,'
-    ' focalPointDelta: $focalPointDelta)';
+      'focalPoint: $focalPoint,'
+      ' localFocalPoint: $localFocalPoint,'
+      ' scale: $scale,'
+      ' horizontalScale: $horizontalScale,'
+      ' verticalScale: $verticalScale,'
+      ' rotation: $rotation,'
+      ' pointerCount: $pointerCount,'
+      ' focalPointDelta: $focalPointDelta)';
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -201,8 +198,7 @@ class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  ScaleEndDetails({ this.velocity = Velocity.zero, this.pointerCount = 0 })
-    : assert(velocity != null);
+  ScaleEndDetails({this.velocity = Velocity.zero, this.pointerCount = 0}) : assert(velocity != null);
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
@@ -234,13 +230,11 @@ bool _isFlingGesture(Velocity velocity) {
   return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
 }
 
-
 /// Defines a line between two pointers on screen.
 ///
 /// [_LineBetweenPointers] is an abstraction of a line between two pointers in
 /// contact with the screen. Used to track the rotation of a scale gesture.
 class _LineBetweenPointers {
-
   /// Creates a [_LineBetweenPointers]. None of the [pointerStartLocation], [pointerStartId]
   /// [pointerEndLocation] and [pointerEndId] must be null. [pointerStartId] and [pointerEndId]
   /// should be different.
@@ -249,9 +243,9 @@ class _LineBetweenPointers {
     this.pointerStartId = 0,
     this.pointerEndLocation = Offset.zero,
     this.pointerEndId = 1,
-  }) : assert(pointerStartLocation != null && pointerEndLocation != null),
-       assert(pointerStartId != null && pointerEndId != null),
-       assert(pointerStartId != pointerEndId);
+  })  : assert(pointerStartLocation != null && pointerEndLocation != null),
+        assert(pointerStartId != null && pointerEndId != null),
+        assert(pointerStartId != pointerEndId);
 
   // The location and the id of the pointer that marks the start of the line.
   final Offset pointerStartLocation;
@@ -260,9 +254,7 @@ class _LineBetweenPointers {
   // The location and the id of the pointer that marks the end of the line.
   final Offset pointerEndLocation;
   final int pointerEndId;
-
 }
-
 
 /// Recognizes a scale gesture.
 ///
@@ -281,7 +273,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    super.kind,
+        super.kind,
     super.supportedDevices,
     this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(dragStartBehavior != null);
@@ -352,9 +344,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   double get _pointerScaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
-  double get _pointerHorizontalScaleFactor => _initialHorizontalSpan > 0.0 ? _currentHorizontalSpan / _initialHorizontalSpan : 1.0;
+  double get _pointerHorizontalScaleFactor =>
+      _initialHorizontalSpan > 0.0 ? _currentHorizontalSpan / _initialHorizontalSpan : 1.0;
 
-  double get _pointerVerticalScaleFactor => _initialVerticalSpan > 0.0 ? _currentVerticalSpan / _initialVerticalSpan : 1.0;
+  double get _pointerVerticalScaleFactor =>
+      _initialVerticalSpan > 0.0 ? _currentVerticalSpan / _initialVerticalSpan : 1.0;
 
   double get _scaleFactor {
     double scale = _pointerScaleFactor;
@@ -465,11 +459,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _lastTransform = event.transform;
     } else if (event is PointerPanZoomStartEvent) {
       assert(_pointerPanZooms[event.pointer] == null);
-      _pointerPanZooms[event.pointer] = _PointerPanZoomData(
-        focalPoint: event.position,
-        scale: 1,
-        rotation: 0
-      );
+      _pointerPanZooms[event.pointer] = _PointerPanZoomData(focalPoint: event.position, scale: 1, rotation: 0);
       didChangeConfiguration = true;
       shouldStartIfAccepted = true;
     } else if (event is PointerPanZoomUpdateEvent) {
@@ -477,11 +467,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       if (!event.synthesized) {
         _velocityTrackers[event.pointer]!.addPosition(event.timeStamp, event.pan);
       }
-      _pointerPanZooms[event.pointer] = _PointerPanZoomData(
-        focalPoint: event.position + event.pan,
-        scale: event.scale,
-        rotation: event.rotation
-      );
+      _pointerPanZooms[event.pointer] =
+          _PointerPanZoomData(focalPoint: event.position + event.pan, scale: event.scale, rotation: event.rotation);
       _lastTransform = event.transform;
       shouldStartIfAccepted = true;
     } else if (event is PointerPanZoomEndEvent) {
@@ -558,12 +545,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void _updateLines() {
     final int count = _pointerLocations.keys.length;
     assert(_pointerQueue.length >= count);
+
     /// In case of just one pointer registered, reconfigure [_initialLine]
     if (count < 2) {
       _initialLine = _currentLine;
     } else if (_initialLine != null &&
-      _initialLine!.pointerStartId == _pointerQueue[0] &&
-      _initialLine!.pointerEndId == _pointerQueue[1]) {
+        _initialLine!.pointerStartId == _pointerQueue[0] &&
+        _initialLine!.pointerEndId == _pointerQueue[1]) {
       /// Rotation updated, set the [_currentLine]
       _currentLine = _LineBetweenPointers(
         pointerStartId: _pointerQueue[0],
@@ -594,7 +582,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialPanZoomRotationFactor = 0.0;
     } else {
       _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-      _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
+      _initialPanZoomRotationFactor =
+          _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
     }
     if (_state == _ScaleState.started) {
       if (onEnd != null) {
@@ -625,7 +614,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
       final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
-      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computePanSlop(pointerDeviceKind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
+      if (spanDelta > computeScaleSlop(pointerDeviceKind) ||
+          focalPointDelta > computePanSlop(pointerDeviceKind, gestureSettings) ||
+          math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
         resolve(GestureDisposition.accepted);
       }
     } else if (_state.index >= _ScaleState.accepted.index) {
@@ -682,7 +673,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           _initialPanZoomRotationFactor = 0.0;
         } else {
           _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-          _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
+          _initialPanZoomRotationFactor =
+              _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
         }
       }
     }

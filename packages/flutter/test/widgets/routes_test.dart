@@ -93,7 +93,6 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
     routes.remove(this);
     super.dispose();
   }
-
 }
 
 Future<void> runNavigatorTest(
@@ -152,7 +151,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { },
+      () {},
       <String>[
         'initial: install',
         'initial: didAdd',
@@ -163,8 +162,11 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(second = TestRoute('second')); },
-      <String>[ // stack is: initial, second
+      () {
+        host.push(second = TestRoute('second'));
+      },
+      <String>[
+        // stack is: initial, second
         'second: install',
         'second: didPush',
         'second: didChangeNext null',
@@ -174,8 +176,11 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(TestRoute('third')); },
-      <String>[ // stack is: initial, second, third
+      () {
+        host.push(TestRoute('third'));
+      },
+      <String>[
+        // stack is: initial, second, third
         'third: install',
         'third: didPush',
         'third: didChangeNext null',
@@ -185,8 +190,11 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.replace(oldRoute: second, newRoute: TestRoute('two')); },
-      <String>[ // stack is: initial, two, third
+      () {
+        host.replace(oldRoute: second, newRoute: TestRoute('two'));
+      },
+      <String>[
+        // stack is: initial, two, third
         'two: install',
         'two: didReplace second',
         'two: didChangeNext third',
@@ -197,8 +205,11 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.pop('hello'); },
-      <String>[ // stack is: initial, two
+      () {
+        host.pop('hello');
+      },
+      <String>[
+        // stack is: initial, two
         'third: didPop hello',
         'two: didPopNext third',
       ],
@@ -209,8 +220,11 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.pop('good bye'); },
-      <String>[ // stack is: initial
+      () {
+        host.pop('good bye');
+      },
+      <String>[
+        // stack is: initial
         'two: didPop good bye',
         'initial: didPopNext two',
       ],
@@ -239,7 +253,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { },
+      () {},
       <String>[
         'first: install',
         'first: didAdd',
@@ -250,7 +264,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(second = TestRoute('second')); },
+      () {
+        host.push(second = TestRoute('second'));
+      },
       <String>[
         'second: install',
         'second: didPush',
@@ -261,7 +277,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(TestRoute('third')); },
+      () {
+        host.push(TestRoute('third'));
+      },
       <String>[
         'third: install',
         'third: didPush',
@@ -272,7 +290,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.removeRouteBelow(second); },
+      () {
+        host.removeRouteBelow(second);
+      },
       <String>[
         'first: dispose',
       ],
@@ -280,7 +300,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.pop('good bye'); },
+      () {
+        host.pop('good bye');
+      },
       <String>[
         'third: didPop good bye',
         'second: didPopNext third',
@@ -292,7 +314,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(TestRoute('three')); },
+      () {
+        host.push(TestRoute('three'));
+      },
       <String>[
         'three: install',
         'three: didPush',
@@ -304,7 +328,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(four = TestRoute('four')); },
+      () {
+        host.push(four = TestRoute('four'));
+      },
       <String>[
         'four: install',
         'four: didPush',
@@ -315,7 +341,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.removeRouteBelow(four); },
+      () {
+        host.removeRouteBelow(four);
+      },
       <String>[
         'second: didChangeNext four',
         'three: dispose',
@@ -324,7 +352,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.pop('the end'); },
+      () {
+        host.pop('the end');
+      },
       <String>[
         'four: didPop the end',
         'second: didPopNext four',
@@ -354,7 +384,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { },
+      () {},
       <String>[
         'A: install',
         'A: didAdd',
@@ -364,7 +394,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(TestRoute('B')); },
+      () {
+        host.push(TestRoute('B'));
+      },
       <String>[
         'B: install',
         'B: didPush',
@@ -376,7 +408,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(routeC = TestRoute('C')); },
+      () {
+        host.push(routeC = TestRoute('C'));
+      },
       <String>[
         'C: install',
         'C: didPush',
@@ -389,7 +423,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.replaceRouteBelow(anchorRoute: routeC, newRoute: routeB = TestRoute('b')); },
+      () {
+        host.replaceRouteBelow(anchorRoute: routeC, newRoute: routeB = TestRoute('b'));
+      },
       <String>[
         'b: install',
         'b: didReplace B',
@@ -401,7 +437,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.popUntil((Route<dynamic> route) => route == routeB); },
+      () {
+        host.popUntil((Route<dynamic> route) => route == routeB);
+      },
       <String>[
         'C: didPop null',
         'b: didPopNext C',
@@ -419,10 +457,14 @@ void main() {
   testWidgets('Route localHistory - popUntil', (WidgetTester tester) async {
     final TestRoute routeA = TestRoute('A');
     routeA.addLocalHistoryEntry(LocalHistoryEntry(
-      onRemove: () { routeA.log('onRemove 0'); },
+      onRemove: () {
+        routeA.log('onRemove 0');
+      },
     ));
     routeA.addLocalHistoryEntry(LocalHistoryEntry(
-      onRemove: () { routeA.log('onRemove 1'); },
+      onRemove: () {
+        routeA.log('onRemove 1');
+      },
     ));
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -438,7 +480,9 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally); },
+      () {
+        host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally);
+      },
       <String>[
         'A: install',
         'A: didAdd',
@@ -453,9 +497,10 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally); },
-      <String>[
-      ],
+      () {
+        host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally);
+      },
+      <String>[],
     );
     await tester.pumpWidget(Container());
     expect(routes.isEmpty, isTrue);
@@ -1012,7 +1057,8 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (WidgetTester tester) async {
+    testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false',
+        (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1411,7 +1457,8 @@ void main() {
       expect(find.byKey(containerKey), findsNothing);
     });
 
-    testWidgets('custom reverseTransitionDuration does not result in interrupted animations', (WidgetTester tester) async {
+    testWidgets('custom reverseTransitionDuration does not result in interrupted animations',
+        (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
@@ -1733,8 +1780,7 @@ void main() {
             ],
           ),
         ],
-      )
-      ;
+      );
 
       expect(semantics, hasSemantics(expectedSemantics));
       semantics.dispose();
@@ -1786,7 +1832,8 @@ void main() {
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
 
-    testWidgets('focus traversal is correct when popping multiple pages simultaneously - with focused children', (WidgetTester tester) async {
+    testWidgets('focus traversal is correct when popping multiple pages simultaneously - with focused children',
+        (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(
@@ -1901,7 +1948,8 @@ void main() {
     expect(find.text('dialog1'), findsNothing);
   });
 
-  testWidgets('can not be dismissed with escape keyboard shortcut if barrier not dismissible', (WidgetTester tester) async {
+  testWidgets('can not be dismissed with escape keyboard shortcut if barrier not dismissible',
+      (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
@@ -2000,9 +2048,9 @@ class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   final Duration reverseTransitionDuration;
 }
 
-class MockPageRoute extends Fake implements PageRoute<dynamic> { }
+class MockPageRoute extends Fake implements PageRoute<dynamic> {}
 
-class MockRoute extends Fake implements Route<dynamic> { }
+class MockRoute extends Fake implements Route<dynamic> {}
 
 class MockRouteAware extends Fake implements RouteAware {
   int didPushCount = 0;
@@ -2069,8 +2117,8 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
     this.barrierLabel,
     this.barrierColor = Colors.black,
     Curve? barrierCurve,
-  }) : _barrierCurve = barrierCurve,
-       _child = child;
+  })  : _barrierCurve = barrierCurve,
+        _child = child;
 
   final Widget _child;
 
@@ -2090,6 +2138,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
     }
     return _barrierCurve!;
   }
+
   final Curve? _barrierCurve;
 
   @override

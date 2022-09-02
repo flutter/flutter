@@ -82,21 +82,21 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.textDirection,
     super.child,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(vsync != null),
-       assert(duration != null),
-       assert(curve != null),
-       assert(clipBehavior != null),
-       _vsync = vsync,
-       _clipBehavior = clipBehavior {
+  })  : assert(vsync != null),
+        assert(duration != null),
+        assert(curve != null),
+        assert(clipBehavior != null),
+        _vsync = vsync,
+        _clipBehavior = clipBehavior {
     _controller = AnimationController(
       vsync: vsync,
       duration: duration,
       reverseDuration: reverseDuration,
     )..addListener(() {
-      if (_controller.value != _lastValue) {
-        markNeedsLayout();
-      }
-    });
+        if (_controller.value != _lastValue) {
+          markNeedsLayout();
+        }
+      });
     _animation = CurvedAnimation(
       parent: _controller,
       curve: curve,
@@ -237,8 +237,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     size = constraints.constrain(_animatedSize!);
     alignChild();
 
-    if (size.width < _sizeTween.end!.width ||
-        size.height < _sizeTween.end!.height) {
+    if (size.width < _sizeTween.end!.width || size.height < _sizeTween.end!.height) {
       _hasVisualOverflow = true;
     }
   }

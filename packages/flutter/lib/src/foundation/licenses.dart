@@ -188,8 +188,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               if (lines.isNotEmpty) {
                 result.add(getParagraph());
               }
-              if (text[currentPosition] == '\r' && currentPosition < text.length - 1
-                  && text[currentPosition + 1] == '\n') {
+              if (text[currentPosition] == '\r' &&
+                  currentPosition < text.length - 1 &&
+                  text[currentPosition + 1] == '\n') {
                 currentPosition += 1;
               }
               lastLineIndent = 0;
@@ -264,7 +265,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     return result;
   }
 }
-
 
 /// A registry for packages to add licenses to, so that they can be displayed
 /// together in an interface such as the [LicensePage].

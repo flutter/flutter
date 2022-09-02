@@ -124,9 +124,9 @@ class SliverPersistentHeader extends StatelessWidget {
     required this.delegate,
     this.pinned = false,
     this.floating = false,
-  }) : assert(delegate != null),
-       assert(pinned != null),
-       assert(floating != null);
+  })  : assert(delegate != null),
+        assert(pinned != null),
+        assert(floating != null);
 
   /// Configuration for the sliver's layout.
   ///
@@ -191,7 +191,7 @@ class SliverPersistentHeader extends StatelessWidget {
 }
 
 class _FloatingHeader extends StatefulWidget {
-  const _FloatingHeader({ required this.child });
+  const _FloatingHeader({required this.child});
 
   final Widget child;
 
@@ -260,7 +260,8 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   final bool floating;
 
   @override
-  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
+  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject =>
+      super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
 
   @override
   void mount(Element? parent, Object? newSlot) {
@@ -296,16 +297,14 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   void _build(double shrinkOffset, bool overlapsContent) {
     owner!.buildScope(this, () {
-      final _SliverPersistentHeaderRenderObjectWidget sliverPersistentHeaderRenderObjectWidget = widget as _SliverPersistentHeaderRenderObjectWidget;
+      final _SliverPersistentHeaderRenderObjectWidget sliverPersistentHeaderRenderObjectWidget =
+          widget as _SliverPersistentHeaderRenderObjectWidget;
       child = updateChild(
         child,
         floating
-          ? _FloatingHeader(child: sliverPersistentHeaderRenderObjectWidget.delegate.build(
-            this,
-            shrinkOffset,
-            overlapsContent
-          ))
-          : sliverPersistentHeaderRenderObjectWidget.delegate.build(this, shrinkOffset, overlapsContent),
+            ? _FloatingHeader(
+                child: sliverPersistentHeaderRenderObjectWidget.delegate.build(this, shrinkOffset, overlapsContent))
+            : sliverPersistentHeaderRenderObjectWidget.delegate.build(this, shrinkOffset, overlapsContent),
         null,
       );
     });
@@ -346,8 +345,8 @@ abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWid
   const _SliverPersistentHeaderRenderObjectWidget({
     required this.delegate,
     this.floating = false,
-  }) : assert(delegate != null),
-       assert(floating != null);
+  })  : assert(delegate != null),
+        assert(floating != null);
 
   final SliverPersistentHeaderDelegate delegate;
   final bool floating;
@@ -405,7 +404,7 @@ class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObje
 }
 
 class _RenderSliverScrollingPersistentHeaderForWidgets extends RenderSliverScrollingPersistentHeader
-  with _RenderSliverPersistentHeaderForWidgetsMixin {
+    with _RenderSliverPersistentHeaderForWidgetsMixin {
   _RenderSliverScrollingPersistentHeaderForWidgets({
     super.stretchConfiguration,
   });
@@ -426,7 +425,7 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
 }
 
 class _RenderSliverPinnedPersistentHeaderForWidgets extends RenderSliverPinnedPersistentHeader
-  with _RenderSliverPersistentHeaderForWidgetsMixin {
+    with _RenderSliverPersistentHeaderForWidgetsMixin {
   _RenderSliverPinnedPersistentHeaderForWidgets({
     super.stretchConfiguration,
     super.showOnScreenConfiguration,
@@ -437,8 +436,8 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
   const _SliverFloatingPersistentHeader({
     required super.delegate,
   }) : super(
-    floating: true,
-  );
+          floating: true,
+        );
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
@@ -460,7 +459,7 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
 }
 
 class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends RenderSliverFloatingPinnedPersistentHeader
-  with _RenderSliverPersistentHeaderForWidgetsMixin {
+    with _RenderSliverPersistentHeaderForWidgetsMixin {
   _RenderSliverFloatingPinnedPersistentHeaderForWidgets({
     required super.vsync,
     super.snapConfiguration,
@@ -473,8 +472,8 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
   const _SliverFloatingPinnedPersistentHeader({
     required super.delegate,
   }) : super(
-    floating: true,
-  );
+          floating: true,
+        );
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
@@ -496,7 +495,7 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
 }
 
 class _RenderSliverFloatingPersistentHeaderForWidgets extends RenderSliverFloatingPersistentHeader
-  with _RenderSliverPersistentHeaderForWidgetsMixin {
+    with _RenderSliverPersistentHeaderForWidgetsMixin {
   _RenderSliverFloatingPersistentHeaderForWidgets({
     required super.vsync,
     super.snapConfiguration,

@@ -41,11 +41,13 @@ void main() {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
 
-    expect(() => Localizations.localeOf(contextKey.currentContext!), throwsA(isAssertionError.having(
+    expect(
+        () => Localizations.localeOf(contextKey.currentContext!),
+        throwsA(isAssertionError.having(
           (AssertionError e) => e.message,
-      'message',
-      contains('does not include a Localizations ancestor'),
-    )));
+          'message',
+          contains('does not include a Localizations ancestor'),
+        )));
   });
 
   testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (WidgetTester tester) async {
@@ -70,7 +72,6 @@ class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {
 }
 
 class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
-
   VoidCallback? onAllowFrame;
 
   @override

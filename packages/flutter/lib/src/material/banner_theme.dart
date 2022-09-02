@@ -30,7 +30,6 @@ import 'theme.dart';
 ///    application.
 @immutable
 class MaterialBannerThemeData with Diagnosticable {
-
   /// Creates a theme that can be used for [MaterialBannerTheme] or
   /// [ThemeData.bannerTheme].
   const MaterialBannerThemeData({
@@ -95,12 +94,12 @@ class MaterialBannerThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    contentTextStyle,
-    elevation,
-    padding,
-    leadingPadding,
-  );
+        backgroundColor,
+        contentTextStyle,
+        elevation,
+        padding,
+        leadingPadding,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -110,12 +109,12 @@ class MaterialBannerThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MaterialBannerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.contentTextStyle == contentTextStyle
-        && other.elevation == elevation
-        && other.padding == padding
-        && other.leadingPadding == leadingPadding;
+    return other is MaterialBannerThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.contentTextStyle == contentTextStyle &&
+        other.elevation == elevation &&
+        other.padding == padding &&
+        other.leadingPadding == leadingPadding;
   }
 
   @override

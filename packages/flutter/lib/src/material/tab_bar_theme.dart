@@ -134,17 +134,17 @@ class TabBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    indicator,
-    indicatorSize,
-    labelColor,
-    labelPadding,
-    labelStyle,
-    unselectedLabelColor,
-    unselectedLabelStyle,
-    overlayColor,
-    splashFactory,
-    mouseCursor,
-  );
+        indicator,
+        indicatorSize,
+        labelColor,
+        labelPadding,
+        labelStyle,
+        unselectedLabelColor,
+        unselectedLabelStyle,
+        overlayColor,
+        splashFactory,
+        mouseCursor,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -154,20 +154,19 @@ class TabBarTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TabBarTheme
-        && other.indicator == indicator
-        && other.indicatorSize == indicatorSize
-        && other.labelColor == labelColor
-        && other.labelPadding == labelPadding
-        && other.labelStyle == labelStyle
-        && other.unselectedLabelColor == unselectedLabelColor
-        && other.unselectedLabelStyle == unselectedLabelStyle
-        && other.overlayColor == overlayColor
-        && other.splashFactory == splashFactory
-        && other.mouseCursor == mouseCursor;
+    return other is TabBarTheme &&
+        other.indicator == indicator &&
+        other.indicatorSize == indicatorSize &&
+        other.labelColor == labelColor &&
+        other.labelPadding == labelPadding &&
+        other.labelStyle == labelStyle &&
+        other.unselectedLabelColor == unselectedLabelColor &&
+        other.unselectedLabelStyle == unselectedLabelStyle &&
+        other.overlayColor == overlayColor &&
+        other.splashFactory == splashFactory &&
+        other.mouseCursor == mouseCursor;
   }
 }
-
 
 @immutable
 class _LerpColors implements MaterialStateProperty<Color?> {
@@ -197,9 +196,6 @@ class _LerpColors implements MaterialStateProperty<Color?> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _LerpColors
-      && other.a == a
-      && other.b == b
-      && other.t == t;
+    return other is _LerpColors && other.a == a && other.b == b && other.t == t;
   }
 }

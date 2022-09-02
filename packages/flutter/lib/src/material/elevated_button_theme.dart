@@ -36,7 +36,7 @@ class ElevatedButtonThemeData with Diagnosticable {
   /// Creates an [ElevatedButtonThemeData].
   ///
   /// The [style] may be null.
-  const ElevatedButtonThemeData({ this.style });
+  const ElevatedButtonThemeData({this.style});
 
   /// Overrides for [ElevatedButton]'s default style.
   ///
@@ -49,7 +49,7 @@ class ElevatedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two elevated button themes.
   static ElevatedButtonThemeData? lerp(ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
-    assert (t != null);
+    assert(t != null);
     if (a == null && b == null) {
       return null;
     }

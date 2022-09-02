@@ -77,14 +77,13 @@ class WidgetSpan extends PlaceholderSpan {
     super.alignment,
     super.baseline,
     super.style,
-  }) : assert(child != null),
-       assert(
-         baseline != null || !(
-          identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
-          identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
-          identical(alignment, ui.PlaceholderAlignment.baseline)
-        ),
-      );
+  })  : assert(child != null),
+        assert(
+          baseline != null ||
+              !(identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
+                  identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
+                  identical(alignment, ui.PlaceholderAlignment.baseline)),
+        );
 
   /// The widget to embed inline within text.
   final Widget child;
@@ -98,7 +97,7 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+  void build(ui.ParagraphBuilder builder, {double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions}) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
@@ -180,10 +179,7 @@ class WidgetSpan extends PlaceholderSpan {
     if (super != other) {
       return false;
     }
-    return other is WidgetSpan
-        && other.child == child
-        && other.alignment == alignment
-        && other.baseline == baseline;
+    return other is WidgetSpan && other.child == child && other.alignment == alignment && other.baseline == baseline;
   }
 
   @override

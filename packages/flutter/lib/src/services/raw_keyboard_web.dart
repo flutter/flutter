@@ -163,37 +163,37 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-        properties.add(DiagnosticsProperty<String>('code', code));
-        properties.add(DiagnosticsProperty<String>('key', key));
-        properties.add(DiagnosticsProperty<int>('location', location));
-        properties.add(DiagnosticsProperty<int>('metaState', metaState));
-        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<String>('code', code));
+    properties.add(DiagnosticsProperty<String>('key', key));
+    properties.add(DiagnosticsProperty<int>('location', location));
+    properties.add(DiagnosticsProperty<int>('metaState', metaState));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RawKeyEventDataWeb
-        && other.code == code
-        && other.key == key
-        && other.location == location
-        && other.metaState == metaState
-        && other.keyCode == keyCode;
+    return other is RawKeyEventDataWeb &&
+        other.code == code &&
+        other.key == key &&
+        other.location == location &&
+        other.metaState == metaState &&
+        other.keyCode == keyCode;
   }
 
   @override
   int get hashCode => Object.hash(
-    code,
-    key,
-    location,
-    metaState,
-    keyCode,
-  );
+        code,
+        key,
+        location,
+        metaState,
+        keyCode,
+      );
 
   // Modifier key masks.
 

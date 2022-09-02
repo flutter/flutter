@@ -105,89 +105,108 @@ class TextTheme with Diagnosticable {
       'Use displayLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline1,
+        TextStyle? headline1,
     @Deprecated(
       'Use displayMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline2,
+        TextStyle? headline2,
     @Deprecated(
       'Use displaySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline3,
+        TextStyle? headline3,
     @Deprecated(
       'Use headlineMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline4,
+        TextStyle? headline4,
     @Deprecated(
       'Use headlineSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline5,
+        TextStyle? headline5,
     @Deprecated(
       'Use titleLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline6,
+        TextStyle? headline6,
     @Deprecated(
       'Use titleMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle1,
+        TextStyle? subtitle1,
     @Deprecated(
       'Use titleSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle2,
+        TextStyle? subtitle2,
     @Deprecated(
       'Use bodyLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText1,
+        TextStyle? bodyText1,
     @Deprecated(
       'Use bodyMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText2,
+        TextStyle? bodyText2,
     @Deprecated(
       'Use bodySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? caption,
+        TextStyle? caption,
     @Deprecated(
       'Use labelLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? button,
+        TextStyle? button,
     @Deprecated(
       'Use labelSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? overline,
-  }) : assert(
-         (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
-             headlineSmall == null && titleLarge == null && titleMedium == null && titleSmall == null &&
-             bodyLarge == null && bodyMedium == null && bodySmall == null && labelLarge == null && labelSmall == null) ||
-         (headline1 == null && headline2 == null && headline3 == null && headline4 == null &&
-             headline5 == null && headline6 == null && subtitle1 == null && subtitle2 == null &&
-             bodyText1 == null && bodyText2 == null && caption == null && button == null && overline == null),
-         'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.'
-       ),
-       displayLarge = displayLarge ?? headline1,
-       displayMedium = displayMedium ?? headline2,
-       displaySmall = displaySmall ?? headline3,
-       headlineMedium = headlineMedium ?? headline4,
-       headlineSmall = headlineSmall ?? headline5,
-       titleLarge = titleLarge ?? headline6,
-       titleMedium = titleMedium ?? subtitle1,
-       titleSmall = titleSmall ?? subtitle2,
-       bodyLarge = bodyLarge ?? bodyText1,
-       bodyMedium = bodyMedium ?? bodyText2,
-       bodySmall = bodySmall ?? caption,
-       labelLarge = labelLarge ?? button,
-       labelSmall = labelSmall ?? overline;
+        TextStyle? overline,
+  })  : assert(
+            (displayLarge == null &&
+                    displayMedium == null &&
+                    displaySmall == null &&
+                    headlineMedium == null &&
+                    headlineSmall == null &&
+                    titleLarge == null &&
+                    titleMedium == null &&
+                    titleSmall == null &&
+                    bodyLarge == null &&
+                    bodyMedium == null &&
+                    bodySmall == null &&
+                    labelLarge == null &&
+                    labelSmall == null) ||
+                (headline1 == null &&
+                    headline2 == null &&
+                    headline3 == null &&
+                    headline4 == null &&
+                    headline5 == null &&
+                    headline6 == null &&
+                    subtitle1 == null &&
+                    subtitle2 == null &&
+                    bodyText1 == null &&
+                    bodyText2 == null &&
+                    caption == null &&
+                    button == null &&
+                    overline == null),
+            'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.'),
+        displayLarge = displayLarge ?? headline1,
+        displayMedium = displayMedium ?? headline2,
+        displaySmall = displaySmall ?? headline3,
+        headlineMedium = headlineMedium ?? headline4,
+        headlineSmall = headlineSmall ?? headline5,
+        titleLarge = titleLarge ?? headline6,
+        titleMedium = titleMedium ?? subtitle1,
+        titleSmall = titleSmall ?? subtitle2,
+        bodyLarge = bodyLarge ?? bodyText1,
+        bodyMedium = bodyMedium ?? bodyText2,
+        bodySmall = bodySmall ?? caption,
+        labelLarge = labelLarge ?? button,
+        labelSmall = labelSmall ?? overline;
 
   /// Largest of the display styles.
   ///
@@ -440,77 +459,96 @@ class TextTheme with Diagnosticable {
       'Use displayLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline1,
+        TextStyle? headline1,
     @Deprecated(
       'Use displayMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline2,
+        TextStyle? headline2,
     @Deprecated(
       'Use displaySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline3,
+        TextStyle? headline3,
     @Deprecated(
       'Use headlineMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline4,
+        TextStyle? headline4,
     @Deprecated(
       'Use headlineSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline5,
+        TextStyle? headline5,
     @Deprecated(
       'Use titleLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline6,
+        TextStyle? headline6,
     @Deprecated(
       'Use titleMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle1,
+        TextStyle? subtitle1,
     @Deprecated(
       'Use titleSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle2,
+        TextStyle? subtitle2,
     @Deprecated(
       'Use bodyLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText1,
+        TextStyle? bodyText1,
     @Deprecated(
       'Use bodyMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText2,
+        TextStyle? bodyText2,
     @Deprecated(
       'Use bodySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? caption,
+        TextStyle? caption,
     @Deprecated(
       'Use labelLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? button,
+        TextStyle? button,
     @Deprecated(
       'Use labelSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? overline,
+        TextStyle? overline,
   }) {
     assert(
-      (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
-          headlineSmall == null && titleLarge == null && titleMedium == null && titleSmall == null &&
-          bodyLarge == null && bodyMedium == null && bodySmall == null && labelLarge == null && labelSmall == null) ||
-      (headline1 == null && headline2 == null && headline3 == null && headline4 == null &&
-          headline5 == null && headline6 == null && subtitle1 == null && subtitle2 == null &&
-          bodyText1 == null && bodyText2 == null && caption == null && button == null && overline == null),
-      'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.'
-    );
+        (displayLarge == null &&
+                displayMedium == null &&
+                displaySmall == null &&
+                headlineMedium == null &&
+                headlineSmall == null &&
+                titleLarge == null &&
+                titleMedium == null &&
+                titleSmall == null &&
+                bodyLarge == null &&
+                bodyMedium == null &&
+                bodySmall == null &&
+                labelLarge == null &&
+                labelSmall == null) ||
+            (headline1 == null &&
+                headline2 == null &&
+                headline3 == null &&
+                headline4 == null &&
+                headline5 == null &&
+                headline6 == null &&
+                subtitle1 == null &&
+                subtitle2 == null &&
+                bodyText1 == null &&
+                bodyText2 == null &&
+                caption == null &&
+                button == null &&
+                overline == null),
+        'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.');
     return TextTheme(
       displayLarge: displayLarge ?? headline1 ?? this.displayLarge,
       displayMedium: displayMedium ?? headline2 ?? this.displayMedium,
@@ -795,53 +833,59 @@ class TextTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TextTheme
-      && displayLarge == other.displayLarge
-      && displayMedium == other.displayMedium
-      && displaySmall == other.displaySmall
-      && headlineLarge == other.headlineLarge
-      && headlineMedium == other.headlineMedium
-      && headlineSmall == other.headlineSmall
-      && titleLarge == other.titleLarge
-      && titleMedium == other.titleMedium
-      && titleSmall == other.titleSmall
-      && bodyLarge == other.bodyLarge
-      && bodyMedium == other.bodyMedium
-      && bodySmall == other.bodySmall
-      && labelLarge == other.labelLarge
-      && labelMedium == other.labelMedium
-      && labelSmall == other.labelSmall;
+    return other is TextTheme &&
+        displayLarge == other.displayLarge &&
+        displayMedium == other.displayMedium &&
+        displaySmall == other.displaySmall &&
+        headlineLarge == other.headlineLarge &&
+        headlineMedium == other.headlineMedium &&
+        headlineSmall == other.headlineSmall &&
+        titleLarge == other.titleLarge &&
+        titleMedium == other.titleMedium &&
+        titleSmall == other.titleSmall &&
+        bodyLarge == other.bodyLarge &&
+        bodyMedium == other.bodyMedium &&
+        bodySmall == other.bodySmall &&
+        labelLarge == other.labelLarge &&
+        labelMedium == other.labelMedium &&
+        labelSmall == other.labelSmall;
   }
 
   @override
   int get hashCode => Object.hash(
-    displayLarge,
-    displayMedium,
-    displaySmall,
-    headlineLarge,
-    headlineMedium,
-    headlineSmall,
-    titleLarge,
-    titleMedium,
-    titleSmall,
-    bodyLarge,
-    bodyMedium,
-    bodySmall,
-    labelLarge,
-    labelMedium,
-    labelSmall,
-  );
+        displayLarge,
+        displayMedium,
+        displaySmall,
+        headlineLarge,
+        headlineMedium,
+        headlineSmall,
+        titleLarge,
+        titleMedium,
+        titleSmall,
+        bodyLarge,
+        bodyMedium,
+        bodySmall,
+        labelLarge,
+        labelMedium,
+        labelSmall,
+      );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final TextTheme defaultTheme = Typography.material2018(platform: defaultTargetPlatform).black;
-    properties.add(DiagnosticsProperty<TextStyle>('displayLarge', displayLarge, defaultValue: defaultTheme.displayLarge));
-    properties.add(DiagnosticsProperty<TextStyle>('displayMedium', displayMedium, defaultValue: defaultTheme.displayMedium));
-    properties.add(DiagnosticsProperty<TextStyle>('displaySmall', displaySmall, defaultValue: defaultTheme.displaySmall));
-    properties.add(DiagnosticsProperty<TextStyle>('headlineLarge', headlineLarge, defaultValue: defaultTheme.headlineLarge));
-    properties.add(DiagnosticsProperty<TextStyle>('headlineMedium', headlineMedium, defaultValue: defaultTheme.headlineMedium));
-    properties.add(DiagnosticsProperty<TextStyle>('headlineSmall', headlineSmall, defaultValue: defaultTheme.headlineSmall));
+    properties
+        .add(DiagnosticsProperty<TextStyle>('displayLarge', displayLarge, defaultValue: defaultTheme.displayLarge));
+    properties
+        .add(DiagnosticsProperty<TextStyle>('displayMedium', displayMedium, defaultValue: defaultTheme.displayMedium));
+    properties
+        .add(DiagnosticsProperty<TextStyle>('displaySmall', displaySmall, defaultValue: defaultTheme.displaySmall));
+    properties
+        .add(DiagnosticsProperty<TextStyle>('headlineLarge', headlineLarge, defaultValue: defaultTheme.headlineLarge));
+    properties.add(
+        DiagnosticsProperty<TextStyle>('headlineMedium', headlineMedium, defaultValue: defaultTheme.headlineMedium));
+    properties
+        .add(DiagnosticsProperty<TextStyle>('headlineSmall', headlineSmall, defaultValue: defaultTheme.headlineSmall));
     properties.add(DiagnosticsProperty<TextStyle>('titleLarge', titleLarge, defaultValue: defaultTheme.titleLarge));
     properties.add(DiagnosticsProperty<TextStyle>('titleMedium', titleMedium, defaultValue: defaultTheme.titleMedium));
     properties.add(DiagnosticsProperty<TextStyle>('titleSmall', titleSmall, defaultValue: defaultTheme.titleSmall));

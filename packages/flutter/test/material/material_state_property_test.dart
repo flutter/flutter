@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   test('MaterialStateProperty.resolveWith()', () {
     final MaterialStateProperty<MaterialState> value = MaterialStateProperty.resolveWith<MaterialState>(
@@ -47,12 +46,12 @@ void main() {
     const MaterialStateProperty<Color?> colorProperty = MaterialStatePropertyAll<Color?>(Color(0xFFFFFFFF));
     expect(colorProperty.toString(), equals('MaterialStatePropertyAll(Color(0xffffffff))'));
 
-    const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(33 + 1/3);
+    const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(33 + 1 / 3);
     expect(doubleProperty.toString(), equals('MaterialStatePropertyAll(33.3)'));
   });
 
   test("Can interpolate between two MaterialStateProperty's", () {
-    const MaterialStateProperty<TextStyle?> textStyle1 =  MaterialStatePropertyAll<TextStyle?>(
+    const MaterialStateProperty<TextStyle?> textStyle1 = MaterialStatePropertyAll<TextStyle?>(
       TextStyle(fontSize: 14.0),
     );
     const MaterialStateProperty<TextStyle?> textStyle2 = MaterialStatePropertyAll<TextStyle?>(
@@ -65,7 +64,8 @@ void main() {
       textStyle2,
       0.0,
       TextStyle.lerp,
-    )!.resolve(enabled)!;
+    )!
+        .resolve(enabled)!;
     expect(textStyle.fontSize, 14.0);
 
     // Using `0.5` interpolation value.
@@ -74,7 +74,8 @@ void main() {
       textStyle2,
       0.5,
       TextStyle.lerp,
-    )!.resolve(enabled)!;
+    )!
+        .resolve(enabled)!;
     expect(textStyle.fontSize, 17.0);
 
     // Using `1.0` interpolation value.
@@ -83,7 +84,8 @@ void main() {
       textStyle2,
       1.0,
       TextStyle.lerp,
-    )!.resolve(enabled)!;
+    )!
+        .resolve(enabled)!;
     expect(textStyle.fontSize, 20.0);
   });
 }

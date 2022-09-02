@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   Future<void> pumpContainer(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(
       DefaultSelectionStyle(
@@ -69,8 +68,7 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: Column(
-        ),
+        child: Column(),
       ),
     );
     expect(registrar.selectables.length, 0);
@@ -94,8 +92,7 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: Column(
-        ),
+        child: Column(),
       ),
     );
     expect(registrar.selectables.length, 0);

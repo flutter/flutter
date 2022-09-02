@@ -158,53 +158,53 @@ class TooltipThemeData with Diagnosticable {
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
-      preferBelow: t < 0.5 ? a?.preferBelow: b?.preferBelow,
+      preferBelow: t < 0.5 ? a?.preferBelow : b?.preferBelow,
       excludeFromSemantics: t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
-      textAlign: t < 0.5 ? a?.textAlign: b?.textAlign,
+      textAlign: t < 0.5 ? a?.textAlign : b?.textAlign,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    height,
-    padding,
-    margin,
-    verticalOffset,
-    preferBelow,
-    excludeFromSemantics,
-    decoration,
-    textStyle,
-    textAlign,
-    waitDuration,
-    showDuration,
-    triggerMode,
-    enableFeedback,
-  );
+        height,
+        padding,
+        margin,
+        verticalOffset,
+        preferBelow,
+        excludeFromSemantics,
+        decoration,
+        textStyle,
+        textAlign,
+        waitDuration,
+        showDuration,
+        triggerMode,
+        enableFeedback,
+      );
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TooltipThemeData
-        && other.height == height
-        && other.padding == padding
-        && other.margin == margin
-        && other.verticalOffset == verticalOffset
-        && other.preferBelow == preferBelow
-        && other.excludeFromSemantics == excludeFromSemantics
-        && other.decoration == decoration
-        && other.textStyle == textStyle
-        && other.textAlign == textAlign
-        && other.waitDuration == waitDuration
-        && other.showDuration == showDuration
-        && other.triggerMode == triggerMode
-        && other.enableFeedback == enableFeedback;
+    return other is TooltipThemeData &&
+        other.height == height &&
+        other.padding == padding &&
+        other.margin == margin &&
+        other.verticalOffset == verticalOffset &&
+        other.preferBelow == preferBelow &&
+        other.excludeFromSemantics == excludeFromSemantics &&
+        other.decoration == decoration &&
+        other.textStyle == textStyle &&
+        other.textAlign == textAlign &&
+        other.waitDuration == waitDuration &&
+        other.showDuration == showDuration &&
+        other.triggerMode == triggerMode &&
+        other.enableFeedback == enableFeedback;
   }
 
   @override

@@ -19,9 +19,9 @@ class _ChildEntry {
     required this.animation,
     required this.transition,
     required this.widgetChild,
-  }) : assert(animation != null),
-       assert(transition != null),
-       assert(controller != null);
+  })  : assert(animation != null),
+        assert(transition != null),
+        assert(controller != null);
 
   // The animation controller for the child's transition.
   final AnimationController controller;
@@ -117,11 +117,11 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  }) : assert(duration != null),
-       assert(switchInCurve != null),
-       assert(switchOutCurve != null),
-       assert(transitionBuilder != null),
-       assert(layoutBuilder != null);
+  })  : assert(duration != null),
+        assert(switchInCurve != null),
+        assert(switchOutCurve != null),
+        assert(transitionBuilder != null),
+        assert(layoutBuilder != null);
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new
@@ -281,8 +281,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
     final bool hasNewChild = widget.child != null;
     final bool hasOldChild = _currentEntry != null;
-    if (hasNewChild != hasOldChild ||
-        hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
+    if (hasNewChild != hasOldChild || hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
       // Child has changed, fade current entry out and add new entry.
       _childNumber += 1;
       _addEntryForNewChild(animate: true);
@@ -299,7 +298,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     }
   }
 
-  void _addEntryForNewChild({ required bool animate }) {
+  void _addEntryForNewChild({required bool animate}) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
@@ -395,6 +394,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   @override
   Widget build(BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
+    return widget.layoutBuilder(_currentEntry?.transition,
+        _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
   }
 }

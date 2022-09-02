@@ -93,7 +93,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter', (WidgetTester tester) async {
-    final Map<String,int> leftBehind = <String,int>{
+    final Map<String, int> leftBehind = <String, int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -168,7 +168,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
-    final Map<String,int> leftBehind = <String,int>{
+    final Map<String, int> leftBehind = <String, int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -244,7 +244,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/76825
   testWidgets('Drag and drop - onMove callback fires correctly with generic parameter', (WidgetTester tester) async {
-    final Map<String,int> targetMoveCount = <String,int>{
+    final Map<String, int> targetMoveCount = <String, int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -262,8 +262,7 @@ void main() {
               return const SizedBox(height: 100.0, child: Text('Target 1'));
             },
             onMove: (DragTargetDetails<int> details) {
-              targetMoveCount['Target 1'] =
-                  targetMoveCount['Target 1']! + details.data;
+              targetMoveCount['Target 1'] = targetMoveCount['Target 1']! + details.data;
             },
           ),
           DragTarget<int>(
@@ -271,8 +270,7 @@ void main() {
               return const SizedBox(height: 100.0, child: Text('Target 2'));
             },
             onMove: (DragTargetDetails<int> details) {
-              targetMoveCount['Target 2'] =
-                  targetMoveCount['Target 2']! + details.data;
+              targetMoveCount['Target 2'] = targetMoveCount['Target 2']! + details.data;
             },
           ),
         ],
@@ -317,7 +315,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
-    final Map<String,int> targetMoveCount = <String,int>{
+    final Map<String, int> targetMoveCount = <String, int>{
       'Target 1': 0,
       'Target 2': 0,
     };
@@ -336,8 +334,7 @@ void main() {
             },
             onMove: (DragTargetDetails<dynamic> details) {
               if (details.data is int) {
-                targetMoveCount['Target 1'] =
-                    targetMoveCount['Target 1']! + (details.data as int);
+                targetMoveCount['Target 1'] = targetMoveCount['Target 1']! + (details.data as int);
               }
             },
           ),
@@ -347,8 +344,7 @@ void main() {
             },
             onMove: (DragTargetDetails<dynamic> details) {
               if (details.data is int) {
-                targetMoveCount['Target 2'] =
-                    targetMoveCount['Target 2']! + (details.data as int);
+                targetMoveCount['Target 2'] = targetMoveCount['Target 2']! + (details.data as int);
               }
             },
           ),
@@ -912,6 +908,7 @@ void main() {
         ),
       );
     }
+
     testWidgets('Null axis draggable moves along all axes', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       final Offset firstLocation = tester.getTopLeft(find.text('N'));
@@ -1096,7 +1093,7 @@ void main() {
 
       expect(updated, 1);
 
-      await gesture.moveBy(const Offset(10 , 0));
+      await gesture.moveBy(const Offset(10, 0));
       await tester.pump();
 
       expect(updated, 1);
@@ -1131,7 +1128,7 @@ void main() {
 
       expect(updated, 0);
 
-      await gesture.moveBy(const Offset(10 , 0));
+      await gesture.moveBy(const Offset(10, 0));
       await tester.pump();
 
       expect(updated, 1);
@@ -1147,7 +1144,8 @@ void main() {
     });
   });
 
-  testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
@@ -1215,7 +1213,8 @@ void main() {
     expect(onDraggableCanceledCalled, isFalse);
   });
 
-  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target', (WidgetTester tester) async {
+  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
@@ -1292,7 +1291,8 @@ void main() {
     expect(onDraggableCanceledOffset, equals(Offset(secondLocation.dx, secondLocation.dy)));
   });
 
-  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
+  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
@@ -1420,7 +1420,9 @@ void main() {
     );
   });
 
-  testWidgets('Drag and drop - DragTarget rebuilds with and without rejected data when a rejected draggable enters and leaves', (WidgetTester tester) async {
+  testWidgets(
+      'Drag and drop - DragTarget rebuilds with and without rejected data when a rejected draggable enters and leaves',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: <Widget>[
@@ -1433,9 +1435,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return SizedBox(
                 height: 100.0,
-                child: rejects.isNotEmpty
-                    ? const Text('Rejected')
-                    : const Text('Target'),
+                child: rejects.isNotEmpty ? const Text('Rejected') : const Text('Target'),
               );
             },
             onWillAccept: (int? data) => false,
@@ -1449,8 +1449,7 @@ void main() {
     expect(find.text('Rejected'), findsNothing);
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
-    final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1473,8 +1472,8 @@ void main() {
     expect(find.text('Rejected'), findsNothing);
   });
 
-
-  testWidgets('Drag and drop - Can drag and drop over a non-accepting target multiple times', (WidgetTester tester) async {
+  testWidgets('Drag and drop - Can drag and drop over a non-accepting target multiple times',
+      (WidgetTester tester) async {
     int numberOfTimesOnDraggableCanceledCalled = 0;
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -1482,18 +1481,16 @@ void main() {
           Draggable<int>(
             data: 1,
             feedback: const Text('Dragging'),
-          onDraggableCanceled: (Velocity velocity, Offset offset) {
-            numberOfTimesOnDraggableCanceledCalled++;
-          },
+            onDraggableCanceled: (Velocity velocity, Offset offset) {
+              numberOfTimesOnDraggableCanceledCalled++;
+            },
             child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return SizedBox(
                 height: 100.0,
-                child: rejects.isNotEmpty
-                    ? const Text('Rejected')
-                    : const Text('Target'),
+                child: rejects.isNotEmpty ? const Text('Rejected') : const Text('Target'),
               );
             },
             onWillAccept: (int? data) => false,
@@ -1507,8 +1504,7 @@ void main() {
     expect(find.text('Rejected'), findsNothing);
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
-    final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1532,8 +1528,7 @@ void main() {
     expect(numberOfTimesOnDraggableCanceledCalled, 1);
 
     // Drag and drop the Draggable onto the Target a second time.
-    final TestGesture secondGesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture secondGesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1556,7 +1551,8 @@ void main() {
     expect(find.text('Rejected'), findsNothing);
   });
 
-  testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target', (WidgetTester tester) async {
+  testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
@@ -1711,12 +1707,12 @@ void main() {
       home: Column(
         children: <Widget>[
           Draggable<int>(
-              data: 1,
-              feedback: const Text('Dragging'),
-              onDragEnd: (DraggableDetails details) {
-                timesOnDragEndCalled++;
-              },
-              child: const Text('Source'),
+            data: 1,
+            feedback: const Text('Dragging'),
+            onDragEnd: (DraggableDetails details) {
+              timesOnDragEndCalled++;
+            },
+            child: const Text('Source'),
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
@@ -1752,15 +1748,15 @@ void main() {
     await tester.pump();
 
     await tester.pumpWidget(MaterialApp(
-        home: Column(
-            children: const <Widget>[
-              Draggable<int>(
-                  data: 1,
-                  feedback: Text('Dragging'),
-                  child: Text('Source'),
-              ),
-            ],
-        ),
+      home: Column(
+        children: const <Widget>[
+          Draggable<int>(
+            data: 1,
+            feedback: Text('Dragging'),
+            child: Text('Source'),
+          ),
+        ],
+      ),
     ));
 
     expect(events, isEmpty);
@@ -1975,7 +1971,8 @@ void main() {
     final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
     final List<DragTargetDetails<DragTargetData>> acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>>[];
     final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
-    final List<DragTargetDetails<ExtendedDragTargetData>> acceptedExtendedDragTargetDataDetails = <DragTargetDetails<ExtendedDragTargetData>>[];
+    final List<DragTargetDetails<ExtendedDragTargetData>> acceptedExtendedDragTargetDataDetails =
+        <DragTargetDetails<ExtendedDragTargetData>>[];
     final DragTargetData dragTargetData = DragTargetData();
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -1995,7 +1992,8 @@ void main() {
                       child: Text('Target1'),
                     ),
                   );
-                }, onAccept: acceptedDragTargetDatas.add,
+                },
+                onAccept: acceptedDragTargetDatas.add,
                 onAcceptWithDetails: acceptedDragTargetDataDetails.add,
               ),
               DragTarget<ExtendedDragTargetData>(
@@ -2213,7 +2211,7 @@ void main() {
           initialEntries: <OverlayEntry>[
             OverlayEntry(
               builder: (BuildContext context) => GestureDetector(
-                onTap: () { /* registers a tap recognizer */ },
+                onTap: () {/* registers a tap recognizer */},
                 child: Draggable<Object>(
                   feedback: Container(
                     width: 100.0,
@@ -2404,7 +2402,8 @@ void main() {
     expect(events, equals(<String>['tap']));
   });
 
-  testWidgets('long-press draggable calls onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgets('long-press draggable calls onDragEnd called if dropped on accepting target',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
@@ -2460,7 +2459,6 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDragEndCalled, isFalse);
 
-
     final Offset secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
     await tester.pump();
@@ -2491,7 +2489,8 @@ void main() {
     expect(onDragEndDraggableDetails.offset, equals(expectedDropOffset));
   });
 
-  testWidgets('long-press draggable calls onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgets('long-press draggable calls onDragCompleted called if dropped on accepting target',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
@@ -2668,87 +2667,90 @@ void main() {
   });
 
   testWidgets('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
-    await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: true, expectedHapticFeedbackCount: 1);
+    await _testLongPressDraggableHapticFeedback(
+        tester: tester, hapticFeedbackOnStart: true, expectedHapticFeedbackCount: 1);
   });
 
   testWidgets('long-press draggable can disable Haptic Feedback', (WidgetTester tester) async {
-    await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: false, expectedHapticFeedbackCount: 0);
+    await _testLongPressDraggableHapticFeedback(
+        tester: tester, hapticFeedbackOnStart: false, expectedHapticFeedbackCount: 0);
   });
 
   testWidgets('Drag feedback with child anchor positions correctly', (WidgetTester tester) async {
     await _testChildAnchorFeedbackPosition(tester: tester);
   });
 
-  testWidgets('Drag feedback with child anchor within a non-global Overlay positions correctly', (WidgetTester tester) async {
+  testWidgets('Drag feedback with child anchor within a non-global Overlay positions correctly',
+      (WidgetTester tester) async {
     await _testChildAnchorFeedbackPosition(tester: tester, left: 100.0, top: 100.0);
   });
 
   testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-      final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
-      // Create a [MaterialApp], with a nested [Navigator], which has the
-      // [Draggable].
-      await tester.pumpWidget(MaterialApp(
-        navigatorKey: rootNavigatorKey,
-        home: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 200.0,
-              child: Navigator(
-                key: childNavigatorKey,
-                onGenerateRoute: (RouteSettings settings) {
-                  if (settings.name == '/') {
-                    return MaterialPageRoute<void>(
-                      settings: settings,
-                      builder: (BuildContext context) => const Draggable<int>(
-                        data: 1,
-                        feedback: Text('Dragging'),
-                        rootOverlay: true,
-                        child: Text('Source'),
-                      ),
-                    );
-                  }
-                  throw UnsupportedError('Unsupported route: $settings');
-                },
-              ),
-            ),
-            DragTarget<int>(
-              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return const SizedBox(
-                    height: 300.0, child: Center(child: Text('Target 1')),
-                );
+    final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
+    // Create a [MaterialApp], with a nested [Navigator], which has the
+    // [Draggable].
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: rootNavigatorKey,
+      home: Column(
+        children: <Widget>[
+          SizedBox(
+            height: 200.0,
+            child: Navigator(
+              key: childNavigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                if (settings.name == '/') {
+                  return MaterialPageRoute<void>(
+                    settings: settings,
+                    builder: (BuildContext context) => const Draggable<int>(
+                      data: 1,
+                      feedback: Text('Dragging'),
+                      rootOverlay: true,
+                      child: Text('Source'),
+                    ),
+                  );
+                }
+                throw UnsupportedError('Unsupported route: $settings');
               },
             ),
-          ],
-        ),
-      ));
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(
+                height: 300.0,
+                child: Center(child: Text('Target 1')),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
 
-      final Offset firstLocation = tester.getCenter(find.text('Source'));
-      final TestGesture gesture =
-          await tester.startGesture(firstLocation, pointer: 7);
-      await tester.pump();
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
 
-      final Offset secondLocation = tester.getCenter(find.text('Target 1'));
-      await gesture.moveTo(secondLocation);
-      await tester.pump();
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
 
-      // Expect that the feedback widget is a descendant of the root overlay,
-      // but not a descendant of the child overlay.
-      expect(
-        find.descendant(
-          of: find.byType(Overlay).first,
-          matching: find.text('Dragging'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byType(Overlay).last,
-          matching: find.text('Dragging'),
-        ),
-        findsNothing,
-      );
-    });
+    // Expect that the feedback widget is a descendant of the root overlay,
+    // but not a descendant of the child overlay.
+    expect(
+      find.descendant(
+        of: find.byType(Overlay).first,
+        matching: find.text('Dragging'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(Overlay).last,
+        matching: find.text('Dragging'),
+      ),
+      findsNothing,
+    );
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/72483
   testWidgets('Drag and drop - DragTarget<Object> can accept Draggable<int> data', (WidgetTester tester) async {
@@ -2787,7 +2789,8 @@ void main() {
     expect(accepted, equals(<int>[1]));
   });
 
-  testWidgets('Drag and drop - DragTarget<int> can accept Draggable<Object> data when runtime type is int', (WidgetTester tester) async {
+  testWidgets('Drag and drop - DragTarget<int> can accept Draggable<Object> data when runtime type is int',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -2823,7 +2826,8 @@ void main() {
     expect(accepted, equals(<int>[1]));
   });
 
-  testWidgets('Drag and drop - DragTarget<int> should not accept Draggable<Object> data when runtime type null', (WidgetTester tester) async {
+  testWidgets('Drag and drop - DragTarget<int> should not accept Draggable<Object> data when runtime type null',
+      (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     bool isReceiveNullDataForCheck = false;
     await tester.pumpWidget(MaterialApp(
@@ -2869,87 +2873,91 @@ void main() {
   testWidgets('Drag and drop can contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(MaterialApp(
-        home: ListView(
-          scrollDirection: Axis.horizontal,
-          addSemanticIndexes: false,
-          children: <Widget>[
-            DragTarget<int>(
-              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return const Text('Target');
-              },
-            ),
-            Container(width: 400.0),
-            const Draggable<int>(
-              data: 1,
-              feedback: Text('H'),
-              childWhenDragging: SizedBox(),
-              axis: Axis.horizontal,
-              ignoringFeedbackSemantics: false,
-              child: Text('H'),
-            ),
-            const Draggable<int>(
-              data: 2,
-              feedback: Text('V'),
-              childWhenDragging: SizedBox(),
-              axis: Axis.vertical,
-              ignoringFeedbackSemantics: false,
-              child: Text('V'),
-            ),
-            const Draggable<int>(
-              data: 3,
-              feedback: Text('N'),
-              childWhenDragging: SizedBox(),
-              child: Text('N'),
-            ),
-          ],
-        ),
+      home: ListView(
+        scrollDirection: Axis.horizontal,
+        addSemanticIndexes: false,
+        children: <Widget>[
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const Text('Target');
+            },
+          ),
+          Container(width: 400.0),
+          const Draggable<int>(
+            data: 1,
+            feedback: Text('H'),
+            childWhenDragging: SizedBox(),
+            axis: Axis.horizontal,
+            ignoringFeedbackSemantics: false,
+            child: Text('H'),
+          ),
+          const Draggable<int>(
+            data: 2,
+            feedback: Text('V'),
+            childWhenDragging: SizedBox(),
+            axis: Axis.vertical,
+            ignoringFeedbackSemantics: false,
+            child: Text('V'),
+          ),
+          const Draggable<int>(
+            data: 3,
+            feedback: Text('N'),
+            childWhenDragging: SizedBox(),
+            child: Text('N'),
+          ),
+        ],
+      ),
     ));
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            textDirection: TextDirection.ltr,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                id: 2,
+                id: 1,
+                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    id: 2,
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 4,
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 9,
-                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                            actions: <SemanticsAction>[SemanticsAction.scrollLeft],
+                            id: 4,
                             children: <TestSemantics>[
                               TestSemantics(
-                                id: 5,
-                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                label: 'Target',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              TestSemantics(
-                                id: 6,
-                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                label: 'H',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              TestSemantics(
-                                id: 7,
-                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                label: 'V',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              TestSemantics(
-                                id: 8,
-                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                label: 'N',
-                                textDirection: TextDirection.ltr,
+                                id: 9,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                actions: <SemanticsAction>[SemanticsAction.scrollLeft],
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                    label: 'Target',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    id: 6,
+                                    tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                    label: 'H',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    id: 7,
+                                    tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                    label: 'V',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    id: 8,
+                                    tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                    label: 'N',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -2961,11 +2969,9 @@ void main() {
               ),
             ],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-      ignoreRect: true,
-    ));
+          ignoreTransform: true,
+          ignoreRect: true,
+        ));
 
     final Offset firstLocation = tester.getTopLeft(find.text('N'));
     final Offset secondLocation = firstLocation + const Offset(300.0, 300.0);
@@ -2974,46 +2980,51 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            textDirection: TextDirection.ltr,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                id: 2,
+                id: 1,
+                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    id: 2,
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 4,
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 9,
-                            flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                            id: 4,
                             children: <TestSemantics>[
                               TestSemantics(
-                                id: 5,
-                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                label: 'Target',
-                                textDirection: TextDirection.ltr,
+                                id: 9,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                    label: 'Target',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    id: 6,
+                                    tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                    label: 'H',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    id: 7,
+                                    tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                    label: 'V',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+
+                                  /// N is moved offscreen.
+                                ],
                               ),
-                              TestSemantics(
-                                id: 6,
-                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                label: 'H',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              TestSemantics(
-                                id: 7,
-                                tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                label: 'V',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              /// N is moved offscreen.
                             ],
                           ),
                         ],
@@ -3024,11 +3035,9 @@ void main() {
               ),
             ],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-      ignoreRect: true,
-    ));
+          ignoreTransform: true,
+          ignoreRect: true,
+        ));
     semantics.dispose();
   });
 
@@ -3193,16 +3202,24 @@ void main() {
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).child, widget1);
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).feedback, widget2);
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).dragAnchor, DragAnchor.child);
-    expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.pointer, child: widget1).dragAnchor, DragAnchor.pointer);
-    expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
+    expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.pointer, child: widget1).dragAnchor,
+        DragAnchor.pointer);
+    expect(
+        LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1)
+            .dragAnchorStrategy,
+        dummyStrategy);
   });
 }
 
-Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester tester, required bool hapticFeedbackOnStart, required int expectedHapticFeedbackCount }) async {
+Future<void> _testLongPressDraggableHapticFeedback(
+    {required WidgetTester tester,
+    required bool hapticFeedbackOnStart,
+    required int expectedHapticFeedbackCount}) async {
   bool onDragStartedCalled = false;
 
   int hapticFeedbackCalls = 0;
-  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
+      (MethodCall methodCall) async {
     if (methodCall.method == 'HapticFeedback.vibrate') {
       hapticFeedbackCalls++;
     }
@@ -3241,7 +3258,8 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   expect(hapticFeedbackCalls, expectedHapticFeedbackCount);
 }
 
-Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
+Future<void> _testChildAnchorFeedbackPosition(
+    {required WidgetTester tester, double top = 0.0, double left = 0.0}) async {
   final List<int> accepted = <int>[];
   final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
   int dragStartedCount = 0;
@@ -3299,7 +3317,6 @@ Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, do
   expect(find.text('Target'), findsOneWidget);
   expect(dragStartedCount, 1);
 
-
   final Offset secondLocation = tester.getBottomRight(find.text('Target'));
   await gesture.moveTo(secondLocation);
   await tester.pump();
@@ -3317,6 +3334,6 @@ Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, do
   expect(feedbackTopLeft, equals(sourceTopLeft + dragOffset));
 }
 
-class DragTargetData { }
+class DragTargetData {}
 
-class ExtendedDragTargetData extends DragTargetData { }
+class ExtendedDragTargetData extends DragTargetData {}

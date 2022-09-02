@@ -43,8 +43,8 @@ class ButtonBarThemeData with Diagnosticable {
     this.buttonAlignedDropdown,
     this.layoutBehavior,
     this.overflowDirection,
-  }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
-       assert(buttonHeight == null || buttonHeight >= 0.0);
+  })  : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
+        assert(buttonHeight == null || buttonHeight >= 0.0);
 
   /// How the children should be placed along the horizontal axis.
   final MainAxisAlignment? alignment;
@@ -165,16 +165,16 @@ class ButtonBarThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    alignment,
-    mainAxisSize,
-    buttonTextTheme,
-    buttonMinWidth,
-    buttonHeight,
-    buttonPadding,
-    buttonAlignedDropdown,
-    layoutBehavior,
-    overflowDirection,
-  );
+        alignment,
+        mainAxisSize,
+        buttonTextTheme,
+        buttonMinWidth,
+        buttonHeight,
+        buttonPadding,
+        buttonAlignedDropdown,
+        layoutBehavior,
+        overflowDirection,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -184,16 +184,16 @@ class ButtonBarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ButtonBarThemeData
-        && other.alignment == alignment
-        && other.mainAxisSize == mainAxisSize
-        && other.buttonTextTheme == buttonTextTheme
-        && other.buttonMinWidth == buttonMinWidth
-        && other.buttonHeight == buttonHeight
-        && other.buttonPadding == buttonPadding
-        && other.buttonAlignedDropdown == buttonAlignedDropdown
-        && other.layoutBehavior == layoutBehavior
-        && other.overflowDirection == overflowDirection;
+    return other is ButtonBarThemeData &&
+        other.alignment == alignment &&
+        other.mainAxisSize == mainAxisSize &&
+        other.buttonTextTheme == buttonTextTheme &&
+        other.buttonMinWidth == buttonMinWidth &&
+        other.buttonHeight == buttonHeight &&
+        other.buttonPadding == buttonPadding &&
+        other.buttonAlignedDropdown == buttonAlignedDropdown &&
+        other.layoutBehavior == layoutBehavior &&
+        other.overflowDirection == overflowDirection;
   }
 
   @override

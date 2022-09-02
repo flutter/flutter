@@ -323,7 +323,7 @@ void main() {
             ),
             TextSpan(
               text: 'Clickable',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
           ],
         ),
@@ -368,7 +368,7 @@ void main() {
             const TextSpan(text: 'hello '),
             TextSpan(
               text: 'world',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
@@ -428,7 +428,7 @@ void main() {
               const TextSpan(text: onScreenText),
               TextSpan(
                 text: offScreenText,
-                recognizer: TapGestureRecognizer()..onTap = () { },
+                recognizer: TapGestureRecognizer()..onTap = () {},
               ),
             ],
             style: textStyle,
@@ -493,7 +493,7 @@ void main() {
               const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
               TextSpan(
                 text: 'world',
-                recognizer: TapGestureRecognizer()..onTap = () { },
+                recognizer: TapGestureRecognizer()..onTap = () {},
               ),
             ],
             style: textStyle,
@@ -542,7 +542,7 @@ void main() {
             const TextSpan(text: 'hello '),
             TextSpan(
               text: 'world',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' this is a '),
             const TextSpan(
@@ -589,7 +589,6 @@ void main() {
     semantics.dispose();
   });
 
-
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
@@ -601,12 +600,12 @@ void main() {
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
             TextSpan(
               text: 'BOY',
-              recognizer: LongPressGestureRecognizer()..onLongPress = () { },
+              recognizer: LongPressGestureRecognizer()..onLongPress = () {},
             ),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
             TextSpan(
               text: 'SIR',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
           ],
@@ -680,7 +679,7 @@ void main() {
           children: <TextSpan>[
             TextSpan(
               text: 'click me',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
           ],
           style: textStyle,
@@ -702,12 +701,14 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(
-      expectedSemantics,
-      ignoreTransform: true,
-      ignoreId: true,
-      ignoreRect: true,
-    ));
+    expect(
+        semantics,
+        hasSemantics(
+          expectedSemantics,
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ));
     semantics.dispose();
   });
 
@@ -721,7 +722,7 @@ void main() {
             const TextSpan(text: 'a '),
             TextSpan(
               text: 'pebble',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
@@ -795,7 +796,7 @@ void main() {
             const TextSpan(text: 'a '),
             TextSpan(
               text: 'pebble',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
@@ -1033,38 +1034,42 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/62550.
       await tester.pumpWidget(
-          Center(
-            child: SizedBox(
-              width: 400,
-              child: Center(
-                child: RichText(
-                  text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
-                  textWidthBasis: TextWidthBasis.longestLine,
-                  textDirection: TextDirection.ltr,
-                ),
+        Center(
+          child: SizedBox(
+            width: 400,
+            child: Center(
+              child: RichText(
+                text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
+                textWidthBasis: TextWidthBasis.longestLine,
+                textDirection: TextDirection.ltr,
               ),
             ),
           ),
-        );
+        ),
+      );
 
-      expect(find.byType(RichText), paints..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawParagraph) {
-          return false;
-        }
-        final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.longestLine > paragraph.width) {
-          throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
-        }
-        if (paragraph.width >= 400) {
-          throw 'paragraph.width (${paragraph.width}) >= 400';
-        }
-        return true;
-      }));
+      expect(
+          find.byType(RichText),
+          paints
+            ..something((Symbol method, List<dynamic> arguments) {
+              if (method != #drawParagraph) {
+                return false;
+              }
+              final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
+              if (paragraph.longestLine > paragraph.width) {
+                throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
+              }
+              if (paragraph.width >= 400) {
+                throw 'paragraph.width (${paragraph.width}) >= 400';
+              }
+              return true;
+            }));
     },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44020
   );
 
-  testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
+  testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length',
+      (WidgetTester tester) async {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
     builder.addText('hello');
     final ui.Paragraph paragraph = builder.build();
@@ -1090,37 +1095,52 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          id: 1,
-          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-          transform: Matrix4(
-            3.0,0.0,0.0,0.0,
-            0.0,3.0,0.0,0.0,
-            0.0,0.0,1.0,0.0,
-            0.0,0.0,0.0,1.0,
-          ),
+    expect(
+        semantics,
+        hasSemantics(TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
-              rect: const Rect.fromLTRB(-4.0, -4.0, 74.0, 18.0),
-              id: 2,
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              id: 1,
+              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+              transform: Matrix4(
+                3.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                3.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+              ),
+              children: <TestSemantics>[
+                TestSemantics(
+                  rect: const Rect.fromLTRB(-4.0, -4.0, 74.0, 18.0),
+                  id: 2,
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
               ],
             ),
           ],
-        ),
-      ],
-    )));
+        )));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
-  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -1140,33 +1160,37 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics(label: 'included'),
-            TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
-              ],
-            ),
-            TestSemantics(label: 'included2'),
-          ],
-        ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(label: 'included'),
+                  TestSemantics(
+                    label: 'HELLO',
+                    actions: <SemanticsAction>[
+                      SemanticsAction.tap,
+                    ],
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isLink,
+                    ],
+                  ),
+                  TestSemantics(label: 'included2'),
+                ],
+              ),
+            ],
+          ),
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
-  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -1198,33 +1222,37 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics(label: 'foo'),
-            TestSemantics(label: 'bar'),
-            TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
-              ],
-            ),
-          ],
-        ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(label: 'foo'),
+                  TestSemantics(label: 'bar'),
+                  TestSemantics(
+                    label: 'HELLO',
+                    actions: <SemanticsAction>[
+                      SemanticsAction.tap,
+                    ],
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isLink,
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
-  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
+  testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -1250,7 +1278,7 @@ void main() {
                       ),
                       TextSpan(
                         text: 'next WS is clipped',
-                        recognizer: TapGestureRecognizer()..onTap = () { },
+                        recognizer: TapGestureRecognizer()..onTap = () {},
                       ),
                       const WidgetSpan(
                         child: Icon(
@@ -1269,24 +1297,27 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          children: <TestSemantics>[
-            TestSemantics(label: 'not clipped'),
-            TestSemantics(
-              label: 'next WS is clipped',
-              flags: <SemanticsFlag>[SemanticsFlag.isLink],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-            ),
-          ],
-        ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(label: 'not clipped'),
+                  TestSemantics(
+                    label: 'next WS is clipped',
+                    flags: <SemanticsFlag>[SemanticsFlag.isLink],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
@@ -1345,40 +1376,38 @@ void main() {
     expect(richText.text.style!.overflow, overflow);
   });
 
-  testWidgets(
-    'Text can be hit-tested without layout or paint being called in a frame',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/85108.
-      await tester.pumpWidget(
-        const Opacity(
-          opacity: 1.0,
-          child: Text(
-            'Hello World',
-            textDirection: TextDirection.ltr,
-            style: TextStyle(color: Color(0xFF123456)),
-          ),
+  testWidgets('Text can be hit-tested without layout or paint being called in a frame', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/85108.
+    await tester.pumpWidget(
+      const Opacity(
+        opacity: 1.0,
+        child: Text(
+          'Hello World',
+          textDirection: TextDirection.ltr,
+          style: TextStyle(color: Color(0xFF123456)),
         ),
-      );
+      ),
+    );
 
-      // The color changed and the opacity is set to 0:
-      //  * 0 opacity will prevent RenderParagraph.paint from being called.
-      //  * Only changing the color will prevent RenderParagraph.performLayout
-      //    from being called.
-      //  The underlying TextPainter should not evict its layout cache in this
-      //  case, for hit-testing.
-      await tester.pumpWidget(
-        const Opacity(
-          opacity: 0.0,
-          child: Text(
-            'Hello World',
-            textDirection: TextDirection.ltr,
-            style: TextStyle(color: Color(0x87654321)),
-          ),
+    // The color changed and the opacity is set to 0:
+    //  * 0 opacity will prevent RenderParagraph.paint from being called.
+    //  * Only changing the color will prevent RenderParagraph.performLayout
+    //    from being called.
+    //  The underlying TextPainter should not evict its layout cache in this
+    //  case, for hit-testing.
+    await tester.pumpWidget(
+      const Opacity(
+        opacity: 0.0,
+        child: Text(
+          'Hello World',
+          textDirection: TextDirection.ltr,
+          style: TextStyle(color: Color(0x87654321)),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Hello World'));
-      expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Hello World'));
+    expect(tester.takeException(), isNull);
   });
 }
 

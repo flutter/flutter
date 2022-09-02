@@ -38,10 +38,10 @@ class DefaultSelectionStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] with an invalid [child],
   /// which means the constructed value cannot be incorporated into the tree.
-  const DefaultSelectionStyle.fallback({ super.key })
-    : cursorColor = null,
-      selectionColor = null,
-      super(child: const _NullWidget());
+  const DefaultSelectionStyle.fallback({super.key})
+      : cursorColor = null,
+        selectionColor = null,
+        super(child: const _NullWidget());
 
   /// The default cursor and selection color (semi-transparent grey).
   ///
@@ -69,22 +69,18 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// DefaultSelectionStyle style = DefaultSelectionStyle.of(context);
   /// ```
   static DefaultSelectionStyle of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<DefaultSelectionStyle>() ?? const DefaultSelectionStyle.fallback();
+    return context.dependOnInheritedWidgetOfExactType<DefaultSelectionStyle>() ??
+        const DefaultSelectionStyle.fallback();
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    return DefaultSelectionStyle(
-      cursorColor: cursorColor,
-      selectionColor: selectionColor,
-      child: child
-    );
+    return DefaultSelectionStyle(cursorColor: cursorColor, selectionColor: selectionColor, child: child);
   }
 
   @override
   bool updateShouldNotify(DefaultSelectionStyle oldWidget) {
-    return cursorColor != oldWidget.cursorColor ||
-           selectionColor != oldWidget.selectionColor;
+    return cursorColor != oldWidget.cursorColor || selectionColor != oldWidget.selectionColor;
   }
 }
 

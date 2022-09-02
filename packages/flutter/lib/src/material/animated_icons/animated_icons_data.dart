@@ -14,7 +14,6 @@ part of material_animated_icons;
 ///
 /// Use with [AnimatedIcon] class to show specific animated icons.
 abstract class AnimatedIcons {
-
   /// The Material Design add to event icon animation.
   static const AnimatedIconData add_event = _$add_event;
 

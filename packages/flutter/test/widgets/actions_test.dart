@@ -73,7 +73,8 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
-    testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke', (WidgetTester tester) async {
+    testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke',
+        (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -217,7 +218,8 @@ void main() {
       expect(invokedAction, equals(testAction));
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
-    testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
+    testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified",
+        (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
@@ -314,7 +316,8 @@ void main() {
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext!), throwsAssertionError);
       expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.',
+        (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -693,12 +696,12 @@ void main() {
     late Action<Intent> testAction;
 
     Future<void> pumpTest(
-        WidgetTester tester, {
-          bool enabled = true,
-          bool directional = false,
-          bool supplyCallbacks = true,
-          required Key key,
-        }) async {
+      WidgetTester tester, {
+      bool enabled = true,
+      bool directional = false,
+      bool supplyCallbacks = true,
+      required Key key,
+    }) async {
       await tester.pumpWidget(
         MediaQuery(
           data: MediaQueryData(
@@ -742,7 +745,8 @@ void main() {
       );
     });
 
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.',
+        (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -775,7 +779,8 @@ void main() {
       expect(hovering, isFalse);
       expect(focusing, isFalse);
     });
-    testWidgets('FocusableActionDetector shows focus highlight appropriately when focused and disabled', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector shows focus highlight appropriately when focused and disabled',
+        (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -885,7 +890,7 @@ void main() {
 
     testWidgets(
       'FocusableActionDetector can prevent its descendants from being traversable',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
         final FocusNode buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
         final FocusNode buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
 
@@ -969,6 +974,7 @@ void main() {
       void testCallback() {
         called = true;
       }
+
       final VoidCallbackAction action = VoidCallbackAction();
       final VoidCallbackIntent intent = VoidCallbackIntent(testCallback);
       action.invoke(intent);
@@ -984,11 +990,11 @@ void main() {
       const TestIntent().debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        })
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description, isEmpty);
     });
@@ -1002,11 +1008,11 @@ void main() {
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        })
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(2));
       expect(
@@ -1063,22 +1069,25 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent : Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   invokingContext2 = context2;
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent : Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         invokingContext3 = context3;
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1128,22 +1137,25 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   invokingContext2 = context2;
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         invokingContext3 = context3;
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1193,18 +1205,20 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2') },
+                    actions: <Type, Action<Intent>>{LogIntent: LogInvocationAction(actionName: 'action2')},
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1236,20 +1250,23 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1282,20 +1299,23 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1', enabled: false), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1', enabled: false), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1323,20 +1343,23 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1365,20 +1388,25 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action2'), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action2'),
+                          context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3', enabled: false), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3', enabled: false),
+                                context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1415,21 +1443,25 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: StatefulBuilder(
                 builder: (BuildContext context2, StateSetter stateSetter) {
                   setState = stateSetter;
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      if (action2LookupContext != null) LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!),
+                    actions: <Type, Action<Intent>>{
+                      if (action2LookupContext != null)
+                        LogIntent: Action<LogIntent>.overridable(
+                            defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1472,12 +1504,13 @@ void main() {
         Builder(
           builder: (BuildContext context) {
             return Actions(
-              actions: <Type, Action<Intent>> { LogIntent : TestContextAction() },
+              actions: <Type, Action<Intent>>{LogIntent: TestContextAction()},
               child: Builder(
                 builder: (BuildContext context) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action1'), context: context),
                     },
                     child: Builder(
                       builder: (BuildContext context1) {
@@ -1510,19 +1543,21 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
+                          actions: <Type, Action<Intent>>{
                             LogIntent: Action<LogIntent>.overridable(
                               defaultAction: Action<LogIntent>.overridable(
                                 defaultAction: Action<LogIntent>.overridable(
@@ -1567,20 +1602,24 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: RedirectOutputAction(actionName: 'action2', newLog: newLogChannel), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: RedirectOutputAction(actionName: 'action2', newLog: newLogChannel),
+                          context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1616,21 +1655,24 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
+              actions: <Type, Action<Intent>>{
                 // The default Action is a ContextAction subclass.
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action1'), context: context1),
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationContextAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1669,20 +1711,24 @@ void main() {
         Builder(
           builder: (BuildContext context1) {
             return Actions(
-              actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                    defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {
                   return Actions(
-                    actions: <Type, Action<Intent>> {
-                      LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action2', enabled: false), context: context2),
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                          defaultAction: LogInvocationContextAction(actionName: 'action2', enabled: false),
+                          context: context2),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
                         return Actions(
-                          actions: <Type, Action<Intent>> {
-                            LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
+                          actions: <Type, Action<Intent>>{
+                            LogIntent: Action<LogIntent>.overridable(
+                                defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1763,6 +1809,7 @@ class TestAction extends CallbackAction<TestIntent> {
     super.removeActionListener(listener);
     listeners.remove(listener);
   }
+
   List<ActionListenerCallback> listeners = <ActionListenerCallback>[];
 
   void _testInvoke(TestIntent intent) => invoke(intent);
@@ -1795,13 +1842,13 @@ class TestContextAction extends ContextAction<TestIntent> {
 }
 
 class LogIntent extends Intent {
-  const LogIntent({ required this.log });
+  const LogIntent({required this.log});
 
   final List<String> log;
 }
 
 class LogInvocationAction extends Action<LogIntent> {
-  LogInvocationAction({ required this.actionName, this.enabled = true });
+  LogInvocationAction({required this.actionName, this.enabled = true});
 
   final String actionName;
 
@@ -1830,7 +1877,7 @@ class LogInvocationAction extends Action<LogIntent> {
 }
 
 class LogInvocationContextAction extends ContextAction<LogIntent> {
-  LogInvocationContextAction({ required this.actionName, this.enabled = true });
+  LogInvocationContextAction({required this.actionName, this.enabled = true});
 
   static BuildContext? invokeContext;
 
@@ -1862,7 +1909,7 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
 }
 
 class LogInvocationButDeferIsEnabledAction extends LogInvocationAction {
-  LogInvocationButDeferIsEnabledAction({ required super.actionName });
+  LogInvocationButDeferIsEnabledAction({required super.actionName});
 
   // Defer `isActionEnabled` to the overridable action.
   @override
@@ -1871,9 +1918,9 @@ class LogInvocationButDeferIsEnabledAction extends LogInvocationAction {
 
 class RedirectOutputAction extends LogInvocationAction {
   RedirectOutputAction({
-      required super.actionName,
-      super.enabled,
-      required this.newLog,
+    required super.actionName,
+    super.enabled,
+    required this.newLog,
   });
 
   final List<String> newLog;

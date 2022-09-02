@@ -49,8 +49,7 @@ bool deepEquals(dynamic valueA, dynamic valueB) {
 
 bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
   if (valueA is ByteData) {
-    return valueB is ByteData
-        && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
+    return valueB is ByteData && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
   }
   if (valueA is Uint8List) {
     return valueB is Uint8List && deepEqualsList(valueA, valueB);

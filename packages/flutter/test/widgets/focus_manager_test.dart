@@ -285,8 +285,7 @@ void main() {
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
-          false);
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
       expect(logs, <int>[20, 21, 10, 11, 0, 1]);
       logs.clear();
 
@@ -296,8 +295,7 @@ void main() {
         <KeyEventResult>[KeyEventResult.handled, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
-          true);
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), true);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
 
@@ -307,8 +305,7 @@ void main() {
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.handled],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1),
-          true);
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
 
@@ -318,15 +315,13 @@ void main() {
         <KeyEventResult>[KeyEventResult.skipRemainingHandlers, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1),
-          false);
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
     }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   group(FocusScopeNode, () {
-
     testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
@@ -417,7 +412,8 @@ void main() {
       expect(child2.hasPrimaryFocus, isTrue);
     });
 
-    testWidgets('Requesting focus before adding to tree results in a request after adding', (WidgetTester tester) async {
+    testWidgets('Requesting focus before adding to tree results in a request after adding',
+        (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode();
       final FocusAttachment scopeAttachment = scope.attach(context);
@@ -474,7 +470,8 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
 
-    testWidgets('Adding a focusedChild to a scope sets scope as focusedChild in parent scope', (WidgetTester tester) async {
+    testWidgets('Adding a focusedChild to a scope sets scope as focusedChild in parent scope',
+        (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode();
       final FocusAttachment scope1Attachment = scope1.attach(context);
@@ -685,11 +682,14 @@ void main() {
       child4.requestFocus();
       await tester.pump();
       expect(child4.ancestors, equals(<FocusNode>[parent2, scope2, tester.binding.focusManager.rootScope]));
-      expect(tester.binding.focusManager.rootScope.descendants, equals(<FocusNode>[child1, child2, parent1, scope1, child3, child4, parent2, scope2]));
+      expect(tester.binding.focusManager.rootScope.descendants,
+          equals(<FocusNode>[child1, child2, parent1, scope1, child3, child4, parent2, scope2]));
       scope2Attachment.reparent(parent: child2);
       await tester.pump();
-      expect(child4.ancestors, equals(<FocusNode>[parent2, scope2, child2, parent1, scope1, tester.binding.focusManager.rootScope]));
-      expect(tester.binding.focusManager.rootScope.descendants, equals(<FocusNode>[child1, child3, child4, parent2, scope2, child2, parent1, scope1]));
+      expect(child4.ancestors,
+          equals(<FocusNode>[parent2, scope2, child2, parent1, scope1, tester.binding.focusManager.rootScope]));
+      expect(tester.binding.focusManager.rootScope.descendants,
+          equals(<FocusNode>[child1, child3, child4, parent2, scope2, child2, parent1, scope1]));
     });
 
     testWidgets('Can move focus between scopes and keep focus', (WidgetTester tester) async {
@@ -982,7 +982,8 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
 
-    testWidgets('Requesting focus on a scope works properly when some focusedChild nodes are unfocusable', (WidgetTester tester) async {
+    testWidgets('Requesting focus on a scope works properly when some focusedChild nodes are unfocusable',
+        (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       final FocusAttachment scope1Attachment = scope1.attach(context);
@@ -1145,6 +1146,7 @@ void main() {
         lastMode = mode;
         callCount++;
       }
+
       FocusManager.instance.addHighlightModeListener(handleModeChange);
       addTearDown(() => FocusManager.instance.removeHighlightModeListener(handleModeChange));
       expect(callCount, equals(0));
@@ -1266,59 +1268,54 @@ void main() {
     });
   });
 
-
   group('Autofocus', () {
-    testWidgets(
-      'works when the previous focused node is detached',
-      (WidgetTester tester) async {
-        final FocusNode node1 = FocusNode();
-        final FocusNode node2 = FocusNode();
+    testWidgets('works when the previous focused node is detached', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode();
+      final FocusNode node2 = FocusNode();
 
-        await tester.pumpWidget(
-          FocusScope(
-            child: Focus(autofocus: true, focusNode: node1, child: const Placeholder()),
-          ),
-        );
-        await tester.pump();
-        expect(node1.hasPrimaryFocus, isTrue);
+      await tester.pumpWidget(
+        FocusScope(
+          child: Focus(autofocus: true, focusNode: node1, child: const Placeholder()),
+        ),
+      );
+      await tester.pump();
+      expect(node1.hasPrimaryFocus, isTrue);
 
-        await tester.pumpWidget(
-          FocusScope(
-            child: SizedBox(
-              child: Focus(autofocus: true, focusNode: node2, child: const Placeholder()),
-            ),
+      await tester.pumpWidget(
+        FocusScope(
+          child: SizedBox(
+            child: Focus(autofocus: true, focusNode: node2, child: const Placeholder()),
           ),
-        );
-        await tester.pump();
-        expect(node2.hasPrimaryFocus, isTrue);
+        ),
+      );
+      await tester.pump();
+      expect(node2.hasPrimaryFocus, isTrue);
     });
 
-    testWidgets(
-      'node detached before autofocus is applied',
-      (WidgetTester tester) async {
-        final FocusScopeNode scopeNode = FocusScopeNode();
-        final FocusNode node1 = FocusNode();
+    testWidgets('node detached before autofocus is applied', (WidgetTester tester) async {
+      final FocusScopeNode scopeNode = FocusScopeNode();
+      final FocusNode node1 = FocusNode();
 
-        await tester.pumpWidget(
-          FocusScope(
-            node: scopeNode,
-            child: Focus(
-              autofocus: true,
-              focusNode: node1,
-              child: const Placeholder(),
-            ),
+      await tester.pumpWidget(
+        FocusScope(
+          node: scopeNode,
+          child: Focus(
+            autofocus: true,
+            focusNode: node1,
+            child: const Placeholder(),
           ),
-        );
-        await tester.pumpWidget(
-          FocusScope(
-            node: scopeNode,
-            child: const Focus(child: Placeholder()),
-          ),
-        );
+        ),
+      );
+      await tester.pumpWidget(
+        FocusScope(
+          node: scopeNode,
+          child: const Focus(child: Placeholder()),
+        ),
+      );
 
-        await tester.pump();
-        expect(node1.hasPrimaryFocus, isFalse);
-        expect(scopeNode.hasPrimaryFocus, isTrue);
+      await tester.pump();
+      expect(node1.hasPrimaryFocus, isFalse);
+      expect(scopeNode.hasPrimaryFocus, isTrue);
     });
 
     testWidgets('autofocus the first candidate', (WidgetTester tester) async {
@@ -1408,7 +1405,8 @@ void main() {
     });
   });
 
-  testWidgets("Doesn't lose focused child when reparenting if the nearestScope doesn't change.", (WidgetTester tester) async {
+  testWidgets("Doesn't lose focused child when reparenting if the nearestScope doesn't change.",
+      (WidgetTester tester) async {
     final BuildContext context = await setupWidget(tester);
     final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
     final FocusScopeNode parent2 = FocusScopeNode(debugLabel: 'parent2');
@@ -1434,7 +1432,8 @@ void main() {
     expect(parent1.focusedChild, equals(child2));
   });
 
-  testWidgets('Ancestors get notified exactly as often as needed if focused child changes focus.', (WidgetTester tester) async {
+  testWidgets('Ancestors get notified exactly as often as needed if focused child changes focus.',
+      (WidgetTester tester) async {
     bool topFocus = false;
     bool parent1Focus = false;
     bool parent2Focus = false;
@@ -1457,6 +1456,7 @@ void main() {
       child1Notify = 0;
       child2Notify = 0;
     }
+
     final BuildContext context = await setupWidget(tester);
     final FocusScopeNode top = FocusScopeNode(debugLabel: 'top');
     final FocusAttachment topAttachment = top.attach(context);
@@ -1581,6 +1581,7 @@ void main() {
     void handleFocusChange() {
       notifyCount++;
     }
+
     tester.binding.focusManager.addListener(handleFocusChange);
 
     parent1.autofocus(child2);
@@ -1609,7 +1610,8 @@ void main() {
     tester.binding.focusManager.removeListener(handleFocusChange);
   });
 
-  testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
+  testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.',
+      (WidgetTester tester) async {
     final FocusNode nodeA = FocusNode(debugLabel: 'a');
     final FocusNode nodeB = FocusNode(debugLabel: 'b');
     await tester.pumpWidget(
@@ -1617,7 +1619,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: Column(
           children: <Widget>[
-            Focus(focusNode: nodeA , child: const Text('a')),
+            Focus(focusNode: nodeA, child: const Text('a')),
             Focus(focusNode: nodeB, child: const Text('b')),
           ],
         ),
@@ -1627,6 +1629,7 @@ void main() {
     void handleFocusChange() {
       notifyCount++;
     }
+
     tester.binding.focusManager.addListener(handleFocusChange);
 
     nodeA.requestFocus();
@@ -1676,6 +1679,7 @@ void main() {
       void handleFocusChange() {
         notifyCount++;
       }
+
       tester.binding.focusManager.addListener(handleFocusChange);
 
       parent1.requestFocus();
@@ -1698,6 +1702,9 @@ void main() {
     expect(messagesStr.split('\n').length, equals(58));
     expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
     expect(messagesStr, contains('FOCUS: Notified 2 dirty nodes'));
-    expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
+    expect(
+        messagesStr,
+        contains(
+            RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
 }

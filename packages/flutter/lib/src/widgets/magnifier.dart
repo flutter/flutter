@@ -29,9 +29,9 @@ import 'overlay.dart';
 /// - [MagnifierOverlayInfoBearer], the data class that updates the
 ///   magnifier.
 typedef MagnifierBuilder = Widget? Function(
-    BuildContext context,
-    MagnifierController controller,
-    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
+  BuildContext context,
+  MagnifierController controller,
+  ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
 );
 
 /// A data class that contains the geometry information of text layouts
@@ -73,20 +73,20 @@ class MagnifierOverlayInfoBearer {
     if (identical(this, other)) {
       return true;
     }
-    return other is MagnifierOverlayInfoBearer
-        && other.globalGesturePosition == globalGesturePosition
-        && other.caretRect == caretRect
-        && other.currentLineBoundaries == currentLineBoundaries
-        && other.fieldBounds == fieldBounds;
+    return other is MagnifierOverlayInfoBearer &&
+        other.globalGesturePosition == globalGesturePosition &&
+        other.caretRect == caretRect &&
+        other.currentLineBoundaries == currentLineBoundaries &&
+        other.fieldBounds == fieldBounds;
   }
 
   @override
   int get hashCode => Object.hash(
-    globalGesturePosition,
-    caretRect,
-    fieldBounds,
-    currentLineBoundaries,
-  );
+        globalGesturePosition,
+        caretRect,
+        fieldBounds,
+        currentLineBoundaries,
+      );
 }
 
 /// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
@@ -105,10 +105,8 @@ class TextMagnifierConfiguration {
   ///
   /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
   /// that never builds a magnifier.
-  const TextMagnifierConfiguration({
-    MagnifierBuilder? magnifierBuilder,
-    this.shouldDisplayHandlesInMagnifier = true
-  }) : _magnifierBuilder = magnifierBuilder;
+  const TextMagnifierConfiguration({MagnifierBuilder? magnifierBuilder, this.shouldDisplayHandlesInMagnifier = true})
+      : _magnifierBuilder = magnifierBuilder;
 
   /// The passed in [MagnifierBuilder].
   ///
@@ -243,7 +241,7 @@ class MagnifierController {
     OverlayEntry? below,
   }) async {
     if (overlayEntry != null) {
-        overlayEntry!.remove();
+      overlayEntry!.remove();
     }
 
     final OverlayState? overlayState = Overlay.of(
@@ -257,7 +255,7 @@ class MagnifierController {
       to: Navigator.maybeOf(context)?.context,
     );
 
-   _overlayEntry = OverlayEntry(
+    _overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
     overlayState!.insert(overlayEntry!, below: below);
@@ -325,10 +323,8 @@ class MagnifierController {
     required Rect rect,
     required Rect bounds,
   }) {
-    assert(rect.width <= bounds.width,
-        'attempted to shift $rect within $bounds, but the rect has a greater width.');
-    assert(rect.height <= bounds.height,
-        'attempted to shift $rect within $bounds, but the rect has a greater height.');
+    assert(rect.width <= bounds.width, 'attempted to shift $rect within $bounds, but the rect has a greater width.');
+    assert(rect.height <= bounds.height, 'attempted to shift $rect within $bounds, but the rect has a greater height.');
 
     Offset rectShift = Offset.zero;
     if (rect.left < bounds.left) {
@@ -405,14 +401,13 @@ class RawMagnifier extends StatelessWidget {
   /// orignally.
   /// {@endtemplate}
   const RawMagnifier({
-      super.key,
-      this.child,
-      this.decoration = const MagnifierDecoration(),
-      this.focalPointOffset = Offset.zero,
-      this.magnificationScale = 1,
-      required this.size,
-      }) : assert(magnificationScale != 0,
-            'Magnification scale of 0 results in undefined behavior.');
+    super.key,
+    this.child,
+    this.decoration = const MagnifierDecoration(),
+    this.focalPointOffset = Offset.zero,
+    this.magnificationScale = 1,
+    required this.size,
+  }) : assert(magnificationScale != 0, 'Magnification scale of 0 results in undefined behavior.');
 
   /// An optional widget to posiiton inside the len of the [RawMagnifier].
   ///
@@ -424,7 +419,6 @@ class RawMagnifier extends StatelessWidget {
   ///
   /// {@macro flutter.widgets.magnifier.RawMagnifier.invisibility_warning}
   final MagnifierDecoration decoration;
-
 
   /// The offset of the magnifier from [RawMagnifier]'s center.
   ///
@@ -493,10 +487,8 @@ class _MagnifierStyle extends StatelessWidget {
   Widget build(BuildContext context) {
     double largestShadow = 0;
     for (final BoxShadow shadow in decoration.shadows ?? <BoxShadow>[]) {
-      largestShadow = math.max(
-          largestShadow,
-          (shadow.blurRadius + shadow.spreadRadius) +
-              math.max(shadow.offset.dy.abs(), shadow.offset.dx.abs()));
+      largestShadow = math.max(largestShadow,
+          (shadow.blurRadius + shadow.spreadRadius) + math.max(shadow.offset.dy.abs(), shadow.offset.dx.abs()));
     }
 
     return ClipPath(
@@ -571,8 +563,7 @@ class _Magnifier extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, _RenderMagnification renderObject) {
+  void updateRenderObject(BuildContext context, _RenderMagnification renderObject) {
     renderObject
       ..focalPointOffset = focalPointOffset
       ..shape = shape
@@ -628,8 +619,7 @@ class _RenderMagnification extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Offset thisCenter = Alignment.center.alongSize(size) + offset;
     final Matrix4 matrix = Matrix4.identity()
-      ..translate(
-          magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
+      ..translate(magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
           magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
     final ImageFilter filter = ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high);

@@ -85,6 +85,7 @@ class _SelectionAreaState extends State<SelectionArea> {
     _internalNode ??= FocusNode();
     return _internalNode!;
   }
+
   FocusNode? _internalNode;
 
   @override

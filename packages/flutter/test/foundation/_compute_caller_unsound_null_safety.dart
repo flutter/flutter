@@ -9,7 +9,6 @@
 import 'package:flutter/src/foundation/_isolates_io.dart';
 import 'package:flutter/src/foundation/isolates.dart' as isolates;
 
-
 int returnInt(int arg) {
   return arg;
 }

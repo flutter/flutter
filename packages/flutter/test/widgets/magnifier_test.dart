@@ -10,8 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _MockAnimationController extends AnimationController {
-  _MockAnimationController()
-      : super(duration: const Duration(minutes: 1), vsync: const TestVSync());
+  _MockAnimationController() : super(duration: const Duration(minutes: 1), vsync: const TestVSync());
   int forwardCalls = 0;
   int reverseCalls = 0;
 
@@ -41,8 +40,7 @@ void main() {
   }
 
   group('Raw Magnifier', () {
-    testWidgets('should render with correct focal point and decoration',
-        (WidgetTester tester) async {
+    testWidgets('should render with correct focal point and decoration', (WidgetTester tester) async {
       final Key appKey = UniqueKey();
       const Size magnifierSize = Size(100, 100);
       const Offset magnifierFocalPoint = Offset(50, 50);
@@ -101,11 +99,11 @@ void main() {
         find.byKey(appKey),
         matchesGoldenFile('widgets.magnifier.styled.png'),
       );
-    }, skip: kIsWeb);  // [intended] Bdf does not display on web.
+    }, skip: kIsWeb); // [intended] Bdf does not display on web.
 
     group('transition states', () {
-      final AnimationController animationController = AnimationController(
-          vsync: const TestVSync(), duration: const Duration(minutes: 2));
+      final AnimationController animationController =
+          AnimationController(vsync: const TestVSync(), duration: const Duration(minutes: 2));
       final MagnifierController magnifierController = MagnifierController();
 
       tearDown(() {
@@ -115,9 +113,7 @@ void main() {
         magnifierController.removeFromOverlay();
       });
 
-      testWidgets(
-          'should immediately remove from overlay on no animation controller',
-          (WidgetTester tester) async {
+      testWidgets('should immediately remove from overlay on no animation controller', (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
@@ -127,8 +123,7 @@ void main() {
             home: Placeholder(),
           ));
 
-          final BuildContext context =
-              tester.firstElement(find.byType(Placeholder));
+          final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
           magnifierController.show(
             context: context,
@@ -148,11 +143,9 @@ void main() {
         });
       });
 
-      testWidgets('should update shown based on animation status',
-          (WidgetTester tester) async {
+      testWidgets('should update shown based on animation status', (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
-          final MagnifierController magnifierController =
-              MagnifierController(animationController: animationController);
+          final MagnifierController magnifierController = MagnifierController(animationController: animationController);
 
           const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
@@ -162,8 +155,7 @@ void main() {
             home: Placeholder(),
           ));
 
-          final BuildContext context =
-              tester.firstElement(find.byType(Placeholder));
+          final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
           magnifierController.show(
             context: context,
@@ -174,15 +166,13 @@ void main() {
           await tester.pump();
 
           // No time has passed, so the animation controller has not completed.
-          expect(magnifierController.animationController?.status,
-              AnimationStatus.forward);
+          expect(magnifierController.animationController?.status, AnimationStatus.forward);
           expect(magnifierController.shown, true);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(magnifierController.animationController?.status,
-              AnimationStatus.completed);
+          expect(magnifierController.animationController?.status, AnimationStatus.completed);
           expect(magnifierController.shown, true);
 
           magnifierController.hide();
@@ -190,15 +180,13 @@ void main() {
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          expect(magnifierController.animationController?.status,
-              AnimationStatus.reverse);
+          expect(magnifierController.animationController?.status, AnimationStatus.reverse);
           expect(magnifierController.shown, false);
 
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          expect(magnifierController.animationController?.status,
-              AnimationStatus.dismissed);
+          expect(magnifierController.animationController?.status, AnimationStatus.dismissed);
           expect(magnifierController.shown, false);
         });
       });
@@ -223,22 +211,16 @@ void main() {
         final Widget fakeMagnifier = Placeholder(key: UniqueKey());
         final Widget fakeBefore = Placeholder(key: UniqueKey());
 
-        final OverlayEntry fakeBeforeOverlayEntry =
-            OverlayEntry(builder: (_) => fakeBefore);
+        final OverlayEntry fakeBeforeOverlayEntry = OverlayEntry(builder: (_) => fakeBefore);
 
         Overlay.of(context)!.insert(fakeBeforeOverlayEntry);
-        magnifierController.show(
-            context: context,
-            builder: (_) => fakeMagnifier,
-            below: fakeBeforeOverlayEntry);
+        magnifierController.show(context: context, builder: (_) => fakeMagnifier, below: fakeBeforeOverlayEntry);
 
         WidgetsBinding.instance.scheduleFrame();
         await tester.pumpAndSettle();
 
-        final Iterable<Element> allOverlayChildren = find
-            .descendant(
-                of: find.byType(Overlay), matching: find.byType(Placeholder))
-            .evaluate();
+        final Iterable<Element> allOverlayChildren =
+            find.descendant(of: find.byType(Overlay), matching: find.byType(Placeholder)).evaluate();
 
         // Expect the magnifier to be the first child, even though it was inserted
         // after the fakeBefore.
@@ -249,8 +231,7 @@ void main() {
       testWidgets('should insert newly built widget without animating out if overlay != null',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
-          final _MockAnimationController animationController =
-              _MockAnimationController();
+          final _MockAnimationController animationController = _MockAnimationController();
 
           const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
@@ -263,8 +244,7 @@ void main() {
             home: Placeholder(),
           ));
 
-          final BuildContext context =
-              tester.firstElement(find.byType(Placeholder));
+          final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
           magnifierController.show(
             context: context,
@@ -283,8 +263,7 @@ void main() {
           await tester.pump();
 
           expect(animationController.reverseCalls, 0,
-              reason:
-                  'should not have called reverse on animation controller due to force remove');
+              reason: 'should not have called reverse on animation controller due to force remove');
 
           expect(find.byWidget(testMagnifier2), findsOneWidget);
         });
@@ -312,11 +291,8 @@ void main() {
       ];
 
       for (int i = 0; i < boundsRects.length; i++) {
-        test(
-            'should shift ${inputRects[i]} to ${outputRects[i]} for bounds ${boundsRects[i]}',
-            () {
-          final Rect outputRect = MagnifierController.shiftWithinBounds(
-              bounds: boundsRects[i], rect: inputRects[i]);
+        test('should shift ${inputRects[i]} to ${outputRects[i]} for bounds ${boundsRects[i]}', () {
+          final Rect outputRect = MagnifierController.shiftWithinBounds(bounds: boundsRects[i], rect: inputRects[i]);
           expect(outputRect, outputRects[i]);
         });
       }

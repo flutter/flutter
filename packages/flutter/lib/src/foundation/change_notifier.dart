@@ -208,8 +208,7 @@ class ChangeNotifier implements Listenable {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
       } else {
-        final List<VoidCallback?> newListeners =
-            List<VoidCallback?>.filled(_listeners.length * 2, null);
+        final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_listeners.length * 2, null);
         for (int i = 0; i < _count; i++) {
           newListeners[i] = _listeners[i];
         }
@@ -394,7 +393,7 @@ class ChangeNotifier implements Listenable {
           if (_listeners[i] == null) {
             // We swap this item with the next not null item.
             int swapIndex = i + 1;
-            while(_listeners[swapIndex] == null) {
+            while (_listeners[swapIndex] == null) {
               swapIndex += 1;
             }
             _listeners[i] = _listeners[swapIndex];

@@ -119,8 +119,8 @@ class ValueListenableBuilder<T> extends StatefulWidget {
     required this.valueListenable,
     required this.builder,
     this.child,
-  }) : assert(valueListenable != null),
-       assert(builder != null);
+  })  : assert(valueListenable != null),
+        assert(builder != null);
 
   /// The [ValueListenable] whose value you depend on in order to build.
   ///
@@ -178,7 +178,9 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   }
 
   void _valueChanged() {
-    setState(() { value = widget.valueListenable.value; });
+    setState(() {
+      value = widget.valueListenable.value;
+    });
   }
 
   @override

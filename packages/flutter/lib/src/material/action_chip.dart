@@ -84,11 +84,11 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
-  }) : assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0);
+  })  : assert(label != null),
+        assert(clipBehavior != null),
+        assert(autofocus != null),
+        assert(pressElevation == null || pressElevation >= 0.0),
+        assert(elevation == null || elevation >= 0.0);
 
   @override
   final Widget? avatar;
@@ -139,9 +139,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _ActionChipDefaultsM3(context, isEnabled)
-      : null;
+    final ChipThemeData? defaults = Theme.of(context).useMaterial3 ? _ActionChipDefaultsM3(context, isEnabled) : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -180,11 +178,16 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   const _ActionChipDefaultsM3(this.context, this.isEnabled)
-    : super(
-        elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
-        showCheckmark: true,
-      );
+      : super(
+          elevation: 0.0,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  topRight: Radius.circular(8.0),
+                  bottomLeft: Radius.circular(8.0),
+                  bottomRight: Radius.circular(8.0))),
+          showCheckmark: true,
+        );
 
   final BuildContext context;
   final bool isEnabled;
@@ -199,7 +202,8 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => null;
 
   @override
-  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get selectedColor => null;
@@ -215,16 +219,14 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => isEnabled
-    ? BorderSide(color: Theme.of(context).colorScheme.outline)
-    : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+      ? BorderSide(color: Theme.of(context).colorScheme.outline)
+      : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? Theme.of(context).colorScheme.primary
-      : Theme.of(context).colorScheme.onSurface,
-    size: 18.0,
-  );
+        color: isEnabled ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
+        size: 18.0,
+      );
 
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
@@ -235,10 +237,10 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   /// remains 4px.
   @override
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+        const EdgeInsets.symmetric(horizontal: 8.0),
+        const EdgeInsets.symmetric(horizontal: 4.0),
+        clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+      )!;
 }
 
 // END GENERATED TOKEN PROPERTIES - ActionChip

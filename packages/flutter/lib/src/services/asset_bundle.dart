@@ -79,7 +79,7 @@ abstract class AssetBundle {
   /// [Utf8Codec] will be used for decoding the string. If the string is
   /// larger than 50 KB, the decoding process is delegated to an
   /// isolate to avoid jank on the main thread.
-  Future<String> loadString(String key, { bool cache = true }) async {
+  Future<String> loadString(String key, {bool cache = true}) async {
     final ByteData data = await load(key);
     if (data == null) {
       throw FlutterError('Unable to load asset: $key');
@@ -108,10 +108,10 @@ abstract class AssetBundle {
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
   /// loaded, the cache will be reread from the asset bundle.
-  void evict(String key) { }
+  void evict(String key) {}
 
   /// If this is a caching asset bundle, clear all cached data.
-  void clear() { }
+  void clear() {}
 
   @override
   String toString() => '${describeIdentity(this)}()';
@@ -125,8 +125,8 @@ class NetworkAssetBundle extends AssetBundle {
   /// Creates a network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
   NetworkAssetBundle(Uri baseUrl)
-    : _baseUrl = baseUrl,
-      _httpClient = HttpClient();
+      : _baseUrl = baseUrl,
+        _httpClient = HttpClient();
 
   final Uri _baseUrl;
   final HttpClient _httpClient;
@@ -180,7 +180,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
 
   @override
-  Future<String> loadString(String key, { bool cache = true }) {
+  Future<String> loadString(String key, {bool cache = true}) {
     if (cache) {
       return _stringCache.putIfAbsent(key, () => super.loadString(key));
     }

@@ -299,7 +299,7 @@ void main() {
                 ShaderMask(
                   shaderCallback: (Rect bounds) => const RadialGradient(
                     radius: 0.05,
-                    colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
+                    colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
                     tileMode: TileMode.mirror,
                   ).createShader(bounds),
                   child: const Placeholder(),
@@ -309,7 +309,7 @@ void main() {
                   onChanged: (RangeValues newValues) {},
                 ),
                 CompositedTransformFollower(
-                 link: LayerLink(),
+                  link: LayerLink(),
                 ),
               ],
             ),

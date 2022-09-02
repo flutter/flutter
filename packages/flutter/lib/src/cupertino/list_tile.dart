@@ -251,15 +251,14 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle titleTextStyle =
-        widget._type == _CupertinoListTileType.base || widget.subtitle == null
-            ? CupertinoTheme.of(context).textTheme.textStyle
-            : CupertinoTheme.of(context).textTheme.textStyle.merge(
-                  TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
-                  ),
-                );
+    final TextStyle titleTextStyle = widget._type == _CupertinoListTileType.base || widget.subtitle == null
+        ? CupertinoTheme.of(context).textTheme.textStyle
+        : CupertinoTheme.of(context).textTheme.textStyle.merge(
+              TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
+              ),
+            );
 
     final TextStyle subtitleTextStyle = widget._type == _CupertinoListTileType.base
         ? CupertinoTheme.of(context).textTheme.textStyle.merge(
@@ -276,8 +275,10 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
             );
 
     final TextStyle? additionalInfoTextStyle = widget.additionalInfo != null
-        ? CupertinoTheme.of(context).textTheme.textStyle.merge(
-            TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)))
+        ? CupertinoTheme.of(context)
+            .textTheme
+            .textStyle
+            .merge(TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)))
         : null;
 
     final Widget title = DefaultTextStyle(
@@ -367,8 +368,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
             const Spacer(),
             if (additionalInfo != null) ...<Widget>[
               additionalInfo,
-              if (widget.trailing != null)
-                const SizedBox(width: _kAdditionalInfoToTrailing),
+              if (widget.trailing != null) const SizedBox(width: _kAdditionalInfoToTrailing),
             ],
             if (widget.trailing != null) widget.trailing!
           ],
@@ -381,12 +381,18 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     }
 
     return GestureDetector(
-      onTapDown: (_) => setState(() { _tapped = true; }),
-      onTapCancel: () => setState(() { _tapped = false; }),
+      onTapDown: (_) => setState(() {
+        _tapped = true;
+      }),
+      onTapCancel: () => setState(() {
+        _tapped = false;
+      }),
       onTap: () async {
         await widget.onTap!();
         if (mounted) {
-          setState(() { _tapped = false; });
+          setState(() {
+            _tapped = false;
+          });
         }
       },
       behavior: HitTestBehavior.opaque,

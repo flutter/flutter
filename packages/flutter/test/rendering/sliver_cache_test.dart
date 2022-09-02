@@ -335,7 +335,6 @@ void main() {
     expect(children.sublist(0, 9).every((RenderBox r) => r.attached), true);
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
 
-
     // scroll to the middle
     root.offset = ViewportOffset.fixed(1500.0);
     pumpFrame();
@@ -433,7 +432,6 @@ void main() {
     );
     expect(children.sublist(0, 9).every((RenderBox r) => r.attached), true);
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
-
 
     // scroll to the middle
     root.offset = ViewportOffset.fixed(1500.0);
@@ -533,7 +531,6 @@ void main() {
     expect(children.sublist(0, 18).every((RenderBox r) => r.attached), true);
     expect(children.sublist(18, 60).any((RenderBox r) => r.attached), false);
 
-
     // scroll to the middle
     root.offset = ViewportOffset.fixed(1500.0);
     pumpFrame();
@@ -592,7 +589,6 @@ void main() {
       adapters.add(adapter);
       return padding;
     });
-
 
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
@@ -754,7 +750,6 @@ void main() {
     // scroll to the end
     root.offset = ViewportOffset.fixed(5400.0);
     pumpFrame();
-
 
     final RenderSliverPadding firstPadding = paddings[0];
     expectSliverConstraints(
@@ -936,7 +931,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { required RenderBox? after }) {
+  void createChild(int index, {required RenderBox? after}) {
     if (index < 0 || index >= children.length) {
       return;
     }
@@ -976,5 +971,5 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  void setDidUnderflow(bool value) { }
+  void setDidUnderflow(bool value) {}
 }

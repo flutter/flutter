@@ -11,9 +11,11 @@ void main() {
     expect(theme.textTheme, ButtonTextTheme.normal);
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(theme.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
-    ));
+    expect(
+        theme.shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        ));
     expect(theme.alignedDropdown, false);
     expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
   });
@@ -40,9 +42,11 @@ void main() {
     expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(theme.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(2.0)),
-    ));
+    expect(
+        theme.shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0)),
+        ));
     expect(theme.alignedDropdown, false);
     expect(theme.colorScheme, null);
 
@@ -69,7 +73,7 @@ void main() {
   testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
     final Key dropdownKey = UniqueKey();
 
-    Widget buildFrame({ required bool alignedDropdown, required TextDirection textDirection }) {
+    Widget buildFrame({required bool alignedDropdown, required TextDirection textDirection}) {
       return MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return Directionality(
@@ -89,7 +93,7 @@ void main() {
                       width: 200.0,
                       child: DropdownButton<String>(
                         key: dropdownKey,
-                        onChanged: (String? value) { },
+                        onChanged: (String? value) {},
                         value: 'foo',
                         items: const <DropdownMenuItem<String>>[
                           DropdownMenuItem<String>(

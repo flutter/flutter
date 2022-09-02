@@ -82,7 +82,10 @@ void main() {
         const TextEditingValue text2 = TextEditingValue(text: 'Text 2');
         fakeTextChannel.incoming?.call(MethodCall(
           'TextInputClient.updateEditingStateWithTag',
-          <dynamic>[0, <String, dynamic>{ client2.autofillId : text2.toJSON() }],
+          <dynamic>[
+            0,
+            <String, dynamic>{client2.autofillId: text2.toJSON()}
+          ],
         ));
 
         expect(client2.currentTextEditingValue, text2);

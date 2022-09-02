@@ -52,11 +52,11 @@ class IconData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IconData
-        && other.codePoint == codePoint
-        && other.fontFamily == fontFamily
-        && other.fontPackage == fontPackage
-        && other.matchTextDirection == matchTextDirection;
+    return other is IconData &&
+        other.codePoint == codePoint &&
+        other.fontFamily == fontFamily &&
+        other.fontPackage == fontPackage &&
+        other.matchTextDirection == matchTextDirection;
   }
 
   @override
@@ -78,9 +78,9 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
     super.showName,
     super.style,
     super.level,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null);
+  })  : assert(showName != null),
+        assert(style != null),
+        assert(level != null);
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

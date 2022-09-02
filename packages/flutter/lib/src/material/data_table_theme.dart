@@ -140,18 +140,18 @@ class DataTableThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    decoration,
-    dataRowColor,
-    dataRowHeight,
-    dataTextStyle,
-    headingRowColor,
-    headingRowHeight,
-    headingTextStyle,
-    horizontalMargin,
-    columnSpacing,
-    dividerThickness,
-    checkboxHorizontalMargin,
-  );
+        decoration,
+        dataRowColor,
+        dataRowHeight,
+        dataTextStyle,
+        headingRowColor,
+        headingRowHeight,
+        headingTextStyle,
+        horizontalMargin,
+        columnSpacing,
+        dividerThickness,
+        checkboxHorizontalMargin,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -161,28 +161,30 @@ class DataTableThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DataTableThemeData
-      && other.decoration == decoration
-      && other.dataRowColor == dataRowColor
-      && other.dataRowHeight == dataRowHeight
-      && other.dataTextStyle == dataTextStyle
-      && other.headingRowColor == headingRowColor
-      && other.headingRowHeight == headingRowHeight
-      && other.headingTextStyle == headingTextStyle
-      && other.horizontalMargin == horizontalMargin
-      && other.columnSpacing == columnSpacing
-      && other.dividerThickness == dividerThickness
-      && other.checkboxHorizontalMargin == checkboxHorizontalMargin;
+    return other is DataTableThemeData &&
+        other.decoration == decoration &&
+        other.dataRowColor == dataRowColor &&
+        other.dataRowHeight == dataRowHeight &&
+        other.dataTextStyle == dataTextStyle &&
+        other.headingRowColor == headingRowColor &&
+        other.headingRowHeight == headingRowHeight &&
+        other.headingTextStyle == headingTextStyle &&
+        other.horizontalMargin == horizontalMargin &&
+        other.columnSpacing == columnSpacing &&
+        other.dividerThickness == dividerThickness &&
+        other.checkboxHorizontalMargin == checkboxHorizontalMargin;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
     properties.add(DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));

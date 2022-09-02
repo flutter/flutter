@@ -18,7 +18,7 @@ const BoxDecoration kBoxDecorationC = BoxDecoration(
 );
 
 class TestBuildCounter extends StatelessWidget {
-  const TestBuildCounter({ super.key });
+  const TestBuildCounter({super.key});
 
   static int buildCount = 0;
 
@@ -29,9 +29,8 @@ class TestBuildCounter extends StatelessWidget {
   }
 }
 
-
 class FlipWidget extends StatefulWidget {
-  const FlipWidget({ super.key, required this.left, required this.right });
+  const FlipWidget({super.key, required this.left, required this.right});
 
   final Widget left;
   final Widget right;
@@ -55,6 +54,6 @@ class FlipWidgetState extends State<FlipWidget> {
   }
 }
 
-void flipStatefulWidget(WidgetTester tester, { bool skipOffstage = true }) {
+void flipStatefulWidget(WidgetTester tester, {bool skipOffstage = true}) {
   tester.state<FlipWidgetState>(find.byType(FlipWidget, skipOffstage: skipOffstage)).flip();
 }

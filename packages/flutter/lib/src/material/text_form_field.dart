@@ -148,98 +148,99 @@ class TextFormField extends FormField<String> {
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
-  }) : assert(initialValue == null || controller == null),
-       assert(textAlign != null),
-       assert(autofocus != null),
-       assert(readOnly != null),
-       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
-       assert(autocorrect != null),
-       assert(enableSuggestions != null),
-       assert(scrollPadding != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(minLines == null || minLines > 0),
-       assert(
-         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         "minLines can't be greater than maxLines",
-       ),
-       assert(expands != null),
-       assert(
-         !expands || (maxLines == null && minLines == null),
-         'minLines and maxLines must be null when expands is true.',
-       ),
-       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
-       assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
-       assert(enableIMEPersonalizedLearning != null),
-       super(
-         initialValue: controller != null ? controller.text : (initialValue ?? ''),
-         enabled: enabled ?? decoration?.enabled ?? true,
-         autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
-         builder: (FormFieldState<String> field) {
-           final _TextFormFieldState state = field as _TextFormFieldState;
-           final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-           void onChangedHandler(String value) {
-             field.didChange(value);
-             if (onChanged != null) {
-               onChanged(value);
-             }
-           }
-           return UnmanagedRestorationScope(
-             bucket: field.bucket,
-             child: TextField(
-               restorationId: restorationId,
-               controller: state._effectiveController,
-               focusNode: focusNode,
-               decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-               keyboardType: keyboardType,
-               textInputAction: textInputAction,
-               style: style,
-               strutStyle: strutStyle,
-               textAlign: textAlign,
-               textAlignVertical: textAlignVertical,
-               textDirection: textDirection,
-               textCapitalization: textCapitalization,
-               autofocus: autofocus,
-               toolbarOptions: toolbarOptions,
-               readOnly: readOnly,
-               showCursor: showCursor,
-               obscuringCharacter: obscuringCharacter,
-               obscureText: obscureText,
-               autocorrect: autocorrect,
-               smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-               smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-               enableSuggestions: enableSuggestions,
-               maxLengthEnforcement: maxLengthEnforcement,
-               maxLines: maxLines,
-               minLines: minLines,
-               expands: expands,
-               maxLength: maxLength,
-               onChanged: onChangedHandler,
-               onTap: onTap,
-               onTapOutside: onTapOutside,
-               onEditingComplete: onEditingComplete,
-               onSubmitted: onFieldSubmitted,
-               inputFormatters: inputFormatters,
-               enabled: enabled ?? decoration?.enabled ?? true,
-               cursorWidth: cursorWidth,
-               cursorHeight: cursorHeight,
-               cursorRadius: cursorRadius,
-               cursorColor: cursorColor,
-               scrollPadding: scrollPadding,
-               scrollPhysics: scrollPhysics,
-               keyboardAppearance: keyboardAppearance,
-               enableInteractiveSelection: enableInteractiveSelection ?? (!obscureText || !readOnly),
-               selectionControls: selectionControls,
-               buildCounter: buildCounter,
-               autofillHints: autofillHints,
-               scrollController: scrollController,
-               enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
-               mouseCursor: mouseCursor,
-             ),
-           );
-         },
-       );
+  })  : assert(initialValue == null || controller == null),
+        assert(textAlign != null),
+        assert(autofocus != null),
+        assert(readOnly != null),
+        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
+        assert(obscureText != null),
+        assert(autocorrect != null),
+        assert(enableSuggestions != null),
+        assert(scrollPadding != null),
+        assert(maxLines == null || maxLines > 0),
+        assert(minLines == null || minLines > 0),
+        assert(
+          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+          "minLines can't be greater than maxLines",
+        ),
+        assert(expands != null),
+        assert(
+          !expands || (maxLines == null && minLines == null),
+          'minLines and maxLines must be null when expands is true.',
+        ),
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
+        assert(enableIMEPersonalizedLearning != null),
+        super(
+          initialValue: controller != null ? controller.text : (initialValue ?? ''),
+          enabled: enabled ?? decoration?.enabled ?? true,
+          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
+          builder: (FormFieldState<String> field) {
+            final _TextFormFieldState state = field as _TextFormFieldState;
+            final InputDecoration effectiveDecoration =
+                (decoration ?? const InputDecoration()).applyDefaults(Theme.of(field.context).inputDecorationTheme);
+            void onChangedHandler(String value) {
+              field.didChange(value);
+              if (onChanged != null) {
+                onChanged(value);
+              }
+            }
+
+            return UnmanagedRestorationScope(
+              bucket: field.bucket,
+              child: TextField(
+                restorationId: restorationId,
+                controller: state._effectiveController,
+                focusNode: focusNode,
+                decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                keyboardType: keyboardType,
+                textInputAction: textInputAction,
+                style: style,
+                strutStyle: strutStyle,
+                textAlign: textAlign,
+                textAlignVertical: textAlignVertical,
+                textDirection: textDirection,
+                textCapitalization: textCapitalization,
+                autofocus: autofocus,
+                toolbarOptions: toolbarOptions,
+                readOnly: readOnly,
+                showCursor: showCursor,
+                obscuringCharacter: obscuringCharacter,
+                obscureText: obscureText,
+                autocorrect: autocorrect,
+                smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+                smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+                enableSuggestions: enableSuggestions,
+                maxLengthEnforcement: maxLengthEnforcement,
+                maxLines: maxLines,
+                minLines: minLines,
+                expands: expands,
+                maxLength: maxLength,
+                onChanged: onChangedHandler,
+                onTap: onTap,
+                onTapOutside: onTapOutside,
+                onEditingComplete: onEditingComplete,
+                onSubmitted: onFieldSubmitted,
+                inputFormatters: inputFormatters,
+                enabled: enabled ?? decoration?.enabled ?? true,
+                cursorWidth: cursorWidth,
+                cursorHeight: cursorHeight,
+                cursorRadius: cursorRadius,
+                cursorColor: cursorColor,
+                scrollPadding: scrollPadding,
+                scrollPhysics: scrollPhysics,
+                keyboardAppearance: keyboardAppearance,
+                enableInteractiveSelection: enableInteractiveSelection ?? (!obscureText || !readOnly),
+                selectionControls: selectionControls,
+                buildCounter: buildCounter,
+                autofillHints: autofillHints,
+                scrollController: scrollController,
+                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+                mouseCursor: mouseCursor,
+              ),
+            );
+          },
+        );
 
   /// Controls the text being edited.
   ///
@@ -276,9 +277,7 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+    _controller = value == null ? RestorableTextEditingController() : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
