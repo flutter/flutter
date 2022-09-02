@@ -1121,14 +1121,14 @@ void main() {
     const String longPressTooltip = 'long press tooltip';
     const String tapTooltip = 'tap tooltip';
     await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: Tooltip(
-              message: 'long press tooltip',
-              child: Radio<bool>(value: true, groupValue: false, onChanged: null),
-            ),
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            message: longPressTooltip,
+            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
           ),
-        )
+        ),
+      )
     );
 
     // Default tooltip shows up after long pressed.
@@ -1147,17 +1147,17 @@ void main() {
 
     expect(find.text(longPressTooltip), findsOneWidget);
 
-    // Tooltip shows up after tapping when set triggerMode to TooltipTriggerMode.longPress.
+    // Tooltip shows up after tapping when set triggerMode to TooltipTriggerMode.tap.
     await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: Tooltip(
-              triggerMode: TooltipTriggerMode.tap,
-              message: tapTooltip,
-              child: Radio<bool>(value: true, groupValue: false, onChanged: null),
-            ),
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            triggerMode: TooltipTriggerMode.tap,
+            message: tapTooltip,
+            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
           ),
-        )
+        ),
+      )
     );
 
     final Finder tooltip1 = find.byType(Tooltip);
