@@ -11,8 +11,6 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -38,10 +36,7 @@ public class PlatformViewsChannel {
   }
 
   private static String detailedExceptionString(Exception exception) {
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter printWriter = new PrintWriter(stringWriter);
-    exception.printStackTrace(printWriter);
-    return stringWriter.toString();
+    return Log.getStackTraceString(exception);
   }
 
   private final MethodChannel.MethodCallHandler parsingHandler =
