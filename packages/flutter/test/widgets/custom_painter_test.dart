@@ -520,7 +520,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  }, skip: true);
+  }, skip: true); // https://github.com/flutter/flutter/pull/110859
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
