@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 const MethodChannel _kMethodChannel =
   MethodChannel('tests.flutter.dev/windows_startup_test');
 
-/// Check that the application's window is visible.
+/// Returns true if the application's window is visible.
 Future<bool> isWindowVisible() async {
   final bool? visible = await _kMethodChannel.invokeMethod<bool?>('isWindowVisible');
   if (visible == null) {
@@ -17,7 +17,7 @@ Future<bool> isWindowVisible() async {
   return visible;
 }
 
-/// Check whether the app's dark mode is enabled.
+/// Returns true if the app's dark mode is enabled.
 Future<bool> isAppDarkModeEnabled() async {
   final bool? enabled = await _kMethodChannel.invokeMethod<bool?>('isAppDarkModeEnabled');
   if (enabled == null) {
@@ -27,6 +27,7 @@ Future<bool> isAppDarkModeEnabled() async {
   return enabled;
 }
 
+/// Returns true if the operating system dark mode setting is enabled.
 Future<bool> isSystemDarkModeEnabled() async {
   final bool? enabled = await _kMethodChannel.invokeMethod<bool?>('isSystemDarkModeEnabled');
   if (enabled == null) {
