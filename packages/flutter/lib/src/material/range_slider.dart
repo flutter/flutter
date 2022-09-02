@@ -655,7 +655,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           );
         },
       );
-      Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
     }
   }
 }
