@@ -1319,7 +1319,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
   /// ```
   ///
   /// {@end-tool}

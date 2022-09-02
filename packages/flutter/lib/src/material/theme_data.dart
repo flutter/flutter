@@ -295,7 +295,6 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties (as well as primaryColorBrightness, and primarySwatch)
     // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
-    Color? backgroundColor,
     Color? bottomAppBarColor,
     Brightness? brightness,
     Color? canvasColor,
@@ -305,7 +304,6 @@ class ThemeData with Diagnosticable {
     Color? dialogBackgroundColor,
     Color? disabledColor,
     Color? dividerColor,
-    Color? errorColor,
     Color? focusColor,
     Color? highlightColor,
     Color? hintColor,
@@ -424,6 +422,16 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
     Color? selectedRowColor,
+    @Deprecated(
+      'Use colorScheme.error instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? errorColor,
+    @Deprecated(
+      'Use colorScheme.background instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? backgroundColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -507,19 +515,17 @@ class ThemeData with Diagnosticable {
       primaryColorDark: primaryColorDark,
       accentColor: accentColor,
       cardColor: cardColor,
-      backgroundColor: backgroundColor,
-      errorColor: errorColor,
+      backgroundColor: isDark ? Colors.grey[700]! : primarySwatch[200]!,
+      errorColor: Colors.red[700],
       brightness: effectiveBrightness,
     );
     selectedRowColor ??= Colors.grey[100]!;
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
-    backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
-    errorColor ??= Colors.red[700]!;
     // The default [buttonTheme] is here because it doesn't use the defaults for
     // [disabledColor], [highlightColor], and [splashColor].
     buttonTheme ??= ButtonThemeData(
@@ -587,12 +593,14 @@ class ThemeData with Diagnosticable {
     tooltipTheme ??= const TooltipThemeData();
     expansionTileTheme ??= const ExpansionTileThemeData();
 
-     // DEPRECATED (newest deprecations at the bottom)
+    // DEPRECATED (newest deprecations at the bottom)
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
     primaryColorBrightness = estimatedPrimaryColorBrightness;
+    errorColor ??= Colors.red[700]!;
+    backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
 
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
@@ -613,7 +621,6 @@ class ThemeData with Diagnosticable {
       useMaterial3: useMaterial3,
       visualDensity: visualDensity,
       // COLOR
-      backgroundColor: backgroundColor,
       bottomAppBarColor: bottomAppBarColor,
       canvasColor: canvasColor,
       cardColor: cardColor,
@@ -621,7 +628,6 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor: dialogBackgroundColor,
       disabledColor: disabledColor,
       dividerColor: dividerColor,
-      errorColor: errorColor,
       focusColor: focusColor,
       highlightColor: highlightColor,
       hintColor: hintColor,
@@ -688,6 +694,8 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor,
       selectedRowColor: selectedRowColor,
+      errorColor: errorColor,
+      backgroundColor: backgroundColor,
     );
   }
 
@@ -720,7 +728,6 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
-    required this.backgroundColor,
     required this.bottomAppBarColor,
     required this.canvasColor,
     required this.cardColor,
@@ -728,7 +735,6 @@ class ThemeData with Diagnosticable {
     required this.dialogBackgroundColor,
     required this.disabledColor,
     required this.dividerColor,
-    required this.errorColor,
     required this.focusColor,
     required this.highlightColor,
     required this.hintColor,
@@ -845,6 +851,16 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
     Color? selectedRowColor,
+    @Deprecated(
+      'Use colorScheme.error instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? errorColor,
+    @Deprecated(
+      'Use colorScheme.background instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? backgroundColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
@@ -856,6 +872,8 @@ class ThemeData with Diagnosticable {
        _primaryColorBrightness = primaryColorBrightness,
        _toggleableActiveColor = toggleableActiveColor,
        _selectedRowColor = selectedRowColor,
+       _errorColor = errorColor,
+       _backgroundColor = backgroundColor,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -868,7 +886,6 @@ class ThemeData with Diagnosticable {
        assert(useMaterial3 != null),
        assert(visualDensity != null),
         // COLOR
-       assert(backgroundColor != null),
        assert(bottomAppBarColor != null),
        assert(canvasColor != null),
        assert(cardColor != null),
@@ -876,7 +893,6 @@ class ThemeData with Diagnosticable {
        assert(dialogBackgroundColor != null),
        assert(disabledColor != null),
        assert(dividerColor != null),
-       assert(errorColor != null),
        assert(focusColor != null),
        assert(highlightColor != null),
        assert(hintColor != null),
@@ -932,7 +948,17 @@ class ThemeData with Diagnosticable {
        assert(textSelectionTheme != null),
        assert(timePickerTheme != null),
        assert(toggleButtonsTheme != null),
-       assert(tooltipTheme != null);
+       assert(tooltipTheme != null),
+        // DEPRECATED (newest deprecations at the bottom)
+       assert(accentColor != null),
+       assert(accentColorBrightness != null),
+       assert(accentTextTheme != null),
+       assert(accentIconTheme != null),
+       assert(buttonColor != null),
+       assert(fixTextFieldOutlineLabel != null),
+       assert(primaryColorBrightness != null),
+       assert(errorColor != null),
+       assert(backgroundColor != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1277,10 +1303,6 @@ class ThemeData with Diagnosticable {
 
   // COLOR
 
-  /// A color that contrasts with the [primaryColor], e.g. used as the
-  /// remaining part of a progress bar.
-  final Color backgroundColor;
-
   /// The default color of the [BottomAppBar].
   ///
   /// This can be overridden by specifying [BottomAppBar.color].
@@ -1316,9 +1338,6 @@ class ThemeData with Diagnosticable {
   /// To create an appropriate [BorderSide] that uses this color, consider
   /// [Divider.createBorderSide].
   final Color dividerColor;
-
-  /// The color to use for input validation errors, e.g. in [TextField] fields.
-  final Color errorColor;
 
   /// The focus color used indicate that a component has the input focus.
   final Color focusColor;
@@ -1683,6 +1702,24 @@ class ThemeData with Diagnosticable {
   )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
+  /// Obsolete property that was used for input validation errors, e.g. in
+  /// [TextField] fields. Use [ColorScheme.error] instead.
+  @Deprecated(
+    'Use colorScheme.error instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  Color get errorColor => _errorColor!;
+  final Color? _errorColor;
+
+  /// Obsolete property that was unused by the framework.
+  /// Use [ColorScheme.background] instead.
+  @Deprecated(
+    'Use colorScheme.background instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  Color get backgroundColor => _backgroundColor!;
+  final Color? _backgroundColor;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1708,7 +1745,6 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
-    Color? backgroundColor,
     Color? bottomAppBarColor,
     Brightness? brightness,
     Color? canvasColor,
@@ -1717,7 +1753,6 @@ class ThemeData with Diagnosticable {
     Color? dialogBackgroundColor,
     Color? disabledColor,
     Color? dividerColor,
-    Color? errorColor,
     Color? focusColor,
     Color? highlightColor,
     Color? hintColor,
@@ -1834,6 +1869,16 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
     Color? selectedRowColor,
+    @Deprecated(
+      'Use colorScheme.error instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Color? errorColor,
+    @Deprecated(
+      'Use colorScheme.background instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Color? backgroundColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1855,7 +1900,6 @@ class ThemeData with Diagnosticable {
       useMaterial3: useMaterial3 ?? this.useMaterial3,
       visualDensity: visualDensity ?? this.visualDensity,
       // COLOR
-      backgroundColor: backgroundColor ?? this.backgroundColor,
       bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
       canvasColor: canvasColor ?? this.canvasColor,
       cardColor: cardColor ?? this.cardColor,
@@ -1863,7 +1907,6 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
       disabledColor: disabledColor ?? this.disabledColor,
       dividerColor: dividerColor ?? this.dividerColor,
-      errorColor: errorColor ?? this.errorColor,
       focusColor: focusColor ?? this.focusColor,
       highlightColor: highlightColor ?? this.highlightColor,
       hintColor: hintColor ?? this.hintColor,
@@ -1930,6 +1973,8 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
+      errorColor: errorColor ?? _errorColor,
+      backgroundColor: backgroundColor ?? _backgroundColor,
     );
   }
 
@@ -2055,7 +2100,6 @@ class ThemeData with Diagnosticable {
       useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       // COLOR
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t)!,
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t)!,
       cardColor: Color.lerp(a.cardColor, b.cardColor, t)!,
@@ -2063,7 +2107,6 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t)!,
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t)!,
       dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t)!,
-      errorColor: Color.lerp(a.errorColor, b.errorColor, t)!,
       focusColor: Color.lerp(a.focusColor, b.focusColor, t)!,
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
       hintColor: Color.lerp(a.hintColor, b.hintColor, t)!,
@@ -2130,6 +2173,8 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
+      errorColor: Color.lerp(a.errorColor, b.errorColor, t),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
     );
   }
 
@@ -2157,7 +2202,6 @@ class ThemeData with Diagnosticable {
         other.useMaterial3 == useMaterial3 &&
         other.visualDensity == visualDensity &&
         // COLOR
-        other.backgroundColor == backgroundColor &&
         other.bottomAppBarColor == bottomAppBarColor &&
         other.canvasColor == canvasColor &&
         other.cardColor == cardColor &&
@@ -2165,7 +2209,6 @@ class ThemeData with Diagnosticable {
         other.dialogBackgroundColor == dialogBackgroundColor &&
         other.disabledColor == disabledColor &&
         other.dividerColor == dividerColor &&
-        other.errorColor == errorColor &&
         other.focusColor == focusColor &&
         other.highlightColor == highlightColor &&
         other.hintColor == hintColor &&
@@ -2231,7 +2274,9 @@ class ThemeData with Diagnosticable {
         other.primaryColorBrightness == primaryColorBrightness &&
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.toggleableActiveColor == toggleableActiveColor &&
-        other.selectedRowColor == selectedRowColor;
+        other.selectedRowColor == selectedRowColor &&
+        other.errorColor == errorColor &&
+        other.backgroundColor == backgroundColor;
   }
 
   @override
@@ -2256,7 +2301,6 @@ class ThemeData with Diagnosticable {
       useMaterial3,
       visualDensity,
       // COLOR
-      backgroundColor,
       bottomAppBarColor,
       canvasColor,
       cardColor,
@@ -2264,7 +2308,6 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor,
       disabledColor,
       dividerColor,
-      errorColor,
       focusColor,
       highlightColor,
       hintColor,
@@ -2331,6 +2374,8 @@ class ThemeData with Diagnosticable {
       androidOverscrollIndicator,
       toggleableActiveColor,
       selectedRowColor,
+      errorColor,
+      backgroundColor,
     ];
     return Object.hashAll(values);
   }
@@ -2357,7 +2402,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
     // COLORS
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.debug));
@@ -2365,7 +2409,6 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor, level: DiagnosticLevel.debug));
@@ -2432,6 +2475,8 @@ class ThemeData with Diagnosticable {
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
   }
 }
 

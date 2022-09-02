@@ -1440,7 +1440,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 }
 
 TextStyle _m2CounterErrorStyle(BuildContext context) =>
-  Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).errorColor);
+  Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // BEGIN GENERATED TOKEN PROPERTIES - TextField
 

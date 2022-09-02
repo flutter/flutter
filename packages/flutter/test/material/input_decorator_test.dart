@@ -4621,7 +4621,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(getBorderColor(tester), theme.errorColor);
+    expect(getBorderColor(tester), theme.colorScheme.error);
 
     // Disabled
     await tester.pumpWidget(
