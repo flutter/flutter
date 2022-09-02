@@ -2,17 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-
-class TestNotifier extends ChangeNotifier {
-  void notify() {
-    notifyListeners();
-  }
-
-  bool get isListenedTo => hasListeners;
-}
 
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
@@ -24,7 +17,7 @@ void main() {
   test('addListener and removeListener add and remove listeners.', () {
     final ObjectEvent event = ObjectDisposed(object: 'object');
     ObjectEvent? recievedEvent;
-    ObjectEvent listener(ObjectEvent event) => recievedEvent = event;
+    void listener(ObjectEvent event) => recievedEvent = event;
     expect(ma.hasListeners, isFalse);
 
     ma.addListener(listener);
@@ -132,7 +125,50 @@ void main() {
     // TODO(polina-c): add test
   });
 
-  test('publishers in Flutter respect kFlutterMemoryAllocationsEnabled', () {
-    // TODO(polina-c): add test
+  test('kFlutterMemoryAllocationsEnabled is true in debug mode.', () {
+    expect(kFlutterMemoryAllocationsEnabled, isTrue);
   });
+
+  test('publishers in Flutter dispatch events in debug mode', () async {
+    int eventCount = 0;
+    void listener(ObjectEvent event) => eventCount++;
+    ma.addListener(listener);
+
+    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
+    expect(eventCount, expectedEventCount);
+
+    ma.removeListener(listener);
+    expect(ma.hasListeners, isFalse);
+  });
+}
+
+Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
+  int count = 0;
+
+  final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
+  final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {}); count++;
+  final Image image = await _createImage(); //count++; count++; count++;
+  final Picture picture = _createPicture(); //count++;
+
+  valueNotifier.dispose(); count++;
+  changeNotifier.dispose(); count++;
+  image.dispose(); //count++;
+  picture.dispose(); //count++;
+
+  return count;
+}
+
+Future<Image> _createImage() async {
+  final Picture picture = _createPicture();
+  final Image result = await picture.toImage(10, 10);
+  picture.dispose();
+  return result;
+}
+
+Picture _createPicture() {
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  canvas.clipRect(rect);
+  return recorder.endRecording();
 }
