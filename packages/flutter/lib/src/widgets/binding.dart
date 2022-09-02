@@ -361,7 +361,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     if (!kReleaseMode) {
       registerServiceExtension(
-        name: extensions.debugDumpAppExt,
+        name: extensions.debugDumpAppExtension,
         callback: (Map<String, String> parameters) async {
           final String data = _debugDumpAppString();
           return <String, Object>{
@@ -372,7 +372,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       if (!kIsWeb) {
         registerBoolServiceExtension(
-          name: extensions.showPerformanceOverlayExt,
+          name: extensions.showPerformanceOverlayExtension,
           getter: () =>
           Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
           setter: (bool value) {
@@ -386,7 +386,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       }
 
       registerServiceExtension(
-        name: extensions.didSendFirstFrameEventExt,
+        name: extensions.didSendFirstFrameEventExtension,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -398,7 +398,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(
-        name: extensions.didSendFirstFrameRasterizedEventExt,
+        name: extensions.didSendFirstFrameRasterizedEventExtension,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -410,7 +410,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(
-        name: extensions.fastReassembleExt,
+        name: extensions.fastReassembleExtension,
         callback: (Map<String, Object> params) async {
           // This mirrors the implementation of the 'reassemble' callback registration
           // in lib/src/foundation/binding.dart, but with the extra binding config used
@@ -428,7 +428,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
-        name: extensions.profileWidgetBuildsExt,
+        name: extensions.profileWidgetBuildsExtension,
         getter: () async => debugProfileBuildsEnabled,
         setter: (bool value) async {
           if (debugProfileBuildsEnabled != value) {
@@ -437,7 +437,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
       registerBoolServiceExtension(
-        name: extensions.profileUserWidgetBuildsExt,
+        name: extensions.profileUserWidgetBuildsExtension,
         getter: () async => debugProfileBuildsEnabledUserWidgets,
         setter: (bool value) async {
           if (debugProfileBuildsEnabledUserWidgets != value) {
@@ -449,7 +449,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     assert(() {
       registerBoolServiceExtension(
-        name: extensions.debugAllowBannerExt,
+        name: extensions.debugAllowBannerExtension,
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
           if (WidgetsApp.debugAllowBannerOverride == value) {

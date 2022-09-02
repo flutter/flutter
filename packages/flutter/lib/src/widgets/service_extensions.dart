@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Service extension that, when called, will output a string representation of
-/// this app's widget tree to console.
+/// Name of service extension that, when called, will output a string
+/// representation of this app's widget tree to console.
 ///
 /// See also:
 ///
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String debugDumpAppExt = 'debugDumpApp';
+const String debugDumpAppExtension = 'debugDumpApp';
 
-/// Service extension that, when called, will overlay a performance graph on top
-/// of this app.
+/// Name of service extension that, when called, will overlay a performance
+/// graph on top of this app.
 ///
 /// See also:
 ///
@@ -20,37 +20,38 @@ const String debugDumpAppExt = 'debugDumpApp';
 ///   that this service extension exposes.
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String showPerformanceOverlayExt = 'showPerformanceOverlay';
+const String showPerformanceOverlayExtension = 'showPerformanceOverlay';
 
-/// Service extension that, when called, will return whether the first
+/// Name of service extension that, when called, will return whether the first
 /// 'Flutter.Frame' event has been reported on the Extension stream.
 ///
 /// See also:
 ///
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String didSendFirstFrameEventExt = 'didSendFirstFrameEvent';
+const String didSendFirstFrameEventExtension = 'didSendFirstFrameEvent';
 
-/// Service extension that, when called, will return whether the first frame
-/// has been rasterized and the trace event 'Rasterized first useful frame' has
-/// been sent out.
+/// Name of service extension that, when called, will return whether the first
+/// frame has been rasterized and the trace event 'Rasterized first useful
+/// frame' has been sent out.
 ///
 /// See also:
 ///
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String didSendFirstFrameRasterizedEventExt =
+const String didSendFirstFrameRasterizedEventExtension =
     'didSendFirstFrameRasterizedEvent';
 
-/// Service extension that, when called, will reassemble the application.
+/// Name of service extension that, when called, will reassemble the
+/// application.
 ///
 /// See also:
 ///
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String fastReassembleExt = 'fastReassemble';
+const String fastReassembleExtension = 'fastReassemble';
 
-/// Service extension that, when called, will change the value of
+/// Name of service extension that, when called, will change the value of
 /// [debugProfileBuildsEnabled], which adds [Timeline] events for every widget
 /// built.
 ///
@@ -60,9 +61,9 @@ const String fastReassembleExt = 'fastReassemble';
 ///   exposes.
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String profileWidgetBuildsExt = 'profileWidgetBuilds';
+const String profileWidgetBuildsExtension = 'profileWidgetBuilds';
 
-/// Service extension that, when called, will change the value of
+/// Name of service extension that, when called, will change the value of
 /// [debugProfileBuildsEnabledUserWidgets], which adds [Timeline] events for
 /// every user-created widget built.
 ///
@@ -71,9 +72,9 @@ const String profileWidgetBuildsExt = 'profileWidgetBuilds';
 ///   service extension exposes.
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String profileUserWidgetBuildsExt = 'profileUserWidgetBuilds';
+const String profileUserWidgetBuildsExtension = 'profileUserWidgetBuilds';
 
-/// Service extension that, when called, will change the value of
+/// Name of service extension that, when called, will change the value of
 /// [WidgetsApp.debugAllowBannerOverride], which controls the visibility of the
 /// debug banner for debug mode apps.
 ///
@@ -83,4 +84,4 @@ const String profileUserWidgetBuildsExt = 'profileUserWidgetBuilds';
 ///   extension exposes.
 /// * [BindingBase.initServiceExtensions], where the service extension is
 ///   registered.
-const String debugAllowBannerExt = 'debugAllowBanner';
+const String debugAllowBannerExtension = 'debugAllowBanner';
