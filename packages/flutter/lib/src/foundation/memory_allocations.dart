@@ -45,7 +45,7 @@ abstract class ObjectEvent{
   /// The method enables code like:
   /// ```dart
   /// MemoryAllocations.instance
-  ///   .addListener((event) => dartMethod(event.toMap()));
+  ///   .addListener((ObjectEventListener event) => dartMethod(event.toMap()));
   /// ```
   Map<Object, Map<String, Object>> toMap();
 }
