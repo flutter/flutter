@@ -93,7 +93,6 @@ bool ImGui_ImplImpeller_Init(std::shared_ptr<impeller::Context> context) {
     auto desc = impeller::PipelineBuilder<impeller::ImguiRasterVertexShader,
                                           impeller::ImguiRasterFragmentShader>::
         MakeDefaultPipelineDescriptor(*context);
-    desc->SetSampleCount(impeller::SampleCount::kCount4);
     auto stencil = desc->GetFrontStencilAttachmentDescriptor();
     if (stencil.has_value()) {
       stencil->stencil_compare = impeller::CompareFunction::kAlways;

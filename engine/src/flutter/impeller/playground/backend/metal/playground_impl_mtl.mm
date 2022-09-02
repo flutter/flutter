@@ -70,6 +70,7 @@ PlaygroundImplMTL::PlaygroundImplMTL()
   data_->metal_layer.device = ContextMTL::Cast(*context).GetMTLDevice();
   // This pixel format is one of the documented supported formats.
   data_->metal_layer.pixelFormat = ToMTLPixelFormat(PixelFormat::kDefaultColor);
+  data_->metal_layer.framebufferOnly = NO;
   cocoa_window.contentView.layer = data_->metal_layer;
   cocoa_window.contentView.wantsLayer = YES;
 
