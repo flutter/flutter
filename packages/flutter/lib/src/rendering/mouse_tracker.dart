@@ -14,8 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
-
 import 'object.dart';
 
 export 'package:flutter/services.dart' show
@@ -299,7 +297,7 @@ class MouseTracker extends ChangeNotifier {
   /// result.
   ///
   /// The [updateWithEvent] indicates that an event has been observed, and is
-  /// called during the handler of the event.  It is typically called by
+  /// called during the handler of the event. It is typically called by
   /// [RendererBinding], and should be called with all events received, and let
   /// [MouseTracker] filter which to react to.
   ///

@@ -878,9 +878,7 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(tip, paints..path(
-      color: const Color(0x80800000),
-    ));
+    expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
   testWidgets('Tooltip stays after long press', (WidgetTester tester) async {
@@ -1051,6 +1049,37 @@ void main() {
     // Go without crashes.
     await gesture.removePointer();
     gesture = null;
+  });
+
+  testWidgets('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/95851
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
+    expect(tooltipState.ensureTooltipVisible(), true);
+
+    // Remove the tooltip.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    expect(tooltipState.ensureTooltipVisible(), false);
   });
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {

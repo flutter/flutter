@@ -5,7 +5,8 @@
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
+import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
+
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -14,10 +15,13 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'diagnostics.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
+
+export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
 // Examples can assume:
 // mixin BarBinding on BindingBase { }
@@ -116,6 +120,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// class.
 ///
 /// ```dart
+/// // continuing from previous example...
 /// class FooLibraryBinding extends BindingBase with BarBinding, FooBinding {
 ///   static FooBinding ensureInitialized() {
 ///     if (FooBinding._instance == null) {
@@ -174,8 +179,8 @@ abstract class BindingBase {
   /// Each of these other bindings could individually access a
   /// [ui.SingletonFlutterWindow] statically, but that would preclude the
   /// ability to test its behaviors with a fake window for verification
-  /// purposes.  Therefore, [BindingBase] exposes this
-  /// [ui.SingletonFlutterWindow] for use by other bindings.  A subclass of
+  /// purposes. Therefore, [BindingBase] exposes this
+  /// [ui.SingletonFlutterWindow] for use by other bindings. A subclass of
   /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
   /// accessor to return a different [ui.SingletonFlutterWindow] implementation,
   /// such as a [TestWindow].

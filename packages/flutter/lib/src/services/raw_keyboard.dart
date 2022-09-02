@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 import 'hardware_keyboard.dart';
-import 'keyboard_key.dart';
+import 'keyboard_key.g.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
 import 'raw_keyboard_ios.dart';
@@ -16,6 +17,10 @@ import 'raw_keyboard_macos.dart';
 import 'raw_keyboard_web.dart';
 import 'raw_keyboard_windows.dart';
 import 'system_channels.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, ValueChanged;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
 /// An enum describing the side of the keyboard that a key is on, to allow
 /// discrimination between which key is pressed (e.g. the left or right SHIFT
@@ -84,7 +89,7 @@ enum ModifierKey {
 
   /// The SCROLL LOCK modifier key.
   ///
-  /// Typically, there is one of these.  Only shown as "pressed" when the scroll
+  /// Typically, there is one of these. Only shown as "pressed" when the scroll
   /// lock is on, so on a key up when the mode is turned on, on each key press
   /// when it's enabled, and on a key down when it is turned off.
   scrollLockModifier,
@@ -564,7 +569,7 @@ class RawKeyUpEvent extends RawKeyEvent {
 /// a handler that can determine if the key has been handled or not.
 ///
 /// The handler should return true if the key has been handled, and false if the
-/// key was not handled.  It must not return null.
+/// key was not handled. It must not return null.
 typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
 
 /// An interface for listening to raw key events.

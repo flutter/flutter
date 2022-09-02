@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
@@ -17,9 +15,9 @@ import 'test_utils.dart';
 
 
 void main() {
-  Directory tempDir;
-  FlutterRunTestDriver flutter;
-  Logger logger;
+  late Directory tempDir;
+  late FlutterRunTestDriver flutter;
+  late Logger logger;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
@@ -71,11 +69,11 @@ migration:
 ''', flush: true);
     FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
 
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision, equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision, equals('93kf9v3njfa90vnidfjvn39nvi3vnie'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root]!.createRevision, equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root]!.baseRevision, equals('93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision, equals('abfj19vkla9vnlka9vni3n808v3nch8cd'));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision, equals('ab93kf9v3njfa90vnidfjvn39nvi3vnie'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.createRevision, equals('abfj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.baseRevision, equals('ab93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
     expect(metadata.migrateConfig.unmanagedFiles[0], equals('lib/main.dart'));
     expect(metadata.migrateConfig.unmanagedFiles[1], equals('ios/Runner.xcodeproj/project.pbxproj'));
@@ -107,10 +105,10 @@ project_type: app
     const String testBaseRevision = 'testanas9anlnq9ba7bjhavan3kma';
     MigrateConfig config = MigrateConfig(
       platformConfigs: <SupportedPlatform, MigratePlatformConfig>{
-        SupportedPlatform.android: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.ios: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.root: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.windows: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.android: MigratePlatformConfig(platform: SupportedPlatform.android, createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.ios: MigratePlatformConfig(platform: SupportedPlatform.ios, createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.root: MigratePlatformConfig(platform: SupportedPlatform.root, createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.windows: MigratePlatformConfig(platform: SupportedPlatform.windows, createRevision: testCreateRevision, baseRevision: testBaseRevision),
       },
       unmanagedFiles: <String>[
         'lib/main.dart',
@@ -169,8 +167,6 @@ migration:
       projectDirectory: tempDir,
       currentRevision: currentRevision,
       createRevision: createRevision,
-      create: true,
-      update: true,
       logger: logger,
     );
 
@@ -179,16 +175,16 @@ migration:
     final List<SupportedPlatform> keyList = List<SupportedPlatform>.from(metadata.migrateConfig.platformConfigs.keys);
 
     expect(keyList[0], equals(SupportedPlatform.root));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision, equals(currentRevision));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision, equals(createRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root]!.baseRevision, equals(currentRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root]!.createRevision, equals(createRevision));
 
     expect(keyList[1], equals(SupportedPlatform.android));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision, equals(currentRevision));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision, equals(createRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.baseRevision, equals(currentRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.createRevision, equals(createRevision));
 
     expect(keyList[2], equals(SupportedPlatform.ios));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].baseRevision, equals(currentRevision));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios].createRevision, equals(createRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios]!.baseRevision, equals(currentRevision));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.ios]!.createRevision, equals(createRevision));
 
     final File metadataFileOutput = tempDir.childFile('.metadata_output');
     metadata.writeFile(outputFile: metadataFileOutput);
@@ -227,5 +223,16 @@ migration:
     - 'lib/main.dart'
     - 'ios/Runner.xcodeproj/project.pbxproj'
 '''));
+  });
+
+  testUsingContext('equality compares platform', () async {
+    const String testCreateRevision = 'testmc9skl32nlnf23lnakcs9njr3';
+    const String testBaseRevision = 'testanas9anlnq9ba7bjhavan3kma';
+    final MigratePlatformConfig configAndroid = MigratePlatformConfig(platform: SupportedPlatform.android, createRevision: testCreateRevision, baseRevision: testBaseRevision);
+    final MigratePlatformConfig configIos = MigratePlatformConfig(platform: SupportedPlatform.ios, createRevision: testCreateRevision, baseRevision: testBaseRevision);
+
+    expect(configAndroid.equals(configIos), false);
+    expect(configAndroid.equals(configAndroid), true);
+    expect(configIos.equals(configIos), true);
   });
 }

@@ -13,6 +13,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A place in an [Overlay] that can contain a widget.
 ///
 /// Overlay entries are inserted into an [Overlay] using the
@@ -270,13 +273,25 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// [OverlayEntry] objects.
 ///
 /// Although you can create an [Overlay] directly, it's most common to use the
-/// overlay created by the [Navigator] in a [WidgetsApp] or a [MaterialApp]. The
-/// navigator uses its overlay to manage the visual appearance of its routes.
+/// overlay created by the [Navigator] in a [WidgetsApp], [CupertinoApp] or a
+/// [MaterialApp]. The navigator uses its overlay to manage the visual
+/// appearance of its routes.
 ///
 /// The [Overlay] widget uses a custom stack implementation, which is very
 /// similar to the [Stack] widget. The main use case of [Overlay] is related to
 /// navigation and being able to insert widgets on top of the pages in an app.
 /// To simply display a stack of widgets, consider using [Stack] instead.
+///
+/// An [Overlay] widget requires a [Directionality] widget to be in scope, so
+/// that it can resolve direction-sensitive coordinates of any
+/// [Positioned.directional] children.
+///
+/// {@tool dartpad}
+/// This example shows how to use the [Overlay] to highlight the [NavigationBar]
+/// destination.
+///
+/// ** See code in examples/api/lib/widgets/overlay/overlay.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -284,6 +299,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 ///  * [OverlayState], which is used to insert the entries into the overlay.
 ///  * [WidgetsApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
+///  * [CupertinoApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [Stack], which allows directly displaying a stack of widgets.
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
@@ -292,7 +308,8 @@ class Overlay extends StatefulWidget {
   /// [OverlayState] is initialized.
   ///
   /// Rather than creating an overlay, consider using the overlay that is
-  /// created by the [Navigator] in a [WidgetsApp] or a [MaterialApp] for the application.
+  /// created by the [Navigator] in a [WidgetsApp], [CupertinoApp], or a
+  /// [MaterialApp] for the application.
   const Overlay({
     super.key,
     this.initialEntries = const <OverlayEntry>[],
@@ -320,13 +337,16 @@ class Overlay extends StatefulWidget {
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The [OverlayState] from the closest instance of [Overlay] that encloses
+  /// the given context, and, in debug mode, will throw if one is not found.
   ///
-  /// In debug mode, if the `debugRequiredFor` argument is provided then this
-  /// function will assert that an overlay was found and will throw an exception
-  /// if not. The exception attempts to explain that the calling [Widget] (the
-  /// one given by the `debugRequiredFor` argument) needs an [Overlay] to be
-  /// present to function.
+  /// In debug mode, if the `debugRequiredFor` argument is provided and an
+  /// overlay isn't found, then this function will throw an exception containing
+  /// the runtime type of the given widget in the error message. The exception
+  /// attempts to explain that the calling [Widget] (the one given by the
+  /// `debugRequiredFor` argument) needs an [Overlay] to be present to function.
+  /// If `debugRequiredFor` is not supplied, then the error message is more
+  /// generic.
   ///
   /// Typical usage is as follows:
   ///
@@ -335,25 +355,28 @@ class Overlay extends StatefulWidget {
   /// ```
   ///
   /// If `rootOverlay` is set to true, the state from the furthest instance of
-  /// this class is given instead. Useful for installing overlay entries
-  /// above all subsequent instances of [Overlay].
+  /// this class is given instead. Useful for installing overlay entries above
+  /// all subsequent instances of [Overlay].
   ///
   /// This method can be expensive (it walks the element tree).
-  static OverlayState? of(
+  ///
+  /// See also:
+  ///
+  /// * [Overlay.maybeOf] for a similar function that returns null if an
+  ///   [Overlay] is not found.
+  static OverlayState of(
     BuildContext context, {
     bool rootOverlay = false,
     Widget? debugRequiredFor,
   }) {
-    final OverlayState? result = rootOverlay
-        ? context.findRootAncestorStateOfType<OverlayState>()
-        : context.findAncestorStateOfType<OverlayState>();
+    final OverlayState? result = maybeOf(context, rootOverlay: rootOverlay);
     assert(() {
-      if (debugRequiredFor != null && result == null) {
+      if (result == null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
           ErrorSummary('No Overlay widget found.'),
-          ErrorDescription('${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.'),
-          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.'),
-          DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
+          ErrorDescription('${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.'),
+          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.'),
+          if (debugRequiredFor != null) DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
           if (context.widget != debugRequiredFor)
             context.describeElement('The context from which that widget was searching for an overlay was'),
         ];
@@ -362,7 +385,36 @@ class Overlay extends StatefulWidget {
       }
       return true;
     }());
-    return result;
+    return result!;
+  }
+
+  /// The [OverlayState] from the closest instance of [Overlay] that encloses
+  /// the given context, if any.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// OverlayState? overlay = Overlay.maybeOf(context);
+  /// ```
+  ///
+  /// If `rootOverlay` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for installing overlay entries above
+  /// all subsequent instances of [Overlay].
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  ///  * [Overlay.of] for a similar function that returns a non-nullable result
+  ///    and throws if an [Overlay] is not found.
+
+  static OverlayState? maybeOf(
+    BuildContext context, {
+    bool rootOverlay = false,
+  }) {
+    return rootOverlay
+        ? context.findRootAncestorStateOfType<OverlayState>()
+        : context.findAncestorStateOfType<OverlayState>();
   }
 
   @override

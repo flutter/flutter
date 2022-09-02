@@ -56,7 +56,7 @@ class MyStatelessWidget extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 'Subheader',
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.start,
               ),
             ),

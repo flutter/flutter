@@ -66,8 +66,8 @@ class CupertinoPicker extends StatefulWidget {
   /// the current picker index or for selecting an initial index value.
   ///
   /// The [looping] argument decides whether the child list loops and can be
-  /// scrolled infinitely.  If set to true, scrolling past the end of the list
-  /// will loop the list back to the beginning.  If set to false, the list will
+  /// scrolled infinitely. If set to true, scrolling past the end of the list
+  /// will loop the list back to the beginning. If set to false, the list will
   /// stop scrolling when you reach the end or the beginning.
   CupertinoPicker({
     super.key,

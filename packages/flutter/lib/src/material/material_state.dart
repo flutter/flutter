@@ -8,6 +8,9 @@ import 'package:flutter/services.dart';
 
 import 'input_border.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///
@@ -321,30 +324,35 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// (the empty set of states) will be used.
   ///
   /// Usage:
+  ///
   /// ```dart
   /// ChipTheme(
   ///   data: Theme.of(context).chipTheme.copyWith(
   ///     side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
   ///       if (states.contains(MaterialState.selected)) {
-  ///         return const BorderSide(width: 1, color: Colors.red);
+  ///         return const BorderSide(color: Colors.red);
   ///       }
   ///       return null;  // Defer to default value on the theme or widget.
   ///     }),
   ///   ),
-  ///   child: Chip(),
-  /// )
+  ///   child: const Chip(
+  ///     label: Text('Transceiver'),
+  ///   ),
+  /// ),
+  /// ```
   ///
-  /// // OR
+  /// Alternatively:
   ///
+  /// ```dart
   /// Chip(
-  ///   ...
+  ///   label: const Text('Transceiver'),
   ///   side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.selected)) {
-  ///       return const BorderSide(width: 1, color: Colors.red);
+  ///       return const BorderSide(color: Colors.red);
   ///     }
   ///     return null;  // Defer to default value on the theme or widget.
   ///   }),
-  /// )
+  /// ),
   /// ```
   static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
       _MaterialStateBorderSide(callback);
@@ -596,8 +604,8 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 /// of [MaterialState]s.
 ///
 /// Material state properties represent values that depend on a widget's material
-/// "state".  The state is encoded as a set of [MaterialState] values, like
-/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed].  For
+/// "state". The state is encoded as a set of [MaterialState] values, like
+/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
 /// example the [InkWell.overlayColor] defines the color that fills the ink well
 /// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
 /// uses the overlay color's [resolve] method to compute the color for the
@@ -605,7 +613,7 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// [ButtonStyle], which is used to configure the appearance of
 /// buttons like [TextButton], [ElevatedButton], and [OutlinedButton],
-/// has many material state properties.  The button widgets keep track
+/// has many material state properties. The button widgets keep track
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
 ///
@@ -658,6 +666,36 @@ abstract class MaterialStateProperty<T> {
   // a dart fix that will replace this with MaterialStatePropertyAll:
   // https://github.com/dart-lang/sdk/issues/49056.
   static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
+
+  /// Linearly interpolate between two [MaterialStateProperty]s.
+  static MaterialStateProperty<T?>? lerp<T>(
+    MaterialStateProperty<T>? a,
+    MaterialStateProperty<T>? b,
+    double t,
+    T? Function(T?, T?, double) lerpFunction,
+  ) {
+    // Avoid creating a _LerpProperties object for a common case.
+    if (a == null && b == null) {
+      return null;
+    }
+    return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+}
+
+class _LerpProperties<T> implements MaterialStateProperty<T?> {
+  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
+
+  final MaterialStateProperty<T>? a;
+  final MaterialStateProperty<T>? b;
+  final double t;
+  final T? Function(T?, T?, double) lerpFunction;
+
+  @override
+  T? resolve(Set<MaterialState> states) {
+    final T? resolvedA = a?.resolve(states);
+    final T? resolvedB = b?.resolve(states);
+    return lerpFunction(resolvedA, resolvedB, t);
+  }
 }
 
 class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
@@ -684,5 +722,34 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
   T resolve(Set<MaterialState> states) => value;
 
   @override
-  String toString() => 'MaterialStatePropertyAll($value)';
+  String toString() {
+    if (value is double) {
+      return 'MaterialStatePropertyAll(${debugFormatDouble(value as double)})';
+    } else {
+      return 'MaterialStatePropertyAll($value)';
+    }
+  }
+}
+
+/// Manages a set of [MaterialState]s and notifies listeners of changes.
+///
+/// Used by widgets that expose their internal state for the sake of
+/// extensions that add support for additional states. See
+/// [TextButton.statesController] for example.
+///
+/// The controller's [value] is its current set of states. Listeners
+/// are notified whenever the [value] changes. The [value] should only be
+/// changed with [update]; it should not be modified directly.
+class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
+  /// Creates a MaterialStatesController.
+  MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
+
+  /// Adds [state] to [value] if [add] is true, and removes it otherwise,
+  /// and notifies listeners if [value] has changed.
+  void update(MaterialState state, bool add) {
+    final bool valueChanged = add ? value.add(state) : value.remove(state);
+    if (valueChanged) {
+      notifyListeners();
+    }
+  }
 }

@@ -312,7 +312,19 @@ class NestedScrollView extends StatefulWidget {
     return <Widget>[
       ...headerSliverBuilder(context, bodyIsScrolled),
       SliverFillRemaining(
+        // The inner (body) scroll view must use this scroll controller so that
+        // the independent scroll positions can be kept in sync.
         child: PrimaryScrollController(
+          // The inner scroll view should always inherit this
+          // PrimaryScrollController, on every platform.
+          automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
+          // `PrimaryScrollController.scrollDirection` is not set, and so it is
+          // restricted to the default Axis.vertical.
+          // Ideally the inner and outer views would have the same
+          // scroll direction, and so we could assume
+          // `NestedScrollView.scrollDirection` for the PrimaryScrollController,
+          // but use cases already exist where the axes are mismatched.
+          // https://github.com/flutter/flutter/issues/102001
           controller: innerController,
           child: body,
         ),
@@ -672,6 +684,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         );
       },
     );
+  }
+
+  // TODO(Piinks): https://github.com/flutter/flutter/issues/100748
+  @override
+  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
+    return null;
   }
 
   ScrollActivity createOuterBallisticScrollActivity(double velocity) {
@@ -1332,6 +1350,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
+    coordinator.updateUserScrollDirection(ScrollDirection.idle);
   }
 
   // This is called by activities when they finish their work and want to go
@@ -1346,6 +1365,12 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       simulation,
       mode: _NestedBallisticScrollActivityMode.independent,
     ));
+  }
+
+  // TODO(Piinks): see https://github.com/flutter/flutter/issues/100748
+  @override
+  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
+    return null;
   }
 
   ScrollActivity createBallisticScrollActivity(
@@ -1369,6 +1394,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           metrics,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.inner:
         return _NestedInnerBallisticScrollActivity(
@@ -1376,9 +1402,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           this,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.independent:
-        return BallisticScrollActivity(this, simulation, context.vsync);
+        return BallisticScrollActivity(this, simulation, context.vsync, activity?.shouldIgnorePointer ?? true);
     }
   }
 
@@ -1450,7 +1477,8 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
     _NestedScrollPosition position,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(position, simulation, vsync);
+    bool shouldIgnorePointer,
+  ) : super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
 
@@ -1486,9 +1514,10 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
     this.metrics,
     Simulation simulation,
     TickerProvider vsync,
+    bool shouldIgnorePointer,
   ) : assert(metrics.minRange != metrics.maxRange),
       assert(metrics.maxRange > metrics.minRange),
-      super(position, simulation, vsync);
+      super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;

@@ -4,8 +4,8 @@
 
 
 import 'dart:convert' show jsonDecode;
-import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -210,6 +210,64 @@ void main() {
         ),
       ]);
     });
+
+    test('Invalid TextRange fails loudly when being converted to JSON', () async {
+      final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
+      FlutterError.onError = (FlutterErrorDetails details) {
+        record.add(details);
+      };
+
+      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateEditingState',
+        'args': <dynamic>[-1, <String, dynamic>{
+          'text': '1',
+          'selectionBase': 2,
+          'selectionExtent': 3,
+        }],
+      });
+
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+      expect(record.length, 1);
+      // Verify the error message in parts because Web formats the message
+      // differently from others.
+      expect(record[0].exception.toString(), matches(RegExp(r'\brange.start >= 0 && range.start <= text.length\b')));
+      expect(record[0].exception.toString(), matches(RegExp(r'\bRange start 2 is out of text of length 1\b')));
+    });
+
+    test('FloatingCursor coordinates type-casting', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/109632.
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      FlutterError.onError = errors.add;
+
+      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateFloatingCursor',
+        'args': <dynamic>[
+          -1,
+          'FloatingCursorDragState.update',
+          <String, dynamic>{ 'X': 2, 'Y': 3 },
+        ],
+      });
+
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(errors, isEmpty);
+    });
   });
 
   group('TextInputConfiguration', () {
@@ -346,6 +404,35 @@ void main() {
       );
 
       expect(client.latestMethodCall, 'connectionClosed');
+    });
+
+    test('TextInputClient performSelectors method is called', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.performedSelectors, isEmpty);
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send performSelectors message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[
+          1,
+          <dynamic>[
+            'selector1',
+            'selector2',
+          ]
+        ],
+        'method': 'TextInputClient.performSelectors',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'performSelector');
+      expect(client.performedSelectors, <String>['selector1', 'selector2']);
     });
 
     test('TextInputClient performPrivateCommand method is called', () async {
@@ -669,10 +756,11 @@ void main() {
   });
 }
 
-class FakeTextInputClient implements TextInputClient {
+class FakeTextInputClient with TextInputClient {
   FakeTextInputClient(this.currentTextEditingValue);
 
   String latestMethodCall = '';
+  final List<String> performedSelectors = <String>[];
 
   @override
   TextEditingValue currentTextEditingValue;
@@ -725,5 +813,11 @@ class FakeTextInputClient implements TextInputClient {
   @override
   void removeTextPlaceholder() {
     latestMethodCall = 'removeTextPlaceholder';
+  }
+
+  @override
+  void performSelector(String selectorName) {
+    latestMethodCall = 'performSelector';
+    performedSelectors.add(selectorName);
   }
 }

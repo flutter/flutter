@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:coverage/coverage.dart' as coverage;
 import 'package:meta/meta.dart';
@@ -15,11 +15,12 @@ import '../globals.dart' as globals;
 import '../vmservice.dart';
 
 import 'test_device.dart';
+import 'test_time_recorder.dart';
 import 'watcher.dart';
 
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryNames, this.verbose = true, @required this.packagesPath});
+  CoverageCollector({this.libraryNames, this.verbose = true, required this.packagesPath, this.resolver, this.testTimeRecorder});
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -29,11 +30,26 @@ class CoverageCollector extends TestWatcher {
   final String packagesPath;
 
   /// Map of file path to coverage hit map for that file.
-  Map<String, coverage.HitMap> _globalHitmap;
+  Map<String, coverage.HitMap>? _globalHitmap;
 
   /// The names of the libraries to gather coverage for. If null, all libraries
   /// will be accepted.
-  Set<String> libraryNames;
+  Set<String>? libraryNames;
+
+  final coverage.Resolver? resolver;
+  final Map<String, List<List<int>>> _ignoredLinesInFilesCache = <String, List<List<int>>>{};
+
+  final TestTimeRecorder? testTimeRecorder;
+
+  static Future<coverage.Resolver> getResolver(String? packagesPath) async {
+    try {
+      return await coverage.Resolver.create(packagesPath: packagesPath);
+    } on FileSystemException {
+      // When given a bad packages path (as for instance done in some tests)
+      // just ignore it and return one without a packages path.
+      return coverage.Resolver.create();
+    }
+  }
 
   @override
   Future<void> handleFinishedTest(TestDevice testDevice) async {
@@ -53,11 +69,13 @@ class CoverageCollector extends TestWatcher {
   }
 
   void _addHitmap(Map<String, coverage.HitMap> hitmap) {
+    final Stopwatch? stopwatch = testTimeRecorder?.start(TestTimePhases.CoverageAddHitmap);
     if (_globalHitmap == null) {
       _globalHitmap = hitmap;
     } else {
-      _globalHitmap.merge(hitmap);
+      _globalHitmap!.merge(hitmap);
     }
+    testTimeRecorder?.stop(TestTimePhases.CoverageAddHitmap, stopwatch!);
   }
 
   /// The directory of the package for which coverage is being collected.
@@ -104,10 +122,14 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverage(TestDevice testDevice) async {
+  Future<void> collectCoverage(TestDevice testDevice, {@visibleForTesting Future<FlutterVmService> Function(Uri?)? connector}) async {
     assert(testDevice != null);
 
-    Map<String, dynamic> data;
+    final Stopwatch? totalTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageTotal);
+
+    Map<String, dynamic>? data;
+
+    final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
     final Future<void> processComplete = testDevice.finished.catchError(
       (Object error) => throw Exception(
@@ -117,9 +139,9 @@ class CoverageCollector extends TestWatcher {
     );
 
     final Future<void> collectionComplete = testDevice.observatoryUri
-      .then((Uri observatoryUri) {
+      .then((Uri? observatoryUri) {
         _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri, libraryNames)
+        return collect(observatoryUri, libraryNames, connector: connector ?? _defaultConnect)
           .then<void>((Map<String, dynamic> result) {
             if (result == null) {
               throw Exception('Failed to collect coverage.');
@@ -131,44 +153,50 @@ class CoverageCollector extends TestWatcher {
 
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
+    testTimeRecorder?.stop(TestTimePhases.CoverageCollect, collectTestTimeRecorderStopwatch!);
 
     _logMessage('Merging coverage data...');
-    _addHitmap(await coverage.HitMap.parseJson(
-      data['coverage'] as List<Map<String, dynamic>>,
-      packagePath: packageDirectory,
-      checkIgnoredLines: true,
-    ));
+    final Stopwatch? parseTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageParseJson);
+    final Map<String, coverage.HitMap> hitmap = coverage.HitMap.parseJsonSync(
+        data!['coverage'] as List<Map<String, dynamic>>,
+        checkIgnoredLines: true,
+        resolver: resolver ?? await CoverageCollector.getResolver(packageDirectory),
+        ignoredLinesInFilesCache: _ignoredLinesInFilesCache);
+    testTimeRecorder?.stop(TestTimePhases.CoverageParseJson, parseTestTimeRecorderStopwatch!);
+
+    _addHitmap(hitmap);
     _logMessage('Done merging coverage data into global coverage map.');
+    testTimeRecorder?.stop(TestTimePhases.CoverageTotal, totalTestTimeRecorderStopwatch!);
   }
 
   /// Returns formatted coverage data once all coverage data has been collected.
   ///
   /// This will not start any collection tasks. It us up to the caller of to
   /// call [collectCoverage] for each process first.
-  Future<String> finalizeCoverage({
-    String Function(Map<String, coverage.HitMap> hitmap) formatter,
-    coverage.Resolver resolver,
-    Directory coverageDirectory,
+  Future<String?> finalizeCoverage({
+    String Function(Map<String, coverage.HitMap> hitmap)? formatter,
+    coverage.Resolver? resolver,
+    Directory? coverageDirectory,
   }) async {
     if (_globalHitmap == null) {
       return null;
     }
     if (formatter == null) {
-      resolver ??= await coverage.Resolver.create(packagesPath: packagesPath);
+      final coverage.Resolver usedResolver = resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
           ? <String>[globals.fs.path.join(packagePath, 'lib')]
           : <String>[coverageDirectory.path];
       formatter = (Map<String, coverage.HitMap> hitmap) => hitmap
-          .formatLcov(resolver, reportOn: reportOn, basePath: packagePath);
+          .formatLcov(usedResolver, reportOn: reportOn, basePath: packagePath);
     }
-    final String result = formatter(_globalHitmap);
+    final String result = formatter(_globalHitmap!);
     _globalHitmap = null;
     return result;
   }
 
-  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
-    final String coverageData = await finalizeCoverage(
+  Future<bool> collectCoverageData(String? coveragePath, { bool mergeCoverageData = false, Directory? coverageDirectory }) async {
+    final String? coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
     _logMessage('coverage information collection complete');
@@ -225,15 +253,15 @@ class CoverageCollector extends TestWatcher {
   Future<void> handleTestTimedOut(TestDevice testDevice) async { }
 }
 
-Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
+Future<FlutterVmService> _defaultConnect(Uri? serviceUri) {
   return connectToVmService(
-      serviceUri, compression: CompressionOptions.compressionOff, logger: globals.logger,);
+      serviceUri!, compression: CompressionOptions.compressionOff, logger: globals.logger,);
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String> libraryNames, {
+Future<Map<String, dynamic>> collect(Uri? serviceUri, Set<String>? libraryNames, {
   bool waitPaused = false,
-  String debugName,
-  Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
+  String? debugName,
+  Future<FlutterVmService> Function(Uri?) connector = _defaultConnect,
   @visibleForTesting bool forceSequential = false,
 }) async {
   final FlutterVmService vmService = await connector(serviceUri);
@@ -244,31 +272,31 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String> libraryNames, {
 
 Future<Map<String, dynamic>> _getAllCoverage(
   vm_service.VmService service,
-  Set<String> libraryNames,
+  Set<String>? libraryNames,
   bool forceSequential,
 ) async {
   final vm_service.Version version = await service.getVersion();
-  final bool libraryFilters = (version.major == 3 && version.minor >= 57) || version.major > 3;
+  final bool libraryFilters = (version.major == 3 && version.minor! >= 57) || version.major! > 3;
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
-  bool libraryPredicate(String libraryName) {
+  bool libraryPredicate(String? libraryName) {
     if (libraryNames == null) {
       return true;
     }
-    final Uri uri = Uri.parse(libraryName);
+    final Uri uri = Uri.parse(libraryName!);
     if (uri.scheme != 'package') {
       return false;
     }
     final String scope = uri.path.split('/').first;
     return libraryNames.contains(scope);
   }
-  for (final vm_service.IsolateRef isolateRef in vm.isolates) {
-    if (isolateRef.isSystemIsolate) {
+  for (final vm_service.IsolateRef isolateRef in vm.isolates!) {
+    if (isolateRef.isSystemIsolate!) {
       continue;
     }
     if (libraryFilters) {
       final vm_service.SourceReport sourceReport = await service.getSourceReport(
-          isolateRef.id,
+          isolateRef.id!,
           <String>['Coverage'],
           forceCompile: true,
           reportLines: true,
@@ -283,7 +311,7 @@ Future<Map<String, dynamic>> _getAllCoverage(
     } else {
       vm_service.ScriptList scriptList;
       try {
-        scriptList = await service.getScripts(isolateRef.id);
+        scriptList = await service.getScripts(isolateRef.id!);
       } on vm_service.SentinelException {
         continue;
       }
@@ -294,14 +322,14 @@ Future<Map<String, dynamic>> _getAllCoverage(
 
       // For each ScriptRef loaded into the VM, load the corresponding Script
       // and SourceReport object.
-      for (final vm_service.ScriptRef script in scriptList.scripts) {
-        final String libraryUri = script.uri;
+      for (final vm_service.ScriptRef script in scriptList.scripts!) {
+        final String? libraryUri = script.uri;
         if (!libraryPredicate(libraryUri)) {
           continue;
         }
-        final String scriptId = script.id;
+        final String? scriptId = script.id;
         final Future<void> getSourceReport = service.getSourceReport(
-          isolateRef.id,
+          isolateRef.id!,
           <String>['Coverage'],
           scriptId: scriptId,
           forceCompile: true,
@@ -328,36 +356,36 @@ void _buildCoverageMap(
   List<vm_service.SourceReport> sourceReports,
   List<Map<String, dynamic>> coverage,
 ) {
-  final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
+  final Map<String?, Map<int, int>> hitMaps = <String?, Map<int, int>>{};
   for (final vm_service.SourceReport sourceReport  in sourceReports) {
-    for (final vm_service.SourceReportRange range in sourceReport.ranges) {
-      final vm_service.SourceReportCoverage coverage = range.coverage;
+    for (final vm_service.SourceReportRange range in sourceReport.ranges!) {
+      final vm_service.SourceReportCoverage? coverage = range.coverage;
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {
         continue;
       }
-      final vm_service.ScriptRef scriptRef = sourceReport.scripts[range.scriptIndex];
-      final String uri = scriptRef.uri;
+      final vm_service.ScriptRef scriptRef = sourceReport.scripts![range.scriptIndex!];
+      final String? uri = scriptRef.uri;
 
       hitMaps[uri] ??= <int, int>{};
-      final Map<int, int> hitMap = hitMaps[uri];
-      final List<int> hits = coverage.hits;
-      final List<int> misses = coverage.misses;
+      final Map<int, int>? hitMap = hitMaps[uri];
+      final List<int>? hits = coverage.hits;
+      final List<int>? misses = coverage.misses;
       if (hits != null) {
         for (final int line in hits) {
-          final int current = hitMap[line] ?? 0;
+          final int current = hitMap![line] ?? 0;
           hitMap[line] = current + 1;
         }
       }
       if (misses != null) {
         for (final int line in misses) {
-          hitMap[line] ??= 0;
+          hitMap![line] ??= 0;
         }
       }
     }
   }
-  hitMaps.forEach((String uri, Map<int, int> hitMap) {
-    coverage.add(_toScriptCoverageJson(uri, hitMap));
+  hitMaps.forEach((String? uri, Map<int, int> hitMap) {
+    coverage.add(_toScriptCoverageJson(uri!, hitMap));
   });
 }
 

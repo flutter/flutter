@@ -114,7 +114,7 @@ class RangeSlider extends StatefulWidget {
   /// the slider. To know when the value starts to change, or when it is done
   /// changing, set the optional callbacks [onChangeStart] and/or [onChangeEnd].
   ///
-  /// * [values], which  determines currently selected values for this range
+  /// * [values], which determines currently selected values for this range
   ///   slider.
   /// * [onChanged], which is called while the user is selecting a new value for
   ///   the range slider.
@@ -190,7 +190,7 @@ class RangeSlider extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [onChangeStart], which  is called when the user starts  changing the
+  ///  * [onChangeStart], which is called when the user starts changing the
   ///    values.
   ///  * [onChangeEnd], which is called when the user stops changing the values.
   final ValueChanged<RangeValues>? onChanged;
@@ -292,7 +292,7 @@ class RangeSlider extends StatefulWidget {
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
   /// Each label is rendered using the active [ThemeData]'s
-  /// [TextTheme.bodyText1] text style, with the theme data's
+  /// [TextTheme.bodyLarge] text style, with the theme data's
   /// [ColorScheme.onPrimary] color. The label's text style can be overridden
   /// with [SliderThemeData.valueIndicatorTextStyle].
   ///
@@ -609,7 +609,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       rangeValueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyLarge!.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
       minThumbSeparation: sliderTheme.minThumbSeparation ?? defaultMinThumbSeparation,
@@ -655,7 +655,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           );
         },
       );
-      Overlay.of(context)!.insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
     }
   }
 }
@@ -704,6 +704,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
+      gestureSettings: MediaQuery.of(context).gestureSettings,
     );
   }
 
@@ -724,7 +725,8 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..platform = Theme.of(context).platform;
+      ..platform = Theme.of(context).platform
+      ..gestureSettings = MediaQuery.of(context).gestureSettings;
   }
 }
 
@@ -744,6 +746,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     required this.onChangeEnd,
     required _RangeSliderState state,
     required TextDirection textDirection,
+    required DeviceGestureSettings gestureSettings,
   })  : assert(values != null),
         assert(values.start >= 0.0 && values.start <= 1.0),
         assert(values.end >= 0.0 && values.end <= 1.0),
@@ -768,12 +771,14 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _handleDragCancel;
+      ..onCancel = _handleDragCancel
+      ..gestureSettings = gestureSettings;
     _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
-      ..onTapCancel = _handleTapCancel;
+      ..onTapCancel = _handleTapCancel
+      ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -880,6 +885,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     }
     _platform = value;
     markNeedsSemanticsUpdate();
+  }
+
+  DeviceGestureSettings? get gestureSettings => _drag.gestureSettings;
+  set gestureSettings(DeviceGestureSettings? gestureSettings) {
+    _drag.gestureSettings = gestureSettings;
+    _tap.gestureSettings = gestureSettings;
   }
 
   SemanticFormatterCallback? _semanticFormatterCallback;

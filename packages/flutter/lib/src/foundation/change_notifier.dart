@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show VoidCallback;
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
-import 'basic_types.dart';
 import 'diagnostics.dart';
+
+export 'dart:ui' show VoidCallback;
 
 /// An object that maintains a list of listeners.
 ///
@@ -167,11 +170,10 @@ class ChangeNotifier implements Listenable {
   /// [notifyListeners]; and similarly, by overriding [removeListener], checking
   /// if [hasListeners] is false after calling `super.removeListener()`, and if
   /// so, stopping that same work.
+  ///
+  /// This method returns false if [dispose] has been called.
   @protected
-  bool get hasListeners {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
-    return _count > 0;
-  }
+  bool get hasListeners => _count > 0;
 
   /// Register a closure to be called when the object changes.
   ///
@@ -294,6 +296,10 @@ class ChangeNotifier implements Listenable {
   /// [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
+  ///
+  /// This method does not notify listeners, and clears the listener list once
+  /// it is called. Consumers of this class must decide on whether to notify
+  /// listeners or not immediately before disposal.
   @mustCallSuper
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));

@@ -7,9 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -49,6 +47,16 @@ abstract class ScrollActivityDelegate {
   /// Terminate the current activity and start a ballistic activity with the
   /// given velocity.
   void goBallistic(double velocity);
+
+  /// Update the ballistic animation instead of restarting it, for example as
+  /// the result of a layout change after a flinging gesture.
+  ///
+  /// The [initVelocity] and [initPosition] refer to the starting values of the
+  /// new ballistic animation.
+  ///
+  /// Can return null if the current [ScrollPhysics.createBallisticSimulation]
+  /// returns null, which will trigger an [IdleScrollActivity] instead.
+  Simulation? updateBallisticAnimation(double initVelocity, double initPosition);
 }
 
 /// Base class for scrolling activities like dragging and flinging.
@@ -246,6 +254,7 @@ class ScrollDragController implements Drag {
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
+       _kind = details.kind,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
@@ -426,6 +435,8 @@ class ScrollDragController implements Drag {
     onDragCanceled?.call();
   }
 
+  /// The type of input device driving the drag.
+  final PointerDeviceKind? _kind;
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
   /// [DragEndDetails] object.
   dynamic get lastDetails => _lastDetails;
@@ -485,7 +496,7 @@ class DragScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  bool get shouldIgnorePointer => _controller?._kind != PointerDeviceKind.trackpad;
 
   @override
   bool get isScrolling => true;
@@ -523,12 +534,17 @@ class DragScrollActivity extends ScrollActivity {
 class BallisticScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on a [simulation].
   ///
-  /// The [delegate], [simulation], and [vsync] arguments must not be null.
+  /// The [delegate], [simulation], and [vsync] arguments must not be null. The
+  /// [initVelocity] and [initPosition] arguments allow the ballistic activity
+  /// to update the simulation instead of restarting it.
   BallisticScrollActivity(
     super.delegate,
     Simulation simulation,
     TickerProvider vsync,
-  ) {
+    this.shouldIgnorePointer, {
+    double initVelocity = 0.0,
+    double initPosition = 0.0,
+  }) : _initVelocity = initVelocity, _initPosition = initPosition {
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
       vsync: vsync,
@@ -540,6 +556,10 @@ class BallisticScrollActivity extends ScrollActivity {
 
   late AnimationController _controller;
 
+  final double _initVelocity;
+
+  final double _initPosition;
+
   @override
   void resetActivity() {
     delegate.goBallistic(velocity);
@@ -547,7 +567,13 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    delegate.goBallistic(velocity);
+    final Simulation? newSimulation = delegate.updateBallisticAnimation(
+      _initVelocity,
+      _initPosition,
+    );
+    if (newSimulation != null) {
+      _controller.updateSimulation(newSimulation);
+    }
   }
 
   void _tick() {
@@ -578,7 +604,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  final bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;

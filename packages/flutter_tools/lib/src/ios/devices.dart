@@ -361,6 +361,7 @@ class IOSDevice extends Device {
         '--verify-entry-points',
       ],
       if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
+      if (debuggingOptions.traceSystrace) '--trace-systrace',
       if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (debuggingOptions.traceSkia) '--trace-skia',
       if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
@@ -703,7 +704,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
     void logMessage(vm_service.Event event) {
       if (_iosDeployDebugger != null && _iosDeployDebugger!.debuggerAttached) {
-        // Prefer the more complete logs from the  attached debugger.
+        // Prefer the more complete logs from the attached debugger.
         return;
       }
       final String message = processVmServiceMessage(event);

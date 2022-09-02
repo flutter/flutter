@@ -58,7 +58,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                         ),
                         Text(
                           'CART',
-                          style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                          style: localTheme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 16.0),
                         Text('${model.totalCartQuantity} ITEMS'),
@@ -78,7 +78,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   right: 16.0,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: kShrinePink100,
+                      backgroundColor: kShrinePink100,
                       shape: const BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
@@ -109,8 +109,8 @@ class ShoppingCartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyText2!.copyWith(color: kShrineBrown600);
-    final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headline4;
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: kShrineBrown600);
+    final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headlineMedium;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
@@ -243,7 +243,7 @@ class ShoppingCartRow extends StatelessWidget {
                             ),
                             Text(
                               product.name,
-                              style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                              style: localTheme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),

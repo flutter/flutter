@@ -14,7 +14,11 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
-export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
+export 'package:flutter/physics.dart' show Simulation, SpringDescription;
+export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
+
+export 'animation.dart' show Animation, AnimationStatus;
+export 'curves.dart' show Curve;
 
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
@@ -751,6 +755,15 @@ class AnimationController extends Animation<double>
       AnimationStatus.reverse;
     _checkStatusChanged();
     return result;
+  }
+
+  /// Update the simulation without restarting the animation.
+  ///
+  /// The current simulation will be replaced with the provided [Simulation].
+  /// It is only valid to call this when an animation is currently underway.
+  void updateSimulation(Simulation simulation) {
+    assert(isAnimating);
+    _simulation = simulation;
   }
 
   /// Stops running this animation.

@@ -55,7 +55,7 @@ Future<void> main() async {
     expect(
       find.byType(DecoratedBox),
       paints
-        ..path(color: Color(Colors.blue.value))
+        ..rect(color: Color(Colors.blue.value))
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );

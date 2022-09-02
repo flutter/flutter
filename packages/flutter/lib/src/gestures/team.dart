@@ -6,6 +6,8 @@
 import 'arena.dart';
 import 'binding.dart';
 
+export 'arena.dart' show GestureArenaEntry, GestureArenaMember;
+
 class _CombiningGestureArenaEntry implements GestureArenaEntry {
   _CombiningGestureArenaEntry(this._combiner, this._member);
 

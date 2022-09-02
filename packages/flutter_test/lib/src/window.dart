@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui hide window;
 
 import 'package:flutter/foundation.dart';
@@ -309,6 +308,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     platformDispatcher.onTextScaleFactorChanged = callback;
+  }
+
+  @override
+  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
   }
 
   @override
@@ -723,6 +728,18 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   @override
+  bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefinedTestValue ?? _platformDispatcher.nativeSpellCheckServiceDefined;
+  bool? _nativeSpellCheckServiceDefinedTestValue;
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+    _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+  }
+  /// Deletes existing value that determines whether or not a native spell check
+  /// service is defined and returns to the real value.
+  void clearNativeSpellCheckServiceDefined() {
+    _nativeSpellCheckServiceDefinedTestValue = null;
+  }
+
+  @override
   bool get brieflyShowPassword => _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
   bool? _brieflyShowPasswordTestValue;
   /// Hides the real [brieflyShowPassword] and reports the given
@@ -883,6 +900,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
     clearLocalesTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
+    clearNativeSpellCheckServiceDefined();
   }
 
   @override

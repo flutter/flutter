@@ -297,7 +297,11 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  }).catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
+  })
+  // TODO(srawlins): Fix this static issue,
+  // https://github.com/flutter/flutter/issues/105750.
+  // ignore: body_might_complete_normally_catch_error
+  .catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     debugPrint('${stamp()} (process terminated with exit code $exitCode)');
@@ -375,7 +379,7 @@ void main() {
             return null;
           }),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms\.$'), 'called reassemble', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms \(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.$'), 'called reassemble', 'called paint'], handler: (String line) {
             processManager.killPid(pid, ProcessSignal.sigusr2);
             return null;
           }),
@@ -514,7 +518,7 @@ void main() {
         'A RenderFlex overflowed by 69200 pixels on the right.',
         '',
         'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:31:12$')),
+        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:12$')),
         '',
         'To inspect this widget in Flutter DevTools, visit:',
         startsWith('http'),
@@ -608,7 +612,7 @@ void main() {
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',
       'g Run source code generators.',
-      'j Dump frame raster stats for the current frame.',
+      'j Dump frame raster stats for the current frame. (Unsupported for web)',
       'h Repeat this help message.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',

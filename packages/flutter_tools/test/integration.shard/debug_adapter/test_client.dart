@@ -325,7 +325,7 @@ extension DapTestClientExtension on DapTestClient {
   Future<List<OutputEventBody>> collectAllOutput({
     String? program,
     String? cwd,
-    Future<Response> Function()? start,
+    Future<void> Function()? start,
     Future<Response> Function()? launch,
     bool skipInitialPubGetOutput = true
   }) async {

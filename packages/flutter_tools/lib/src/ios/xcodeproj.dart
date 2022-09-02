@@ -47,6 +47,7 @@ class XcodeProjectInterpreter {
     required FileSystem fileSystem,
     required Usage usage,
     Version? version,
+    String? build,
   }) : _platform = platform,
         _fileSystem = fileSystem,
         _logger = logger,
@@ -58,6 +59,7 @@ class XcodeProjectInterpreter {
           processManager: processManager,
         ),
         _version = version,
+        _build = build,
         _versionText = version?.toString(),
         _usage = usage;
 
@@ -70,6 +72,7 @@ class XcodeProjectInterpreter {
   factory XcodeProjectInterpreter.test({
     required ProcessManager processManager,
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
+    String? build = '13C100',
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -82,6 +85,7 @@ class XcodeProjectInterpreter {
       usage: TestUsage(),
       logger: BufferLogger.test(),
       version: version,
+      build: build,
     );
   }
 
@@ -91,8 +95,7 @@ class XcodeProjectInterpreter {
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
   final Usage _usage;
-
-  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
+  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
   void _updateVersion() {
     if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
@@ -118,6 +121,7 @@ class XcodeProjectInterpreter {
       final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
       final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
       _version = Version(majorVersion, minorVersion, patchVersion);
+      _build = match.group(2);
     } on ProcessException {
       // Ignored, leave values null.
     }
@@ -134,11 +138,19 @@ class XcodeProjectInterpreter {
   }
 
   Version? _version;
+  String? _build;
   Version? get version {
     if (_version == null) {
       _updateVersion();
     }
     return _version;
+  }
+
+  String? get build {
+    if (_build == null) {
+      _updateVersion();
+    }
+    return _build;
   }
 
   /// The `xcrun` Xcode command to run or locate development
@@ -149,7 +161,7 @@ class XcodeProjectInterpreter {
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
     final List<String> xcrunCommand = <String>[];
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>[
         '/usr/bin/arch',

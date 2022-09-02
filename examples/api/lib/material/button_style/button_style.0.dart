@@ -58,35 +58,9 @@ class ButtonTypesGroup extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           ElevatedButton(onPressed: onPressed, child: const Text('Elevated')),
-
-          // Use an ElevatedButton with specific style to implement the
-          // 'Filled' type.
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              // Foreground color
-              onPrimary: Theme.of(context).colorScheme.onPrimary,
-              // Background color
-              primary: Theme.of(context).colorScheme.primary,
-            ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
-            onPressed: onPressed,
-            child: const Text('Filled'),
-          ),
-
-          // Use an ElevatedButton with specific style to implement the
-          // 'Filled Tonal' type.
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              // Foreground color
-              onPrimary: Theme.of(context).colorScheme.onSecondaryContainer,
-              // Background color
-              primary: Theme.of(context).colorScheme.secondaryContainer,
-            ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
-            onPressed: onPressed,
-            child: const Text('Filled Tonal'),
-          ),
-
+          FilledButton(onPressed: onPressed, child: const Text('Filled')),
+          FilledButton.tonal(onPressed: onPressed, child: const Text('Filled Tonal')),
           OutlinedButton(onPressed: onPressed, child: const Text('Outlined')),
-
           TextButton(onPressed: onPressed, child: const Text('Text')),
         ],
       ),

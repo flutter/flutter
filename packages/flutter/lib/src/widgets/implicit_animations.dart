@@ -21,7 +21,7 @@ import 'transitions.dart';
 //   const MyWidget({super.key, this.targetColor = Colors.black}) : super(duration: const Duration(seconds: 1));
 //   final Color targetColor;
 //   @override
-//   MyWidgetState createState() => MyWidgetState();
+//   ImplicitlyAnimatedWidgetState<MyWidget> createState() => throw UnimplementedError(); // ignore: no_logic_in_create_state
 // }
 // void setState(VoidCallback fn) { }
 
@@ -297,7 +297,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -2106,5 +2106,112 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
           : widget.shadowColor,
       child: widget.child,
     );
+  }
+}
+
+/// Animated version of [FractionallySizedBox] which automatically transitions the
+/// child's size over a given duration whenever the given [widthFactor] or
+/// [heightFactor] changes, as well as the position whenever the given [alignment]
+/// changes.
+///
+/// For the animation, you can choose a [curve] as well as a [duration] and the
+/// widget will automatically animate to the new target [widthFactor] or
+/// [heightFactor].
+///
+/// {@tool dartpad}
+/// The following example transitions an [AnimatedFractionallySizedBox]
+/// between two states. It adjusts the [heightFactor], [widthFactor], and
+/// [alignment] properties when tapped, using a [curve] of [Curves.fastOutSlowIn]
+///
+/// ** See code in examples/api/lib/widgets/implicit_animations/animated_fractionally_sized_box.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [AnimatedAlign], which is an implicitly animated version of [Align].
+///  * [AnimatedContainer], which can transition more values at once.
+///  * [AnimatedSlide], which can animate the translation of child by a given offset relative to its size.
+///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
+///    transitions its child's position over a given duration whenever the given
+///    position changes.
+class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that sizes its child to a fraction of the total available
+  /// space that animates implicitly, and positions its child by an alignment
+  /// that animates implicitly.
+  ///
+  /// The [curve] and [duration] argument must not be null
+  /// If non-null, the [widthFactor] and [heightFactor] arguments must be
+  /// non-negative.
+  const AnimatedFractionallySizedBox({
+    super.key,
+    this.alignment = Alignment.center,
+    this.child,
+    this.heightFactor,
+    this.widthFactor,
+    super.curve,
+    required super.duration,
+    super.onEnd,
+  }) : assert(alignment != null),
+       assert(widthFactor == null || widthFactor >= 0.0),
+       assert(heightFactor == null || heightFactor >= 0.0);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  /// {@macro flutter.widgets.basic.fractionallySizedBox.heightFactor}
+  final double? heightFactor;
+
+  /// {@macro flutter.widgets.basic.fractionallySizedBox.widthFactor}
+  final double? widthFactor;
+
+  /// {@macro flutter.widgets.basic.fractionallySizedBox.alignment}
+  final AlignmentGeometry alignment;
+
+  @override
+  AnimatedWidgetBaseState<AnimatedFractionallySizedBox> createState() => _AnimatedFractionallySizedBoxState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(DiagnosticsProperty<double>('widthFactor', widthFactor));
+    properties.add(DiagnosticsProperty<double>('heightFactor', heightFactor));
+  }
+}
+
+class _AnimatedFractionallySizedBoxState extends AnimatedWidgetBaseState<AnimatedFractionallySizedBox> {
+  AlignmentGeometryTween? _alignment;
+  Tween<double>? _heightFactorTween;
+  Tween<double>? _widthFactorTween;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
+    if(widget.heightFactor != null) {
+      _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    }
+    if(widget.widthFactor != null) {
+      _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      alignment: _alignment!.evaluate(animation)!,
+      heightFactor: _heightFactorTween?.evaluate(animation),
+      widthFactor: _widthFactorTween?.evaluate(animation),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, defaultValue: null));
+    description.add(DiagnosticsProperty<Tween<double>>('widthFactor', _widthFactorTween, defaultValue: null));
+    description.add(DiagnosticsProperty<Tween<double>>('heightFactor', _heightFactorTween, defaultValue: null));
   }
 }

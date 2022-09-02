@@ -4,9 +4,8 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui show Codec, ImmutableBuffer;
-import 'dart:ui' show Size, Locale, TextDirection;
+import 'dart:ui' show Locale, Size, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -1163,11 +1162,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// bundled, the app has to specify which ones to include. For instance a
 /// package named `fancy_backgrounds` could have:
 ///
-/// ```
-/// lib/backgrounds/background1.png
-/// lib/backgrounds/background2.png
-/// lib/backgrounds/background3.png
-/// ```
+///     lib/backgrounds/background1.png
+///     lib/backgrounds/background2.png
+///     lib/backgrounds/background3.png
 ///
 /// To include, say the first image, the `pubspec.yaml` of the app should specify
 /// it in the `assets` section:

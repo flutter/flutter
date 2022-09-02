@@ -9,6 +9,9 @@ import 'framework.dart';
 
 export 'package:flutter/scheduler.dart' show TickerProvider;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Enables or disables tickers (and thus animation controllers) in the widget
 /// subtree.
 ///

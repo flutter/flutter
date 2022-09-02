@@ -124,7 +124,7 @@ class _ChipsTile extends StatelessWidget {
                 alignment: Alignment.center,
                 constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
                 padding: const EdgeInsets.all(8.0),
-                child: Text('None', style: Theme.of(context).textTheme.caption!.copyWith(fontStyle: FontStyle.italic)),
+                child: Text('None', style: Theme.of(context).textTheme.bodySmall!.copyWith(fontStyle: FontStyle.italic)),
               ),
             ),
         ],
@@ -194,16 +194,16 @@ class _ChipDemoState extends State<ChipDemo> {
   }
 
   // This converts a String to a unique color, based on the hash value of the
-  // String object.  It takes the bottom 16 bits of the hash, and uses that to
+  // String object. It takes the bottom 16 bits of the hash, and uses that to
   // pick a hue for an HSV color, and then creates the color (with a preset
-  // saturation and value).  This means that any unique strings will also have
+  // saturation and value). This means that any unique strings will also have
   // unique colors, but they'll all be readable, since they have the same
   // saturation and value.
   Color _nameToColor(String name, ThemeData theme) {
     assert(name.length > 1);
     final int hash = name.hashCode & 0xffff;
     final double hue = (360.0 * hash / (1 << 15)) % 360.0;
-    final double themeValue = HSVColor.fromColor(theme.backgroundColor).value;
+    final double themeValue = HSVColor.fromColor(theme.colorScheme.background).value;
     return HSVColor.fromAHSV(1.0, hue, 0.4, themeValue).toColor();
   }
 
@@ -318,7 +318,7 @@ class _ChipDemoState extends State<ChipDemo> {
         child: Center(
           child: Text(
             _createResult(),
-            style: theme.textTheme.headline6,
+            style: theme.textTheme.titleLarge,
           ),
         ),
       ),
@@ -347,7 +347,12 @@ class _ChipDemoState extends State<ChipDemo> {
                 borderRadius: BorderRadius.circular(10.0),
               ))
             : theme.chipTheme,
-        child: Scrollbar(child: ListView(children: tiles)),
+        child: Scrollbar(
+          child: ListView(
+            primary: true,
+            children: tiles,
+          )
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(_reset),

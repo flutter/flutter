@@ -8,6 +8,9 @@ import 'package:flutter/painting.dart';
 import 'colors.dart';
 import 'text_theme.dart';
 
+// Examples can assume:
+// late TargetPlatform platform;
+
 /// A characterization of the of a [TextTheme]'s glyphs that is used to define
 /// its localized [TextStyle] geometry for [ThemeData.textTheme].
 ///
@@ -46,7 +49,7 @@ enum ScriptCategory {
 /// [MaterialLocalizations.scriptCategory] and is created
 /// by merging a color text theme - [black] for
 /// [Brightness.light] themes and [white] for [Brightness.dark]
-/// themes -  and a geometry text theme, one of [englishLike], [dense],
+/// themes - and a geometry text theme, one of [englishLike], [dense],
 /// or [tall], depending on the locale.
 ///
 /// To lookup the localized text theme use
@@ -77,6 +80,7 @@ enum ScriptCategory {
 /// See also:
 ///
 ///  * <https://material.io/design/typography/>
+///  * <https://m3.material.io/styles/typography>
 @immutable
 class Typography with Diagnosticable {
   /// Creates a typography instance.
@@ -157,6 +161,9 @@ class Typography with Diagnosticable {
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2021], [dense2021], and [tall2021].
+  ///
+  /// See also:
+  ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
     TargetPlatform? platform = TargetPlatform.android,
     TextTheme? black,
@@ -725,13 +732,15 @@ class Typography with Diagnosticable {
   static const TextTheme tall2021 = _M3Typography.tall;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - Typography
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_98
+// Token database version: v0_101
+
 class _M3Typography {
   _M3Typography._();
 
@@ -790,4 +799,4 @@ class _M3Typography {
   );
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - Typography

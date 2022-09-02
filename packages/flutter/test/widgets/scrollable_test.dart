@@ -946,8 +946,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 38);
-    expect(cheapWidgets, 20);
+    expect(expensiveWidgets, 40);
+    expect(cheapWidgets, 21);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
@@ -989,9 +989,9 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 18);
-    expect(cheapWidgets, 40);
-    expect(physics.count, 40 + 18);
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 44);
+    expect(physics.count, 44 + 17);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
@@ -1032,7 +1032,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
     expect(expensiveWidgets, 0);
-    expect(cheapWidgets, 58);
+    expect(cheapWidgets, 61);
   });
 
   testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
@@ -1426,6 +1426,22 @@ void main() {
     });
     expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
     handle.dispose();
+  });
+
+  testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
+    await pumpTest(tester, null);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(const Duration(milliseconds: 200));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(testPointer.hover(tester.getCenter(find.byType(Scrollable))));
+    await tester.sendEventToBinding(testPointer.scrollInertiaCancel()); // Cancel partway through.
+    await tester.pump();
+    expect(getScrollOffset(tester), closeTo(342.5439, 0.0001));
+    await tester.pump(const Duration(milliseconds: 4800));
+    expect(getScrollOffset(tester), closeTo(342.5439, 0.0001));
   });
 }
 
