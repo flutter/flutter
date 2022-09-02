@@ -49,7 +49,7 @@ enum ScriptCategory {
 /// [MaterialLocalizations.scriptCategory] and is created
 /// by merging a color text theme - [black] for
 /// [Brightness.light] themes and [white] for [Brightness.dark]
-/// themes -  and a geometry text theme, one of [englishLike], [dense],
+/// themes - and a geometry text theme, one of [englishLike], [dense],
 /// or [tall], depending on the locale.
 ///
 /// To lookup the localized text theme use

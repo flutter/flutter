@@ -311,7 +311,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// the semantics tree.
   ///
   /// This value should be set to false when the [feedback] widget is intended
-  /// to be the same object as the [child].  Placing a [GlobalKey] on this
+  /// to be the same object as the [child]. Placing a [GlobalKey] on this
   /// widget will ensure semantic focus is kept on the element as it moves in
   /// and out of the feedback position.
   ///

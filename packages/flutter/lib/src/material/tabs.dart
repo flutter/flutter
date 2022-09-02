@@ -98,7 +98,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
 
   /// The height of the [Tab].
   ///
-  /// If null, the height will be calculated based on the content of the [Tab].  When `icon` is not
+  /// If null, the height will be calculated based on the content of the [Tab]. When `icon` is not
   /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
   /// height is 46.0 pixels.
   final double? height;
