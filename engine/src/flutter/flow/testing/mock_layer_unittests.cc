@@ -61,8 +61,8 @@ TEST_F(MockLayerTest, SimpleParams) {
 }
 
 TEST_F(MockLayerTest, FakePlatformView) {
-  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint(),
-                                           true /* fake_has_platform_view */);
+  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
+  layer->set_fake_has_platform_view(true);
   EXPECT_EQ(preroll_context()->has_platform_view, false);
 
   layer->Preroll(preroll_context(), SkMatrix());
@@ -70,8 +70,8 @@ TEST_F(MockLayerTest, FakePlatformView) {
 }
 
 TEST_F(MockLayerTest, SaveLayerOnLeafNodesCanvas) {
-  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint(),
-                                           true /* fake_has_platform_view */);
+  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
+  layer->set_fake_has_platform_view(true);
   EXPECT_EQ(preroll_context()->has_platform_view, false);
 
   layer->Preroll(preroll_context(), SkMatrix());
@@ -91,6 +91,34 @@ TEST_F(MockLayerTest, OpacityInheritance) {
   context->subtree_can_inherit_opacity = false;
   mock2->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(context->subtree_can_inherit_opacity);
+}
+
+TEST_F(MockLayerTest, FlagGetSet) {
+  auto mock_layer = std::make_shared<MockLayer>(SkPath());
+
+  EXPECT_EQ(mock_layer->parent_has_platform_view(), false);
+  mock_layer->set_parent_has_platform_view(true);
+  EXPECT_EQ(mock_layer->parent_has_platform_view(), true);
+
+  EXPECT_EQ(mock_layer->parent_has_texture_layer(), false);
+  mock_layer->set_parent_has_texture_layer(true);
+  EXPECT_EQ(mock_layer->parent_has_texture_layer(), true);
+
+  EXPECT_EQ(mock_layer->fake_has_platform_view(), false);
+  mock_layer->set_fake_has_platform_view(true);
+  EXPECT_EQ(mock_layer->fake_has_platform_view(), true);
+
+  EXPECT_EQ(mock_layer->fake_reads_surface(), false);
+  mock_layer->set_fake_reads_surface(true);
+  EXPECT_EQ(mock_layer->fake_reads_surface(), true);
+
+  EXPECT_EQ(mock_layer->fake_opacity_compatible(), false);
+  mock_layer->set_fake_opacity_compatible(true);
+  EXPECT_EQ(mock_layer->fake_opacity_compatible(), true);
+
+  EXPECT_EQ(mock_layer->fake_has_texture_layer(), false);
+  mock_layer->set_fake_has_texture_layer(true);
+  EXPECT_EQ(mock_layer->fake_has_texture_layer(), true);
 }
 
 }  // namespace testing
