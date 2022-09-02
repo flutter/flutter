@@ -542,7 +542,7 @@ Matcher matchesSemantics({
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
-  bool isMixedCheck = false,
+  //bool isMixedCheck = false,
   bool isSelected = false,
   bool isButton = false,
   bool isSlider = false,
@@ -618,7 +618,7 @@ Matcher matchesSemantics({
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
-    isMixedCheck: isMixedCheck,
+    //isMixedCheck: isMixedCheck,
     isSelected: isSelected,
     isButton: isButton,
     isSlider: isSlider,
@@ -715,7 +715,7 @@ Matcher containsSemantics({
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
-  bool? isMixedCheck,
+  //bool? isMixedCheck,
   bool? isSelected,
   bool? isButton,
   bool? isSlider,
@@ -791,7 +791,7 @@ Matcher containsSemantics({
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
-    isMixedCheck: isMixedCheck,
+    //isMixedCheck: isMixedCheck,
     isSelected: isSelected,
     isButton: isButton,
     isSlider: isSlider,
@@ -2089,7 +2089,7 @@ class _MatchesSemanticsData extends Matcher {
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
-    required bool? isMixedCheck,
+    //required bool? isMixedCheck,
     required bool? isSelected,
     required bool? isButton,
     required bool? isSlider,

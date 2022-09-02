@@ -578,7 +578,6 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
-          mixedCheck: true,
         ),
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
