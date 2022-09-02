@@ -278,10 +278,8 @@ ComponentV2::ComponentV2(
     other_dirs.push_back(dir);
   }
 
-  cloned_directory_ptr_.events()
-      .OnOpen = [this, other_dirs](
-                    zx_status_t status,
-                    std::unique_ptr<fuchsia::io::NodeInfo> info) {
+  cloned_directory_ptr_.events().OnOpen = [this, other_dirs](zx_status_t status,
+                                                             auto unused) {
     cloned_directory_ptr_.Unbind();
     if (status != ZX_OK) {
       FML_LOG(ERROR) << "could not bind out directory for flutter component("
