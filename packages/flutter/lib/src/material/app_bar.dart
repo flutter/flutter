@@ -942,11 +942,13 @@ class _AppBarState extends State<AppBar> {
         ?? appBarTheme.iconTheme
         ?? defaults.iconTheme!.copyWith(color: foregroundColor);
 
+    final Color? actionForegroundColor = widget.foregroundColor
+      ?? appBarTheme.foregroundColor;
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? defaults.actionsIconTheme?.copyWith(color: foregroundColor)
+      ?? defaults.actionsIconTheme?.copyWith(color: actionForegroundColor)
       ?? overallIconTheme;
 
     TextStyle? toolbarTextStyle = backwardsCompatibility
@@ -998,10 +1000,20 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      leading = ConstrainedBox(
-        constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
-        child: leading,
-      );
+      // Based on the Material Design 3 specs, the leading IconButton should have
+      // a size of 48x48, and a highlight size of 40x40. Users can also put other
+      // type of widgets on leading with the original config.
+      if (theme.useMaterial3) {
+        leading =  ConstrainedBox(
+          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
+          child: leading is IconButton ? Center(child: leading) : leading,
+        );
+      } else {
+        leading = ConstrainedBox(
+          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
+          child: leading,
+        );
+      }
     }
 
     Widget? title = widget.title;
@@ -1056,7 +1068,7 @@ class _AppBarState extends State<AppBar> {
     if (widget.actions != null && widget.actions!.isNotEmpty) {
       actions = Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: theme.useMaterial3 ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
         children: widget.actions!,
       );
     } else if (hasEndDrawer) {

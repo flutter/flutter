@@ -812,9 +812,9 @@ class GitTagVersion {
       return '$x.$y.$z+hotfix.${hotfix! + 1}.pre.$commits';
     }
     if (devPatch != null && devVersion != null) {
-      // The next published release this commit will appear in will be a beta
-      // release, thus increment [y].
-      return '$x.${y! + 1}.0-0.0.pre.$commits';
+      // The next tag that will contain this commit will be the next candidate
+      // branch, which will increment the devVersion.
+      return '$x.$y.0-${devVersion! + 1}.0.pre.$commits';
     }
     return '$x.$y.${z! + 1}-0.0.pre.$commits';
   }
