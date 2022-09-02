@@ -18,6 +18,7 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'platform_menu_bar.dart';
 import 'router.dart';
+import 'service_extensions.dart' as extensions;
 import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -360,7 +361,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     if (!kReleaseMode) {
       registerServiceExtension(
-        name: 'debugDumpApp',
+        name: extensions.debugDumpAppExt,
         callback: (Map<String, String> parameters) async {
           final String data = _debugDumpAppString();
           return <String, Object>{
@@ -371,7 +372,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       if (!kIsWeb) {
         registerBoolServiceExtension(
-          name: 'showPerformanceOverlay',
+          name: extensions.showPerformanceOverlayExt,
           getter: () =>
           Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
           setter: (bool value) {
@@ -385,7 +386,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       }
 
       registerServiceExtension(
-        name: 'didSendFirstFrameEvent',
+        name: extensions.didSendFirstFrameEventExt,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -396,10 +397,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      // This returns 'true' when the first frame is rasterized, and the trace
-      // event 'Rasterized first useful frame' is sent out.
       registerServiceExtension(
-        name: 'didSendFirstFrameRasterizedEvent',
+        name: extensions.didSendFirstFrameRasterizedEventExt,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -411,7 +410,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(
-        name: 'fastReassemble',
+        name: extensions.fastReassembleExt,
         callback: (Map<String, Object> params) async {
           // This mirrors the implementation of the 'reassemble' callback registration
           // in lib/src/foundation/binding.dart, but with the extra binding config used
@@ -429,7 +428,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
-        name: 'profileWidgetBuilds',
+        name: extensions.profileWidgetBuildsExt,
         getter: () async => debugProfileBuildsEnabled,
         setter: (bool value) async {
           if (debugProfileBuildsEnabled != value) {
@@ -438,7 +437,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
       registerBoolServiceExtension(
-        name: 'profileUserWidgetBuilds',
+        name: extensions.profileUserWidgetBuildsExt,
         getter: () async => debugProfileBuildsEnabledUserWidgets,
         setter: (bool value) async {
           if (debugProfileBuildsEnabledUserWidgets != value) {
@@ -450,7 +449,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     assert(() {
       registerBoolServiceExtension(
-        name: 'debugAllowBanner',
+        name: extensions.debugAllowBannerExt,
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
           if (WidgetsApp.debugAllowBannerOverride == value) {
@@ -459,20 +458,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
         },
-      );
-
-      // This service extension is deprecated and will be removed by 12/1/2018.
-      // Use ext.flutter.inspector.show instead.
-      registerBoolServiceExtension(
-          name: 'debugWidgetInspector',
-          getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
-          setter: (bool value) {
-            if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
-              return Future<void>.value();
-            }
-            WidgetsApp.debugShowWidgetInspectorOverride = value;
-            return _forceRebuild();
-          },
       );
 
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
@@ -661,12 +646,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (
-        await observer.didPushRouteInformation(
-          RouteInformation(
-            location: routeArguments['location'] as String,
-            state: routeArguments['state'] as Object?,
-          ),
-        )
+      await observer.didPushRouteInformation(
+        RouteInformation(
+          location: routeArguments['location'] as String,
+          state: routeArguments['state'] as Object?,
+        ),
+      )
       ) {
         return;
       }
@@ -748,21 +733,21 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           ErrorSummary('Build scheduled during frame.'),
           ErrorDescription(
             'While the widget tree was being built, laid out, and painted, '
-            'a new frame was scheduled to rebuild the widget tree.',
+                'a new frame was scheduled to rebuild the widget tree.',
           ),
           ErrorHint(
             'This might be because setState() was called from a layout or '
-            'paint callback. '
-            'If a change is needed to the widget tree, it should be applied '
-            'as the tree is being built. Scheduling a change for the subsequent '
-            'frame instead results in an interface that lags behind by one frame. '
-            'If this was done to make your build dependent on a size measured at '
-            'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
-            'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
-            'is the desired effect, for example because this is an '
-            'animation, consider scheduling the frame in a post-frame callback '
-            'using SchedulerBinding.addPostFrameCallback or '
-            'using an AnimationController to trigger the animation.',
+                'paint callback. '
+                'If a change is needed to the widget tree, it should be applied '
+                'as the tree is being built. Scheduling a change for the subsequent '
+                'frame instead results in an interface that lags behind by one frame. '
+                'If this was done to make your build dependent on a size measured at '
+                'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
+                'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
+                'is the desired effect, for example because this is an '
+                'animation, consider scheduling the frame in a post-frame callback '
+                'using SchedulerBinding.addPostFrameCallback or '
+                'using an AnimationController to trigger the animation.',
           ),
         ]);
       }
