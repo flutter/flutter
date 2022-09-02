@@ -5,10 +5,8 @@
 package io.flutter.plugin.common;
 
 import androidx.annotation.NonNull;
+import io.flutter.Log;
 import io.flutter.plugin.common.StandardMessageCodec.ExposedByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -75,7 +73,7 @@ public final class StandardMethodCodec implements MethodCodec {
     messageCodec.writeValue(stream, errorCode);
     messageCodec.writeValue(stream, errorMessage);
     if (errorDetails instanceof Throwable) {
-      messageCodec.writeValue(stream, getStackTrace((Throwable) errorDetails));
+      messageCodec.writeValue(stream, Log.getStackTraceString((Throwable) errorDetails));
     } else {
       messageCodec.writeValue(stream, errorDetails);
     }
@@ -96,7 +94,7 @@ public final class StandardMethodCodec implements MethodCodec {
     messageCodec.writeValue(stream, errorCode);
     messageCodec.writeValue(stream, errorMessage);
     if (errorDetails instanceof Throwable) {
-      messageCodec.writeValue(stream, getStackTrace((Throwable) errorDetails));
+      messageCodec.writeValue(stream, Log.getStackTraceString((Throwable) errorDetails));
     } else {
       messageCodec.writeValue(stream, errorDetails);
     }
@@ -133,12 +131,5 @@ public final class StandardMethodCodec implements MethodCodec {
         }
     }
     throw new IllegalArgumentException("Envelope corrupted");
-  }
-
-  @NonNull
-  private static String getStackTrace(@NonNull Throwable t) {
-    Writer result = new StringWriter();
-    t.printStackTrace(new PrintWriter(result));
-    return result.toString();
   }
 }
