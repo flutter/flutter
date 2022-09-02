@@ -385,7 +385,7 @@ void main() {
           }),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
           // This could look like 'Restarted application in 1,237ms.'
-          Multiple(<Pattern>[RegExp(r'^Restarted application in [0-9][0-9,]*ms.$'), 'called main', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'], handler: (String line) {
             return 'q';
           }),
           const Barrier('Application finished.'),
