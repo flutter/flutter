@@ -15,7 +15,7 @@ const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocation
 /// By default, the constant is true for profile and debug mode and false
 /// for release mode, for app size optimization goals.
 /// To enable the dispatching for release mode, pass the compilation flag:
-/// ```
+/// ```shell
 /// --dart-define=flutter.memory_allocations=true
 /// ```
 const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kProfileMode || kDebugMode;
@@ -45,7 +45,7 @@ abstract class ObjectEvent{
   /// pure dart library, that cannot depend on Flutter.
   ///
   /// The method enables code like:
-  /// ```
+  /// ```dart
   /// MemoryAllocations.instance
   ///   .addListener((event) => dartMethod(event.toMap()));
   /// ```
@@ -100,9 +100,10 @@ class ObjectDisposed extends ObjectEvent {
 
 /// An interface for listening to object lifecycle events.
 ///
-/// [MemoryAllocations] already listens to creation and disposal events
+/// If [kFlutterMemoryAllocationsEnabled] is true,
+/// [MemoryAllocations] listens to creation and disposal events
 /// for disposable objects in Flutter Framework.
-/// Dispatch events for other objects by invoking
+/// To dispatch events for other objects, invoke
 /// [MemoryAllocations.dispatchObjectEvent].
 ///
 /// The class is optimized for massive event flow and small number of
