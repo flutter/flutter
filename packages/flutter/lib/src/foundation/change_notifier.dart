@@ -96,6 +96,8 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -212,14 +214,14 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (!_creationDispatched) {
-      if (MemoryAllocations.instance.hasListeners) {
-          MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
-          library: FlutterLibraries.flutterFoundation,
+    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectEvent(() {
+        return ObjectCreated(
+          library: _flutterFoundationLibrary,
           className: 'ChangeNotifier',
           object: this,
-        ));
-      }
+        );
+      });
       _creationDispatched = true;
     }
     if (_count == _listeners.length) {
@@ -325,8 +327,8 @@ class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
-    if (_creationDispatched && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(ObjectDisposed(object: this));
+    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectDisposed(object: this));
     }
     _listeners = _emptyListeners;
     _count = 0;
@@ -462,14 +464,15 @@ class _MergingListenable extends Listenable {
 /// listeners.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
-  ValueNotifier(this._value)
-  {
-    if (MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
-        library: FlutterLibraries.flutterFoundation,
-        className: 'ValueNotifier',
-        object: this,
-      ));
+  ValueNotifier(this._value) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectEvent(() {
+        return ObjectCreated(
+          library: _flutterFoundationLibrary,
+          className: 'ValueNotifier',
+          object: this,
+        );
+      });
     }
     _creationDispatched = true;
   }

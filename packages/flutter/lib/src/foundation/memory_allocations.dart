@@ -5,16 +5,22 @@
 // import 'dart:ui' as ui;
 
 import 'assertions.dart';
+import 'constants.dart';
 import 'diagnostics.dart';
 
-/// List of the Flutter Framework and SDK libraries with instrumented
-/// classes.
-class FlutterLibraries {
-  /// Name for `dart:ui`.
-  static const String dartUi = 'dart:ui';
-  /// Name for `package:flutter/foundation.dart`.
-  static const String flutterFoundation = 'package:flutter/foundation.dart';
-}
+const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocations');
+
+/// If true, Flutter objects dispatch the memory allocation events.
+///
+/// By default, the constant is true for profile and debug mode and false
+/// for release mode, for app size optimization goals.
+/// To enable the dispatching for release mode, pass the compilation flag:
+/// ```
+/// --dart-define=flutter.memory_allocations=true
+/// ```
+const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kProfileMode || kDebugMode;
+
+// const String _dartUiLibrary = 'dart:ui';
 
 class _FieldNames {
   static const String eventType = 'eventType';
@@ -48,6 +54,9 @@ abstract class ObjectEvent{
 
 /// A listener of [ObjectEvent].
 typedef ObjectEventListener = void Function(ObjectEvent);
+
+/// A builder of [ObjectEvent].
+typedef ObjectEventBuilder = ObjectEvent Function();
 
 /// An event that describes creation of an object.
 class ObjectCreated extends ObjectEvent {
@@ -84,7 +93,7 @@ class ObjectDisposed extends ObjectEvent {
   @override
   Map<Object, Map<String, Object>> toMap() {
     return <Object, Map<String, Object>>{object: <String, Object>{
-      FieldNames.eventType: 'disposed',
+      _FieldNames.eventType: 'disposed',
     }};
   }
 }
@@ -125,7 +134,7 @@ class MemoryAllocations {
   /// Number of active notification loops.
   ///
   /// When equal to zero, we can delete listeners from the list,
-  /// otherwize should null them.
+  /// otherwise should null them.
   int _activeDispatchLoops = 0;
 
   /// If true, listeners were nulled by [removeListener].
@@ -193,19 +202,20 @@ class MemoryAllocations {
   ///
   /// Listeners, removed during an event dispatching, will not be invoked
   /// after the removal.
-  void dispatchObjectEvent(ObjectEvent objectEvent) {
+  void dispatchObjectEvent(ObjectEventBuilder objectEventBuilder) {
     final List<ObjectEventListener?>? listeners = _listeners;
     if (listeners == null || listeners.isEmpty) {
       return;
     }
 
+    final ObjectEvent event = objectEventBuilder();
     _activeDispatchLoops++;
     final int end = listeners.length;
     for (int i = 0; i < end; i++) {
       try {
-        listeners[i]?.call(objectEvent);
+        listeners[i]?.call(event);
       } catch (exception, stack) {
-        final String type = objectEvent.object.runtimeType.toString();
+        final String type = event.object.runtimeType.toString();
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
@@ -215,7 +225,7 @@ class MemoryAllocations {
           informationCollector: () => <DiagnosticsNode>[
             DiagnosticsProperty<Object>(
               'The $type sending notification was',
-              objectEvent.object,
+              event.object,
               style: DiagnosticsTreeStyle.errorProperty,
             ),
           ],
@@ -253,13 +263,13 @@ class MemoryAllocations {
   }
 
   // void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
-  //   library: FlutterLibraries.dartUi,
+  //   library: FlutterLibraries.dartUiLibrary,
   //   className: 'Image',
   //   object: image,
   // ));
 
   // void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
-  //   library: FlutterLibraries.dartUi,
+  //   library: FlutterLibraries.dartUiLibrary,
   //   className: 'Picture',
   //   object: picture,
   // ));
