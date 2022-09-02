@@ -30,6 +30,7 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(std::shared_ptr<Context> context,
   color0_tex.size = fbo_size;
   color0_tex.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
   color0_tex.sample_count = SampleCount::kCount1;
+  color0_tex.storage_mode = StorageMode::kDevicePrivate;
 
   ColorAttachment color0;
   color0.texture = std::make_shared<TextureGLES>(
