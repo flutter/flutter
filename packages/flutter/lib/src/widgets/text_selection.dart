@@ -119,7 +119,9 @@ abstract class TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
+    // TODO(chunhtai): Change to ValueListenable<ClipboardStatus>? once
+    // migration is done. https://github.com/flutter/flutter/issues/99360
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   );
 
@@ -176,7 +178,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
@@ -184,7 +188,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
-  void handleCopy(TextSelectionDelegate delegate) {
+  // TODO(chunhtai): remove optional parameter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.copySelection(SelectionChangedCause.toolbar);
   }
 
@@ -787,16 +793,16 @@ class SelectionOverlay {
   /// a magnifierBuilder will not be provided, or the magnifierBuilder will return null
   /// on platforms not mobile.
   ///
-  /// This is NOT the souce of truth for if the magnifier is up or not,
+  /// This is NOT the source of truth for if the magnifier is up or not,
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
-  void showMagnifier(MagnifierOverlayInfoBearer initalInfoBearer) {
+  void showMagnifier(MagnifierOverlayInfoBearer initialInfoBearer) {
     if (_toolbar != null) {
       hideToolbar();
     }
 
-    // Start from empty, so we don't utilize any rememnant values.
-    _magnifierOverlayInfoBearer.value = initalInfoBearer;
+    // Start from empty, so we don't utilize any remnant values.
+    _magnifierOverlayInfoBearer.value = initialInfoBearer;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
@@ -1056,8 +1062,7 @@ class SelectionOverlay {
       OverlayEntry(builder: _buildEndHandle),
     ];
 
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
-      .insertAll(_handles!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -1079,7 +1084,7 @@ class SelectionOverlay {
       return;
     }
     _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar!);
   }
 
   bool _buildScheduled = false;
@@ -1150,7 +1155,7 @@ class SelectionOverlay {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null) {
-      handle = Container();
+      handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
@@ -1177,7 +1182,7 @@ class SelectionOverlay {
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
       // Hide the second handle when collapsed.
-      handle = Container();
+      handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
@@ -1201,7 +1206,7 @@ class SelectionOverlay {
 
   Widget _buildToolbar(BuildContext context) {
     if (selectionControls == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
 
     final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
@@ -1585,6 +1590,19 @@ class TextSelectionGestureDetectorBuilder {
         && renderEditable.selection!.end >= textPosition.offset;
   }
 
+  bool _tapWasOnSelection(Offset position) {
+    if (renderEditable.selection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = renderEditable.getPositionForPoint(
+      position,
+    );
+
+    return renderEditable.selection!.start < textPosition.offset
+        && renderEditable.selection!.end > textPosition.offset;
+  }
+
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever
@@ -1815,6 +1833,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
+          editableText.hideToolbar();
           // On desktop platforms the selection is set on tap down.
           if (_isShiftTapping) {
             _isShiftTapping = false;
@@ -1822,6 +1841,7 @@ class TextSelectionGestureDetectorBuilder {
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+          editableText.hideToolbar();
           if (isShiftPressedValid) {
             _isShiftTapping = true;
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
@@ -1855,7 +1875,16 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
               // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              final TextSelection previousSelection = editableText.textEditingValue.selection;
+              // If the tap was within the previous selection, then the selection should stay the same.
+              if (!_tapWasOnSelection(details.globalPosition)) {
+                renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              }
+              if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
+                editableText.toggleToolbar(false);
+              } else {
+                editableText.hideToolbar(false);
+              }
               break;
           }
           break;
@@ -2472,8 +2501,18 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     ClipboardStatus value = ClipboardStatus.unknown,
   }) : super(value);
 
+  bool _disposed = false;
+  // TODO(chunhtai): remove this getter once migration is done.
+  // https://github.com/flutter/flutter/issues/99360
+  /// True if this instance has been disposed.
+  bool get disposed => _disposed;
+
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
+    if (_disposed) {
+      return;
+    }
+
     final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
@@ -2486,7 +2525,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
-      if (value == ClipboardStatus.unknown) {
+      if (_disposed || value == ClipboardStatus.unknown) {
         return;
       }
       value = ClipboardStatus.unknown;
@@ -2497,7 +2536,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
         ? ClipboardStatus.pasteable
         : ClipboardStatus.notPasteable;
 
-    if (nextStatus == value) {
+    if (_disposed || nextStatus == value) {
       return;
     }
     value = nextStatus;
@@ -2517,7 +2556,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    if (!hasListeners) {
+    if (!_disposed && !hasListeners) {
       WidgetsBinding.instance.removeObserver(this);
     }
   }
@@ -2538,6 +2577,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _disposed = true;
     super.dispose();
   }
 }

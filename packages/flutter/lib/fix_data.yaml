@@ -17,6 +17,245 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'displayLarge'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: headline1
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'displayLarge'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'displayMedium'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: headline2
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'displayMedium'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'displaySmall'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: headline3
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'displaySmall'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'headlineMedium'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: headline4
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'headlineMedium'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'headlineSmall'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: headline5
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'headlineSmall'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'titleLarge'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: headline6
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'titleLarge'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'titleMedium'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: subtitle1
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'titleMedium'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'titleSmall'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: subtitle2
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'titleSmall'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'bodyLarge'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: bodyText1
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'bodyLarge'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'bodyMedium'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: bodyText2
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'bodyMedium'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'bodySmall'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: caption
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'bodySmall'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'labelLarge'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: button
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'labelLarge'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: "Rename to 'labelSmall'"
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      getter: overline
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'labelSmall'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: 'Rename arguments'
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'headline1'
+        newName: 'displayLarge'
+      - kind: 'renameParameter'
+        oldName: 'headline2'
+        newName: 'displayMedium'
+      - kind: 'renameParameter'
+        oldName: 'headline3'
+        newName: 'displaySmall'
+      - kind: 'renameParameter'
+        oldName: 'headline4'
+        newName: 'headlineMedium'
+      - kind: 'renameParameter'
+        oldName: 'headline5'
+        newName: 'headlineSmall'
+      - kind: 'renameParameter'
+        oldName: 'headline6'
+        newName: 'titleLarge'
+      - kind: 'renameParameter'
+        oldName: 'subtitle1'
+        newName: 'titleMedium'
+      - kind: 'renameParameter'
+        oldName: 'subtitle2'
+        newName: 'titleSmall'
+      - kind: 'renameParameter'
+        oldName: 'bodyText1'
+        newName: 'bodyLarge'
+      - kind: 'renameParameter'
+        oldName: 'bodyText2'
+        newName: 'bodyMedium'
+      - kind: 'renameParameter'
+        oldName: 'caption'
+        newName: 'bodySmall'
+      - kind: 'renameParameter'
+        oldName: 'button'
+        newName: 'labelLarge'
+      - kind: 'renameParameter'
+        oldName: 'overline'
+        newName: 'labelSmall'
+
+  # Changes made in https://github.com/flutter/flutter/pull/109817
+  - title: 'Rename arguments'
+    date: 2022-08-18
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'TextTheme'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'headline1'
+        newName: 'displayLarge'
+      - kind: 'renameParameter'
+        oldName: 'headline2'
+        newName: 'displayMedium'
+      - kind: 'renameParameter'
+        oldName: 'headline3'
+        newName: 'displaySmall'
+      - kind: 'renameParameter'
+        oldName: 'headline4'
+        newName: 'headlineMedium'
+      - kind: 'renameParameter'
+        oldName: 'headline5'
+        newName: 'headlineSmall'
+      - kind: 'renameParameter'
+        oldName: 'headline6'
+        newName: 'titleLarge'
+      - kind: 'renameParameter'
+        oldName: 'subtitle1'
+        newName: 'titleMedium'
+      - kind: 'renameParameter'
+        oldName: 'subtitle2'
+        newName: 'titleSmall'
+      - kind: 'renameParameter'
+        oldName: 'bodyText1'
+        newName: 'bodyLarge'
+      - kind: 'renameParameter'
+        oldName: 'bodyText2'
+        newName: 'bodyMedium'
+      - kind: 'renameParameter'
+        oldName: 'caption'
+        newName: 'bodySmall'
+      - kind: 'renameParameter'
+        oldName: 'button'
+        newName: 'labelLarge'
+      - kind: 'renameParameter'
+        oldName: 'overline'
+        newName: 'labelSmall'
+
   # Changes made in https://github.com/flutter/flutter/pull/109070
   - title: "Remove 'selectedRowColor'"
     date: 2022-08-05

@@ -1149,6 +1149,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1166,6 +1167,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1202,6 +1204,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: const Color(0x1f000000),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1222,6 +1225,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: const Color(0x1f000000),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1242,6 +1246,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1251,6 +1256,30 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           ),
     );
+  });
+
+  testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
+    final Widget buildApp = MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ListTile(
+              onTap: () {},
+              splashColor: const Color(0xff88ff88),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildApp);
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(ListTile)).center);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Material), paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)));
+    await gesture.up();
   });
 
   testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
@@ -1349,51 +1378,22 @@ void main() {
     await tester.pumpWidget(buildListTile(rectShape));
     Rect rect = tester.getRect(find.byType(ListTile));
 
-    // Check if a path was painted with the correct color and shape
+    // Check if a rounded rectangle was painted with the correct color and shape
     expect(
       find.byType(Material),
-      paints..path(
-        color: tileColor,
-        // Corners should be included
-        includes: <Offset>[
-          Offset(rect.left, rect.top),
-          Offset(rect.right, rect.top),
-          Offset(rect.left, rect.bottom),
-          Offset(rect.right, rect.bottom),
-        ],
-        // Points outside rect should be excluded
-        excludes: <Offset>[
-          Offset(rect.left - 1, rect.top - 1),
-          Offset(rect.right + 1, rect.top - 1),
-          Offset(rect.left - 1, rect.bottom + 1),
-          Offset(rect.right + 1, rect.bottom + 1),
-        ],
-      ),
+      paints..rect(color: tileColor, rect: rect),
     );
 
     // Test stadium shape
     await tester.pumpWidget(buildListTile(stadiumShape));
     rect = tester.getRect(find.byType(ListTile));
 
-    // Check if a path was painted with the correct color and shape
+    // Check if a rounded rectangle was painted with the correct color and shape
     expect(
       find.byType(Material),
-      paints..path(
+      paints..clipRect()..rrect(
         color: tileColor,
-        // Center points of sides should be included
-        includes: <Offset>[
-          Offset(rect.left + rect.width / 2, rect.top),
-          Offset(rect.left, rect.top + rect.height / 2),
-          Offset(rect.right, rect.top + rect.height / 2),
-          Offset(rect.left + rect.width / 2, rect.bottom),
-        ],
-        // Corners should be excluded
-        excludes: <Offset>[
-          Offset(rect.left, rect.top),
-          Offset(rect.right, rect.top),
-          Offset(rect.left, rect.bottom),
-          Offset(rect.right, rect.bottom),
-        ],
+        rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)),
       ),
     );
   });
@@ -1504,14 +1504,14 @@ void main() {
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
@@ -1533,7 +1533,7 @@ void main() {
     );
 
     // Before ListTile is tapped, it should be tileColor
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to trigger ink effect and wait for it to be underway.
     await tester.tap(find.byType(ListTile));
@@ -1543,7 +1543,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..path(color: tileColor)
+        ..rect(color: tileColor)
         ..circle(),
     );
   });
@@ -1572,13 +1572,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: defaultColor));
+    expect(find.byType(Material), paints..rect(color: defaultColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: defaultColor));
+    expect(find.byType(Material), paints..rect(color: defaultColor));
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
@@ -2017,9 +2017,9 @@ void main() {
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
     await tester.pumpWidget(buildFrame());
-    // Enabled color should be default bodyText2 color.
-    expect(textColor(leadingKey), theme.textTheme.bodyText2!.color);
-    expect(textColor(trailingKey), theme.textTheme.bodyText2!.color);
+    // Enabled color should be default bodyMedium color.
+    expect(textColor(leadingKey), theme.textTheme.bodyMedium!.color);
+    expect(textColor(trailingKey), theme.textTheme.bodyMedium!.color);
 
     await tester.pumpWidget(buildFrame(selected: true));
     // Wait for text color to animate.
@@ -2286,7 +2286,7 @@ void main() {
         'isThreeLine: THREE_LINE',
         'dense: true',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
-        'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+        'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
         'style: ListTileStyle.list',
         'selectedColor: Color(0xff0000ff)',
         'iconColor: Color(0xff00ff00)',
@@ -2422,25 +2422,25 @@ void main() {
       // ListTile - ListTileStyle.list (default).
       await tester.pumpWidget(buildFrame());
       RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-      expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
       RenderParagraph title = _getTextRenderObject(tester, 'title');
-      expect(title.text.style!.color, theme.textTheme.subtitle1!.color);
+      expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
       RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-      expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
       RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-      expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
 
       // ListTile - ListTileStyle.drawer.
       await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
       await tester.pumpAndSettle();
       leading = _getTextRenderObject(tester, 'leading');
-      expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
       title = _getTextRenderObject(tester, 'title');
-      expect(title.text.style!.color, theme.textTheme.subtitle1!.color);
+      expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
       subtitle = _getTextRenderObject(tester, 'subtitle');
-      expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
       trailing = _getTextRenderObject(tester, 'trailing');
-      expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
+      expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
     });
   });
 }

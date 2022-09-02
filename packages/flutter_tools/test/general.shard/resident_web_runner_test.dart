@@ -1049,6 +1049,69 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('ResidentWebRunner generates files when l10n.yaml exists', () async {
+    fakeVmServiceHost =
+        FakeVmServiceHost(requests: kAttachExpectations.toList());
+    setupMocks();
+    final ResidentRunner residentWebRunner = ResidentWebRunner(
+      flutterDevice,
+      flutterProject:
+          FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+      stayResident: false,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      usage: globals.flutterUsage,
+      systemClock: globals.systemClock,
+    );
+
+    // Create necessary files.
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  generate: true
+''');
+    globals.fs.directory('.dart_tool')
+      .childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "../../../path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+    expect(await residentWebRunner.run(), 0);
+    final File generatedLocalizationsFile = globals.fs.directory('.dart_tool')
+      .childDirectory('flutter_gen')
+      .childDirectory('gen_l10n')
+      .childFile('app_localizations.dart');
+    expect(generatedLocalizationsFile.existsSync(), isTrue);
+    // Completing this future ensures that the daemon can exit correctly.
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   // While this file should be ignored on web, generating it here will cause a
   // perf regression in hot restart.
   testUsingContext('Does not generate dart_plugin_registrant.dart', () async {

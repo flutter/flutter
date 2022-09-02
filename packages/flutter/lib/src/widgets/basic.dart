@@ -493,6 +493,45 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
 /// easier to use and less expensive than [BackdropFilter].
 ///
+/// {@tool snippet}
+///
+/// This example shows how the common case of applying a [BackdropFilter] blur
+/// to a single sibling can be replaced with an [ImageFiltered] widget. This code
+/// is generally simpler and the performance will be improved dramatically for
+/// complex filters like blurs.
+///
+/// The implementation below is unnecessarily expensive.
+///
+/// ```dart
+///  Widget buildBackdrop() {
+///    return Stack(
+///      children: <Widget>[
+///        Positioned.fill(child: Image.asset('image.png')),
+///        Positioned.fill(
+///          child: BackdropFilter(
+///            filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///          ),
+///        ),
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+/// Instead consider the following approach which directly applies a blur
+/// to the child widget.
+///
+/// ```dart
+///  Widget buildFilter() {
+///    return ImageFiltered(
+///      imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///      child: Image.asset('image.png'),
+///    );
+///  }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ImageFiltered], which applies an [ImageFilter] to its child.
@@ -2474,8 +2513,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 }
 
 /// A container widget that applies an arbitrary transform to its constraints,
-/// and sizes its child using the resulting [BoxConstraints], treating any
-/// overflow as error.
+/// and sizes its child using the resulting [BoxConstraints], optionally
+/// clipping, or treating the overflow as an error.
 ///
 /// This container sizes its child using a [BoxConstraints] created by applying
 /// [constraintsTransform] to its own constraints. This container will then
@@ -2484,12 +2523,12 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// [alignment]. If the container cannot expand enough to accommodate the entire
 /// child, the child will be clipped if [clipBehavior] is not [Clip.none].
 ///
-/// In debug mode, if the child overflows the container, a warning will be
-/// printed on the console, and black and yellow striped areas will appear where
-/// the overflow occurs.
+/// In debug mode, if [clipBehavior] is [Clip.none] and the child overflows the
+/// container, a warning will be printed on the console, and black and yellow
+/// striped areas will appear where the overflow occurs.
 ///
 /// When [child] is null, this widget becomes as small as possible and never
-/// overflows
+/// overflows.
 ///
 /// This widget can be used to ensure some of [child]'s natural dimensions are
 /// honored, and get an early warning otherwise during development. For
@@ -2525,7 +2564,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes additional constraints on its child,
 ///    and allows the child to overflow itself.
 ///  * [UnconstrainedBox] which allows its children to render themselves
-///    unconstrained, expands to fit them, and considers overflow to be an error.
+///    unconstrained and expands to fit them.
 class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that uses a function to transform the constraints it
   /// passes to its child. If the child overflows the parent's constraints, a
@@ -2646,6 +2685,13 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   final BoxConstraintsTransform constraintsTransform;
 
   /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// {@template flutter.widgets.ConstraintsTransformBox.clipBehavior}
+  /// In debug mode, if `clipBehavior` is [Clip.none], and the child overflows
+  /// its constraints, a warning will be printed on the console, and black and
+  /// yellow striped areas will appear where the overflow occurs. For other
+  /// values of `clipBehavior`, the contents are clipped accordingly.
+  /// {@endtemplate}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -3904,6 +3950,7 @@ class IndexedStack extends Stack {
     super.key,
     super.alignment,
     super.textDirection,
+    super.clipBehavior,
     StackFit sizing = StackFit.loose,
     this.index = 0,
     super.children,
@@ -3917,6 +3964,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
+      fit:fit,
+      clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
     );
@@ -3927,6 +3976,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     renderObject
       ..index = index
+      ..fit = fit
+      ..clipBehavior = clipBehavior
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
@@ -7403,6 +7454,8 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// variables that represents state should be kept outside the [builder] function.
 ///
 /// {@tool snippet}
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
 ///
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
