@@ -144,16 +144,23 @@ void main() {
 
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
+  // TODO(polina-c): uncomment count increase for SDK events
+  // when https://github.com/flutter/engine/pull/35274 lands.
 
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {}); count++;
-  final Image image = await _createImage(); //count++; count++; count++;
   final Picture picture = _createPicture(); //count++;
 
   valueNotifier.dispose(); count++;
   changeNotifier.dispose(); count++;
-  image.dispose(); //count++;
   picture.dispose(); //count++;
+
+  // TODO(polina-c): Remove the condition after
+  // https://github.com/flutter/engine/pull/35791 is fixed.
+  if (!kIsWeb) {
+    final Image image = await _createImage(); //count++; count++; count++;
+    image.dispose(); //count++;
+  }
 
   return count;
 }
