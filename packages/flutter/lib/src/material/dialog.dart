@@ -115,8 +115,7 @@ class Dialog extends StatelessWidget {
   /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
   /// [ColorScheme.surfaceTint] will be used.
   ///
-  /// To disable this feature, set [surfaceTintColor] to a transparent color
-  /// (i.e. [Color.alpha] is 0).
+  /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
   ///
   /// See also:
   ///   * [Material.surfaceTintColor], which describes how the surface tint will
