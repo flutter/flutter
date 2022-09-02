@@ -594,8 +594,6 @@ void main() {
         ),
       ],
     );
-    // TODO(schectman): Disable this test while modifying the engine
-    //expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     await tester.pumpWidget(Semantics(
       key: const Key('b'),

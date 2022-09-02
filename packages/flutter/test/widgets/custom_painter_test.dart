@@ -451,24 +451,6 @@ void _defineTests() {
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
-    // TODO(schectman): Disable this test while modifying the engine:
-    /// 
-    /*flags.remove(SemanticsFlag.hasImplicitScrolling);
-    TestSemantics expectedSemantics = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-            id: 1,
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 2,
-                rect: TestSemantics.fullScreen,
-                flags: flags,
-              ),
-            ],
-        ),
-      ],
-    );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));*/
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
@@ -505,21 +487,6 @@ void _defineTests() {
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags.remove(SemanticsFlag.hasImplicitScrolling);
-    /*expectedSemantics = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-            id: 1,
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 2,
-                rect: TestSemantics.fullScreen,
-                flags: flags,
-              ),
-            ],
-        ),
-      ],
-    );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));*/
     semantics.dispose();
   });
 
