@@ -28,13 +28,13 @@ void main() {
     expect(ma.hasListeners, isFalse);
 
     ma.addListener(listener);
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(recievedEvent, equals(event));
     expect(ma.hasListeners, isTrue);
     recievedEvent = null;
 
     ma.removeListener(listener);
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(recievedEvent, isNull);
     expect(ma.hasListeners, isFalse);
   });
@@ -58,7 +58,7 @@ void main() {
     ma.addListener(badListener2);
     ma.addListener(listener2);
 
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(log, <String>['badListener1', 'listener1', 'badListener2','listener2']);
     expect(tester.takeException(), contains('Multiple exceptions (2)'));
 
@@ -69,7 +69,7 @@ void main() {
 
     log.clear();
     expect(ma.hasListeners, isFalse);
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(log, <String>[]);
   });
 
@@ -85,11 +85,11 @@ void main() {
 
     ma.addListener(listener1);
 
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(log, <String>['listener1']);
     log.clear();
 
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(log, <String>['listener1','listener2']);
     log.clear();
 
@@ -97,7 +97,7 @@ void main() {
     ma.removeListener(listener2);
 
     expect(ma.hasListeners, isFalse);
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(log, <String>[]);
   });
 
@@ -115,7 +115,7 @@ void main() {
     ma.addListener(listener1);
     ma.addListener(listener2);
 
-    ma.dispatchObjectEvent(event);
+    ma.dispatchObjectEvent(() => event);
     expect(log, <String>['listener1']);
     log.clear();
 
@@ -131,5 +131,4 @@ void main() {
   test('last removeListener unsubscribes from Flutter SDK events', () {
     // TODO(polina-c): add test
   });
-
 }
