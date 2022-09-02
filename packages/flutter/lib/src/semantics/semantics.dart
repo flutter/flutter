@@ -776,7 +776,6 @@ class SemanticsProperties extends DiagnosticableTree {
   const SemanticsProperties({
     this.enabled,
     this.checked,
-    this.mixedCheck,
     this.selected,
     this.toggled,
     this.button,
@@ -854,10 +853,6 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// This is mutually exclusive with [toggled].
   final bool? checked;
-
-  /// If non-null, indicates that this widget is a tristate checkbox
-  /// currently in its mixed state.
-  final bool? mixedCheck;
 
   /// If non-null, indicates that this subtree represents a toggle switch
   /// or similar widget with an "on" state, and what its current

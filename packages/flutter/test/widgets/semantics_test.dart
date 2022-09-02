@@ -594,6 +594,7 @@ void main() {
         ),
       ],
     );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     await tester.pumpWidget(Semantics(
       key: const Key('b'),
@@ -631,7 +632,7 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
-  });
+  }, skip: true); // https://github.com/flutter/engine/pull/35868
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

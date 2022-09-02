@@ -444,7 +444,6 @@ void _defineTests() {
             image: true,
             liveRegion: true,
             toggled: true,
-            mixedCheck: true,
           ),
         ),
       ),

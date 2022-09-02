@@ -97,11 +97,6 @@ class AndroidSemanticsNode {
   /// Equivalent to [SemanticsFlag.isChecked].
   bool get isChecked => _flags['isChecked'] as bool;
 
-  /// Whether a tristate checkbox is currently half-checked.
-  ///
-  /// Equivalent to [SemanticsFlags.isMixedCheck].
-  bool get isMixedCheck => _flags['isMixedCheck'] as bool;
-
   /// Whether the node can be in a checked state.
   ///
   /// Equivalent to [SemanticsFlag.hasCheckedState]
