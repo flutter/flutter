@@ -4353,9 +4353,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.checked != null) {
       config.isChecked = _properties.checked;
     }
-    if (_properties.mixedCheck != null) {
+    // TODO(schectman): Re-add this feature once engine PR is merged:
+    /// https://github.com/flutter/engine/pull/35868
+    /*if (_properties.mixedCheck != null) {
       config.isMixedCheck = _properties.mixedCheck;
-    }
+    }*/
     if (_properties.toggled != null) {
       config.isToggled = _properties.toggled;
     }

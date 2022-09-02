@@ -4198,12 +4198,15 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isChecked, value!);
   }
 
+  // TODO(schectman): Uncomment once engine PR goes through
   /// If this node is tristate, this state represents whether it is in its third mixed state.
-  bool? get isMixedCheck => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isMixedCheck) : null;
+  /// This property is temporarily disabled until the corresponding engine PR is merged:
+  /// https://github.com/flutter/engine/pull/35868
+  /*bool? get isMixedCheck => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isMixedCheck) : null;
   set isMixedCheck(bool? value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isMixedCheck, value!);
-  }
+  }*/
 
   /// If this node has Boolean state that can be controlled by the user, whether
   /// that state is on or off, corresponding to true and false, respectively.

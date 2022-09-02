@@ -542,6 +542,7 @@ Matcher matchesSemantics({
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
+  bool isMixedCheck = false,
   bool isSelected = false,
   bool isButton = false,
   bool isSlider = false,
@@ -617,6 +618,7 @@ Matcher matchesSemantics({
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
+    isMixedCheck: isMixedCheck,
     isSelected: isSelected,
     isButton: isButton,
     isSlider: isSlider,
@@ -713,6 +715,7 @@ Matcher containsSemantics({
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
+  bool? isMixedCheck,
   bool? isSelected,
   bool? isButton,
   bool? isSlider,
@@ -788,6 +791,7 @@ Matcher containsSemantics({
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
+    isMixedCheck: isMixedCheck,
     isSelected: isSelected,
     isButton: isButton,
     isSlider: isSlider,
@@ -2085,6 +2089,7 @@ class _MatchesSemanticsData extends Matcher {
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
+    required bool? isMixedCheck,
     required bool? isSelected,
     required bool? isButton,
     required bool? isSlider,
@@ -2138,6 +2143,10 @@ class _MatchesSemanticsData extends Matcher {
   })  : flags = <SemanticsFlag, bool>{
           if (hasCheckedState != null) SemanticsFlag.hasCheckedState: hasCheckedState,
           if (isChecked != null) SemanticsFlag.isChecked: isChecked,
+          // TODO(schectman): Uncomment once engine PR goes through
+          /// This feature is temorarily disabled until the corresponding engine PR is merged:
+          /// https://github.com/flutter/engine/pull/35868
+          //if (isMixedCheck != null) SemanticsFlag.isMixedCheck: isMixedCheck,
           if (isSelected != null) SemanticsFlag.isSelected: isSelected,
           if (isButton != null) SemanticsFlag.isButton: isButton,
           if (isSlider != null) SemanticsFlag.isSlider: isSlider,
