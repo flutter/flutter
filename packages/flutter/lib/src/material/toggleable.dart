@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'feedback.dart';
 import 'material_state.dart';
 
 // Duration of the animation that moves the toggle from one state to another.
@@ -320,10 +321,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       mouseCursor: mouseCursor.resolve(states),
       child: GestureDetector(
         excludeFromSemantics: !isInteractive,
-        onTapDown: _handleTapDown,
-        onTap: _handleTap,
-        onTapUp: _handleTapEnd,
-        onTapCancel: _handleTapEnd,
+        onTapDown: isInteractive ? _handleTapDown : null,
+        onTap: isInteractive ? _handleTap : null,
+        onTapUp: isInteractive ? _handleTapEnd : null,
+        onTapCancel: isInteractive ? _handleTapEnd : null,
         child: Semantics(
           enabled: isInteractive,
           child: CustomPaint(
