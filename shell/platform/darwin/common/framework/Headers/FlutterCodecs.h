@@ -118,7 +118,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * NSAsserts on failure.
  */
-- (void)writeValue:(nullable id)value;
+- (void)writeValue:(id)value;
 @end
 
 /**
