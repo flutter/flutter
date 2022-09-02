@@ -17,7 +17,12 @@ class DoctorCommand extends FlutterCommand {
       hide: !verbose,
       help: 'Used to determine if Flutter engine artifacts for all platforms '
             'are available for download.',
-      valueHelp: 'engine revision git hash',);
+      valueHelp: 'engine revision git hash',
+    );
+    argParser.addFlag('delete-temporary-directories',
+      help: 'Attempt to delete temporary directories left behind by the '
+            'Flutter CLI tool.',
+    );
   }
 
   final bool verbose;
@@ -33,6 +38,10 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (boolArg('delete-temporary-directories') ?? false) {
+      await globals.doctor!.deleteTemporaryDirectories();
+      return const FlutterCommandResult(ExitStatus.success);
+    }
     globals.flutterVersion.fetchTagsAndUpdate();
     if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
       final String engineRevision = stringArgDeprecated('check-for-remote-artifacts')!;

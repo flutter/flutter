@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
+import 'package:path/path.dart' show Context;
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -765,6 +766,74 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
+  group('temporary tool directories', () {
+    late ProcessManager processManager;
+    late BufferLogger logger;
+    late FakeLocalFileSystem fs;
+    late FakeDeletingDoctor doctor;
+
+    setUp(() {
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      fs = FakeLocalFileSystem();
+      doctor = FakeDeletingDoctor(logger: logger);
+    });
+
+    testUsingContext('flutter doctor --clean-temporary-directories will delete temp tool dirs', () async {
+      Cache.disableLocking();
+
+      final Directory tempDir1 = fs._delegate.systemTempDirectory.childDirectory('flutter_tools.123')..createSync();
+      final Directory tempDir2 = fs._delegate.systemTempDirectory.childDirectory('flutter_tools.456')..createSync();
+
+      final DoctorCommand doctorCommand = DoctorCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(doctorCommand);
+
+      await commandRunner.run(<String>['doctor', '--clean-temporary-directories']);
+
+      expect(flutterVersion.didFetchTagsAndUpdate, isFalse);
+      expect(tempDir1.existsSync(), isFalse);
+      expect(tempDir2.existsSync(), isFalse);
+      expect(fs.systemTempDirectory.existsSync(), isTrue);
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, contains('Succeeded in deleting 2 files'));
+
+      Cache.enableLocking();
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      FileSystem: () => fs,
+      FlutterVersion: () => flutterVersion,
+      Doctor: () => doctor,
+    }, initializeFlutterRoot: false);
+
+    testUsingContext('flutter doctor --clean-temporary-directories will log temp tool dirs that failed to delete', () async {
+      Cache.disableLocking();
+
+      final Directory deletableDir = fs._delegate.systemTempDirectory.childDirectory('flutter_tools.123')..createSync();
+      final Directory undeletableDir = fs._delegate.systemTempDirectory.childDirectory('flutter_tools.456')..createSync();
+      doctor.throwingPaths.add('flutter_tools.456');
+
+      final DoctorCommand doctorCommand = DoctorCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(doctorCommand);
+
+      await commandRunner.run(<String>['doctor', '--clean-temporary-directories']);
+
+      expect(flutterVersion.didFetchTagsAndUpdate, isFalse);
+      expect(deletableDir.existsSync(), isFalse);
+      expect(undeletableDir.existsSync(), isTrue);
+      expect(fs.systemTempDirectory.existsSync(), isTrue);
+      expect(logger.errorText, matches(RegExp(r'Tried but failed to delete .*flutter_tools\.456')));
+      expect(logger.statusText, contains('Failed to delete 1 file'));
+      expect(logger.statusText, contains('Succeeded in deleting 1 file'));
+
+      Cache.enableLocking();
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      FileSystem: () => fs,
+      FlutterVersion: () => flutterVersion,
+      Doctor: () => doctor,
+    }, initializeFlutterRoot: false);
+  });
+
   testUsingContext('Fetches tags to get the right version', () async {
     Cache.disableLocking();
 
@@ -839,6 +908,14 @@ class NoOpDoctor implements Doctor {
 
   @override
   List<Workflow> get workflows => <Workflow>[];
+
+  @override
+  Future<bool> deleteTemporaryDirectories() {
+    throw UnimplementedError();
+  }
+
+  @override
+  void deleteEntity(FileSystemEntity entity) {}
 }
 
 class PassingValidator extends DoctorValidator {
@@ -1129,6 +1206,23 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
   }
 }
 
+/// A doctor that overrides [Doctor.deleteEntity].
+class FakeDeletingDoctor extends Doctor {
+  FakeDeletingDoctor({
+    required super.logger,
+  });
+
+  final Set<String> throwingPaths = <String>{};
+
+  @override
+  void deleteEntity(FileSystemEntity entity) {
+    if (throwingPaths.any((String path) => entity.path.contains(path))) {
+      throw FileSystemException('Failed to delete ${entity.path}');
+    }
+    entity.deleteSync(recursive: true);
+  }
+}
+
 /// A doctor that has two groups of two validators each.
 class FakeGroupedDoctor extends Doctor {
   FakeGroupedDoctor(Logger logger) : super(logger: logger);
@@ -1231,3 +1325,33 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   @override
   final bool supportsColor = false;
 }
+
+class FakeLocalFileSystem extends Fake implements LocalFileSystem {
+  FakeLocalFileSystem({
+    FileSystem? delegate,
+  }) : _delegate = delegate ?? MemoryFileSystem.test();
+
+  final FileSystem _delegate;
+
+  @override
+  Context get path => _delegate.path;
+
+  @override
+  Directory get currentDirectory => _delegate.currentDirectory;
+
+  @override
+  Directory directory(Object? path) => _delegate.directory(path);
+
+  @override
+  FileSystemEntityType typeSync(String path, {bool followLinks = true}) {
+    return _delegate.typeSync(path, followLinks: followLinks);
+  }
+
+  @override
+  Directory get superSystemTempDirectory => _delegate.systemTempDirectory;
+
+  @override
+  late final Directory systemTempDirectory = _delegate.systemTempDirectory.createTempSync('flutter_tools.');
+}
+
+class UndeleteableDirectory extends Fake implements Directory {}

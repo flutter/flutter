@@ -337,6 +337,38 @@ class Doctor {
     return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
+  /// Delete temporary directories created by previous tool invocations.
+  Future<void> deleteTemporaryDirectories() async {
+    final List<Directory> toolTempDirectories = await findPreviousToolTempDirectories(globals.fs);
+    if (toolTempDirectories.isEmpty) {
+      return;
+    }
+    int succeededToDelete = 0;
+    int failedToDelete = 0;
+    for (final Directory tempDir in toolTempDirectories) {
+      try {
+        deleteEntity(tempDir);
+        succeededToDelete += 1;
+      } on FileSystemException {
+        _logger.printError('Tried but failed to delete ${tempDir.absolute.path}');
+        failedToDelete += 1;
+      }
+    }
+    final int totalFiles = succeededToDelete + failedToDelete;
+    _logger.printStatus('Tried to delete $totalFiles file${totalFiles == 1 ? '' : 's'}');
+    if (succeededToDelete > 0) {
+      _logger.printStatus('Succeeded in deleting $succeededToDelete file${succeededToDelete == 1 ? '' : 's'}');
+    }
+    if (failedToDelete > 0) {
+      _logger.printStatus('Failed to delete $failedToDelete file${failedToDelete == 1 ? '' : 's'}');
+    }
+  }
+
+  @visibleForOverriding
+  void deleteEntity(FileSystemEntity entity) {
+    entity.deleteSync(recursive: true);
+  }
+
   /// Maximum allowed duration for an entire validator to take.
   ///
   /// This should only ever be reached if a process is stuck.
@@ -574,37 +606,17 @@ class FlutterValidator extends DoctorValidator {
   Future<List<ValidationMessage>> _checkToolTempDirs() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    final FileSystem fs = _fileSystem;
+    final List<Directory> toolTempDirectories = await findPreviousToolTempDirectories(_fileSystem);
 
-    final Directory systemTempDir;
-    if (fs is LocalFileSystem) {
-      systemTempDir = fs.superSystemTempDirectory;
-    } else {
-      systemTempDir = fs.systemTempDirectory;
-    }
-
-    final List<Directory> toolTempDirs = await _allToolTempDirectories(systemTempDir);
-    final int toolTempDirCount = toolTempDirs.length;
+    final int toolTempDirCount = toolTempDirectories.length;
     if (toolTempDirCount > _kMaxAllowedToolTempDirs) {
-      final String message = 'The Flutter tool has created $toolTempDirCount temporary directories on your system.';
+      final String message = 'The Flutter tool has created $toolTempDirCount '
+        'temporary directories on your system. To delete these files, use '
+        '`flutter doctor --delete-temporary-directories`.';
       messages.add(ValidationMessage.error(message));
     }
 
     return messages;
-  }
-
-  Future<List<Directory>> _allToolTempDirectories(Directory systemTempDir) async {
-    final List<FileSystemEntity> allContents = await systemTempDir.list().toList();
-    final List<Directory> toolTempDirectories = <Directory>[];
-    for (final FileSystemEntity entity in allContents) {
-      if (entity is! Directory) {
-        continue;
-      }
-      if (entity.basename.startsWith(r'flutter_tools.')) {
-        toolTempDirectories.add(entity);
-      }
-    }
-    return toolTempDirectories;
   }
 
   ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {

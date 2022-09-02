@@ -45,7 +45,6 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       _platform = platform,
       super(delegate);
 
-  @visibleForTesting
   FileSystem get fileSystem => delegate;
 
   final Platform _platform;

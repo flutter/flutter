@@ -7,6 +7,8 @@ import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
 import 'common.dart';
+import 'error_handling_io.dart';
+import '../globals.dart' as globals;
 import 'io.dart';
 import 'platform.dart';
 import 'process.dart';
@@ -173,6 +175,41 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
   return _getUniqueFile(dir, baseName, ext);
 }
 
+/// Find all directories in the system temp directory created by the tool.
+///
+/// Note that the tool's [LocalFileSystem] class overrides
+/// [local_fs.LocalFileSystem.systemTempDirectory] to be a newly-created
+/// directory managed by the currently-running tool process.
+Future<List<Directory>> findPreviousToolTempDirectories(FileSystem fs) async {
+  final Directory systemTempDir;
+  if (fs is ErrorHandlingFileSystem) {
+    fs = fs.fileSystem;
+  }
+  if (fs is LocalFileSystem) {
+    systemTempDir = fs.superSystemTempDirectory;
+  } else {
+    // no-op
+    return <Directory>[];
+  }
+
+  final List<FileSystemEntity> allContents = await systemTempDir.list().toList();
+  final List<Directory> toolTempDirectories = <Directory>[];
+  for (final FileSystemEntity entity in allContents) {
+    if (entity is! Directory) {
+      continue;
+    }
+    if (entity.absolute.path == fs.systemTempDirectory.absolute.path) {
+      // Don't include the current tool invocation temp dir
+      continue;
+    }
+    if (entity.basename.startsWith(LocalFileSystem.kToolTempDirectoryPrefix)) {
+      toolTempDirectories.add(entity);
+    }
+  }
+
+  return toolTempDirectories;
+}
+
 /// This class extends [local_fs.LocalFileSystem] in order to clean up
 /// directories and files that the tool creates under the system temporary
 /// directory when the tool exits either normally or when killed by a signal.
@@ -202,15 +239,21 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   final List<ProcessSignal> _fatalSignals;
 
   void _tryToDeleteTemp() {
+    print('in _tryToDeleteTemp');
     try {
       if (_systemTemp?.existsSync() ?? false) {
+        print('trying to delete $_systemTemp');
         _systemTemp?.deleteSync(recursive: true);
+      } else {
+        print('couldn\'t find _systemTemp');
       }
     } on FileSystemException {
       // ignore
     }
     _systemTemp = null;
   }
+
+  static String kToolTempDirectoryPrefix = 'flutter_tools.';
 
   // This getter returns a fresh entry under /tmp, like
   // /tmp/flutter_tools.abcxyz, then the rest of the tool creates /tmp entries
@@ -225,8 +268,9 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
           'Did you set an invalid override in your environment? See issue https://github.com/flutter/flutter/issues/74042 for more context.'
         );
       }
-      _systemTemp = superSystemTempDirectory.createTempSync('flutter_tools.')
+      _systemTemp = superSystemTempDirectory.createTempSync(kToolTempDirectoryPrefix)
         ..createSync(recursive: true);
+      print('created temp file $_systemTemp');
       // Make sure that the temporary directory is cleaned up if the tool is
       // killed by a signal.
       for (final ProcessSignal signal in _fatalSignals) {
@@ -243,6 +287,8 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       shutdownHooks.addShutdownHook(
         _tryToDeleteTemp,
       );
+      print('_shutdownHooks is $_shutdownHooks');
+      print('globals.shutdownHooks is ${globals.shutdownHooks}');
     }
     return _systemTemp!;
   }
