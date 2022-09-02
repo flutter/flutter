@@ -221,32 +221,31 @@ ComponentV1::ComponentV1(
                             fuchsia::io::OpenFlags::RIGHT_WRITABLE,
                         cloned_directory_ptr_.NewRequest());
 
-  cloned_directory_ptr_.events().OnOpen =
-      [this](zx_status_t status, std::unique_ptr<fuchsia::io::NodeInfo> info) {
-        cloned_directory_ptr_.Unbind();
-        if (status != ZX_OK) {
-          FML_LOG(ERROR)
-              << "could not bind out directory for flutter component("
-              << debug_label_ << "): " << zx_status_get_string(status);
-          return;
-        }
-        const char* other_dirs[] = {"debug", "ctrl", "diagnostics"};
-        // add other directories as RemoteDirs.
-        for (auto& dir_str : other_dirs) {
-          fuchsia::io::DirectoryHandle dir;
-          auto request = dir.NewRequest().TakeChannel();
-          auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
-                                                dir_str, request.release());
-          if (status == ZX_OK) {
-            outgoing_dir_->AddEntry(
-                dir_str, std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
-          } else {
-            FML_LOG(ERROR) << "could not add out directory entry(" << dir_str
-                           << ") for flutter component(" << debug_label_
-                           << "): " << zx_status_get_string(status);
-          }
-        }
-      };
+  cloned_directory_ptr_.events().OnOpen = [this](zx_status_t status,
+                                                 auto unused) {
+    cloned_directory_ptr_.Unbind();
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "could not bind out directory for flutter component("
+                     << debug_label_ << "): " << zx_status_get_string(status);
+      return;
+    }
+    const char* other_dirs[] = {"debug", "ctrl", "diagnostics"};
+    // add other directories as RemoteDirs.
+    for (auto& dir_str : other_dirs) {
+      fuchsia::io::DirectoryHandle dir;
+      auto request = dir.NewRequest().TakeChannel();
+      auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
+                                            dir_str, request.release());
+      if (status == ZX_OK) {
+        outgoing_dir_->AddEntry(
+            dir_str, std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
+      } else {
+        FML_LOG(ERROR) << "could not add out directory entry(" << dir_str
+                       << ") for flutter component(" << debug_label_
+                       << "): " << zx_status_get_string(status);
+      }
+    }
+  };
 
   cloned_directory_ptr_.set_error_handler(
       [this](zx_status_t status) { cloned_directory_ptr_.Unbind(); });
