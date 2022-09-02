@@ -2088,7 +2088,7 @@ targets:
       task_name: routing_test
 
   - name: Linux_android spell_check_test
-    bringup: true
+    # bringup: true -- FOR TESTING ONLY
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
