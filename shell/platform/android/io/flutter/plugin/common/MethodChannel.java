@@ -11,9 +11,6 @@ import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.ByteBuffer;
 
 /**
@@ -280,14 +277,8 @@ public class MethodChannel {
         Log.e(TAG + name, "Failed to handle method call", e);
         reply.reply(
             codec.encodeErrorEnvelopeWithStacktrace(
-                "error", e.getMessage(), null, getStackTrace(e)));
+                "error", e.getMessage(), null, Log.getStackTraceString(e)));
       }
-    }
-
-    private String getStackTrace(Exception e) {
-      Writer result = new StringWriter();
-      e.printStackTrace(new PrintWriter(result));
-      return result.toString();
     }
   }
 }
