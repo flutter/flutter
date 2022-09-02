@@ -5,8 +5,9 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
+
+import 'windows.dart';
 
 void drawHelloWorld() {
   final ui.ParagraphStyle style = ui.ParagraphStyle();
@@ -30,33 +31,38 @@ void drawHelloWorld() {
 }
 
 void main() async {
-  // Create a completer to send the result back to the integration test.
-  final Completer<String> completer = Completer<String>();
-  enableFlutterDriverExtension(handler: (String? message) => completer.future);
+  // Create a completer to send the window visibility result back to the
+  // integration test.
+  final Completer<String> visibilityCompleter = Completer<String>();
+  enableFlutterDriverExtension(handler: (String? message) async {
+    if (message == 'verifyWindowVisibility') {
+      return visibilityCompleter.future;
+    } else if (message == 'verifyTheme') {
+      final bool app = await isAppDarkModeEnabled();
+      final bool system = await isSystemDarkModeEnabled();
+
+      return (app == system)
+        ? 'success'
+        : 'error: app dark mode ($app) does not match system dark mode ($system)';
+    }
+
+    throw 'Unrecognized message: $message';
+  });
 
   try {
-    const MethodChannel methodChannel =
-        MethodChannel('tests.flutter.dev/windows_startup_test');
-
-    final bool? visible = await methodChannel.invokeMethod('isWindowVisible');
-    if (visible == null || visible == true) {
+    if (await isWindowVisible()) {
       throw 'Window should be hidden at startup';
     }
 
     bool firstFrame = true;
     ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) async {
-      final bool? visible = await methodChannel.invokeMethod('isWindowVisible');
-      if (visible == null) {
-        throw 'Method channel unavailable';
-      }
-
-      if (visible == true) {
+      if (await isWindowVisible()) {
         if (firstFrame) {
           throw 'Window should be hidden on first frame';
         }
 
-        if (!completer.isCompleted) {
-          completer.complete('success');
+        if (!visibilityCompleter.isCompleted) {
+          visibilityCompleter.complete('success');
         }
       }
 
@@ -68,7 +74,7 @@ void main() async {
 
     ui.PlatformDispatcher.instance.scheduleFrame();
   } catch (e) {
-    completer.completeError(e);
+    visibilityCompleter.completeError(e);
     rethrow;
   }
 }

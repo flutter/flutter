@@ -7,10 +7,24 @@
 #include <optional>
 #include <mutex>
 
+#include <dwmapi.h>
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
+
+/// Window attribute that enables dark mode window decorations.
+///
+/// Redefined in case the developer's machine has a Windows SDK older than
+/// version 10.0.22000.0.
+/// See: https://docs.microsoft.com/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
+constexpr const wchar_t kGetPreferredBrightnessRegKey[] =
+L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+constexpr const wchar_t kGetPreferredBrightnessRegValue[] = L"AppsUseLightTheme";
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -50,11 +64,38 @@ bool FlutterWindow::OnCreate() {
       &flutter::StandardMethodCodec::GetInstance());
 
   channel.SetMethodCallHandler(
-    [](const flutter::MethodCall<>& call,
+    [&](const flutter::MethodCall<>& call,
        std::unique_ptr<flutter::MethodResult<>> result) {
-      std::scoped_lock lock(visible_mutex);
-      if (call.method_name() == "isWindowVisible") {
+       std::string method = call.method_name();
+
+      if (method == "isWindowVisible") {
+        std::scoped_lock lock(visible_mutex);
         result->Success(visible);
+      } else if (method == "isAppDarkModeEnabled") {
+        BOOL enabled;
+        HRESULT hr = DwmGetWindowAttribute(GetHandle(),
+                                           DWMWA_USE_IMMERSIVE_DARK_MODE,
+                                           &enabled, sizeof(enabled));
+        if (SUCCEEDED(hr)) {
+          result->Success((bool)enabled);
+        } else {
+          result->Error("error", "Received result handle " + hr);
+        }
+      } else if (method == "isSystemDarkModeEnabled") {
+        DWORD data;
+        DWORD data_size = sizeof(data);
+        LONG status = RegGetValue(HKEY_CURRENT_USER,
+                                  kGetPreferredBrightnessRegKey,
+                                  kGetPreferredBrightnessRegValue,
+                                  RRF_RT_REG_DWORD, nullptr, &data, &data_size);
+
+        if (status == ERROR_SUCCESS) {
+          // Preferred brightness is 0 if dark mode is enabled,
+          // otherwise non-zero.
+          result->Success(data == 0);
+        } else {
+          result->Error("error", "Received status " + status);
+        }
       } else {
         result->NotImplemented();
       }
