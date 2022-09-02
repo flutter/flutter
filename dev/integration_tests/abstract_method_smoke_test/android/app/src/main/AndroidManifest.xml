@@ -4,8 +4,6 @@ found in the LICENSE file. -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.abstract_method_smoke_test">
-    <!-- TODO(https://github.com/flutter/flutter/issues/42349): Remove this permission once this issue is fixed. -->
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!-- ${applicationName} is used by the Flutter tool to select the Application
          class to use. For most apps, this is the default Android application.
          In most cases you can leave this as-is, but you if you want to provide
