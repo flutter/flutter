@@ -33,6 +33,7 @@ class BackButtonIcon extends StatelessWidget {
     final IconData data;
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
+        // Android uses semantics label to annotate the back button.
         semanticsLabel = MaterialLocalizations.of(context).backButtonTooltip;
         data = Icons.arrow_back;
         break;
