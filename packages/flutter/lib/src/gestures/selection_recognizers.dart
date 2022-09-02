@@ -108,11 +108,19 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapAndDragGestureRecognizer({
+    this.deadline = kPressTimeout,
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
     super.kind,
     super.supportedDevices,
   });
+
+  /// If non-null, the recognizer will call [_didExceedDeadline] after this
+  /// amount of time has elapsed since starting to track the primary pointer.
+  ///
+  /// The [_didExceedDeadline] will not be called if the primary pointer is
+  /// accepted, rejected, or all pointers are up or canceled before [deadline].
+  final Duration? deadline;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.dragStartBehavior}
   DragStartBehavior dragStartBehavior;
@@ -154,6 +162,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   // Tap related state
   PointerUpEvent? _up;
+  PointerDownEvent? _down;
+  Timer? _deadlineTimer;
+  int? get primaryPointer => _primaryPointer;
+  int? _primaryPointer;
   
   // Drag related state
   OffsetPair? _correctedPosition;
@@ -212,6 +224,14 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void addAllowedPointer(PointerDownEvent event) {
     print('addAllowedPointer $event ${event.pointer}');
     super.addAllowedPointer(event);
+    if (_state == _DragState.ready) {
+      print('setting deadline');
+      _primaryPointer = event.pointer;
+      if (deadline != null) {
+        print('setting deadline 2');
+        _deadlineTimer = Timer(deadline!, () => _didExceedDeadlineWithEvent(event));
+      }
+    }
   }
 
   @override
@@ -222,9 +242,20 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void acceptGesture(int pointer) {
+    print('accept gesture $pointer');
+    if (pointer == primaryPointer) {
+      _stopDeadlineTimer();
+    }
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
-    print('accept gesture $pointer');
+    if (pointer == primaryPointer) {
+      if (_down != null) {
+        _checkTapDown(_down!);
+      }
+      if (_up != null) {
+        _checkTapUp(_up!);
+      }
+    }
   }
 
   @override
@@ -251,7 +282,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         _checkEnd();
         break;
     }
+    _stopDeadlineTimer();
     _up = null;
+    _down = null;
     _initialButtons = null;
     _state = _DragState.ready;
     _consecutiveTapCountWhileDragging = null;
@@ -264,7 +297,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       print('handle PointerDownEvent $event');
       if (_state == _DragState.ready) {
         _globalDistanceMoved = 0.0;
-        _checkTapDown(event);
+        _initialButtons = event.buttons;
+        _state = _DragState.possible;
+        _down = event;
+
+        if (dragStartBehavior == DragStartBehavior.down) {
+          _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+        }
+        // _checkTapDown(event);
+
       }
     } else if (event is PointerMoveEvent) {
       print('handle PointerMoveEvent $event');
@@ -322,8 +363,21 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void rejectGesture(int pointer) {
     print('reject gesture $pointer');
     print('cancel from reject');
+    if (pointer == primaryPointer) {
+      _stopDeadlineTimer();
+    }
     _giveUpPointer(pointer);
   }
+
+  @override
+  void dispose() {
+    _stopDeadlineTimer();
+    consecutiveTapTimeout();
+    super.dispose();
+  }
+
+  @override
+  String get debugDescription => 'tap_and_drag';
 
   void _checkTapDown(PointerDownEvent event) {
     _initialButtons = event.buttons;
@@ -438,6 +492,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     }
   }
 
+  void _didExceedDeadlineWithEvent(PointerDownEvent event) {
+    _didExceedDeadline();
+  }
+
+  void _didExceedDeadline() {
+    if (_down != null) {
+      _checkTapDown(_down!);
+    }
+  }
+
   void _giveUpPointer(int pointer) {
     print('give up pointer $pointer');
     stopTrackingPointer(pointer);
@@ -448,13 +512,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     }
   }
 
-  @override
-  void dispose() {
-    consecutiveTapTimeout();
-    super.dispose();
+  void _stopDeadlineTimer() {
+    if (_deadlineTimer != null) {
+      _deadlineTimer!.cancel();
+      _deadlineTimer = null;
+    }
   }
-
-  @override
-  String get debugDescription => 'tap_and_drag';
 }
 
