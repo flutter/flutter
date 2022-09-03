@@ -1,4 +1,4 @@
-Signature: f0fb0669b8d565d6de4d1a3a3ab61919
+Signature: 6f4e4b16fb125da2c12e742cfd7a15be
 
 UNUSED LICENSES:
 
@@ -11068,6 +11068,7 @@ FILE: ../../../third_party/dart/runtime/bin/analyze_snapshot.cc
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.mm
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils_test.cc
+FILE: ../../../third_party/dart/runtime/bin/socket_base_posix.cc
 FILE: ../../../third_party/dart/runtime/bin/utils.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory.h
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_fuchsia.cc
