@@ -110,10 +110,10 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
-  ChipActionTemplate('ActionChip', '$materialLib/chip_action.dart', tokens).updateFile();
-  ChipFilterTemplate('FilterChip', '$materialLib/chip_filter.dart', tokens).updateFile();
-  ChipFilterTemplate('FilterChip', '$materialLib/chip_choice.dart', tokens).updateFile();
-  ChipInputTemplate('InputChip', '$materialLib/chip_input.dart', tokens).updateFile();
+  ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
+  FilterChipTemplate('FilterChip', '$materialLib/filter_chip.dart', tokens).updateFile();
+  FilterChipTemplate('FilterChip', '$materialLib/choice_chip.dart', tokens).updateFile();
+  InputChipTemplate('InputChip', '$materialLib/input_chip.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   IconButtonTemplate('IconButton', '$materialLib/icon_button.dart', tokens).updateFile();

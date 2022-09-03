@@ -4,8 +4,8 @@
 
 import 'template.dart';
 
-class ChipFilterTemplate extends TokenTemplate {
-  const ChipFilterTemplate(super.blockName, super.fileName, super.tokens);
+class FilterChipTemplate extends TokenTemplate {
+  const FilterChipTemplate(super.blockName, super.fileName, super.tokens);
 
   static const String tokenGroup = 'md.comp.filter-chip';
   static const String variant = '.flat';

@@ -4,8 +4,8 @@
 
 import 'template.dart';
 
-class ChipInputTemplate extends TokenTemplate {
-  const ChipInputTemplate(super.blockName, super.fileName, super.tokens);
+class InputChipTemplate extends TokenTemplate {
+  const InputChipTemplate(super.blockName, super.fileName, super.tokens);
 
   static const String tokenGroup = 'md.comp.input-chip';
   static const String variant = '';
