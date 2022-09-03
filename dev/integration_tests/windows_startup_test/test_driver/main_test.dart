@@ -8,16 +8,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 void main() {
   test('Windows app starts and draws frame', () async {
     final FlutterDriver driver = await FlutterDriver.connect(printCommunication: true);
-    final String result = await driver.requestData('verifyWindowVisibility');
-
-    expect(result, equals('success'));
-
-    await driver.close();
-  }, timeout: Timeout.none);
-
-  test('Windows app theme matches system theme', () async {
-    final FlutterDriver driver = await FlutterDriver.connect(printCommunication: true);
-    final String result = await driver.requestData('verifyTheme');
+    final String result = await driver.requestData(null);
 
     expect(result, equals('success'));
 
