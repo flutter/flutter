@@ -1180,6 +1180,7 @@ void main() {
 
   test('TextPainter - debugDisposed', () {
     final TextPainter painter = TextPainter();
+    expect(painter.debugDisposed, false);
     painter.dispose();
     expect(painter.debugDisposed, true);
   });

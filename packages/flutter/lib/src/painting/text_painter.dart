@@ -1072,17 +1072,17 @@ class TextPainter {
   ///
   /// Only for use when asserts are enabled.
   bool get debugDisposed {
-    bool disposed = false;
+    bool? disposed;
     assert(() {
       disposed = _disposed;
       return true;
     }());
-    return disposed;
+    return disposed ?? (throw StateError('debugDisposed only available when asserts are on.'));
   }
 
   /// Releases the resources associated with this painter.
   ///
-  /// After disposal, this painter is unusable.
+  /// After disposal this painter is unusable.
   void dispose() {
     assert(() {
       _disposed = true;
