@@ -1607,7 +1607,6 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
     ImGui::Begin("Color Matrix", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
       std::string label = "##1";
-      label.c_str();
       for (int i = 0; i < 20; i += 5) {
         ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float,
                             &(color_matrix.array[i]), 5, nullptr, nullptr,
