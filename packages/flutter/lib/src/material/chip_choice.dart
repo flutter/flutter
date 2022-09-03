@@ -207,6 +207,7 @@ class ChoiceChip extends StatelessWidget
       surfaceTintColor: surfaceTintColor,
       selectedShadowColor: selectedShadowColor,
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
     );
   }
 }
