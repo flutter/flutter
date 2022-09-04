@@ -71,7 +71,7 @@ Future<void> restoreAndVerify(WidgetTester tester) async {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({Key? key, this.useExternal = false}) : super(key: key);
+  const TestWidget({super.key, this.useExternal = false});
 
   final bool useExternal;
 

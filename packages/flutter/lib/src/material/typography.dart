@@ -77,6 +77,7 @@ enum ScriptCategory {
 /// See also:
 ///
 ///  * <https://material.io/design/typography/>
+///  * <https://m3.material.io/styles/typography>
 @immutable
 class Typography with Diagnosticable {
   /// Creates a typography instance.
@@ -91,7 +92,7 @@ class Typography with Diagnosticable {
     TextTheme? tall,
   }) = Typography.material2018;
 
-  /// Creates a typography instance using material design's 2014 defaults.
+  /// Creates a typography instance using Material Design's 2014 defaults.
   ///
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
@@ -119,7 +120,7 @@ class Typography with Diagnosticable {
     );
   }
 
-  /// Creates a typography instance using material design's 2018 defaults.
+  /// Creates a typography instance using Material Design's 2018 defaults.
   ///
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
@@ -157,6 +158,9 @@ class Typography with Diagnosticable {
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2021], [dense2021], and [tall2021].
+  ///
+  /// See also:
+  ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
     TargetPlatform? platform = TargetPlatform.android,
     TextTheme? black,
@@ -222,7 +226,7 @@ class Typography with Diagnosticable {
       assert(dense != null),
       assert(tall != null);
 
-  /// A material design text theme with dark glyphs.
+  /// A Material Design text theme with dark glyphs.
   ///
   /// This [TextTheme] should provide color but not geometry (font size,
   /// weight, etc). A text theme's geometry depends on the locale. To look
@@ -233,7 +237,7 @@ class Typography with Diagnosticable {
   /// geometry.
   final TextTheme black;
 
-  /// A material design text theme with light glyphs.
+  /// A Material Design text theme with light glyphs.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   /// A text theme's geometry depends on the locale. To look up a localized
@@ -322,10 +326,12 @@ class Typography with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Typography
         && other.black == black
         && other.white == white
@@ -354,245 +360,245 @@ class Typography with Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('tall', tall, defaultValue: defaultTypography.tall));
   }
 
-  /// A material design text theme with dark glyphs based on Roboto.
+  /// A Material Design text theme with dark glyphs based on Roboto.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackMountainView = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'blackMountainView displayLarge', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'blackMountainView displayMedium', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'blackMountainView displaySmall', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'blackMountainView headlineLarge', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'blackMountainView headlineMedium', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'blackMountainView headlineSmall', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'blackMountainView titleLarge', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'blackMountainView titleMedium', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'blackMountainView titleSmall', fontFamily: 'Roboto', color: Colors.black,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'blackMountainView bodyLarge', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'blackMountainView bodyMedium', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'blackMountainView bodySmall',   fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'blackMountainView labelLarge',    fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'blackMountainView labelMedium',  fontFamily: 'Roboto', color: Colors.black,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'blackMountainView labelSmall',  fontFamily: 'Roboto', color: Colors.black,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'blackMountainView displayLarge', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'blackMountainView displayMedium', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'blackMountainView displaySmall', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'blackMountainView headlineLarge', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'blackMountainView headlineMedium', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'blackMountainView headlineSmall', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'blackMountainView titleLarge', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'blackMountainView titleMedium', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'blackMountainView titleSmall', fontFamily: 'Roboto', color: Colors.black, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'blackMountainView bodyLarge', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'blackMountainView bodyMedium', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'blackMountainView bodySmall', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'blackMountainView labelLarge', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'blackMountainView labelMedium', fontFamily: 'Roboto', color: Colors.black, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'blackMountainView labelSmall', fontFamily: 'Roboto', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on Roboto.
+  /// A Material Design text theme with light glyphs based on Roboto.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteMountainView = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'whiteMountainView displayLarge', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'whiteMountainView displayMedium', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'whiteMountainView displaySmall', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'whiteMountainView headlineLarge', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'whiteMountainView headlineMedium', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'whiteMountainView headlineSmall', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'whiteMountainView titleLarge', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'whiteMountainView titleMedium', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'whiteMountainView titleSmall', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'whiteMountainView bodyLarge', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'whiteMountainView bodyMedium', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'whiteMountainView bodySmall',   fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'whiteMountainView labelLarge',    fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'whiteMountainView labelMedium',  fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'whiteMountainView labelSmall',  fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'whiteMountainView displayLarge', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'whiteMountainView displayMedium', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'whiteMountainView displaySmall', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'whiteMountainView headlineLarge', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'whiteMountainView headlineMedium', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'whiteMountainView headlineSmall', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'whiteMountainView titleLarge', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'whiteMountainView titleMedium', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'whiteMountainView titleSmall', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'whiteMountainView bodyLarge', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'whiteMountainView bodyMedium', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'whiteMountainView bodySmall', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'whiteMountainView labelLarge', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'whiteMountainView labelMedium', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'whiteMountainView labelSmall', fontFamily: 'Roboto', color: Colors.white, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with dark glyphs based on Segoe UI.
+  /// A Material Design text theme with dark glyphs based on Segoe UI.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackRedmond = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'blackRedmond displayLarge', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'blackRedmond displayMedium', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'blackRedmond displaySmall', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'blackRedmond headlineLarge', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'blackRedmond headlineMedium', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'blackRedmond headlineSmall', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'blackRedmond titleLarge', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'blackRedmond titleMedium', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'blackRedmond titleSmall', fontFamily: 'Segoe UI', color: Colors.black,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'blackRedmond bodyLarge', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'blackRedmond bodyMedium', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'blackRedmond bodySmall',   fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'blackRedmond labelLarge',    fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'blackRedmond labelMedium',  fontFamily: 'Segoe UI', color: Colors.black,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'blackRedmond labelSmall',  fontFamily: 'Segoe UI', color: Colors.black,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'blackRedmond displayLarge', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'blackRedmond displayMedium', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'blackRedmond displaySmall', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'blackRedmond headlineLarge', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'blackRedmond headlineMedium', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'blackRedmond headlineSmall', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'blackRedmond titleLarge', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'blackRedmond titleMedium', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'blackRedmond titleSmall', fontFamily: 'Segoe UI', color: Colors.black, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'blackRedmond bodyLarge', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'blackRedmond bodyMedium', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'blackRedmond bodySmall', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'blackRedmond labelLarge', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'blackRedmond labelMedium', fontFamily: 'Segoe UI', color: Colors.black, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'blackRedmond labelSmall', fontFamily: 'Segoe UI', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on Segoe UI.
+  /// A Material Design text theme with light glyphs based on Segoe UI.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteRedmond = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'whiteRedmond displayLarge', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'whiteRedmond displayMedium', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'whiteRedmond displaySmall', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'whiteRedmond headlineLarge', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'whiteRedmond headlineMedium', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'whiteRedmond headlineSmall', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'whiteRedmond titleLarge', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'whiteRedmond titleMedium', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'whiteRedmond titleSmall', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'whiteRedmond bodyLarge', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'whiteRedmond bodyMedium', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'whiteRedmond bodySmall',   fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'whiteRedmond labelLarge',    fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'whiteRedmond labelMedium',  fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'whiteRedmond labelSmall',  fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'whiteRedmond displayLarge', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'whiteRedmond displayMedium', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'whiteRedmond displaySmall', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'whiteRedmond headlineLarge', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'whiteRedmond headlineMedium', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'whiteRedmond headlineSmall', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'whiteRedmond titleLarge', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'whiteRedmond titleMedium', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'whiteRedmond titleSmall', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'whiteRedmond bodyLarge', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'whiteRedmond bodyMedium', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'whiteRedmond bodySmall', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'whiteRedmond labelLarge', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'whiteRedmond labelMedium', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'whiteRedmond labelSmall', fontFamily: 'Segoe UI', color: Colors.white, decoration: TextDecoration.none),
   );
 
   static const List<String> _helsinkiFontFallbacks = <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'];
-  /// A material design text theme with dark glyphs based on Roboto, with
+  /// A Material Design text theme with dark glyphs based on Roboto, with
   /// fallback fonts that are likely (but not guaranteed) to be installed on
   /// Linux.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackHelsinki = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'blackHelsinki displayLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'blackHelsinki displayMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'blackHelsinki displaySmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'blackHelsinki headlineLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'blackHelsinki headlineMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'blackHelsinki headlineSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'blackHelsinki titleLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'blackHelsinki titleMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'blackHelsinki titleSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'blackHelsinki bodyLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'blackHelsinki bodyMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'blackHelsinki bodySmall',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'blackHelsinki labelLarge',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'blackHelsinki labelMedium',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'blackHelsinki labelSmall',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'blackHelsinki displayLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'blackHelsinki displayMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'blackHelsinki displaySmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'blackHelsinki headlineLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'blackHelsinki headlineMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'blackHelsinki headlineSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'blackHelsinki titleLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'blackHelsinki titleMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'blackHelsinki titleSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'blackHelsinki bodyLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'blackHelsinki bodyMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'blackHelsinki bodySmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'blackHelsinki labelLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'blackHelsinki labelMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'blackHelsinki labelSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on Roboto, with fallbacks of DejaVu Sans, Liberation Sans and Arial.
+  /// A Material Design text theme with light glyphs based on Roboto, with fallbacks of DejaVu Sans, Liberation Sans and Arial.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteHelsinki = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'whiteHelsinki displayLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'whiteHelsinki displayMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'whiteHelsinki displaySmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'whiteHelsinki headlineLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'whiteHelsinki headlineMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'whiteHelsinki headlineSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'whiteHelsinki titleLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'whiteHelsinki titleMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'whiteHelsinki titleSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'whiteHelsinki bodyLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'whiteHelsinki bodyMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'whiteHelsinki bodySmall',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'whiteHelsinki labelLarge',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'whiteHelsinki labelMedium',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'whiteHelsinki labelSmall',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'whiteHelsinki displayLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'whiteHelsinki displayMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'whiteHelsinki displaySmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'whiteHelsinki headlineLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'whiteHelsinki headlineMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'whiteHelsinki headlineSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'whiteHelsinki titleLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'whiteHelsinki titleMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'whiteHelsinki titleSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'whiteHelsinki bodyLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'whiteHelsinki bodyMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'whiteHelsinki bodySmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'whiteHelsinki labelLarge', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'whiteHelsinki labelMedium', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'whiteHelsinki labelSmall', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with dark glyphs based on San Francisco.
+  /// A Material Design text theme with dark glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///
   /// This theme uses the iOS version of the font names.
   static const TextTheme blackCupertino = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'blackCupertino displayLarge', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'blackCupertino displayMedium', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'blackCupertino displaySmall', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'blackCupertino headlineLarge', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'blackCupertino headlineMedium', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'blackCupertino headlineSmall', fontFamily: '.SF UI Display', color: Colors.black87, decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'blackCupertino titleLarge', fontFamily: '.SF UI Display', color: Colors.black87, decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'blackCupertino titleMedium', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'blackCupertino titleSmall', fontFamily: '.SF UI Text', color: Colors.black,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'blackCupertino bodyLarge', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'blackCupertino bodyMedium', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'blackCupertino bodySmall',   fontFamily: '.SF UI Text', color: Colors.black54, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'blackCupertino labelLarge',    fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'blackCupertino labelMedium',  fontFamily: '.SF UI Text', color: Colors.black,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'blackCupertino labelSmall',  fontFamily: '.SF UI Text', color: Colors.black,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'blackCupertino displayLarge', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'blackCupertino displayMedium', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'blackCupertino displaySmall', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'blackCupertino headlineLarge', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'blackCupertino headlineMedium', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'blackCupertino headlineSmall', fontFamily: '.SF UI Display', color: Colors.black87, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'blackCupertino titleLarge', fontFamily: '.SF UI Display', color: Colors.black87, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'blackCupertino titleMedium', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'blackCupertino titleSmall', fontFamily: '.SF UI Text', color: Colors.black, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'blackCupertino bodyLarge', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'blackCupertino bodyMedium', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'blackCupertino bodySmall', fontFamily: '.SF UI Text', color: Colors.black54, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'blackCupertino labelLarge', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'blackCupertino labelMedium', fontFamily: '.SF UI Text', color: Colors.black, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'blackCupertino labelSmall', fontFamily: '.SF UI Text', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on San Francisco.
+  /// A Material Design text theme with light glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///
   /// This theme uses the iOS version of the font names.
   static const TextTheme whiteCupertino = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'whiteCupertino displayLarge', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'whiteCupertino displayMedium', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'whiteCupertino displaySmall', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'whiteCupertino headlineLarge', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'whiteCupertino headlineMedium', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'whiteCupertino headlineSmall', fontFamily: '.SF UI Display', color: Colors.white,   decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'whiteCupertino titleLarge', fontFamily: '.SF UI Display', color: Colors.white,   decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'whiteCupertino titleMedium', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
-    titleSmall   : TextStyle(debugLabel: 'whiteCupertino titleSmall',   fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'whiteCupertino bodyLarge', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'whiteCupertino bodyMedium', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
-    bodySmall    : TextStyle(debugLabel: 'whiteCupertino bodySmall',    fontFamily: '.SF UI Text', color: Colors.white70,   decoration: TextDecoration.none),
-    labelLarge : TextStyle(debugLabel: 'whiteCupertino labelLarge', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'whiteCupertino labelMedium',  fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'whiteCupertino labelSmall',  fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'whiteCupertino displayLarge', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'whiteCupertino displayMedium', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'whiteCupertino displaySmall', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'whiteCupertino headlineLarge', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'whiteCupertino headlineMedium', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'whiteCupertino headlineSmall', fontFamily: '.SF UI Display', color: Colors.white, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'whiteCupertino titleLarge', fontFamily: '.SF UI Display', color: Colors.white, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'whiteCupertino titleMedium', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'whiteCupertino titleSmall', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'whiteCupertino bodyLarge', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'whiteCupertino bodyMedium', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'whiteCupertino bodySmall', fontFamily: '.SF UI Text', color: Colors.white70, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'whiteCupertino labelLarge', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'whiteCupertino labelMedium', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'whiteCupertino labelSmall', fontFamily: '.SF UI Text', color: Colors.white, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with dark glyphs based on San Francisco.
+  /// A Material Design text theme with dark glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///
   /// This theme uses the macOS version of the font names.
   static const TextTheme blackRedwoodCity = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'blackRedwoodCity displayLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'blackRedwoodCity displayMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'blackRedwoodCity displaySmall', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'blackRedwoodCity headlineLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'blackRedwoodCity headlineMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'blackRedwoodCity headlineSmall', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'blackRedwoodCity titleLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'blackRedwoodCity titleMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
-    titleSmall : TextStyle(debugLabel: 'blackRedwoodCity titleSmall', fontFamily: '.AppleSystemUIFont', color: Colors.black,   decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'blackRedwoodCity bodyLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'blackRedwoodCity bodyMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
-    bodySmall   : TextStyle(debugLabel: 'blackRedwoodCity bodySmall',   fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
-    labelLarge    : TextStyle(debugLabel: 'blackRedwoodCity labelLarge',    fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'blackRedwoodCity labelMedium',  fontFamily: '.AppleSystemUIFont', color: Colors.black,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'blackRedwoodCity labelSmall',  fontFamily: '.AppleSystemUIFont', color: Colors.black,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'blackRedwoodCity displayLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'blackRedwoodCity displayMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'blackRedwoodCity displaySmall', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'blackRedwoodCity headlineLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'blackRedwoodCity headlineMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'blackRedwoodCity headlineSmall', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'blackRedwoodCity titleLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'blackRedwoodCity titleMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'blackRedwoodCity titleSmall', fontFamily: '.AppleSystemUIFont', color: Colors.black, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'blackRedwoodCity bodyLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'blackRedwoodCity bodyMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'blackRedwoodCity bodySmall', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'blackRedwoodCity labelLarge', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'blackRedwoodCity labelMedium', fontFamily: '.AppleSystemUIFont', color: Colors.black, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'blackRedwoodCity labelSmall', fontFamily: '.AppleSystemUIFont', color: Colors.black, decoration: TextDecoration.none),
   );
 
-  /// A material design text theme with light glyphs based on San Francisco.
+  /// A Material Design text theme with light glyphs based on San Francisco.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   ///
   /// This theme uses the macOS version of the font names.
   static const TextTheme whiteRedwoodCity = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'whiteRedwoodCity displayLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
-    displayMedium : TextStyle(debugLabel: 'whiteRedwoodCity displayMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
-    displaySmall : TextStyle(debugLabel: 'whiteRedwoodCity displaySmall', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
-    headlineLarge : TextStyle(debugLabel: 'whiteRedwoodCity headlineLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
-    headlineMedium : TextStyle(debugLabel: 'whiteRedwoodCity headlineMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
-    headlineSmall : TextStyle(debugLabel: 'whiteRedwoodCity headlineSmall', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
-    titleLarge : TextStyle(debugLabel: 'whiteRedwoodCity titleLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
-    titleMedium : TextStyle(debugLabel: 'whiteRedwoodCity titleMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
-    titleSmall   : TextStyle(debugLabel: 'whiteRedwoodCity titleSmall',   fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
-    bodyLarge : TextStyle(debugLabel: 'whiteRedwoodCity bodyLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
-    bodyMedium : TextStyle(debugLabel: 'whiteRedwoodCity bodyMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
-    bodySmall    : TextStyle(debugLabel: 'whiteRedwoodCity bodySmall',    fontFamily: '.AppleSystemUIFont', color: Colors.white70,   decoration: TextDecoration.none),
-    labelLarge : TextStyle(debugLabel: 'whiteRedwoodCity labelLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
-    labelMedium  : TextStyle(debugLabel: 'whiteRedwoodCity labelMedium',  fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
-    labelSmall  : TextStyle(debugLabel: 'whiteRedwoodCity labelSmall',  fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    displayLarge: TextStyle(debugLabel: 'whiteRedwoodCity displayLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    displayMedium: TextStyle(debugLabel: 'whiteRedwoodCity displayMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    displaySmall: TextStyle(debugLabel: 'whiteRedwoodCity displaySmall', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    headlineLarge: TextStyle(debugLabel: 'whiteRedwoodCity headlineLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    headlineMedium: TextStyle(debugLabel: 'whiteRedwoodCity headlineMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    headlineSmall: TextStyle(debugLabel: 'whiteRedwoodCity headlineSmall', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    titleLarge: TextStyle(debugLabel: 'whiteRedwoodCity titleLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    titleMedium: TextStyle(debugLabel: 'whiteRedwoodCity titleMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'whiteRedwoodCity titleSmall', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'whiteRedwoodCity bodyLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'whiteRedwoodCity bodyMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'whiteRedwoodCity bodySmall', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'whiteRedwoodCity labelLarge', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'whiteRedwoodCity labelMedium', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'whiteRedwoodCity labelSmall', fontFamily: '.AppleSystemUIFont', color: Colors.white, decoration: TextDecoration.none),
   );
 
   /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
   /// English, French, Russian, etc.
   static const TextTheme englishLike2014 = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'englishLike displayLarge 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
-    displayMedium : TextStyle(debugLabel: 'englishLike displayMedium 2014', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    displaySmall : TextStyle(debugLabel: 'englishLike displaySmall 2014', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineLarge : TextStyle(debugLabel: 'englishLike headlineLarge 2014', inherit: false, fontSize:  40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineMedium : TextStyle(debugLabel: 'englishLike headlineMedium 2014', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineSmall : TextStyle(debugLabel: 'englishLike headlineSmall 2014', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    titleLarge : TextStyle(debugLabel: 'englishLike titleLarge 2014',    inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    titleMedium : TextStyle(debugLabel: 'englishLike titleMedium 2014',  inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    titleSmall : TextStyle(debugLabel: 'englishLike titleSmall 2014', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
-    bodyLarge : TextStyle(debugLabel: 'englishLike bodyLarge 2014',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    bodyMedium : TextStyle(debugLabel: 'englishLike bodyMedium 2014',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    bodySmall   : TextStyle(debugLabel: 'englishLike bodySmall 2014',  inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    labelLarge    : TextStyle(debugLabel: 'englishLike labelLarge 2014',   inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    labelMedium  : TextStyle(debugLabel: 'englishLike labelMedium 2014', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    labelSmall  : TextStyle(debugLabel: 'englishLike labelSmall 2014', inherit: false, fontSize:  10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
+    displayLarge: TextStyle(debugLabel: 'englishLike displayLarge 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
+    displayMedium: TextStyle(debugLabel: 'englishLike displayMedium 2014', inherit: false, fontSize: 56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    displaySmall: TextStyle(debugLabel: 'englishLike displaySmall 2014', inherit: false, fontSize: 45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineLarge: TextStyle(debugLabel: 'englishLike headlineLarge 2014', inherit: false, fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineMedium: TextStyle(debugLabel: 'englishLike headlineMedium 2014', inherit: false, fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineSmall: TextStyle(debugLabel: 'englishLike headlineSmall 2014', inherit: false, fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    titleLarge: TextStyle(debugLabel: 'englishLike titleLarge 2014', inherit: false, fontSize: 20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    titleMedium: TextStyle(debugLabel: 'englishLike titleMedium 2014', inherit: false, fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    titleSmall: TextStyle(debugLabel: 'englishLike titleSmall 2014', inherit: false, fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
+    bodyLarge: TextStyle(debugLabel: 'englishLike bodyLarge 2014', inherit: false, fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    bodyMedium: TextStyle(debugLabel: 'englishLike bodyMedium 2014', inherit: false, fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    bodySmall: TextStyle(debugLabel: 'englishLike bodySmall 2014', inherit: false, fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    labelLarge: TextStyle(debugLabel: 'englishLike labelLarge 2014', inherit: false, fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    labelMedium: TextStyle(debugLabel: 'englishLike labelMedium 2014', inherit: false, fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    labelSmall: TextStyle(debugLabel: 'englishLike labelSmall 2014', inherit: false, fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
   /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
@@ -601,41 +607,41 @@ class Typography with Diagnosticable {
   /// The font sizes, weights, and letter spacings in this version match the
   /// [2018 Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme englishLike2018 = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'englishLike displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
-    displayMedium : TextStyle(debugLabel: 'englishLike displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
-    displaySmall : TextStyle(debugLabel: 'englishLike displaySmall 2018', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
-    headlineLarge : TextStyle(debugLabel: 'englishLike headlineLarge 2018', fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
-    headlineMedium : TextStyle(debugLabel: 'englishLike headlineMedium 2018', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
-    headlineSmall : TextStyle(debugLabel: 'englishLike headlineSmall 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
-    titleLarge : TextStyle(debugLabel: 'englishLike titleLarge 2018', fontSize: 20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
-    titleMedium : TextStyle(debugLabel: 'englishLike titleMedium 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
-    titleSmall : TextStyle(debugLabel: 'englishLike titleSmall 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
-    bodyLarge : TextStyle(debugLabel: 'englishLike bodyLarge 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.5),
-    bodyMedium : TextStyle(debugLabel: 'englishLike bodyMedium 2018', fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
-    bodySmall    : TextStyle(debugLabel: 'englishLike bodySmall 2018',    fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
-    labelLarge   : TextStyle(debugLabel: 'englishLike labelLarge 2018',   fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.25),
-    labelMedium  : TextStyle(debugLabel: 'englishLike labelMedium 2018',  fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
-    labelSmall  : TextStyle(debugLabel: 'englishLike labelSmall 2018',  fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
+    displayLarge: TextStyle(debugLabel: 'englishLike displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
+    displayMedium: TextStyle(debugLabel: 'englishLike displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
+    displaySmall: TextStyle(debugLabel: 'englishLike displaySmall 2018', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
+    headlineLarge: TextStyle(debugLabel: 'englishLike headlineLarge 2018', fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
+    headlineMedium: TextStyle(debugLabel: 'englishLike headlineMedium 2018', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
+    headlineSmall: TextStyle(debugLabel: 'englishLike headlineSmall 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
+    titleLarge: TextStyle(debugLabel: 'englishLike titleLarge 2018', fontSize: 20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
+    titleMedium: TextStyle(debugLabel: 'englishLike titleMedium 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
+    titleSmall: TextStyle(debugLabel: 'englishLike titleSmall 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
+    bodyLarge: TextStyle(debugLabel: 'englishLike bodyLarge 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.5),
+    bodyMedium: TextStyle(debugLabel: 'englishLike bodyMedium 2018', fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
+    bodySmall: TextStyle(debugLabel: 'englishLike bodySmall 2018', fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
+    labelLarge: TextStyle(debugLabel: 'englishLike labelLarge 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.25),
+    labelMedium: TextStyle(debugLabel: 'englishLike labelMedium 2018', fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
+    labelSmall: TextStyle(debugLabel: 'englishLike labelSmall 2018', fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
   /// Defines text geometry for dense scripts, such as Chinese, Japanese
   /// and Korean.
   static const TextTheme dense2014 = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'dense displayLarge 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
-    displayMedium : TextStyle(debugLabel: 'dense displayMedium 2014', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    displaySmall : TextStyle(debugLabel: 'dense displaySmall 2014', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headlineLarge : TextStyle(debugLabel: 'dense headlineLarge 2014', inherit: false, fontSize:  40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headlineMedium : TextStyle(debugLabel: 'dense headlineMedium 2014', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headlineSmall : TextStyle(debugLabel: 'dense headlineSmall 2014', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    titleLarge : TextStyle(debugLabel: 'dense titleLarge 2014',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    titleMedium : TextStyle(debugLabel: 'dense titleMedium 2014',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    titleSmall : TextStyle(debugLabel: 'dense titleSmall 2014', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    bodyLarge : TextStyle(debugLabel: 'dense bodyLarge 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    bodyMedium : TextStyle(debugLabel: 'dense bodyMedium 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    bodySmall   : TextStyle(debugLabel: 'dense bodySmall 2014',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    labelLarge    : TextStyle(debugLabel: 'dense labelLarge 2014',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    labelMedium  : TextStyle(debugLabel: 'dense labelMedium 2014', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    labelSmall  : TextStyle(debugLabel: 'dense labelSmall 2014', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    displayLarge: TextStyle(debugLabel: 'dense displayLarge 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    displayMedium: TextStyle(debugLabel: 'dense displayMedium 2014', inherit: false, fontSize: 56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    displaySmall: TextStyle(debugLabel: 'dense displaySmall 2014', inherit: false, fontSize: 45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headlineLarge: TextStyle(debugLabel: 'dense headlineLarge 2014', inherit: false, fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headlineMedium: TextStyle(debugLabel: 'dense headlineMedium 2014', inherit: false, fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headlineSmall: TextStyle(debugLabel: 'dense headlineSmall 2014', inherit: false, fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    titleLarge: TextStyle(debugLabel: 'dense titleLarge 2014', inherit: false, fontSize: 21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    titleMedium: TextStyle(debugLabel: 'dense titleMedium 2014', inherit: false, fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    titleSmall: TextStyle(debugLabel: 'dense titleSmall 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    bodyLarge: TextStyle(debugLabel: 'dense bodyLarge 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    bodyMedium: TextStyle(debugLabel: 'dense bodyMedium 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    bodySmall: TextStyle(debugLabel: 'dense bodySmall 2014', inherit: false, fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    labelLarge: TextStyle(debugLabel: 'dense labelLarge 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    labelMedium: TextStyle(debugLabel: 'dense labelMedium 2014', inherit: false, fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    labelSmall: TextStyle(debugLabel: 'dense labelSmall 2014', inherit: false, fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
   );
 
   /// Defines text geometry for dense scripts, such as Chinese, Japanese
@@ -644,40 +650,40 @@ class Typography with Diagnosticable {
   /// The font sizes, weights, and letter spacings in this version match the
   /// 2018 [Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme dense2018 = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'dense displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
-    displayMedium : TextStyle(debugLabel: 'dense displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
-    displaySmall : TextStyle(debugLabel: 'dense displaySmall 2018', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headlineLarge : TextStyle(debugLabel: 'dense headlineLarge 2018', fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headlineMedium : TextStyle(debugLabel: 'dense headlineMedium 2018', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headlineSmall : TextStyle(debugLabel: 'dense headlineSmall 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    titleLarge : TextStyle(debugLabel: 'dense titleLarge 2018', fontSize: 21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    titleMedium : TextStyle(debugLabel: 'dense titleMedium 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    titleSmall : TextStyle(debugLabel: 'dense titleSmall 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    bodyLarge : TextStyle(debugLabel: 'dense bodyLarge 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    bodyMedium : TextStyle(debugLabel: 'dense bodyMedium 2018', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    bodySmall    : TextStyle(debugLabel: 'dense bodySmall 2018',    fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    labelLarge   : TextStyle(debugLabel: 'dense labelLarge 2018',   fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    labelMedium  : TextStyle(debugLabel: 'dense labelMedium 2018',  fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    labelSmall  : TextStyle(debugLabel: 'dense labelSmall 2018',  fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    displayLarge: TextStyle(debugLabel: 'dense displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    displayMedium: TextStyle(debugLabel: 'dense displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    displaySmall: TextStyle(debugLabel: 'dense displaySmall 2018', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headlineLarge: TextStyle(debugLabel: 'dense headlineLarge 2018', fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headlineMedium: TextStyle(debugLabel: 'dense headlineMedium 2018', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headlineSmall: TextStyle(debugLabel: 'dense headlineSmall 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    titleLarge: TextStyle(debugLabel: 'dense titleLarge 2018', fontSize: 21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    titleMedium: TextStyle(debugLabel: 'dense titleMedium 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    titleSmall: TextStyle(debugLabel: 'dense titleSmall 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    bodyLarge: TextStyle(debugLabel: 'dense bodyLarge 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    bodyMedium: TextStyle(debugLabel: 'dense bodyMedium 2018', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    bodySmall: TextStyle(debugLabel: 'dense bodySmall 2018', fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    labelLarge: TextStyle(debugLabel: 'dense labelLarge 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    labelMedium: TextStyle(debugLabel: 'dense labelMedium 2018', fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    labelSmall: TextStyle(debugLabel: 'dense labelSmall 2018', fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
   );
 
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
   static const TextTheme tall2014 = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'tall displayLarge 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    displayMedium : TextStyle(debugLabel: 'tall displayMedium 2014', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    displaySmall : TextStyle(debugLabel: 'tall displaySmall 2014', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineLarge : TextStyle(debugLabel: 'tall headlineLarge 2014', inherit: false, fontSize:  40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineMedium : TextStyle(debugLabel: 'tall headlineMedium 2014', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineSmall : TextStyle(debugLabel: 'tall headlineSmall 2014', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    titleLarge : TextStyle(debugLabel: 'tall titleLarge 2014',    inherit: false, fontSize:  21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    titleMedium : TextStyle(debugLabel: 'tall titleMedium 2014',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    titleSmall : TextStyle(debugLabel: 'tall titleSmall 2014', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    bodyLarge : TextStyle(debugLabel: 'tall bodyLarge 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    bodyMedium : TextStyle(debugLabel: 'tall bodyMedium 2014',    inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    bodySmall   : TextStyle(debugLabel: 'tall bodySmall 2014',  inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    labelLarge    : TextStyle(debugLabel: 'tall labelLarge 2014',   inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    labelMedium  : TextStyle(debugLabel: 'tall labelMedium 2014', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    labelSmall  : TextStyle(debugLabel: 'tall labelSmall 2014', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    displayLarge: TextStyle(debugLabel: 'tall displayLarge 2014', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    displayMedium: TextStyle(debugLabel: 'tall displayMedium 2014', inherit: false, fontSize: 56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    displaySmall: TextStyle(debugLabel: 'tall displaySmall 2014', inherit: false, fontSize: 45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineLarge: TextStyle(debugLabel: 'tall headlineLarge 2014', inherit: false, fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineMedium: TextStyle(debugLabel: 'tall headlineMedium 2014', inherit: false, fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineSmall: TextStyle(debugLabel: 'tall headlineSmall 2014', inherit: false, fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    titleLarge: TextStyle(debugLabel: 'tall titleLarge 2014', inherit: false, fontSize: 21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    titleMedium: TextStyle(debugLabel: 'tall titleMedium 2014', inherit: false, fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    titleSmall: TextStyle(debugLabel: 'tall titleSmall 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    bodyLarge: TextStyle(debugLabel: 'tall bodyLarge 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    bodyMedium: TextStyle(debugLabel: 'tall bodyMedium 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    bodySmall: TextStyle(debugLabel: 'tall bodySmall 2014', inherit: false, fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    labelLarge: TextStyle(debugLabel: 'tall labelLarge 2014', inherit: false, fontSize: 15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    labelMedium: TextStyle(debugLabel: 'tall labelMedium 2014', inherit: false, fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    labelSmall: TextStyle(debugLabel: 'tall labelSmall 2014', inherit: false, fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
   );
 
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
@@ -685,21 +691,21 @@ class Typography with Diagnosticable {
   /// The font sizes, weights, and letter spacings in this version match the
   /// 2018 [Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme tall2018 = TextTheme(
-    displayLarge : TextStyle(debugLabel: 'tall displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    displayMedium : TextStyle(debugLabel: 'tall displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    displaySmall : TextStyle(debugLabel: 'tall displaySmall 2018', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineLarge : TextStyle(debugLabel: 'tall headlineLarge 2018', fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineMedium : TextStyle(debugLabel: 'tall headlineMedium 2018', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headlineSmall : TextStyle(debugLabel: 'tall headlineSmall 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    titleLarge : TextStyle(debugLabel: 'tall titleLarge 2018', fontSize: 21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    displayLarge: TextStyle(debugLabel: 'tall displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    displayMedium: TextStyle(debugLabel: 'tall displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    displaySmall: TextStyle(debugLabel: 'tall displaySmall 2018', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineLarge: TextStyle(debugLabel: 'tall headlineLarge 2018', fontSize: 40.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineMedium: TextStyle(debugLabel: 'tall headlineMedium 2018', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headlineSmall: TextStyle(debugLabel: 'tall headlineSmall 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    titleLarge: TextStyle(debugLabel: 'tall titleLarge 2018', fontSize: 21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
     titleMedium : TextStyle(debugLabel: 'tall titleMedium 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    titleSmall : TextStyle(debugLabel: 'tall titleSmall 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    bodyLarge : TextStyle(debugLabel: 'tall bodyLarge 2018', fontSize: 17.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    bodyMedium : TextStyle(debugLabel: 'tall bodyMedium 2018', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    bodySmall    : TextStyle(debugLabel: 'tall bodySmall 2018',    fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    labelLarge   : TextStyle(debugLabel: 'tall labelLarge 2018',   fontSize: 15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    labelMedium  : TextStyle(debugLabel: 'tall labelMedium 2018',  fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    labelSmall  : TextStyle(debugLabel: 'tall labelSmall 2018',  fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    titleSmall: TextStyle(debugLabel: 'tall titleSmall 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    bodyLarge: TextStyle(debugLabel: 'tall bodyLarge 2018', fontSize: 17.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    bodyMedium: TextStyle(debugLabel: 'tall bodyMedium 2018', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    bodySmall: TextStyle(debugLabel: 'tall bodySmall 2018', fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    labelLarge: TextStyle(debugLabel: 'tall labelLarge 2018', fontSize: 15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    labelMedium: TextStyle(debugLabel: 'tall labelMedium 2018', fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    labelSmall: TextStyle(debugLabel: 'tall labelSmall 2018', fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
   );
 
   /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
@@ -723,13 +729,15 @@ class Typography with Diagnosticable {
   static const TextTheme tall2021 = _M3Typography.tall;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - Typography
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Token database version: v0_101
+
 class _M3Typography {
   _M3Typography._();
 
@@ -788,4 +796,4 @@ class _M3Typography {
   );
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - Typography

@@ -188,6 +188,16 @@ void main() {
         await project.regeneratePlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
+      _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
+        // This is not a valid Xml document
+        const String invalidManifest = '<manifest></application>';
+        final FlutterProject project = await someProject(androidManifestOverride: invalidManifest);
+
+        expect(
+          () => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore),
+          throwsToolExit(message: 'Please ensure that the android manifest is a valid XML document and try again.'),
+        );
+      });
       _testInMemory('Android project not on v2 embedding shows a warning', () async {
         final FlutterProject project = await someProject();
         // The default someProject with an empty <manifest> already indicates
@@ -251,7 +261,7 @@ void main() {
         final FlutterProject project = await someProject();
         project.macos.managedDirectory.createSync(recursive: true);
         await project.regeneratePlatformSpecificTooling();
-        expectExists(project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'));
+        expectExists(project.macos.pluginRegistrantImplementation);
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
@@ -318,7 +328,6 @@ void main() {
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('flutter_export_environment.sh'));
-        expectExists(flutter.childFile('${project.manifest.appName}.podspec'));
         expectExists(flutter.childFile('Generated.xcconfig'));
         final Directory pluginRegistrantClasses = flutter
             .childDirectory('FlutterPluginRegistrant')
@@ -571,14 +580,14 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       });
 
       testUsingContext('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
         mockXcodeProjectInterpreter.buildSettings = <String, String>{
-          'FULL_PRODUCT_NAME': 'My App.app'
+          'FULL_PRODUCT_NAME': 'My App.app',
         };
         mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
 
@@ -586,7 +595,7 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       });
     });
 
@@ -770,7 +779,9 @@ apply plugin: 'kotlin-android'
   });
 }
 
-Future<FlutterProject> someProject() async {
+Future<FlutterProject> someProject({
+  String androidManifestOverride,
+}) async {
   final Directory directory = globals.fs.directory('some_project');
   directory.childDirectory('.dart_tool')
     .childFile('package_config.json')
@@ -782,7 +793,7 @@ Future<FlutterProject> someProject() async {
       ..createSync(recursive: true);
   androidDirectory
     .childFile('AndroidManifest.xml')
-    .writeAsStringSync('<manifest></manifest>');
+    .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
   return FlutterProject.fromDirectory(directory);
 }
 
@@ -888,7 +899,7 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
         'name': 'flutter_template_images',
         'rootUri': dummyTemplateImagesDirectory.uri.toString(),
         'packageUri': 'lib/',
-        'languageVersion': '2.6'
+        'languageVersion': '2.6',
       },
     ],
   }));

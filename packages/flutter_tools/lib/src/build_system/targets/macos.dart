@@ -93,7 +93,7 @@ abstract class UnpackMacOS extends Target {
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
-      ...archList
+      ...archList,
     ]);
 
     if (verifyResult.exitCode != 0) {

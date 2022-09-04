@@ -18,6 +18,7 @@ import 'assets.dart';
 import 'dart_plugin_registrant.dart';
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
+import 'shader_compiler.dart';
 
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
@@ -33,6 +34,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
     ...IconTreeShaker.inputs,
+    ...ShaderCompiler.inputs,
   ];
 
   @override
@@ -44,7 +46,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<String> get depfiles => <String>[
-    'flutter_assets.d'
+    'flutter_assets.d',
   ];
 
   @override
@@ -204,7 +206,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
         forceLinkPlatform = false;
         break;
     }
@@ -225,6 +226,8 @@ class KernelSnapshot extends Target {
       trackWidgetCreation: trackWidgetCreation && buildMode != BuildMode.release,
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
+      initializeFromDill: buildMode.isPrecompiled ? null :
+          environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesFile.path,
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,

@@ -6,7 +6,7 @@ import 'dart:ui' show TextAffinity, TextPosition, TextRange;
 
 import 'package:flutter/foundation.dart';
 
-export 'dart:ui' show TextAffinity, TextPosition, TextRange;
+export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of text that represents a selection.
 @immutable
@@ -140,10 +140,12 @@ class TextSelection extends TextRange {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other is! TextSelection)
+    }
+    if (other is! TextSelection) {
       return false;
+    }
     if (!isValid) {
       return !other.isValid;
     }

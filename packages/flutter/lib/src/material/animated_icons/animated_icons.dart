@@ -35,7 +35,7 @@ class AnimatedIcon extends StatelessWidget {
   /// The [progress] and [icon] arguments must not be null.
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.progress,
     this.color,
@@ -43,8 +43,7 @@ class AnimatedIcon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
   }) : assert(progress != null),
-       assert(icon != null),
-       super(key: key);
+       assert(icon != null);
 
   /// The animation progress for the animated icon.
   ///
@@ -111,8 +110,9 @@ class AnimatedIcon extends StatelessWidget {
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
     final double iconOpacity = iconTheme.opacity!;
     Color iconColor = color ?? iconTheme.color!;
-    if (iconOpacity != 1.0)
+    if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+    }
     return Semantics(
       label: semanticLabel,
       child: CustomPaint(
@@ -162,9 +162,10 @@ class _AnimatedIconPainter extends CustomPainter {
     }
     canvas.scale(scale, scale);
 
-    final double clampedProgress = progress.value.clamp(0.0, 1.0);
-    for (final _PathFrames path in paths)
+    final double clampedProgress = clampDouble(progress.value, 0.0, 1.0);
+    for (final _PathFrames path in paths) {
       path.paint(canvas, color, uiPathFactory, clampedProgress);
+    }
   }
 
 
@@ -204,8 +205,9 @@ class _PathFrames {
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
-    for (final _PathCommand command in commands)
+    for (final _PathCommand command in commands) {
       command.apply(path, progress);
+    }
     canvas.drawPath(path, paint);
   }
 }
@@ -292,8 +294,9 @@ class _PathClose extends _PathCommand {
 T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
-  if (values.length == 1)
+  if (values.length == 1) {
     return values[0];
+  }
   final double targetIdx = lerpDouble(0, values.length -1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();

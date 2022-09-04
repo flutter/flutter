@@ -10,7 +10,7 @@ const Offset _kRowOffset = Offset(0.0, -50.0);
 void main() {
   testWidgets('Change selected fruit using CupertinoPicker', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.CupertinoPickerApp(),
     );
 
     // Open the Cupertino picker.

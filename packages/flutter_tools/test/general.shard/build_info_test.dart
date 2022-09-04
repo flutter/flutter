@@ -107,6 +107,17 @@ void main() {
     expect(() => getIOSArchForName('bogus'), throwsException);
   });
 
+  testWithoutContext('named BuildInfo has correct defaults', () {
+    expect(BuildInfo.debug.mode, BuildMode.debug);
+    expect(BuildInfo.debug.trackWidgetCreation, true);
+
+    expect(BuildInfo.profile.mode, BuildMode.profile);
+    expect(BuildInfo.profile.trackWidgetCreation, false);
+
+    expect(BuildInfo.release.mode, BuildMode.release);
+    expect(BuildInfo.release.trackWidgetCreation, false);
+  });
+
   testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
       treeShakeIcons: true,
@@ -121,6 +132,8 @@ void main() {
       codeSizeDirectory: 'foo/code-size',
       fileSystemRoots: <String>['test5', 'test6'],
       fileSystemScheme: 'scheme',
+      buildName: '122',
+      buildNumber: '22'
     );
 
     expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
@@ -136,6 +149,8 @@ void main() {
       'CodeSizeDirectory': 'foo/code-size',
       'FileSystemRoots': 'test5,test6',
       'FileSystemScheme': 'scheme',
+      'BuildName': '122',
+      'BuildNumber': '22',
     });
   });
 
@@ -195,7 +210,7 @@ void main() {
       '-Pbundle-sksl-path=foo/bar/baz.sksl.json',
       '-Pcode-size-directory=foo/code-size',
       '-Pfoo=bar',
-      '-Pfizz=bazz'
+      '-Pfizz=bazz',
     ]);
   });
 
@@ -209,19 +224,19 @@ void main() {
 
   testWithoutContext('decodeDartDefines decodes base64 encoded dart defines', () {
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'ImhlbGxvIg=='
+      kDartDefines: 'ImhlbGxvIg==',
     }, kDartDefines), <String>['"hello"']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ=='
+      kDartDefines: 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==',
     }, kDartDefines), <String>['https://www.google.com']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'MiwzLDQ=,NQ=='
+      kDartDefines: 'MiwzLDQ=,NQ==',
     }, kDartDefines), <String>['2,3,4', '5']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U='
+      kDartDefines: 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U=',
     }, kDartDefines), <String>['true', 'false', 'flase']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'MTIzMiw0NTY=,Mg=='
+      kDartDefines: 'MTIzMiw0NTY=,Mg==',
     }, kDartDefines), <String>['1232,456', '2']);
   });
 }

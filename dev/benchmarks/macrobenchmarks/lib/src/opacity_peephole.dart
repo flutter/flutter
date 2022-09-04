@@ -28,7 +28,7 @@ class OpacityPeepholePage extends StatelessWidget {
               onPressed: () {
                 Navigator.pushNamed(context, variant.route);
               },
-            )
+            ),
         ],
       ),
     );

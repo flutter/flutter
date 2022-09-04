@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import '../convert.dart';
-import 'common.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -296,11 +295,11 @@ class _DefaultProcessUtils implements ProcessUtils {
       final Future<void> stdoutFuture = process.stdout
           .transform<String>(const Utf8Decoder(reportErrors: false))
           .listen(stdoutBuffer.write)
-          .asFuture<void>(null);
+          .asFuture<void>();
       final Future<void> stderrFuture = process.stderr
           .transform<String>(const Utf8Decoder(reportErrors: false))
           .listen(stderrBuffer.write)
-          .asFuture<void>(null);
+          .asFuture<void>();
 
       int? exitCode;
       exitCode = await process.exitCode.then<int?>((int x) => x).timeout(timeout, onTimeout: () {

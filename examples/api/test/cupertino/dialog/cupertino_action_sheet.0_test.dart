@@ -10,7 +10,7 @@ void main() {
   testWidgets('Perform an action on CupertinoActionSheet', (WidgetTester tester) async {
     const String actionText = 'Destructive Action';
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.ActionSheetApp(),
     );
 
     // Launch the CupertinoActionSheet.

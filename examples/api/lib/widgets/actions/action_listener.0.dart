@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ActionListenerExample extends StatefulWidget {
-  const ActionListenerExample({Key? key}) : super(key: key);
+  const ActionListenerExample({super.key});
 
   @override
   State<ActionListenerExample> createState() => _ActionListenerExampleState();
@@ -111,7 +111,7 @@ class MyIntent extends Intent {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();

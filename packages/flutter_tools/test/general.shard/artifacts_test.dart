@@ -89,6 +89,13 @@ void main() {
           .createSync(recursive: true);
       fileSystem
           .directory(xcframeworkPath)
+          .childDirectory('ios-arm64')
+          .childDirectory('Flutter.framework')
+          .createSync(recursive: true);
+
+      // TODO(jmagman): Remove ios-arm64_armv7 checks when armv7 engine artifacts are removed.
+      fileSystem
+          .directory(xcframeworkPath)
           .childDirectory('ios-arm64_armv7')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
@@ -100,10 +107,27 @@ void main() {
         fileSystem.path
             .join(xcframeworkPath, 'ios-arm64_x86_64-simulator', 'Flutter.framework'),
       );
+      final String actualReleaseFrameworkArtifact = artifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.release,
+        environmentType: EnvironmentType.physical,
+      );
+      final String expectedArm64ReleaseFrameworkArtifact = fileSystem.path.join(
+        xcframeworkPath,
+        'ios-arm64',
+        'Flutter.framework',
+      );
+      final String expectedArmv7ReleaseFrameworkArtifact = fileSystem.path.join(
+        xcframeworkPath,
+        'ios-arm64_armv7',
+        'Flutter.framework',
+      );
+
+      // TODO(jmagman): Replace with expect(actualReleaseFrameworkArtifact, expectedArm64ReleaseFrameworkArtifact) when armv7 engine artifacts are removed.
       expect(
-        artifacts.getArtifactPath(Artifact.flutterFramework,
-            platform: TargetPlatform.ios, mode: BuildMode.release, environmentType: EnvironmentType.physical),
-        fileSystem.path.join(xcframeworkPath, 'ios-arm64_armv7', 'Flutter.framework'),
+        actualReleaseFrameworkArtifact,
+        anyOf(expectedArm64ReleaseFrameworkArtifact, expectedArmv7ReleaseFrameworkArtifact),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),
@@ -116,18 +140,6 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester, platform: TargetPlatform.linux_arm64),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester'),
-      );
-      expect(
-        artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath, platform: TargetPlatform.windows_uwp_x64, mode: BuildMode.debug),
-        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'windows-uwp-x64-debug'),
-      );
-      expect(
-        artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath, platform: TargetPlatform.windows_uwp_x64, mode: BuildMode.profile),
-        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'windows-uwp-x64-profile'),
-      );
-      expect(
-        artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath, platform: TargetPlatform.windows_uwp_x64, mode: BuildMode.release),
-        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'windows-uwp-x64-release'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
@@ -303,6 +315,14 @@ void main() {
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
           'snapshots', 'frontend_server.dart.snapshot')
       );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.impellerc).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.libtessellator).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
+      );
     });
 
     testWithoutContext('getEngineType', () {
@@ -332,20 +352,6 @@ void main() {
       );
 
       expect(artifacts.getHostArtifact(HostArtifact.engineDartBinary).path, contains('.exe'));
-    });
-
-    testWithoutContext('Looks up windows UWP artifacts in host engine', () async {
-      artifacts = LocalEngineArtifacts(
-        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'winuwp_debug_unopt'),
-        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'winuwp_debug_unopt'),
-        cache: cache,
-        fileSystem: fileSystem,
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-      );
-
-      expect(artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath), '/out/winuwp_debug_unopt');
     });
 
     testWithoutContext('Looks up dart on linux platforms', () async {

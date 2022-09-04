@@ -19,7 +19,7 @@ import 'framework.dart';
 ///  * [PageStorage], which is the closet ancestor for [PageStorageKey].
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
-  const PageStorageKey(T value) : super(value);
+  const PageStorageKey(super.value);
 }
 
 @immutable
@@ -33,8 +33,9 @@ class _StorageEntryIdentifier {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _StorageEntryIdentifier
         && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
@@ -56,8 +57,9 @@ class PageStorageBucket {
   static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
     final Key? key = widget.key;
-    if (key is PageStorageKey)
+    if (key is PageStorageKey) {
       keys.add(key);
+    }
     return widget is! PageStorage;
   }
 
@@ -91,8 +93,9 @@ class PageStorageBucket {
       _storage![identifier] = data;
     } else {
       final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-      if (contextIdentifier.isNotEmpty)
+      if (contextIdentifier.isNotEmpty) {
         _storage![contextIdentifier] = data;
+      }
     }
   }
 
@@ -105,10 +108,12 @@ class PageStorageBucket {
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
   dynamic readState(BuildContext context, { Object? identifier }) {
-    if (_storage == null)
+    if (_storage == null) {
       return null;
-    if (identifier != null)
+    }
+    if (identifier != null) {
       return _storage![identifier];
+    }
     final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
     return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
@@ -153,11 +158,10 @@ class PageStorage extends StatelessWidget {
   ///
   /// The [bucket] argument must not be null.
   const PageStorage({
-    Key? key,
+    super.key,
     required this.bucket,
     required this.child,
-  }) : assert(bucket != null),
-       super(key: key);
+  }) : assert(bucket != null);
 
   /// The widget below this widget in the tree.
   ///

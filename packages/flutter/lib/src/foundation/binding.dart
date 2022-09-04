@@ -14,10 +14,13 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'diagnostics.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
+
+export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
 // Examples can assume:
 // mixin BarBinding on BindingBase { }
@@ -370,7 +373,7 @@ abstract class BindingBase {
   /// before the point in the application code that wants to initialize the binding, or
   /// to verify that the binding is the one that is expected.
   ///
-  /// For example, if an application uses [Zone]s to report uncaught execptions, it may
+  /// For example, if an application uses [Zone]s to report uncaught exceptions, it may
   /// need to ensure that `ensureInitialized()` has not yet been invoked on any binding
   /// at the point where it configures the zone and initializes the binding.
   ///
@@ -827,8 +830,9 @@ abstract class BindingBase {
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
-        if (debugInstrumentationEnabled)
+        if (debugInstrumentationEnabled) {
           debugPrint('service extension method received: $method($parameters)');
+        }
         return true;
       }());
 

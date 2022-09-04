@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -64,19 +64,18 @@ import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
-import 'windows/uwptool.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
   FutureOr<T> Function() runner, {
-  Map<Type, Generator> overrides,
+  Map<Type, Generator>? overrides,
 }) async {
 
   // Wrap runner with any asynchronous initialization that should run with the
   // overrides and callbacks.
-  bool runningOnBot;
+  late bool runningOnBot;
   FutureOr<T> runnerWrapper() async {
     runningOnBot = await globals.isRunningOnBot;
     return runner();
@@ -91,9 +90,9 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         processManager: globals.processManager,
         fileSystem: globals.fs,
-        artifacts: globals.artifacts,
+        artifacts: globals.artifacts!,
         usage: globals.flutterUsage,
-        gradleUtils: globals.gradleUtils,
+        gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
@@ -159,11 +158,11 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         logger: globals.logger,
         platform: globals.platform,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         usage: globals.flutterUsage,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
-        globals.cocoaPods,
+        globals.cocoaPods!,
         globals.userMessages,
       ),
       Config: () => Config(
@@ -188,34 +187,29 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         androidSdk: globals.androidSdk,
-        iosSimulatorUtils: globals.iosSimulatorUtils,
+        iosSimulatorUtils: globals.iosSimulatorUtils!,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
-        iosWorkflow: globals.iosWorkflow,
-        artifacts: globals.artifacts,
+        iosWorkflow: globals.iosWorkflow!,
+        artifacts: globals.artifacts!,
         flutterVersion: globals.flutterVersion,
-        androidWorkflow: androidWorkflow,
-        fuchsiaWorkflow: fuchsiaWorkflow,
-        xcDevice: globals.xcdevice,
+        androidWorkflow: androidWorkflow!,
+        fuchsiaWorkflow: fuchsiaWorkflow!,
+        xcDevice: globals.xcdevice!,
         userMessages: globals.userMessages,
-        windowsWorkflow: windowsWorkflow,
+        windowsWorkflow: windowsWorkflow!,
         macOSWorkflow: MacOSWorkflow(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
-        fuchsiaSdk: globals.fuchsiaSdk,
+        fuchsiaSdk: globals.fuchsiaSdk!,
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
         customDevicesConfig: globals.customDevicesConfig,
-        uwptool: UwpTool(
-          artifacts: globals.artifacts,
-          logger: globals.logger,
-          processManager: globals.processManager,
-        ),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        dartExecutable: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
@@ -226,7 +220,7 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         logger: globals.logger,
         fileSystem: globals.fs,
-        androidWorkflow: androidWorkflow,
+        androidWorkflow: androidWorkflow!,
       ),
       FeatureFlags: () => FlutterFeatureFlags(
         flutterVersion: globals.flutterVersion,
@@ -240,7 +234,7 @@ Future<T> runInContext<T>(
       FuchsiaWorkflow: () => FuchsiaWorkflow(
         featureFlags: featureFlags,
         platform: globals.platform,
-        fuchsiaArtifacts: globals.fuchsiaArtifacts,
+        fuchsiaArtifacts: globals.fuchsiaArtifacts!,
       ),
       GradleUtils: () => GradleUtils(
         fileSystem: globals.fs,
@@ -253,11 +247,11 @@ Future<T> runInContext<T>(
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
         processManager: globals.processManager,
-        xcode: globals.xcode,
+        xcode: globals.xcode!,
       ),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,
-        xcode: globals.xcode,
+        xcode: globals.xcode!,
         platform: globals.platform,
       ),
       LocalEngineLocator: () => LocalEngineLocator(
@@ -265,7 +259,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         fileSystem: globals.fs,
-        flutterRoot: Cache.flutterRoot,
+        flutterRoot: Cache.flutterRoot!,
       ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
@@ -293,7 +287,7 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
       ),
       OutputPreferences: () => OutputPreferences(
-        wrapText: globals.stdio.hasTerminal ?? false,
+        wrapText: globals.stdio.hasTerminal,
         showColor:  globals.platform.stdoutSupportsAnsi,
         stdio: globals.stdio,
       ),
@@ -324,7 +318,7 @@ Future<T> runInContext<T>(
       SystemClock: () => const SystemClock(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
-        firstRunMessenger: FirstRunMessenger(persistentToolState: globals.persistentToolState),
+        firstRunMessenger: FirstRunMessenger(persistentToolState: globals.persistentToolState!),
       ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
@@ -349,17 +343,17 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
         logger: globals.logger,
-        artifacts: globals.artifacts,
+        artifacts: globals.artifacts!,
         cache: globals.cache,
         platform: globals.platform,
-        xcode: globals.xcode,
+        xcode: globals.xcode!,
         iproxy: IProxy(
-          iproxyPath: globals.artifacts.getHostArtifact(
+          iproxyPath: globals.artifacts!.getHostArtifact(
             HostArtifact.iproxy,
           ).path,
           logger: globals.logger,

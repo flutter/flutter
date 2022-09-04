@@ -61,7 +61,7 @@ void main() {
           stdout: 'Hello World\n',
           stderr: 'Goodnight, Moon\n',
           completer: completer,
-        )
+        ),
       ]),
       logger: BufferLogger.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),

@@ -58,7 +58,7 @@ class DebugAdapterCommand extends FlutterCommand {
       platform: globals.platform,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
-      test: boolArg('test'),
+      test: boolArgDeprecated('test'),
     );
 
     await server.channel.closed;
