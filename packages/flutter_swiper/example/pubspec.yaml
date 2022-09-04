@@ -1,0 +1,32 @@
+name: example
+description: A new Flutter project.
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.0
+
+  flutter_swiper:
+    path: ../
+
+  percent_indicator:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+
+  assets:
+    - images/bg0.jpeg
+    - images/bg1.jpeg
+    - images/bg2.jpeg
+    - images/bg.jpeg
+    - images/1.png
+    - images/2.png
+    - images/3.png

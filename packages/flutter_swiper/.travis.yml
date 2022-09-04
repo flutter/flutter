@@ -1,0 +1,10 @@
+language: dart
+env:
+  - SHARD=dartfmt
+  - SHARD=test
+install:
+  - ./dev/bots/travis_install.sh
+script:
+  - ./dev/bots/travis_script.sh
+after_success:
+  - coveralls-lcov coverage/lcov.info
