@@ -17,17 +17,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
 import 'package:gen_defaults/banner_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
-import 'package:gen_defaults/action_chip_template.dart';
-import 'package:gen_defaults/filter_chip_template.dart';
-import 'package:gen_defaults/input_chip_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
+import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
+import 'package:gen_defaults/input_chip_template.dart';
 import 'package:gen_defaults/input_decorator_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
