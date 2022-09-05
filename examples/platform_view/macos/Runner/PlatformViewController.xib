@@ -8,7 +8,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PlatformViewController" customModule="platform_view" customModuleProvider="target">
             <connections>
-                <outlet property="label" destination="Eug-C1-PRv" id="MxT-vW-lcr"/>
+                <outlet property="label" destination="Eug-C1-PRv" id="wbw-1a-uP2"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
             </connections>
         </customObject>
@@ -39,7 +39,7 @@
                                         <font key="font" metaFont="system"/>
                                     </buttonCell>
                                     <connections>
-                                        <action selector="close:" target="-2" id="Bdy-qq-WIs"/>
+                                        <action selector="pop:" target="-2" id="KiK-HY-d8D"/>
                                     </connections>
                                 </button>
                             </subviews>
