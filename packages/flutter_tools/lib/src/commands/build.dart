@@ -88,7 +88,7 @@ abstract class BuildSubCommand extends FlutterCommand {
       );
     } else {
       globals.printStatus(
-        '⚠️ Building without sound null safety ⚠️',
+        'Building without sound null safety ⚠️',
         emphasis: true,
       );
       globals.printStatus(

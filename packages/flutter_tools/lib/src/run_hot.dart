@@ -1026,7 +1026,7 @@ class HotRunner extends ResidentRunner {
       globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
     } else {
       globals.printStatus(
-        '⚠️ Running without sound null safety ⚠️',
+        'Running without sound null safety ⚠️',
         emphasis: true,
       );
       globals.printStatus(
