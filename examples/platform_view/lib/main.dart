@@ -55,9 +55,10 @@ class _MyHomePageState extends State<MyHomePage> {
         return const Text('Continue in iOS view');
       case TargetPlatform.windows:
         return const Text('Cotninue in Windows view');
+      case TargetPlatform.macOS:
+        return const Text('Continue in macOS view');
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-      case TargetPlatform.macOS:
         throw UnimplementedError('Platform not yet implemented');
     }
   }
