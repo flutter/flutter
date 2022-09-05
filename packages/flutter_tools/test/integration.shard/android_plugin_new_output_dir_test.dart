@@ -48,7 +48,7 @@ void main() {
       'dependencies:',
       '''
 dependencies:
-  image_picker: any''',
+  image_picker: 0.8.5+3''',
     );
     modulePubspec.writeAsStringSync(pubspecContent);
 
