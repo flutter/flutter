@@ -9,7 +9,26 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    RegisterMethodChannel(registry: flutterViewController)
 
     super.awakeFromNib()
+  }
+
+  func RegisterMethodChannel(registry: FlutterPluginRegistry) {
+    let registrar = registry.registrar(forPlugin: "platform_view")
+    let channel = FlutterMethodChannel(name: "samples.flutter.io/platform_view",
+                                       binaryMessenger: registrar.messenger)
+    channel.setMethodCallHandler({ (call, result) in
+      if (call.method == "switchView") {
+        let count = call.arguments as! Int
+        let controller: NSViewController = PlatformViewController(
+          withCount: count,
+          onClose: { platformViewController in
+            result(platformViewController.count)
+          }
+        )
+        self.contentViewController?.presentAsSheet(controller)
+      }
+    })
   }
 }
