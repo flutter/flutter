@@ -10,6 +10,8 @@ import Cocoa
 class PlatformViewController: NSViewController {
     var count: Int = 0
 
+    var dispose: ((PlatformViewController)->())?
+
     @IBOutlet weak var label: NSTextField!
 
     var labelText: String {
@@ -25,15 +27,18 @@ class PlatformViewController: NSViewController {
 
     public required init?(coder aDecoder: NSCoder) {
       self.count = 0
+      self.dispose = nil
       super.init(coder: aDecoder)
     }
 
-    init(withCount count: Int, onClose close: ((Int)->())?) {
+    init(withCount count: Int, onClose dispose: ((PlatformViewController)->())?) {
       self.count = count
+      self.dispose = dispose
       super.init(nibName: nil, bundle: nil)
     }
 
     @IBAction func pop(_ sender: Any) {
+      self.dispose?(self)
       dismiss(self)
     }
 
