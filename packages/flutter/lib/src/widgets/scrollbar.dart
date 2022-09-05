@@ -863,7 +863,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
 /// painted. In this case, the scrollbar cannot accurately represent the
 /// relative location of the visible area, or calculate the accurate delta to
-/// apply when  dragging on the thumb or tapping on the track.
+/// apply when dragging on the thumb or tapping on the track.
 ///
 /// ### Interaction
 ///
@@ -1134,7 +1134,7 @@ class RawScrollbar extends StatefulWidget {
   ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
-  ///              return  Text('item $index');
+  ///              return Text('item $index');
   ///            },
   ///          ),
   ///        ),
@@ -1219,7 +1219,7 @@ class RawScrollbar extends StatefulWidget {
   ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
-  ///              return  Text('item $index');
+  ///              return Text('item $index');
   ///            },
   ///          ),
   ///        ),

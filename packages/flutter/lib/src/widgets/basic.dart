@@ -82,7 +82,7 @@ export 'package:flutter/services.dart' show
 // BIDIRECTIONAL TEXT SUPPORT
 
 /// An [InheritedElement] that has hundreds of dependencies but will
-/// infrequently change.  This provides a performance tradeoff where building
+/// infrequently change. This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
 ///
 /// |                     | _UbiquitiousInheritedElement | InheritedElement |
@@ -101,7 +101,7 @@ class _UbiquitousInheritedElement extends InheritedElement {
   @override
   void setDependencies(Element dependent, Object? value) {
     // This is where the cost of [InheritedElement] is incurred during build
-    // time of the widget tree.  Omitting this bookkeeping is where the
+    // time of the widget tree. Omitting this bookkeeping is where the
     // performance savings come from.
     assert(value == null);
   }
@@ -3411,7 +3411,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// See also:
   ///
   ///  * [RenderBox.getMaxIntrinsicWidth], which defines a widget's max
-  ///    intrinsic width  in general.
+  ///    intrinsic width in general.
   final double? stepWidth;
 
   /// If non-null, force the child's height to be a multiple of this value.

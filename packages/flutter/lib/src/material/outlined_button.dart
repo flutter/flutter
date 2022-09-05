@@ -30,7 +30,7 @@ import 'theme_data.dart';
 /// elevation) [Material] widget. The label's [Text] and [Icon]
 /// widgets are displayed in the [style]'s
 /// [ButtonStyle.foregroundColor] and the outline's weight and color
-/// are defined by [ButtonStyle.side].  The button reacts to touches
+/// are defined by [ButtonStyle.side]. The button reacts to touches
 /// by filling with the [style]'s [ButtonStyle.overlayColor].
 ///
 /// The outlined button's default style is defined by [defaultStyleOf].
@@ -42,7 +42,7 @@ import 'theme_data.dart';
 ///
 /// Unlike [TextButton] or [ElevatedButton], outline buttons have a
 /// default [ButtonStyle.side] which defines the appearance of the
-/// outline.  Because the default `side` is non-null, it
+/// outline. Because the default `side` is non-null, it
 /// unconditionally overrides the shape's [OutlinedBorder.side]. In
 /// other words, to specify an outlined button's shape _and_ the
 /// appearance of its outline, both the [ButtonStyle.shape] and

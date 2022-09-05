@@ -604,8 +604,8 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 /// of [MaterialState]s.
 ///
 /// Material state properties represent values that depend on a widget's material
-/// "state".  The state is encoded as a set of [MaterialState] values, like
-/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed].  For
+/// "state". The state is encoded as a set of [MaterialState] values, like
+/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
 /// example the [InkWell.overlayColor] defines the color that fills the ink well
 /// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
 /// uses the overlay color's [resolve] method to compute the color for the
@@ -613,7 +613,7 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// [ButtonStyle], which is used to configure the appearance of
 /// buttons like [TextButton], [ElevatedButton], and [OutlinedButton],
-/// has many material state properties.  The button widgets keep track
+/// has many material state properties. The button widgets keep track
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
 ///

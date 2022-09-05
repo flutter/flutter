@@ -644,7 +644,7 @@ Your $application code is in $relativeAppMain.
   }
 
   // Takes an application template and replaces the main.dart with one from the
-  // documentation website in sampleCode.  Returns the difference in the number
+  // documentation website in sampleCode. Returns the difference in the number
   // of files after applying the sample, since it also deletes the application's
   // test directory (since the template's test doesn't apply to the sample).
   int _applySample(Directory directory, String sampleCode) {

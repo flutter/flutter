@@ -2062,7 +2062,7 @@ void main() {
     await tester.pumpWidget(buildFrame(false, false));
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
 
-    await tester.pumpWidget(buildFrame(null, null));  // resizeToAvoidBottomInset default  is true
+    await tester.pumpWidget(buildFrame(null, null));  // resizeToAvoidBottomInset default is true
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
 
     await tester.pumpWidget(buildFrame(null, false));

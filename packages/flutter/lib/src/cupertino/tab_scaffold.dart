@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+
 import 'bottom_tab_bar.dart';
 import 'colors.dart';
 import 'theme.dart';
@@ -457,7 +458,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     _focusActiveTab();
   }
 
-  // Will focus the active tab if the FocusScope above it has focus already.  If
+  // Will focus the active tab if the FocusScope above it has focus already. If
   // not, then it will just mark it as the preferred focus for that scope.
   void _focusActiveTab() {
     if (tabFocusNodes.length != widget.tabCount) {
