@@ -69,7 +69,7 @@ void main() {
     OutputPreferences: () => OutputPreferences.test(),
   });
 
-  testUsingContext('symbolize exits when --debug-info file is missing', () async {
+  testUsingContext('symbolize exits when --debug-info dwarf file is missing', () async {
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
@@ -79,6 +79,20 @@ void main() {
       .run(const <String>['symbolize', '--debug-info=app.debug']);
 
     expect(result, throwsToolExit(message: 'app.debug does not exist.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when --debug-info dSYM is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--debug-info=app.dSYM']);
+
+    expect(result, throwsToolExit(message: 'app.dSYM does not exist.'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
