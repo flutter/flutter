@@ -85,13 +85,17 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
-  testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
+  testWidgets('color defaults to BottomAppBarTheme.color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(
+                bottomAppBarTheme: BottomAppBarTheme.of(context).copyWith(
+                    color: const Color(0xffffff00),
+                ),
+              ),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -116,7 +120,11 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(
+                bottomAppBarTheme: BottomAppBarTheme.of(context).copyWith(
+                    color: const Color(0xffffff00),
+                ),
+              ),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,

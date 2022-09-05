@@ -77,8 +77,7 @@ class BottomAppBar extends StatefulWidget {
   /// The bottom app bar's background color.
   ///
   /// If this property is null then [BottomAppBarTheme.color] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null then
-  /// [ThemeData.bottomAppBarColor] is used.
+  /// [ThemeData.bottomAppBarTheme] is used.
   final Color? color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
@@ -139,7 +138,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
         )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
     final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
-    final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
+    final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarTheme.color!;
     final Color effectiveColor = ElevationOverlay.applyOverlay(context, color, elevation);
     return PhysicalShape(
       clipper: clipper,
