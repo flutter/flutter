@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case TargetPlatform.iOS:
         return const Text('Continue in iOS view');
       case TargetPlatform.windows:
-        return const Text('Cotninue in Windows view');
+        return const Text('Continue in Windows view');
       case TargetPlatform.macOS:
         return const Text('Continue in macOS view');
       case TargetPlatform.fuchsia:
