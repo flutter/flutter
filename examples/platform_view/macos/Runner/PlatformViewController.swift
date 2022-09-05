@@ -23,6 +23,16 @@ class PlatformViewController: NSViewController {
       self.label.stringValue = labelText
     }
 
+    public required init?(coder aDecoder: NSCoder) {
+      self.count = 0
+      super.init(coder: aDecoder)
+    }
+
+    init(withCount count: Int, onClose close: ((Int)->())?) {
+      self.count = count
+      super.init(nibName: nil, bundle: nil)
+    }
+
     @IBAction func pop(_ sender: Any) {
       dismiss(self)
     }
