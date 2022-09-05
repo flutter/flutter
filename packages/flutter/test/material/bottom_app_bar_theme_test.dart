@@ -21,13 +21,12 @@ void main() {
   });
 
   testWidgets('BAB color - Widget', (WidgetTester tester) async {
-    const Color themeColor = Colors.white10;
     const Color babThemeColor = Colors.black87;
     const Color babColor = Colors.pink;
     const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(bottomAppBarTheme: theme, bottomAppBarColor: themeColor),
+      theme: ThemeData(bottomAppBarTheme: theme),
       home: const Scaffold(body: BottomAppBar(color: babColor)),
     ));
 
@@ -36,29 +35,16 @@ void main() {
   });
 
   testWidgets('BAB color - BabTheme', (WidgetTester tester) async {
-    const Color themeColor = Colors.white10;
     const Color babThemeColor = Colors.black87;
     const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(bottomAppBarTheme: theme, bottomAppBarColor: themeColor),
+      theme: ThemeData(bottomAppBarTheme: theme),
       home: const Scaffold(body: BottomAppBar()),
     ));
 
     final PhysicalShape widget = _getBabRenderObject(tester);
     expect(widget.color, babThemeColor);
-  });
-
-  testWidgets('BAB color - Theme', (WidgetTester tester) async {
-    const Color themeColor = Colors.white10;
-
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(bottomAppBarColor: themeColor),
-      home: const Scaffold(body: BottomAppBar()),
-    ));
-
-    final PhysicalShape widget = _getBabRenderObject(tester);
-    expect(widget.color, themeColor);
   });
 
   testWidgets('BAB color - Default', (WidgetTester tester) async {
@@ -74,9 +60,9 @@ void main() {
 
   testWidgets('BAB theme customizes shape', (WidgetTester tester) async {
     const BottomAppBarTheme theme = BottomAppBarTheme(
-        color: Colors.white30,
-        shape: CircularNotchedRectangle(),
-        elevation: 1.0,
+      color: Colors.white30,
+      shape: CircularNotchedRectangle(),
+      elevation: 1.0,
     );
 
     await tester.pumpWidget(_withTheme(theme));
@@ -87,7 +73,8 @@ void main() {
     );
   });
 
-  testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
+  testWidgets('BAB theme does not affect defaults',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(body: BottomAppBar()),
     ));
@@ -101,10 +88,10 @@ void main() {
 
 PhysicalShape _getBabRenderObject(WidgetTester tester) {
   return tester.widget<PhysicalShape>(
-      find.descendant(
-          of: find.byType(BottomAppBar),
-          matching: find.byType(PhysicalShape),
-      ),
+    find.descendant(
+      of: find.byType(BottomAppBar),
+      matching: find.byType(PhysicalShape),
+    ),
   );
 }
 
@@ -114,20 +101,20 @@ Widget _withTheme(BottomAppBarTheme theme) {
   return MaterialApp(
     theme: ThemeData(bottomAppBarTheme: theme),
     home: Scaffold(
-        floatingActionButton: const FloatingActionButton(onPressed: null),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: RepaintBoundary(
-          key: _painterKey,
-          child: BottomAppBar(
-            child: Row(
-              children: const <Widget>[
-                Icon(Icons.add),
-                Expanded(child: SizedBox()),
-                Icon(Icons.add),
-              ],
-            ),
+      floatingActionButton: const FloatingActionButton(onPressed: null),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: RepaintBoundary(
+        key: _painterKey,
+        child: BottomAppBar(
+          child: Row(
+            children: const <Widget>[
+              Icon(Icons.add),
+              Expanded(child: SizedBox()),
+              Icon(Icons.add),
+            ],
           ),
         ),
+      ),
     ),
   );
 }

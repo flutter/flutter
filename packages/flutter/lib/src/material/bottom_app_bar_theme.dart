@@ -29,15 +29,13 @@ import 'theme.dart';
 class BottomAppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.bottomAppBarTheme].
   const BottomAppBarTheme({
-    this.color,
+    required this.color,
     this.elevation,
     this.shape,
   });
 
   /// Default value for [BottomAppBar.color].
-  ///
-  /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
-  final Color? color;
+  final Color color;
 
   /// Default value for [BottomAppBar.elevation].
   final double? elevation;
@@ -69,10 +67,11 @@ class BottomAppBarTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
+  static BottomAppBarTheme lerp(
+      BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
     assert(t != null);
     return BottomAppBarTheme(
-      color: Color.lerp(a?.color, b?.color, t),
+      color: Color.lerp(a?.color, b?.color, t)!,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: t < 0.5 ? a?.shape : b?.shape,
     );
@@ -80,10 +79,10 @@ class BottomAppBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    color,
-    elevation,
-    shape,
-  );
+        color,
+        elevation,
+        shape,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -93,17 +92,19 @@ class BottomAppBarTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BottomAppBarTheme
-        && other.color == color
-        && other.elevation == elevation
-        && other.shape == shape;
+    return other is BottomAppBarTheme &&
+        other.color == color &&
+        other.elevation == elevation &&
+        other.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation,
+        defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
   }
 }
