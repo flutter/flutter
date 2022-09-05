@@ -37,16 +37,16 @@ if (pluginsFile.exists()) {
 
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
-        p.subprojects { sp ->
-            String sanitizedPluginName = sp.name.replace(":", "");
+        p.subprojects { subproject ->
+            String pluginName = subproject.name.replace(":", "");
             if (object != null && object.plugins != null && object.plugins.android != null
-                    && object.plugins.android.name.contains(sanitizedPluginName)) {
+                    && object.plugins.android.name.contains(pluginName)) {
                 File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
-                        + "plugins_build_output" + File.separator + sanitizedPluginName);
+                        + "plugins_build_output" + File.separator + pluginName);
                 if (!androidPluginBuildOutputDir.exists()) {
                     androidPluginBuildOutputDir.mkdirs()
                 }
-                sp.buildDir = androidPluginBuildOutputDir
+                subproject.buildDir = androidPluginBuildOutputDir
             }
         }
         def _mainModuleName = binding.variables['mainModuleName']
