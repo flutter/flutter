@@ -17,7 +17,7 @@
 
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/TODO
+  # Changes made in https://github.com/flutter/flutter/pull/111000
   - title: "Remove 'bottomAppBarColor'"
     date: 2022-09-04
     element:
