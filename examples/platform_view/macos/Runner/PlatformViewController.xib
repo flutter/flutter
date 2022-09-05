@@ -68,7 +68,7 @@
                                         <font key="font" metaFont="system"/>
                                     </buttonCell>
                                     <connections>
-                                        <action selector="increment:" target="-2" id="cKy-48-EgE"/>
+                                        <action selector="increment:" target="-2" id="t7P-hc-bBq"/>
                                     </connections>
                                 </button>
                             </subviews>
