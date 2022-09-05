@@ -5519,7 +5519,8 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 200,
-            height: 28,
+            // 40 is the minimum height required for the single-line text.
+            height: 40,
             child: TextField(
               controller: TextEditingController(text: 'A'),
             ),

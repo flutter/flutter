@@ -1375,7 +1375,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     }
 
     switch (textDirection) {
-      case TextDirection.rtl: {
+      case TextDirection.rtl:
         double start = right - _boxSize(icon).width;
         double end = left;
         if (prefixIcon != null) {
@@ -1406,8 +1406,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           end += baselineLayout(suffix!, end);
         }
         break;
-      }
-      case TextDirection.ltr: {
+      case TextDirection.ltr:
         double start = left + _boxSize(icon).width;
         double end = right;
         if (prefixIcon != null) {
@@ -1438,7 +1437,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           end -= baselineLayout(suffix!, end - suffix!.size.width);
         }
         break;
-      }
     }
 
     if (helperError != null || counter != null) {
@@ -1474,18 +1472,21 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width,
-              _boxSize(container).width / 2.0 + floatWidth / 2.0,
-              floatAlign);
-
+          decoration.borderGap.start = lerpDouble(
+            labelX + _boxSize(label).width,
+            _boxSize(container).width / 2.0 + floatWidth / 2.0,
+            floatAlign,
+          );
           break;
         case TextDirection.ltr:
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
           // floating label is centered, it's already relative to _BorderContainer.
-          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width,
-              _boxSize(container).width / 2.0 - floatWidth / 2.0,
-              floatAlign);
+          decoration.borderGap.start = lerpDouble(
+            labelX - _boxSize(icon).width,
+            _boxSize(container).width / 2.0 - floatWidth / 2.0,
+            floatAlign,
+          );
           break;
       }
       decoration.borderGap.extent = label!.size.width * _kFinalLabelScale;
@@ -2168,7 +2169,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isHovering: isHovering,
     );
 
-    final Widget? label = decoration.labelText == null && decoration.label == null ? null : _Shaker(
+    final String? labelText = decoration.labelText;
+    final Widget? labelTextWidget = decoration.label
+      ?? (labelText != null ? Text(labelText, overflow: TextOverflow.ellipsis, textAlign: textAlign) : null);
+
+    final Widget? label = labelTextWidget == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
         duration: _kTransitionDuration,
@@ -2180,11 +2185,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           style: widget._labelShouldWithdraw
             ? _getFloatingLabelStyle(themeData, defaults)
             : labelStyle,
-          child: decoration.label ?? Text(
-            decoration.labelText!,
-            overflow: TextOverflow.ellipsis,
-            textAlign: textAlign,
-          ),
+          child: labelTextWidget,
         ),
       ),
     );
@@ -2204,7 +2205,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
         child: decoration.suffix,
       );
-
 
     final bool decorationIsDense = decoration.isDense ?? false;
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
