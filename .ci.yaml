@@ -2516,6 +2516,7 @@ targets:
 
   - name: Mac flutter_gallery_macos__start_up
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
