@@ -14,7 +14,11 @@ class PlatformViewController: NSViewController {
         super.viewDidLoad()
         // Do view setup here.
     }
-    
+
+    @IBAction func pop(_ sender: Any) {
+      dismiss(self)
+    }
+
     @IBAction func increment(_ sender: Any) {
       self.count += 1
     }

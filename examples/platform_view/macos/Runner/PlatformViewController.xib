@@ -39,7 +39,7 @@
                                         <font key="font" metaFont="system"/>
                                     </buttonCell>
                                     <connections>
-                                        <action selector="pop:" target="-2" id="KiK-HY-d8D"/>
+                                        <action selector="close:" target="-2" id="Bdy-qq-WIs"/>
                                     </connections>
                                 </button>
                             </subviews>
