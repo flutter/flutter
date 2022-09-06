@@ -248,6 +248,7 @@
 /dev/devicelab/bin/tasks/complex_layout_macos__compile.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_macos__compile.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_macos__start_up.dart @a-wallen @flutter/desktop
+/dev/devicelab/bin/tasks/platform_view_macos__start_up.dart @a-wallen @flutter/desktop
 
 ## Host only framework tests
 # Linux analyze
