@@ -291,7 +291,7 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
   late FlutterProject project;
   late Set<AndroidBuildInfo> androidBuildInfo;
   late String target;
-  late String? outputDirectoryPath;
+  String? outputDirectoryPath;
   late String buildNumber;
 
   @override

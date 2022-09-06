@@ -597,8 +597,8 @@ void main() {
     final String pluginName = projectDir.basename;
     expect(pubspec.dependencies, contains(pluginName));
     expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
-    final PathDependency? pathDependency = pubspec.dependencies[pluginName] as PathDependency?;
-    expect(pathDependency!.path, '../');
+    final PathDependency pathDependency = pubspec.dependencies[pluginName]! as PathDependency;
+    expect(pathDependency.path, '../');
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
       fileSystem: globals.fs,

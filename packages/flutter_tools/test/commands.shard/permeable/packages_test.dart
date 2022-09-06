@@ -241,9 +241,9 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand? getCommand = command.subcommands['get'] as PackagesGetCommand?;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand!.usageValues).commandPackagesNumberPlugins, 0);
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -263,9 +263,9 @@ void main() {
       final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
 
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
-      final PackagesGetCommand? getCommand = command.subcommands['get'] as PackagesGetCommand?;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand!.usageValues).commandPackagesNumberPlugins, 1);
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -283,9 +283,9 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand? getCommand = command.subcommands['get'] as PackagesGetCommand?;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand!.usageValues).commandPackagesProjectModule, false);
+      expect((await getCommand.usageValues).commandPackagesProjectModule, false);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -303,9 +303,9 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand? getCommand = command.subcommands['get'] as PackagesGetCommand?;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand!.usageValues).commandPackagesProjectModule, true);
+      expect((await getCommand.usageValues).commandPackagesProjectModule, true);
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -332,9 +332,9 @@ void main() {
       androidManifest.writeAsStringSync(updatedAndroidManifestString);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand? getCommand = command.subcommands['get'] as PackagesGetCommand?;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand!.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
+      expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -352,9 +352,9 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand? getCommand = command.subcommands['get'] as PackagesGetCommand?;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand!.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
+      expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
