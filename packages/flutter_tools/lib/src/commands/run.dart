@@ -669,12 +669,12 @@ class RunCommand extends RunCommandBase {
         ),
     ];
 
-    final ResidentRunner runner = await (createRunner(
+    final ResidentRunner runner = (await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
       flutterProject: flutterProject,
       hotMode: hotMode,
-    ) as FutureOr<ResidentRunner>);
+    ))!;
 
     DateTime? appStartedTime;
     // Sync completer so the completing agent attaching to the resident doesn't
