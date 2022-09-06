@@ -1743,6 +1743,9 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
   }
 
   _Iterator<_OverlayEntryLocation>? _forwardIterator() {
+    // Since the _Iterator returned by this method will be used immediately,
+    // it's OK to evaluate the first value and determine if we can just return
+    // null.
     _OverlayEntryLocation? child = _childAfter(null);
     if (child == null) {
       return null;
@@ -1751,6 +1754,7 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
     return () {
       if (isInitial) {
         assert(child != null);
+        assert(_sortedChildren.contains(child));
         isInitial = false;
         return child;
       }
@@ -1759,6 +1763,9 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
   }
 
   _Iterator<_OverlayEntryLocation>? _backwardIterator() {
+    // Since the _Iterator returned by this method will be used immediately,
+    // it's OK to evaluate the first value and determine if we can just return
+    // null.
     _OverlayEntryLocation? child = _childBefore(null);
     if (child == null) {
       return null;
@@ -1767,6 +1774,7 @@ class _EventOrderChildModel extends _RenderTheatreChildModel {
     return () {
       if (isInitial) {
         assert(child != null);
+        assert(_sortedChildren.contains(child));
         isInitial = false;
         return child;
       }
