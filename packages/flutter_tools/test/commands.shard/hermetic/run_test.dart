@@ -947,7 +947,7 @@ class FakeDevice extends Fake implements Device {
   @override
   String get id => 'fake_device';
 
-  void _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
+  Never _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
 
   @override
   Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
@@ -1042,7 +1042,6 @@ class FakeDevice extends Fake implements Device {
       }
       _throwToolExit(kSuccess);
     }
-    throw UnimplementedError();  // Unreachable.
   }
 }
 
