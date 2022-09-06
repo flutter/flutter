@@ -1166,8 +1166,8 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
-  /// Returns the current [DartPerformanceMode] requested. If no requests have
-  /// been made, returns `null`.
+  /// Returns the current [DartPerformanceMode] requested or `null` If no requests have
+  /// been made.
   @visibleForTesting
   DartPerformanceMode? getRequestedPerformanceMode() {
     return _performanceMode;
