@@ -78,6 +78,9 @@ bool FlutterWindow::OnCreate() {
                                            &enabled, sizeof(enabled));
         if (SUCCEEDED(hr)) {
           result->Success((bool)enabled);
+        } else if (hr == E_INVALIDARG) {
+          // Fallback if the operating system doesn't support dark mode.
+          result->Success(false);
         } else {
           result->Error("error", "Received result handle " + hr);
         }
@@ -93,6 +96,9 @@ bool FlutterWindow::OnCreate() {
           // Preferred brightness is 0 if dark mode is enabled,
           // otherwise non-zero.
           result->Success(data == 0);
+        } else if (status == ERROR_FILE_NOT_FOUND) {
+          // Fallback if the operating system doesn't support dark mode.
+          result->Success(false);
         } else {
           result->Error("error", "Received status " + status);
         }
