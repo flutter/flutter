@@ -568,7 +568,7 @@ class FlutterVmService {
         'viewId': viewId,
       },
     );
-    return response?.json as Map<String, Object?>?;
+    return response?.json;
   }
 
   Future<String> flutterDebugDumpApp({
