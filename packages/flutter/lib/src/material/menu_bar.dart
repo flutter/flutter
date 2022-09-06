@@ -69,8 +69,7 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 ///
 /// This is a Material Design menu bar that typically resides above the main
 /// body of an application (but can go anywhere) that defines a menu system for
-/// invoking callbacks or firing [Intent]s in response to user selection of a
-/// menu item.
+/// invoking callbacks in response to user selection of a menu item.
 ///
 /// The menus can be opened with a click or tap. Once a menu is opened, it can
 /// be navigated by using the arrow and tab keys or via mouse hover. Selecting a
@@ -91,9 +90,9 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 /// Menu items using [MenuItemButton] can have a [SingleActivator] or
 /// [CharacterActivator] assigned to them as their [MenuItemButton.shortcut],
 /// which will display an appropriate shortcut hint. Even though their labels
-/// are displayed in the menu, shortcuts are not automatically handled, they
-/// must be available in whatever context they are appropriate, and handled
-/// via another mechanism.
+/// are displayed in the menu, shortcuts are not automatically handled. They
+/// must be available in whatever context they are appropriate, and handled via
+/// another mechanism.
 ///
 /// If shortcuts should be generally enabled, but are not easily defined in a
 /// context surrounding the menu bar, consider registering them with a
@@ -102,11 +101,10 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 /// sure that selecting a menu item and triggering the shortcut do the same
 /// thing, it is recommended that they call the same callback.
 ///
-/// {@tool dartpad}
-/// This example shows a [MenuBar] that contains a single top level menu,
-/// containing three items for "About", a checkbox menu item for showing a
-/// message, and "Quit". The items are identified with an enum value, and the
-/// shortcuts are registered globally with the [ShortcutRegistry].
+/// {@tool dartpad} This example shows a [MenuBar] that contains a single top
+/// level menu, containing three items for "About", a checkbox menu item for
+/// showing a message, and "Quit". The items are identified with an enum value,
+/// and the shortcuts are registered globally with the [ShortcutRegistry].
 ///
 /// ** See code in examples/api/lib/material/menu_bar/menu_bar.0.dart **
 /// {@end-tool}
@@ -130,6 +128,8 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 ///   don't involve using [Actions].
 class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// Creates a const [MenuBar].
+  ///
+  /// The [children] argument is required.
   const MenuBar({
     super.key,
     this.controller,
@@ -161,11 +161,10 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
-  /// The list of menu items that are the top level children of the
-  /// [MenuBar].
+  /// The list of menu items that are the top level children of the [MenuBar].
   ///
   /// A Widget in Flutter is immutable, so directly modifying the `children`
   /// with [List] APIs such as `someMenuBarWidget.menus.add(...)` will result in
@@ -188,6 +187,8 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 }
 
 class _MenuBarState extends State<MenuBar> with DiagnosticableTreeMixin {
+  // If a controller isn't given to the widget, then we have to manage our own
+  // internal controller.
   MenuController? _internalController;
   MenuController get _controller {
     return widget.controller ?? (_internalController ??= MenuController());
@@ -256,9 +257,10 @@ class _MenuBarState extends State<MenuBar> with DiagnosticableTreeMixin {
   }
 }
 
-/// A button for use in a [MenuBar] or menu created with [createMaterialMenu]
-/// that can be activated by click or keyboard navigation that displays a
-/// shortcut hint and optional leading/trailing icons.
+/// A button for use in a [MenuBar], in a menu created with
+/// [createMaterialMenu], or on its own, that can be activated by click or
+/// keyboard navigation that displays a shortcut hint and optional
+/// leading/trailing icons.
 ///
 /// This widget represents a leaf entry in a menu hierarchy that is typically
 /// part of a [MenuBar], but may be used independently, or as part of a menu
@@ -266,7 +268,7 @@ class _MenuBarState extends State<MenuBar> with DiagnosticableTreeMixin {
 ///
 /// The menu item shows a hint for an associated shortcut, if any. When selected
 /// via click or by pressing enter while focused, it will call its [onPressed]
-/// callback. Pressing the [shortcut] will not automatically call the
+/// callback. Activating the [shortcut] will not automatically call the
 /// [onPressed] callback: handling of the shortcut must happen outside of the
 /// menu system. If [onPressed] is null, then this item will be disabled.
 ///
@@ -377,11 +379,11 @@ class MenuItemButton extends StatefulWidget {
 
   /// Defines the button's default appearance.
   ///
-  /// The button [child]'s [Text] and [Icon] widgets are rendered with
-  /// the [style]'s foreground color. The button's [InkWell] adds
-  /// the [style]'s overlay color when the button is focused, hovered
-  /// or pressed. The button's background color becomes its [Material]
-  /// color and is transparent by default.
+  /// The button [child]'s [Text] and [Icon] widgets are rendered with the
+  /// [style]'s foreground color. The button's [InkWell] adds the [style]'s
+  /// overlay color when the button is focused, hovered or pressed. The button's
+  /// background color becomes its [Material] color and is transparent by
+  /// default.
   ///
   /// All of the [ButtonStyle]'s defaults appear below.
   ///
@@ -393,9 +395,9 @@ class MenuItemButton extends StatefulWidget {
   /// all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.of(context).textScaleFactor` and the names of the
-  /// [EdgeInsets] constructors and [EdgeInsetsGeometry.lerp] have been
-  /// abbreviated for readability.
+  /// `MediaQuery.of(context).textScaleFactor` and the names of the [EdgeInsets]
+  /// constructors and [EdgeInsetsGeometry.lerp] have been abbreviated for
+  /// readability.
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
@@ -539,6 +541,7 @@ class MenuItemButton extends StatefulWidget {
 }
 
 class _MenuItemButtonState extends State<MenuItemButton> {
+  // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   bool get _enabled => widget.onPressed != null;
@@ -574,7 +577,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleFocusChange() {
     if (!_focusNode.hasPrimaryFocus) {
-      // Close any child menus of this menu.
+      // Close any child menus of this button's menu.
       _MenuHandleBase.maybeOf(context)?._closeChildren();
     }
   }
@@ -636,8 +639,8 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   }
 }
 
-/// A menu button that displays a cascading menu as part of a [MenuBar], or as
-/// part of a menu defined by [createMaterialMenu].
+/// A menu button that displays a cascading menu as part of a [MenuBar], as a
+/// standalone widget, or as part of a menu defined by [createMaterialMenu].
 ///
 /// This widget represents an item in a [MenuBar] or menu that has a submenu.
 /// Like the leaf [MenuItemButton], it shows a label with an optional leading or
@@ -649,8 +652,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 /// [MenuStyle.alignment] on the [style] and [alignmentOffset] argument,
 /// respectively.
 ///
-/// When activated (clicked, through keyboard navigation, or via hovering with a
-/// mouse), it will open a submenu containing the [menuChildren].
+/// When activated (by being clicked, through keyboard navigation, or via
+/// hovering with a mouse), it will open a submenu containing the
+/// [menuChildren].
 ///
 /// If [menuChildren] is empty, then this menu item will appear disabled.
 ///
@@ -694,13 +698,13 @@ class MenuButton extends StatefulWidget {
 
   /// Handler called when the focus changes.
   ///
-  /// Called with true if this widget's node gains focus, and false if it loses
-  /// focus.
+  /// Called with true if this widget's [focusNode] gains focus, and false if it
+  /// loses focus.
   final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -719,13 +723,15 @@ class MenuButton extends StatefulWidget {
   /// {@macro flutter.material.inkwell.statesController}
   final MaterialStatesController? statesController;
 
-  /// Typically the button's label.
+  /// The widget displayed in the center of this button.
+  ///
+  /// Typically this is the button's label, using a [Text] widget.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// The offset in pixels of the menu relative to the alignment origin
-  /// determined by [MenuStyle.alignment] on the [style] attribute.
+  /// The offset of the menu relative to the alignment origin determined by
+  /// [MenuStyle.alignment] on the [style] attribute.
   ///
   /// Use this for fine adjustments of the menu placement.
   ///
@@ -744,8 +750,7 @@ class MenuButton extends StatefulWidget {
 
   /// The [MenuStyle] of the menu specified by [menuChildren].
   ///
-  /// Defaults to the value of [MenuThemeData.style] of the
-  /// ambient [MenuTheme].
+  /// Defaults to the value of [MenuThemeData.style] of the ambient [MenuTheme].
   final MenuStyle? menuStyle;
 
   /// A callback that is invoked when the menu is opened.
@@ -765,26 +770,25 @@ class MenuButton extends StatefulWidget {
 
   /// Defines the button's default appearance.
   ///
-  /// The button [child]'s [Text] and [Icon] widgets are rendered with
-  /// the [ButtonStyle]'s foreground color. The button's [InkWell] adds
-  /// the style's overlay color when the button is focused, hovered
-  /// or pressed. The button's background color becomes its [Material]
-  /// color and is transparent by default.
+  /// The button [child]'s [Text] and [Icon] widgets are rendered with the
+  /// [ButtonStyle]'s foreground color. The button's [InkWell] adds the style's
+  /// overlay color when the button is focused, hovered or pressed. The button's
+  /// background color becomes its [Material] color and is transparent by
+  /// default.
   ///
   /// All of the ButtonStyle's defaults appear below.
   ///
-  /// In this list "Theme.foo" is shorthand for
-  /// `Theme.of(context).foo`. Color scheme values like
-  /// "onSurface(0.38)" are shorthand for
-  /// `onSurface.withOpacity(0.38)`. [MaterialStateProperty] valued
-  /// properties that are not followed by a sublist have the same
-  /// value for all states, otherwise the values are as specified for
-  /// each state and "others" means all other states.
+  /// In this list "Theme.foo" is shorthand for `Theme.of(context).foo`. Color
+  /// scheme values like "onSurface(0.38)" are shorthand for
+  /// `onSurface.withOpacity(0.38)`. [MaterialStateProperty] valued properties
+  /// that are not followed by a sublist have the same value for all states,
+  /// otherwise the values are as specified for each state and "others" means
+  /// all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.of(context).textScaleFactor` and the names of the
-  /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
-  /// abbreviated for readability.
+  /// `MediaQuery.of(context).textScaleFactor` and the names of the EdgeInsets
+  /// constructors and `EdgeInsetsGeometry.lerp` have been abbreviated for
+  /// readability.
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
@@ -824,8 +828,8 @@ class MenuButton extends StatefulWidget {
     return _MenuButtonDefaultsM3(context);
   }
 
-  /// Returns the [MenuButtonThemeData.style] of the closest
-  /// [MenuButtonTheme] ancestor.
+  /// Returns the [MenuButtonThemeData.style] of the closest [MenuButtonTheme]
+  /// ancestor.
   ButtonStyle? themeStyleOf(BuildContext context) {
     return MenuButtonTheme.of(context).style;
   }
@@ -923,10 +927,10 @@ class MenuButton extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('label', child.toString(), defaultValue: null));
-    properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
+    properties.add(DiagnosticsProperty<Widget>('child', child));
     properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
+    properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
   }
 }
 
@@ -988,8 +992,7 @@ class _MenuButtonState extends State<MenuButton> {
     super.didUpdateWidget(oldWidget);
   }
 
-  void _updateChildMenu(BuildContext context) {
-    final MenuController controller = MenuController.maybeOf(context) ?? (_internalMenuController ??= MenuController());
+  void _updateChildMenu(BuildContext context, MenuController controller) {
     final _MenuHandleBase parent = _MenuHandleBase.maybeOf(context) ?? controller._root;
     final MenuStyle? themeStyle = MenuTheme.of(context).style;
     final MenuStyle defaultStyle = _MenuDefaultsM3(context);
@@ -1042,18 +1045,20 @@ class _MenuButtonState extends State<MenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    _updateChildMenu(context);
+    final MenuController controller = MenuController.maybeOf(context) ?? (_internalMenuController ??= MenuController());
+    _updateChildMenu(context, controller);
     return _MenuHandleMarker(
       handle: _handle!,
       child: MenuAnchor(
+        controller: controller,
         builder: (BuildContext context) {
           // Since we don't want to use the theme style or default style from the
           // TextButton, we merge the styles, merging them in the right order when
           // each type of style exists. Each "*StyleOf" function is only called once.
           final ButtonStyle mergedStyle =
               widget.style?.merge(widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))) ??
-                  widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
-                  widget.defaultStyleOf(context);
+              widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
+              widget.defaultStyleOf(context);
 
           return TextButton(
             key: _buttonKey,
@@ -1123,23 +1128,35 @@ class _MenuButtonState extends State<MenuButton> {
   }
 }
 
+/// A widget used to mark the "anchor" for a set of submenus created by
+/// [createMaterialMenu].
 ///
+/// When creating a menu, it is necessary to either provide it with a specific
+/// location to be shown, via the `globalMenuPosition` argument to
+/// [createMaterialMenu], or to provide it with a region that forms the button
+/// it should be aligned to.  This widget does the latter.
+///
+/// The [controller] is required, and the same [controller] should be supplied
+/// to [createMaterialMenu].
 class MenuAnchor extends StatefulWidget {
   ///
   const MenuAnchor({
     super.key,
     required this.builder,
-    this.controller,
+    required this.controller,
   });
 
   ///
   final WidgetBuilder builder;
 
   /// The supplied controller is owned by the caller, and must be disposed by
-  /// the owner when it is no longer in use. If a `controller` is supplied,
-  /// calling [MenuController.closeAll] on the controller will close all
-  /// associated menus.
-  final MenuController? controller;
+  /// the owner when it is no longer in use. Calling [MenuController.closeAll]
+  /// on the controller will close all associated menus.
+  ///
+  /// When the menu is created, the same controller must be supplied to
+  /// [createMaterialMenu] if a [MenuAnchor] is used instead of a specific menu
+  /// location.
+  final MenuController controller;
 
   @override
   State<MenuAnchor> createState() => _MenuAnchorState();
@@ -1154,12 +1171,12 @@ class _MenuAnchorState extends State<MenuAnchor> {
   @override
   void initState() {
     super.initState();
-    widget.controller?.addListener(_handleControllerChanged);
+    widget.controller.addListener(_handleControllerChanged);
   }
 
   @override
   void dispose() {
-    widget.controller?.removeListener(_handleControllerChanged);
+    widget.controller.removeListener(_handleControllerChanged);
     super.dispose();
     _disposed = true;
   }
@@ -1168,8 +1185,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
   void didUpdateWidget(covariant MenuAnchor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?.removeListener(_handleControllerChanged);
-      widget.controller?.addListener(_handleControllerChanged);
+      oldWidget.controller.removeListener(_handleControllerChanged);
+      widget.controller.addListener(_handleControllerChanged);
     }
   }
 
@@ -1214,15 +1231,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
     if (widget.controller != null) {
       child = ExcludeFocus(
-        excluding: !widget.controller!.menuIsOpen,
+        excluding: !widget.controller.menuIsOpen,
         child: TapRegion(
           groupId: widget.controller,
           onTapOutside: (PointerDownEvent event) {
             assert(_debugMenuInfo('Tapped Outside ${widget.controller}'));
-            widget.controller!.closeAll();
+            widget.controller.closeAll();
           },
           child: _MenuHandleMarker(
-            handle: widget.controller!,
+            handle: widget.controller,
             child: child,
           ),
         ),

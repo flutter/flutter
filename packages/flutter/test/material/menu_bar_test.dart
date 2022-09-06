@@ -248,6 +248,7 @@ void main() {
       }) {
         return createMaterialMenu(
           buttonFocusNode: focusNode,
+          controller: controller,
           alignmentOffset: alignmentOffset,
           style: MenuStyle(alignment: alignment),
           children: <Widget>[
@@ -268,26 +269,30 @@ void main() {
           ],
         );
       }
+
       MenuHandle menuHandle = updateMenu();
 
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
-              child: MenuAnchor(builder: (BuildContext context) {
-                return ElevatedButton(
-                  key: buttonKey,
-                  focusNode: focusNode,
-                  onPressed: () {
-                    if (menuHandle.isOpen) {
-                      menuHandle.close();
-                    } else {
-                      menuHandle.open(context);
-                    }
-                  },
-                  child: const Text('Press Me'),
-                );
-              }),
+              child: MenuAnchor(
+                controller: controller,
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    key: buttonKey,
+                    focusNode: focusNode,
+                    onPressed: () {
+                      if (menuHandle.isOpen) {
+                        menuHandle.close();
+                      } else {
+                        menuHandle.open(context);
+                      }
+                    },
+                    child: const Text('Press Me'),
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -346,6 +351,7 @@ void main() {
         Offset alignmentOffset = Offset.zero,
       }) {
         return createMaterialMenu(
+          controller: controller,
           buttonFocusNode: focusNode,
           alignmentOffset: alignmentOffset,
           style: MenuStyle(alignment: alignment),
@@ -367,6 +373,7 @@ void main() {
           ],
         );
       }
+
       MenuHandle menuHandle = updateMenu();
 
       await tester.pumpWidget(
@@ -375,20 +382,23 @@ void main() {
             textDirection: TextDirection.rtl,
             child: Material(
               child: Center(
-                child: MenuAnchor(builder: (BuildContext context) {
-                  return ElevatedButton(
-                    key: buttonKey,
-                    focusNode: focusNode,
-                    onPressed: () {
-                      if (menuHandle.isOpen) {
-                        menuHandle.close();
-                      } else {
-                        menuHandle.open(context);
-                      }
-                    },
-                    child: const Text('Press Me'),
-                  );
-                }),
+                child: MenuAnchor(
+                  controller: controller,
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      key: buttonKey,
+                      focusNode: focusNode,
+                      onPressed: () {
+                        if (menuHandle.isOpen) {
+                          menuHandle.close();
+                        } else {
+                          menuHandle.open(context);
+                        }
+                      },
+                      child: const Text('Press Me'),
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -440,6 +450,7 @@ void main() {
     testWidgets('menu position in LTR', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test');
       final MenuHandle menuHandle = createMaterialMenu(
+        controller: controller,
         buttonFocusNode: focusNode,
         children: <Widget>[
           MenuItemButton(
@@ -463,20 +474,23 @@ void main() {
         MaterialApp(
           home: Material(
             child: Center(
-              child: MenuAnchor(builder: (BuildContext context) {
-                testContext = context;
-                return ElevatedButton(
-                  focusNode: focusNode,
-                  onPressed: () {
-                    if (menuHandle.isOpen) {
-                      menuHandle.close();
-                    } else {
-                      menuHandle.open(context);
-                    }
-                  },
-                  child: const Text('Press Me'),
-                );
-              }),
+              child: MenuAnchor(
+                controller: controller,
+                builder: (BuildContext context) {
+                  testContext = context;
+                  return ElevatedButton(
+                    focusNode: focusNode,
+                    onPressed: () {
+                      if (menuHandle.isOpen) {
+                        menuHandle.close();
+                      } else {
+                        menuHandle.open(context);
+                      }
+                    },
+                    child: const Text('Press Me'),
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -502,6 +516,7 @@ void main() {
     testWidgets('menu position and offset in RTL', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test');
       final MenuHandle menuHandle = createMaterialMenu(
+        controller: controller,
         buttonFocusNode: focusNode,
         children: <Widget>[
           MenuItemButton(
@@ -528,20 +543,23 @@ void main() {
             textDirection: TextDirection.rtl,
             child: Material(
               child: Center(
-                child: MenuAnchor(builder: (BuildContext context) {
-                  testContext = context;
-                  return ElevatedButton(
-                    focusNode: focusNode,
-                    onPressed: () {
-                      if (menuHandle.isOpen) {
-                        menuHandle.close();
-                      } else {
-                        menuHandle.open(context);
-                      }
-                    },
-                    child: const Text('Press Me'),
-                  );
-                }),
+                child: MenuAnchor(
+                  controller: controller,
+                  builder: (BuildContext context) {
+                    testContext = context;
+                    return ElevatedButton(
+                      focusNode: focusNode,
+                      onPressed: () {
+                        if (menuHandle.isOpen) {
+                          menuHandle.close();
+                        } else {
+                          menuHandle.open(context);
+                        }
+                      },
+                      child: const Text('Press Me'),
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -812,11 +830,9 @@ void main() {
 
       expect(
         description.join('\n'),
-        equalsIgnoringHashCodes(
-          'controller: MenuController#00000\n'
-          'style: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: MaterialStatePropertyAll(10.0))\n'
-          'clipBehavior: Clip.none'
-        ),
+        equalsIgnoringHashCodes('controller: MenuController#00000\n'
+            'style: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: MaterialStatePropertyAll(10.0))\n'
+            'clipBehavior: Clip.none'),
       );
     });
 
@@ -1323,7 +1339,6 @@ void main() {
 
       await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
-
 
       mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
       expect(mnemonic0.data, equals('Esc'));

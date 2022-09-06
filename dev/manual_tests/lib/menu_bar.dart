@@ -246,24 +246,22 @@ class _ControlsState extends State<_Controls> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          TapRegion(
-            groupId: widget.menuController,
-            child: MenuAnchor(
-              builder: (BuildContext context) {
-                return TextButton(
-                  key: _buttonKey,
-                  focusNode: _focusNode,
-                  onPressed: () {
-                    if (_menuEntry!.isOpen) {
-                      _menuEntry!.close();
-                    } else {
-                      _menuEntry!.open(context);
-                    }
-                  },
-                  child: const Text('Open Menu'),
-                );
-              },
-            ),
+          MenuAnchor(
+            controller: widget.menuController,
+            builder: (BuildContext context) {
+              return TextButton(
+                key: _buttonKey,
+                focusNode: _focusNode,
+                onPressed: () {
+                  if (_menuEntry!.isOpen) {
+                    _menuEntry!.close();
+                  } else {
+                    _menuEntry!.open(context);
+                  }
+                },
+                child: const Text('Open Menu'),
+              );
+            },
           ),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),

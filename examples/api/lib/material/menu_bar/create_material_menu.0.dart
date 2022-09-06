@@ -195,24 +195,22 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
         // with the MenuController that the menu is using as its group ID. This
         // prevents tapping on the button when the menu is open from closing the
         // menu by activating the "tap outside" action of the menu.
-        TapRegion(
-          groupId: _controller,
-          child: MenuAnchor(
-            builder: (BuildContext context) {
-              return TextButton(
-                key: _buttonKey,
-                focusNode: _buttonFocusNode,
-                onPressed: () {
-                  if (_menuHandle.isOpen) {
-                    _menuHandle.close();
-                  } else {
-                    _menuHandle.open(context);
-                  }
-                },
-                child: const Text('OPEN MENU'),
-              );
-            },
-          ),
+        MenuAnchor(
+          controller: _controller,
+          builder: (BuildContext context) {
+            return TextButton(
+              key: _buttonKey,
+              focusNode: _buttonFocusNode,
+              onPressed: () {
+                if (_menuHandle.isOpen) {
+                  _menuHandle.close();
+                } else {
+                  _menuHandle.open(context);
+                }
+              },
+              child: const Text('OPEN MENU'),
+            );
+          },
         ),
         Expanded(
           child: Container(
