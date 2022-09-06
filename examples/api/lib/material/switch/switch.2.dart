@@ -37,14 +37,23 @@ class _SwitchExampleState extends State<SwitchExample> {
   bool light1 = true;
   bool light2 = true;
 
-  final MaterialStateProperty<ImageProvider?> thumbImage =
-    MaterialStateProperty.resolveWith<ImageProvider?>((Set<MaterialState> states) {
+  final MaterialStateProperty<Image?> thumbImage =
+    MaterialStateProperty.resolveWith<Image?>((Set<MaterialState> states) {
       // Thumb image when the switch is selected.
       if (states.contains(MaterialState.selected)) {
-        return const NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg');
+        return const Image(image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'));
       }
       return null;
     },
+  );
+
+  final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+    // Thumb image when the switch is selected.
+    if (states.contains(MaterialState.selected)) {
+      return const Icon(Icons.check);
+    }
+    return const Icon(Icons.close);
+  },
   );
 
   @override
@@ -61,8 +70,7 @@ class _SwitchExampleState extends State<SwitchExample> {
           },
         ),
         Switch(
-          activeIcon: Icons.check,
-          inactiveIcon: Icons.close,
+          thumbImage: thumbIcon,
           value: light1,
           onChanged: (bool value) {
             setState(() {

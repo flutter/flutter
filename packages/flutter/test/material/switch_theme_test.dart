@@ -53,16 +53,15 @@ void main() {
   });
 
   testWidgets('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final Uint8List thumbImageBytes = Uint8List.fromList(kBlueRectPng);
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    SwitchThemeData(
-      thumbColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
-      trackColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
-      mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+    const SwitchThemeData(
+      thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
+      trackColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      overlayColor: const MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
+      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
-      thumbImage: MaterialStatePropertyAll<ImageProvider>(MemoryImage(thumbImageBytes, scale: 1.5)),
+      thumbImage: MaterialStatePropertyAll<Icon>(Icon(IconData(123))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -76,7 +75,7 @@ void main() {
     expect(description[3], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
     expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
     expect(description[5], 'splashRadius: 1.0');
-    expect(description[6], 'thumbImage: MaterialStatePropertyAll(MemoryImage(Uint8List#${shortHash(thumbImageBytes)}, scale: 1.5))');
+    expect(description[6], 'thumbImage: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
   });
 
   testWidgets('Switch is themeable', (WidgetTester tester) async {
@@ -91,8 +90,8 @@ void main() {
     const Color focusOverlayColor = Color(0xfffffff4);
     const Color hoverOverlayColor = Color(0xfffffff5);
     const double splashRadius = 1.0;
-    final _TestImageProvider provider1 = _TestImageProvider();
-    final _TestImageProvider provider2 = _TestImageProvider();
+    const Icon icon1 = Icon(Icons.check);
+    const Icon icon2 = Icon(Icons.close);
 
     final ThemeData themeData = ThemeData(
       switchTheme: SwitchThemeData(
@@ -122,9 +121,9 @@ void main() {
         splashRadius: splashRadius,
         thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
-            return provider1;
+            return icon1;
           }
-          return provider2;
+          return icon2;
         }),
       ),
     );
@@ -144,8 +143,6 @@ void main() {
     }
 
     // Switch.
-    expect(provider1.loadCallCount, 0);
-    expect(provider2.loadCallCount, 0);
     await tester.pumpWidget(buildSwitch());
     await tester.pumpAndSettle();
     expect(
@@ -154,7 +151,8 @@ void main() {
       ? (paints
         ..rrect(color: defaultTrackColor)
         ..rrect(color: themeData.colorScheme.outline)
-        ..circle(color: defaultThumbColor))
+        ..circle(color: defaultThumbColor)
+        ..paragraph())
       : (paints
         ..rrect(color: defaultTrackColor)
         ..circle()
@@ -164,9 +162,6 @@ void main() {
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), material3 ? const Size(60.0, 40.0) : const Size(59.0, 40.0));
-    // Only the unselected image shows.
-    expect(provider1.loadCallCount, 0);
-    expect(provider2.loadCallCount, 1); // because the switch is off, only unselected image shows.
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
@@ -176,7 +171,7 @@ void main() {
       material3
       ? (paints
         ..rrect(color: selectedTrackColor)
-        ..circle(color: selectedThumbColor))
+        ..circle(color: selectedThumbColor)..paragraph())
       : (paints
         ..rrect(color: selectedTrackColor)
         ..circle()
@@ -184,9 +179,6 @@ void main() {
         ..circle()
         ..circle(color: selectedThumbColor))
     );
-    // Only the selected image shows.
-    expect(provider1.loadCallCount, 1); // because provider1 is called once in previous test.
-    expect(provider2.loadCallCount, 1);
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
@@ -256,9 +248,9 @@ void main() {
         splashRadius: themeSplashRadius,
         thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
-            return themeThumbImage1;
+            return Image(image: themeThumbImage1);
           }
-          return themeThumbImage2;
+          return Image(image: themeThumbImage2);
         }),
       ),
     );
@@ -291,9 +283,9 @@ void main() {
             splashRadius: splashRadius,
             thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return selectedThumbImage;
+                return Image(image: selectedThumbImage);
               }
-              return defaultThumbImage;
+              return Image(image: defaultThumbImage);
             }),
           ),
         ),

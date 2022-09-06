@@ -81,7 +81,7 @@ class SwitchThemeData with Diagnosticable {
   ///
   /// It is overridden by [Switch.thumbImage], [Switch.activeThumbImage] and
   /// [Switch.inactiveThumbImage].
-  final MaterialStateProperty<ImageProvider?>? thumbImage;
+  final MaterialStateProperty<Widget?>? thumbImage;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -92,7 +92,7 @@ class SwitchThemeData with Diagnosticable {
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     MaterialStateProperty<Color?>? overlayColor,
     double? splashRadius,
-    MaterialStateProperty<ImageProvider?>? thumbImage,
+    MaterialStateProperty<Widget?>? thumbImage,
   }) {
     return SwitchThemeData(
       thumbColor: thumbColor ?? this.thumbColor,
@@ -158,7 +158,7 @@ class SwitchThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<ImageProvider?>>('thumbImage', thumbImage, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Widget?>>('thumbImage', thumbImage, defaultValue: null));
   }
 }
 

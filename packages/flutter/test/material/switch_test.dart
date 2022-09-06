@@ -1808,87 +1808,40 @@ void main() {
       expect(imageCache.liveImageCount, 2);
     });
 
-    testWidgets('thumbImage works correctly', (WidgetTester tester) async {
-      imageCache.clear();
-      final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
-      final _TestImageProvider provider1 = _TestImageProvider();
-      final _TestImageProvider provider2 = _TestImageProvider();
+    testWidgets('Using thumbImage, Switch does not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+      final DelayedImageProvider imageProvider = DelayedImageProvider(image);
 
-      expect(provider1.loadCallCount, 0);
-      expect(provider2.loadCallCount, 0);
-
-      bool value1 = true;
+      final MaterialStateProperty<Image?> thumbImage =
+      MaterialStateProperty.resolveWith<Image?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return Image(image: imageProvider);
+        }
+        return null;
+      },
+      );
       await tester.pumpWidget(
         MaterialApp(
-          theme: themeData,
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Switch(
-                  thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
-                      return provider1;
-                    }
-                    return provider2;
-                  }),
-                  value: value1,
-                  onChanged: (bool val) {
-                    setState(() {
-                      value1 = val;
-                    });
-                  },
-                ),
-              );
-            }
-          )
-        )
+          theme: theme,
+          home: Material(
+            child: Center(
+              child: Switch(
+                value: true,
+                onChanged: null,
+                thumbImage: thumbImage,
+              ),
+            ),
+          ),
+        ),
       );
 
-      expect(provider1.loadCallCount, 1);
-      expect(provider2.loadCallCount, 0);
-      expect(imageCache.liveImageCount, 1);
-      await tester.tap(find.byType(Switch));
-      await tester.pumpAndSettle();
-      expect(provider1.loadCallCount, 1);
-      expect(provider2.loadCallCount, 1);
-      expect(imageCache.liveImageCount, 2);
+      expect(find.byType(Switch), findsOneWidget);
 
-      // test thumbImage override activeThumbImage/inactiveThumbImage
+      // Dispose the switch by taking down the tree.
       await tester.pumpWidget(Container());
-      final _TestImageProvider provider3 = _TestImageProvider();
-      final _TestImageProvider provider4 = _TestImageProvider();
-      final _TestImageProvider provider5 = _TestImageProvider();
-      expect(provider3.loadCallCount, 0);
-      expect(provider4.loadCallCount, 0);
-      expect(provider5.loadCallCount, 0);
+      expect(find.byType(Switch), findsNothing);
 
-      const bool value2 = true;
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: themeData,
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Switch(
-                  thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
-                      return provider3;
-                    }
-                    return provider4;
-                  }),
-                  value: value2,
-                  onChanged: (bool val) { },
-                  activeThumbImage: provider5,
-                ),
-              );
-            }
-          )
-        )
-      );
-      await tester.pumpAndSettle();
-      expect(provider3.loadCallCount, 1);
-      expect(provider4.loadCallCount, 0);
-      expect(provider5.loadCallCount, 0);
+      imageProvider.complete();
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('do not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
@@ -2002,7 +1955,7 @@ void main() {
           ..rrect(
             style: PaintingStyle.stroke,
             color: colors.outline,
-            rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+            rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
           ..circle(color: colors.outline), // thumb color
         reason: 'Inactive enabled switch should match these colors',
@@ -2059,7 +2012,7 @@ void main() {
           ..rrect(
             style: PaintingStyle.stroke,
             color: colors.onSurface.withOpacity(0.12),
-            rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+            rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
           ..circle(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)), // thumb color
         reason: 'Inactive disabled switch should match these colors',
@@ -2228,7 +2181,7 @@ void main() {
           ..rrect(
             style: PaintingStyle.stroke,
             color: colors.outline,
-            rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+            rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
           ..circle(color: Colors.orange[500])
       );
@@ -2249,7 +2202,7 @@ void main() {
           ..rrect(
             style: PaintingStyle.stroke,
             color: colors.onSurface.withOpacity(0.12),
-            rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+            rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
           ..circle(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
       );
@@ -2383,7 +2336,7 @@ void main() {
           ..rrect(
             style: PaintingStyle.stroke,
             color: colors.onSurface.withOpacity(0.12),
-            rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+            rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
           ..circle(color: inactiveDisabledThumbColor),
         reason: 'Inactive disabled switch should default track and custom thumb color',
@@ -2740,11 +2693,20 @@ void main() {
     });
 
     testWidgets('Switch can set icon - M3', (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(useMaterial3: true,
+      final ThemeData themeData = ThemeData(
+        useMaterial3: true,
         colorSchemeSeed: const Color(0xff6750a4),
         brightness: Brightness.light);
 
-      Widget buildSwitch({required bool enabled, required bool active, IconData? activeIcon, IconData? inactiveIcon}) {
+      MaterialStateProperty<Icon?> thumbImage(Icon? activeIcon, Icon? inactiveIcon) {
+        return MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return activeIcon;
+          }
+          return inactiveIcon;
+        });
+      }
+      Widget buildSwitch({required bool enabled, required bool active, Icon? activeIcon, Icon? inactiveIcon}) {
         return Theme(
           data: themeData,
           child: Directionality(
@@ -2754,8 +2716,7 @@ void main() {
                 return Material(
                   child: Center(
                     child: Switch(
-                      inactiveIcon: inactiveIcon,
-                      activeIcon: activeIcon,
+                      thumbImage: thumbImage(activeIcon, inactiveIcon),
                       value: active,
                       onChanged: enabled ? (_) {} : null,
                     ),
@@ -2768,7 +2729,7 @@ void main() {
       }
 
       // active icon shows when switch is on.
-      await tester.pumpWidget(buildSwitch(enabled: true, active: true, activeIcon: Icons.close));
+      await tester.pumpWidget(buildSwitch(enabled: true, active: true, activeIcon: const Icon(Icons.close)));
       await tester.pumpAndSettle();
       expect(
         Material.of(tester.element(find.byType(Switch))),
@@ -2778,7 +2739,7 @@ void main() {
       );
 
       // inactive icon shows when switch is off.
-      await tester.pumpWidget(buildSwitch(enabled: true, active: false, inactiveIcon: Icons.close));
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false, inactiveIcon: const Icon(Icons.close)));
       await tester.pumpAndSettle();
       expect(
         Material.of(tester.element(find.byType(Switch))),
@@ -2789,7 +2750,7 @@ void main() {
       );
 
       // active icon doesn't show when switch is off.
-      await tester.pumpWidget(buildSwitch(enabled: true, active: false, activeIcon: Icons.check));
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false, activeIcon: const Icon(Icons.check)));
       await tester.pumpAndSettle();
       expect(
         Material.of(tester.element(find.byType(Switch))),
@@ -2798,7 +2759,7 @@ void main() {
       );
 
       // inactive icon doesn't show when switch is on.
-      await tester.pumpWidget(buildSwitch(enabled: true, active: true, inactiveIcon: Icons.check));
+      await tester.pumpWidget(buildSwitch(enabled: true, active: true, inactiveIcon: const Icon(Icons.check)));
       await tester.pumpAndSettle();
       expect(
           Material.of(tester.element(find.byType(Switch))),

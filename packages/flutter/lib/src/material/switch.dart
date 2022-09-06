@@ -23,7 +23,7 @@ import 'toggleable.dart';
 // Examples can assume:
 // bool _giveVerse = true;
 // late StateSetter setState;
-// late ImageProvider disabledImage;
+// late Image disabledImage;
 
 const double _kSwitchMinSize = kMinInteractiveDimension - 8.0;
 
@@ -114,8 +114,6 @@ class Switch extends StatelessWidget {
     this.splashRadius,
     this.focusNode,
     this.autofocus = false,
-    this.activeIcon,
-    this.inactiveIcon
   })  : _switchType = _SwitchType.material,
         assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -160,8 +158,6 @@ class Switch extends StatelessWidget {
     this.splashRadius,
     this.focusNode,
     this.autofocus = false,
-    this.activeIcon,
-    this.inactiveIcon,
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
@@ -335,7 +331,7 @@ class Switch extends StatelessWidget {
   final MaterialStateProperty<Color?>? trackColor;
 
   /// {@template flutter.material.switch.thumbImage}
-  /// The image to use on the thumb of this switch
+  /// The image or icon to use on the thumb of this switch
   ///
   /// Resolved in the following states:
   ///  * [MaterialState.selected].
@@ -352,7 +348,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbImage: MaterialStateProperty.resolveWith<ImageProvider?>((Set<MaterialState> states) {
+  ///   thumbImage: MaterialStateProperty.resolveWith<Image?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return disabledImage;
   ///     }
@@ -366,8 +362,8 @@ class Switch extends StatelessWidget {
   /// If null, then the value of [activeThumbImage] is used in the selected
   /// state and [inactiveThumbImage] in the default state. If that is also null,
   /// then the value of [SwitchThemeData.thumbImage] is used. If this is also null,
-  /// then the [Switch] does not have any images on the thumb.
-  final MaterialStateProperty<ImageProvider?>? thumbImage;
+  /// then the [Switch] does not have any images or icons on the thumb.
+  final MaterialStateProperty<Widget?>? thumbImage;
 
   /// {@template flutter.material.switch.materialTapTargetSize}
   /// Configures the minimum size of the tap target.
@@ -463,16 +459,6 @@ class Switch extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The optional icon on the thumb of this switch when the switch is on.
-  ///
-  /// This property can be null.
-  final IconData? activeIcon;
-
-  /// The optional icon on the thumb of this switch when the switch is off.
-  ///
-  /// This property can be null.
-  final IconData? inactiveIcon;
-
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
@@ -534,8 +520,6 @@ class Switch extends StatelessWidget {
       splashRadius: splashRadius,
       focusNode: focusNode,
       autofocus: autofocus,
-      activeIcon: activeIcon,
-      inactiveIcon: inactiveIcon,
     );
   }
 
@@ -595,8 +579,6 @@ class _MaterialSwitch extends StatefulWidget {
     this.splashRadius,
     this.focusNode,
     this.autofocus = false,
-    this.activeIcon,
-    this.inactiveIcon,
   })  : assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
@@ -613,7 +595,7 @@ class _MaterialSwitch extends StatefulWidget {
   final ImageErrorListener? onInactiveThumbImageError;
   final MaterialStateProperty<Color?>? thumbColor;
   final MaterialStateProperty<Color?>? trackColor;
-  final MaterialStateProperty<ImageProvider?>? thumbImage;
+  final MaterialStateProperty<Widget?>? thumbImage;
   final MaterialTapTargetSize? materialTapTargetSize;
   final DragStartBehavior dragStartBehavior;
   final MouseCursor? mouseCursor;
@@ -624,8 +606,6 @@ class _MaterialSwitch extends StatefulWidget {
   final FocusNode? focusNode;
   final bool autofocus;
   final Size size;
-  final IconData? activeIcon;
-  final IconData? inactiveIcon;
 
   @override
   State<StatefulWidget> createState() => _MaterialSwitchState();
@@ -788,12 +768,37 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         ?? switchTheme.trackColor?.resolve(inactiveStates)
         ?? defaults.trackColor!.resolve(inactiveStates)!;
     final Color? effectiveInactiveTrackOutlineColor = switchConfig.trackOutlineColor?.resolve(inactiveStates);
-    final ImageProvider? effectiveActiveThumbImage = widget.thumbImage?.resolve(activeStates)
-        ?? _widgetThumbImage.resolve(activeStates)
-        ?? switchTheme.thumbImage?.resolve(activeStates);
-    final ImageProvider? effectiveInactiveThumbImage = widget.thumbImage?.resolve(inactiveStates)
-        ?? _widgetThumbImage.resolve(inactiveStates)
-        ?? switchTheme.thumbImage?.resolve(inactiveStates);
+
+    final Widget? thumbWidget = widget.thumbImage?.resolve(states);
+    ImageProvider? effectiveActiveThumbImage;
+    ImageProvider? effectiveInactiveThumbImage;
+    if (thumbWidget is Image) {
+      effectiveActiveThumbImage = (widget.thumbImage?.resolve(activeStates) as Image?)?.image;
+      effectiveInactiveThumbImage = (widget.thumbImage?.resolve(inactiveStates) as Image?)?.image;
+    }
+    final Widget? thumbThemeWidget = switchTheme.thumbImage?.resolve(states);
+    effectiveActiveThumbImage ??= _widgetThumbImage.resolve(activeStates);
+    effectiveInactiveThumbImage ??= _widgetThumbImage.resolve(inactiveStates);
+    if (thumbThemeWidget is Image) {
+      effectiveActiveThumbImage ??= (switchTheme.thumbImage?.resolve(activeStates) as Image?)?.image;
+      effectiveInactiveThumbImage ??= (switchTheme.thumbImage?.resolve(inactiveStates) as Image?)?.image;
+    }
+
+    Icon? effectiveActiveIcon;
+    Icon? effectiveInactiveIcon;
+    if (theme.useMaterial3) {
+      if (thumbWidget is Icon) {
+        effectiveActiveIcon = widget.thumbImage?.resolve(activeStates) as Icon?;
+        effectiveInactiveIcon = widget.thumbImage?.resolve(inactiveStates) as Icon?;
+      }
+      if (thumbThemeWidget is Icon) {
+        effectiveActiveIcon ??= switchTheme.thumbImage?.resolve(activeStates) as Icon?;
+        effectiveInactiveIcon ??= switchTheme.thumbImage?.resolve(inactiveStates) as Icon?;
+      }
+    }
+
+    final Color effectiveActiveIconColor = effectiveActiveIcon?.color ?? switchConfig.iconColor.resolve(activeStates);
+    final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? switchConfig.iconColor.resolve(inactiveStates);
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
@@ -825,10 +830,6 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
     });
 
-    final Color effectiveActiveIconColor = switchConfig.iconColor.resolve(activeStates);
-    final Color effectiveInactiveIconColor = switchConfig.iconColor.resolve(inactiveStates);
-    final IconData? effectiveActiveIcon = theme.useMaterial3 ? widget.activeIcon : null;
-    final IconData? effectiveInactiveIcon = theme.useMaterial3 ? widget.inactiveIcon : null;
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? switchConfig.activeThumbRadius : switchConfig.thumbRadiusWithIcon;
     final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null && effectiveInactiveThumbImage == null
       ? switchConfig.inactiveThumbRadius : switchConfig.thumbRadiusWithIcon;
@@ -884,6 +885,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..inactiveIconColor = effectiveInactiveIconColor
             ..activeIcon = effectiveActiveIcon
             ..inactiveIcon = effectiveInactiveIcon
+            ..iconTheme = IconTheme.of(context)
             ..thumbShadow = switchConfig.thumbShadow,
         ),
       ),
@@ -892,9 +894,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 }
 
 class _SwitchPainter extends ToggleablePainter {
-  IconData? get activeIcon => _activeIcon;
-  IconData? _activeIcon;
-  set activeIcon(IconData? value) {
+  Icon? get activeIcon => _activeIcon;
+  Icon? _activeIcon;
+  set activeIcon(Icon? value) {
     if (value == _activeIcon) {
       return;
     }
@@ -902,13 +904,23 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  IconData? get inactiveIcon => _inactiveIcon;
-  IconData? _inactiveIcon;
-  set inactiveIcon(IconData? value) {
+  Icon? get inactiveIcon => _inactiveIcon;
+  Icon? _inactiveIcon;
+  set inactiveIcon(Icon? value) {
     if (value == _inactiveIcon) {
       return;
     }
     _inactiveIcon = value;
+    notifyListeners();
+  }
+
+  IconThemeData? get iconTheme => _iconTheme;
+  IconThemeData? _iconTheme;
+  set iconTheme(IconThemeData? value) {
+    if (value == _iconTheme) {
+      return;
+    }
+    _iconTheme = value;
     notifyListeners();
   }
 
@@ -1186,7 +1198,7 @@ class _SwitchPainter extends ToggleablePainter {
     // track underneath.
     final Color thumbColor = Color.alphaBlend(lerpedThumbColor, surfaceColor);
 
-    final IconData? thumbIcon = currentValue < 0.5 ? inactiveIcon : activeIcon;
+    final Icon? thumbIcon = currentValue < 0.5 ? inactiveIcon : activeIcon;
 
     final ImageProvider? thumbImage = currentValue < 0.5 ? inactiveThumbImage : activeThumbImage;
 
@@ -1253,11 +1265,21 @@ class _SwitchPainter extends ToggleablePainter {
 
     if (trackOutlineColor != null) {
       // paint track outline
+      final Rect outlineTrackRect = Rect.fromLTWH(
+        trackPaintOffset.dx + 1,
+        trackPaintOffset.dy + 1,
+        trackWidth - 2,
+        trackHeight - 2,
+      );
+      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
+        outlineTrackRect,
+        Radius.circular(trackRadius),
+      );
       final Paint outlinePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2
         ..color = trackOutlineColor;
-      canvas.drawRRect(trackRRect, outlinePaint);
+      canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
   }
 
@@ -1269,7 +1291,7 @@ class _SwitchPainter extends ToggleablePainter {
       ImageProvider? thumbImage,
       ImageErrorListener? thumbErrorListener,
       double thumbRadius,
-      IconData? thumbIcon,
+      Icon? thumbIcon,
       ) {
     try {
       _isPainting = true;
@@ -1292,18 +1314,31 @@ class _SwitchPainter extends ToggleablePainter {
         configuration.copyWith(size: Size.fromRadius(radius)),
       );
 
-      if (thumbIcon != null) {
+      if (thumbIcon != null && thumbIcon.icon != null) {
         final Color iconColor = Color.lerp(inactiveIconColor, activeIconColor, currentValue)!;
-        const double iconSize = _SwitchConfigM3.iconSize;
+        final double iconSize = thumbIcon.size ?? _SwitchConfigM3.iconSize;
+        final IconData iconData = thumbIcon.icon!;
+        final double? iconWeight = thumbIcon.weight ?? iconTheme?.weight;
+        final double? iconFill = thumbIcon.fill ?? iconTheme?.fill;
+        final double? iconGrade = thumbIcon.grade ?? iconTheme?.grade;
+        final double? iconOpticalSize = thumbIcon.opticalSize ?? iconTheme?.opticalSize;
+        final List<Shadow>? iconShadows = thumbIcon.shadows ?? iconTheme?.shadows;
 
         final TextSpan textSpan = TextSpan(
-          text: String.fromCharCode(thumbIcon.codePoint),
+          text: String.fromCharCode(iconData.codePoint),
           style: TextStyle(
+            fontVariations: <FontVariation>[
+              if (iconFill != null) FontVariation('FILL', iconFill),
+              if (iconWeight != null) FontVariation('wght', iconWeight),
+              if (iconGrade != null) FontVariation('GRAD', iconGrade),
+              if (iconOpticalSize != null) FontVariation('opsz', iconOpticalSize),
+            ],
             color: iconColor,
             fontSize: iconSize,
             inherit: false,
-            fontFamily: thumbIcon.fontFamily,
-            package: thumbIcon.fontPackage,
+            fontFamily: iconData.fontFamily,
+            package: iconData.fontPackage,
+            shadows: iconShadows,
           ),
         );
         final TextPainter textPainter = TextPainter(
