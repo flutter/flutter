@@ -5832,6 +5832,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 3,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6398,6 +6399,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6422,6 +6424,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6464,6 +6467,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6549,6 +6553,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6573,6 +6578,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6615,6 +6621,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6710,6 +6717,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6734,6 +6742,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6776,6 +6785,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6872,6 +6882,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6917,6 +6928,7 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6927,6 +6939,7 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7060,6 +7073,7 @@ void main() {
       controller.selection,
       equals(const TextSelection.collapsed(
         offset: 4,
+        affinity: TextAffinity.upstream,
       )),
     );
 
@@ -7243,6 +7257,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7266,6 +7281,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7323,6 +7339,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7435,6 +7452,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7458,6 +7476,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7515,6 +7534,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7626,6 +7646,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
     );
@@ -10383,7 +10404,6 @@ void main() {
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 7);
     expect(controller.selection.extentOffset, 10);
-
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],

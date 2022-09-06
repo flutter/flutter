@@ -2040,7 +2040,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection firstWord = _getWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
       firstWord : _getWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
-
     _setSelection(
       TextSelection(
         baseOffset: firstWord.base.offset,
@@ -2072,8 +2071,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     final TextRange word = _textPainter.getWordBoundary(position);
+    final int effectiveOffset;
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        // upstream affinity is effectively -1 in text position.
+        effectiveOffset = position.offset - 1;
+        break;
+      case TextAffinity.downstream:
+        effectiveOffset = position.offset;
+        break;
+    }
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= word.end) {
+    // This also needs to account for cases where user tap at the end of text.
+    // No matter how far the user tap from the end of text, the text position
+    // will always be TextPosition(textLength, TextAffinity.upstream). The
+    // effectiveOffset cannot accurate this case.
+    if (effectiveOffset >= word.end || position.offset == _plainText.length) {
       return TextSelection.fromPosition(position);
     }
     // If text is obscured, the entire sentence should be treated as one word.
@@ -2086,8 +2099,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
-        && position.offset > 0) {
+    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(effectiveOffset))
+        && effectiveOffset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {

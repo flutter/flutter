@@ -1229,6 +1229,7 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 21,
+              affinity: TextAffinity.upstream,
             ));
           }, variant: TargetPlatformVariant.all());
 

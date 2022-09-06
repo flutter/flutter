@@ -1129,6 +1129,9 @@ class TextPainter {
   /// {@endtemplate}
   TextRange getWordBoundary(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
+    if (position.affinity == TextAffinity.upstream) {
+      position = TextPosition(offset: position.offset - 1);
+    }
     return _paragraph!.getWordBoundary(position);
   }
 
