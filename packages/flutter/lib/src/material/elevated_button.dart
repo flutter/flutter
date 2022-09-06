@@ -22,7 +22,7 @@ import 'theme_data.dart';
 /// A Material Design "elevated button".
 ///
 /// Use elevated buttons to add dimension to otherwise mostly flat
-/// layouts, e.g.  in long busy lists of content, or in wide
+/// layouts, e.g. in long busy lists of content, or in wide
 /// spaces. Avoid using elevated buttons on already-elevated content
 /// such as dialogs or cards.
 ///
@@ -33,7 +33,7 @@ import 'theme_data.dart';
 /// background is the [ButtonStyle.backgroundColor].
 ///
 /// The elevated button's default style is defined by
-/// [defaultStyleOf].  The style of this elevated button can be
+/// [defaultStyleOf]. The style of this elevated button can be
 /// overridden with its [style] parameter. The style of all elevated
 /// buttons in a subtree can be overridden with the
 /// [ElevatedButtonTheme], and the style of all of the elevated

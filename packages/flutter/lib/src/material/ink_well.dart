@@ -501,7 +501,7 @@ class InkResponse extends StatelessWidget {
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec. The [overlayColor] doesn't map
   /// a state to [highlightColor] because a separate highlight is not
-  /// used by the current design guidelines.  See
+  /// used by the current design guidelines. See
   /// https://material.io/design/interaction/states.html#pressed
   ///
   /// If the overlay color is null or resolves to null, then [focusColor],

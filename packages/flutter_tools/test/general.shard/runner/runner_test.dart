@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -32,7 +33,7 @@ void main() {
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
       //
-      // Tests might trigger exit() multiple times.  In real life, exit() would
+      // Tests might trigger exit() multiple times. In real life, exit() would
       // cause the VM to terminate immediately, so only the first one matters.
       firstExitCode = null;
       io.setExitFunctionForTests((int exitCode) {
@@ -66,6 +67,7 @@ void main() {
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
             reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
           ));
           return null;
         },
@@ -100,7 +102,7 @@ void main() {
 
     // This Completer completes when CrashingFlutterCommand.runCommand
     // completes, but ideally we'd want it to complete when execution resumes
-    // runner.run.  Currently the distinction does not matter, but if it ever
+    // runner.run. Currently the distinction does not matter, but if it ever
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
     final Completer<void> commandCompleter = Completer<void>();
@@ -118,6 +120,7 @@ void main() {
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
             reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
           ));
           return null;
         },
@@ -157,16 +160,17 @@ void main() {
       // catch it in a zone.
       unawaited(runZoned<Future<void>?>(
         () {
-        unawaited(runner.run(
-          <String>['crash'],
-          () => <FlutterCommand>[
-            CrashingFlutterCommand(),
-          ],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          reportCrashes: true,
-        ));
-        return null;
+          unawaited(runner.run(
+            <String>['crash'],
+            () => <FlutterCommand>[
+              CrashingFlutterCommand(),
+            ],
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
+          ));
+          return null;
         },
         onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
@@ -336,7 +340,7 @@ class CustomBugInstructions extends UserMessages {
 /// A fake [CrashReporter] that waits for a [Future] to complete.
 ///
 /// Used to exacerbate a race between the success and failure paths of
-/// [runner.run].  See https://github.com/flutter/flutter/issues/56406.
+/// [runner.run]. See https://github.com/flutter/flutter/issues/56406.
 class WaitingCrashReporter implements CrashReporter {
   WaitingCrashReporter(Future<void> future) : _future = future;
 

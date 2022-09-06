@@ -1198,7 +1198,7 @@ class SilentStatus extends Status {
 
 const int _kTimePadding = 8; // should fit "99,999ms"
 
-/// Constructor writes [message] to [stdout].  On [cancel] or [stop], will call
+/// Constructor writes [message] to [stdout]. On [cancel] or [stop], will call
 /// [onFinish]. On [stop], will additionally print out summary information.
 class SummaryStatus extends Status {
   SummaryStatus({
