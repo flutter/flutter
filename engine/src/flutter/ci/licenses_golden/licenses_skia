@@ -1,4 +1,4 @@
-Signature: 0748a14adf05a098de773dec112bdfd8
+Signature: ceba30abe3612584a06f73411495bcc1
 
 UNUSED LICENSES:
 
@@ -1354,6 +1354,8 @@ FILE: ../../../third_party/skia/src/svg/BUILD.bazel
 FILE: ../../../third_party/skia/src/text/BUILD.bazel
 FILE: ../../../third_party/skia/src/text/gpu/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/BUILD.bazel
+FILE: ../../../third_party/skia/src/utils/mac/BUILD.bazel
+FILE: ../../../third_party/skia/src/utils/win/BUILD.bazel
 FILE: ../../../third_party/skia/src/xml/BUILD.bazel
 FILE: ../../../third_party/skia/src/xps/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/BUILD.bazel
