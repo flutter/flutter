@@ -6,6 +6,7 @@ import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
+
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -178,8 +179,8 @@ abstract class BindingBase {
   /// Each of these other bindings could individually access a
   /// [ui.SingletonFlutterWindow] statically, but that would preclude the
   /// ability to test its behaviors with a fake window for verification
-  /// purposes.  Therefore, [BindingBase] exposes this
-  /// [ui.SingletonFlutterWindow] for use by other bindings.  A subclass of
+  /// purposes. Therefore, [BindingBase] exposes this
+  /// [ui.SingletonFlutterWindow] for use by other bindings. A subclass of
   /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
   /// accessor to return a different [ui.SingletonFlutterWindow] implementation,
   /// such as a [TestWindow].

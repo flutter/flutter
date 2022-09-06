@@ -234,7 +234,7 @@ class Focus extends StatefulWidget {
   /// {@template flutter.widgets.Focus.canRequestFocus}
   /// If true, this widget may request the primary focus.
   ///
-  /// Defaults to true.  Set to false if you want the [FocusNode] this widget
+  /// Defaults to true. Set to false if you want the [FocusNode] this widget
   /// manages to do nothing when [FocusNode.requestFocus] is called on it. Does
   /// not affect the children of this node, and [FocusNode.hasFocus] can still
   /// return true if this node is the ancestor of the primary focus.
