@@ -7,7 +7,6 @@
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
-#include "third_party/skia/src/codec/SkCodecImageGenerator.h"
 #ifdef FML_OS_MACOSX
 #include "third_party/skia/include/ports/SkImageGeneratorCG.h"
 #elif FML_OS_WIN
