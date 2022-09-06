@@ -1190,7 +1190,9 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     setupMocks();
 
-    webDevFS.exception = ChromeDebugException(<String, dynamic>{});
+    webDevFS.exception = ChromeDebugException(<String, dynamic>{
+      'text': 'error',
+    });
 
     await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1259,7 +1261,7 @@ class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
-  late String name;
+  String name = 'FakeDevice';
 
   int count = 0;
 

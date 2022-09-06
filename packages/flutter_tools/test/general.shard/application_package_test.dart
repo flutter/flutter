@@ -79,10 +79,10 @@ void main() {
         )
       );
 
-      final ApplicationPackage applicationPackage = await (ApplicationPackageFactory.instance!.getPackageForPlatform(
+      final ApplicationPackage applicationPackage = (await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
         applicationBinary: apkFile,
-      ) as FutureOr<ApplicationPackage>);
+      ))!;
       expect(applicationPackage.name, 'app.apk');
       expect(applicationPackage, isA<PrebuiltApplicationPackage>());
       expect((applicationPackage as PrebuiltApplicationPackage).applicationPackage.path, apkFile.path);
@@ -121,8 +121,6 @@ void main() {
     }, overrides: overrides);
 
     testWithoutContext('returns null when failed to extract manifest', () async {
-      final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
-      sdk.latestVersion = sdkVersion;
       final Logger logger = BufferLogger.test();
       final AndroidApk? androidApk = AndroidApk.fromApk(
         fs.file(''),

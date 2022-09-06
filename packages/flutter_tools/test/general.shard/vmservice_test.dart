@@ -215,7 +215,7 @@ void main() {
       windows: false,
     ));
 
-    final Map<String, Object>? rawRequest = json.decode(await completer.future) as Map<String, Object>?;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kSetAssetBundlePathMethod),
@@ -243,7 +243,7 @@ void main() {
       windows: true,
     ));
 
-    final Map<String, Object>? rawRequest = json.decode(await completer.future) as Map<String, Object>?;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kSetAssetBundlePathMethod),
@@ -267,7 +267,7 @@ void main() {
       viewId: 'abc',
     ));
 
-    final Map<String, Object>? rawRequest = json.decode(await completer.future) as Map<String, Object>?;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kGetSkSLsMethod),
@@ -289,7 +289,7 @@ void main() {
       uiIsolateId: 'def',
     ));
 
-    final Map<String, Object>? rawRequest = json.decode(await completer.future) as Map<String, Object>?;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kFlushUIThreadTasksMethod),
@@ -487,7 +487,7 @@ void main() {
     final vm_service.Response? timeline = await fakeVmServiceHost.vmService.getTimeline();
     expect(timeline, isNull);
 
-    final Map<String, Object>? rasterStats =
+    final Map<String, Object?>? rasterStats =
       await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: '1', uiIsolateId: '12');
     expect(rasterStats, isNull);
 
@@ -533,7 +533,7 @@ void main() {
       ]
     );
 
-    final Map<String, Object>? rasterStats =
+    final Map<String, Object?>? rasterStats =
       await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: 'view/1', uiIsolateId: 'isolate/123');
     expect(rasterStats, equals(response));
 
