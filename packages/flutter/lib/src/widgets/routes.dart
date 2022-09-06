@@ -237,7 +237,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = false;
         }
-        _performanceModeRequestHandle =
+        _performanceModeRequestHandle ??=
           SchedulerBinding.instance
             .requestPerformanceMode(ui.DartPerformanceMode.latency);
         break;
