@@ -1151,7 +1151,7 @@ mixin SchedulerBinding on BindingBase {
       _numPerformanceModeRequests = 1;
     }
 
-    return PerformanceModeRequestHandle._(() => _disposePerformanceModeRequest());
+    return PerformanceModeRequestHandle._(_disposePerformanceModeRequest);
   }
 
   /// Remove a request for a specific [DartPerformanceMode].
