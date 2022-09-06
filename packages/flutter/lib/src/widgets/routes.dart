@@ -110,9 +110,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   /// Handle to the performance mode request.
   ///
-  /// When the route is installed, the performance mode is requested, and this is
-  /// then disposed when the route is disposed. Requesting [DartPerformanceMode.latency]
-  /// indicated to the engine that the transition is latency sensitive and to delay
+  /// When the route is animating, the performance mode is requested. It is then
+  /// disposed when the animation ends. Requesting [DartPerformanceMode.latency]
+  /// indicates to the engine that the transition is latency sensitive and to delay
   /// non-essential work while this handle is active.
   PerformanceModeRequestHandle? _performanceModeRequestHandle;
 
@@ -237,6 +237,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = false;
         }
+        _performanceModeRequestHandle =
+          SchedulerBinding.instance
+            .requestPerformanceMode(ui.DartPerformanceMode.latency);
         break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
@@ -261,8 +264,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     _animation = createAnimation()
       ..addStatusListener(_handleStatusChanged);
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
-    _performanceModeRequestHandle =
-      SchedulerBinding.instance.requestPerformanceMode(ui.DartPerformanceMode.latency);
     super.install();
     if (_animation!.isCompleted && overlayEntries.isNotEmpty) {
       overlayEntries.first.opaque = opaque;

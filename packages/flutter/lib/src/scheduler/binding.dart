@@ -188,7 +188,7 @@ enum SchedulerPhase {
 /// See also:
 ///
 /// * [PerformanceModeRequestHandle] for more information on the lifecycle of the handle.
-typedef PerformanceModeCleaupCallback = void Function();
+typedef PerformanceModeCleaupCallback = VoidCallback;
 
 /// An opaque handle that keeps a request for [DartPerformanceMode] active until
 /// disposed.
@@ -636,7 +636,7 @@ mixin SchedulerBinding on BindingBase {
   /// Asserts that there are no pending performance mode requests in debug mode.
   ///
   /// Throws a [FlutterError] if there are pending performance mode requests,
-  /// as this indicates a potential memory leak. 
+  /// as this indicates a potential memory leak.
   bool debugAssertNoPendingPerformanceModeRequests(String reason) {
     assert(() {
       if (_performanceMode != null) {
@@ -1145,8 +1145,10 @@ mixin SchedulerBinding on BindingBase {
     }
 
     if (_performanceMode == mode) {
+      assert(_numPerformanceModeRequests > 0);
       _numPerformanceModeRequests++;
     } else if (_performanceMode == null) {
+      assert(_numPerformanceModeRequests == 0);
       _performanceMode = mode;
       _numPerformanceModeRequests = 1;
     }
@@ -1166,11 +1168,16 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
-  /// Returns the current [DartPerformanceMode] requested or `null` If no requests have
+  /// Returns the current [DartPerformanceMode] requested or `null` if no requests have
   /// been made.
-  @visibleForTesting
-  DartPerformanceMode? getRequestedPerformanceMode() {
-    return _performanceMode;
+  ///
+  /// This is only supported in debug and profile modes, returns `null` in release mode.
+  DartPerformanceMode? debugGetRequestedPerformanceMode() {
+    if (!(kDebugMode || kProfileMode)) {
+      return null;
+    } else {
+      return _performanceMode;
+    }
   }
 
   /// Called by the engine to produce a new frame.
