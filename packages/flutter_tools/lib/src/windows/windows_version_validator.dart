@@ -7,21 +7,39 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../doctor_validator.dart';
 
+const List<String> unsupportedVersions = <String>[
+  '6',
+  '7',
+  '8',
+];
+
+/// Validator to be run with `flutter doctor` to check
+/// Windows host machines if they are running supported versions.
 class WindowsVersionValidator extends DoctorValidator {
-  /// Validator to be run with `flutter doctor` to check
-  /// Windows host machines if they are running supported versions,
-  /// current unsupported versions = 7, 8
   const WindowsVersionValidator({required ProcessManager processManager})
       : _processManager = processManager,
         super('Windows Version');
 
   final ProcessManager _processManager;
 
+  /// Provide a literal string as the Regex pattern
+  /// and a string to validate and get a boolean determining
+  /// if the string has at least one match
+  static Iterable<RegExpMatch> validateString(String pattern, String str,
+      {bool multiLine = true}) {
+    final RegExp regex = RegExp(
+      pattern,
+      multiLine: multiLine,
+    );
+
+    return regex.allMatches(str);
+  }
+
   @override
   Future<ValidationResult> validate() async {
     final ProcessResult result;
     try {
-      result = _processManager.runSync(<String>['systeminfo']);
+      result = await _processManager.run(<String>['systeminfo']);
     } on ProcessException {
       return const ValidationResult(
         ValidationType.missing,
@@ -41,65 +59,19 @@ class WindowsVersionValidator extends DoctorValidator {
 
     final String resultStdout = result.stdout as String;
 
-    // Define the major versions that are not supported
-    const List<String> unsupportedVersions = <String>[
-      '7',
-      '8',
-    ];
-
-    final List<String> systemInfoElements = resultStdout.split('\n');
-
     // Regular expression pattern for identifying
     // semantic versioned strings
     // (ie. 10.5.4123)
-    final RegExp regex = RegExp(r'^([0-9]+)\.([0-9]+)\.([0-9]+)$');
+    final Iterable<RegExpMatch> matches = validateString(
+        r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$', resultStdout);
 
-    // Define the list that will contain the matches;
-    // if ran successfully, this list should have only
-    // one item
-    final List<String> versionList = <String>[];
-
-    // Use two booleans to identify when you have found
-    // the word 'version' and a version number that matches
-    // the regex pattern above; only once both are found do
-    // we report back a valid version
-    bool versionText = false;
-    bool versionSemver = false;
-    String? version;
-    for (final String curLine in systemInfoElements) {
-      final List<String> lineElems = curLine.split(' ');
-
-      for (final String elem in lineElems){
-        final bool match = regex.hasMatch(elem);
-
-        if (match) {
-          versionSemver = true;
-          version = elem;
-        }
-
-        if (elem.toLowerCase().contains('version')) {
-          versionText = true;
-        }
-      }
-
-      // Once both booleans are true, add
-      // the version to the list that will contain
-      // at most, one element if ran as anticipated
-      if (versionText && versionSemver && version != null) {
-        versionList.add(version);
-      }
-
-      // Reset the boolean values for the next line
-      versionText = false;
-      versionSemver = false;
-      version = null;
-    }
-
+    // Use the string split method to extract the major version
+    // and check against the [unsupportedVersions] list
     final ValidationType windowsVersionStatus;
     String statusInfo;
-    if (versionList.length == 1 &&
+    if (matches.length == 1 &&
         !unsupportedVersions
-            .contains(versionList.elementAt(0).split('.').elementAt(0))) {
+            .contains(matches.elementAt(0).group(2)?.split('.').elementAt(0))) {
       windowsVersionStatus = ValidationType.installed;
       statusInfo = 'Installed version of Windows is version 10 or higher';
     } else {
