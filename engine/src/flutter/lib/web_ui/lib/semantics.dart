@@ -163,6 +163,7 @@ class SemanticsFlag {
   static const int _kIsLinkIndex = 1 << 22;
   static const int _kIsSliderIndex = 1 << 23;
   static const int _kIsKeyboardKeyIndex = 1 << 24;
+  static const int _kIsCheckStateMixedIndex = 1 << 25;
 
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(_kHasCheckedStateIndex);
   static const SemanticsFlag isChecked = SemanticsFlag._(_kIsCheckedIndex);
@@ -189,6 +190,7 @@ class SemanticsFlag {
   static const SemanticsFlag hasToggledState = SemanticsFlag._(_kHasToggledStateIndex);
   static const SemanticsFlag isToggled = SemanticsFlag._(_kIsToggledIndex);
   static const SemanticsFlag hasImplicitScrolling = SemanticsFlag._(_kHasImplicitScrollingIndex);
+  static const SemanticsFlag isCheckStateMixed = SemanticsFlag._(_kIsCheckStateMixedIndex);
 
   static const Map<int, SemanticsFlag> values = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
@@ -216,6 +218,7 @@ class SemanticsFlag {
     _kIsLinkIndex: isLink,
     _kIsSliderIndex: isSlider,
     _kIsKeyboardKeyIndex: isKeyboardKey,
+    _kIsCheckStateMixedIndex: isCheckStateMixed,
   };
 
   @override
@@ -271,6 +274,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isSlider';
       case _kIsKeyboardKeyIndex:
         return 'SemanticsFlag.isKeyboardKey';
+      case _kIsCheckStateMixedIndex:
+        return 'SemanticsFlag.isCheckStateMixed';
     }
     assert(false, 'Unhandled index: $index (0x${index.toRadixString(8).padLeft(4, "0")})');
     return '';
