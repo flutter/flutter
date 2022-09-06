@@ -4,20 +4,20 @@ To run the Flutter runner integration tests locally,
 first start a Fuchsia package server:
 
 ```shell
-$ cd "$FUCHSIA_DIR"
-$ fx serve
+cd "$FUCHSIA_DIR"
+fx serve
 ```
 
 Then run the integration test:
 
 ```shell
-$ ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh <integration_test_folder_name> --no-lto
+$ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh <integration_test_folder_name> --no-lto
 ```
 
 For example, to run the `embedder` integration test:
 
 ```shell
-$ ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh embedder --no-lto
+$ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh embedder --no-lto
 ```
 
 Command-line options:
@@ -43,5 +43,5 @@ once, you don't need to build Fuchsia or start the emulator anymore, and can pas
 `--skip-fuchsia-build` and `--skip-fuchsia-emu` to skip those steps.
 
 ```shell
-$ ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh embedder --no-lto --skip-fuchsia-build --skip-fuchsia-emu
+$ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh embedder --no-lto --skip-fuchsia-build --skip-fuchsia-emu
 ```
