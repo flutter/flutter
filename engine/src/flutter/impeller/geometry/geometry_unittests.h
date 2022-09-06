@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
 #include <iostream>
 
 #include "gtest/gtest.h"
@@ -101,6 +102,35 @@ inline ::testing::AssertionResult SizeNear(impeller::Size a, impeller::Size b) {
                : ::testing::AssertionFailure() << "Sizes are not equal.";
 }
 
+inline ::testing::AssertionResult Array4Near(std::array<uint8_t, 4> a,
+                                             std::array<uint8_t, 4> b) {
+  auto equal = NumberNear(a[0], b[0]) && NumberNear(a[1], b[1]) &&
+               NumberNear(a[2], b[2]) && NumberNear(a[3], b[3]);
+
+  return equal ? ::testing::AssertionSuccess()
+               : ::testing::AssertionFailure() << "Arrays are not equal.";
+}
+
+inline ::testing::AssertionResult ColorBufferNear(
+    std::vector<uint8_t> a,
+    std::vector<impeller::Color> b) {
+  if (a.size() != b.size() * 4) {
+    return ::testing::AssertionFailure()
+           << "Color buffer length does not match";
+  }
+  for (auto i = 0u; i < b.size(); i++) {
+    auto right = b[i].Premultiply().ToR8G8B8A8();
+    auto j = i * 4;
+    auto equal = NumberNear(a[j], right[0]) && NumberNear(a[j + 1], right[1]) &&
+                 NumberNear(a[j + 2], right[2]) &&
+                 NumberNear(a[j + 3], right[3]);
+    if (!equal) {
+      ::testing::AssertionFailure() << "Color buffers are not equal.";
+    }
+  }
+  return ::testing::AssertionSuccess();
+}
+
 #define ASSERT_MATRIX_NEAR(a, b) ASSERT_PRED2(&::MatrixNear, a, b)
 #define ASSERT_QUATERNION_NEAR(a, b) ASSERT_PRED2(&::QuaternionNear, a, b)
 #define ASSERT_RECT_NEAR(a, b) ASSERT_PRED2(&::RectNear, a, b)
@@ -109,3 +139,5 @@ inline ::testing::AssertionResult SizeNear(impeller::Size a, impeller::Size b) {
 #define ASSERT_VECTOR3_NEAR(a, b) ASSERT_PRED2(&::Vector3Near, a, b)
 #define ASSERT_VECTOR4_NEAR(a, b) ASSERT_PRED2(&::Vector4Near, a, b)
 #define ASSERT_SIZE_NEAR(a, b) ASSERT_PRED2(&::SizeNear, a, b)
+#define ASSERT_ARRAY_4_NEAR(a, b) ASSERT_PRED2(&::Array4Near, a, b)
+#define ASSERT_COLOR_BUFFER_NEAR(a, b) ASSERT_PRED2(&::ColorBufferNear, a, b)

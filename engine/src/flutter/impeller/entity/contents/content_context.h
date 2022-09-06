@@ -196,6 +196,7 @@ class ContentContext {
       ContentContextOptions opts) const {
     return GetPipeline(radial_gradient_fill_pipelines_, opts);
   }
+
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetRRectBlurPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(rrect_blur_pipelines_, opts);

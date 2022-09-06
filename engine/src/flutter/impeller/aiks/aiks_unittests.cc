@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cmath>
+#include <iostream>
 #include <tuple>
 
 #include "flutter/testing/testing.h"
@@ -334,11 +335,212 @@ TEST_P(AiksTest, CanRenderLinearGradient) {
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
     paint.color_source = [tile_mode]() {
-      auto contents = std::make_shared<LinearGradientContents>();
-      contents->SetEndPoints({0, 0}, {200, 200});
       std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
                                    Color{0.1294, 0.5882, 0.9529, 1.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
+
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
       contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderLinearGradientManyColors) {
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0,
+          (1.0 / 6.0) * 1,
+          (1.0 / 6.0) * 2,
+          (1.0 / 6.0) * 3,
+          (1.0 / 6.0) * 4,
+          (1.0 / 6.0) * 5,
+          1.0,
+      };
+
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderLinearGradientWayManyColors) {
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
+    auto color = Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0};
+    std::vector<Color> colors;
+    std::vector<Scalar> stops;
+    auto current_stop = 0.0;
+    for (int i = 0; i < 2000; i++) {
+      colors.push_back(color);
+      stops.push_back(current_stop);
+      current_stop += 1 / 2000.0;
+    }
+    stops[2000 - 1] = 1.0;
+    paint.color_source = [tile_mode, stops = std::move(stops),
+                          colors = std::move(colors)]() {
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0 / 126.0,  2.0 / 126.0,  4.0 / 126.0, 8.0 / 126.0,
+          16.0 / 126.0, 32.0 / 126.0, 1.0,
+      };
+
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
       contents->SetTileMode(tile_mode);
       contents->SetMatrix(matrix);
       return contents;
@@ -386,11 +588,84 @@ TEST_P(AiksTest, CanRenderRadialGradient) {
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
     paint.color_source = [tile_mode]() {
-      auto contents = std::make_shared<RadialGradientContents>();
-      contents->SetCenterAndRadius({100, 100}, 100);
       std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
                                    Color{0.1294, 0.5882, 0.9529, 1.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
+
+      auto contents = std::make_shared<RadialGradientContents>();
+      contents->SetCenterAndRadius({100, 100}, 100);
       contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0,
+          (1.0 / 6.0) * 1,
+          (1.0 / 6.0) * 2,
+          (1.0 / 6.0) * 3,
+          (1.0 / 6.0) * 4,
+          (1.0 / 6.0) * 5,
+          1.0,
+      };
+
+      auto contents = std::make_shared<RadialGradientContents>();
+      contents->SetCenterAndRadius({100, 100}, 100);
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
       contents->SetTileMode(tile_mode);
       contents->SetMatrix(matrix);
       return contents;
@@ -442,6 +717,78 @@ TEST_P(AiksTest, CanRenderSweepGradient) {
       contents->SetCenterAndAngles({100, 100}, Degrees(45), Degrees(135));
       std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
                                    Color{0.1294, 0.5882, 0.9529, 1.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
+    canvas.DrawRect({0, 0, 600, 600}, paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderSweepGradientManyColors) {
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static int selected_tile_mode = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    static Matrix matrix = {
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 0, 1   //
+    };
+    std::string label = "##1";
+    label.c_str();
+    for (int i = 0; i < 4; i++) {
+      ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
+                          4, NULL, NULL, "%.2f", 0);
+      label[2]++;
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+    canvas.Translate({100.0, 100.0, 0});
+    auto tile_mode = tile_modes[selected_tile_mode];
+    paint.color_source = [tile_mode]() {
+      auto contents = std::make_shared<SweepGradientContents>();
+      contents->SetCenterAndAngles({100, 100}, Degrees(45), Degrees(135));
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0,
+          (1.0 / 6.0) * 1,
+          (1.0 / 6.0) * 2,
+          (1.0 / 6.0) * 3,
+          (1.0 / 6.0) * 4,
+          (1.0 / 6.0) * 5,
+          1.0,
+      };
+
+      contents->SetStops(std::move(stops));
       contents->SetColors(std::move(colors));
       contents->SetTileMode(tile_mode);
       contents->SetMatrix(matrix);
@@ -461,7 +808,12 @@ TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
     contents->SetEndPoints({0, 0}, {100, 100});
     std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
                                  Color{0.1294, 0.5882, 0.9529, 1.0}};
+    std::vector<Scalar> stops = {
+        0.0,
+        1.0,
+    };
     contents->SetColors(std::move(colors));
+    contents->SetStops(std::move(stops));
     contents->SetTileMode(Entity::TileMode::kRepeat);
     return contents;
   };
