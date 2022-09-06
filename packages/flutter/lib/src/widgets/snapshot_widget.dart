@@ -318,7 +318,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
 /// would be a snapshot.
 ///
 /// The painter can call [notifyListeners] to have the [SnapshotWidget]
-/// re-paint (re-using the same raster). This allows animations to be  performed
+/// re-paint (re-using the same raster). This allows animations to be performed
 /// without re-snapshotting of children. For certain scale or perspective changing
 /// transforms, such as a rotation, this can be significantly faster than performing
 /// the same animation at the widget level.
