@@ -6,6 +6,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -342,7 +343,16 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class FakeXcodeProjectInfo extends Fake implements XcodeProjectInfo {}
+class FakeXcodeProjectInfo extends Fake implements XcodeProjectInfo {
+  @override
+  String? schemeFor(BuildInfo? buildInfo) => 'fake';
+
+  @override
+  String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) => 'Release';
+
+  @override
+  List<String> targets = [];
+}
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({
