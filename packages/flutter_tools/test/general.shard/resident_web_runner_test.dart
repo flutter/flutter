@@ -1446,7 +1446,7 @@ class FakeChromeTab extends Fake implements ChromeTab {
   final FakeWipConnection connection = FakeWipConnection();
 
   @override
-  Future<WipConnection> connect({Function/*?*/ onError}) async {
+  Future<WipConnection> connect({Function? onError}) async {
     return connection;
   }
 }
