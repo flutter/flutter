@@ -2403,7 +2403,9 @@ class LayerLink {
   Size? leaderSize;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  }
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].

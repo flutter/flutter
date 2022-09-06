@@ -696,6 +696,9 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.pink)),
       listTileTheme: const ListTileThemeData(),
+      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
+      menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
+      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(foregroundColor: Colors.blue)),
@@ -810,6 +813,9 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
       iconButtonTheme: const IconButtonThemeData(),
       listTileTheme: const ListTileThemeData(),
+      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
+      menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
+      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
@@ -910,6 +916,9 @@ void main() {
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
       iconButtonTheme: otherTheme.iconButtonTheme,
       listTileTheme: otherTheme.listTileTheme,
+      menuBarTheme: otherTheme.menuBarTheme,
+      menuButtonTheme: otherTheme.menuButtonTheme,
+      menuTheme: otherTheme.menuTheme,
       navigationBarTheme: otherTheme.navigationBarTheme,
       navigationRailTheme: otherTheme.navigationRailTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
@@ -1009,6 +1018,9 @@ void main() {
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
     expect(themeDataCopy.iconButtonTheme, equals(otherTheme.iconButtonTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
+    expect(themeDataCopy.menuBarTheme, equals(otherTheme.menuBarTheme));
+    expect(themeDataCopy.menuButtonTheme, equals(otherTheme.menuButtonTheme));
+    expect(themeDataCopy.menuTheme, equals(otherTheme.menuTheme));
     expect(themeDataCopy.navigationBarTheme, equals(otherTheme.navigationBarTheme));
     expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
@@ -1021,8 +1033,6 @@ void main() {
     expect(themeDataCopy.tabBarTheme, equals(otherTheme.tabBarTheme));
     expect(themeDataCopy.textButtonTheme, equals(otherTheme.textButtonTheme));
     expect(themeDataCopy.textSelectionTheme, equals(otherTheme.textSelectionTheme));
-    expect(themeDataCopy.textSelectionTheme.selectionColor, equals(otherTheme.textSelectionTheme.selectionColor));
-    expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
     expect(themeDataCopy.textSelectionTheme.selectionColor, equals(otherTheme.textSelectionTheme.selectionColor));
     expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
     expect(themeDataCopy.textSelectionTheme.selectionHandleColor, equals(otherTheme.textSelectionTheme.selectionHandleColor));
@@ -1141,10 +1151,14 @@ void main() {
       'dividerTheme',
       'drawerTheme',
       'elevatedButtonTheme',
+      'expansionTileTheme',
       'filledButtonTheme',
       'floatingActionButtonTheme',
       'iconButtonTheme',
       'listTileTheme',
+      'menuBarTheme',
+      'menuButtonTheme',
+      'menuTheme',
       'navigationBarTheme',
       'navigationRailTheme',
       'outlinedButtonTheme',
@@ -1160,7 +1174,6 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
-      'expansionTileTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'accentColor',
       'accentColorBrightness',
