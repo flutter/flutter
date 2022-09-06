@@ -130,13 +130,10 @@ Map<String, dynamic> readJsonTestsSubShardFile(String fileName) {
 Map<int, TestSpecs> generateMetrics(File metrics) {
   final Map<int, TestSpecs> allTestSpecs = <int, TestSpecs>{};
   if (!metrics.existsSync()) {
-    print('failed');
     return allTestSpecs;
   }
-  bool success = false;
-  print('lines');
-  print(metrics.readAsLinesSync().length);
 
+  bool success = false;
   for(final String metric in metrics.readAsLinesSync()) {
     final Map<String, dynamic> entry = json.decode(metric) as Map<String, dynamic>;
     if (entry.containsKey('suite')) {

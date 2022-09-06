@@ -418,7 +418,6 @@ Future<void> _runGeneralToolTests() async {
     // This overrides the 15 minute default for tools tests.
     // See the README.md and dart_test.yaml files in the flutter_tools package.
     perTestTimeout: const Duration(seconds: 2),
-    collectMetrics: true,
   );
 }
 
@@ -1752,8 +1751,8 @@ Future<void> _runDartTest(String workingDirectory, {
     cpus = 1;
   }
 
-  const LocalFileSystem fs = LocalFileSystem();
-  final File metricFile = fs.currentDirectory.childFile('$platformName.json');
+  const LocalFileSystem fileSystem = LocalFileSystem();
+  final File metricFile = fileSystem.file(path.join(flutterRoot, '$platformName.json'));
   final List<String> args = <String>[
     'run',
     'test',
@@ -1795,18 +1794,13 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
-  print(metricFile.path);
-  if (metricFile.existsSync()) {
-    print('exists');
-  } else {
-    print('no exists');
-  }
-
   if (collectMetrics) {
-    const LocalFileSystem fs = LocalFileSystem();
-    final File metricFile = fs.file('$platformName.json');
-    final Map<int, TestSpecs> testSpecs = generateMetrics(metricFile);
-    print(testSpecs.length);
+    try {
+      final Map<int, TestSpecs> testSpecs = generateMetrics(metricFile);
+      print(testSpecs.length);
+    } on fs.FileSystemException catch (e){
+      print('Failed to generate metrics: $e');
+    }
   }
 }
 
