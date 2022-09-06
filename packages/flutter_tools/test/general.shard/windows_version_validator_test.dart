@@ -185,4 +185,25 @@ void main() {
     expect(result.statusInfo, invalidWindowsValidationResult.statusInfo,
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
+
+  testWithoutContext('Unit testing on a regex pattern validator', () async {
+    const String regexPattern =
+        r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$';
+    const String testStr = r'''
+OS Version:                10.0.19044 N/A Build 19044
+OSz Version:                10.0.19044 N/A Build 19044
+OS 6Version:                10.0.19044 N/A Build 19044
+OxS Version:                10.0.19044 N/A Build 19044
+OS Version:                10.19044 N/A Build 19044
+OS Version:                10.x.19044 N/A Build 19044
+OS Version:                10.0.19044 N/A Build 19044
+OS Version:                .0.19044 N/A Build 19044
+''';
+
+    final Iterable<RegExpMatch> matches =
+        WindowsVersionValidator.validateString(regexPattern, testStr);
+
+    expect(matches.length, 2,
+        reason: 'There should be only two matches for the pattern provided');
+  });
 }

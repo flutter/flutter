@@ -22,6 +22,19 @@ class WindowsVersionValidator extends DoctorValidator {
 
   final ProcessManager _processManager;
 
+  /// Provide a literal string as the Regex pattern
+  /// and a string to validate and get a boolean determining
+  /// if the string has at least one match
+  static Iterable<RegExpMatch> validateString(String pattern, String str,
+      {bool multiLine = true}) {
+    final RegExp regex = RegExp(
+      pattern,
+      multiLine: multiLine,
+    );
+
+    return regex.allMatches(str);
+  }
+
   @override
   Future<ValidationResult> validate() async {
     final ProcessResult result;
@@ -49,11 +62,8 @@ class WindowsVersionValidator extends DoctorValidator {
     // Regular expression pattern for identifying
     // semantic versioned strings
     // (ie. 10.5.4123)
-    final RegExp regex = RegExp(
-      r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$',
-      multiLine: true,
-    );
-    final Iterable<RegExpMatch> matches = regex.allMatches(resultStdout);
+    final Iterable<RegExpMatch> matches = validateString(
+        r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$', resultStdout);
 
     // Use the string split method to extract the major version
     // and check against the [unsupportedVersions] list
