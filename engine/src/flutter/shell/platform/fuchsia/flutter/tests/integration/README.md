@@ -1,84 +1,47 @@
-# `flutter integration tests`
+# Flutter runner integration tests
 
-## Configure and build fuchsia
+To run the Flutter runner integration tests locally,
+first start a Fuchsia package server:
 
 ```shell
 $ cd "$FUCHSIA_DIR"
-$ fx set terminal.x64
-$ fx build
+$ fx serve
 ```
 
-## Build the test
-
-You can specify the test's package target to build only the test package, with
-its dependencies. This will also build the required runner.
+Then run the integration test:
 
 ```shell
-$ cd "$ENGINE_DIR/src"
-$ ./flutter/tools/gn --fuchsia <flags> \
-      # for example: --goma --fuchsia-cpu=x64 --runtime-mode=debug
-$ ninja -C out/fuchsia_debug_x64 \
-    flutter/shell/platform/fuchsia/flutter/tests/integration
+$ ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh <integration_test_folder_name> --no-lto
 ```
 
-
-## Start an emulator
+For example, to run the `embedder` integration test:
 
 ```shell
-ffx emu start --net tap
+$ ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh embedder --no-lto
 ```
 
-NOTE: Do _not_ run the default package server. The instructions below describe
-how to launch a flutter-specific package server.
+Command-line options:
 
-## Publish the test packages to the Fuchsia package server
+* Pass `--unoptimized` to disable C++ compiler optimizations.
+* Add `--fuchsia-cpu x64` or `--fuchsia-cpu arm64` to target a particular architecture.
+  The default is x64.
+* Add `--runtime-mode debug` or `--runtime-mode profile` to switch between JIT and AOT
+  builds.  These correspond to a vanilla Fuchsia build and a `--release` Fuchsia build
+  respectively.  The default is debug/JIT builds.
+* For Googlers, add the `--goma` argument when using goma, and add the `--xcode-symlinks`
+  argument when using goma on macOS.
+* Remove `--no-lto` if you care about performance or binary size; unfortunately it results
+  in a *much* slower build.
 
-The tests currently specify the Fuchsia package server's standard domain,
-`fuchsia.com`, as the server to use to resolve (locate and load) the test
-packages. So, before running the test, the most recently built `.far` files
-need to be published to the Fuchsia package repo:
+## Iterating on tests
+
+By default, `run_integration_test.sh` will build Fuchsia and start up a Fuchsia emulator
+to ensure that the test runs on the correct environment.
+
+However, this is slow for iterating on tests. Once you've run `run_integration_tests.sh`
+once, you don't need to build Fuchsia or start the emulator anymore, and can pass
+`--skip-fuchsia-build` and `--skip-fuchsia-emu` to skip those steps.
 
 ```shell
-$ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
-  -f "$FLUTTER_ENGINE_DIR"/src/out/fuchsia_*64/oot_flutter_jit_runner-0.far
-$ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
-  -f "$FLUTTER_ENGINE_DIR"/src/out/fuchsia_*64/flutter-embedder-test-0.far
-$ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
-  -f $(find "$FLUTTER_ENGINE_DIR"/src/out/fuchsia_*64 -name parent-view.far)
-$ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
-  -f $(find "$FLUTTER_ENGINE_DIR"/src/out/fuchsia_*64 -name child-view.far)
+$ ENGINE_DIR/flutter/tools/fuchsia/devshell/run_integration_test.sh embedder --no-lto --skip-fuchsia-build --skip-fuchsia-emu
 ```
-
-## Run the test
-
-```shell
-$ ffx test run fuchsia-pkg:://fuchsia.com/flutter-embedder-test#meta/flutter-embedder-test.cm
-```
-
-If, for example, you only make a change to the Dart code in `parent-view`, you
-can rebuild only the parent-view package target, and republish it.
-
-```shell
-$ ninja -C out/fuchsia_debug_x64 \
-    flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/parent-view:package
-$ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
-  -f $(find "$FLUTTER_ENGINE_DIR"/src/out/fuchsia_*64 -name parent-view.far)
-```
-
-Then re-run the test as above.
-
-The tests use a flutter runner with "oot_" prefixed to its package name, to
-avoid conflicting with any flutter_runner package in the base fuchsia image.
-After making a change to the flutter_runner you can re-deploy it with:
-
-```shell
-$ ninja -C out/fuchsia_debug_x64 \
-    flutter/shell/platform/fuchsia/flutter:oot_flutter_jit_runner
-$ fx pm publish -a -repo "$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files/" \
-  -f $(find "$FLUTTER_ENGINE_DIR"/src/out/fuchsia_*64 -name oot_flutter_jit_runner.far)
-```
-
-Then re-run the test as above.
-
-From here, you can modify the Flutter test, rebuild flutter, and usually rerun
-the test without rebooting, by repeating the commands above.
