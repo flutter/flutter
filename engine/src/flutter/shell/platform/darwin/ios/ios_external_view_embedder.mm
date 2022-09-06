@@ -98,4 +98,15 @@ bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
   return true;
 }
 
+// |ExternalViewEmbedder|
+void IOSExternalViewEmbedder::PushFilterToVisitedPlatformViews(
+    std::shared_ptr<const DlImageFilter> filter) {
+  platform_views_controller_->PushFilterToVisitedPlatformViews(filter);
+}
+
+// |ExternalViewEmbedder|
+void IOSExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
+  platform_views_controller_->PushVisitedPlatformView(view_id);
+}
+
 }  // namespace flutter

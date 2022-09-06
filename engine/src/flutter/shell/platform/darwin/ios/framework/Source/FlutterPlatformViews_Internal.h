@@ -48,6 +48,16 @@
 // The parent view handles clipping to its subviews.
 @interface ChildClippingView : UIView
 
+// Applies blur backdrop filters to the ChildClippingView with blur radius values from
+// blurRadii. Returns NO if Apple's API has changed and blurred backdrop filters cannot
+// be applied, otherwise returns YES.
+- (BOOL)applyBlurBackdropFilters:(NSArray*)blurRadii;
+
+// The UIView used to extract the gaussianBlur filter. This must be a UIVisualEffectView
+// initalized with UIBlurEffect to extract the correct filter. Made a public property
+// for custom unit tests.
+@property(nonatomic, retain) UIView* blurEffectView;
+
 @end
 
 namespace flutter {
@@ -186,6 +196,12 @@ class FlutterPlatformViewsController {
   // responder. Returns -1 if no such platform view is found.
   long FindFirstResponderPlatformViewId();
 
+  // Pushes backdrop filter mutation to the mutator stack of each visited platform view.
+  void PushFilterToVisitedPlatformViews(std::shared_ptr<const DlImageFilter> filter);
+
+  // Pushes the view id of a visted platform view to the list of visied platform views.
+  void PushVisitedPlatformView(int64_t view_id) { visited_platform_views_.push_back(view_id); }
+
  private:
   static const size_t kMaxLayerAllocations = 2;
 
@@ -292,6 +308,9 @@ class FlutterPlatformViewsController {
   // A vector of embedded view IDs according to their composition order.
   // The last ID in this vector belond to the that is composited on top of all others.
   std::vector<int64_t> composition_order_;
+
+  // A vector of visited platform view IDs.
+  std::vector<int64_t> visited_platform_views_;
 
   // The latest composition order that was presented in Present().
   std::vector<int64_t> active_composition_order_;

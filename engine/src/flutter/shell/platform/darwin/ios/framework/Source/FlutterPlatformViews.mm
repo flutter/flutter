@@ -33,6 +33,8 @@
 @end
 
 namespace flutter {
+// Becomes NO if Apple's API changes and blurred backdrop filters cannot be applied.
+BOOL canApplyBlurBackdrop = YES;
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetLayer(
     GrDirectContext* gr_context,
@@ -318,6 +320,15 @@ void FlutterPlatformViewsController::EndFrame(
   }
 }
 
+void FlutterPlatformViewsController::PushFilterToVisitedPlatformViews(
+    std::shared_ptr<const DlImageFilter> filter) {
+  for (int64_t id : visited_platform_views_) {
+    EmbeddedViewParams params = current_composition_params_[id];
+    params.PushImageFilter(filter);
+    current_composition_params_[id] = params;
+  }
+}
+
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
     int view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
@@ -414,6 +425,8 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
                                CGRectGetWidth(flutter_view.bounds),
                                CGRectGetHeight(flutter_view.bounds))] autorelease];
 
+  NSMutableArray* blurRadii = [[[NSMutableArray alloc] init] autorelease];
+
   auto iter = mutators_stack.Begin();
   while (iter != mutators_stack.End()) {
     switch ((*iter)->GetType()) {
@@ -434,11 +447,25 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
       case kOpacity:
         embedded_view.alpha = (*iter)->GetAlphaFloat() * embedded_view.alpha;
         break;
-      case kBackdropFilter:
+      case kBackdropFilter: {
+        // We only support DlBlurImageFilter for BackdropFilter.
+        if ((*iter)->GetFilter().asBlur() && canApplyBlurBackdrop) {
+          // sigma_x is arbitrarily chosen as the radius value because Quartz sets
+          // sigma_x and sigma_y equal to each other. DlBlurImageFilter's Tile Mode
+          // is not supported in Quartz's gaussianBlur CAFilter, so it is not used
+          // to blur the PlatformView.
+          [blurRadii addObject:@((*iter)->GetFilter().asBlur()->sigma_x())];
+        }
         break;
+      }
     }
     ++iter;
   }
+
+  if (canApplyBlurBackdrop) {
+    canApplyBlurBackdrop = [clipView applyBlurBackdropFilters:blurRadii];
+  }
+
   // Reverse the offset of the clipView.
   // The clipView's frame includes the final translate of the final transform matrix.
   // So we need to revese this translate so the platform view can layout at the correct offset.
@@ -517,6 +544,7 @@ void FlutterPlatformViewsController::Reset() {
   clip_count_.clear();
   views_to_recomposite_.clear();
   layer_pool_->RecycleLayers();
+  visited_platform_views_.clear();
 }
 
 SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
@@ -777,6 +805,7 @@ void FlutterPlatformViewsController::CommitCATransactionIfNeeded() {
 void FlutterPlatformViewsController::ResetFrameState() {
   slices_.clear();
   composition_order_.clear();
+  visited_platform_views_.clear();
 }
 
 }  // namespace flutter

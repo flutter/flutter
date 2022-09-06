@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 
+#include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
@@ -56,7 +57,23 @@ void ResetAnchor(CALayer* layer) {
 
 }  // namespace flutter
 
-@implementation ChildClippingView
+@implementation ChildClippingView {
+  // A gaussianFilter from UIVisualEffectView that can be copied for new backdrop filters.
+  NSObject* _gaussianFilter;
+}
+
+// Lazy initializes blurEffectView as the expected UIVisualEffectView. The backdropFilter blur
+// requires this UIVisualEffectView initialization. The lazy initalization is only used to allow
+// custom unit tests.
+- (UIView*)blurEffectView {
+  if (!_blurEffectView) {
+    // blurEffectView is only needed to extract its gaussianBlur filter. It is released after
+    // searching its subviews and extracting the filter.
+    _blurEffectView = [[[UIVisualEffectView alloc]
+        initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]] retain];
+  }
+  return _blurEffectView;
+}
 
 // The ChildClippingView's frame is the bounding rect of the platform view. we only want touches to
 // be hit tested and consumed by this view if they are inside the embedded platform view which could
@@ -68,6 +85,86 @@ void ResetAnchor(CALayer* layer) {
     }
   }
   return NO;
+}
+
+// Creates and initializes a UIVisualEffectView with a UIBlurEffect. Extracts and returns its
+// gaussianFilter. Returns nil if Apple's API has changed and the filter cannot be extracted.
+- (NSObject*)extractGaussianFilter {
+  NSObject* gaussianFilter = nil;
+
+  for (UIView* view in self.blurEffectView.subviews) {
+    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+      for (CIFilter* filter in view.layer.filters) {
+        if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"]) {
+          if ([[filter valueForKey:@"inputRadius"] isKindOfClass:[NSNumber class]]) {
+            gaussianFilter = filter;
+          }
+          // No need to look at other CIFilters. If the API structure has not changed, the
+          // gaussianBlur filter was succesfully saved. Otherwise, still exit the loop because the
+          // filter cannot be extracted.
+          break;
+        }
+      }
+      // No need to look at other UIViews. If the API structure has not changed, the gaussianBlur
+      // filter was succesfully saved. Otherwise, still exit the loop because the filter cannot
+      // be extracted.
+      break;
+    }
+  }
+
+  return gaussianFilter;
+}
+
+- (BOOL)applyBlurBackdropFilters:(NSArray*)blurRadii {
+  // The outer if-statement checks for the first time this method is called and _gaussianFilter is
+  // not initialized. The inner if-statement checks if extracting the gaussianBlur was successful.
+  // If it was not successful, this method will not be called again. Thus the if-statements check
+  // for different conditions.
+  if (!_gaussianFilter) {
+    _gaussianFilter = [self extractGaussianFilter];
+
+    if (!_gaussianFilter) {
+      FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
+                         "access the gaussianBlur CAFilter.";
+      return NO;
+    }
+  }
+
+  BOOL newRadiusValues = NO;
+
+  if ([blurRadii count] != [self.layer.filters count]) {
+    newRadiusValues = YES;
+  } else {
+    for (NSUInteger i = 0; i < [blurRadii count]; i++) {
+      if ([self.layer.filters[i] valueForKey:@"inputRadius"] != blurRadii[i]) {
+        newRadiusValues = YES;
+        break;
+      }
+    }
+  }
+
+  if (newRadiusValues) {
+    NSMutableArray* newGaussianFilters = [[[NSMutableArray alloc] init] autorelease];
+
+    for (NSUInteger i = 0; i < [blurRadii count]; i++) {
+      NSObject* newGaussianFilter = [[_gaussianFilter copy] autorelease];
+      [newGaussianFilter setValue:blurRadii[i] forKey:@"inputRadius"];
+      [newGaussianFilters addObject:newGaussianFilter];
+    }
+
+    self.layer.filters = newGaussianFilters;
+  }
+
+  return YES;
+}
+
+- (void)dealloc {
+  [_blurEffectView release];
+  _blurEffectView = nil;
+
+  [_gaussianFilter release];
+  _gaussianFilter = nil;
+  [super dealloc];
 }
 
 @end
