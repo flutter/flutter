@@ -55,7 +55,7 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [ List<int>? binary ]) {
+  void send(Map<String, Object?> message, [ List<int>? binary ]) {
     outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
@@ -98,7 +98,7 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'daemon.version'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.version'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['result'], isNotEmpty);
@@ -113,7 +113,7 @@ void main() {
       // Use the flutter_gallery project which has a known set of supported platforms.
       final String projectPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'flutter_gallery');
 
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
         'id': 0,
         'method': 'daemon.getSupportedPlatforms',
         'params': <String, Object>{'projectRoot': projectPath},
@@ -122,7 +122,7 @@ void main() {
 
       expect(response.data['id'], 0);
       expect(response.data['result'], isNotEmpty);
-      expect((response.data['result'] as Map<String, dynamic>?)!['platforms'], <String>{'macos'});
+      expect((response.data['result']! as Map<String, Object?>)['platforms'], <String>{'macos'});
     }, overrides: <Type, Generator>{
       // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
       FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: false, isMacOSEnabled: true),
@@ -135,7 +135,7 @@ void main() {
       );
       globals.printError('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage message) {
-        return message.data['event'] == 'daemon.logMessage' && (message.data['params'] as Map<String, dynamic>?)!['level'] == 'error';
+        return message.data['event'] == 'daemon.logMessage' && (message.data['params']! as Map<String, Object?>)['level'] == 'error';
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
@@ -153,7 +153,7 @@ void main() {
       );
       globals.printWarning('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage message) {
-        return message.data['event'] == 'daemon.logMessage' && (message.data['params'] as Map<String, dynamic>?)!['level'] == 'warning';
+        return message.data['event'] == 'daemon.logMessage' && (message.data['params']! as Map<String, Object?>)['level'] == 'warning';
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
@@ -201,7 +201,7 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.shutdown'}));
       return daemon.onExit.then<void>((int code) async {
         await daemonStreams.inputs.close();
         expect(code, 0);
@@ -214,7 +214,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'app.restart'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.restart'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['error'], contains('appId is required'));
@@ -226,7 +226,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
         'id': 0,
         'method': 'app.callServiceExtension',
         'params': <String, String>{
@@ -244,7 +244,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'app.stop'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.stop'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['error'], contains('appId is required'));
@@ -255,7 +255,7 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.getDevices'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.getDevices'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['result'], isList);
@@ -269,10 +269,10 @@ void main() {
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.getDevices'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.getDevices'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
-      final dynamic result = response.data['result'];
+      final Object? result = response.data['result'];
       expect(result, isList);
       expect(result, isNotEmpty);
     });
@@ -291,7 +291,7 @@ void main() {
         expect(response.data['event'], 'device.added');
         expect(response.data['params'], isMap);
 
-        final Map<String, dynamic> params = castStringKeyedMap(response.data['params'])!;
+        final Map<String, Object?> params = castStringKeyedMap(response.data['params'])!;
         expect(params['platform'], isNotEmpty); // the fake device has a platform of 'android-arm'
       });
     }, overrides: <Type, Generator>{
@@ -305,7 +305,7 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.discoverDevices'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.discoverDevices'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['result'], isList);
@@ -319,10 +319,10 @@ void main() {
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.discoverDevices'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.discoverDevices'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
-      final dynamic result = response.data['result'];
+      final Object? result = response.data['result'];
       expect(result, isList);
       expect(result, isNotEmpty);
       expect(discoverer.discoverDevicesCalled, true);
@@ -337,17 +337,17 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       final FakeAndroidDevice device = FakeAndroidDevice();
       discoverer.addDevice(device);
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
         'id': 0,
         'method': 'device.supportsRuntimeMode',
-        'params': <String, dynamic>{
+        'params': <String, Object?>{
           'deviceId': 'device',
           'buildMode': 'profile',
         },
       }));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
-      final dynamic result = response.data['result'];
+      final Object? result = response.data['result'];
       expect(result, true);
       expect(device.supportsRuntimeModeCalledBuildMode, BuildMode.profile);
     });
@@ -363,10 +363,10 @@ void main() {
       discoverer.addDevice(device);
       final FakeDeviceLogReader logReader = FakeDeviceLogReader();
       device.logReader = logReader;
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
         'id': 0,
         'method': 'device.logReader.start',
-        'params': <String, dynamic>{
+        'params': <String, Object?>{
           'deviceId': 'device',
         },
       }));
@@ -385,10 +385,10 @@ void main() {
 
       // Now try to stop the log reader.
       expect(logReader.disposeCalled, false);
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
         'id': 1,
         'method': 'device.logReader.stop',
-        'params': <String, dynamic>{
+        'params': <String, Object?>{
           'id': logReaderId,
         },
       }));
@@ -417,10 +417,10 @@ void main() {
         // First upload the application package.
         final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
         applicationPackageFactory.applicationPackage = applicationPackage;
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
           'id': 0,
           'method': 'device.uploadApplicationPackage',
-          'params': <String, dynamic>{
+          'params': <String, Object?>{
             'targetPlatform': 'android',
             'applicationBinary': 'test_file',
           },
@@ -434,10 +434,10 @@ void main() {
         // Try starting the app.
         final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
         device.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
           'id': 1,
           'method': 'device.startApp',
-          'params': <String, dynamic>{
+          'params': <String, Object?>{
             'deviceId': 'device',
             'applicationPackageId': applicationPackageId,
             'debuggingOptions': DebuggingOptions.enabled(BuildInfo.debug).toJson(),
@@ -446,15 +446,15 @@ void main() {
         final DaemonMessage startAppResponse = await broadcastOutput.firstWhere(_notEvent);
         expect(startAppResponse.data['id'], 1);
         expect(device.startAppPackage, applicationPackage);
-        final Map<String, dynamic> startAppResult = (startAppResponse.data['result'] as Map<String, dynamic>?)!;
+        final Map<String, Object?> startAppResult = startAppResponse.data['result']! as Map<String, Object?>;
         expect(startAppResult['started'], true);
         expect(startAppResult['observatoryUri'], observatoryUri.toString());
 
         // Try stopping the app.
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
           'id': 2,
           'method': 'device.stopApp',
-          'params': <String, dynamic>{
+          'params': <String, Object?>{
             'deviceId': 'device',
             'applicationPackageId': applicationPackageId,
           },
@@ -475,7 +475,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.launch'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.launch'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['error'], contains('emulatorId is required'));
@@ -486,8 +486,8 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      final Map<String, dynamic> params = <String, dynamic>{'emulatorId': 'device', 'coldBoot': 1};
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.launch', 'params': params}));
+      final Map<String, Object?> params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.launch', 'params': params}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['error'], contains('coldBoot is not a bool'));
@@ -498,7 +498,7 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['result'], isList);
@@ -517,8 +517,8 @@ void main() {
       unawaited(daemonStreams.outputs.stream
         .firstWhere((DaemonMessage request) => request.data['method'] == 'app.exposeUrl')
         .then((DaemonMessage request) {
-          expect((request.data['params'] as Map<String, dynamic>?)!['url'], equals(originalUrl));
-          daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': request.data['id'], 'result': <String, dynamic>{'url': mappedUrl}}));
+          expect((request.data['params']! as Map<String, Object?>)['url'], equals(originalUrl));
+          daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': request.data['id'], 'result': <String, Object?>{'url': mappedUrl}}));
         })
       );
 
@@ -532,9 +532,9 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'devtools.serve'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
-      final Map<String, dynamic> result = (response.data['result'] as Map<String, dynamic>?)!;
+      final Map<String, Object?> result = response.data['result']! as Map<String, Object?>;
       expect(result, isNotEmpty);
       expect(result['host'], '127.0.0.1');
       expect(result['port'], 1234);
@@ -548,9 +548,9 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'devtools.serve'}));
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
-      final Map<String, dynamic> result = (response.data['result'] as Map<String, dynamic>?)!;
+      final Map<String, Object?> result = response.data['result']! as Map<String, Object?>;
       expect(result, isNotEmpty);
       expect(result['host'], null);
       expect(result['port'], null);
@@ -564,7 +564,7 @@ void main() {
         final FakeSocket socket = FakeSocket();
         bool connectCalled = false;
         int? connectPort;
-        ioOverrides.connectCallback = (dynamic host, int port) async {
+        ioOverrides.connectCallback = (Object? host, int port) async {
           connectCalled = true;
           connectPort = port;
           if (host == io.InternetAddress.loopbackIPv4) {
@@ -577,7 +577,7 @@ void main() {
           daemonConnection,
           notifyingLogger: notifyingLogger,
         );
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'proxy.connect', 'params': <String, Object?>{'port': 123}}));
 
         final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
@@ -598,13 +598,13 @@ void main() {
         expect(data[0], <int>[10, 11, 12]);
 
         // Can proxy data to the socket.
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.write', 'params': <String, dynamic>{'id': id}}, Stream<List<int>>.value(<int>[21, 22, 23])));
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'proxy.write', 'params': <String, Object?>{'id': id}}, Stream<List<int>>.value(<int>[21, 22, 23])));
         await pumpEventQueue();
         expect(socket.addedData[0], <int>[21, 22, 23]);
 
         // Closes the connection when disconnect request received.
         expect(socket.closeCalled, false);
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.disconnect', 'params': <String, dynamic>{'id': id}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'proxy.disconnect', 'params': <String, Object?>{'id': id}}));
         await pumpEventQueue();
         expect(socket.closeCalled, true);
 
@@ -623,7 +623,7 @@ void main() {
         final FakeSocket socket = FakeSocket();
         bool connectIpv4Called = false;
         int? connectPort;
-        ioOverrides.connectCallback = (dynamic host, int port) async {
+        ioOverrides.connectCallback = (Object? host, int port) async {
           connectPort = port;
           if (host == io.InternetAddress.loopbackIPv4) {
             connectIpv4Called = true;
@@ -637,7 +637,7 @@ void main() {
           daemonConnection,
           notifyingLogger: notifyingLogger,
         );
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'proxy.connect', 'params': <String, Object?>{'port': 123}}));
 
         final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
@@ -651,13 +651,13 @@ void main() {
     testUsingContext('proxy.connect fails if both ipv6 and ipv4 failed', () async {
       final TestIOOverrides ioOverrides = TestIOOverrides();
       await io.IOOverrides.runWithIOOverrides(() async {
-        ioOverrides.connectCallback = (dynamic host, int port) => throw const io.SocketException('fail');
+        ioOverrides.connectCallback = (Object? host, int port) => throw const io.SocketException('fail');
 
         daemon = Daemon(
           daemonConnection,
           notifyingLogger: notifyingLogger,
         );
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'proxy.connect', 'params': <String, Object?>{'port': 123}}));
 
         final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
@@ -964,11 +964,11 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
 class TestIOOverrides extends io.IOOverrides {
-  late Future<io.Socket> Function(dynamic host, int port) connectCallback;
+  late Future<io.Socket> Function(Object? host, int port) connectCallback;
 
   @override
-  Future<io.Socket> socketConnect(dynamic host, int port,
-      {dynamic sourceAddress, int sourcePort = 0, Duration? timeout}) {
+  Future<io.Socket> socketConnect(Object? host, int port,
+      {Object? sourceAddress, int sourcePort = 0, Duration? timeout}) {
     return connectCallback(host, port);
   }
 }
