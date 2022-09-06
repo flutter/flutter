@@ -482,8 +482,11 @@ class CupertinoDatePicker extends StatefulWidget {
     // because there's no other way to get the information we want without
     // laying out the text.
     painter.layout();
-
-    return painter.maxIntrinsicWidth;
+    try {
+      return painter.maxIntrinsicWidth;
+    } finally {
+      painter.dispose();
+    }
   }
 }
 
@@ -1663,6 +1666,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   @override
   void dispose() {
     PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
+    textPainter.dispose();
     super.dispose();
   }
 
