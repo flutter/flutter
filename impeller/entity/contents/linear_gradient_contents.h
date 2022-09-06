@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/impeller/renderer/texture.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
@@ -32,14 +33,19 @@ class LinearGradientContents final : public ColorSourceContents {
 
   void SetColors(std::vector<Color> colors);
 
-  void SetTileMode(Entity::TileMode tile_mode);
+  void SetStops(std::vector<Scalar> stops);
 
   const std::vector<Color>& GetColors() const;
+
+  const std::vector<Scalar>& GetStops() const;
+
+  void SetTileMode(Entity::TileMode tile_mode);
 
  private:
   Point start_point_;
   Point end_point_;
   std::vector<Color> colors_;
+  std::vector<Scalar> stops_;
   Entity::TileMode tile_mode_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LinearGradientContents);

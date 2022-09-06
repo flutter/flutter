@@ -9,6 +9,7 @@
 
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/constants.h"
+#include "impeller/geometry/gradient.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/path_component.h"
@@ -907,6 +908,48 @@ TEST(GeometryTest, ColorPremultiply) {
   }
 }
 
+TEST(GeometryTest, ColorR8G8B8A8) {
+  {
+    Color a(1.0, 0.5, 0.2, 0.5);
+    std::array<uint8_t, 4> expected = {255, 128, 51, 128};
+    ASSERT_ARRAY_4_NEAR(a.ToR8G8B8A8(), expected);
+  }
+
+  {
+    Color a(0.0, 0.0, 0.0, 0.0);
+    std::array<uint8_t, 4> expected = {0, 0, 0, 0};
+    ASSERT_ARRAY_4_NEAR(a.ToR8G8B8A8(), expected);
+  }
+
+  {
+    Color a(1.0, 1.0, 1.0, 1.0);
+    std::array<uint8_t, 4> expected = {255, 255, 255, 255};
+    ASSERT_ARRAY_4_NEAR(a.ToR8G8B8A8(), expected);
+  }
+}
+
+TEST(GeometryTest, ColorLerp) {
+  {
+    Color a(0.0, 0.0, 0.0, 0.0);
+    Color b(1.0, 1.0, 1.0, 1.0);
+
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 0.5), Color(0.5, 0.5, 0.5, 0.5));
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 0.0), a);
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 1.0), b);
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 0.2), Color(0.2, 0.2, 0.2, 0.2));
+  }
+
+  {
+    Color a(0.2, 0.4, 1.0, 0.5);
+    Color b(0.4, 1.0, 0.2, 0.3);
+
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 0.5), Color(0.3, 0.7, 0.6, 0.4));
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 0.0), a);
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 1.0), b);
+    ASSERT_COLOR_NEAR(Color::lerp(a, b, 0.2), Color(0.24, 0.52, 0.84, 0.46));
+  }
+}
+
 TEST(GeometryTest, CanConvertBetweenDegressAndRadians) {
   {
     auto deg = Degrees{90.0};
@@ -1358,6 +1401,70 @@ TEST(GeometryTest, MatrixPrinting) {
        0.000000,       0.000000,       1.000000,      30.000000,
        0.000000,       0.000000,       0.000000,       1.000000,
 ))");
+}
+
+TEST(GeometryTest, Gradient) {
+  {
+    // Simple 2 color gradient produces color buffer containing exactly those
+    // values.
+    std::vector<Color> colors = {Color::Red(), Color::Blue()};
+    std::vector<Scalar> stops = {0.0, 1.0};
+    uint32_t texture_size;
+
+    auto gradient = CreateGradientBuffer(colors, stops, &texture_size);
+
+    ASSERT_COLOR_BUFFER_NEAR(gradient, colors);
+    ASSERT_EQ(texture_size, 2u);
+  }
+
+  {
+    // Simple N color gradient produces color buffer containing exactly those
+    // values.
+    std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green(),
+                                 Color::White()};
+    std::vector<Scalar> stops = {0.0, 0.33, 0.66, 1.0};
+    uint32_t texture_size;
+
+    auto gradient = CreateGradientBuffer(colors, stops, &texture_size);
+
+    ASSERT_COLOR_BUFFER_NEAR(gradient, colors);
+    ASSERT_EQ(texture_size, 4u);
+  }
+
+  {
+    // Gradient with color stops will lerp and scale buffer.
+    std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green()};
+    std::vector<Scalar> stops = {0.0, 0.25, 1.0};
+    uint32_t texture_size;
+
+    auto gradient = CreateGradientBuffer(colors, stops, &texture_size);
+
+    std::vector<Color> lerped_colors = {
+        Color::Red(),
+        Color::Blue(),
+        Color::lerp(Color::Blue(), Color::Green(), 0.3333),
+        Color::lerp(Color::Blue(), Color::Green(), 0.6666),
+        Color::Green(),
+    };
+    ASSERT_COLOR_BUFFER_NEAR(gradient, lerped_colors);
+    ASSERT_EQ(texture_size, 5u);
+  }
+
+  {
+    // Gradient size is capped at 1024.
+    std::vector<Color> colors = {};
+    std::vector<Scalar> stops = {};
+    for (auto i = 0u; i < 2000; i++) {
+      colors.push_back(Color::Blue());
+      stops.push_back(i / 2000.0);
+    }
+    stops[1999] = 1.0;
+
+    uint32_t texture_size;
+    auto gradient = CreateGradientBuffer(colors, stops, &texture_size);
+
+    ASSERT_EQ(texture_size, 1024u);
+  }
 }
 
 }  // namespace testing

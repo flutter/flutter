@@ -97,6 +97,8 @@ impeller_component("entity") {
     "contents/filters/morphology_filter_contents.h",
     "contents/filters/srgb_to_linear_filter_contents.cc",
     "contents/filters/srgb_to_linear_filter_contents.h",
+    "contents/gradient_generator.cc",
+    "contents/gradient_generator.h",
     "contents/linear_gradient_contents.cc",
     "contents/linear_gradient_contents.h",
     "contents/radial_gradient_contents.cc",
