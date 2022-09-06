@@ -88,9 +88,9 @@ std::optional<Snapshot> DirectionalMorphologyFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-
-    auto transformed_radius = entity.GetTransformation().TransformDirection(
-        direction_ * radius_.radius);
+    auto transform = entity.GetTransformation() * effect_transform;
+    auto transformed_radius =
+        transform.TransformDirection(direction_ * radius_.radius);
     auto transformed_texture_vertices =
         Rect(Size(input_snapshot->texture->GetSize()))
             .GetTransformedPoints(input_snapshot->transform);
@@ -156,11 +156,9 @@ std::optional<Rect> DirectionalMorphologyFilterContents::GetFilterCoverage(
   if (!coverage.has_value()) {
     return std::nullopt;
   }
-
-  auto transformed_vector = inputs[0]
-                                ->GetTransform(entity)
-                                .TransformDirection(direction_ * radius_.radius)
-                                .Abs();
+  auto transform = inputs[0]->GetTransform(entity) * effect_transform;
+  auto transformed_vector =
+      transform.TransformDirection(direction_ * radius_.radius).Abs();
 
   auto extent = coverage->size + transformed_vector * 2;
   return Rect(coverage->origin - transformed_vector, Size(extent.x, extent.y));

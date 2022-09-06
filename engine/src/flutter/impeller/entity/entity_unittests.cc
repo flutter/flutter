@@ -1018,6 +1018,7 @@ TEST_P(EntityTest, MorphologyFilter) {
     static float path_rect[4] = {0, 0,
                                  static_cast<float>(boston->GetSize().width),
                                  static_cast<float>(boston->GetSize().height)};
+    static float effect_transform_scale = 1;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
@@ -1035,6 +1036,8 @@ TEST_P(EntityTest, MorphologyFilter) {
       ImGui::SliderFloat2("Scale", scale, 0, 3);
       ImGui::SliderFloat2("Skew", skew, -3, 3);
       ImGui::SliderFloat4("Path XYWH", path_rect, -1000, 1000);
+      ImGui::SliderFloat("Effect transform scale", &effect_transform_scale, 0,
+                         3);
     }
     ImGui::End();
 
@@ -1052,9 +1055,12 @@ TEST_P(EntityTest, MorphologyFilter) {
     input = texture;
     input_size = input_rect.size;
 
+    auto effect_transform = Matrix::MakeScale(
+        Vector2{effect_transform_scale, effect_transform_scale});
+
     auto contents = FilterContents::MakeMorphology(
         FilterInput::Make(input), Radius{radius[0]}, Radius{radius[1]},
-        morphology_types[selected_morphology_type]);
+        morphology_types[selected_morphology_type], effect_transform);
 
     auto ctm = Matrix::MakeScale(GetContentScale()) *
                Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *

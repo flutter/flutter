@@ -70,12 +70,15 @@ class FilterContents : public Contents {
       FilterInput::Ref input,
       Radius radius,
       Vector2 direction,
-      MorphType morph_type);
+      MorphType morph_type,
+      const Matrix& effect_transform = Matrix());
 
-  static std::shared_ptr<FilterContents> MakeMorphology(FilterInput::Ref input,
-                                                        Radius radius_x,
-                                                        Radius radius_y,
-                                                        MorphType morph_type);
+  static std::shared_ptr<FilterContents> MakeMorphology(
+      FilterInput::Ref input,
+      Radius radius_x,
+      Radius radius_y,
+      MorphType morph_type,
+      const Matrix& effect_transform = Matrix());
 
   static std::shared_ptr<FilterContents> MakeColorMatrix(
       FilterInput::Ref input,
