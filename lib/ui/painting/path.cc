@@ -308,11 +308,4 @@ void CanvasPath::clone(Dart_Handle path_handle) {
   path->mutable_path() = this->path();
 }
 
-// This is doomed to be called too early, since Paths are mutable.
-// However, it can help for some of the clone/shift/transform type methods
-// where the resultant path will initially have a meaningful size.
-size_t CanvasPath::GetAllocationSize() const {
-  return sizeof(CanvasPath) + path().approximateBytesUsed();
-}
-
 }  // namespace flutter

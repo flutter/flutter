@@ -21,7 +21,6 @@ typedef CanvasImage Image;
 static const tonic::DartWrapperInfo kDartWrapperInfo_ui_Image = {
     "ui",
     "_Image",
-    sizeof(Image),
 };
 const tonic::DartWrapperInfo& Image::dart_wrapper_info_ =
     kDartWrapperInfo_ui_Image;
@@ -39,10 +38,4 @@ void CanvasImage::dispose() {
   ClearDartWrapper();
 }
 
-size_t CanvasImage::GetAllocationSize() const {
-  // We don't actually want Dart's GC to use the size of this object to make GC
-  // decisions, as it is generally both created and disposed in the framework.
-  // This is similar to why we do not report the sizes of engine layers.
-  return sizeof(*this);
-}
 }  // namespace flutter

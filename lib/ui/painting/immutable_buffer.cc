@@ -77,10 +77,6 @@ Dart_Handle ImmutableBuffer::initFromAsset(Dart_Handle buffer_handle,
   return Dart_Null();
 }
 
-size_t ImmutableBuffer::GetAllocationSize() const {
-  return sizeof(ImmutableBuffer) + data_->size();
-}
-
 #if FML_OS_ANDROID
 
 // Compressed image buffers are allocated on the UI thread but are deleted on a

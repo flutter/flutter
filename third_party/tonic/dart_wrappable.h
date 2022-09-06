@@ -34,11 +34,6 @@ class DartWrappable {
   // Implement using IMPLEMENT_WRAPPERTYPEINFO macro
   virtual const DartWrapperInfo& GetDartWrapperInfo() const = 0;
 
-  // Override this to customize the object size reported to the Dart garbage
-  // collector.
-  // Implement using IMPLEMENT_WRAPPERTYPEINFO macro
-  virtual size_t GetAllocationSize() const;
-
   virtual void RetainDartWrappableReference() const = 0;
 
   virtual void ReleaseDartWrappableReference() const = 0;
@@ -85,7 +80,6 @@ class DartWrappable {
       kDartWrapperInfo_##LibraryName_##ClassName = {            \
           #LibraryName,                                         \
           #ClassName,                                           \
-          sizeof(ClassName),                                    \
   };                                                            \
   const tonic::DartWrapperInfo& ClassName::dart_wrapper_info_ = \
       kDartWrapperInfo_##LibraryName_##ClassName;

@@ -22,13 +22,6 @@ Paragraph::Paragraph(std::unique_ptr<txt::Paragraph> paragraph)
 
 Paragraph::~Paragraph() = default;
 
-size_t Paragraph::GetAllocationSize() const {
-  // We don't have an accurate accounting of the paragraph's memory consumption,
-  // so return a fixed size to indicate that its impact is more than the size
-  // of the Paragraph class.
-  return 2000;
-}
-
 double Paragraph::width() {
   return m_paragraph->GetMaxWidth();
 }

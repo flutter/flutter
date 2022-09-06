@@ -75,8 +75,6 @@ class ImmutableBuffer : public RefCountedDartWrappable<ImmutableBuffer> {
     ClearDartWrapper();
   }
 
-  size_t GetAllocationSize() const override;
-
  private:
   explicit ImmutableBuffer(sk_sp<SkData> data) : data_(std::move(data)) {}
 

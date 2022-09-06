@@ -125,7 +125,6 @@ TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
         image_handle, tonic::DartWrappable::kPeerIndex, &peer);
     ASSERT_FALSE(Dart_IsError(result));
     CanvasImage* canvas_image = reinterpret_cast<CanvasImage*>(peer);
-    ASSERT_EQ(canvas_image->GetAllocationSize(), sizeof(*canvas_image));
 
     int64_t format = -1;
     result = Dart_IntegerToInt64(format_handle, &format);
