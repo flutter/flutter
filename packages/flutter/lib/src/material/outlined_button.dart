@@ -80,7 +80,7 @@ class OutlinedButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
-    required Widget super.child,
+    required super.child,
   });
 
   /// Create a text button from a pair of widgets that serve as the button's
