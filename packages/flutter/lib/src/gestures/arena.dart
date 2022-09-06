@@ -225,6 +225,7 @@ class GestureArenaManager {
     print('_resolve');
     final _GestureArena? state = _arenas[pointer];
     if (state == null) {
+      print('arena has already resolved');
       return; // This arena has already resolved.
     }
     assert(_debugLogDiagnostic(pointer, '${ disposition == GestureDisposition.accepted ? "Accepting" : "Rejecting" }: $member'));
