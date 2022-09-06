@@ -166,7 +166,7 @@ Future<void> writeBundle(
       try {
         // This will result in strange looking files, for example files with `/`
         // on Windows or files that end up getting URI encoded such as `#.ext`
-        // to `%23.ext`.  However, we have to keep it this way since the
+        // to `%23.ext`. However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));

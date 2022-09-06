@@ -5,6 +5,7 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../integration.shard/test_utils.dart';
@@ -75,7 +76,7 @@ void main() {
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
       group('build in ${buildMode.name} mode', () {
-        late Directory buildPath;
+        late Directory outputPath;
         late Directory outputApp;
         late Directory frameworkDirectory;
         late Directory outputFlutterFramework;
@@ -83,6 +84,9 @@ void main() {
         late Directory outputAppFramework;
         late File outputAppFrameworkBinary;
         late File outputPluginFrameworkBinary;
+        late Directory buildPath;
+        late Directory buildAppFrameworkDsym;
+        late File buildAppFrameworkDsymBinary;
         late ProcessResult buildResult;
 
         setUpAll(() {
@@ -98,14 +102,14 @@ void main() {
             '--split-debug-info=foo debug info/',
           ], workingDirectory: projectRoot);
 
-          buildPath = fileSystem.directory(fileSystem.path.join(
+          outputPath = fileSystem.directory(fileSystem.path.join(
             projectRoot,
             'build',
             'ios',
             'iphoneos',
           ));
 
-          outputApp = buildPath.childDirectory('Runner.app');
+          outputApp = outputPath.childDirectory('Runner.app');
 
           frameworkDirectory = outputApp.childDirectory('Frameworks');
           outputFlutterFramework = frameworkDirectory.childDirectory('Flutter.framework');
@@ -115,6 +119,16 @@ void main() {
           outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
           outputPluginFrameworkBinary = frameworkDirectory.childDirectory('hello.framework').childFile('hello');
+
+          buildPath = fileSystem.directory(fileSystem.path.join(
+            projectRoot,
+            'build',
+            'ios',
+            '${sentenceCase(buildMode.name)}-iphoneos',
+          ));
+
+          buildAppFrameworkDsym = buildPath.childDirectory('App.framework.dSYM');
+          buildAppFrameworkDsymBinary = buildAppFrameworkDsym.childFile('Contents/Resources/DWARF/App');
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
@@ -127,6 +141,8 @@ void main() {
 
           expect(outputAppFrameworkBinary, exists);
           expect(outputAppFramework.childFile('Info.plist'), exists);
+
+          expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
 
           final File vmSnapshot = fileSystem.file(fileSystem.path.join(
             outputAppFramework.path,
@@ -190,6 +206,25 @@ void main() {
           expect(aotSymbolsFound, buildMode != BuildMode.debug);
         });
 
+        // dSYM is not created for a debug build so nothing to check.
+        if (buildMode != BuildMode.debug) {
+          testWithoutContext('check symbols in dSYM', () {
+            final ProcessResult nm = processManager.runSync(
+              <String>[
+                'nm',
+                '--debug-syms',
+                '--defined-only',
+                '--just-symbol-name',
+                buildAppFrameworkDsymBinary.path,
+                '-arch',
+                'arm64',
+              ],
+            );
+            final List<String> symbols = (nm.stdout as String).split('\n');
+            expect(symbols, contains('_kDartVmSnapshotInstructions'));
+          });
+        }
+
         testWithoutContext('xcode_backend embed_and_thin', () {
           outputFlutterFramework.deleteSync(recursive: true);
           outputAppFramework.deleteSync(recursive: true);
@@ -219,7 +254,7 @@ void main() {
                 'ios',
                 'Release-iphoneos',
               ),
-              'TARGET_BUILD_DIR': buildPath.path,
+              'TARGET_BUILD_DIR': outputPath.path,
               'FRAMEWORKS_FOLDER_PATH': 'Runner.app/Frameworks',
               'VERBOSE_SCRIPT_LOGGING': '1',
               'FLUTTER_BUILD_MODE': 'release',

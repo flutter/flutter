@@ -210,7 +210,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
           'main.dill',
         ]),
         kWhichSysctlCommand,
@@ -253,6 +252,21 @@ void main() {
           'build/foo/App.framework/App',
           'build/foo/snapshot_assembly.o',
         ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-S',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
+        ]),
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -285,7 +299,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
           '--dwarf-stack-traces',
           '--save-debugging-info=$debugPath',
           'main.dill',
@@ -311,6 +324,21 @@ void main() {
           '-arch',
           'arm64',
           ...kDefaultClang,
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-S',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
         ]),
       ]);
 
@@ -344,7 +372,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
           '--obfuscate',
           'main.dill',
         ]),
@@ -369,6 +396,21 @@ void main() {
           '-arch',
           'arm64',
           ...kDefaultClang,
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-S',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
         ]),
       ]);
 
@@ -400,7 +442,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
-          '--strip',
           'main.dill',
         ]),
         kWhichSysctlCommand,
@@ -424,6 +465,21 @@ void main() {
           '-arch',
           'arm64',
           ...kDefaultClang,
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-S',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
         ]),
       ]);
 

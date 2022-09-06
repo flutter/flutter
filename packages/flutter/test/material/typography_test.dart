@@ -101,6 +101,26 @@ void main() {
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 
+  test('Can lerp between different typographies', () {
+    final List<Typography> all = <Typography>[
+      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2014(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2018(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2021(platform: platform),
+    ];
+
+    for (final Typography fromTypography in all) {
+      for (final Typography toTypegraphy in all) {
+        Object? error;
+        try {
+          Typography.lerp(fromTypography, toTypegraphy, 0.5);
+        } catch (e) {
+          error = e;
+        }
+        expect(error, isNull);
+      }
+    }
+  });
+
   test('englishLike2018 TextTheme matches Material Design spec', () {
     // Check the default material text theme against the style values
     // shown https://material.io/design/typography/#type-scale.

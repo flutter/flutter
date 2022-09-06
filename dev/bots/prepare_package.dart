@@ -185,7 +185,7 @@ typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> he
 
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
-  /// [tempDir] is the directory to use for creating the archive.  The script
+  /// [tempDir] is the directory to use for creating the archive. The script
   /// will place several GiB of data there, so it should have available space.
   ///
   /// The processManager argument is used to inject a mock of [ProcessManager] for
@@ -263,7 +263,7 @@ class ArchiveCreator {
   /// platform we're running on.
   final Platform platform;
 
-  /// The branch to build the archive for.  The branch must contain [revision].
+  /// The branch to build the archive for. The branch must contain [revision].
   final Branch branch;
 
   /// The git revision hash to build the archive for. This revision has
@@ -385,7 +385,7 @@ class ArchiveCreator {
   /// git will give an error.
   ///
   /// If [strict] is true, the exact [revision] must be tagged to return the
-  /// version.  If [strict] is not true, will look backwards in time starting at
+  /// version. If [strict] is not true, will look backwards in time starting at
   /// [revision] to find the most recent version tag.
   ///
   /// The version found as a git tag is added to the information given by
