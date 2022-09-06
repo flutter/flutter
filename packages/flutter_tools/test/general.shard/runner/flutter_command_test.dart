@@ -348,7 +348,7 @@ void main() {
             final Completer<void> c = Completer<void>();
             await c.future;
             throw UnsupportedError('Unreachable');
-          } as Future<FlutterCommandResult> Function()
+          }
         );
 
         unawaited(flutterCommand.run());
@@ -396,7 +396,7 @@ void main() {
           final Completer<void> c = Completer<void>();
           await c.future;
           throw UnsupportedError('Unreachable');
-        } as Future<FlutterCommandResult> Function());
+        });
 
         unawaited(flutterCommand.run());
         await checkLockCompleter.future;
