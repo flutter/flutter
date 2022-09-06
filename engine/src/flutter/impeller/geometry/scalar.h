@@ -19,10 +19,15 @@ constexpr T Absolute(const T& val) {
   return val >= T{} ? val : -val;
 }
 
+constexpr inline bool ScalarNearlyZero(Scalar x,
+                                       Scalar tolerance = kEhCloseEnough) {
+  return Absolute(x) <= tolerance;
+}
+
 constexpr inline bool ScalarNearlyEqual(Scalar x,
                                         Scalar y,
                                         Scalar tolerance = kEhCloseEnough) {
-  return Absolute(x - y) <= tolerance;
+  return ScalarNearlyZero(x - y, tolerance);
 }
 
 struct Degrees;
