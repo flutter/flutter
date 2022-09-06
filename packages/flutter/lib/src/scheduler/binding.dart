@@ -633,9 +633,10 @@ mixin SchedulerBinding on BindingBase {
     return true;
   }
 
-  /// Asserts that there are no pending performance mode requests. If there are
-  /// any pending requests, throws an exception as it indicates undisposed
-  /// performance mode requests.
+  /// Asserts that there are no pending performance mode requests in debug mode.
+  ///
+  /// Throws a [FlutterError] if there are pending performance mode requests,
+  /// as this indicates a potential memory leak. 
   bool debugAssertNoPendingPerformanceModeRequests(String reason) {
     assert(() {
       if (_performanceMode != null) {
