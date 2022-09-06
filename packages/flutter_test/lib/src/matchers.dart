@@ -542,6 +542,7 @@ Matcher matchesSemantics({
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
+  bool isCheckStateMixed = false,
   bool isSelected = false,
   bool isButton = false,
   bool isSlider = false,
@@ -617,6 +618,7 @@ Matcher matchesSemantics({
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
+    isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
     isButton: isButton,
     isSlider: isSlider,
@@ -713,6 +715,7 @@ Matcher containsSemantics({
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
+  bool? isCheckStateMixed,
   bool? isSelected,
   bool? isButton,
   bool? isSlider,
@@ -788,6 +791,7 @@ Matcher containsSemantics({
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
+    isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
     isButton: isButton,
     isSlider: isSlider,
@@ -2085,6 +2089,7 @@ class _MatchesSemanticsData extends Matcher {
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
+    required bool? isCheckStateMixed,
     required bool? isSelected,
     required bool? isButton,
     required bool? isSlider,
@@ -2138,6 +2143,7 @@ class _MatchesSemanticsData extends Matcher {
   })  : flags = <SemanticsFlag, bool>{
           if (hasCheckedState != null) SemanticsFlag.hasCheckedState: hasCheckedState,
           if (isChecked != null) SemanticsFlag.isChecked: isChecked,
+          if (isCheckStateMixed != null) SemanticsFlag.isCheckStateMixed: isCheckStateMixed,
           if (isSelected != null) SemanticsFlag.isSelected: isSelected,
           if (isButton != null) SemanticsFlag.isButton: isButton,
           if (isSlider != null) SemanticsFlag.isSlider: isSlider,

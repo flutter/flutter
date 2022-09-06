@@ -139,6 +139,24 @@ void main() {
       hasEnabledState: true,
       isChecked: true,
     ));
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: const Material(
+        child: Checkbox(
+          value: null,
+          tristate: true,
+          onChanged: null,
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isCheckStateMixed: true,
+    ));
+
     handle.dispose();
   });
 
@@ -239,6 +257,7 @@ void main() {
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
         SemanticsFlag.isFocusable,
+        SemanticsFlag.isCheckStateMixed,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));

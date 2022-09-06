@@ -425,6 +425,7 @@ void _defineTests() {
           properties: SemanticsProperties(
             enabled: true,
             checked: true,
+            mixed: true,
             selected: true,
             hidden: true,
             button: true,
@@ -444,7 +445,6 @@ void _defineTests() {
             image: true,
             liveRegion: true,
             toggled: true,
-            isCheckStateMixed: true,
           ),
         ),
       ),
@@ -477,6 +477,7 @@ void _defineTests() {
           properties: SemanticsProperties(
             enabled: true,
             checked: true,
+            mixed: true,
             toggled: true,
             selected: true,
             hidden: true,
@@ -496,7 +497,6 @@ void _defineTests() {
             namesRoute: true,
             image: true,
             liveRegion: true,
-            isCheckStateMixed: true,
           ),
         ),
       ),
