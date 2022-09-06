@@ -2729,6 +2729,16 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac platform_view_macos__start_up
+    bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: platform_view_macos__start_up
+
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
