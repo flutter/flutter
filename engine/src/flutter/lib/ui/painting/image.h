@@ -37,8 +37,6 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
 
   void set_image(sk_sp<DlImage> image) { image_ = image; }
 
-  size_t GetAllocationSize() const override;
-
  private:
   CanvasImage();
 

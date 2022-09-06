@@ -25,8 +25,6 @@ TEST_F(ShellTest, SingleFrameCodecAccuratelyReportsSize) {
     Dart_Handle result = Dart_GetNativeInstanceField(
         handle, tonic::DartWrappable::kPeerIndex, &peer);
     ASSERT_FALSE(Dart_IsError(result));
-    SingleFrameCodec* codec = reinterpret_cast<SingleFrameCodec*>(peer);
-    ASSERT_EQ(codec->GetAllocationSize(), sizeof(SingleFrameCodec));
   };
   auto finish = [message_latch](Dart_NativeArguments args) {
     message_latch->Signal();

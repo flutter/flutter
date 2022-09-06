@@ -111,8 +111,6 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
 
   const SkPath& path() const { return tracked_path_->path; }
 
-  size_t GetAllocationSize() const override;
-
  private:
   CanvasPath();
 
