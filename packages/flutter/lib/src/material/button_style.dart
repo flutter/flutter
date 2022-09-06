@@ -74,12 +74,12 @@ import 'theme_data.dart';
 /// Configuring a ButtonStyle directly makes it possible to very
 /// precisely control the button’s visual attributes for all states.
 /// This level of control is typically required when a custom
-/// “branded” look and feel is desirable.  However, in many cases it’s
+/// “branded” look and feel is desirable. However, in many cases it’s
 /// useful to make relatively sweeping changes based on a few initial
 /// parameters with simple values. The button styleFrom() methods
 /// enable such sweeping changes. See for example:
-/// [TextButton.styleFrom], [ElevatedButton.styleFrom],
-/// [OutlinedButton.styleFrom].
+/// [ElevatedButton.styleFrom], [FilledButton.styleFrom],
+/// [OutlinedButton.styleFrom], [TextButton.styleFrom].
 ///
 /// For example, to override the default text and icon colors for a
 /// [TextButton], as well as its overlay color, with all of the
@@ -119,8 +119,8 @@ import 'theme_data.dart';
 /// | Type         | Flutter implementation  |
 /// | :----------- | :---------------------- |
 /// | Elevated     | [ElevatedButton]        |
-/// | Filled       | Styled [ElevatedButton] |
-/// | Filled Tonal | Styled [ElevatedButton] |
+/// | Filled       | [FilledButton]          |
+/// | Filled Tonal | [FilledButton.tonal]    |
 /// | Outlined     | [OutlinedButton]        |
 /// | Text         | [TextButton]            |
 ///
@@ -132,9 +132,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [TextButtonTheme], the theme for [TextButton]s.
 ///  * [ElevatedButtonTheme], the theme for [ElevatedButton]s.
+///  * [FilledButtonTheme], the theme for [FilledButton]s.
 ///  * [OutlinedButtonTheme], the theme for [OutlinedButton]s.
+///  * [TextButtonTheme], the theme for [TextButton]s.
 @immutable
 class ButtonStyle with Diagnosticable {
   /// Create a [ButtonStyle].
@@ -484,18 +485,18 @@ class ButtonStyle with Diagnosticable {
       return null;
     }
     return ButtonStyle(
-      textStyle: _lerpProperties<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
-      backgroundColor: _lerpProperties<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      foregroundColor:  _lerpProperties<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
-      overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
-      shadowColor: _lerpProperties<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
-      surfaceTintColor: _lerpProperties<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
-      elevation: _lerpProperties<double?>(a?.elevation, b?.elevation, t, lerpDouble),
-      padding:  _lerpProperties<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
-      minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
-      fixedSize: _lerpProperties<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
-      maximumSize: _lerpProperties<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
-      iconSize: _lerpProperties<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
+      textStyle: MaterialStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
+      backgroundColor: MaterialStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
+      foregroundColor: MaterialStateProperty.lerp<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
+      overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      shadowColor: MaterialStateProperty.lerp<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
+      surfaceTintColor: MaterialStateProperty.lerp<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
+      elevation: MaterialStateProperty.lerp<double?>(a?.elevation, b?.elevation, t, lerpDouble),
+      padding: MaterialStateProperty.lerp<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
+      fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
+      maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       side: _lerpSides(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
@@ -508,36 +509,12 @@ class ButtonStyle with Diagnosticable {
     );
   }
 
-  static MaterialStateProperty<T?>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T? Function(T?, T?, double) lerpFunction ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null) {
-      return null;
-    }
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-
   // Special case because BorderSide.lerp() doesn't support null arguments
   static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
     if (a == null && b == null) {
       return null;
     }
     return _LerpSides(a, b, t);
-  }
-}
-
-class _LerpProperties<T> implements MaterialStateProperty<T?> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T? Function(T?, T?, double) lerpFunction;
-
-  @override
-  T? resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
   }
 }
 

@@ -918,7 +918,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
 //
 // If all content and buttons do not fit on screen, and iOS is NOT in accessibility mode:
 // A minimum height for the action button section is calculated. The action
-// button section will not be rendered shorter than this minimum.  See
+// button section will not be rendered shorter than this minimum. See
 // [_RenderCupertinoDialogActions] for the minimum height calculation.
 //
 // With the minimum action button section calculated, the content section can
@@ -1335,7 +1335,7 @@ enum _AlertDialogSections {
 
 // The "content section" of a CupertinoAlertDialog.
 //
-// If title is missing, then only content is added.  If content is
+// If title is missing, then only content is added. If content is
 // missing, then only title is added. If both are missing, then it returns
 // a SingleChildScrollView with a zero-sized Container.
 class _CupertinoAlertContentSection extends StatelessWidget {
@@ -2254,7 +2254,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   void _drawButtonBackgroundsAndDividersSingleRow(Canvas canvas, Offset offset) {
     // The vertical divider sits between the left button and right button (if
-    // the dialog has 2 buttons).  The vertical divider is hidden if either the
+    // the dialog has 2 buttons). The vertical divider is hidden if either the
     // left or right button is pressed.
     final Rect verticalDivider = childCount == 2 && !_isButtonPressed
         ? Rect.fromLTWH(

@@ -282,9 +282,9 @@ void main() {
     final ThemeData themeDataM3 = ThemeData(
       useMaterial3: material3,
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          visualDensity: const VisualDensity(horizontal: 1, vertical: -1)
-        )
+          style: IconButton.styleFrom(
+              visualDensity: const VisualDensity(horizontal: 1, vertical: -1)
+          )
       ),
     );
     await tester.pumpWidget(
@@ -1649,10 +1649,10 @@ void main() {
       return tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
-            iconButtonTheme: IconButtonThemeData(
-              style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity)
-            ),
-            visualDensity: themeVisualDensity
+              iconButtonTheme: IconButtonThemeData(
+                  style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity)
+              ),
+              visualDensity: themeVisualDensity
           ),
           home: Material(
             child: Center(

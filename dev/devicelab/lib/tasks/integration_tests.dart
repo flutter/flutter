@@ -149,6 +149,14 @@ TaskFunction createSpellCheckIntegrationTest() {
   );
 }
 
+TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
+    'lib/main.dart',
+    deviceIdOverride: deviceIdOverride,
+  );
+}
+
 class DriverTest {
   DriverTest(
     this.testDirectory,

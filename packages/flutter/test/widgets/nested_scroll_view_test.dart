@@ -2216,7 +2216,7 @@ void main() {
       await tester.drag(find.text('Item 49'), const Offset(0.0, -50.0));
       await tester.pump();
       // If handled correctly, the last item should still be visible and
-      // progressing  back down to the bottom edge, instead of jumping further
+      // progressing back down to the bottom edge, instead of jumping further
       // up the list and out of view.
       expect(find.text('Item 49'), findsOneWidget);
       await tester.pumpAndSettle();

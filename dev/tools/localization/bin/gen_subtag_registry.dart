@@ -7,8 +7,8 @@ import 'dart:io';
 
 const String registry = 'https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry';
 
-/// A script to generate a Dart cache of https://www.iana.org.  This should be
-/// run occasionally.  It was created since iana.org was found to be flakey.
+/// A script to generate a Dart cache of https://www.iana.org. This should be
+/// run occasionally. It was created since iana.org was found to be flakey.
 ///
 /// To execute: dart gen_subtag_registry.dart > language_subtag_registry.dart
 Future<void> main() async {

@@ -133,7 +133,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// internal default property value.
 ///
 /// In Material Design 3, the [IconButton.visualDensity] defaults to [VisualDensity.standard]
-/// for all platforms because the button will have a rounded rectangle shape if
+/// for all platforms; otherwise the button will have a rounded rectangle shape if
 /// the [IconButton.visualDensity] is set to [VisualDensity.compact]. Users can
 /// customize it by using [IconButtonTheme], [IconButton.style] or [IconButton.visualDensity].
 ///

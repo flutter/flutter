@@ -15,6 +15,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   factory MockFlutterDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
+    bool simulateAppStarted = true,
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
@@ -26,6 +27,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
       channel,
       fileSystem: fileSystem,
       platform: platform,
+      simulateAppStarted: simulateAppStarted,
     );
   }
 
@@ -35,10 +37,12 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     ByteStreamServerChannel channel, {
     required FileSystem fileSystem,
     required Platform platform,
+    this.simulateAppStarted = true,
   }) : super(channel, fileSystem: fileSystem, platform: platform);
 
   final StreamSink<List<int>> stdin;
   final Stream<List<int>> stdout;
+  final bool simulateAppStarted;
 
   late String executable;
   late List<String> processArgs;
@@ -57,7 +61,10 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
     // Pretend we launched the app and got the app.started event so that
     // launchRequest will complete.
-    appStartedCompleter.complete();
+    if (simulateAppStarted) {
+      appId = 'TEST';
+      appStartedCompleter.complete();
+    }
   }
 
   @override

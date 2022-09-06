@@ -1305,14 +1305,14 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void didUpdateWidget(_FloatingActionButtonTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
+      // Get the right scale and rotation animations to use for this widget.
+      _updateAnimations();
+    }
     final bool oldChildIsNull = oldWidget.child == null;
     final bool newChildIsNull = widget.child == null;
     if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key) {
       return;
-    }
-    if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
-      // Get the right scale and rotation animations to use for this widget.
-      _updateAnimations();
     }
     if (_previousController.status == AnimationStatus.dismissed) {
       final double currentValue = widget.currentController.value;
@@ -2484,7 +2484,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   double get _floatingActionButtonVisibilityValue => _floatingActionButtonVisibilityController.value;
 
   /// Sets the current value of the visibility animation for the
-  /// [Scaffold.floatingActionButton].  This value must not be null.
+  /// [Scaffold.floatingActionButton]. This value must not be null.
   set _floatingActionButtonVisibilityValue(double newValue) {
     assert(newValue != null);
     _floatingActionButtonVisibilityController.value = clampDouble(newValue,
@@ -2522,7 +2522,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // iOS FEATURES - status bar tap, back gesture
 
   // On iOS, tapping the status bar scrolls the app's primary scrollable to the
-  // top. We implement this by looking up the  primary scroll controller and
+  // top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
     final ScrollController? primaryScrollController = PrimaryScrollController.of(context);

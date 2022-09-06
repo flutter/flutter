@@ -221,7 +221,7 @@ void _writeGeneratedFlutterConfig(
   if (artifacts is LocalEngineArtifacts) {
     final String engineOutPath = artifacts.engineOutPath;
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
+    environment['LOCAL_ENGINE'] = artifacts.localEngineName;
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
 }
