@@ -6,7 +6,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -351,7 +350,7 @@ class FakeXcodeProjectInfo extends Fake implements XcodeProjectInfo {
   String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) => 'Release';
 
   @override
-  List<String> targets = [];
+  List<String> targets = <String>[];
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
