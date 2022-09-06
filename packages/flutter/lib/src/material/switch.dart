@@ -63,7 +63,7 @@ enum _SwitchType { material, adaptive }
 ///
 /// {@tool dartpad}
 /// This example shows how to add icons and images on the thumb of the [Switch]
-/// using [Switch.inactiveIcon], [Switch.activeIcon] and [Switch.thumbImage] properties.
+/// using the [Switch.thumbImage] property.
 ///
 /// ** See code in examples/api/lib/material/switch/switch.2.dart **
 /// {@end-tool}
