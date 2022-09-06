@@ -382,7 +382,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// Builds the label for an destination in a [NavigationBar].
   ///
   /// To animate between unselected and selected, build the icon based on
-  /// [_NavigationDestinationInfo.selectedAnimation].  When the animation is
+  /// [_NavigationDestinationInfo.selectedAnimation]. When the animation is
   /// 0, the destination is unselected, when the animation is 1, the destination
   /// is selected.
   ///

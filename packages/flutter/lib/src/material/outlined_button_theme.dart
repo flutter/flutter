@@ -16,7 +16,7 @@ import 'theme.dart';
 /// overall [Theme]'s [ThemeData.outlinedButtonTheme].
 ///
 /// The [style]'s properties override [OutlinedButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [OutlinedButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [OutlinedButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///

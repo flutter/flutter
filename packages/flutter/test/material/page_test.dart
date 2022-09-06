@@ -158,7 +158,7 @@ void main() {
   testWidgets('test page transition (_ZoomPageTransition) without rasterization', (WidgetTester tester) async {
     Iterable<Layer> findLayers(Finder of) {
       return tester.layerListOf(
-        find.ancestor(of: of, matching: find.byType(RasterWidget)).first,
+        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
       );
     }
 
@@ -174,7 +174,7 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<void>(
-            preferRasterization: false,
+            allowSnapshotting: false,
             builder: (BuildContext context) {
               if (settings.name == '/') {
                 return const Material(child: Text('Page 1'));
@@ -1004,8 +1004,7 @@ void main() {
     await tester.pumpWidget(
       RootRestorationScope(
         restorationId: 'root',
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             onPopPage: (Route<dynamic> route, dynamic result) { return false; },
             pages: const <Page<Object?>>[
@@ -1174,6 +1173,23 @@ class _TestRestorableWidgetState extends State<TestRestorableWidget> with Restor
           child: const Text('increment'),
         ),
       ],
+    );
+  }
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: child,
+      ),
     );
   }
 }

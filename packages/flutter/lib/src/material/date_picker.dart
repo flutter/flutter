@@ -869,7 +869,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 ///   * [helpText], the label displayed at the top of the dialog.
 ///   * [cancelText], the label on the cancel button for the text input mode.
-///   * [confirmText],the  label on the ok button for the text input mode.
+///   * [confirmText],the label on the ok button for the text input mode.
 ///   * [saveText], the label on the save button for the fullscreen calendar
 ///     mode.
 ///   * [errorFormatText], the message used when an input text isn't in a proper

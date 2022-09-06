@@ -132,7 +132,7 @@ class _OverlayExampleState extends State<OverlayExample> {
     );
 
     // Add the OverlayEntry to the Overlay.
-    Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
+    Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
   }
 
   // Remove the OverlayEntry.

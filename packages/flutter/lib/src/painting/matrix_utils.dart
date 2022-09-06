@@ -245,7 +245,7 @@ class MatrixUtils {
     // since we know that Z=0.0. We can also get rid of the 3rd row because
     // we ignore the resulting Z coordinate. Finally we can get rid of the
     // last row if we don't have a perspective transform since we can verify
-    // that the results are 1.0 for all points.  This gets us down to 16
+    // that the results are 1.0 for all points. This gets us down to 16
     // multiplies and 16 adds in the non-perspective case and 24 of each for
     // the perspective case. (Plus the 12 comparisons to turn them back into
     // a bounding box.)
@@ -282,7 +282,7 @@ class MatrixUtils {
     // continue to hold with respect to the non-normalized coordinates so
     // we can still save a lot of multiplications by computing the 4
     // non-normalized coordinates using relative additions before we normalize
-    // them and they lose their "pseudo-parallelogram" relationships.  We still
+    // them and they lose their "pseudo-parallelogram" relationships. We still
     // have to do the normalization divisions and min/max all 4 points to
     // get the resulting transformed bounding box, but we save a lot of
     // calculations over blindly transforming all 4 coordinates independently.
@@ -344,8 +344,8 @@ class MatrixUtils {
     // for a total of 8 multiplies, 8 adds, and 4 comparisons.
     //
     // An astute observer will note that we do need to do 2 subtractions at
-    // the top of the method to compute the width and height.  Add those to
-    // all of the relative solutions listed above.  The test for perspective
+    // the top of the method to compute the width and height. Add those to
+    // all of the relative solutions listed above. The test for perspective
     // also adds 3 compares to the affine case and up to 3 compares to the
     // perspective case (depending on which test fails, the rest are omitted).
     //

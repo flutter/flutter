@@ -2191,8 +2191,12 @@ abstract class RenderBox extends RenderObject {
       return false;
     }());
     assert(_debugSetDoingBaseline(true));
-    final double? result = getDistanceToActualBaseline(baseline);
-    assert(_debugSetDoingBaseline(false));
+    final double? result;
+    try {
+      result = getDistanceToActualBaseline(baseline);
+    } finally {
+      assert(_debugSetDoingBaseline(false));
+    }
     if (result == null && !onlyReal) {
       return size.height;
     }
