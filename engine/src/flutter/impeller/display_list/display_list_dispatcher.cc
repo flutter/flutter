@@ -313,16 +313,19 @@ void DisplayListDispatcher::setColorSource(
       auto start_point = ToPoint(linear->start_point());
       auto end_point = ToPoint(linear->end_point());
       std::vector<Color> colors;
+      std::vector<float> stops;
       for (auto i = 0; i < linear->stop_count(); i++) {
         colors.emplace_back(ToColor(linear->colors()[i]));
+        stops.emplace_back(linear->stops()[i]);
       }
       auto tile_mode = ToTileMode(linear->tile_mode());
       auto matrix = ToMatrix(linear->matrix());
       paint_.color_source = [start_point, end_point, colors = std::move(colors),
-                             tile_mode, matrix]() {
+                             stops = std::move(stops), tile_mode, matrix]() {
         auto contents = std::make_shared<LinearGradientContents>();
-        contents->SetEndPoints(start_point, end_point);
         contents->SetColors(std::move(colors));
+        contents->SetStops(std::move(stops));
+        contents->SetEndPoints(start_point, end_point);
         contents->SetTileMode(tile_mode);
         contents->SetMatrix(matrix);
         return contents;
@@ -336,16 +339,19 @@ void DisplayListDispatcher::setColorSource(
       auto center = ToPoint(radialGradient->center());
       auto radius = radialGradient->radius();
       std::vector<Color> colors;
+      std::vector<float> stops;
       for (auto i = 0; i < radialGradient->stop_count(); i++) {
         colors.emplace_back(ToColor(radialGradient->colors()[i]));
+        stops.emplace_back(radialGradient->stops()[i]);
       }
       auto tile_mode = ToTileMode(radialGradient->tile_mode());
       auto matrix = ToMatrix(radialGradient->matrix());
       paint_.color_source = [center, radius, colors = std::move(colors),
-                             tile_mode, matrix]() {
+                             stops = std::move(stops), tile_mode, matrix]() {
         auto contents = std::make_shared<RadialGradientContents>();
-        contents->SetCenterAndRadius(center, radius);
         contents->SetColors(std::move(colors));
+        contents->SetStops(std::move(stops));
+        contents->SetCenterAndRadius(center, radius);
         contents->SetTileMode(tile_mode);
         contents->SetMatrix(matrix);
         return contents;
@@ -361,16 +367,20 @@ void DisplayListDispatcher::setColorSource(
       auto start_angle = Degrees(sweepGradient->start());
       auto end_angle = Degrees(sweepGradient->end());
       std::vector<Color> colors;
+      std::vector<Scalar> stops;
       for (auto i = 0; i < sweepGradient->stop_count(); i++) {
         colors.emplace_back(ToColor(sweepGradient->colors()[i]));
+        stops.emplace_back(sweepGradient->stops()[i]);
       }
       auto tile_mode = ToTileMode(sweepGradient->tile_mode());
       auto matrix = ToMatrix(sweepGradient->matrix());
       paint_.color_source = [center, start_angle, end_angle,
-                             colors = std::move(colors), tile_mode, matrix]() {
+                             colors = std::move(colors),
+                             stops = std::move(stops), tile_mode, matrix]() {
         auto contents = std::make_shared<SweepGradientContents>();
         contents->SetCenterAndAngles(center, start_angle, end_angle);
         contents->SetColors(std::move(colors));
+        contents->SetStops(std::move(stops));
         contents->SetTileMode(tile_mode);
         contents->SetMatrix(matrix);
         return contents;

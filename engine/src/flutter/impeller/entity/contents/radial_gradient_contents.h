@@ -32,14 +32,19 @@ class RadialGradientContents final : public ColorSourceContents {
 
   void SetColors(std::vector<Color> colors);
 
-  void SetTileMode(Entity::TileMode tile_mode);
+  void SetStops(std::vector<Scalar> stops);
 
   const std::vector<Color>& GetColors() const;
+
+  const std::vector<Scalar>& GetStops() const;
+
+  void SetTileMode(Entity::TileMode tile_mode);
 
  private:
   Point center_;
   Scalar radius_;
   std::vector<Color> colors_;
+  std::vector<Scalar> stops_;
   Entity::TileMode tile_mode_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RadialGradientContents);

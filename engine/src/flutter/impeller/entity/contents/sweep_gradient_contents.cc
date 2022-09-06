@@ -6,8 +6,10 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/gradient_generator.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/sampler_library.h"
 #include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
@@ -29,12 +31,10 @@ void SweepGradientContents::SetCenterAndAngles(Point center,
 
 void SweepGradientContents::SetColors(std::vector<Color> colors) {
   colors_ = std::move(colors);
-  if (colors_.empty()) {
-    colors_.push_back(Color::Black());
-    colors_.push_back(Color::Black());
-  } else if (colors_.size() < 2u) {
-    colors_.push_back(colors_.back());
-  }
+}
+
+void SweepGradientContents::SetStops(std::vector<Scalar> stops) {
+  stops_ = std::move(stops);
 }
 
 void SweepGradientContents::SetTileMode(Entity::TileMode tile_mode) {
@@ -43,6 +43,10 @@ void SweepGradientContents::SetTileMode(Entity::TileMode tile_mode) {
 
 const std::vector<Color>& SweepGradientContents::GetColors() const {
   return colors_;
+}
+
+const std::vector<Scalar>& SweepGradientContents::GetStops() const {
+  return stops_;
 }
 
 bool SweepGradientContents::Render(const ContentContext& renderer,
@@ -69,18 +73,24 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
     }
   }
 
-  VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation();
-  frame_info.matrix = GetInverseMatrix();
+  auto gradient_texture =
+      CreateGradientTexture(colors_, stops_, renderer.GetContext());
+  if (gradient_texture == nullptr) {
+    return false;
+  }
 
   FS::GradientInfo gradient_info;
   gradient_info.center = center_;
   gradient_info.bias = bias_;
   gradient_info.scale = scale_;
-  gradient_info.start_color = colors_[0].Premultiply();
-  gradient_info.end_color = colors_[1].Premultiply();
+  gradient_info.texture_sampler_y_coord_scale =
+      gradient_texture->GetYCoordScale();
   gradient_info.tile_mode = static_cast<Scalar>(tile_mode_);
+
+  VS::FrameInfo frame_info;
+  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation();
+  frame_info.matrix = GetInverseMatrix();
 
   Command cmd;
   cmd.label = "SweepGradientFill";
@@ -93,6 +103,12 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
   FS::BindGradientInfo(
       cmd, pass.GetTransientsBuffer().EmplaceUniform(gradient_info));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+  FS::BindTextureSampler(
+      cmd, gradient_texture,
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
   return pass.AddCommand(std::move(cmd));
 }
 
