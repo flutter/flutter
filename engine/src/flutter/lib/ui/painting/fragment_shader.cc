@@ -23,7 +23,6 @@ namespace flutter {
 static const tonic::DartWrapperInfo kDartWrapperInfo_ui_FragmentShader = {
     "ui",
     "_FragmentShader",
-    sizeof(FragmentShader),
 };
 const tonic::DartWrapperInfo& FragmentShader::dart_wrapper_info_ =
     kDartWrapperInfo_ui_FragmentShader;

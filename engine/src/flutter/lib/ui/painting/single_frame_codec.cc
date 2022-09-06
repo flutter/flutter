@@ -113,8 +113,4 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   return Dart_Null();
 }
 
-size_t SingleFrameCodec::GetAllocationSize() const {
-  return sizeof(*this);
-}
-
 }  // namespace flutter

@@ -80,13 +80,6 @@ bool Vertices::init(Dart_Handle vertices_handle,
   return true;
 }
 
-size_t Vertices::GetAllocationSize() const {
-  if (!vertices_) {
-    return sizeof(*this);
-  }
-  return vertices_->size();
-}
-
 void Vertices::dispose() {
   vertices_.reset();
   ClearDartWrapper();

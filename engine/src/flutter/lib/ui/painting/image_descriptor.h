@@ -114,10 +114,6 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
     ClearDartWrapper();
   }
 
-  size_t GetAllocationSize() const override {
-    return sizeof(ImageDescriptor) + sizeof(SkImageInfo) + buffer_->size();
-  }
-
  private:
   ImageDescriptor(sk_sp<SkData> buffer,
                   const SkImageInfo& image_info,

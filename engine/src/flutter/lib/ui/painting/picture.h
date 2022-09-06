@@ -40,7 +40,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
   void dispose();
 
-  size_t GetAllocationSize() const override;
+  size_t GetAllocationSize() const;
 
   static void RasterizeToImageSync(sk_sp<DisplayList> display_list,
                                    uint32_t width,

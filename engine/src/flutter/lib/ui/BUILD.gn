@@ -228,7 +228,6 @@ if (enable_unittests) {
       "painting/image_generator_registry_unittests.cc",
       "painting/path_unittests.cc",
       "painting/single_frame_codec_unittests.cc",
-      "painting/vertices_unittests.cc",
       "semantics/semantics_update_builder_unittests.cc",
       "window/platform_configuration_unittests.cc",
       "window/platform_message_response_dart_unittests.cc",
