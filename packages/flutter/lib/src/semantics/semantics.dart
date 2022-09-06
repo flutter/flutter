@@ -776,6 +776,7 @@ class SemanticsProperties extends DiagnosticableTree {
   const SemanticsProperties({
     this.enabled,
     this.checked,
+    this.mixed,
     this.selected,
     this.toggled,
     this.button,
@@ -853,6 +854,12 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// This is mutually exclusive with [toggled].
   final bool? checked;
+
+  /// If true, indicates that this subtree represents a checkbox
+  /// or similar widget with a "mixed" check state.
+  ///
+  /// This must be false when [Checkbox.tristate] is false.
+  final bool? mixed;
 
   /// If non-null, indicates that this subtree represents a toggle switch
   /// or similar widget with an "on" state, and what its current
@@ -1490,6 +1497,7 @@ class SemanticsProperties extends DiagnosticableTree {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
@@ -4191,6 +4199,20 @@ class SemanticsConfiguration {
   set isChecked(bool? value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value!);
+  }
+
+  /// If this node has tristate that can be controlled by the user, whether
+  /// that state is in its mixed state.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have checked/unchecked state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// mixed checked state.
+  bool? get isMixed => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isCheckStateMixed) : null;
+  set isMixed(bool? value) {
+    _setFlag(SemanticsFlag.hasCheckedState, true);
+    _setFlag(SemanticsFlag.isCheckStateMixed, value!);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
