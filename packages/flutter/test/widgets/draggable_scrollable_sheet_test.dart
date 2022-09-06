@@ -1455,4 +1455,55 @@ void main() {
       closeTo(.6, precisionErrorTolerance),
     );
   });
+
+  testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/67219
+    DraggableScrollableController controller = DraggableScrollableController();
+    int buildCount = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => Scaffold(
+          body: DraggableScrollableSheet(
+            initialChildSize: 0.25,
+            snap: true,
+            snapSizes: const <double>[0.25, 0.5, 1.0],
+            controller: controller,
+            builder: (BuildContext context, ScrollController scrollController) {
+              buildCount++;
+              return ListView(
+                controller: scrollController,
+                children: <Widget>[
+                  const Text('Drag me!'),
+                  ElevatedButton(
+                    onPressed: () => setState(() {
+                      controller = DraggableScrollableController();
+                    }),
+                    child: const Text('Regenerate controller'),
+                  ),
+                  Container(
+                    height: 10000,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(buildCount, 1);
+
+    await tester.fling(find.text('Drag me!'), const Offset(0, -300), 300);
+    await tester.pumpAndSettle();
+
+    // No need to rebuild the scrollable sheet, as only position has changed.
+    expect(buildCount, 1);
+
+    await tester.tap(find.text('Regenerate controller'));
+    await tester.pump();
+
+    // DraggableScrollableSheet has rebuilt, so expect the builder to be called.
+    expect(buildCount, 2);
+  });
 }
