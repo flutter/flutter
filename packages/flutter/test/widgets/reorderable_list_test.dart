@@ -572,48 +572,48 @@ void main() {
     expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 400));
   });
 
-  // testWidgets('SliverReorderableList - properly animates the drop at starting position in a reversed list', (WidgetTester tester) async {
-  //   // Regression test for https://github.com/flutter/flutter/issues/84625
-  //   final List<int> items = List<int>.generate(8, (int index) => index);
+  testWidgets('SliverReorderableList - properly animates the drop at starting position in a reversed list', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84625
+    final List<int> items = List<int>.generate(8, (int index) => index);
 
-  //   Future<void> pressDragRelease(Offset start, Offset delta) async {
-  //     final TestGesture drag = await tester.startGesture(start);
-  //     await tester.pump(kPressTimeout);
-  //     await drag.moveBy(delta);
-  //     await tester.pumpAndSettle();
-  //     await drag.up();
-  //     await tester.pump();
-  //   }
+    Future<void> pressDragRelease(Offset start, Offset delta) async {
+      final TestGesture drag = await tester.startGesture(start);
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(delta);
+      await tester.pumpAndSettle();
+      await drag.up();
+      await tester.pump();
+    }
 
-  //   // The TestList is 800x600 SliverReorderableList with 8 items 800x100 each.
-  //   // Each item has a text widget with 'item $index' that can be moved by a
-  //   // press and drag gesture. For this test we are reversing the order so
-  //   // the first item is at the bottom.
-  //   await tester.pumpWidget(TestList(items: items, reverse: true));
+    // The TestList is 800x600 SliverReorderableList with 8 items 800x100 each.
+    // Each item has a text widget with 'item $index' that can be moved by a
+    // press and drag gesture. For this test we are reversing the order so
+    // the first item is at the bottom.
+    await tester.pumpWidget(TestList(items: items, reverse: true));
 
-  //   expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
-  //   expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400));
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
+    expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400));
 
-  //   // Drag item 0 downwards off the edge and let it snap back. It should
-  //   // smoothly animate back up.
-  //   await pressDragRelease(tester.getCenter(find.text('item 0')), const Offset(0, 50));
-  //   expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 550));
-  //   expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400));
+    // Drag item 0 downwards off the edge and let it snap back. It should
+    // smoothly animate back up.
+    await pressDragRelease(tester.getCenter(find.text('item 0')), const Offset(0, 50));
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 550));
+    expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400));
 
-  //   // After the first several frames we should be moving closer to the final position,
-  //   // not further away as was the case with the original bug.
-  //   await tester.pump(const Duration(milliseconds: 10));
-  //   expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(550));
+    // After the first several frames we should be moving closer to the final position,
+    // not further away as was the case with the original bug.
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(550));
 
-  //   // Sample the middle (don't use exact values as it depends on the internal
-  //   // curve being used).
-  //   await tester.pump(const Duration(milliseconds: 125));
-  //   expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(550));
+    // Sample the middle (don't use exact values as it depends on the internal
+    // curve being used).
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(550));
 
-  //   // Wait for it to finish, it should be back to the original position
-  //   await tester.pumpAndSettle();
-  //   expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
-  // });
+    // Wait for it to finish, it should be back to the original position
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
+  });
 
   testWidgets('SliverReorderableList calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(8, (int index) => index);
