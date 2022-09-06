@@ -860,6 +860,17 @@ class _DialPainter extends CustomPainter {
 
   static const double _labelPadding = 28.0;
 
+  void dispose() {
+    for (final _TappableLabel label in primaryLabels) {
+      label.painter.dispose();
+    }
+    for (final _TappableLabel label in secondaryLabels) {
+      label.painter.dispose();
+    }
+    primaryLabels.clear();
+    secondaryLabels.clear();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final double radius = size.shortestSide / 2.0;
@@ -966,6 +977,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   late ThemeData themeData;
   late MaterialLocalizations localizations;
   late MediaQueryData media;
+  _DialPainter? painter;
 
   @override
   void didChangeDependencies() {
@@ -989,6 +1001,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   void dispose() {
     _thetaController.dispose();
+    painter?.dispose();
     super.dispose();
   }
 
@@ -1280,6 +1293,18 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         break;
     }
 
+    painter?.dispose();
+    painter = _DialPainter(
+      selectedValue: selectedDialValue,
+      primaryLabels: primaryLabels,
+      secondaryLabels: secondaryLabels,
+      backgroundColor: backgroundColor,
+      accentColor: accentColor,
+      dotColor: theme.colorScheme.surface,
+      theta: _theta.value,
+      textDirection: Directionality.of(context),
+    );
+
     return GestureDetector(
       excludeFromSemantics: true,
       onPanStart: _handlePanStart,
@@ -1288,16 +1313,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       onTapUp: _handleTapUp,
       child: CustomPaint(
         key: const ValueKey<String>('time-picker-dial'),
-        painter: _DialPainter(
-          selectedValue: selectedDialValue,
-          primaryLabels: primaryLabels,
-          secondaryLabels: secondaryLabels,
-          backgroundColor: backgroundColor,
-          accentColor: accentColor,
-          dotColor: theme.colorScheme.surface,
-          theta: _theta.value,
-          textDirection: Directionality.of(context),
-        ),
+        painter: painter,
       ),
     );
   }

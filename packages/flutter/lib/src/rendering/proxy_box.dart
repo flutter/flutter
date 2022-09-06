@@ -1515,6 +1515,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       return true;
     }());
   }
+
+  @override
+  void dispose() {
+    _debugText?.dispose();
+    _debugText = null;
+    super.dispose();
+  }
 }
 
 /// Clips its child using a rectangle.
