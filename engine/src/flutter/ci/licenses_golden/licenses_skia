@@ -1,4 +1,4 @@
-Signature: 1f15eac3af3c8dd5f7d52fcefbe4f6f7
+Signature: 0748a14adf05a098de773dec112bdfd8
 
 UNUSED LICENSES:
 
@@ -3924,8 +3924,6 @@ FILE: ../../../third_party/skia/src/utils/SkPolyUtils.h
 FILE: ../../../third_party/skia/src/utils/SkShadowTessellator.cpp
 FILE: ../../../third_party/skia/src/utils/SkShadowTessellator.h
 FILE: ../../../third_party/skia/src/utils/SkShadowUtils.cpp
-FILE: ../../../third_party/skia/src/utils/SkThreadUtils_pthread.cpp
-FILE: ../../../third_party/skia/src/utils/SkThreadUtils_win.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 Google Inc.
 
