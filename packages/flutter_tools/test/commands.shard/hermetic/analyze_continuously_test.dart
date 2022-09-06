@@ -86,7 +86,7 @@ void main() {
         directory: tempDir.path,
       );
 
-      AnalysisServer server = AnalysisServer(
+      final AnalysisServer server = AnalysisServer(
         globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         <String>[tempDir.path],
         fileSystem: fileSystem,
@@ -125,15 +125,15 @@ void main() {
       directory: tempDir.path,
     );
 
-      AnalysisServer server = AnalysisServer(
-        globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-        <String>[tempDir.path],
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        logger: logger,
-        terminal: terminal,
-      );
+    final AnalysisServer server = AnalysisServer(
+      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      <String>[tempDir.path],
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      logger: logger,
+      terminal: terminal,
+    );
 
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -152,7 +152,7 @@ void main() {
   testUsingContext('Returns no errors when source is error-free', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    AnalysisServer server = AnalysisServer(
+    final AnalysisServer server = AnalysisServer(
       globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
       <String>[tempDir.path],
       fileSystem: fileSystem,
