@@ -1,4 +1,4 @@
-Signature: 8fa2735db88d5a84db42b84331b25b75
+Signature: 5236c005e38301b4d21e6a526a3e7302
 
 UNUSED LICENSES:
 
@@ -1310,6 +1310,8 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/piet/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/vk/BUILD.bazel
 FILE: ../../../third_party/skia/src/image/BUILD.bazel
@@ -5507,6 +5509,7 @@ FILE: ../../../third_party/skia/include/core/SkCombinationBuilder.h
 FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ImageProvider.h
+FILE: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/include/sksl/SkSLVersion.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/bazel_build.go
