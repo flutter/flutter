@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <OCMock/OCMock.h>
+#import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
@@ -242,6 +243,805 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   XCTAssertTrue([childClippingView pointInside:CGPointMake(199, 199) withEvent:nil]);
 }
 
+- (void)testApplyBackdropFilter {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push a backdrop filter
+  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  stack.PushBackdropFilter(filter);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [mockFlutterView addSubview:childClippingView];
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has the CAFilter, no additional filters were added
+  XCTAssertEqual(1, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // sigmaX is chosen for input radius, regardless of sigmaY
+  NSObject* gaussianFilter = [childClippingView.layer.filters firstObject];
+  XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+  XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+}
+
+- (void)testApplyMultipleBackdropFilters {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push backdrop filters
+  for (int i = 0; i < 50; i++) {
+    auto filter = std::make_shared<flutter::DlBlurImageFilter>(i, 2, flutter::DlTileMode::kClamp);
+    stack.PushBackdropFilter(filter);
+  }
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:ChildClippingView.class]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [mockFlutterView addSubview:childClippingView];
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has CAFilters for the multiple backdrop filters
+  XCTAssertEqual(50, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // All filters have sigma X radius
+  for (int i = 0; i < 50; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    XCTAssertEqualObjects(@(i), [gaussianFilter valueForKey:@"inputRadius"]);
+  }
+}
+
+- (void)testAddBackdropFilters {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push a backdrop filter
+  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  stack.PushBackdropFilter(filter);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [mockFlutterView addSubview:childClippingView];
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has the CAFilter, no additional filters were added
+  XCTAssertEqual(1, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  //
+  // Simulate adding 1 backdrop filter (create a new mutators stack)
+  // Create embedded view params
+  flutter::MutatorsStack stack2;
+  // Layer tree always pushes a screen scale factor to the stack
+  stack2.PushTransform(screenScaleMatrix);
+  // Push backdrop filters
+  for (int i = 0; i < 2; i++) {
+    stack2.PushBackdropFilter(filter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has CAFilters for the multiple backdrop filters
+  XCTAssertEqual(2, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // All filters have sigma X radius
+  for (int i = 0; i < 2; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+  }
+}
+
+- (void)testRemoveBackdropFilters {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push backdrop filters
+  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  for (int i = 0; i < 5; i++) {
+    stack.PushBackdropFilter(filter);
+  }
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:ChildClippingView.class]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [mockFlutterView addSubview:childClippingView];
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // Simulate removing 1 backdrop filter (create a new mutators stack)
+  // Create embedded view params
+  flutter::MutatorsStack stack2;
+  // Layer tree always pushes a screen scale factor to the stack
+  stack2.PushTransform(screenScaleMatrix);
+  // Push backdrop filters
+  for (int i = 0; i < 4; i++) {
+    stack2.PushBackdropFilter(filter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has CAFilters for the multiple backdrop filters
+  XCTAssertEqual(4, (int)[childClippingView.layer.filters count]);
+
+  // All filters have sigma X radius
+  for (int i = 0; i < 4; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+  }
+
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // Simulate removing all backdrop filters (replace the mutators stack)
+  // Update embedded view params, delete except screenScaleMatrix
+  for (int i = 0; i < 5; i++) {
+    stack2.Pop();
+  }
+  // No backdrop filters in the stack, so no nothing to push
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has no CAFilters because no backdrop filters were added
+  XCTAssertEqual(0, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+}
+
+- (void)testEditBackdropFilters {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push backdrop filters
+  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  for (int i = 0; i < 5; i++) {
+    stack.PushBackdropFilter(filter);
+  }
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:ChildClippingView.class]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [mockFlutterView addSubview:childClippingView];
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // Simulate editing 1 backdrop filter in the middle of the stack (create a new mutators stack)
+  // Create embedded view params
+  flutter::MutatorsStack stack2;
+  // Layer tree always pushes a screen scale factor to the stack
+  stack2.PushTransform(screenScaleMatrix);
+  // Push backdrop filters
+  for (int i = 0; i < 5; i++) {
+    if (i == 3) {
+      auto filter2 =
+          std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
+
+      stack2.PushBackdropFilter(filter2);
+      continue;
+    }
+
+    stack2.PushBackdropFilter(filter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has CAFilters for the multiple backdrop filters
+  XCTAssertEqual(5, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // The edited backdrop filter has the new radius value
+  for (int i = 0; i < 5; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    if (i == 3) {
+      XCTAssertEqualObjects(@(2), [gaussianFilter valueForKey:@"inputRadius"]);
+    } else {
+      XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+    }
+  }
+
+  // Simulate editing 1 backdrop filter in the beginning of the stack (replace the mutators stack)
+  // Update embedded view params, delete except screenScaleMatrix
+  for (int i = 0; i < 5; i++) {
+    stack2.Pop();
+  }
+  // Push backdrop filters
+  for (int i = 0; i < 5; i++) {
+    if (i == 0) {
+      auto filter2 =
+          std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
+      stack2.PushBackdropFilter(filter2);
+      continue;
+    }
+
+    stack2.PushBackdropFilter(filter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has CAFilters for the multiple backdrop filters
+  XCTAssertEqual(5, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // The edited backdrop filter has the new radius value
+  for (int i = 0; i < 5; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    if (i == 0) {
+      XCTAssertEqualObjects(@(2), [gaussianFilter valueForKey:@"inputRadius"]);
+    } else {
+      XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+    }
+  }
+
+  // Simulate editing 1 backdrop filter in the end of the stack (replace the mutators stack)
+  // Update embedded view params, delete except screenScaleMatrix
+  for (int i = 0; i < 5; i++) {
+    stack2.Pop();
+  }
+  // Push backdrop filters
+  for (int i = 0; i < 5; i++) {
+    if (i == 4) {
+      auto filter2 =
+          std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
+      stack2.PushBackdropFilter(filter2);
+      continue;
+    }
+
+    stack2.PushBackdropFilter(filter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has CAFilters for the multiple backdrop filters
+  XCTAssertEqual(5, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // The edited backdrop filter has the new radius value
+  for (int i = 0; i < 5; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    if (i == 4) {
+      XCTAssertEqualObjects(@(2), [gaussianFilter valueForKey:@"inputRadius"]);
+    } else {
+      XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+    }
+  }
+
+  // Simulate editing all backdrop filters in the stack (replace the mutators stack)
+  // Update embedded view params, delete except screenScaleMatrix
+  for (int i = 0; i < 5; i++) {
+    stack2.Pop();
+  }
+  // Push backdrop filters
+  for (int i = 0; i < 5; i++) {
+    auto filter2 = std::make_shared<flutter::DlBlurImageFilter>(i, 2, flutter::DlTileMode::kClamp);
+
+    stack2.PushBackdropFilter(filter2);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has CAFilters for the multiple backdrop filters
+  XCTAssertEqual(5, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // The edited backdrop filter has the new radius value
+  for (int i = 0; i < 5; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+
+    XCTAssertEqualObjects(@(i), [gaussianFilter valueForKey:@"inputRadius"]);
+  }
+}
+
+- (void)testApplyBackdropFilterNotDlBlurImageFilter {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push a dilate backdrop filter
+  auto dilateFilter = std::make_shared<flutter::DlDilateImageFilter>(5, 2);
+  stack.PushBackdropFilter(dilateFilter);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [mockFlutterView addSubview:childClippingView];
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // No filters were added
+  XCTAssertEqual(0, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // Simulate adding a non-DlBlurImageFilter in the middle of the stack (create a new mutators
+  // stack) Create embedded view params
+  flutter::MutatorsStack stack2;
+  // Layer tree always pushes a screen scale factor to the stack
+  stack2.PushTransform(screenScaleMatrix);
+  // Push backdrop filters and dilate filter
+  auto blurFilter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+
+  for (int i = 0; i < 5; i++) {
+    if (i == 2) {
+      stack2.PushBackdropFilter(dilateFilter);
+      continue;
+    }
+
+    stack2.PushBackdropFilter(blurFilter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // Filters were only added for DlBlurImageFilters
+  XCTAssertEqual(4, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // The added filters are all gaussianBlur filters
+  for (int i = 0; i < 4; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+  }
+
+  // Simulate adding a non-DlBlurImageFilter to the beginning of the stack (replace the mutators
+  // stack) Update embedded view params, delete except screenScaleMatrix
+  for (int i = 0; i < 5; i++) {
+    stack2.Pop();
+  }
+  // Push backdrop filters and dilate filter
+  for (int i = 0; i < 5; i++) {
+    if (i == 0) {
+      stack2.PushBackdropFilter(dilateFilter);
+      continue;
+    }
+
+    stack2.PushBackdropFilter(blurFilter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // Filters were only added for DlBlurImageFilters
+  XCTAssertEqual(4, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // The added filters are all gaussianBlur filters
+  for (int i = 0; i < 4; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+  }
+
+  // Simulate adding a non-DlBlurImageFilter to the end of the stack (replace the mutators stack)
+  // Update embedded view params, delete except screenScaleMatrix
+  for (int i = 0; i < 5; i++) {
+    stack2.Pop();
+  }
+  // Push backdrop filters and dilate filter
+  for (int i = 0; i < 5; i++) {
+    if (i == 4) {
+      stack2.PushBackdropFilter(dilateFilter);
+      continue;
+    }
+
+    stack2.PushBackdropFilter(blurFilter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // Filters were only added for DlBlurImageFilters
+  XCTAssertEqual(4, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // The added filters are all gaussianBlur filters
+  for (int i = 0; i < 4; i++) {
+    NSObject* gaussianFilter = childClippingView.layer.filters[i];
+    XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+    XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+  }
+
+  // Simulate adding only non-DlBlurImageFilter to the stack (replace the mutators stack)
+  // Update embedded view params, delete except screenScaleMatrix
+  for (int i = 0; i < 5; i++) {
+    stack2.Pop();
+  }
+  // Push dilate filters
+  for (int i = 0; i < 5; i++) {
+    stack2.PushBackdropFilter(dilateFilter);
+  }
+
+  embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
+                                                                     SkSize::Make(10, 10), stack2);
+
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // No filters were added
+  XCTAssertEqual(0, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+}
+
+- (void)testApplyBackdropFilterAPIChanged {
+  NSArray* blurRadii = @[ @(1), @(5), @(10) ];
+
+  // The gaussianBlur filter is extracted once for each childClippingView.
+  // Each test requires a new childClippingView
+  // Valid UIVisualEffectView API
+  ChildClippingView* childClippingView1 = [[ChildClippingView alloc] init];
+  childClippingView1.blurEffectView = [[UIVisualEffectView alloc]
+      initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+  XCTAssertTrue([childClippingView1 applyBlurBackdropFilters:blurRadii]);
+
+  // Invalid UIVisualEffectView initialization
+  ChildClippingView* childClippingView2 = [[ChildClippingView alloc] init];
+  childClippingView2.blurEffectView = [[UIVisualEffectView alloc] init];
+  XCTAssertFalse([childClippingView2 applyBlurBackdropFilters:blurRadii]);
+
+  // Invalid UIView
+  ChildClippingView* childClippingView3 = [[ChildClippingView alloc] init];
+  childClippingView3.blurEffectView = [[UIView alloc] init];
+  XCTAssertFalse([childClippingView3 applyBlurBackdropFilters:blurRadii]);
+
+  // Invalid UIVisualEffectView API for "name"
+  UIVisualEffectView* editedUIVisualEffectView1 = [[UIVisualEffectView alloc]
+      initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+  NSArray* subviews1 = editedUIVisualEffectView1.subviews;
+  for (UIView* view in subviews1) {
+    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+      for (CIFilter* filter in view.layer.filters) {
+        if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"]) {
+          [filter setValue:@"notGaussianBlur" forKey:@"name"];
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  ChildClippingView* childClippingView4 = [[ChildClippingView alloc] init];
+  childClippingView4.blurEffectView = editedUIVisualEffectView1;
+  XCTAssertFalse([childClippingView4 applyBlurBackdropFilters:blurRadii]);
+
+  // Invalid UIVisualEffectView API for "inputRadius"
+  UIVisualEffectView* editedUIVisualEffectView2 = [[UIVisualEffectView alloc]
+      initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+  NSArray* subviews2 = editedUIVisualEffectView2.subviews;
+  for (UIView* view in subviews2) {
+    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+      for (CIFilter* filter in view.layer.filters) {
+        if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"]) {
+          [filter setValue:@"invalidInputRadius" forKey:@"inputRadius"];
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  ChildClippingView* childClippingView5 = [[ChildClippingView alloc] init];
+  childClippingView5.blurEffectView = editedUIVisualEffectView2;
+  XCTAssertFalse([childClippingView5 applyBlurBackdropFilters:blurRadii]);
+}
+
 - (void)testCompositePlatformView {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
@@ -294,6 +1094,86 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   CGRect platformViewRectInFlutterView = [gMockPlatformView convertRect:gMockPlatformView.bounds
                                                                  toView:mockFlutterView];
   XCTAssertTrue(CGRectEqualToRect(platformViewRectInFlutterView, CGRectMake(100, 100, 300, 300)));
+}
+
+- (void)testBackdropFilterCorrectlyPushedAndReset {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  SkMatrix screenScaleMatrix =
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  stack.PushTransform(screenScaleMatrix);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+
+  flutterPlatformViewsController->BeginFrame(SkISize::Make(0, 0));
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
+  flutterPlatformViewsController->PushVisitedPlatformView(2);
+  auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
+  flutterPlatformViewsController->PushFilterToVisitedPlatformViews(filter);
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [mockFlutterView addSubview:childClippingView];
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // childClippingView has the CAFilter, no additional filters were added
+  XCTAssertEqual(1, (int)[childClippingView.layer.filters count]);
+  // No new views were added
+  XCTAssertEqual(0, (int)[gMockPlatformView.subviews count]);
+
+  // sigmaX is chosen for input radius, regardless of sigmaY
+  NSObject* gaussianFilter = [childClippingView.layer.filters firstObject];
+  XCTAssertEqualObjects(@"gaussianBlur", [gaussianFilter valueForKey:@"name"]);
+  XCTAssertEqualObjects(@(5), [gaussianFilter valueForKey:@"inputRadius"]);
+
+  // New frame, with no filter pushed.
+  auto embeddedViewParams2 =
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+  flutterPlatformViewsController->BeginFrame(SkISize::Make(0, 0));
+  flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams2));
+  flutterPlatformViewsController->CompositeEmbeddedView(2);
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+
+  [mockFlutterView setNeedsLayout];
+  [mockFlutterView layoutIfNeeded];
+
+  // No filter in this frame.
+  XCTAssertEqual(0, (int)[childClippingView.layer.filters count]);
 }
 
 - (void)testChildClippingViewShouldBeTheBoundingRectOfPlatformView {

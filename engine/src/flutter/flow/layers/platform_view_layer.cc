@@ -29,6 +29,7 @@ void PlatformViewLayer::Preroll(PrerollContext* context,
                                            context->display_list_enabled);
   context->view_embedder->PrerollCompositeEmbeddedView(view_id_,
                                                        std::move(params));
+  context->view_embedder->PushVisitedPlatformView(view_id_);
 }
 
 void PlatformViewLayer::Paint(PaintContext& context) const {

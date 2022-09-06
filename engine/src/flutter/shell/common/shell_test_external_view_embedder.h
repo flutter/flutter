@@ -7,6 +7,7 @@
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/raster_thread_merger.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flutter {
 
@@ -32,8 +33,14 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   // the external view embedder.
   int GetSubmittedFrameCount();
 
-  // Returns the size of last submitted frame surface
+  // Returns the size of last submitted frame surface.
   SkISize GetLastSubmittedFrameSize();
+
+  // Returns the mutators stack for the given platform view.
+  MutatorsStack GetStack(int64_t);
+
+  // Returns the list of visited platform views.
+  std::vector<int64_t> GetVisitedPlatformViews();
 
  private:
   // |ExternalViewEmbedder|
@@ -65,6 +72,13 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   EmbedderPaintContext CompositeEmbeddedView(int view_id) override;
 
   // |ExternalViewEmbedder|
+  void PushVisitedPlatformView(int64_t view_id) override;
+
+  // |ExternalViewEmbedder|
+  void PushFilterToVisitedPlatformViews(
+      std::shared_ptr<const DlImageFilter> filter) override;
+
+  // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,
                    std::unique_ptr<SurfaceFrame> frame) override;
 
@@ -84,7 +98,11 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   PostPrerollResult post_preroll_result_;
 
   bool support_thread_merging_;
-
+  SkISize frame_size_;
+  std::map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
+  std::map<int64_t, MutatorsStack> mutators_stacks_;
+  std::map<int64_t, EmbeddedViewParams> current_composition_params_;
+  std::vector<int64_t> visited_platform_views_;
   std::atomic<int> submitted_frame_count_;
   std::atomic<SkISize> last_submitted_frame_size_;
 
