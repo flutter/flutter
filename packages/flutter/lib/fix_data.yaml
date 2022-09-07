@@ -17,7 +17,7 @@
 
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/TODO
+  # Changes made in https://github.com/flutter/flutter/pull/111080
   - title: "Deprecate ThemeData.bottomAppBarColor"
     date: 2022-09-06
     element:
@@ -28,7 +28,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'bottomAppBarColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/TODO
+  # Changes made in https://github.com/flutter/flutter/pull/111080
   - title: "Deprecate ThemeData.bottomAppBarColor"
     date: 2022-09-06
     element:
@@ -39,7 +39,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'bottomAppBarColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/TODO
+  # Changes made in https://github.com/flutter/flutter/pull/111080
   - title: "Deprecate ThemeData.bottomAppBarColor"
     date: 2022-09-06
     element:
