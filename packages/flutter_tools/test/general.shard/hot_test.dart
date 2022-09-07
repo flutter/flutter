@@ -278,7 +278,7 @@ void main() {
           },
         );
 
-        (fakeFlutterDevice.devFS as FakeDevFs?)!.baseUri = Uri.parse('file:///base_uri');
+        (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
         final OperationResult result = await HotRunner(
           devices,
@@ -348,7 +348,7 @@ void main() {
           },
         );
 
-        (fakeFlutterDevice.devFS as FakeDevFs?)!.baseUri = Uri.parse('file:///base_uri');
+        (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
         final OperationResult result = await HotRunner(
           devices,

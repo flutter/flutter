@@ -1190,7 +1190,7 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     setupMocks();
 
-    webDevFS.exception = ChromeDebugException(<String, dynamic>{
+    webDevFS.exception = ChromeDebugException(<String, Object?>{
       'text': 'error',
     });
 
