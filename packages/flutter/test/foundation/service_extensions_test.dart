@@ -578,7 +578,7 @@ void main() {
   test('Service extensions - exit', () async {
     // no test for _calling_ 'exit', because that should terminate the process!
     // Not expecting extension to be available for web platform.
-    expect(binding.extensions.containsKey('exit'), !isBrowser);
+    expect(binding.extensions.containsKey(FoundationServiceExtensions.exit.name), !isBrowser);
   });
 
   test('Service extensions - platformOverride', () async {
@@ -588,11 +588,11 @@ void main() {
 
     expect(binding.reassembled, 0);
     expect(defaultTargetPlatform, TargetPlatform.android);
-    result = await binding.testExtension('platformOverride', <String, String>{});
+    result = await binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{});
     expect(result, <String, String>{'value': 'android'});
     expect(defaultTargetPlatform, TargetPlatform.android);
     expect(extensionChangedEvents, isEmpty);
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'iOS'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'iOS'}));
     expect(result, <String, String>{'value': 'iOS'});
     expect(binding.reassembled, 1);
     expect(defaultTargetPlatform, TargetPlatform.iOS);
@@ -600,7 +600,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'iOS');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'macOS'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'macOS'}));
     expect(result, <String, String>{'value': 'macOS'});
     expect(binding.reassembled, 2);
     expect(defaultTargetPlatform, TargetPlatform.macOS);
@@ -608,7 +608,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'macOS');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'android'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'android'}));
     expect(result, <String, String>{'value': 'android'});
     expect(binding.reassembled, 3);
     expect(defaultTargetPlatform, TargetPlatform.android);
@@ -616,7 +616,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'android');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'fuchsia'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'fuchsia'}));
     expect(result, <String, String>{'value': 'fuchsia'});
     expect(binding.reassembled, 4);
     expect(defaultTargetPlatform, TargetPlatform.fuchsia);
@@ -624,7 +624,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'fuchsia');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'default'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'default'}));
     expect(result, <String, String>{'value': 'android'});
     expect(binding.reassembled, 5);
     expect(defaultTargetPlatform, TargetPlatform.android);
@@ -632,7 +632,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'android');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'iOS'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'iOS'}));
     expect(result, <String, String>{'value': 'iOS'});
     expect(binding.reassembled, 6);
     expect(defaultTargetPlatform, TargetPlatform.iOS);
@@ -640,7 +640,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'iOS');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'linux'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'linux'}));
     expect(result, <String, String>{'value': 'linux'});
     expect(binding.reassembled, 7);
     expect(defaultTargetPlatform, TargetPlatform.linux);
@@ -648,7 +648,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'linux');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'windows'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'windows'}));
     expect(result, <String, String>{'value': 'windows'});
     expect(binding.reassembled, 8);
     expect(defaultTargetPlatform, TargetPlatform.windows);
@@ -656,7 +656,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'windows');
-    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'bogus'}));
+    result = await hasReassemble(binding.testExtension(FoundationServiceExtensions.platformOverride.name, <String, String>{'value': 'bogus'}));
     expect(result, <String, String>{'value': 'android'});
     expect(binding.reassembled, 9);
     expect(defaultTargetPlatform, TargetPlatform.android);
@@ -843,7 +843,7 @@ void main() {
 
     completed = false;
     expect(binding.reassembled, 0);
-    pendingResult = binding.testExtension('reassemble', <String, String>{});
+    pendingResult = binding.testExtension(FoundationServiceExtensions.reassemble.name, <String, String>{});
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
@@ -925,7 +925,7 @@ void main() {
 
   test('Service extensions - brightnessOverride', () async {
     Map<String, dynamic> result;
-    result = await binding.testExtension('brightnessOverride', <String, String>{});
+    result = await binding.testExtension(FoundationServiceExtensions.brightnessOverride.name, <String, String>{});
     final String brightnessValue = result['value'] as String;
 
     expect(brightnessValue, 'Brightness.light');
@@ -933,26 +933,26 @@ void main() {
 
   test('Service extensions - activeDevToolsServerAddress', () async {
     Map<String, dynamic> result;
-    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{});
+    result = await binding.testExtension(FoundationServiceExtensions.activeDevToolsServerAddress.name, <String, String>{});
     String serverAddress = result['value'] as String;
     expect(serverAddress, '');
-    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9101'});
+    result = await binding.testExtension(FoundationServiceExtensions.activeDevToolsServerAddress.name, <String, String>{'value': 'http://127.0.0.1:9101'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:9101');
-    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9102'});
+    result = await binding.testExtension(FoundationServiceExtensions.activeDevToolsServerAddress.name, <String, String>{'value': 'http://127.0.0.1:9102'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:9102');
   });
 
   test('Service extensions - connectedVmServiceUri', () async {
     Map<String, dynamic> result;
-    result = await binding.testExtension('connectedVmServiceUri', <String, String>{});
+    result = await binding.testExtension(FoundationServiceExtensions.connectedVmServiceUri.name, <String, String>{});
     String serverAddress = result['value'] as String;
     expect(serverAddress, '');
-    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54669/kMUMseKAnog=/'});
+    result = await binding.testExtension(FoundationServiceExtensions.connectedVmServiceUri.name, <String, String>{'value': 'http://127.0.0.1:54669/kMUMseKAnog=/'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:54669/kMUMseKAnog=/');
-    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
+    result = await binding.testExtension(FoundationServiceExtensions.connectedVmServiceUri.name, <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
   });
