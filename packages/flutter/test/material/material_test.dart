@@ -189,6 +189,58 @@ void main() {
     expect(log, isEmpty);
   });
 
+  testWidgets('Shadow color defaults', (WidgetTester tester) async {
+    Widget buildWithShadow(Color? shadowColor) {
+      return Center(
+        child: SizedBox(
+          height: 100.0,
+          width: 100.0,
+          child: Material(
+            shadowColor: shadowColor,
+            elevation: 10,
+            shape: const CircleBorder(),
+          ),
+        )
+      );
+    }
+
+    // Default M2 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: false,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().shadowColor);
+
+    // Default M3 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().colorScheme.shadow);
+
+    // Drop shadow can be turned off with a transparent color.
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(Colors.transparent),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, Colors.transparent);
+  });
+
   testWidgets('Shadows animate smoothly', (WidgetTester tester) async {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
@@ -303,6 +355,23 @@ void main() {
       await tester.pumpAndSettle();
       final RenderPhysicalShape noTintModel = getModel(tester);
       expect(noTintModel.color, equals(baseColor));
+
+      // With transparent surfaceTintColor, it should not apply an overlay
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildMaterial(
+            color: baseColor,
+            surfaceTintColor: Colors.transparent,
+            elevation: 12.0,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderPhysicalShape transparentTintModel = getModel(tester);
+      expect(transparentTintModel.color, equals(baseColor));
 
       // With surfaceTintColor specified, it should not apply an overlay based
       // on the elevation.

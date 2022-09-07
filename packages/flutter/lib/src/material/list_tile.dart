@@ -593,7 +593,13 @@ class ListTile extends StatelessWidget {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
-    final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
+    final Color? color = iconColor
+      ?? tileTheme.iconColor
+      ?? theme.listTileTheme.iconColor
+      // If [ThemeData.useMaterial3] is set to true the disabled icon color
+      // will be set to Theme.colorScheme.onSurface(0.38), if false, defaults to null,
+      // as described in: https://m3.material.io/components/icon-buttons/specs.
+      ?? (theme.useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : null);
     if (color != null) {
       return color;
     }

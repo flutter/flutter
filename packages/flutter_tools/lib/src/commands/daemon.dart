@@ -1590,7 +1590,7 @@ class DebounceOperationQueue<T, K> {
   final Map<K, Future<T>> _operationQueue = <K, Future<T>>{};
   Future<void>? _inProgressAction;
 
-  Future<T>? queueAndDebounce(
+  Future<T> queueAndDebounce(
     K operationType,
     Duration debounceDuration,
     Future<T> Function() action,
@@ -1599,7 +1599,7 @@ class DebounceOperationQueue<T, K> {
     // debounce timer and return its future.
     if (_operationQueue[operationType] != null) {
       _debounceTimers[operationType]?.reset();
-      return _operationQueue[operationType];
+      return _operationQueue[operationType]!;
     }
 
     // Otherwise, put one in the queue with a timer.

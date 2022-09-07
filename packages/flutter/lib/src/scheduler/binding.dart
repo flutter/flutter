@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, PlatformDispatcher, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, DartPerformanceMode, FramePhase, FrameTiming, PlatformDispatcher, TimingsCallback;
 
 import 'package:collection/collection.dart' show HeapPriorityQueue, PriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -181,6 +181,34 @@ enum SchedulerPhase {
   ///
   /// See [SchedulerBinding.handleDrawFrame].
   postFrameCallbacks,
+}
+
+/// This callback is invoked when a request for [DartPerformanceMode] is disposed.
+///
+/// See also:
+///
+/// * [PerformanceModeRequestHandle] for more information on the lifecycle of the handle.
+typedef _PerformanceModeCleaupCallback = VoidCallback;
+
+/// An opaque handle that keeps a request for [DartPerformanceMode] active until
+/// disposed.
+///
+/// To create a [PerformanceModeRequestHandle], use [SchedulerBinding.requestPerformanceMode].
+/// The component that makes the request is responsible for disposing the handle.
+class PerformanceModeRequestHandle {
+  PerformanceModeRequestHandle._(_PerformanceModeCleaupCallback this._cleanup);
+
+  _PerformanceModeCleaupCallback? _cleanup;
+
+  /// Call this method to signal to [SchedulerBinding] that a request for a [DartPerformanceMode]
+  /// is no longer needed.
+  ///
+  /// This method must only be called once per object.
+  void dispose() {
+    assert(_cleanup != null);
+    _cleanup!();
+    _cleanup = null;
+  }
 }
 
 /// Scheduler for running the following:
@@ -599,6 +627,20 @@ mixin SchedulerBinding on BindingBase {
               DiagnosticsStackTrace('── callback $id ──', callbacks[id]!.debugStack, showSeparator: false),
           ],
         ));
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  /// Asserts that there are no pending performance mode requests in debug mode.
+  ///
+  /// Throws a [FlutterError] if there are pending performance mode requests,
+  /// as this indicates a potential memory leak.
+  bool debugAssertNoPendingPerformanceModeRequests(String reason) {
+    assert(() {
+      if (_performanceMode != null) {
+        throw FlutterError(reason);
       }
       return true;
     }());
@@ -1082,6 +1124,59 @@ mixin SchedulerBinding on BindingBase {
       _removedIds.clear();
     } finally {
       _schedulerPhase = SchedulerPhase.midFrameMicrotasks;
+    }
+  }
+
+  DartPerformanceMode? _performanceMode;
+  int _numPerformanceModeRequests = 0;
+
+  /// Request a specific [DartPerformanceMode].
+  ///
+  /// Returns `null` if the request was not successful due to conflicting performance mode requests.
+  /// Two requests are said to be in conflict if they are not of the same [DartPerformanceMode] type,
+  /// and an explicit request for a performance mode has been made prior.
+  ///
+  /// Requestor is responsible for calling [PerformanceModeRequestHandle.dispose] when it no longer
+  /// requires the performance mode.
+  PerformanceModeRequestHandle? requestPerformanceMode(DartPerformanceMode mode) {
+    // conflicting requests are not allowed.
+    if (_performanceMode != null && _performanceMode != mode) {
+      return null;
+    }
+
+    if (_performanceMode == mode) {
+      assert(_numPerformanceModeRequests > 0);
+      _numPerformanceModeRequests++;
+    } else if (_performanceMode == null) {
+      assert(_numPerformanceModeRequests == 0);
+      _performanceMode = mode;
+      _numPerformanceModeRequests = 1;
+    }
+
+    return PerformanceModeRequestHandle._(_disposePerformanceModeRequest);
+  }
+
+  /// Remove a request for a specific [DartPerformanceMode].
+  ///
+  /// If all the pending requests have been disposed, the engine will revert to the
+  /// [DartPerformanceMode.balanced] performance mode.
+  void _disposePerformanceModeRequest() {
+    _numPerformanceModeRequests--;
+    if (_numPerformanceModeRequests == 0) {
+      _performanceMode = null;
+      PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
+    }
+  }
+
+  /// Returns the current [DartPerformanceMode] requested or `null` if no requests have
+  /// been made.
+  ///
+  /// This is only supported in debug and profile modes, returns `null` in release mode.
+  DartPerformanceMode? debugGetRequestedPerformanceMode() {
+    if (!(kDebugMode || kProfileMode)) {
+      return null;
+    } else {
+      return _performanceMode;
     }
   }
 

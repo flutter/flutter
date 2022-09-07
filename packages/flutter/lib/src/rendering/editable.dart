@@ -388,6 +388,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _autocorrectHighlightPainter.dispose();
     _selectionPainter.dispose();
     _caretPainter.dispose();
+    _textPainter.dispose();
     super.dispose();
   }
 
