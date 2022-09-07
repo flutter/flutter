@@ -195,7 +195,7 @@ void main() {
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
       expect(logContents, contains('[!] Flutter'));
 
-      final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter?)!._details;
+      final CrashDetails sentDetails = (globals.crashReporter! as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error.toString(), 'Exception: an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
