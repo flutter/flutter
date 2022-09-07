@@ -22,11 +22,11 @@ const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kProfileMod
 
 class _FieldNames {
   static const String eventType = 'eventType';
-  static const String labraryName = 'labraryName';
+  static const String libraryName = 'libraryName';
   static const String className = 'className';
 }
 
-/// A lyfecycle event of an object.
+/// A lifecycle event of an object.
 abstract class ObjectEvent{
   /// Creates an instance of [ObjectEvent].
   ObjectEvent({
@@ -75,7 +75,7 @@ class ObjectCreated extends ObjectEvent {
   @override
   Map<Object, Map<String, Object>> toMap() {
     return <Object, Map<String, Object>>{object: <String, Object>{
-      _FieldNames.labraryName: library,
+      _FieldNames.libraryName: library,
       _FieldNames.className: className,
       _FieldNames.eventType: 'created',
     }};
@@ -104,6 +104,10 @@ class ObjectDisposed extends ObjectEvent {
 /// for disposable objects in Flutter Framework.
 /// To dispatch events for other objects, invoke
 /// [MemoryAllocations.dispatchObjectEvent].
+///
+/// Use this class with condition `kFlutterMemoryAllocationsEnabled`,
+/// to make sure not to increase size of the application by the code
+/// of the class, if memory allocations are disabled.
 ///
 /// The class is optimized for massive event flow and small number of
 /// added or removed listeners.
@@ -177,8 +181,8 @@ class MemoryAllocations {
 
   void _checkListenersForEmptiness() {
     if (_listeners?.isEmpty ?? false) {
-        _listeners = null;
-        _unSubscribeFromSdkObjects();
+      _listeners = null;
+      _unSubscribeFromSdkObjects();
     }
   }
 
