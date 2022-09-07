@@ -3796,6 +3796,7 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(1));
 
       // Double tap selecting the same word somewhere else is fine.
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
@@ -3811,6 +3812,7 @@ void main() {
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
 
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
