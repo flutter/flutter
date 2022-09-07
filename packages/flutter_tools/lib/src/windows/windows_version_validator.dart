@@ -56,11 +56,11 @@ class WindowsVersionValidator extends DoctorValidator {
         r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$', resultStdout);
 
     // Use the string split method to extract the major version
-    // and check against the [unsupportedVersions] list
+    // and check against the [kUnsupportedVersions] list
     final ValidationType windowsVersionStatus;
     final String statusInfo;
     if (matches.length == 1 &&
-        !unsupportedVersions
+        !kUnsupportedVersions
             .contains(matches.elementAt(0).group(2)?.split('.').elementAt(0))) {
       windowsVersionStatus = ValidationType.installed;
       statusInfo = 'Installed version of Windows is version 10 or higher';
