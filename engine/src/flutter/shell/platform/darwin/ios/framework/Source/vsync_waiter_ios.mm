@@ -97,6 +97,10 @@ double VsyncWaiterIOS::GetRefreshRate() const {
   display_link_.get().paused = NO;
 }
 
+- (void)pause {
+  display_link_.get().paused = YES;
+}
+
 - (void)onDisplayLink:(CADisplayLink*)link {
   TRACE_EVENT0("flutter", "VSYNC");
 
