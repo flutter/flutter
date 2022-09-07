@@ -485,6 +485,7 @@ class ThemeData with Diagnosticable {
       accentColor ??= colorScheme.secondary;
       accentColorBrightness ??= ThemeData.estimateBrightnessForColor(colorScheme.secondary);
       scaffoldBackgroundColor ??= colorScheme.background;
+      bottomAppBarColor ??= colorScheme.surface;
       cardColor ??= colorScheme.surface;
       dividerColor ??= colorScheme.outline;
       backgroundColor ??= colorScheme.background;
@@ -1993,7 +1994,7 @@ class ThemeData with Diagnosticable {
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
       errorColor: errorColor ?? _errorColor,
       backgroundColor: backgroundColor ?? _backgroundColor,
-      bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
+      bottomAppBarColor: bottomAppBarColor ?? _bottomAppBarColor,
     );
   }
 
