@@ -55,6 +55,17 @@ transforms:
     date: 2022-08-24
     element:
       uris: [ 'material.dart' ]
+      field: 'backgroundColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.background'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110162
+  - title: "Migrate to 'ColorScheme.background'"
+    date: 2022-08-24
+    element:
+      uris: [ 'material.dart' ]
       method: 'copyWith'
       inClass: 'ThemeData'
     oneOf:
