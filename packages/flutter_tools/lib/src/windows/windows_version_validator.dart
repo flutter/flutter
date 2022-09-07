@@ -7,14 +7,14 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../doctor_validator.dart';
 
-const List<String> unsupportedVersions = <String>[
+/// Flutter only supports development on Windows host machines version 10 and greater.
+const List<String> kUnsupportedVersions = <String>[
   '6',
   '7',
   '8',
 ];
 
-/// Validator to be run with `flutter doctor` to check
-/// Windows host machines if they are running supported versions.
+/// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
   const WindowsVersionValidator({required ProcessManager processManager})
       : _processManager = processManager,
@@ -58,7 +58,7 @@ class WindowsVersionValidator extends DoctorValidator {
     // Use the string split method to extract the major version
     // and check against the [unsupportedVersions] list
     final ValidationType windowsVersionStatus;
-    String statusInfo;
+    final String statusInfo;
     if (matches.length == 1 &&
         !unsupportedVersions
             .contains(matches.elementAt(0).group(2)?.split('.').elementAt(0))) {

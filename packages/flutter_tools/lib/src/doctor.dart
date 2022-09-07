@@ -130,9 +130,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
       ),
-      if (platform.isWindows) WindowsVersionValidator(
-        processManager: globals.processManager,
-      ),
+      if (platform.isWindows)
+        WindowsVersionValidator(
+          processManager: globals.processManager,
+        ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
       if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
