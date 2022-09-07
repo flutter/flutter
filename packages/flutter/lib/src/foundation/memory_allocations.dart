@@ -115,6 +115,8 @@ class MemoryAllocations {
   MemoryAllocations._();
 
   /// The shared instance of [MemoryAllocations].
+  ///
+  /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   static final MemoryAllocations instance = MemoryAllocations._();
 
   /// List of listeners.
@@ -127,6 +129,8 @@ class MemoryAllocations {
   /// dispatched.
   ///
   /// Listeners can be removed with [removeListener].
+  ///
+  /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   void addListener(ObjectEventListener listener){
     if (_listeners == null) {
       _listeners = <ObjectEventListener?>[];
@@ -148,6 +152,8 @@ class MemoryAllocations {
   /// dispatched.
   ///
   /// Listeners can be added with [addListener].
+  ///
+  /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   void removeListener(ObjectEventListener listener){
     final List<ObjectEventListener?>? listeners = _listeners;
     if (listeners == null) {
@@ -189,6 +195,8 @@ class MemoryAllocations {
   /// Return true if there are listeners.
   ///
   /// If there is no listeners, the app can save on creating the event object.
+  ///
+  /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   bool get hasListeners {
     if (_listenersContainNulls) {
       return _listeners?.firstWhere((ObjectEventListener? l) => l != null) != null;
@@ -206,6 +214,8 @@ class MemoryAllocations {
   ///
   /// Listeners, removed during an event dispatching, will not be invoked
   /// after the removal.
+  ///
+  /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   void dispatchObjectEvent(ObjectEventBuilder objectEventBuilder) {
     final List<ObjectEventListener?>? listeners = _listeners;
     if (listeners == null || listeners.isEmpty) {
