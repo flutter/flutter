@@ -818,7 +818,7 @@ class _RouterScope extends InheritedWidget {
 /// See also:
 ///
 ///  * [Listenable] and its subclasses, which provide a similar mechanism for
-///    one-way signalling.
+///    one-way signaling.
 class _CallbackHookProvider<T> {
   final ObserverList<ValueGetter<T>> _callbacks = ObserverList<ValueGetter<T>>();
 
@@ -1203,7 +1203,7 @@ abstract class RouteInformationParser<T> {
   ///
   /// The input [BuildContext] can be used for looking up [InheritedWidget]s
   /// If one uses [BuildContext.dependOnInheritedWidgetOfExactType], a
-  /// dependency will be created. The [Router] will reparse the
+  /// dependency will be created. The [Router] will re-parse the
   /// [RouteInformation] from its [RouteInformationProvider] if the dependency
   /// notifies its listeners.
   ///

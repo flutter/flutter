@@ -70,7 +70,7 @@ class SnapshotController extends ChangeNotifier {
   }
 }
 
-/// A widget that can replace its child with a snapshoted version of the child.
+/// A widget that can replace its child with a snapshotted version of the child.
 ///
 /// A snapshot is a frozen texture-backed representation of all child pictures
 /// and layers stored as a [ui.Image].

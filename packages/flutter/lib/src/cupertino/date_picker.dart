@@ -208,7 +208,7 @@ enum _PickerColumnType {
 ///
 /// {@tool dartpad}
 /// This sample shows how to implement CupertinoDatePicker with different picker modes.
-/// We can provide intiial dateTime value for the picker to display. When user changes
+/// We can provide initial dateTime value for the picker to display. When user changes
 /// the drag the date or time wheels, the picker will call onDateTimeChanged callback.
 ///
 /// CupertinoDatePicker can be displayed directly on a screen or in a popup.

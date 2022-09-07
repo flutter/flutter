@@ -827,11 +827,11 @@ class TextEditingValue {
   /// prediction changes.
   ///
   /// Composing regions can also be used for performing multistage input, which
-  /// is typically used by IMEs designed for phoetic keyboard to enter
+  /// is typically used by IMEs designed for phonetic keyboard to enter
   /// ideographic symbols. As an example, many CJK keyboards require the user to
-  /// enter a latin alphabet sequence and then convert it to CJK characters. On
+  /// enter a Latin alphabet sequence and then convert it to CJK characters. On
   /// iOS, the default software keyboards do not have a dedicated view to show
-  /// the unfinished latin sequence, so it's displayed directly in the text
+  /// the unfinished Latin sequence, so it's displayed directly in the text
   /// field, inside of a composing region.
   ///
   /// The composing region should typically only be changed by the IME, or the
@@ -879,7 +879,7 @@ class TextEditingValue {
   ///
   /// This method also adjusts the selection range and the composing range of the
   /// resulting [TextEditingValue], such that they point to the same substrings
-  /// as the correspoinding ranges in the original [TextEditingValue]. For
+  /// as the corresponding ranges in the original [TextEditingValue]. For
   /// example, if the original [TextEditingValue] is "Hello world" with the word
   /// "world" selected, replacing "Hello" with a different string using this
   /// method will not change the selected word.

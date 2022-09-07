@@ -247,7 +247,7 @@ abstract class TextEditingDelta {
   TextEditingValue apply(TextEditingValue value);
 }
 
-/// A structure representing an insertion of a single/or contigous sequence of
+/// A structure representing an insertion of a single/or contiguous sequence of
 /// characters at some offset of an editing state.
 @immutable
 class TextEditingDeltaInsertion extends TextEditingDelta {

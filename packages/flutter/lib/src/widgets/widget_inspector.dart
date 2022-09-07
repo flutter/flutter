@@ -1531,7 +1531,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns JSON representing the chain of [DiagnosticsNode] instances from
-  /// root of thee tree to the [Element] or [RenderObject] matching `id`.
+  /// root of the tree to the [Element] or [RenderObject] matching `id`.
   ///
   /// The JSON contains all information required to display a tree view with
   /// all nodes other than nodes along the path collapsed.

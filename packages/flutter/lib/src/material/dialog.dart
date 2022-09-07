@@ -225,7 +225,7 @@ class Dialog extends StatelessWidget {
 /// A Material Design alert dialog.
 ///
 /// An alert dialog (also known as a basic dialog) informs the user about
-/// situations that require acknowledgement. An alert dialog has an optional
+/// situations that require acknowledgment. An alert dialog has an optional
 /// title and an optional list of actions. The title is displayed above the
 /// content and the actions are displayed below the content.
 ///

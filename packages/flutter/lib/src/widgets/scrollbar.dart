@@ -934,7 +934,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// {@tool dartpad}
 /// This sample shows how to disable the default Scrollbar for a [Scrollable]
-/// widget to avoid duplicate Scrollbars when runnung on desktop platforms.
+/// widget to avoid duplicate Scrollbars when running on desktop platforms.
 ///
 /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
 /// {@end-tool}

@@ -45,7 +45,7 @@ enum _CupertinoListTileType { base, notched }
 /// take care of text wrapping.
 ///
 /// The size of [leading] is by default constrained to match the iOS size,
-/// depending of the type of list tile. This can however be overriden by
+/// depending of the type of list tile. This can however be overridden by
 /// providing [leadingSize]. The [trailing] widget is not constrained and is
 /// therefore a responsibility of the caller to ensure reasonable size of the
 /// [trailing] widget.
@@ -60,7 +60,7 @@ enum _CupertinoListTileType { base, notched }
 ///
 /// The [onTap] callback provides an option to react to taps anywhere inside the
 /// list tile. This can be used to navigate routes and according to iOS
-/// behaviour it should not be used for example to toggle the [CupertinoSwitch]
+/// behavior it should not be used for example to toggle the [CupertinoSwitch]
 /// in the trailing widget.
 ///
 /// See also:
@@ -91,9 +91,9 @@ class CupertinoListTile extends StatefulWidget {
   ///
   /// The [onTap] parameter is used to provide an action that is called when the
   /// tile is tapped. It is mainly used for navigating to a new route. It should
-  /// not be used to toggle a trailing [CupertinoSwitch] and similar usecases
+  /// not be used to toggle a trailing [CupertinoSwitch] and similar use cases
   /// because when tile is tapped, it switches the background color and remains
-  /// changed. This is according to iOS behaviour.
+  /// changed. This is according to iOS behavior.
   ///
   /// The [backgroundColor] provides a custom background color for the tile in
   /// a state before tapped. By default, it matches the theme's background color
@@ -154,9 +154,9 @@ class CupertinoListTile extends StatefulWidget {
   ///
   /// The [onTap] parameter is used to provide an action that is called when the
   /// tile is tapped. It is mainly used for navigating to a new route. It should
-  /// not be used to toggle a trailing [CupertinoSwitch] and similar usecases
+  /// not be used to toggle a trailing [CupertinoSwitch] and similar use cases
   /// because when tile is tapped, it switches the background color and remains
-  /// changed. This is according to iOS behaviour.
+  /// changed. This is according to iOS behavior.
   ///
   /// The [backgroundColor] provides a custom background color for the tile in
   /// a state before tapped. By default, it matches the theme's background color
@@ -218,7 +218,7 @@ class CupertinoListTile extends StatefulWidget {
   /// The [onTap] function is called when a user taps on [CupertinoListTile]. If
   /// left `null`, the [CupertinoListTile] will not react on taps. If this is a
   /// `Future<void> Function()`, then the [CupertinoListTile] remains activated
-  /// until the returned future is awaited. This is according to iOS behaviour.
+  /// until the returned future is awaited. This is according to iOS behavior.
   /// However, if this function is a `void Function()`, then the tile is active
   /// only for the duration of invocation.
   final FutureOr<void> Function()? onTap;

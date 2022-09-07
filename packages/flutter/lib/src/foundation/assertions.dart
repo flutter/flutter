@@ -1042,7 +1042,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// Adds a stack filtering function to [defaultStackFilter].
   ///
   /// For example, the framework adds common patterns of element building to
-  /// elide tree-walking patterns in the stacktrace.
+  /// elide tree-walking patterns in the stack trace.
   ///
   /// Added filters are checked in order of addition. The first matching filter
   /// wins, and subsequent filters will not be checked.
@@ -1232,7 +1232,7 @@ void debugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
 class DiagnosticsStackTrace extends DiagnosticsBlock {
   /// Creates a diagnostic for a stack trace.
   ///
-  /// [name] describes a name the stacktrace is given, e.g.
+  /// [name] describes a name the stack trace is given, e.g.
   /// `When the exception was thrown, this was the stack`.
   /// [stackFilter] provides an optional filter to use to filter which frames
   /// are included. If no filter is specified, [FlutterError.defaultStackFilter]

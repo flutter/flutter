@@ -266,7 +266,7 @@ class CupertinoMagnifier extends StatelessWidget {
   /// The default size of the magnifier.
   ///
   /// This is public so that positioners can choose to depend on it, although
-  /// it is overrideable.
+  /// it is overridable.
   @visibleForTesting
   static const Size kDefaultSize = Size(80, 47.5);
 

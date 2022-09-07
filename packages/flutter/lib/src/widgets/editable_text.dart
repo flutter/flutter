@@ -4189,7 +4189,7 @@ class _ScribblePlaceholder extends WidgetSpan {
   }
 }
 
-/// An interface for retriving the logical text boundary (left-closed-right-open)
+/// An interface for retrieving the logical text boundary (left-closed-right-open)
 /// at a given location in a document.
 ///
 /// Depending on the implementation of the [_TextBoundary], the input
