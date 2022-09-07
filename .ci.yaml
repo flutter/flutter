@@ -3533,7 +3533,6 @@ targets:
       task_name: microbenchmarks_impeller_ios
 
   - name: Mac_ios native_platform_view_ui_tests_ios
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
