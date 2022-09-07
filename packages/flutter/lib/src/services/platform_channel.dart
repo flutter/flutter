@@ -268,10 +268,10 @@ class MethodChannel {
   /// [binaryMessenger]'s [BinaryMessenger.send] method.
   ///
   /// If the result is null and `missingOk` is true, this returns null. (This is
-  /// the behaviour of [OptionalMethodChannel.invokeMethod].)
+  /// the behavior of [OptionalMethodChannel.invokeMethod].)
   ///
   /// If the result is null and `missingOk` is false, this throws a
-  /// [MissingPluginException]. (This is the behaviour of
+  /// [MissingPluginException]. (This is the behavior of
   /// [MethodChannel.invokeMethod].)
   ///
   /// Otherwise, the result is decoded using the [codec]'s

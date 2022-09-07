@@ -110,7 +110,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// layer that it wishes to expose, and should have an
 /// `ensureInitialized` method that constructs the class if that
 /// layer's mixin's `_instance` field is null. This allows the binding
-/// to be overriden by developers who have more specific needs, while
+/// to be overridden by developers who have more specific needs, while
 /// still allowing other code to call `ensureInitialized` when a binding
 /// is needed.
 ///
