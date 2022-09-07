@@ -304,6 +304,23 @@ void main() {
     expect(s10.fontFamilyFallback, <String>[]);
   });
 
+  test('TextStyle package font merge', () {
+    const TextStyle s1 = TextStyle(package: 'p', fontFamily: 'font1', fontFamilyFallback: <String>['fallback1']);
+    const TextStyle s2 = TextStyle(package: 'p', fontFamily: 'font2', fontFamilyFallback: <String>['fallback2']);
+
+    final TextStyle emptyMerge = const TextStyle().merge(s1);
+    expect(emptyMerge.fontFamily, 'packages/p/font1');
+    expect(emptyMerge.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp1 = TextStyle.lerp(s1, s2, 0)!;
+    expect(lerp1.fontFamily, 'packages/p/font1');
+    expect(lerp1.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp2 = TextStyle.lerp(s1, s2, 1.0)!;
+    expect(lerp2.fontFamily, 'packages/p/font2');
+    expect(lerp2.fontFamilyFallback, <String>['packages/p/fallback2']);
+  });
+
   test('TextStyle font family fallback', () {
     const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
     expect(s1.fontFamilyFallback![0], 'Roboto');

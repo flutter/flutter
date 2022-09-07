@@ -147,6 +147,8 @@ class Drawer extends StatelessWidget {
     super.key,
     this.backgroundColor,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.shape,
     this.width,
     this.child,
@@ -167,6 +169,40 @@ class Drawer extends StatelessWidget {
   /// If this is null, then [DrawerThemeData.elevation] is used. If that
   /// is also null, then it defaults to 16.0.
   final double? elevation;
+
+  /// The color used to paint a drop shadow under the drawer's [Material],
+  /// which reflects the drawer's [elevation].
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then no drop shadow will
+  /// be rendered.
+  ///
+  /// If null and [ThemeData.useMaterial3] is false then it will default to
+  /// [ThemeData.shadowColor].
+  ///
+  /// See also:
+  ///   * [Material.shadowColor], which describes how the drop shadow is painted.
+  ///   * [elevation], which affects how the drop shadow is painted.
+  ///   * [surfaceTintColor], which can be used to indicate elevation through
+  ///     tinting the background color.
+  final Color? shadowColor;
+
+  /// The color used as a surface tint overlay on the drawer's background color,
+  /// which reflects the drawer's [elevation].
+  ///
+  /// If [ThemeData.useMaterial3] is false property has no effect.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
+  /// [ColorScheme.surfaceTint] will be used.
+  ///
+  /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
+  ///
+  /// See also:
+  ///   * [Material.surfaceTintColor], which describes how the surface tint will
+  ///     be applied to the background color of the drawer.
+  ///   * [elevation], which affects the opacity of the surface tint.
+  ///   * [shadowColor], which can be used to indicate elevation through
+  ///     a drop shadow.
+  final Color? surfaceTintColor;
 
   /// The shape of the drawer.
   ///
@@ -189,7 +225,7 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// The semantic label of the dialog used by accessibility frameworks to
+  /// The semantic label of the drawer used by accessibility frameworks to
   /// announce screen transitions when the drawer is opened and closed.
   ///
   /// If this label is not provided, it will default to
@@ -216,6 +252,7 @@ class Drawer extends StatelessWidget {
       case TargetPlatform.windows:
         label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
@@ -226,6 +263,8 @@ class Drawer extends StatelessWidget {
         child: Material(
           color: backgroundColor ?? drawerTheme.backgroundColor,
           elevation: elevation ?? drawerTheme.elevation ?? 16.0,
+          shadowColor: shadowColor ?? drawerTheme.shadowColor ?? (useMaterial3 ? Colors.transparent : Theme.of(context).shadowColor),
+          surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? (useMaterial3 ? Theme.of(context).colorScheme.surfaceTint : null),
           shape: shape ?? drawerTheme.shape,
           child: child,
         ),

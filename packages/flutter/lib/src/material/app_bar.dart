@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'app_bar_theme.dart';
 import 'back_button.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flexible_space_bar.dart';
@@ -2369,6 +2370,9 @@ class _AppBarDefaultsM3 extends AppBarTheme {
 
   @override
   Color? get foregroundColor => _colors.onSurface;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 
   @override
   Color? get surfaceTintColor => _colors.surfaceTint;

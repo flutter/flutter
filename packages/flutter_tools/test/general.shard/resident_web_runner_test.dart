@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -32,7 +30,6 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
@@ -90,20 +87,20 @@ const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
 ];
 
 void main() {
-  FakeDebugConnection debugConnection;
-  FakeChromeDevice chromeDevice;
-  FakeAppConnection appConnection;
-  FakeFlutterDevice flutterDevice;
-  FakeWebDevFS webDevFS;
-  FakeResidentCompiler residentCompiler;
-  FakeChromeConnection chromeConnection;
-  FakeChromeTab chromeTab;
-  FakeWebServerDevice webServerDevice;
-  FakeDevice mockDevice;
-  FakeVmServiceHost fakeVmServiceHost;
-  FileSystem fileSystem;
-  ProcessManager processManager;
-  TestUsage testUsage;
+  late FakeDebugConnection debugConnection;
+  late FakeChromeDevice chromeDevice;
+  late FakeAppConnection appConnection;
+  late FakeFlutterDevice flutterDevice;
+  late FakeWebDevFS webDevFS;
+  late FakeResidentCompiler residentCompiler;
+  late FakeChromeConnection chromeConnection;
+  late FakeChromeTab chromeTab;
+  late FakeWebServerDevice webServerDevice;
+  late FakeDevice mockDevice;
+  late FakeVmServiceHost fakeVmServiceHost;
+  late FileSystem fileSystem;
+  late ProcessManager processManager;
+  late TestUsage testUsage;
 
   setUp(() {
     testUsage = TestUsage();
@@ -114,6 +111,7 @@ void main() {
     appConnection = FakeAppConnection();
     webDevFS = FakeWebDevFS();
     residentCompiler = FakeResidentCompiler();
+    chromeDevice = FakeChromeDevice();
     chromeConnection = FakeChromeConnection();
     chromeTab = FakeChromeTab('index.html');
     webServerDevice = FakeWebServerDevice();
@@ -161,7 +159,7 @@ void main() {
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
 
-    flutterDevice.device = FakeChromeDevice();
+    flutterDevice.device = chromeDevice;
 
     expect(residentWebRunner.debuggingEnabled, true);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -897,7 +895,7 @@ void main() {
     setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
         Completer<DebugConnectionInfo>();
-    final Future<int> result = residentWebRunner.run(
+    final Future<int?> result = residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     );
     await connectionInfoCompleter.future;
@@ -1192,7 +1190,9 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     setupMocks();
 
-    webDevFS.exception = ChromeDebugException(<String, dynamic>{});
+    webDevFS.exception = ChromeDebugException(<String, Object?>{
+      'text': 'error',
+    });
 
     await expectLater(residentWebRunner.run, throwsToolExit());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1232,9 +1232,9 @@ flutter:
 
 ResidentRunner setUpResidentRunner(
   FlutterDevice flutterDevice, {
-  Logger logger,
-  SystemClock systemClock,
-  DebuggingOptions debuggingOptions,
+  Logger? logger,
+  SystemClock? systemClock,
+  DebuggingOptions? debuggingOptions,
 }) {
   return ResidentWebRunner(
     flutterDevice,
@@ -1261,7 +1261,7 @@ class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
-  String name;
+  String name = 'FakeDevice';
 
   int count = 0;
 
@@ -1269,26 +1269,26 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
 
   @override
-  DartDevelopmentService dds;
+  late DartDevelopmentService dds;
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    covariant ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, dynamic>? platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     return LaunchResult.succeeded();
   }
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage app, {
-    String userIdentifier,
+    covariant ApplicationPackage? app, {
+    String? userIdentifier,
   }) async {
     if (count > 0) {
       throw StateError('stopApp called more than once.');
@@ -1299,14 +1299,14 @@ class FakeDevice extends Fake implements Device {
 }
 
 class FakeDebugConnection extends Fake implements DebugConnection {
-  FakeVmServiceHost Function() fakeVmServiceHost;
+  late FakeVmServiceHost Function() fakeVmServiceHost;
 
   @override
   vm_service.VmService get vmService =>
       fakeVmServiceHost.call().vmService.service;
 
   @override
-  String uri;
+  late String uri;
 
   final Completer<void> completer = Completer<void>();
   bool didClose = false;
@@ -1340,14 +1340,14 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override
   Future<CompilerOutput> recompile(
     Uri mainUri,
-    List<Uri> invalidatedFiles, {
-    @required String outputPath,
-    @required PackageConfig packageConfig,
-    @required String projectRootPath,
-    @required FileSystem fs,
+    List<Uri>? invalidatedFiles, {
+    required String outputPath,
+    required PackageConfig packageConfig,
+    required FileSystem fs,
+    String? projectRootPath,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
-    File dartPluginRegistrant,
+    File? dartPluginRegistrant,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -1368,11 +1368,11 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 }
 
 class FakeWebDevFS extends Fake implements WebDevFS {
-  Object exception;
-  ConnectionResult result;
-  UpdateFSReport report;
+  Object? exception;
+  ConnectionResult? result;
+  late UpdateFSReport report;
 
-  Uri mainUri;
+  Uri? mainUri;
 
   @override
   List<Uri> sources = <Uri>[];
@@ -1381,10 +1381,10 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   Uri baseUri = Uri.parse('http://localhost:12345');
 
   @override
-  DateTime lastCompiled = DateTime.now();
+  DateTime? lastCompiled = DateTime.now();
 
   @override
-  PackageConfig lastPackageConfig = PackageConfig.empty;
+  PackageConfig? lastPackageConfig = PackageConfig.empty;
 
   @override
   Future<Uri> create() async {
@@ -1393,33 +1393,33 @@ class FakeWebDevFS extends Fake implements WebDevFS {
 
   @override
   Future<UpdateFSReport> update({
-    @required Uri mainUri,
-    @required ResidentCompiler generator,
-    @required bool trackWidgetCreation,
-    @required String pathToReload,
-    @required List<Uri> invalidatedFiles,
-    @required PackageConfig packageConfig,
-    @required String dillOutputPath,
-    @required DevelopmentShaderCompiler shaderCompiler,
-    DevFSWriter devFSWriter,
-    String target,
-    AssetBundle bundle,
-    DateTime firstBuildTime,
+    required Uri mainUri,
+    required ResidentCompiler generator,
+    required bool trackWidgetCreation,
+    required String pathToReload,
+    required List<Uri> invalidatedFiles,
+    required PackageConfig packageConfig,
+    required String dillOutputPath,
+    required DevelopmentShaderCompiler shaderCompiler,
+    DevFSWriter? devFSWriter,
+    String? target,
+    AssetBundle? bundle,
+    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String projectRootPath,
-    File dartPluginRegistrant,
+    String? projectRootPath,
+    File? dartPluginRegistrant,
   }) async {
     this.mainUri = mainUri;
     return report;
   }
 
   @override
-  Future<ConnectionResult> connect(bool useDebugExtension, {VmServiceFactory vmServiceFactory = createVmServiceDelegate}) async {
+  Future<ConnectionResult?> connect(bool useDebugExtension, {VmServiceFactory vmServiceFactory = createVmServiceDelegate}) async {
     if (exception != null) {
       assert(exception is Exception || exception is Error);
       // ignore: only_throw_errors, exception is either Error or Exception here.
-      throw exception;
+      throw exception!;
     }
     return result;
   }
@@ -1430,12 +1430,12 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
 
   @override
   Future<ChromeTab> getTab(bool Function(ChromeTab tab) accept,
-      {Duration retryFor}) async {
+      {Duration? retryFor}) async {
     return tabs.firstWhere(accept);
   }
 
   @override
-  Future<List<ChromeTab>> getTabs({Duration retryFor}) async {
+  Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
     return tabs;
   }
 }
@@ -1448,7 +1448,7 @@ class FakeChromeTab extends Fake implements ChromeTab {
   final FakeWipConnection connection = FakeWipConnection();
 
   @override
-  Future<WipConnection> connect({Function/*?*/ onError}) async {
+  Future<WipConnection> connect({Function? onError}) async {
     return connection;
   }
 }
@@ -1491,9 +1491,9 @@ class TestChromiumLauncher implements ChromiumLauncher {
   Future<Chromium> launch(
     String url, {
     bool headless = false,
-    int debugPort,
+    int? debugPort,
     bool skipCheck = false,
-    Directory cacheDir,
+    Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
   }) async {
     return currentCompleter.future;
@@ -1506,35 +1506,35 @@ class TestChromiumLauncher implements ChromiumLauncher {
 }
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
-  Uri testUri;
+  Uri? testUri;
   UpdateFSReport report = UpdateFSReport(
     success: true,
     invalidatedSourcesCount: 1,
   );
-  Exception reportError;
+  Exception? reportError;
 
   @override
-  ResidentCompiler generator;
+  ResidentCompiler? generator;
 
   @override
-  Stream<Uri> get observatoryUris => Stream<Uri>.value(testUri);
+  Stream<Uri?> get observatoryUris => Stream<Uri?>.value(testUri);
 
   @override
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
 
   @override
-  FlutterVmService vmService;
+  FlutterVmService? vmService;
 
-  DevFS _devFS;
-
-  @override
-  DevFS get devFS => _devFS;
+  DevFS? _devFS;
 
   @override
-  set devFS(DevFS value) {}
+  DevFS? get devFS => _devFS;
 
   @override
-  Device device;
+  set devFS(DevFS? value) {}
+
+  @override
+  Device? device;
 
   @override
   Future<void> stopEchoingDeviceLog() async {}
@@ -1543,7 +1543,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> initLogReader() async {}
 
   @override
-  Future<Uri> setupDevFS(String fsName, Directory rootDirectory) async {
+  Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) async {
     return testUri;
   }
 
@@ -1553,38 +1553,38 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
-    ReloadSources reloadSources,
-    Restart restart,
-    CompileExpression compileExpression,
-    GetSkSLMethod getSkSLMethod,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-    int hostVmServicePort,
-    int ddsPort,
+    ReloadSources? reloadSources,
+    Restart? restart,
+    CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
+    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    int? hostVmServicePort,
+    int? ddsPort,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
     bool cacheStartupProfile = false,
-    @required bool allowExistingDdsInstance,
-    bool ipv6 = false,
+    required bool allowExistingDdsInstance,
+    bool? ipv6 = false,
   }) async {}
 
   @override
   Future<UpdateFSReport> updateDevFS({
-    Uri mainUri,
-    String target,
-    AssetBundle bundle,
-    DateTime firstBuildTime,
+    Uri? mainUri,
+    String? target,
+    AssetBundle? bundle,
+    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
-    String projectRootPath,
-    String pathToReload,
-    String dillOutputPath,
-    List<Uri> invalidatedFiles,
-    PackageConfig packageConfig,
-    File dartPluginRegistrant,
+    String? projectRootPath,
+    String? pathToReload,
+    String? dillOutputPath,
+    List<Uri>? invalidatedFiles,
+    PackageConfig? packageConfig,
+    File? dartPluginRegistrant,
   }) async {
     if (reportError != null) {
-      throw reportError;
+      throw reportError!;
     }
     return report;
   }
@@ -1597,7 +1597,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
