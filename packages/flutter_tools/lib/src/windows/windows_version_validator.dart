@@ -14,6 +14,11 @@ const List<String> kUnsupportedVersions = <String>[
   '8',
 ];
 
+/// Regex pattern for identifying line from systeminfo stdout with windows version
+/// (ie. 10.5.4123)
+const String kWindowsOSVersionSemVerPattern =
+    r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$';
+
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
   const WindowsVersionValidator({required ProcessManager processManager})
@@ -22,22 +27,10 @@ class WindowsVersionValidator extends DoctorValidator {
 
   final ProcessManager _processManager;
 
-  /// Provide a literal string as the Regex pattern
-  /// and a string to validate and get a boolean determining
-  /// if the string has at least one match
-  static Iterable<RegExpMatch> validateString(String pattern, String str,
-      {bool multiLine = true}) {
-    final RegExp regex = RegExp(
-      pattern,
-      multiLine: multiLine,
-    );
-
-    return regex.allMatches(str);
-  }
-
   @override
   Future<ValidationResult> validate() async {
-    final ProcessResult result = await _processManager.run(<String>['systeminfo']);
+    final ProcessResult result =
+        await _processManager.run(<String>['systeminfo']);
 
     if (result.exitCode != 0) {
       return const ValidationResult(
@@ -49,11 +42,9 @@ class WindowsVersionValidator extends DoctorValidator {
 
     final String resultStdout = result.stdout as String;
 
-    // Regular expression pattern for identifying
-    // semantic versioned strings
-    // (ie. 10.5.4123)
-    final Iterable<RegExpMatch> matches = validateString(
-        r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$', resultStdout);
+    final RegExp regex =
+        RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
+    final Iterable<RegExpMatch> matches = regex.allMatches(resultStdout);
 
     // Use the string split method to extract the major version
     // and check against the [kUnsupportedVersions] list

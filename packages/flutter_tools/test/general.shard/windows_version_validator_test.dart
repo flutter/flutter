@@ -194,15 +194,13 @@ void main() {
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
 
-  testWithoutContext('Running into an nonzero exit code from systeminfo command', () async {
+  testWithoutContext(
+      'Running into an nonzero exit code from systeminfo command', () async {
     final WindowsVersionValidator windowsVersionValidator =
         WindowsVersionValidator(
       processManager: FakeProcessManager.list(
         <FakeCommand>[
-          const FakeCommand(
-            command: <String>['systeminfo'],
-            exitCode: 1
-          ),
+          const FakeCommand(command: <String>['systeminfo'], exitCode: 1),
         ],
       ),
     );
@@ -216,8 +214,6 @@ void main() {
   });
 
   testWithoutContext('Unit testing on a regex pattern validator', () async {
-    const String regexPattern =
-        r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$';
     const String testStr = r'''
 OS Version:                10.0.19044 N/A Build 19044
 OSz Version:                10.0.19044 N/A Build 19044
@@ -229,8 +225,9 @@ OS Version:                10.0.19044 N/A Build 19044
 OS Version:                .0.19044 N/A Build 19044
 ''';
 
-    final Iterable<RegExpMatch> matches =
-        WindowsVersionValidator.validateString(regexPattern, testStr);
+    final RegExp regex =
+        RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
+    final Iterable<RegExpMatch> matches = regex.allMatches(testStr);
 
     expect(matches.length, 2,
         reason: 'There should be only two matches for the pattern provided');
