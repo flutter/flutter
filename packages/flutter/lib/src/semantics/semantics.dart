@@ -875,7 +875,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// or similar widget with an "on" state, and what its current
   /// state is.
   ///
-  /// This is mutually exclusive with [checked].
+  /// This is mutually exclusive with [checked] and [mixed].
   final bool? toggled;
 
   /// If non-null indicates that this subtree represents something that can be
@@ -4209,6 +4209,7 @@ class SemanticsConfiguration {
   set isChecked(bool? value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value!);
+    assert(value != true || isCheckStateMixed != true);
   }
 
   /// If this node has tristate that can be controlled by the user, whether
@@ -4223,6 +4224,7 @@ class SemanticsConfiguration {
   set isCheckStateMixed(bool? value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isCheckStateMixed, value!);
+    assert(value != true || isChecked != true);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether

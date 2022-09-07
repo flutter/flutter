@@ -425,7 +425,6 @@ void _defineTests() {
           properties: SemanticsProperties(
             enabled: true,
             checked: true,
-            mixed: true,
             selected: true,
             hidden: true,
             button: true,
@@ -452,7 +451,9 @@ void _defineTests() {
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
-    flags.remove(SemanticsFlag.hasImplicitScrolling);
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isCheckStateMixed);
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
@@ -476,7 +477,7 @@ void _defineTests() {
           rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
           properties: SemanticsProperties(
             enabled: true,
-            checked: true,
+            checked: false,
             mixed: true,
             toggled: true,
             selected: true,
@@ -504,7 +505,9 @@ void _defineTests() {
     flags = SemanticsFlag.values.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
-    flags.remove(SemanticsFlag.hasImplicitScrolling);
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isChecked);
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
