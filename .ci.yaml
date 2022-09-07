@@ -3131,15 +3131,6 @@ targets:
         ["devicelab", "android", "mac", "arm64"]
       task_name: run_release_test
 
-  - name: Mac_android flutter_gallery_mac__start_up
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "mac"]
-      task_name: flutter_gallery_mac__start_up
-
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
