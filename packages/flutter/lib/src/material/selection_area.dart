@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'debug.dart';
@@ -43,6 +44,7 @@ class SelectionArea extends StatefulWidget {
     this.selectionControls,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
+    this.onSelectionChanged,
     required this.child,
   });
 
@@ -81,6 +83,9 @@ class SelectionArea extends StatefulWidget {
   ///
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
   final SelectableRegionToolbarBuilder? contextMenuBuilder;
+
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   /// The child widget this selection area applies to.
   ///
@@ -141,6 +146,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       focusNode: _effectiveFocusNode,
       contextMenuBuilder: widget.contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+      onSelectionChanged: widget.onSelectionChanged,
       child: widget.child,
     );
   }

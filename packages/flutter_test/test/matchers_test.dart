@@ -733,6 +733,62 @@ void main() {
       ));
       handle.dispose();
     });
+
+    testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      addTearDown(() => handle.dispose());
+
+      const Key key = Key('semantics');
+      await tester.pumpWidget(Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        link: true,
+        onTap: () { },
+        onLongPress: () { },
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
+        textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () { },
+          const CustomSemanticsAction(label: 'bar'): () { },
+        },
+      ));
+
+      // This should fail due to the mis-match between the `namesRoute` value.
+      void failedExpectation() => expect(tester.getSemantics(find.byKey(key)),
+        matchesSemantics(
+          // Adding the explicit `false` for test readability
+          // ignore: avoid_redundant_argument_values
+          namesRoute: false,
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        ),
+      );
+
+      expect(failedExpectation, throwsA(isA<TestFailure>()));
+    });
   });
 
   group('containsSemantics', () {
@@ -1172,6 +1228,60 @@ void main() {
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
       expect(node, containsSemantics(customActions: <CustomSemanticsAction>[action]));
+    });
+
+    testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      addTearDown(() => handle.dispose());
+
+      const Key key = Key('semantics');
+      await tester.pumpWidget(Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        link: true,
+        onTap: () { },
+        onLongPress: () { },
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
+        textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () { },
+          const CustomSemanticsAction(label: 'bar'): () { },
+        },
+      ));
+
+      // This should fail due to the mis-match between the `namesRoute` value.
+      void failedExpectation() => expect(tester.getSemantics(find.byKey(key)),
+        containsSemantics(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          namesRoute: false,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        ),
+      );
+
+      expect(failedExpectation, throwsA(isA<TestFailure>()));
     });
   });
 

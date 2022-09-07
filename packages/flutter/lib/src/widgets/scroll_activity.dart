@@ -48,7 +48,7 @@ abstract class ScrollActivityDelegate {
   /// given velocity.
   void goBallistic(double velocity);
 
-  /// Update the ballistic animation instead of restarting  it, for example as
+  /// Update the ballistic animation instead of restarting it, for example as
   /// the result of a layout change after a flinging gesture.
   ///
   /// The [initVelocity] and [initPosition] refer to the starting values of the

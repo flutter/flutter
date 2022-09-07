@@ -48,7 +48,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline2!,
+      style: Theme.of(context).textTheme.displayMedium!,
       textAlign: TextAlign.center,
       child: Container(
         alignment: FractionalOffset.center,

@@ -216,6 +216,7 @@ class SelectableRegion extends StatefulWidget {
     required this.selectionControls,
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.onSelectionChanged,
   });
 
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
@@ -245,6 +246,9 @@ class SelectableRegion extends StatefulWidget {
   /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
 
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
+
   @override
   State<StatefulWidget> createState() => SelectableRegionState();
 }
@@ -268,6 +272,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
   Orientation? _lastOrientation;
+  SelectedContent? _lastSelectedContent;
 
   @override
   void initState() {
@@ -405,8 +410,16 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectEndTo(offset: details.globalPosition, continuous: true);
   }
 
+  void _updateSelectedContentIfNeeded() {
+    if (_lastSelectedContent?.plainText != _selectable?.getSelectedContent()?.plainText) {
+      _lastSelectedContent = _selectable?.getSelectedContent();
+      widget.onSelectionChanged?.call(_lastSelectedContent);
+    }
+  }
+
   void _handleMouseDragEnd(DragEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
@@ -414,6 +427,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectWordAt(offset: details.globalPosition);
     _showToolbar();
     _showHandles();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
@@ -422,6 +436,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleRightClickDown(TapDownDetails details) {
@@ -429,6 +444,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectWordAt(offset: details.globalPosition);
     _showHandles();
     _showToolbar(location: details.globalPosition);
+    _updateSelectedContentIfNeeded();
   }
 
   // Selection update helper methods.
@@ -488,6 +504,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     );
    }
   _stopSelectionEndEdgeUpdate();
+  _updateSelectedContentIfNeeded();
  }
 
   void _stopSelectionEndEdgeUpdate() {
@@ -878,6 +895,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _clearSelection() {
     _finalizeSelection();
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
+    _updateSelectedContentIfNeeded();
   }
 
   Future<void> _copy() async {
@@ -920,6 +938,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _showToolbar();
       _showHandles();
     }
+    _updateSelectedContentIfNeeded();
   }
 
   @override

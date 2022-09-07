@@ -885,6 +885,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
     ));
+    assert(debugAssertNoPendingPerformanceModeRequests(
+      'A performance mode was requested and not disposed by a test.'
+    ));
     assert(debugAssertAllFoundationVarsUnset(
       'The value of a foundation debug variable was changed by the test.',
       debugPrintOverride: debugPrintOverride,

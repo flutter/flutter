@@ -515,7 +515,7 @@ class DataTable extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataTextStyle] is used. By default, the text
-  /// style is [TextTheme.bodyText2].
+  /// style is [TextTheme.bodyMedium].
   final TextStyle? dataTextStyle;
 
   /// {@template flutter.material.dataTable.headingRowColor}
@@ -565,7 +565,7 @@ class DataTable extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.headingTextStyle] is used. By default, the
-  /// text style is [TextTheme.subtitle2].
+  /// text style is [TextTheme.titleSmall].
   final TextStyle? headingTextStyle;
 
   /// {@template flutter.material.dataTable.horizontalMargin}
@@ -774,7 +774,7 @@ class DataTable extends StatelessWidget {
     final TextStyle effectiveHeadingTextStyle = headingTextStyle
       ?? dataTableTheme.headingTextStyle
       ?? themeData.dataTableTheme.headingTextStyle
-      ?? themeData.textTheme.subtitle2!;
+      ?? themeData.textTheme.titleSmall!;
     final double effectiveHeadingRowHeight = headingRowHeight
       ?? dataTableTheme.headingRowHeight
       ?? themeData.dataTableTheme.headingRowHeight
@@ -837,7 +837,7 @@ class DataTable extends StatelessWidget {
     final TextStyle effectiveDataTextStyle = dataTextStyle
       ?? dataTableTheme.dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
-      ?? themeData.textTheme.bodyText2!;
+      ?? themeData.textTheme.bodyMedium!;
     final double effectiveDataRowHeight = dataRowHeight
       ?? dataTableTheme.dataRowHeight
       ?? themeData.dataTableTheme.dataRowHeight

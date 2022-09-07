@@ -82,7 +82,7 @@ class _RestorableCounterState extends State<RestorableCounter>
             ),
             Text(
               '${_counter.value}',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),

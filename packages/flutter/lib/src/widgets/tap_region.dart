@@ -406,7 +406,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
 ///
 ///  * [TapRegion], a widget that inserts a [RenderTapRegion] into the render
 ///    tree.
-class RenderTapRegion extends RenderProxyBox with Diagnosticable {
+class RenderTapRegion extends RenderProxyBox {
   /// Creates a [RenderTapRegion].
   RenderTapRegion({
     TapRegionRegistry? registry,
@@ -464,6 +464,12 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   Object? _groupId;
   set groupId(Object? value) {
     if (_groupId != value) {
+      // If the group changes, we need to unregister and re-register under the
+      // new group. The re-registration happens automatically in layout().
+      if (_isRegistered) {
+        _registry!.unregisterTapRegion(this);
+        _isRegistered = false;
+      }
       _groupId = value;
       markNeedsLayout();
     }
@@ -515,7 +521,7 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<String?>('debugLabel', debugLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }

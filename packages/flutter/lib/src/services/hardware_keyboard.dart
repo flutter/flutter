@@ -353,7 +353,7 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 /// ## Compared to [RawKeyboard]
 ///
 /// [RawKeyboard] is the legacy API, and will be deprecated and removed in the
-/// future.  It is recommended to always use [HardwareKeyboard] and [KeyEvent]
+/// future. It is recommended to always use [HardwareKeyboard] and [KeyEvent]
 /// APIs (such as [FocusNode.onKeyEvent]) to handle key events.
 ///
 /// Behavior-wise, [RawKeyboard] provides a less unified, less regular
@@ -672,7 +672,7 @@ class KeyMessage {
   /// The list of [KeyEvent]s converted from the native key message.
   ///
   /// A native key message is converted into multiple [KeyEvent]s in a regular
-  /// event model.  The [events] might contain zero or any number of
+  /// event model. The [events] might contain zero or any number of
   /// [KeyEvent]s.
   ///
   /// See also:

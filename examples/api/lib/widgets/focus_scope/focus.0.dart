@@ -69,7 +69,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       debugLabel: 'Scope',
       autofocus: true,
       child: DefaultTextStyle(
-        style: textTheme.headline4!,
+        style: textTheme.headlineMedium!,
         child: Focus(
           onKey: _handleKeyPress,
           debugLabel: 'Button',

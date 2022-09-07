@@ -18,7 +18,7 @@ import '../dart/package_map.dart';
 /// The flutter tool can be run with the output files of one or more engine builds
 /// replacing the cached artifacts. Typically this is done by setting the
 /// `--local-engine` command line flag to the name of the desired engine variant
-/// (e.g. "host_debug_unopt").  Provided that the `flutter/` and `engine/` directories
+/// (e.g. "host_debug_unopt"). Provided that the `flutter/` and `engine/` directories
 /// are located adjacent to one another, the output folder will be located
 /// automatically.
 ///

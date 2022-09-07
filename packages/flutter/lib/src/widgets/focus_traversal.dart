@@ -1347,7 +1347,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
         a.order.runtimeType == b.order.runtimeType,
         'When sorting nodes for determining focus order, the order (${a.order}) of '
         "node ${a.node}, isn't the same type as the order (${b.order}) of ${b.node}. "
-        "Incompatible order types can't be compared.  Use a FocusTraversalGroup to group "
+        "Incompatible order types can't be compared. Use a FocusTraversalGroup to group "
         'similar orders together.',
       );
       return a.order.compareTo(b.order);
@@ -1442,7 +1442,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// {@tool dartpad}
 /// This sample shows three rows of buttons, each grouped by a
 /// [FocusTraversalGroup], each with different traversal order policies. Use tab
-/// traversal to see the order they are traversed in.  The first row follows a
+/// traversal to see the order they are traversed in. The first row follows a
 /// numerical order, the second follows a lexical order (ordered to traverse
 /// right to left), and the third ignores the numerical order assigned to it and
 /// traverses in widget order.

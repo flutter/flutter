@@ -1060,7 +1060,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   final BackButtonDispatcher parent;
 
   /// The parent of this child back button dispatcher decide to let this
-  /// child to handle the invoke the  callback request in
+  /// child to handle the invoke the callback request in
   /// [BackButtonDispatcher.invokeCallback].
   ///
   /// Return a boolean future with true if this child will handle the request;

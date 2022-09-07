@@ -1255,6 +1255,43 @@ void main() {
       skip: kIsWeb, // [intended]
     );
   });
+
+  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+    SelectedContent? content;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Center(
+            child: Text('How are you'),
+          ),
+        ),
+      ),
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 4), kind: PointerDeviceKind.mouse);
+    expect(content, isNull);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    await gesture.moveTo(textOffsetToPosition(paragraph, 7));
+    await gesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are');
+
+    // Backwards selection.
+    await gesture.down(textOffsetToPosition(paragraph, 3));
+    expect(content, isNull);
+    await gesture.moveTo(textOffsetToPosition(paragraph, 0));
+    await gesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How');
+  });
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
