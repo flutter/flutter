@@ -11,7 +11,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog_theme.dart';
-import 'elevation_overlay.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -46,6 +45,8 @@ class Dialog extends StatelessWidget {
     super.key,
     this.backgroundColor,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
     this.insetPadding = _defaultInsetPadding,
@@ -53,7 +54,8 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.child,
-  }) : assert(clipBehavior != null);
+  }) : assert(clipBehavior != null),
+       assert(elevation == null || elevation >= 0.0);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -67,11 +69,62 @@ class Dialog extends StatelessWidget {
   /// {@template flutter.material.dialog.elevation}
   /// The z-coordinate of this [Dialog].
   ///
-  /// If null then [DialogTheme.elevation] is used, and if that's null then the
-  /// dialog's elevation is 24.0.
+  /// Controls how far above the parent the dialog will appear. Elevation is
+  /// represented by a drop shadow if [shadowColor] is non null,
+  /// and a surface tint overlay on the background color if [surfaceTintColor] is
+  /// non null.
+  ///
+  /// If null then [DialogTheme.elevation] is used, and if that is null then
+  /// the elevation will match the Material Design specification for Dialogs.
+  ///
+  /// See also:
+  ///   * [Material.elevation], which describes how [elevation] effects the
+  ///     drop shadow or surface tint overlay.
+  ///   * [shadowColor], color of the drop shadow used to indicate the elevation.
+  ///   * [surfaceTintColor], color of an overlay on top of the background
+  ///     color used to indicate the elevation.
+  ///   * <https://m3.material.io/components/dialogs/overview>, the Material
+  ///     Design specification for dialogs.
   /// {@endtemplate}
-  /// {@macro flutter.material.material.elevation}
   final double? elevation;
+
+  /// {@template flutter.material.dialog.shadowColor}
+  /// The color used to paint a drop shadow under the dialog's [Material],
+  /// which reflects the dialog's [elevation].
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then no drop shadow will
+  /// be rendered.
+  ///
+  /// If null and [ThemeData.useMaterial3] is false then it will default to
+  /// [ThemeData.shadowColor].
+  ///
+  /// See also:
+  ///   * [Material.shadowColor], which describes how the drop shadow is painted.
+  ///   * [elevation], which affects how the drop shadow is painted.
+  ///   * [surfaceTintColor], which can be used to indicate elevation through
+  ///     tinting the background color.
+  /// {@endtemplate}
+  final Color? shadowColor;
+
+  /// {@template flutter.material.dialog.surfaceTintColor}
+  /// The color used as a surface tint overlay on the dialog's background color,
+  /// which reflects the dialog's [elevation].
+  ///
+  /// If [ThemeData.useMaterial3] is false property has no effect.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
+  /// [ColorScheme.surfaceTint] will be used.
+  ///
+  /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
+  ///
+  /// See also:
+  ///   * [Material.surfaceTintColor], which describes how the surface tint will
+  ///     be applied to the background color of the dialog.
+  ///   * [elevation], which affects the opacity of the surface tint.
+  ///   * [shadowColor], which can be used to indicate elevation through
+  ///     a drop shadow.
+  /// {@endtemplate}
+  final Color? surfaceTintColor;
 
   /// {@template flutter.material.dialog.insetAnimationDuration}
   /// The duration of the animation to show when the system keyboard intrudes
@@ -155,6 +208,8 @@ class Dialog extends StatelessWidget {
             child: Material(
               color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
               elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
+              shadowColor: shadowColor ?? dialogTheme.shadowColor ?? defaults.shadowColor,
+              surfaceTintColor: surfaceTintColor ?? dialogTheme.surfaceTintColor ?? defaults.surfaceTintColor,
               shape: shape ?? dialogTheme.shape ?? defaults.shape!,
               type: MaterialType.card,
               clipBehavior: clipBehavior,
@@ -280,6 +335,8 @@ class AlertDialog extends StatelessWidget {
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.semanticLabel,
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
@@ -478,8 +535,13 @@ class AlertDialog extends StatelessWidget {
   final Color? backgroundColor;
 
   /// {@macro flutter.material.dialog.elevation}
-  /// {@macro flutter.material.material.elevation}
   final double? elevation;
+
+  /// {@macro flutter.material.dialog.shadowColor}
+  final Color? shadowColor;
+
+  /// {@macro flutter.material.dialog.surfaceTintColor}
+  final Color? surfaceTintColor;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
@@ -695,6 +757,8 @@ class AlertDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
       insetPadding: insetPadding,
       clipBehavior: clipBehavior,
       shape: shape,
@@ -860,6 +924,8 @@ class SimpleDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
     this.backgroundColor,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.semanticLabel,
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
@@ -915,8 +981,13 @@ class SimpleDialog extends StatelessWidget {
   final Color? backgroundColor;
 
   /// {@macro flutter.material.dialog.elevation}
-  /// {@macro flutter.material.material.elevation}
   final double? elevation;
+
+  /// {@macro flutter.material.dialog.shadowColor}
+  final Color? shadowColor;
+
+  /// {@macro flutter.material.dialog.surfaceTintColor}
+  final Color? surfaceTintColor;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
@@ -1031,6 +1102,8 @@ class SimpleDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
       insetPadding: insetPadding,
       clipBehavior: clipBehavior,
       shape: shape,
@@ -1297,6 +1370,9 @@ class _DialogDefaultsM2 extends DialogTheme {
   Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
 
   @override
+  Color? get shadowColor => Theme.of(context).shadowColor;
+
+  @override
   TextStyle? get titleTextStyle => _textTheme.titleLarge;
 
   @override
@@ -1330,9 +1406,14 @@ class _DialogDefaultsM3 extends DialogTheme {
   @override
   Color? get iconColor => _colors.secondary;
 
-  // TODO(darrenaustin): overlay should be handled by Material widget: https://github.com/flutter/flutter/issues/9160
   @override
-  Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.primary, 6.0);
+  Color? get backgroundColor => _colors.surface;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
+
+  @override
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   TextStyle? get titleTextStyle => _textTheme.headlineSmall;

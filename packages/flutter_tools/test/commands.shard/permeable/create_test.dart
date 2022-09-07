@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
@@ -60,12 +58,12 @@ const String samplesIndexJson = '''
 ]''';
 
 void main() {
-  Directory tempDir;
-  Directory projectDir;
-  FakeFlutterVersion fakeFlutterVersion;
-  LoggingProcessManager loggingProcessManager;
-  FakeProcessManager fakeProcessManager;
-  BufferLogger logger;
+  late Directory tempDir;
+  late Directory projectDir;
+  late FakeFlutterVersion fakeFlutterVersion;
+  late LoggingProcessManager loggingProcessManager;
+  late FakeProcessManager fakeProcessManager;
+  late BufferLogger logger;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -569,7 +567,7 @@ void main() {
     // Expect the dependency on flutter_web_plugins exists
     expect(pubspec.dependencies, contains('flutter_web_plugins'));
     // The platform is correctly registered
-    final YamlMap web = ((pubspec.flutter['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
+    final YamlMap web = ((pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
     expect(web['pluginClass'], 'FlutterProjectWeb');
     expect(web['fileName'], 'flutter_project_web.dart');
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
@@ -599,7 +597,7 @@ void main() {
     final String pluginName = projectDir.basename;
     expect(pubspec.dependencies, contains(pluginName));
     expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
-    final PathDependency pathDependency = pubspec.dependencies[pluginName] as PathDependency;
+    final PathDependency pathDependency = pubspec.dependencies[pluginName]! as PathDependency;
     expect(pathDependency.path, '../');
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
@@ -1158,7 +1156,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1255,7 +1253,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -2548,9 +2546,9 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint> env = pubspec.environment;
-    expect(env['flutter'].allows(Version(2, 5, 0)), true);
-    expect(env['flutter'].allows(Version(2, 4, 9)), false);
+    final Map<String, VersionConstraint?> env = pubspec.environment!;
+    expect(env['flutter']!.allows(Version(2, 5, 0)), true);
+    expect(env['flutter']!.allows(Version(2, 4, 9)), false);
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -3084,7 +3082,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir,
   );
@@ -3124,7 +3122,7 @@ Future<void> _getPackages(Directory workingDir) async {
   // While flutter test does get packages, it doesn't write version
   // files anymore.
   await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     <String>[
       flutterToolsSnapshotPath,
       'packages',
@@ -3134,7 +3132,7 @@ Future<void> _getPackages(Directory workingDir) async {
   );
 }
 
-Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
+Future<void> _runFlutterTest(Directory workingDir, { String? target }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -3153,7 +3151,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );
@@ -3171,8 +3169,8 @@ class LoggingProcessManager extends LocalProcessManager {
   @override
   Future<Process> start(
     List<Object> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
@@ -3193,14 +3191,14 @@ class LoggingProcessManager extends LocalProcessManager {
   }
 }
 
-String _getStringValueFromPlist({File plistFile, String key}) {
+String _getStringValueFromPlist({required File plistFile, String? key}) {
   final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
 }
 
-bool _getBooleanValueFromPlist({File plistFile, String key}) {
+bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
   final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);

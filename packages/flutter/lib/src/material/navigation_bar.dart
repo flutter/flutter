@@ -67,8 +67,9 @@ class NavigationBar extends StatelessWidget {
     required this.destinations,
     this.onDestinationSelected,
     this.backgroundColor,
-    this.surfaceTintColor,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.height,
     this.labelBehavior,
   }) :  assert(destinations != null && destinations.length >= 2),
@@ -109,6 +110,22 @@ class NavigationBar extends StatelessWidget {
   /// and [ColorScheme.onSurface] using an [ElevationOverlay].
   final Color? backgroundColor;
 
+  /// The elevation of the [NavigationBar] itself.
+  ///
+  /// If null, [NavigationBarThemeData.elevation] is used. If that
+  /// is also null, then if [ThemeData.useMaterial3] is true then it will
+  /// be 3.0 otherwise 0.0.
+  final double? elevation;
+
+  /// The color used for the drop shadow to indicate elevation.
+  ///
+  /// If null, [NavigationBarThemeData.shadowColor] is used. If that
+  /// is also null, the default value is [Colors.transparent] which
+  /// indicates that no drop shadow will be displayed.
+  ///
+  /// See [Material.shadowColor] for more details on drop shadows.
+  final Color? shadowColor;
+
   /// The color used as an overlay on [backgroundColor] to indicate elevation.
   ///
   /// If null, [NavigationBarThemeData.surfaceTintColor] is used. If that
@@ -117,13 +134,6 @@ class NavigationBar extends StatelessWidget {
   /// See [Material.surfaceTintColor] for more details on how this
   /// overlay is applied.
   final Color? surfaceTintColor;
-
-  /// The elevation of the [NavigationBar] itself.
-  ///
-  /// If null, [NavigationBarThemeData.elevation] is used. If that
-  /// is also null, then if [ThemeData.useMaterial3] is true then it will
-  /// be 3.0 otherwise 0.0.
-  final double? elevation;
 
   /// The height of the [NavigationBar] itself.
   ///
@@ -171,8 +181,9 @@ class NavigationBar extends StatelessWidget {
       color: backgroundColor
         ?? navigationBarTheme.backgroundColor
         ?? defaults.backgroundColor!,
-      surfaceTintColor: surfaceTintColor ?? navigationBarTheme.surfaceTintColor ?? defaults.surfaceTintColor,
       elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
+      shadowColor: shadowColor ?? navigationBarTheme.shadowColor ?? defaults.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? navigationBarTheme.surfaceTintColor ?? defaults.surfaceTintColor,
       child: SafeArea(
         child: SizedBox(
           height: effectiveHeight,
@@ -1249,6 +1260,8 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override Color? get backgroundColor => _colors.surface;
+
+  @override Color? get shadowColor => Colors.transparent;
 
   @override Color? get surfaceTintColor => _colors.surfaceTint;
 
