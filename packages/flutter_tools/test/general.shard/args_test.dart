@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
@@ -111,7 +109,7 @@ void main() {
   });
 }
 
-void verifyCommandRunner(CommandRunner<Object> runner) {
+void verifyCommandRunner(CommandRunner<Object?> runner) {
   expect(runner.argParser, isNotNull, reason: '${runner.runtimeType} has no argParser');
   expect(runner.argParser.allowsAnything, isFalse, reason: '${runner.runtimeType} allows anything');
   expect(runner.argParser.allowTrailingOptions, isFalse, reason: '${runner.runtimeType} allows trailing options');
@@ -119,7 +117,7 @@ void verifyCommandRunner(CommandRunner<Object> runner) {
   runner.commands.values.forEach(verifyCommand);
 }
 
-void verifyCommand(Command<Object> runner) {
+void verifyCommand(Command<Object?> runner) {
   expect(runner.argParser, isNotNull, reason: 'command ${runner.name} has no argParser');
   verifyOptions(runner.name, runner.argParser.options.values);
 
@@ -161,7 +159,7 @@ const String _needHelp = "Every option must have help explaining what it does, e
 
 const String _header = ' Comment: ';
 
-void verifyOptions(String command, Iterable<Option> options) {
+void verifyOptions(String? command, Iterable<Option> options) {
   String target;
   if (command == null) {
     target = 'the global argument "';
@@ -191,10 +189,11 @@ void verifyOptions(String command, Iterable<Option> options) {
     if (option.defaultsTo != null) {
       expect(option.help, isNot(contains('Default')), reason: '${_header}Help for $target--${option.name}" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).');
 
-      if (option.allowedHelp != null) {
-        for (final String allowedValue in option.allowedHelp.keys) {
+      final Map<String, String>? allowedHelp = option.allowedHelp;
+      if (allowedHelp != null) {
+        for (final String allowedValue in allowedHelp.keys) {
           expect(
-            option.allowedHelp[allowedValue],
+            allowedHelp[allowedValue],
             isNot(anyOf(contains('default'), contains('Default'))),
             reason: '${_header}Help for $target--${option.name} $allowedValue" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).',
           );
@@ -202,7 +201,7 @@ void verifyOptions(String command, Iterable<Option> options) {
       }
     }
     expect(option.help, isNot(matches(_bannedArgumentReferencePatterns)), reason: '${_header}Help for $target--${option.name}" contains the string "--" in an unexpected way. If it\'s trying to mention another argument, it should be quoted, as in "--foo".');
-    for (final String line in option.help.split('\n')) {
+    for (final String line in option.help!.split('\n')) {
       if (!line.startsWith('    ')) {
         expect(line, isNot(contains('  ')), reason: '${_header}Help for $target--${option.name}" has excessive whitespace (check e.g. for double spaces after periods or round line breaks in the source).');
         expect(line, matches(_allowedTrailingPatterns), reason: '${_header}A line in the help for $target--${option.name}" does not end with the expected period that a full sentence should end with. (If the help ends with a URL, place it after a colon, don\'t leave a trailing period; if it\'s sample code, prefix the line with four spaces.)');

@@ -122,6 +122,27 @@ void main() {
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample3.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  // Regression test for https://github.com/flutter/flutter/issues/103202.
+  testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
+    await _loadIconFont();
+
+    await tester.pumpWidget(MaterialApp(
+      home: IconTheme(
+        data: const IconThemeData(size: 200),
+        child: Wrap(
+          children: const <Icon>[
+            Icon(Icons.repeat_on),
+            Icon(Icons.repeat_on_outlined),
+            Icon(Icons.repeat_on_rounded),
+            Icon(Icons.repeat_on_sharp),
+          ],
+        ),
+      ),
+    ));
+
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample4.png'));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 // Loads the cached material icon font.

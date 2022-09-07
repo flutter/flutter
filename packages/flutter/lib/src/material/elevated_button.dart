@@ -582,11 +582,11 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color>? get shadowColor =>
-    ButtonStyleButton.allOrNull<Color>(_colors.shadow);
+    MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    ButtonStyleButton.allOrNull<Color>(_colors.surfaceTint);
+    MaterialStatePropertyAll<Color>(_colors.surfaceTint);
 
   @override
   MaterialStateProperty<double>? get elevation =>
@@ -608,23 +608,23 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
+    MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(64.0, 40.0));
+    const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
-    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    const MaterialStatePropertyAll<Size>(Size.infinite);
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
