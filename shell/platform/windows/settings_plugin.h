@@ -49,11 +49,14 @@ class SettingsPlugin {
   // Returns the user-preferred brightness.
   virtual PlatformBrightness GetPreferredBrightness();
 
+  // Starts watching brightness changes.
+  virtual void WatchPreferredBrightnessChanged();
+
+  // Starts watching text scale factor changes.
+  virtual void WatchTextScaleFactorChanged();
+
  private:
   std::unique_ptr<BasicMessageChannel<rapidjson::Document>> channel_;
-
-  void WatchPreferredBrightnessChanged();
-  void WatchTextScaleFactorChanged();
 
   HKEY preferred_brightness_reg_hkey_ = nullptr;
   HKEY text_scale_factor_reg_hkey_ = nullptr;
