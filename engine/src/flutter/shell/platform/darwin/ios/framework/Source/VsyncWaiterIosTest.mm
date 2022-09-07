@@ -116,4 +116,23 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [vsyncClient release];
 }
 
+- (void)testAwaitAndPauseWillWorkCorrectly {
+  auto thread_task_runner = CreateNewThread("VsyncWaiterIosTest");
+  VSyncClient* vsyncClient = [[[VSyncClient alloc]
+      initWithTaskRunner:thread_task_runner
+                callback:[](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {}]
+      autorelease];
+
+  CADisplayLink* link = [vsyncClient getDisplayLink];
+  XCTAssertTrue(link.isPaused);
+
+  [vsyncClient await];
+  XCTAssertFalse(link.isPaused);
+
+  [vsyncClient pause];
+  XCTAssertTrue(link.isPaused);
+
+  [vsyncClient release];
+}
+
 @end

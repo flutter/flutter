@@ -45,6 +45,8 @@
 
 - (void)await;
 
+- (void)pause;
+
 - (void)invalidate;
 
 - (double)getRefreshRate;
