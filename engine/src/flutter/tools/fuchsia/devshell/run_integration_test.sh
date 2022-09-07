@@ -45,10 +45,17 @@ test_name=$1
 shift # past argument
 
 # Ensure we know about the test and look up its packages.
+# The first package listed here should be the main package for the test
+# (the package that gets passed to `ffx test run`).
 test_packages=
 case $test_name in
   embedder)
     test_packages=("flutter-embedder-test-0.far" "parent-view.far" "child-view.far")
+    ;;
+  text-input)
+    # TODO(https://fxbug.dev/107917): Finish implementing and remove this warning.
+    engine-warning "This test currently hangs because the Dart view hasn't been implemented yet. https://fxbug.dev/107917"
+    test_packages=("text-input-test-0.far" "text-input-view.far")
     ;;
   *)
     engine-error "Unknown test name $test_name. You may need to add it to $0"
@@ -142,6 +149,20 @@ fuchsia_out_dir_name=fuchsia_${runtime_mode}${unoptimized_suffix}_${fuchsia_cpu}
 fuchsia_out_dir="$ENGINE_DIR"/out/"${fuchsia_out_dir_name}"
 engine-info "Building ${fuchsia_out_dir_name}..."
 ${ninja_cmd} -C "${fuchsia_out_dir}" flutter/shell/platform/fuchsia/flutter/tests/integration/$test_name:tests
+
+engine-debug "Printing test package contents for debugging..."
+far_tool="$ENGINE_DIR"/fuchsia/sdk/linux/tools/x64/far
+for test_package in "${test_packages[@]}"
+do
+  far_debug_dir=/tmp/"$test_name"_package_contents
+  "${far_tool}" extract --archive="$(find $fuchsia_out_dir -name "$test_package")" --output="${far_debug_dir}"
+  "${far_tool}" extract --archive="${far_debug_dir}"/meta.far --output="${far_debug_dir}"
+  engine-debug "... $test_package tree:"
+  tree "${far_debug_dir}"
+  engine-debug "... $test_package/meta/contents:"
+  cat "${far_debug_dir}"/meta/contents
+  rm -r "${far_debug_dir}"
+done
 
 engine-info "Registering debug symbols..."
 "$ENGINE_DIR"/fuchsia/sdk/linux/tools/x64/symbol-index add "${fuchsia_out_dir}"/.build-id "${fuchsia_out_dir}"

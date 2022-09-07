@@ -2,14 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-assert(is_fuchsia)
+name: text-input-view
 
-import("//build/fuchsia/sdk.gni")
-
-group("integration") {
-  testonly = true
-  deps = [
-    "embedder:tests",
-    "text-input:tests",
-  ]
-}
+environment:
+  sdk: '>=2.12.0 <3.0.0'

@@ -6,28 +6,31 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/tools/fuchsia/fuchsia_archive.gni")
+import("//flutter/tools/fuchsia/gn-sdk/package.gni")
 
 group("tests") {
   testonly = true
-  deps = [ ":flutter-embedder-test" ]
+  deps = [ ":text-input-test" ]
 }
 
-executable("flutter-embedder-test-bin") {
+executable("text-input-test-bin") {
   testonly = true
 
-  output_name = "flutter-embedder-test"
+  output_name = "text-input-test"
 
-  sources = [ "flutter-embedder-test.cc" ]
+  sources = [ "text-input-test.cc" ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
   libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.feedback",
     "$fuchsia_sdk_root/fidl:fuchsia.logger",
+    "$fuchsia_sdk_root/fidl:fuchsia.sys",
     "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.composition",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.observation.geometry",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.scene",
@@ -46,11 +49,10 @@ executable("flutter-embedder-test-bin") {
   ]
 }
 
-fuchsia_test_archive("flutter-embedder-test") {
+fuchsia_test_archive("text-input-test") {
   deps = [
-    ":flutter-embedder-test-bin",
-    "child-view:package",
-    "parent-view:package",
+    ":text-input-test-bin",
+    "text-input-view:package",
 
     # "OOT" copies of the runners used by tests, to avoid conflicting with the
     # runners in the base fuchsia image.

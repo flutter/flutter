@@ -29,6 +29,15 @@ function engine-is-stderr-tty {
   [[ -t 2 ]]
 }
 
+# engine-debug prints a line to stderr with a cyan DEBUG: prefix.
+function engine-debug {
+  if engine-is-stderr-tty; then
+    echo -e >&2 "\033[1;36mDEBUG:\033[0m $*"
+  else
+    echo -e >&2 "DEBUG: $*"
+  fi
+}
+
 # engine-info prints a line to stderr with a green INFO: prefix.
 function engine-info {
   if engine-is-stderr-tty; then

@@ -6,19 +6,31 @@
         "gtest_runner.shard.cml",
         "sys/component/realm_builder_absolute.shard.cml",
 
+        "syslog/client.shard.cml",
+        "vulkan/client.shard.cml",
+
         // This test needs both the vulkan facet and the hermetic-tier-2 facet,
         // so we are forced to make it a system test.
         "sys/testing/system-test.shard.cml",
+
     ],
     program: {
         binary: "bin/app",
     },
+    use: [
+        { protocol: "fuchsia.sys2.EventSource" },
+        {
+            event: "stopped",
+            from: "framework",
+        },
+    ],
     offer: [
         {
-            // Offer capabilities needed by components in this test realm.
-            // Keep it minimal, describe only what's actually needed.
             protocol: [
+                "fuchsia.kernel.RootJobForInspect",
+                "fuchsia.kernel.Stats",
                 "fuchsia.logger.LogSink",
+                "fuchsia.scheduler.ProfileProvider",
                 "fuchsia.sysmem.Allocator",
                 "fuchsia.tracing.provider.Registry",
                 "fuchsia.vulkan.loader.Loader",

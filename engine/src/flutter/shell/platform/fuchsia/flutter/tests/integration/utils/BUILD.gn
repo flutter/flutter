@@ -1,0 +1,42 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+import("//build/fuchsia/sdk.gni")
+
+source_set("check_view") {
+  sources = [
+    "check_view.cc",
+    "check_view.h",
+  ]
+
+  deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.observation.geometry",
+    "$fuchsia_sdk_root/pkg:zx",
+    "//flutter/fml",
+  ]
+}
+
+source_set("color") {
+  sources = [
+    "color.cc",
+    "color.h",
+  ]
+}
+
+source_set("screenshot") {
+  sources = [
+    "screenshot.cc",
+    "screenshot.h",
+  ]
+
+  deps = [
+    ":color",
+    "$fuchsia_sdk_root/fidl:fuchsia.logger",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
+    "$fuchsia_sdk_root/pkg:zx",
+    "//flutter/fml",
+  ]
+}
