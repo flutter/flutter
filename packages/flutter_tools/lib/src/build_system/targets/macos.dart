@@ -302,19 +302,23 @@ class CompileMacOSFramework extends Target {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
 
-    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App');
-    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
-    final ProcessResult result = await environment.processManager.run(<String>[
-      'lipo',
-      ...darwinArchs.map((DarwinArch iosArch) =>
-          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
-      '-create',
-      '-output',
-      resultPath,
-    ]);
-    if (result.exitCode != 0) {
-      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
-    }
+    // Combine the app lib into a fat framework.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework/App',
+      inputDir: buildOutputPath,
+    );
+
+    // And combine the dSYM for each architecture too, if it was created.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
+      inputDir: buildOutputPath,
+      // Don't fail if the dSYM wasn't created (i.e. during a debug build).
+      skipMissingInputs: true,
+    );
   }
 
   @override
@@ -332,6 +336,7 @@ class CompileMacOSFramework extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 }
 
@@ -381,6 +386,26 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('App.framework')
       .childFile('App')
       .copySync(outputDirectory.childFile('App').path);
+
+    // Copy the dSYM
+    if (environment.buildDir.childDirectory('App.framework.dSYM').existsSync()) {
+      final File dsymOutputBinary = environment
+        .outputDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App');
+      dsymOutputBinary.parent.createSync(recursive: true);
+      environment
+        .buildDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App')
+        .copySync(dsymOutputBinary.path);
+    }
 
     // Copy assets into asset directory.
     final Directory assetDirectory = outputDirectory
@@ -530,6 +555,18 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     CompileMacOSFramework(),
     ProfileUnpackMacOS(),
   ];
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
 }
 
 
@@ -544,6 +581,18 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
     ReleaseUnpackMacOS(),
+  ];
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
   ];
 
   @override
