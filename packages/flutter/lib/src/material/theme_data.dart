@@ -865,7 +865,7 @@ class ThemeData with Diagnosticable {
     )
     Color? backgroundColor,
     @Deprecated(
-      'Use BottomAppBarTheme.color instead.'
+      'Use BottomAppBarTheme.color instead. '
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
@@ -2294,7 +2294,7 @@ class ThemeData with Diagnosticable {
         other.toggleableActiveColor == toggleableActiveColor &&
         other.selectedRowColor == selectedRowColor &&
         other.errorColor == errorColor &&
-        other.backgroundColor == backgroundColor && 
+        other.backgroundColor == backgroundColor &&
         other.bottomAppBarColor == bottomAppBarColor;
   }
 

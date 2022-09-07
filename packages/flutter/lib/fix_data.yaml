@@ -24,7 +24,7 @@ transforms:
       uris: [ 'material.dart' ]
       constructor: ''
       inClass: 'ThemeData'
-    oneOf: 
+    oneOf:
       - if: "bottomAppBarColor != ''"
         changes:
           - kind: 'removeParameter'
@@ -33,10 +33,10 @@ transforms:
             index: 73
             name: 'bottomAppBarTheme'
             style: optional_named
-            argumentValue: 
+            argumentValue:
               expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
               requiredIf: "bottomAppBarColor != ''"
-    variables: 
+    variables:
       bottomAppBarColor:
         kind: 'fragment'
         value: 'arguments[bottomAppBarColor]'
@@ -48,7 +48,7 @@ transforms:
       uris: [ 'material.dart' ]
       constructor: 'raw'
       inClass: 'ThemeData'
-    oneOf: 
+    oneOf:
       - if: "bottomAppBarColor != ''"
         changes:
           - kind: 'removeParameter'
@@ -57,10 +57,10 @@ transforms:
             index: 73
             name: 'bottomAppBarTheme'
             style: optional_named
-            argumentValue: 
+            argumentValue:
               expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
               requiredIf: "bottomAppBarColor != ''"
-    variables: 
+    variables:
       bottomAppBarColor:
         kind: 'fragment'
         value: 'arguments[bottomAppBarColor]'
@@ -72,7 +72,7 @@ transforms:
       uris: [ 'material.dart' ]
       method: 'copyWith'
       inClass: 'ThemeData'
-    oneOf: 
+    oneOf:
       - if: "bottomAppBarColor != ''"
         changes:
           - kind: 'removeParameter'
@@ -81,10 +81,10 @@ transforms:
             index: 73
             name: 'bottomAppBarTheme'
             style: optional_named
-            argumentValue: 
+            argumentValue:
               expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
               requiredIf: "bottomAppBarColor != ''"
-    variables: 
+    variables:
       bottomAppBarColor:
         kind: 'fragment'
         value: 'arguments[bottomAppBarColor]'
