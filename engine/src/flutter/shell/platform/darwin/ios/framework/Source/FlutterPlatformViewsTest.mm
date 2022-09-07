@@ -1851,7 +1851,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
       nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, SkCanvas* canvas) { return false; });
+      [](const flutter::SurfaceFrame& surface_frame, SkCanvas* canvas) { return false; },
+      /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertFalse(
       flutterPlatformViewsController->SubmitFrame(nullptr, nullptr, std::move(mock_surface)));
 
@@ -1861,7 +1862,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutterPlatformViewsController->CompositeEmbeddedView(2);
   auto mock_surface_submit_true = std::make_unique<flutter::SurfaceFrame>(
       nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, SkCanvas* canvas) { return true; });
+      [](const flutter::SurfaceFrame& surface_frame, SkCanvas* canvas) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   XCTAssertTrue(flutterPlatformViewsController->SubmitFrame(nullptr, nullptr,
                                                             std::move(mock_surface_submit_true)));
 }

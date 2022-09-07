@@ -288,7 +288,8 @@ void DrawSimpleFrame(FlatlandExternalViewEmbedder& external_view_embedder,
       nullptr, std::make_unique<flutter::SurfaceFrame>(
                    nullptr, std::move(framebuffer_info),
                    [](const flutter::SurfaceFrame& surface_frame,
-                      SkCanvas* canvas) { return true; }));
+                      SkCanvas* canvas) { return true; },
+                   frame_size));
 }
 
 void DrawFrameWithView(FlatlandExternalViewEmbedder& external_view_embedder,
@@ -316,7 +317,8 @@ void DrawFrameWithView(FlatlandExternalViewEmbedder& external_view_embedder,
       nullptr, std::make_unique<flutter::SurfaceFrame>(
                    nullptr, std::move(framebuffer_info),
                    [](const flutter::SurfaceFrame& surface_frame,
-                      SkCanvas* canvas) { return true; }));
+                      SkCanvas* canvas) { return true; },
+                   frame_size));
 }
 
 };  // namespace

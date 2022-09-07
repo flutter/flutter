@@ -13,10 +13,12 @@ TEST(FlowTest, SurfaceFrameDoesNotSubmitInDtor) {
   SurfaceFrame::FramebufferInfo framebuffer_info;
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) {
+      /*submit_callback=*/
+      [](const SurfaceFrame&, SkCanvas*) {
         EXPECT_FALSE(true);
         return true;
-      });
+      },
+      SkISize::Make(800, 600));
   surface_frame.reset();
 }
 
@@ -25,6 +27,7 @@ TEST(FlowTest, SurfaceFrameDoesNotHaveEmptyCanvas) {
   SurfaceFrame frame(
       /*surface=*/nullptr, framebuffer_info,
       /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600),
       /*context_result=*/nullptr, /*display_list_fallback=*/true);
 
   EXPECT_FALSE(frame.SkiaCanvas()->getLocalClipBounds().isEmpty());

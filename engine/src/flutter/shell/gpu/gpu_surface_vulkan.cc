@@ -43,7 +43,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
         nullptr, SurfaceFrame::FramebufferInfo(),
         [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
           return true;
-        });
+        },
+        frame_size);
   }
 
   FlutterVulkanImage image = delegate_->AcquireImage(frame_size);
@@ -77,8 +78,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
 
   SurfaceFrame::FramebufferInfo framebuffer_info{.supports_readback = true};
 
-  return std::make_unique<SurfaceFrame>(
-      std::move(surface), std::move(framebuffer_info), std::move(callback));
+  return std::make_unique<SurfaceFrame>(std::move(surface),
+                                        std::move(framebuffer_info),
+                                        std::move(callback), frame_size);
 }
 
 SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {

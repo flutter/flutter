@@ -120,6 +120,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
       nullptr,                          // surface
       SurfaceFrame::FramebufferInfo{},  // framebuffer info
       submit_callback,                  // submit callback
+      size,                             // frame size
       std::move(context_switch),        // context result
       true                              // display list fallback
   );
