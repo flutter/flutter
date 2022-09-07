@@ -158,7 +158,7 @@ abstract class ChromiumDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     await _chrome?.close();
