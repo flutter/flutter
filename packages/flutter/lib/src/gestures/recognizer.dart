@@ -443,7 +443,6 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
       _trackedPointers.remove(pointer);
       if (_trackedPointers.isEmpty) {
-        print('tracked pointers empty');
         didStopTrackingLastPointer(pointer);
       }
     }
