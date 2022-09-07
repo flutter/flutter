@@ -138,7 +138,9 @@ bool TextContents::Render(const ContentContext& renderer,
             Point{font.GetMetrics().min_extent.x, font.GetMetrics().ascent};
         vtx.glyph_size = Point{static_cast<Scalar>(glyph_size.width),
                                static_cast<Scalar>(glyph_size.height)};
-        vtx.atlas_position = atlas_glyph_pos->origin;
+        vtx.atlas_position =
+            atlas_glyph_pos->origin + Point{1 / atlas_glyph_pos->size.width,
+                                            1 / atlas_glyph_pos->size.height};
         vtx.atlas_glyph_size =
             Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height};
         vertex_builder.AppendVertex(std::move(vtx));
