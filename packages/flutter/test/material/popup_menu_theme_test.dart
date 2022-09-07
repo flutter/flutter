@@ -83,8 +83,8 @@ void main() {
         child: Column(
           children: <Widget>[
             Padding(
-              // The padding makes sure the menu as enough space to around to
-              // get properly aligned when displayed (`_kMenuScreenPadding`).
+              // The padding makes sure the menu has enough space to around it
+              // to get properly aligned when displayed (`_kMenuScreenPadding`).
               padding: const EdgeInsets.all(8.0),
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
@@ -225,8 +225,8 @@ void main() {
         child: Column(
           children: <Widget>[
             Padding(
-              // The padding makes sure the menu as enough space to around to
-              // get properly aligned when displayed (`_kMenuScreenPadding`).
+              // The padding makes sure the menu has enough space to around it
+              // to get properly aligned when displayed (`_kMenuScreenPadding`).
               padding: const EdgeInsets.all(8.0),
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
