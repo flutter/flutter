@@ -15342,6 +15342,9 @@ class Icons {
   /// <i class="material-icons-outlined md-36">movie_creation</i> &#x2014; material icon named "movie creation" (outlined).
   static const IconData movie_creation_outlined = IconData(0xf1f3, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">movie_edit</i> &#x2014; material icon named "movie edit".
+  static const IconData movie_edit = IconData(0xf08b9, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">movie_filter</i> &#x2014; material icon named "movie filter".
   static const IconData movie_filter = IconData(0xe40f, fontFamily: 'MaterialIcons');
 
@@ -26123,18 +26126,6 @@ class Icons {
 
   /// <i class="material-icons-outlined md-36">west</i> &#x2014; material icon named "west" (outlined).
   static const IconData west_outlined = IconData(0xf4c3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">whatsapp</i> &#x2014; material icon named "whatsapp".
-  static const IconData whatsapp = IconData(0xf05a6, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">whatsapp</i> &#x2014; material icon named "whatsapp" (sharp).
-  static const IconData whatsapp_sharp = IconData(0xf04ab, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">whatsapp</i> &#x2014; material icon named "whatsapp" (round).
-  static const IconData whatsapp_rounded = IconData(0xf03b8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">whatsapp</i> &#x2014; material icon named "whatsapp" (outlined).
-  static const IconData whatsapp_outlined = IconData(0xf0699, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">whatshot</i> &#x2014; material icon named "whatshot".
   static const IconData whatshot = IconData(0xe6e3, fontFamily: 'MaterialIcons');
