@@ -707,7 +707,7 @@ abstract class ResidentHandlers {
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
-        final Map<String, Object>? rasterData =
+        final Map<String, Object?>? rasterData =
           await device.vmService!.renderFrameWithRasterStats(
             viewId: view.id,
             uiIsolateId: view.uiIsolate!.id,
