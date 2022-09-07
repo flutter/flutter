@@ -3221,7 +3221,6 @@ targets:
   - name: Mac_ios complex_layout_scroll_perf_bad_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
