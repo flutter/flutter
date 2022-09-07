@@ -14,6 +14,7 @@ import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
+import 'service_extensions.dart';
 import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
@@ -63,7 +64,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(() {
       // these service extensions only work in debug mode
       registerBoolServiceExtension(
-        name: 'invertOversizedImages',
+        name: RenderingServiceExtensions.invertOversizedImages.name,
         getter: () async => debugInvertOversizedImages,
         setter: (bool value) async {
           if (debugInvertOversizedImages != value) {
@@ -74,7 +75,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'debugPaint',
+        name: RenderingServiceExtensions.debugPaint.name,
         getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
           if (debugPaintSizeEnabled == value) {
@@ -85,7 +86,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'debugPaintBaselinesEnabled',
+        name: RenderingServiceExtensions.debugPaintBaselinesEnabled.name,
         getter: () async => debugPaintBaselinesEnabled,
         setter: (bool value) {
           if (debugPaintBaselinesEnabled == value) {
@@ -96,7 +97,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'repaintRainbow',
+        name: RenderingServiceExtensions.repaintRainbow.name,
         getter: () async => debugRepaintRainbowEnabled,
         setter: (bool value) {
           final bool repaint = debugRepaintRainbowEnabled && !value;
@@ -108,7 +109,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerServiceExtension(
-        name: 'debugDumpLayerTree',
+        name: RenderingServiceExtensions.debugDumpLayerTree.name,
         callback: (Map<String, String> parameters) async {
           final String data = RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
           return <String, Object>{
@@ -117,7 +118,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'debugDisableClipLayers',
+        name: RenderingServiceExtensions.debugDisableClipLayers.name,
         getter: () async => debugDisableClipLayers,
         setter: (bool value) {
           if (debugDisableClipLayers == value) {
@@ -128,7 +129,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'debugDisablePhysicalShapeLayers',
+        name: RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name,
         getter: () async => debugDisablePhysicalShapeLayers,
         setter: (bool value) {
           if (debugDisablePhysicalShapeLayers == value) {
@@ -139,7 +140,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'debugDisableOpacityLayers',
+        name: RenderingServiceExtensions.debugDisableOpacityLayers.name,
         getter: () async => debugDisableOpacityLayers,
         setter: (bool value) {
           if (debugDisableOpacityLayers == value) {
@@ -155,7 +156,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
       registerServiceExtension(
-        name: 'debugDumpRenderTree',
+        name: RenderingServiceExtensions.debugDumpRenderTree.name,
         callback: (Map<String, String> parameters) async {
           final String data = RendererBinding.instance.renderView.toStringDeep();
           return <String, Object>{
@@ -164,7 +165,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerServiceExtension(
-        name: 'debugDumpSemanticsTreeInTraversalOrder',
+        name: RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name,
         callback: (Map<String, String> parameters) async {
           return <String, Object>{
             'data': _generateSemanticsTree(DebugSemanticsDumpOrder.traversalOrder),
@@ -172,7 +173,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerServiceExtension(
-        name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
+        name: RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name,
         callback: (Map<String, String> parameters) async {
           return <String, Object>{
             'data': _generateSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest),
@@ -180,7 +181,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'profileRenderObjectPaints',
+        name: RenderingServiceExtensions.profileRenderObjectPaints.name,
         getter: () async => debugProfilePaintsEnabled,
         setter: (bool value) async {
           if (debugProfilePaintsEnabled != value) {
@@ -189,7 +190,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         },
       );
       registerBoolServiceExtension(
-        name: 'profileRenderObjectLayouts',
+        name: RenderingServiceExtensions.profileRenderObjectLayouts.name,
         getter: () async => debugProfileLayoutsEnabled,
         setter: (bool value) async {
           if (debugProfileLayoutsEnabled != value) {

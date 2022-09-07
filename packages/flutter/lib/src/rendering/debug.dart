@@ -94,7 +94,7 @@ bool debugPrintLayouts = false;
 /// this on in your unit tests for additional validations.
 bool debugCheckIntrinsicSizes = false;
 
-/// Adds [dart:developer.Timeline] events for every [RenderObject] layout.
+/// Adds [Timeline] events for every [RenderObject] layout.
 ///
 /// The timing information this flag exposes is not representative of the actual
 /// cost of layout, because the overhead of adding timeline events is
@@ -120,7 +120,7 @@ bool debugCheckIntrinsicSizes = false;
 ///    debugging information related to [RenderObject] layouts.
 bool debugProfileLayoutsEnabled = false;
 
-/// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
+/// Adds [Timeline] events for every [RenderObject] painted.
 ///
 /// The timing information this flag exposes is not representative of actual
 /// paints, because the overhead of adding timeline events is significant
