@@ -865,8 +865,7 @@ class ThemeData with Diagnosticable {
     )
     Color? backgroundColor,
     @Deprecated(
-      'Use BottomAppBarTheme.color instead.'
-      'No longer used by the framework, please remove any reference to it. '
+      'Use BottomAppBarTheme.color instead. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
