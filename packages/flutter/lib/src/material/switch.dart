@@ -45,7 +45,9 @@ enum _SwitchType { material, adaptive }
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Material Design 3 provides the option to add an icon on the thumb of the [Switch].
+/// Material Design 3 provides the option to add icons on the thumb of the [Switch].
+/// If [ThemeData.useMaterial3] is set to true, users can use [Switch.thumbImage]
+/// to add optional Icons or Images based on the different [MaterialState]s of the [Switch].
 ///
 /// {@tool dartpad}
 /// This example shows a toggleable [Switch]. When the thumb slides to the other
@@ -341,7 +343,7 @@ class Switch extends StatelessWidget {
   ///
   /// {@tool snippet}
   /// This example resolves the [thumbImage] based on the current
-  /// [MaterialState] of the [Switch], providing a different [ImageProvider] when it is
+  /// [MaterialState] of the [Switch], providing a different [Widget] when it is
   /// [MaterialState.disabled].
   ///
   /// ```dart
