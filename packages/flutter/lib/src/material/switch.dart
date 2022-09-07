@@ -762,6 +762,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
         ?? _widgetTrackColor.resolve(activeStates)
         ?? switchTheme.trackColor?.resolve(activeStates)
+        ?? _widgetThumbColor.resolve(activeStates)?.withAlpha(0x80)
         ?? defaults.trackColor!.resolve(activeStates)!;
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
         ?? _widgetTrackColor.resolve(inactiveStates)
