@@ -80,6 +80,7 @@ TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) 
 }
 
 class GalleryTransitionTest {
+
   GalleryTransitionTest({
     this.semanticsEnabled = false,
     this.testFile = 'transitions_perf',
@@ -140,7 +141,7 @@ class GalleryTransitionTest {
           '--trace-startup',
         if (applicationBinaryPath != null)
           '--use-application-binary=$applicationBinaryPath'
-        else 
+        else
           ...<String>[
             '-t',
             'test_driver/$testFile.dart',
