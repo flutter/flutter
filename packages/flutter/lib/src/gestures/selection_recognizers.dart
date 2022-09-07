@@ -251,8 +251,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _stopDeadlineTimer();
     }
 
-    // assert(!_acceptedActivePointers.contains(pointer));
-    // _acceptedActivePointers.add(pointer);
+    assert(!_acceptedActivePointers.contains(pointer));
+    _acceptedActivePointers.add(pointer);
 
     // Called when this recognizer is accepted by the `GestureArena`.
     if (pointer == primaryPointer) {
@@ -338,6 +338,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       }
 
       if (event.buttons != _initialButtons) {
+        print('event.buttons ${event.buttons} != $_initialButtons initialButtons');
         _giveUpPointer(event.pointer);
       }
 
@@ -358,6 +359,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         // The drag is not accepted yet, so we should call tap up on a `PointerUpEvent`.
         _up = event;
         stopTrackingIfPointerNoLongerDown(event);
+        // _giveUpPointer(event.pointer);
       } else {
         _giveUpPointer(event.pointer);
       }
@@ -377,6 +379,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _stopDeadlineTimer();
     }
     _giveUpPointer(pointer);
+
+    // Reset down and up when the recognizer has been rejected.
+    // This prevents an erroneous _up being sent when this recognizer is
+    // accepted for a drag, following a previous rejection.
+    _down = null;
+    _up = null;
   }
 
   @override
@@ -493,6 +501,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       default:
     }
     _resetTaps();
+    if (!_acceptedActivePointers.remove(event.pointer)) {
+      print('resolving pointer from _giveUp');
+      resolvePointer(event.pointer, GestureDisposition.rejected);
+    }
+    _initialButtons = null;
   }
 
   void _checkStart(PointerMoveEvent event) {    
@@ -570,10 +583,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     stopTrackingPointer(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
-    // if (!_acceptedActivePointers.remove(pointer)) {
-    //   print('resolving pointer from _giveUp');
-    //   resolvePointer(pointer, GestureDisposition.rejected);
-    // }
+    if (!_acceptedActivePointers.remove(pointer)) {
+      print('resolving pointer from _giveUp');
+      resolvePointer(pointer, GestureDisposition.rejected);
+    } else {
+      print('succesfully removed accepted pointer $pointer');
+    }
   }
 
   void _resetTaps() {
