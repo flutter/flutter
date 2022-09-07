@@ -6,62 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-@immutable
-class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
-  const MyThemeExtensionA({
-    required this.color1,
-    required this.color2,
-  });
-
-  final Color? color1;
-  final Color? color2;
-
-  @override
-  MyThemeExtensionA copyWith({Color? color1, Color? color2}) {
-    return MyThemeExtensionA(
-      color1: color1 ?? this.color1,
-      color2: color2 ?? this.color2,
-    );
-  }
-
-  @override
-  MyThemeExtensionA lerp(MyThemeExtensionA? other, double t) {
-    if (other is! MyThemeExtensionA) {
-      return this;
-    }
-    return MyThemeExtensionA(
-      color1: Color.lerp(color1, other.color1, t),
-      color2: Color.lerp(color2, other.color2, t),
-    );
-  }
-}
-
-@immutable
-class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
-  const MyThemeExtensionB({
-    required this.textStyle,
-  });
-
-  final TextStyle? textStyle;
-
-  @override
-  MyThemeExtensionB copyWith({Color? color, TextStyle? textStyle}) {
-    return MyThemeExtensionB(
-      textStyle: textStyle ?? this.textStyle,
-    );
-  }
-
-  @override
-  MyThemeExtensionB lerp(MyThemeExtensionB? other, double t) {
-    if (other is! MyThemeExtensionB) {
-      return this;
-    }
-    return MyThemeExtensionB(
-      textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
-    );
-  }
-}
-
 void main() {
   test('Theme data control test', () {
     final ThemeData dark = ThemeData.dark();
@@ -1204,4 +1148,60 @@ void main() {
     // Ensure they are all there.
     expect(propertyNames, expectedPropertyNames);
   });
+}
+
+@immutable
+class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
+  const MyThemeExtensionA({
+    required this.color1,
+    required this.color2,
+  });
+
+  final Color? color1;
+  final Color? color2;
+
+  @override
+  MyThemeExtensionA copyWith({Color? color1, Color? color2}) {
+    return MyThemeExtensionA(
+      color1: color1 ?? this.color1,
+      color2: color2 ?? this.color2,
+    );
+  }
+
+  @override
+  MyThemeExtensionA lerp(MyThemeExtensionA? other, double t) {
+    if (other is! MyThemeExtensionA) {
+      return this;
+    }
+    return MyThemeExtensionA(
+      color1: Color.lerp(color1, other.color1, t),
+      color2: Color.lerp(color2, other.color2, t),
+    );
+  }
+}
+
+@immutable
+class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
+  const MyThemeExtensionB({
+    required this.textStyle,
+  });
+
+  final TextStyle? textStyle;
+
+  @override
+  MyThemeExtensionB copyWith({Color? color, TextStyle? textStyle}) {
+    return MyThemeExtensionB(
+      textStyle: textStyle ?? this.textStyle,
+    );
+  }
+
+  @override
+  MyThemeExtensionB lerp(MyThemeExtensionB? other, double t) {
+    if (other is! MyThemeExtensionB) {
+      return this;
+    }
+    return MyThemeExtensionB(
+      textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
+    );
+  }
 }

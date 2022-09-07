@@ -15,17 +15,18 @@ void main() {
     }
 
     await tester.pumpWidget(
-      const example.MenuBarApp(),
+      const example.ContextMenuApp(),
     );
 
-    await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+    await tester.tapAt(const Offset(100, 200));
     await tester.pump();
-
     expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(100.0, 200.0, 404.0, 400.0)));
 
     // Make sure tapping in a different place causes the menu to move.
-    await tester.tapAt(const Offset(200, 100), buttons: kSecondaryButton);
+    await tester.tapAt(const Offset(200, 100));
     await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
 
     expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(200.0, 100.0, 504.0, 300.0)));
 
@@ -36,7 +37,7 @@ void main() {
     expect(find.text(example.MenuSelection.colorRed.label), findsNothing);
     expect(find.text(example.MenuSelection.colorGreen.label), findsNothing);
     expect(find.text(example.MenuSelection.colorBlue.label), findsNothing);
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.ContextMenuApp.kMessage), findsNothing);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -59,31 +60,28 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsOneWidget);
+    expect(find.text(example.ContextMenuApp.kMessage), findsOneWidget);
     expect(find.text('Last Selected: ${example.MenuSelection.showMessage.label}'), findsOneWidget);
   });
 
   testWidgets('Shortcuts work', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MenuBarApp(),
+      const example.ContextMenuApp(),
     );
 
-    await tester.tapAt(const Offset(100, 100), buttons: kSecondaryButton);
-    await tester.pump();
-
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.ContextMenuApp.kMessage), findsNothing);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsOneWidget);
+    expect(find.text(example.ContextMenuApp.kMessage), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.ContextMenuApp.kMessage), findsNothing);
     expect(find.text('Last Selected: ${example.MenuSelection.resetMessage.label}'), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);

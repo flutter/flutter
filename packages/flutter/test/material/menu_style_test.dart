@@ -127,7 +127,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().first).size, equals(const Size(250.0, 40.0)));
 
       // MenuTheme affects menus.
-      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(279.0, 48.0, 379.0, 148.0)));
+      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(279.0, 40.0, 379.0, 140.0)));
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
@@ -283,8 +283,9 @@ void main() {
         equals(const Rect.fromLTRB(366.0, 64.0, 520.0, 78.0)),
       );
       expect(
-          tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
-          equals(const Rect.fromLTRB(350.0, 48.0, 602.0, 178.0)));
+        tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
+        equals(const Rect.fromLTRB(350.0, 48.0, 602.0, 178.0)),
+      );
     });
   });
 }
@@ -306,10 +307,10 @@ enum TestMenu {
   subMenu40('Sub Menu 40'),
   subMenu41('Sub Menu 41'),
   subMenu42('Sub Menu 42'),
-  subSubMenu100('Sub Sub Menu 100'),
-  subSubMenu101('Sub Sub Menu 101'),
-  subSubMenu102('Sub Sub Menu 102'),
-  subSubMenu103('Sub Sub Menu 103');
+  subSubMenu110('Sub Sub Menu 110'),
+  subSubMenu111('Sub Sub Menu 111'),
+  subSubMenu112('Sub Sub Menu 112'),
+  subSubMenu113('Sub Sub Menu 113');
 
   const TestMenu(this.label);
   final String label;
@@ -361,24 +362,24 @@ List<Widget> createTestMenus({
           menuChildren: <Widget>[
             MenuItemButton(
               key: UniqueKey(),
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu100) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu100],
-              child: Text(TestMenu.subSubMenu100.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu110) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu110],
+              child: Text(TestMenu.subSubMenu110.label),
             ),
             MenuItemButton(
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu101) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu101],
-              child: Text(TestMenu.subSubMenu101.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu111) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu111],
+              child: Text(TestMenu.subSubMenu111.label),
             ),
             MenuItemButton(
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu102) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu102],
-              child: Text(TestMenu.subSubMenu102.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu112) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu112],
+              child: Text(TestMenu.subSubMenu112.label),
             ),
             MenuItemButton(
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu103) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu103],
-              child: Text(TestMenu.subSubMenu103.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu113) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu113],
+              child: Text(TestMenu.subSubMenu113.label),
             ),
           ],
           child: Text(TestMenu.subMenu11.label),

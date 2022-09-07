@@ -7,8 +7,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MenuBarApp());
+void main() => runApp(const ContextMenuApp());
 
+/// An enhanced enum to define the available menus and their shortcuts.
+///
+/// Using an enum for menu definition is not required, but this illustrates how
+/// they could be used for simple menu systems.
 enum MenuSelection {
   about('About'),
   showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
@@ -24,46 +28,35 @@ enum MenuSelection {
   final MenuSerializableShortcut? shortcut;
 }
 
-class MenuBarApp extends StatelessWidget {
-  const MenuBarApp({super.key});
+class ContextMenuApp extends StatelessWidget {
+  const ContextMenuApp({super.key});
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'createMaterialMenu Sample',
-      home: Scaffold(body: MyCascadingMenu()),
+      home: Scaffold(body: MyContextMenu(message: kMessage)),
     );
   }
 }
 
-class MyCascadingMenu extends StatefulWidget {
-  const MyCascadingMenu({super.key});
+class MyContextMenu extends StatefulWidget {
+  const MyContextMenu({super.key, required this.message});
+
+  final String message;
 
   @override
-  State<MyCascadingMenu> createState() => _MyCascadingMenuState();
+  State<MyContextMenu> createState() => _MyContextMenuState();
 }
 
-class _MyCascadingMenuState extends State<MyCascadingMenu> {
+class _MyContextMenuState extends State<MyContextMenu> {
   MenuSelection? _lastSelection;
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   late MenuHandle _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
 
-  static const String kMessage = '"Talk less. Smile more." - A. Burr';
-
-  /// This is the global key that the menu uses to determine which themes should
-  /// be used for the menus. When the position of the menu is supplied to the
-  /// [MenuHandle], as is the case in this example in [_handleSecondaryTapDown],
-  /// it can be attached to any widget that is in the right context to collect
-  /// the correct ancestor themes from (e.g. [TextButtonTheme], [MenuBarTheme],
-  /// etc.). If the [MenuHandle._globalMenuPosition] is not set, then this key is
-  /// also used to determine the bounding box of the widget that the menu is
-  /// aligned to with [MenuHandle.alignment].
-  final GlobalKey _buttonKey = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
+  void _updateMenu() {
     _menuHandle = createMaterialMenu(
       buttonFocusNode: _buttonFocusNode,
       children: <Widget>[
@@ -189,15 +182,19 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     }
   }
 
-  void _handleSecondaryTapDown(TapDownDetails details) {
+  void _handleTapDown(TapDownDetails details) {
+    if (!HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) &&
+        !HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
+      return;
+    }
     _menuHandle.open(context, position: details.globalPosition);
   }
 
   @override
   Widget build(BuildContext context) {
+    _updateMenu();
     return GestureDetector(
-      key: _buttonKey,
-      onSecondaryTapDown: _handleSecondaryTapDown,
+      onTapDown: _handleTapDown,
       child: Container(
         alignment: Alignment.center,
         color: backgroundColor,
@@ -206,18 +203,16 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
           children: <Widget>[
             const Padding(
               padding: EdgeInsets.all(8.0),
-              child: Text('Right-click anywhere in the red to show the menu.'),
+              child: Text('Ctrl-click anywhere on the background to show the menu.'),
             ),
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Text(
-                showingMessage ? kMessage : '',
+                showingMessage ? widget.message : '',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
-            Text(
-              _lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : '',
-            ),
+            Text(_lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : ''),
           ],
         ),
       ),

@@ -12,8 +12,8 @@ import 'theme.dart';
 // Examples can assume:
 // late Widget child;
 
-/// Defines the visual properties of the submenus created by [MenuButton] and
-/// [MenuBar] widgets.
+/// Defines the configuration of the submenus created by the [MenuButton] and
+/// [MenuBar] widgets, and the [createMaterialMenu] function.
 ///
 /// Descendant widgets obtain the current [MenuThemeData] object using
 /// `MenuTheme.of(context)`.
@@ -28,14 +28,12 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [ThemeData], which describes the overall theme for the application.
-///  * [MenuBarThemeData], which describes the theme for the menu bar itself in a
-///    [MenuBar] widget.
+///  * [MenuBarThemeData], which describes the theme for the menu bar itself in
+///    a [MenuBar] widget.
 @immutable
 class MenuThemeData with Diagnosticable {
   /// Creates a const set of properties used to configure [MenuTheme].
-  const MenuThemeData({
-    this.style,
-  });
+  const MenuThemeData({this.style});
 
   /// The [MenuStyle] of a [MenuButton] menu.
   ///
@@ -45,13 +43,7 @@ class MenuThemeData with Diagnosticable {
 
   /// Linearly interpolate between two menu button themes.
   static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
-    }
-    return MenuThemeData(
-      style: MenuStyle.lerp(a?.style, b?.style, t),
-    );
+    return MenuThemeData(style: MenuStyle.lerp(a?.style, b?.style, t));
   }
 
   @override
@@ -76,21 +68,21 @@ class MenuThemeData with Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration in this widget's
-/// descendants for menus created by the [MenuButton] widget and by
-/// [createMaterialMenu].
+/// descendants for menus created by the [MenuBar] or [MenuButton] widgets, or
+/// by [createMaterialMenu].
 ///
 /// Values specified here are used for [MenuButton]'s menu properties that are
 /// not given an explicit non-null value.
 ///
 /// See also:
 ///
-///  * [MenuThemeData], a configuration object that holds attributes of a menu used
-///    by this theme.
+///  * [MenuThemeData], a configuration object that holds attributes of a menu
+///    used by this theme.
 ///  * [MenuBarTheme], which does the same thing for the [MenuBar] widget.
 ///  * [MenuBar], a widget that manages [MenuItemButton]s.
 ///  * [MenuItemButton], a widget that is a selectable item in a menu bar menu.
-///  * [MenuButton], a widget that specifies an item with a cascading
-///    submenu in a [MenuBar] menu.
+///  * [MenuButton], a widget that specifies an item with a cascading submenu in
+///    a [MenuBar] menu.
 class MenuTheme extends InheritedTheme {
   /// Creates a const theme that controls the configurations for the menus
   /// created by the [MenuButton] widget and by [createMaterialMenu].
@@ -106,8 +98,7 @@ class MenuTheme extends InheritedTheme {
 
   /// Returns the closest instance of this class's [data] value that encloses
   /// the given context. If there is no ancestor, it returns
-  /// [ThemeData.menuTheme]. Applications can assume that the returned
-  /// value will not be null.
+  /// [ThemeData.menuTheme].
   ///
   /// Typical usage is as follows:
   ///

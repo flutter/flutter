@@ -24,20 +24,21 @@ import 'theme_data.dart';
 //   Widget build(BuildContext context) => const SizedBox();
 // }
 
-/// The visual properties that most menus have in common.
+/// The visual properties that menus have in common.
 ///
-/// Menus and their themes have a `MenuStyle` property which defines the visual
-/// properties whose default values are to be overridden. The default values are
-/// defined by the individual menu widgets and are typically based on overall
-/// theme's [ThemeData.colorScheme] and [ThemeData.textTheme].
+/// Menus created by [MenuBar] and [createMaterialMenu] and their themes have a
+/// `MenuStyle` property which defines the visual properties whose default
+/// values are to be overridden. The default values are defined by the
+/// individual menu widgets and are typically based on overall theme's
+/// [ThemeData.colorScheme] and [ThemeData.textTheme].
 ///
-/// All of the MenuStyle properties are null by default.
+/// All of the `MenuStyle` properties are null by default.
 ///
 /// Many of the `MenuStyle` properties are [MaterialStateProperty] objects which
-/// resolve to different values depending on the menu's state. For example
-/// the [Color] properties are defined with `MaterialStateProperty<Color>` and
-/// can resolve to different colors depending on if the menu is pressed,
-/// hovered, focused, disabled, etc.
+/// resolve to different values depending on the menu's state. For example the
+/// [Color] properties are defined with `MaterialStateProperty<Color>` and can
+/// resolve to different colors depending on if the menu is pressed, hovered,
+/// focused, disabled, etc.
 ///
 /// These properties can override the default value for just one state or all of
 /// them. For example to create a [MenuButton] whose background color is the
@@ -61,7 +62,7 @@ import 'theme_data.dart';
 /// ),
 /// ```
 ///
-/// In this case the background color for all other menu states would fallback
+/// In this case the background color for all other menu states would fall back
 /// to the [MenuButton]'s default values. To unconditionally set the menu's
 /// [backgroundColor] for all states one could write:
 ///
@@ -117,10 +118,9 @@ class MenuStyle with Diagnosticable {
 
   /// The shadow color of the menu's [Material].
   ///
-  /// The material's elevation shadow can be difficult to see for
-  /// dark themes, so by default the menu classes add a
-  /// semi-transparent overlay to indicate elevation. See
-  /// [ThemeData.applyElevationOverlayColor].
+  /// The material's elevation shadow can be difficult to see for dark themes,
+  /// so by default the menu classes add a semi-transparent overlay to indicate
+  /// elevation. See [ThemeData.applyElevationOverlayColor].
   final MaterialStateProperty<Color?>? shadowColor;
 
   /// The surface tint color of the menu's [Material].
@@ -141,37 +141,37 @@ class MenuStyle with Diagnosticable {
 
   /// The menu's size.
   ///
-  /// This size is still constrained by the style's [minimumSize]
-  /// and [maximumSize]. Fixed size dimensions whose value is
-  /// [double.infinity] are ignored.
+  /// This size is still constrained by the style's [minimumSize] and
+  /// [maximumSize]. Fixed size dimensions whose value is [double.infinity] are
+  /// ignored.
   ///
-  /// To specify menus with a fixed width and the default height use
-  /// `fixedSize: Size.fromWidth(320)`. Similarly, to specify a fixed
-  /// height and the default width use `fixedSize: Size.fromHeight(100)`.
+  /// To specify menus with a fixed width and the default height use `fixedSize:
+  /// Size.fromWidth(320)`. Similarly, to specify a fixed height and the default
+  /// width use `fixedSize: Size.fromHeight(100)`.
   final MaterialStateProperty<Size?>? fixedSize;
 
   /// The maximum size of the menu itself.
   ///
-  /// A [Size.infinite] or null value for this property means that
-  /// the menu's maximum size is not constrained.
+  /// A [Size.infinite] or null value for this property means that the menu's
+  /// maximum size is not constrained.
   ///
   /// This value must be greater than or equal to [minimumSize].
   final MaterialStateProperty<Size?>? maximumSize;
 
   /// The color and weight of the menu's outline.
   ///
-  /// This value is combined with [shape] to create a shape decorated
-  /// with an outline.
+  /// This value is combined with [shape] to create a shape decorated with an
+  /// outline.
   final MaterialStateProperty<BorderSide?>? side;
 
   /// The shape of the menu's underlying [Material].
   ///
-  /// This shape is combined with [side] to create a shape decorated
-  /// with an outline.
+  /// This shape is combined with [side] to create a shape decorated with an
+  /// outline.
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over
-  /// this menu's [InkWell].
+  /// The cursor for a mouse pointer when it enters or is hovering over this
+  /// menu's [InkWell].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// Defines how compact the menu's layout will be.
@@ -180,8 +180,8 @@ class MenuStyle with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
-  ///    within a [Theme].
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
+  ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
   /// Determines the desired alignment of the submenu when opened relative to
@@ -190,14 +190,14 @@ class MenuStyle with Diagnosticable {
   /// If there isn't sufficient space to open the menu with the given alignment,
   /// and there's space on the other side of the button, then the alignment is
   /// swapped to it's opposite (1 becomes -1, etc.), and the menu will try to
-  /// appear on the other side of the menu. If there isn't enough space there
+  /// appear on the other side of the button. If there isn't enough space there
   /// either, then the menu will be pushed as far over as necessary to display
   /// as much of itself as possible, possibly overlapping the parent button.
   ///
-  /// Defaults to [AlignmentDirectional.topEnd], which means that in a
-  /// left-to-right context, the menu will appear with its origin at the upper
-  /// right corner of the [MenuButton] that owns it. This applies for vertical
-  /// menus (e.g. created by a [MenuButton] or [createMaterialMenu]).
+  /// For menus created by [MenuButton] or [createMaterialMenu], defaults to
+  /// [AlignmentDirectional.topEnd], which means that in a left-to-right
+  /// context, the menu will appear with its origin at the upper right corner of
+  /// the [MenuButton] that owns it.
   ///
   /// For a [MenuBar], the default is [AlignmentDirectional.bottomStart].
   final AlignmentGeometry? alignment;
@@ -233,48 +233,6 @@ class MenuStyle with Diagnosticable {
       mouseCursor: mouseCursor ?? this.mouseCursor,
       visualDensity: visualDensity ?? this.visualDensity,
       alignment: alignment ?? this.alignment,
-    );
-  }
-
-  /// Returns a copy of this object, but resets to null any properties passed as
-  /// true.
-  ///
-  /// For instance, if you want to have a [MenuStyle] that is the same as
-  /// another style, but reset the `backgroundColor` to null so that it uses the
-  /// default `backgroundColor`, you can call:
-  ///
-  /// ```dart
-  /// MenuStyle newStyle = style.copyWithout(backgroundColor: true);
-  /// ```
-  MenuStyle copyWithout({
-    bool? backgroundColor,
-    bool? shadowColor,
-    bool? surfaceTintColor,
-    bool? elevation,
-    bool? padding,
-    bool? minimumSize,
-    bool? fixedSize,
-    bool? maximumSize,
-    bool? side,
-    bool? shape,
-    bool? mouseCursor,
-    bool? visualDensity,
-    bool? alignment,
-  }) {
-    return MenuStyle(
-      backgroundColor: backgroundColor ?? false ? null : this.backgroundColor,
-      shadowColor: shadowColor ?? false ? null : this.shadowColor,
-      surfaceTintColor: surfaceTintColor ?? false ? null : this.surfaceTintColor,
-      elevation: elevation ?? false ? null : this.elevation,
-      padding: padding ?? false ? null : this.padding,
-      minimumSize: minimumSize ?? false ? null : this.minimumSize,
-      fixedSize: fixedSize ?? false ? null : this.fixedSize,
-      maximumSize: maximumSize ?? false ? null : this.maximumSize,
-      side: side ?? false ? null : this.side,
-      shape: shape ?? false ? null : this.shape,
-      mouseCursor: mouseCursor ?? false ? null : this.mouseCursor,
-      visualDensity: visualDensity ?? false ? null : this.visualDensity,
-      alignment: alignment ?? false ? null : this.alignment,
     );
   }
 
@@ -373,55 +331,25 @@ class MenuStyle with Diagnosticable {
       return null;
     }
     return MenuStyle(
-      backgroundColor: _lerpProperties<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      shadowColor: _lerpProperties<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
-      surfaceTintColor: _lerpProperties<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
-      elevation: _lerpProperties<double?>(a?.elevation, b?.elevation, t, lerpDouble),
-      padding:  _lerpProperties<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
-      minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
-      fixedSize: _lerpProperties<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
-      maximumSize: _lerpProperties<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
-      side: _lerpSides(a?.side, b?.side, t),
+      backgroundColor: MaterialStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
+      shadowColor: MaterialStateProperty.lerp<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
+      surfaceTintColor: MaterialStateProperty.lerp<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
+      elevation: MaterialStateProperty.lerp<double?>(a?.elevation, b?.elevation, t, lerpDouble),
+      padding:  MaterialStateProperty.lerp<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
+      fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
+      maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      side: _LerpSides(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
     );
   }
-
-  static MaterialStateProperty<T?>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T? Function(T?, T?, double) lerpFunction ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null) {
-      return null;
-    }
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-
-  // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
-    if (a == null && b == null) {
-      return null;
-    }
-    return _LerpSides(a, b, t);
-  }
 }
 
-class _LerpProperties<T> implements MaterialStateProperty<T?> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T? Function(T?, T?, double) lerpFunction;
-
-  @override
-  T? resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
-  }
-}
-
+/// A required helper class because [BorderSide.lerp] doesn't support passing or
+/// returning null values.
 class _LerpSides implements MaterialStateProperty<BorderSide?> {
   const _LerpSides(this.a, this.b, this.t);
 

@@ -62,7 +62,9 @@ void main() {
   Finder findMnemonic(String label) {
     return find
         .descendant(
-            of: find.ancestor(of: find.text(label), matching: findMenuBarItemLabels()), matching: find.byType(Text))
+          of: find.ancestor(of: find.text(label), matching: findMenuBarItemLabels()),
+          matching: find.byType(Text),
+        )
         .last;
   }
 
@@ -100,7 +102,7 @@ void main() {
       expect(find.text(TestMenu.mainMenu1.label), findsOneWidget);
       expect(find.text(TestMenu.mainMenu2.label), findsOneWidget);
       expect(find.text(TestMenu.subMenu10.label), findsNothing);
-      expect(find.text(TestMenu.subSubMenu100.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu110.label), findsNothing);
       expect(opened, isEmpty);
 
       await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -112,9 +114,9 @@ void main() {
       expect(find.text(TestMenu.subMenu10.label), findsOneWidget);
       expect(find.text(TestMenu.subMenu11.label), findsOneWidget);
       expect(find.text(TestMenu.subMenu12.label), findsOneWidget);
-      expect(find.text(TestMenu.subSubMenu100.label), findsNothing);
-      expect(find.text(TestMenu.subSubMenu101.label), findsNothing);
-      expect(find.text(TestMenu.subSubMenu102.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu110.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu111.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu112.label), findsNothing);
       expect(opened.last, equals(TestMenu.mainMenu1));
       opened.clear();
 
@@ -127,9 +129,9 @@ void main() {
       expect(find.text(TestMenu.subMenu10.label), findsOneWidget);
       expect(find.text(TestMenu.subMenu11.label), findsOneWidget);
       expect(find.text(TestMenu.subMenu12.label), findsOneWidget);
-      expect(find.text(TestMenu.subSubMenu100.label), findsOneWidget);
-      expect(find.text(TestMenu.subSubMenu101.label), findsOneWidget);
-      expect(find.text(TestMenu.subSubMenu102.label), findsOneWidget);
+      expect(find.text(TestMenu.subSubMenu110.label), findsOneWidget);
+      expect(find.text(TestMenu.subSubMenu111.label), findsOneWidget);
+      expect(find.text(TestMenu.subSubMenu112.label), findsOneWidget);
       expect(opened.last, equals(TestMenu.subMenu11));
     });
 
@@ -168,8 +170,11 @@ void main() {
         equals(const Rect.fromLTRB(112.0, 69.0, 266.0, 83.0)),
       );
       expect(
-          tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
-          equals(const Rect.fromLTRB(104.0, 48.0, 334.0, 200.0)));
+        tester.getRect(
+          find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
+        ),
+        equals(const Rect.fromLTRB(104.0, 48.0, 334.0, 200.0)),
+      );
     });
 
     testWidgets('geometry with RTL direction', (WidgetTester tester) async {
@@ -210,8 +215,11 @@ void main() {
         equals(const Rect.fromLTRB(534.0, 69.0, 688.0, 83.0)),
       );
       expect(
-          tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
-          equals(const Rect.fromLTRB(466.0, 48.0, 696.0, 200.0)));
+        tester.getRect(
+          find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
+        ),
+        equals(const Rect.fromLTRB(466.0, 48.0, 696.0, 200.0)),
+      );
 
       // Close and make sure it goes back where it was.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -236,7 +244,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(246.0, 0.0, 554.0, 48.0)));
+      expect(
+        tester.getRect(find.byType(MenuBar)),
+        equals(const Rect.fromLTRB(246.0, 0.0, 554.0, 48.0)),
+      );
     });
 
     testWidgets('menu alignment and offset in LTR', (WidgetTester tester) async {
@@ -441,7 +452,10 @@ void main() {
 
       final Rect menuRect = tester.getRect(findMenuScope);
       menuHandle.dispose();
-      menuHandle = updateMenu(alignment: AlignmentDirectional.topStart, alignmentOffset: const Offset(10, 20));
+      menuHandle = updateMenu(
+        alignment: AlignmentDirectional.topStart,
+        alignmentOffset: const Offset(10, 20),
+      );
       menuHandle.open(buttonKey.currentContext!);
       await tester.pump();
       expect(tester.getRect(findMenuScope).topLeft - menuRect.topLeft, equals(const Offset(-10, 20)));
@@ -727,7 +741,11 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              children: createTestMenus(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+              children: createTestMenus(
+                onPressed: onPressed,
+                onOpen: onOpen,
+                onClose: onClose,
+              ),
             ),
           ),
         ),
@@ -772,7 +790,11 @@ void main() {
           home: Material(
             child: MenuBar(
               controller: controller,
-              children: createTestMenus(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+              children: createTestMenus(
+                onPressed: onPressed,
+                onOpen: onOpen,
+                onClose: onClose,
+              ),
             ),
           ),
         ),
@@ -786,14 +808,14 @@ void main() {
 
       expect(opened, equals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       opened.clear();
-      await tester.tap(find.text(TestMenu.subSubMenu100.label));
+      await tester.tap(find.text(TestMenu.subSubMenu110.label));
       await tester.pump();
 
-      expect(selected, equals(<TestMenu>[TestMenu.subSubMenu100]));
+      expect(selected, equals(<TestMenu>[TestMenu.subSubMenu110]));
 
       // Selecting a non-submenu item should close all the menus.
       expect(opened, isEmpty);
-      expect(find.text(TestMenu.subSubMenu100.label), findsNothing);
+      expect(find.text(TestMenu.subSubMenu110.label), findsNothing);
       expect(find.text(TestMenu.subMenu11.label), findsNothing);
     });
 
@@ -830,9 +852,11 @@ void main() {
 
       expect(
         description.join('\n'),
-        equalsIgnoringHashCodes('controller: MenuController#00000\n'
-            'style: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: MaterialStatePropertyAll(10.0))\n'
-            'clipBehavior: Clip.none'),
+        equalsIgnoringHashCodes(
+          'controller: MenuController#00000\n'
+          'style: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: MaterialStatePropertyAll(10.0))\n'
+          'clipBehavior: Clip.none',
+        ),
       );
     });
 
@@ -940,7 +964,7 @@ void main() {
       // Open the next submenu
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 100"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       // Go back, close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
@@ -960,19 +984,19 @@ void main() {
       // Open the next submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 100"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 101"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 111"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 102"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 112"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 103"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 103"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
@@ -1030,7 +1054,7 @@ void main() {
       // Open the next submenu
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 100"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       // Go back, close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -1050,19 +1074,19 @@ void main() {
       // Open the next submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 100"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 101"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 111"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 102"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 112"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 103"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 103"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
@@ -1120,9 +1144,9 @@ void main() {
       await tester.pump();
       expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
 
-      await hoverOver(tester, find.text(TestMenu.subSubMenu100.label));
+      await hoverOver(tester, find.text(TestMenu.subSubMenu110.label));
       await tester.pump();
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 100"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
     });
   });
 
@@ -1177,7 +1201,7 @@ void main() {
                 onOpen: onOpen,
                 onClose: onClose,
                 shortcuts: <TestMenu, MenuSerializableShortcut>{
-                  TestMenu.subSubMenu100: const SingleActivator(
+                  TestMenu.subSubMenu110: const SingleActivator(
                     LogicalKeyboardKey.keyA,
                     control: true,
                   )
@@ -1218,10 +1242,10 @@ void main() {
               controller: controller,
               children: createTestMenus(
                 shortcuts: <TestMenu, MenuSerializableShortcut>{
-                  TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                  TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
-                  TestMenu.subSubMenu102: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
-                  TestMenu.subSubMenu103: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+                  TestMenu.subSubMenu110: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
+                  TestMenu.subSubMenu111: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
+                  TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
+                  TestMenu.subSubMenu113: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
                 },
               ),
             ),
@@ -1245,34 +1269,34 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
-          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
+          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('Ctrl A'));
-          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
+          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
           expect(mnemonic1.data, equals('⇧ B'));
-          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
+          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
           expect(mnemonic2.data, equals('Alt C'));
-          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
+          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Meta D'));
           break;
         case TargetPlatform.windows:
-          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
+          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('Ctrl A'));
-          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
+          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
           expect(mnemonic1.data, equals('⇧ B'));
-          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
+          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
           expect(mnemonic2.data, equals('Alt C'));
-          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
+          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Win D'));
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
+          mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('⌃ A'));
-          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
+          mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
           expect(mnemonic1.data, equals('⇧ B'));
-          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
+          mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
           expect(mnemonic2.data, equals('⌥ C'));
-          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
+          mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('⌘ D'));
           break;
       }
@@ -1285,10 +1309,10 @@ void main() {
               children: createTestMenus(
                 includeExtraGroups: true,
                 shortcuts: <TestMenu, MenuSerializableShortcut>{
-                  TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.arrowRight),
-                  TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.arrowLeft),
-                  TestMenu.subSubMenu102: const SingleActivator(LogicalKeyboardKey.arrowUp),
-                  TestMenu.subSubMenu103: const SingleActivator(LogicalKeyboardKey.arrowDown),
+                  TestMenu.subSubMenu110: const SingleActivator(LogicalKeyboardKey.arrowRight),
+                  TestMenu.subSubMenu111: const SingleActivator(LogicalKeyboardKey.arrowLeft),
+                  TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.arrowUp),
+                  TestMenu.subSubMenu113: const SingleActivator(LogicalKeyboardKey.arrowDown),
                 },
               ),
             ),
@@ -1304,13 +1328,13 @@ void main() {
       await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
-      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
+      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
       expect(mnemonic0.data, equals('→'));
-      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
+      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
       expect(mnemonic1.data, equals('←'));
-      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
+      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
       expect(mnemonic2.data, equals('↑'));
-      mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu103.label));
+      mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
       expect(mnemonic3.data, equals('↓'));
 
       // Try some weirder ones.
@@ -1321,9 +1345,9 @@ void main() {
               controller: controller,
               children: createTestMenus(
                 shortcuts: <TestMenu, MenuSerializableShortcut>{
-                  TestMenu.subSubMenu100: const SingleActivator(LogicalKeyboardKey.escape),
-                  TestMenu.subSubMenu101: const SingleActivator(LogicalKeyboardKey.fn),
-                  TestMenu.subSubMenu102: const SingleActivator(LogicalKeyboardKey.enter),
+                  TestMenu.subSubMenu110: const SingleActivator(LogicalKeyboardKey.escape),
+                  TestMenu.subSubMenu111: const SingleActivator(LogicalKeyboardKey.fn),
+                  TestMenu.subSubMenu112: const SingleActivator(LogicalKeyboardKey.enter),
                 },
               ),
             ),
@@ -1340,11 +1364,11 @@ void main() {
       await tester.tap(find.text(TestMenu.subMenu11.label));
       await tester.pump();
 
-      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu100.label));
+      mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
       expect(mnemonic0.data, equals('Esc'));
-      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu101.label));
+      mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
       expect(mnemonic1.data, equals('Fn'));
-      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu102.label));
+      mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
       expect(mnemonic2.data, equals('↵'));
     }, variant: TargetPlatformVariant.all());
 
@@ -1721,10 +1745,10 @@ enum TestMenu {
   subMenu40('Sub Menu 40'),
   subMenu41('Sub Menu 41'),
   subMenu42('Sub Menu 42'),
-  subSubMenu100('Sub Sub Menu 100'),
-  subSubMenu101('Sub Sub Menu 101'),
-  subSubMenu102('Sub Sub Menu 102'),
-  subSubMenu103('Sub Sub Menu 103');
+  subSubMenu110('Sub Sub Menu 110'),
+  subSubMenu111('Sub Sub Menu 111'),
+  subSubMenu112('Sub Sub Menu 112'),
+  subSubMenu113('Sub Sub Menu 113');
 
   const TestMenu(this.label);
   final String label;
@@ -1776,24 +1800,24 @@ List<Widget> createTestMenus({
           menuChildren: <Widget>[
             MenuItemButton(
               key: UniqueKey(),
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu100) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu100],
-              child: Text(TestMenu.subSubMenu100.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu110) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu110],
+              child: Text(TestMenu.subSubMenu110.label),
             ),
             MenuItemButton(
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu101) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu101],
-              child: Text(TestMenu.subSubMenu101.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu111) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu111],
+              child: Text(TestMenu.subSubMenu111.label),
             ),
             MenuItemButton(
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu102) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu102],
-              child: Text(TestMenu.subSubMenu102.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu112) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu112],
+              child: Text(TestMenu.subSubMenu112.label),
             ),
             MenuItemButton(
-              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu103) : null,
-              shortcut: shortcuts[TestMenu.subSubMenu103],
-              child: Text(TestMenu.subSubMenu103.label),
+              onPressed: onPressed != null ? () => onPressed(TestMenu.subSubMenu113) : null,
+              shortcut: shortcuts[TestMenu.subSubMenu113],
+              child: Text(TestMenu.subSubMenu113.label),
             ),
           ],
           child: Text(TestMenu.subMenu11.label),

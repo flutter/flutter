@@ -7,8 +7,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MenuBarApp());
+void main() => runApp(const MenuApp());
 
+/// An enhanced enum to define the available menus and their shortcuts.
+///
+/// Using an enum for menu definition is not required, but this illustrates how
+/// they could be used for simple menu systems.
 enum MenuSelection {
   about('About'),
   showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
@@ -24,20 +28,23 @@ enum MenuSelection {
   final MenuSerializableShortcut? shortcut;
 }
 
-class MenuBarApp extends StatelessWidget {
-  const MenuBarApp({super.key});
+class MenuApp extends StatelessWidget {
+  const MenuApp({super.key});
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'createMaterialMenu Sample',
-      home: Scaffold(body: MyCascadingMenu()),
+      home: Scaffold(body: MyCascadingMenu(message: kMessage)),
     );
   }
 }
 
 class MyCascadingMenu extends StatefulWidget {
-  const MyCascadingMenu({super.key});
+  const MyCascadingMenu({super.key, required this.message});
+
+  final String message;
 
   @override
   State<MyCascadingMenu> createState() => _MyCascadingMenuState();
@@ -50,14 +57,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   late MenuHandle _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
 
-  static const String kMessage = '"Talk less. Smile more." - A. Burr';
-
-  // This is the global key that the menu uses to determine which themes should
-  // be used for the menus, as well as determining what the bounding box is for
-  // the widget that is hosting the menu, so that the menu knows where to
-  // appear.
-  final GlobalKey _buttonKey = GlobalKey();
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -69,10 +68,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     // shortcuts, they only display the shortcut hint text.
     final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
       for (final MenuSelection item in MenuSelection.values)
-        if (item.shortcut != null)
-          item.shortcut!: VoidCallbackIntent(
-            () => _activate(item),
-          ),
+        if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
     };
     // Register the shortcuts with the ShortcutRegistry so that they are
     // available to the entire application.
@@ -112,6 +108,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     setState(() {
       _lastSelection = selection;
     });
+
     switch (selection) {
       case MenuSelection.about:
         showAboutDialog(
@@ -141,8 +138,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void _updateMenu() {
     _menuHandle = createMaterialMenu(
       buttonFocusNode: _buttonFocusNode,
       controller: _controller,
@@ -187,24 +183,29 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
         ),
       ],
     );
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    _updateMenu();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        // The controlling widget for the menu must be wrapped by a TapRegion
-        // with the MenuController that the menu is using as its group ID. This
-        // prevents tapping on the button when the menu is open from closing the
-        // menu by activating the "tap outside" action of the menu.
+        // The controlling widget for the menu is wrapped by a MenuAnchor that
+        // is given the MenuController that the menu is using. This supplies the
+        // menu with a bounding box to use when determining where it should be
+        // placed.
         MenuAnchor(
           controller: _controller,
           builder: (BuildContext context) {
             return TextButton(
-              key: _buttonKey,
               focusNode: _buttonFocusNode,
               onPressed: () {
                 if (_menuHandle.isOpen) {
                   _menuHandle.close();
                 } else {
+                  // The context passed to open() must include the desired
+                  // MenuAnchor in its ancestors.
                   _menuHandle.open(context);
                 }
               },
@@ -222,13 +223,11 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Text(
-                    showingMessage ? kMessage : '',
+                    showingMessage ? widget.message : '',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
-                Text(
-                  _lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : '',
-                ),
+                Text(_lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : ''),
               ],
             ),
           ),

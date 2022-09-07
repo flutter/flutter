@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Can open menu', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MenuBarApp(),
+      const example.MenuApp(),
     );
 
     await tester.tap(find.byType(TextButton));
@@ -23,7 +23,7 @@ void main() {
     expect(find.text(example.MenuSelection.colorRed.label), findsNothing);
     expect(find.text(example.MenuSelection.colorGreen.label), findsNothing);
     expect(find.text(example.MenuSelection.colorBlue.label), findsNothing);
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.MenuApp.kMessage), findsNothing);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -46,30 +46,28 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsOneWidget);
+    expect(find.text(example.MenuApp.kMessage), findsOneWidget);
     expect(find.text('Last Selected: ${example.MenuSelection.showMessage.label}'), findsOneWidget);
   });
+
   testWidgets('Shortcuts work', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MenuBarApp(),
+      const example.MenuApp(),
     );
 
-    await tester.tap(find.byType(TextButton).first);
-    await tester.pump();
-
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.MenuApp.kMessage), findsNothing);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsOneWidget);
+    expect(find.text(example.MenuApp.kMessage), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.MenuApp.kMessage), findsNothing);
     expect(find.text('Last Selected: ${example.MenuSelection.resetMessage.label}'), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);

@@ -14,7 +14,7 @@ import 'theme.dart';
 // late BuildContext context;
 
 /// A [ButtonStyle] theme that overrides the default appearance of [MenuButton]s
-/// and [MenuItemButton]s when it's used with [MenuButtonTheme] or with the
+/// and [MenuItemButton]s when it's used with a [MenuButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.menuTheme].
 ///
 /// The [style]'s properties override [MenuItemButton]'s and [MenuButton]'s
@@ -41,7 +41,7 @@ class MenuButtonThemeData with Diagnosticable {
   /// Creates a [MenuButtonThemeData].
   ///
   /// The [style] may be null.
-  const MenuButtonThemeData({ this.style });
+  const MenuButtonThemeData({this.style});
 
   /// Overrides for [MenuButton] and [MenuItemButton]'s default style.
   ///
@@ -54,13 +54,7 @@ class MenuButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two menu button themes.
   static MenuButtonThemeData? lerp(MenuButtonThemeData? a, MenuButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
-    }
-    return MenuButtonThemeData(
-      style: ButtonStyle.lerp(a?.style, b?.style, t),
-    );
+    return MenuButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
   }
 
   @override

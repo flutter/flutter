@@ -13,8 +13,8 @@ void main() => runApp(const MenuBarApp());
 
 /// A class for consolidating the definition of menu entries.
 ///
-/// This sort of class is not strictly required, but illustrates one way it
-/// could be done.
+/// This sort of class is not required, but illustrates one way defining menus
+/// could be done in an app.
 class MenuSelection {
   const MenuSelection({required this.label, this.shortcut, this.onPressed, this.menuChildren});
 
