@@ -892,4 +892,11 @@ void main() {
   themeData = ThemeData(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
   themeData = ThemeData.raw(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
   themeData = themeData.copyWith(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
+
+  // Changes made in https://github.com/flutter/flutter/pull/TODO
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = ThemeData.copyWith();
+  themeData.bottomAppBarColor; // Removing field reference not supported.
 }

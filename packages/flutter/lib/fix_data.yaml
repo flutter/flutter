@@ -22,6 +22,17 @@ transforms:
     date: 2022-09-06
     element:
       uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'bottomAppBarColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/TODO
+  - title: "Deprecate ThemeData.bottomAppBarColor"
+    date: 2022-09-06
+    element:
+      uris: [ 'material.dart' ]
       constructor: 'raw'
       inClass: 'ThemeData'
     changes:
@@ -38,8 +49,6 @@ transforms:
     changes:
       - kind: 'removeParameter'
         name: 'bottomAppBarColor'
-
-# BottomAppBarTheme colour is required param 
 
   # Changes made in https://github.com/flutter/flutter/pull/110162
   - title: "Migrate to 'ColorScheme.background'"

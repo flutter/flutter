@@ -688,4 +688,11 @@ void main() {
   themeData = ThemeData(backgroundColor: Colors.grey, errorColor: Colors.red);
   themeData = ThemeData.raw(backgroundColor: Colors.grey, errorColor: Colors.red);
   themeData = themeData.copyWith(backgroundColor: Colors.grey, errorColor: Colors.red);
+
+  // Changes made in https://github.com/flutter/flutter/pull/TODO
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(bottomAppBarColor: Colors.green);
+  themeData = ThemeData.raw(bottomAppBarColor: Colors.green);
+  themeData = ThemeData.copyWith(bottomAppBarColor: Colors.green);
+  themeData.bottomAppBarColor; // Removing field reference not supported.
 }
