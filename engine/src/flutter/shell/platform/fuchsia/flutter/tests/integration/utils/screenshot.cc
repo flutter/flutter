@@ -2,21 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "color.h"
+#include "screenshot.h"
 
 #include <zircon/status.h>
 
 #include "flutter/fml/logging.h"
 
-namespace scenic {
-
-// RGBA hex dump
-std::ostream& operator<<(std::ostream& os, const Color& c) {
-  char rgba[9] = {};
-  snprintf(rgba, (sizeof(rgba) / sizeof(char)), "%02X%02X%02X%02X", c.r, c.g,
-           c.b, c.a);
-  return os << rgba;
-}
+namespace fuchsia_test_utils {
 
 Screenshot::Screenshot(
     const fuchsia::ui::scenic::ScreenshotData& screenshot_data)
@@ -75,4 +67,4 @@ std::map<Color, size_t> Screenshot::Histogram() const {
   return histogram;
 }
 
-}  // namespace scenic
+}  // namespace fuchsia_test_utils
