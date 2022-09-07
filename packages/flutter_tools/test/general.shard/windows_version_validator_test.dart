@@ -120,6 +120,14 @@ const ValidationResult invalidWindowsValidationResult = ValidationResult(
   statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
 );
 
+/// Expected return from a nonzero exitcode when
+/// running systeminfo
+const ValidationResult invalidExitCodeValidationResult = ValidationResult(
+  ValidationType.missing,
+  <ValidationMessage>[],
+  statusInfo: 'Exit status from running `systeminfo` was unsuccessful',
+);
+
 void main() {
   testWithoutContext('Successfully running windows version check on windows 10',
       () async {
@@ -183,6 +191,27 @@ void main() {
     expect(result.type, invalidWindowsValidationResult.type,
         reason: 'The ValidationResult type should be the same (missing)');
     expect(result.statusInfo, invalidWindowsValidationResult.statusInfo,
+        reason: 'The ValidationResult statusInfo messages should be the same');
+  });
+
+  testWithoutContext('Running into an nonzero exit code from systeminfo command', () async {
+    final WindowsVersionValidator windowsVersionValidator =
+        WindowsVersionValidator(
+      processManager: FakeProcessManager.list(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>['systeminfo'],
+            exitCode: 1
+          ),
+        ],
+      ),
+    );
+
+    final ValidationResult result = await windowsVersionValidator.validate();
+
+    expect(result.type, invalidExitCodeValidationResult.type,
+        reason: 'The ValidationResult type should be the same (missing)');
+    expect(result.statusInfo, invalidExitCodeValidationResult.statusInfo,
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
 
