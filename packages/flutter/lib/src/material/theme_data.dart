@@ -432,7 +432,7 @@ class ThemeData with Diagnosticable {
     )
     Color? backgroundColor,
     @Deprecated(
-      'Use BottomAppBarTheme.color instead.'
+      'Use BottomAppBarTheme.color instead. '
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
@@ -563,9 +563,7 @@ class ThemeData with Diagnosticable {
     // COMPONENT THEMES
     appBarTheme ??= const AppBarTheme();
     bannerTheme ??= const MaterialBannerThemeData();
-    bottomAppBarTheme ??= BottomAppBarTheme(
-      color: colorSchemeSeed != null ? colorScheme.surface :
-          isDark ? Colors.grey[800]! : Colors.white);
+    bottomAppBarTheme ??= const BottomAppBarTheme();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
@@ -1317,7 +1315,7 @@ class ThemeData with Diagnosticable {
 
   /// The default color of the [BottomAppBar].
     @Deprecated(
-      'Use BottomAppBarTheme.color instead.'
+      'Use BottomAppBarTheme.color instead. '
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
@@ -1895,7 +1893,7 @@ class ThemeData with Diagnosticable {
     )
     Color? backgroundColor,
     @Deprecated(
-      'Use BottomAppBarTheme.color instead.'
+      'Use BottomAppBarTheme.color instead. '
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )

@@ -20,13 +20,14 @@ void main() {
     expect(widget.color, themedColor);
   });
 
-  testWidgets('BAB color - Widget overrrides BabTheme', (WidgetTester tester) async {
+  testWidgets('BAB color - Widget', (WidgetTester tester) async {
+    const Color themeColor = Colors.white10;
     const Color babThemeColor = Colors.black87;
     const Color babColor = Colors.pink;
     const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(bottomAppBarTheme: theme),
+      theme: ThemeData(bottomAppBarTheme: theme, bottomAppBarColor: themeColor),
       home: const Scaffold(body: BottomAppBar(color: babColor)),
     ));
 
@@ -34,12 +35,13 @@ void main() {
     expect(widget.color, babColor);
   });
 
-  testWidgets('BAB color - BabTheme overrides Theme default', (WidgetTester tester) async {
+  testWidgets('BAB color - BabTheme', (WidgetTester tester) async {
+    const Color themeColor = Colors.white10;
     const Color babThemeColor = Colors.black87;
     const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(bottomAppBarTheme: theme),
+      theme: ThemeData(bottomAppBarTheme: theme, bottomAppBarColor: themeColor),
       home: const Scaffold(body: BottomAppBar()),
     ));
 
@@ -47,16 +49,27 @@ void main() {
     expect(widget.color, babThemeColor);
   });
 
-  testWidgets('BAB color - uses Theme default if not set by Widget or BabTheme', (WidgetTester tester) async {
-    const Color themeColor = Colors.white;
+  testWidgets('BAB color - Theme', (WidgetTester tester) async {
+    const Color themeColor = Colors.white10;
 
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(bottomAppBarColor: themeColor),
+      home: const Scaffold(body: BottomAppBar()),
+    ));
+
+    final PhysicalShape widget = _getBabRenderObject(tester);
+    expect(widget.color, themeColor);
+  });
+
+  testWidgets('BAB color - Default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(),
       home: const Scaffold(body: BottomAppBar()),
     ));
 
     final PhysicalShape widget = _getBabRenderObject(tester);
-    expect(widget.color, themeColor);
+
+    expect(widget.color, Colors.white);
   });
 
   testWidgets('BAB theme customizes shape', (WidgetTester tester) async {

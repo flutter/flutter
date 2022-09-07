@@ -694,5 +694,4 @@ void main() {
   themeData = ThemeData(bottomAppBarColor: Colors.green);
   themeData = ThemeData.raw(bottomAppBarColor: Colors.green);
   themeData = ThemeData.copyWith(bottomAppBarColor: Colors.green);
-  themeData.bottomAppBarColor; // Removing field reference not supported.
 }

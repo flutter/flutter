@@ -895,8 +895,7 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/111080
   ThemeData themeData = ThemeData();
-  themeData = ThemeData();
-  themeData = ThemeData.raw();
-  themeData = ThemeData.copyWith();
-  themeData.bottomAppBarColor; // Removing field reference not supported.
+  themeData = ThemeData(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
+  themeData = ThemeData.raw(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
+  themeData = ThemeData.copyWith(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
 }
