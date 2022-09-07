@@ -38,6 +38,32 @@ TEST_F(WindowsTest, LaunchMain) {
   ASSERT_NE(controller, nullptr);
 }
 
+// Verify there is no unexpected output from launching main.
+TEST_F(WindowsTest, LaunchMainHasNoOutput) {
+  // Replace stdout & stderr stream buffers with our own.
+  std::stringstream cout_buffer;
+  std::stringstream cerr_buffer;
+  std::streambuf* old_cout_buffer = std::cout.rdbuf();
+  std::streambuf* old_cerr_buffer = std::cerr.rdbuf();
+  std::cout.rdbuf(cout_buffer.rdbuf());
+  std::cerr.rdbuf(cerr_buffer.rdbuf());
+
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  // Restore original stdout & stderr stream buffer.
+  std::cout.rdbuf(old_cout_buffer);
+  std::cerr.rdbuf(old_cerr_buffer);
+
+  // Verify stdout & stderr have no output.
+  std::string cout = cout_buffer.str();
+  std::string cerr = cerr_buffer.str();
+  EXPECT_TRUE(cout.empty());
+  EXPECT_TRUE(cerr.empty());
+}
+
 // Verify we can successfully launch a custom entry point.
 TEST_F(WindowsTest, LaunchCustomEntrypoint) {
   auto& context = GetContext();
