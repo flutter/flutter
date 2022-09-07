@@ -37,17 +37,7 @@ class WindowsVersionValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final ProcessResult result;
-    try {
-      result = await _processManager.run(<String>['systeminfo']);
-    } on ProcessException {
-      return const ValidationResult(
-        ValidationType.missing,
-        <ValidationMessage>[],
-        statusInfo:
-            'Unable to run Windows version check using built-in `systeminfo`',
-      );
-    }
+    final ProcessResult result = await _processManager.run(<String>['systeminfo']);
 
     if (result.exitCode != 0) {
       return const ValidationResult(
