@@ -9,6 +9,15 @@ class IconButtonTemplate extends TokenTemplate {
     super.colorSchemePrefix = '_colors.',
   });
 
+
+  String _elevationColor(String token) {
+    if (tokens.containsKey(token)) {
+      return 'MaterialStatePropertyAll<Color>(${color(token)})';
+    } else {
+      return 'const MaterialStatePropertyAll<Color>(Colors.transparent)';
+    }
+  }
+
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends ButtonStyle {
@@ -26,7 +35,7 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    ButtonStyleButton.allOrNull<Color>(Colors.transparent);
+    const MaterialStatePropertyAll<Color?>(Colors.transparent);
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
@@ -66,37 +75,41 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
       return null;
     });
 
-  // No default shadow color
-
-  // No default surface tint color
-
   @override
   MaterialStateProperty<double>? get elevation =>
-    ButtonStyleButton.allOrNull<double>(0.0);
+    const MaterialStatePropertyAll<double>(0.0);
+
+  @override
+  MaterialStateProperty<Color>? get shadowColor =>
+    ${_elevationColor("md.comp.icon-button.container.shadow-color")};
+
+  @override
+  MaterialStateProperty<Color>? get surfaceTintColor =>
+    ${_elevationColor("md.comp.icon-button.container.surface-tint-layer.color")};
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(const EdgeInsets.all(8.0));
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(8.0));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(${tokens["md.comp.icon-button.state-layer.size"]}, ${tokens["md.comp.icon-button.state-layer.size"]}));
+    const MaterialStatePropertyAll<Size>(Size(${tokens["md.comp.icon-button.state-layer.size"]}, ${tokens["md.comp.icon-button.state-layer.size"]}));
 
   // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
-    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    const MaterialStatePropertyAll<Size>(Size.infinite);
 
   @override
   MaterialStateProperty<double>? get iconSize =>
-    ButtonStyleButton.allOrNull<double>(${tokens["md.comp.icon-button.icon.size"]});
+    const MaterialStatePropertyAll<double>(${tokens["md.comp.icon-button.icon.size"]});
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-    ButtonStyleButton.allOrNull<OutlinedBorder>(${shape("md.comp.icon-button.state-layer")});
+    const MaterialStatePropertyAll<OutlinedBorder>(${shape("md.comp.icon-button.state-layer", "")});
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
