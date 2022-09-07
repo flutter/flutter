@@ -4207,9 +4207,9 @@ class SemanticsConfiguration {
   /// checked/unchecked state.
   bool? get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
   set isChecked(bool? value) {
+    assert(value != true || isCheckStateMixed != true);
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value!);
-    assert(value != true || isCheckStateMixed != true);
   }
 
   /// If this node has tristate that can be controlled by the user, whether
@@ -4222,9 +4222,9 @@ class SemanticsConfiguration {
   /// mixed checked state.
   bool? get isCheckStateMixed => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isCheckStateMixed) : null;
   set isCheckStateMixed(bool? value) {
+    assert(value != true || isChecked != true);
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isCheckStateMixed, value!);
-    assert(value != true || isChecked != true);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
