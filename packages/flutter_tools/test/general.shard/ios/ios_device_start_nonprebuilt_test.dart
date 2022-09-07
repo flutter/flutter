@@ -165,7 +165,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(projectInfo: FakeXcodeProjectInfo()),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
       Xcode: () => xcode,
     });
 
@@ -342,20 +342,9 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class FakeXcodeProjectInfo extends Fake implements XcodeProjectInfo {
-  @override
-  String? schemeFor(BuildInfo? buildInfo) => 'fake';
-
-  @override
-  String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) => 'Release';
-
-  @override
-  List<String> targets = <String>[];
-}
-
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({
-    required this.projectInfo,
+    this.projectInfo,
     this.buildSettings = const <String, String>{
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
       'WRAPPER_NAME': 'My Super Awesome App.app',
@@ -364,7 +353,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   });
 
   final Map<String, String> buildSettings;
-  final XcodeProjectInfo projectInfo;
+  final XcodeProjectInfo? projectInfo;
 
   @override
   final bool isInstalled = true;
@@ -379,7 +368,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     String projectPath, {
     String? projectFilename,
   }) async => projectInfo;

@@ -84,15 +84,15 @@ Future<void> buildMacOS({
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter!.getInfo(
+  final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
   );
-  final String? scheme = projectInfo.schemeFor(buildInfo);
+  final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {
-    projectInfo.reportFlavorNotFoundAndExit();
+    projectInfo!.reportFlavorNotFoundAndExit();
   }
-  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
+  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
