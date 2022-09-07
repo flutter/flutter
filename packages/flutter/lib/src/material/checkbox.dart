@@ -451,13 +451,13 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? defaults.fillColor!.resolve(inactiveStates)!;
 
     final Set<MaterialState> focusedStates = widget.isError ? (errorState..add(MaterialState.focused)) : states..add(MaterialState.focused);
-    final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
+    Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
       ?? checkboxTheme.overlayColor?.resolve(focusedStates)
       ?? defaults.overlayColor!.resolve(focusedStates)!;
 
     final Set<MaterialState> hoveredStates = widget.isError ? (errorState..add(MaterialState.hovered)) : states..add(MaterialState.hovered);
-    final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
+    Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
       ?? widget.hoverColor
       ?? checkboxTheme.overlayColor?.resolve(hoveredStates)
       ?? defaults.overlayColor!.resolve(hoveredStates)!;
@@ -473,6 +473,15 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? checkboxTheme.overlayColor?.resolve(inactivePressedStates)
       ?? inactiveColor?.withAlpha(kRadialReactionAlpha)
       ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
+
+    if (downPosition != null) {
+      effectiveHoverOverlayColor = states.contains(MaterialState.selected)
+        ? effectiveActivePressedOverlayColor
+        : effectiveInactivePressedOverlayColor;
+      effectiveFocusOverlayColor = states.contains(MaterialState.selected)
+        ? effectiveActivePressedOverlayColor
+        : effectiveInactivePressedOverlayColor;
+    }
 
     final Set<MaterialState> checkStates = widget.isError ? (states..add(MaterialState.error)) : states;
     final Color effectiveCheckColor = widget.checkColor
@@ -497,8 +506,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..reactionHoverFade = reactionHoverFade
           ..inactiveReactionColor = effectiveInactivePressedOverlayColor
           ..reactionColor = effectiveActivePressedOverlayColor
-          ..hoverColor = downPosition != null ? effectiveActivePressedOverlayColor : effectiveHoverOverlayColor
-          ..focusColor = downPosition != null ? effectiveActivePressedOverlayColor : effectiveFocusOverlayColor
+          ..hoverColor = effectiveHoverOverlayColor
+          ..focusColor = effectiveFocusOverlayColor
           ..splashRadius = effectiveSplashRadius
           ..downPosition = downPosition
           ..isFocused = states.contains(MaterialState.focused)
@@ -768,55 +777,13 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
-          return _colors.onSurface.withOpacity(0.38);
-        }
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.error)) {
-          if (states.contains(MaterialState.pressed)) {
-            return _colors.error;
-          }
-          if (states.contains(MaterialState.hovered)) {
-            return _colors.error;
-          }
-          if (states.contains(MaterialState.focused)) {
-            return _colors.error;
-          }
-          return _colors.error;
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary;
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return _colors.primary;
-        }
-        if (states.contains(MaterialState.focused)) {
-          return _colors.primary;
-        }
-        return _colors.primary;
-      }
       if (states.contains(MaterialState.error)) {
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.error;
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return _colors.error;
-        }
-        if (states.contains(MaterialState.focused)) {
-          return _colors.error;
-        }
         return _colors.error;
       }
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface;
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurface;
-      }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface;
+      if (states.contains(MaterialState.selected)) {
+        return _colors.primary;
       }
       return _colors.onSurface;
     });
@@ -833,25 +800,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.error)) {
-          if (states.contains(MaterialState.pressed)) {
-            return _colors.onError;
-          }
-          if (states.contains(MaterialState.hovered)) {
-            return _colors.onError;
-          }
-          if (states.contains(MaterialState.focused)) {
-            return _colors.onError;
-          }
           return _colors.onError;
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary;
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return _colors.onPrimary;
-        }
-        if (states.contains(MaterialState.focused)) {
-          return _colors.onPrimary;
         }
         return _colors.onPrimary;
       }
@@ -864,7 +813,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.error.withOpacity(0.24);
+          return _colors.error.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.error.withOpacity(0.08);

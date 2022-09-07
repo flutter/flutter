@@ -1036,6 +1036,7 @@ void main() {
       reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
     );
 
+    await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildCheckbox(focused: true));
     await tester.pumpAndSettle();
 
@@ -1168,6 +1169,7 @@ void main() {
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
 
+    await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildCheckbox(focused: true));
     await tester.pumpAndSettle();
 
@@ -1563,7 +1565,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: theme.colorScheme.error.withOpacity(0.24))
+        ..circle(color: theme.colorScheme.error.withOpacity(0.12))
         ..path(color: theme.colorScheme.error)
     );
     await gestureLongPress.up();
