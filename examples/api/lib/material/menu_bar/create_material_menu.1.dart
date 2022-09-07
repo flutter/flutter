@@ -7,8 +7,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const String kMessage = '"Talk less. Smile more." - A. Burr';
-
 void main() => runApp(const MenuBarApp());
 
 enum MenuSelection {
@@ -47,10 +45,11 @@ class MyCascadingMenu extends StatefulWidget {
 
 class _MyCascadingMenuState extends State<MyCascadingMenu> {
   MenuSelection? _lastSelection;
-  final MenuController _controller = MenuController();
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  late MenuHandle _menuEntry;
+  late MenuHandle _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   /// This is the global key that the menu uses to determine which themes should
   /// be used for the menus. When the position of the menu is supplied to the
@@ -65,9 +64,8 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   void initState() {
     super.initState();
-    _menuEntry = createMaterialMenu(
+    _menuHandle = createMaterialMenu(
       buttonFocusNode: _buttonFocusNode,
-      controller: _controller,
       children: <Widget>[
         MenuItemButton(
           child: Text(MenuSelection.about.label),
@@ -133,8 +131,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   void dispose() {
     _shortcutsEntry?.dispose();
-    _menuEntry.dispose();
-    _controller.dispose();
+    _menuHandle.dispose();
     _buttonFocusNode.dispose();
     super.dispose();
   }
@@ -193,7 +190,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   }
 
   void _handleSecondaryTapDown(TapDownDetails details) {
-    _menuEntry.open(context, position: details.globalPosition);
+    _menuHandle.open(context, position: details.globalPosition);
   }
 
   @override

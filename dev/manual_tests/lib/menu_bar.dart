@@ -5,30 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum TestMenu {
-  mainMenu1('Menu 1'),
-  mainMenu2('Menu 2'),
-  mainMenu3('Menu 3'),
-  mainMenu4('Menu 4'),
-  subMenu1('Sub Menu 1'),
-  subMenu2('Sub Menu 2'),
-  subMenu3('Sub Menu 3'),
-  subMenu4('Sub Menu 4'),
-  subMenu5('Sub Menu 5'),
-  subMenu6('Sub Menu 6'),
-  subMenu7('Sub Menu 7'),
-  subMenu8('Sub Menu 8'),
-  subSubMenu1('Sub Sub Menu 1'),
-  subSubMenu2('Sub Sub Menu 2'),
-  subSubMenu3('Sub Sub Menu 3'),
-  testButton('TEST button'),
-  standaloneMenu1('Standalone Menu 1'),
-  standaloneMenu2('Standalone Menu 2');
-
-  const TestMenu(this.label);
-  final String label;
-}
-
 void main() {
   runApp(
     const MaterialApp(
@@ -683,4 +659,28 @@ class _TestMenusState extends State<_TestMenus> {
       ],
     );
   }
+}
+
+enum TestMenu {
+  mainMenu1('Menu 1'),
+  mainMenu2('Menu 2'),
+  mainMenu3('Menu 3'),
+  mainMenu4('Menu 4'),
+  subMenu1('Sub Menu 1'),
+  subMenu2('Sub Menu 2'),
+  subMenu3('Sub Menu 3'),
+  subMenu4('Sub Menu 4'),
+  subMenu5('Sub Menu 5'),
+  subMenu6('Sub Menu 6'),
+  subMenu7('Sub Menu 7'),
+  subMenu8('Sub Menu 8'),
+  subSubMenu1('Sub Sub Menu 1'),
+  subSubMenu2('Sub Sub Menu 2'),
+  subSubMenu3('Sub Sub Menu 3'),
+  testButton('TEST button'),
+  standaloneMenu1('Standalone Menu 1'),
+  standaloneMenu2('Standalone Menu 2');
+
+  const TestMenu(this.label);
+  final String label;
 }

@@ -928,7 +928,7 @@ class MenuButton extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('child', child));
+    properties.add(DiagnosticsProperty<String>('child', child.toString()));
     properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
     properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
   }
@@ -1047,20 +1047,20 @@ class _MenuButtonState extends State<MenuButton> {
   Widget build(BuildContext context) {
     final MenuController controller = MenuController.maybeOf(context) ?? (_internalMenuController ??= MenuController());
     _updateChildMenu(context, controller);
-    return _MenuHandleMarker(
-      handle: _handle!,
-      child: MenuAnchor(
-        controller: controller,
-        builder: (BuildContext context) {
-          // Since we don't want to use the theme style or default style from the
-          // TextButton, we merge the styles, merging them in the right order when
-          // each type of style exists. Each "*StyleOf" function is only called once.
-          final ButtonStyle mergedStyle =
-              widget.style?.merge(widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))) ??
-              widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
-              widget.defaultStyleOf(context);
+    return MenuAnchor(
+      controller: controller,
+      builder: (BuildContext context) {
+        // Since we don't want to use the theme style or default style from the
+        // TextButton, we merge the styles, merging them in the right order when
+        // each type of style exists. Each "*StyleOf" function is only called once.
+        final ButtonStyle mergedStyle =
+            widget.style?.merge(widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))) ??
+            widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
+            widget.defaultStyleOf(context);
 
-          return TextButton(
+        return _MenuHandleMarker(
+          handle: _handle!,
+          child: TextButton(
             key: _buttonKey,
             style: mergedStyle,
             focusNode: _buttonFocusNode,
@@ -1073,9 +1073,9 @@ class _MenuButtonState extends State<MenuButton> {
               showDecoration: !_handle!._isTopLevel,
               child: widget.child!,
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -1139,14 +1139,19 @@ class _MenuButtonState extends State<MenuButton> {
 /// The [controller] is required, and the same [controller] should be supplied
 /// to [createMaterialMenu].
 class MenuAnchor extends StatefulWidget {
+  /// Creates a const [MenuAnchor].
   ///
+  /// Both the [builder] and [controller] arguments are required.
   const MenuAnchor({
     super.key,
     required this.builder,
     required this.controller,
   });
 
+  /// The builder that builds the widget that the menu will be attached to.
   ///
+  /// The bounding box of this widget is used as a reference for the
+  /// [MenuStyle.alignment] given for the menu.
   final WidgetBuilder builder;
 
   /// The supplied controller is owned by the caller, and must be disposed by
@@ -1277,39 +1282,22 @@ class _MenuAnchorMarker extends InheritedWidget {
   }
 }
 
-/// Creates a new cascading menu given the focus node for the controlling
-/// widget.
+/// Creates a new cascading menu.
 ///
-/// Calling `createMaterialMenu` creates a new cascading menu controlled by
-/// another widget, typically some type of button.
+/// Calling `createMaterialMenu` creates a new cascading menu that can be
+/// controlled through the [MenuHandle] returned by this function. The menu is
+/// created in a closed state, and [MenuHandle.open] must be called for the menu
+/// to be shown.
 ///
-/// The menu is created in a closed state, and [MenuHandle.open] must be called
-/// for the menu to be shown.
+/// If a `globalMenuPosition` is supplied here, or as the `position` argument to
+/// [MenuHandle.open], then that is where the menu will appear.
 ///
-/// The required argument is a [GlobalKey] that us used to associate a widget
-/// with the menu. The [BuildContext] of the associated widget supplies the
-/// themes and directionality to use for the menu. If `globalMenuPosition` is
-/// not supplied, then this also serves to provide the rectangle used for
-/// determining the alignment of the submenu. Typically this is a [GlobalKey]
-/// attached to the button that is used to open the menu, but a
-/// `globalMenuPosition` may be supplied to override that position, and the key
-/// only needs to indicate the widget where the ambient themes and
-/// directionality can be found.
-///
-/// {@template flutter.material.menu_bar.createMaterialMenu.tap_region_note}
-/// When creating a menu using [createMaterialMenu], in order to handle the case
-/// where the user taps on the control that this menu is associated with and the
-/// menu should toggle its open state, it is sometimes necessary to wrap the
-/// associated control with a [TapRegion] where the [TapRegion.groupId] is set
-/// to the controller for the menu. In this case, it is also necessary to create
-/// a [MenuController] to pass.
-///
-/// If this [TapRegion] is left out, then tapping on the associated control will
-/// be considered tapping "outside" of the menu, and close the menu
-/// automatically. Since tapping the control is often used to call
-/// [MenuHandle.open], the menu will appear to never close when the control is
-/// tapped on, instead of toggling, since it closes and is immediately reopened.
-/// {@endtemplate}
+/// When [MenuHandle.open] is called, if a specific menu position is not
+/// specified, then the supplied build context is used to find the nearest
+/// ancestor [MenuAnchor]. That [MenuAnchor] is used to define the rectangle
+/// used in conjunction with the [MenuStyle.alignment] and
+/// [MenuStyle.alignmentOffset] to determine the location where the menu will
+/// appear.
 ///
 /// The returned [MenuHandle] allows control of menu visibility, and
 /// reconfiguration of the menu. Setting values on the returned [MenuHandle]
@@ -2093,15 +2081,17 @@ abstract class _MenuHandleBase with DiagnosticableTreeMixin, ChangeNotifier {
 /// widget hierarchy.
 ///
 /// Typically, it's not necessary to create a `MenuController` to use a
-/// [MenuBar] or to call [createMaterialMenu], but if open menus need to be
-/// closed with the [closeAll] method in response to an event, a
-/// `MenuController` can be created and passed to the [MenuBar] or
-/// [createMaterialMenu].
+/// [MenuBar], but if open menus need to be closed with the [closeAll] method in
+/// response to an event, a `MenuController` can be created and passed to the
+/// [MenuBar].
+///
+/// If a [MenuAnchor] is used with [createMaterialMenu], then the same
+/// controller that was given to the [MenuAnchor] must also be given to
+/// [createMaterialMenu]. If a specific menu position is given, then no
+/// controller is required.
 ///
 /// The controller can be listened to for some changes in the state of the menu
 /// bar, to see if [menuIsOpen] has changed, for instance.
-///
-/// {@macro flutter.material.menu_bar.createMaterialMenu.tap_region_note}
 ///
 /// The [dispose] method must be called on the controller when it is no longer
 /// needed.
@@ -2479,12 +2469,15 @@ class MenuHandle extends _MenuHandleBase {
   }
 }
 
-/// A helper class used to generate shortcut labels for a [ShortcutActivator].
+/// A helper class used to generate shortcut labels for a
+/// [MenuSerializableShortcut] (a subset of the subclasses of
+/// [ShortcutActivator]).
 ///
-/// This helper class is typically used by the [MenuItemButton] class to display
-/// a label for its assigned shortcut.
+/// This helper class is typically used by the [MenuItemButton] and [MenuButton]
+/// classes to display a label for their assigned shortcuts.
 ///
-/// Call [getShortcutLabel] with the [ShortcutActivator] to get a label for it.
+/// Call [getShortcutLabel] with the [MenuSerializableShortcut] to get a label
+/// for it.
 ///
 /// For instance, calling [getShortcutLabel] with `SingleActivator(trigger:
 /// LogicalKeyboardKey.keyA, control: true)` would return "⌃ A" on macOS, "Ctrl
@@ -2495,6 +2488,62 @@ class _LocalizedShortcutLabeler {
   /// Return the instance for this singleton.
   static _LocalizedShortcutLabeler get instance {
     return _instance ??= _LocalizedShortcutLabeler._();
+  }
+
+  /// Returns the label to be shown to the user in the UI when a
+  /// [MenuSerializableShortcut] is used as a keyboard shortcut.
+  ///
+  /// To keep the representation short, this will return graphical key
+  /// representations when it can. For instance, the default
+  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
+  /// arrows. When [defaultTargetPlatform] is [TargetPlatform.macOS] or
+  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
+  /// [LogicalKeyboardKey.control] will show as '˄', and
+  /// [LogicalKeyboardKey.alt] will show as '⌥'.
+  String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
+    final ShortcutSerialization serialized = shortcut.serializeForMenu();
+    if (serialized.trigger != null) {
+      final List<String> modifiers = <String>[];
+      final LogicalKeyboardKey trigger = serialized.trigger!;
+      // These should be in this order, to match the LogicalKeySet version.
+      if (serialized.alt!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
+      }
+      if (serialized.control!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
+      }
+      if (serialized.meta!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
+      }
+      if (serialized.shift!) {
+        modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+      }
+      String? shortcutTrigger;
+      final int logicalKeyId = trigger.keyId;
+      if (_shortcutGraphicEquivalents.containsKey(trigger)) {
+        shortcutTrigger = _shortcutGraphicEquivalents[trigger];
+      } else {
+        // Otherwise, look it up, and if we don't have a translation for it,
+        // then fall back to the key label.
+        shortcutTrigger = _getLocalizedName(trigger, localizations);
+        if (shortcutTrigger == null && logicalKeyId & LogicalKeyboardKey.planeMask == 0x0) {
+          // If the trigger is a Unicode-character-producing key, then use the
+          // character.
+          shortcutTrigger = String.fromCharCode(logicalKeyId & LogicalKeyboardKey.valueMask).toUpperCase();
+        }
+        // Fall back to the key label if all else fails.
+        shortcutTrigger ??= trigger.keyLabel;
+      }
+      return <String>[
+        ...modifiers,
+        if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
+      ].join(' ');
+    } else if (serialized.character != null) {
+      return serialized.character!;
+    }
+    throw UnimplementedError('Shortcut labels for ShortcutActivators that do not implement '
+        'MenuSerializableShortcut (e.g. ShortcutActivators other than SingleActivator or '
+        'CharacterActivator) are not supported.');
   }
 
   static _LocalizedShortcutLabeler? _instance;
@@ -2640,63 +2689,6 @@ class _LocalizedShortcutLabeler {
     }
     throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
   }
-
-  /// Returns the label to be shown to the user in the UI when a
-  /// [ShortcutActivator] is used as a keyboard shortcut.
-  ///
-  /// To keep the representation short, this will return graphical key
-  /// representations when it can. For instance, the default
-  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
-  /// arrows.
-  ///
-  /// When [defaultTargetPlatform] is [TargetPlatform.macOS] or
-  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
-  /// [LogicalKeyboardKey.control] will show as '˄', and
-  /// [LogicalKeyboardKey.alt] will show as '⌥'.
-  String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
-    final ShortcutSerialization serialized = shortcut.serializeForMenu();
-    if (serialized.trigger != null) {
-      final List<String> modifiers = <String>[];
-      final LogicalKeyboardKey trigger = serialized.trigger!;
-      // These should be in this order, to match the LogicalKeySet version.
-      if (serialized.alt!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-      }
-      if (serialized.control!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-      }
-      if (serialized.meta!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-      }
-      if (serialized.shift!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
-      }
-      String? shortcutTrigger;
-      final int logicalKeyId = trigger.keyId;
-      if (_shortcutGraphicEquivalents.containsKey(trigger)) {
-        shortcutTrigger = _shortcutGraphicEquivalents[trigger];
-      } else {
-        // Otherwise, look it up, and if we don't have a translation for it,
-        // then fall back to the key label.
-        shortcutTrigger = _getLocalizedName(trigger, localizations);
-        if (shortcutTrigger == null && logicalKeyId & LogicalKeyboardKey.planeMask == 0x0) {
-          // If the trigger is a Unicode-character-producing key, then use the character.
-          shortcutTrigger = String.fromCharCode(logicalKeyId & LogicalKeyboardKey.valueMask).toUpperCase();
-        }
-        // Fall back to the key label if all else fails.
-        shortcutTrigger ??= trigger.keyLabel;
-      }
-      return <String>[
-        ...modifiers,
-        if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
-      ].join(' ');
-    } else if (serialized.character != null) {
-      return serialized.character!;
-    }
-    throw UnimplementedError('Shortcut labels for ShortcutActivators that do not implement '
-        'MenuSerializableShortcut (e.g. ShortcutActivators other than SingleActivator or '
-        'CharacterActivator) are not supported.');
-  }
 }
 
 class _MenuDismissAction extends DismissAction {
@@ -2731,8 +2723,8 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     } else {
       final FocusNode? firstNode = currentMenu._firstItemFocusNode;
       if (firstNode != null && firstNode.nearestScope != firstNode) {
-        // Don't request focus if the "first" found node is a focus scope, since that
-        // means that nothing else in the submenu is focusable.
+        // Don't request focus if the "first" found node is a focus scope, since
+        // that means that nothing else in the submenu is focusable.
         firstNode.requestFocus();
       }
       return true;
@@ -2977,8 +2969,7 @@ class _MouseCursor extends MaterialStateMouseCursor {
 //
 // so that the call is entirely removed in release builds.
 //
-// Enabled debug printing by setting _kDebugMenus to true at the top of the
-// file.
+// Enable debug printing by setting _kDebugMenus to true at the top of the file.
 bool _debugMenuInfo(String message, [Iterable<String>? details]) {
   assert(() {
     if (_kDebugMenus) {
@@ -3016,15 +3007,21 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get backgroundColor => ButtonStyleButton.allOrNull<Color>(Colors.transparent);
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor => MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  MaterialStateProperty<Color?>? get foregroundColor {
+    return MaterialStateProperty.resolveWith(
+      (Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return _colors.onSurface.withOpacity(0.38);
         }
         return _colors.primary;
-      });
+      },
+    );
+  }
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor => MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  MaterialStateProperty<Color?>? get overlayColor {
+    return MaterialStateProperty.resolveWith(
+      (Set<MaterialState> states) {
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
@@ -3035,7 +3032,9 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
           return _colors.primary.withOpacity(0.12);
         }
         return null;
-      });
+      },
+    );
+  }
 
   // No default shadow color
 
@@ -3063,13 +3062,16 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       ButtonStyleButton.allOrNull<OutlinedBorder>(const RoundedRectangleBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-      MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  MaterialStateProperty<MouseCursor?>? get mouseCursor {
+    return MaterialStateProperty.resolveWith(
+      (Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return SystemMouseCursors.basic;
         }
         return SystemMouseCursors.click;
-      });
+      },
+    );
+  }
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

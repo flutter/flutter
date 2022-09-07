@@ -7,8 +7,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const String kMessage = '"Talk less. Smile more." - A. Burr';
-
 void main() => runApp(const MenuBarApp());
 
 enum MenuSelection {
@@ -51,6 +49,8 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   late MenuHandle _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   // This is the global key that the menu uses to determine which themes should
   // be used for the menus, as well as determining what the bounding box is for
