@@ -1498,6 +1498,77 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tapTooltip), findsOneWidget);
   });
+
+  testWidgets('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool? value = true;
+    Widget buildApp({bool autoFocus = true}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                isError: true,
+                value: value,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+                autofocus: autoFocus,
+                focusNode: focusNode,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    // Focused
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints..circle(color: theme.colorScheme.error.withOpacity(0.12))..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+    );
+
+    // Default color
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildApp(autoFocus: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+        paints..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..circle(color: theme.colorScheme.error.withOpacity(0.08))
+        ..path(color: theme.colorScheme.error)
+    );
+
+    // Start pressing
+    final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pump();
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..circle(color: theme.colorScheme.error.withOpacity(0.24))
+        ..path(color: theme.colorScheme.error)
+    );
+    await gestureLongPress.up();
+    await tester.pump();
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
