@@ -722,6 +722,7 @@ class WindowsStdoutLogger extends StdoutLogger {
                .replaceAll('✓', '√')
                .replaceAll('🔨', '')
                .replaceAll('💪', '')
+               .replaceAll('⚠️', '!')
                .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
