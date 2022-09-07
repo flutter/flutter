@@ -20,7 +20,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-const bool doNotSkipPerspectiveTextGoldens = !isBrowser;
+const bool skipPerspectiveTextGoldens = isBrowser;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,
@@ -1197,7 +1197,7 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
-      if (doNotSkipPerspectiveTextGoldens) {
+      if (!skipPerspectiveTextGoldens) {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.time.initial.png'),
@@ -1205,7 +1205,7 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
-      if (doNotSkipPerspectiveTextGoldens) {
+      if (!skipPerspectiveTextGoldens) {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.date.initial.png'),
@@ -1213,7 +1213,7 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
-      if (doNotSkipPerspectiveTextGoldens) {
+      if (!skipPerspectiveTextGoldens) {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.datetime.initial.png'),
@@ -1224,7 +1224,7 @@ void main() {
       await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
       await tester.pump();
 
-      if (doNotSkipPerspectiveTextGoldens) {
+      if (!skipPerspectiveTextGoldens) {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.datetime.drag.png'),
