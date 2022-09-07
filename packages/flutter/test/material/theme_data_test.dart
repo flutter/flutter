@@ -245,7 +245,7 @@ void main() {
     expect(theme.accentColor, theme.colorScheme.secondary);
     expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
-    expect(theme.bottomAppBarTheme.color, theme.colorScheme.surface);
+    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.backgroundColor, theme.colorScheme.background);
@@ -297,7 +297,7 @@ void main() {
     expect(theme.accentColor, theme.colorScheme.secondary);
     expect(theme.accentColorBrightness, Brightness.light);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
-    expect(theme.bottomAppBarTheme.color, theme.colorScheme.surface);
+    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.backgroundColor, theme.colorScheme.background);
