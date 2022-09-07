@@ -88,6 +88,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
   return std::make_unique<SurfaceFrame>(nullptr,                          // surface
                                         SurfaceFrame::FramebufferInfo{},  // framebuffer info
                                         submit_callback,                  // submit callback
+                                        frame_info,                       // frame size
                                         nullptr,                          // context result
                                         true                              // display list fallback
   );

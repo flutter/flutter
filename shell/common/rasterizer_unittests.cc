@@ -158,7 +158,8 @@ TEST(RasterizerTest,
 
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillOnce(Return(true));
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
@@ -226,7 +227,8 @@ TEST(
   framebuffer_info.supports_readback = true;
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillOnce(Return(true));
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
@@ -295,7 +297,8 @@ TEST(
 
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillOnce(Return(true));
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
@@ -361,10 +364,12 @@ TEST(RasterizerTest,
 
   auto surface_frame1 = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   auto surface_frame2 = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled())
       .WillRepeatedly(Return(true));
   // Prepare two frames for Draw() and DrawLastLayerTree().
@@ -580,7 +585,8 @@ TEST(RasterizerTest,
   framebuffer_info.supports_readback = true;
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*framebuffer_info=*/framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillOnce(Return(true));
   ON_CALL(delegate, GetIsGpuDisabledSyncSwitch())
       .WillByDefault(Return(is_gpu_disabled_sync_switch));
@@ -636,7 +642,8 @@ TEST(
 
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*framebuffer_info=*/framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillOnce(Return(true));
   ON_CALL(delegate, GetIsGpuDisabledSyncSwitch())
       .WillByDefault(Return(is_gpu_disabled_sync_switch));
@@ -693,7 +700,8 @@ TEST(
 
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*framebuffer_info=*/framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillOnce(Return(false));
   EXPECT_CALL(delegate, GetIsGpuDisabledSyncSwitch())
       .WillOnce(Return(is_gpu_disabled_sync_switch));
@@ -749,7 +757,8 @@ TEST(
 
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*framebuffer_info=*/framebuffer_info,
-      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
+      /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600));
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillOnce(Return(false));
   EXPECT_CALL(delegate, GetIsGpuDisabledSyncSwitch())
       .WillOnce(Return(is_gpu_disabled_sync_switch));
@@ -809,9 +818,9 @@ TEST(RasterizerTest,
         framebuffer_info.supports_readback = true;
         return std::make_unique<SurfaceFrame>(
             /*surface=*/nullptr, framebuffer_info,
-            /*submit_callback=*/[](const SurfaceFrame& frame, SkCanvas*) {
-              return true;
-            });
+            /*submit_callback=*/
+            [](const SurfaceFrame& frame, SkCanvas*) { return true; },
+            /*frame_size=*/SkISize::Make(800, 600));
       }));
   ON_CALL(*surface, MakeRenderContextCurrent())
       .WillByDefault(::testing::Invoke(
@@ -987,7 +996,8 @@ TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
         framebuffer_info.supports_readback = true;
         return std::make_unique<SurfaceFrame>(
             /*surface=*/nullptr, framebuffer_info,
-            /*submit_callback=*/[&](const SurfaceFrame& frame, SkCanvas*) {
+            /*submit_callback=*/
+            [&](const SurfaceFrame& frame, SkCanvas*) {
               const auto pres_time = *frame.submit_info().presentation_time;
               const auto diff = pres_time - first_timestamp;
               int num_frames_submitted = frames_submitted++;
@@ -995,7 +1005,8 @@ TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
                         num_frames_submitted * millis_16.ToMilliseconds());
               submit_latch.CountDown();
               return true;
-            });
+            },
+            /*frame_size=*/SkISize::Make(800, 600));
       }));
 
   ON_CALL(*surface, MakeRenderContextCurrent())
@@ -1066,13 +1077,15 @@ TEST(RasterizerTest, presentationTimeNotSetWhenVsyncTargetInPast) {
         framebuffer_info.supports_readback = true;
         return std::make_unique<SurfaceFrame>(
             /*surface=*/nullptr, framebuffer_info,
-            /*submit_callback=*/[&](const SurfaceFrame& frame, SkCanvas*) {
+            /*submit_callback=*/
+            [&](const SurfaceFrame& frame, SkCanvas*) {
               const std::optional<fml::TimePoint> pres_time =
                   frame.submit_info().presentation_time;
               EXPECT_EQ(pres_time, std::nullopt);
               submit_latch.CountDown();
               return true;
-            });
+            },
+            /*frame_size=*/SkISize::Make(800, 600));
       }));
 
   ON_CALL(*surface, MakeRenderContextCurrent())
