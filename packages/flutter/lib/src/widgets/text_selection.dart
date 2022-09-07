@@ -1263,7 +1263,7 @@ class SelectionOverlay {
         return;
       }
       _toolbar = OverlayEntry(builder: _buildToolbar);
-      Overlay.of(this.context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
+      Overlay.of(this.context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar!);
       return;
     }
 

@@ -1810,7 +1810,7 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: TextEditingController(text: 'blah blah'),
           focusNode: focusNode,
-          toolbarOptions: const ToolbarOptions(),
+          toolbarOptions: ToolbarOptions.empty,
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: cupertinoTextSelectionControls,

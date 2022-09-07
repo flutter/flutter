@@ -74,7 +74,7 @@ class ContextMenuController {
     Widget? debugRequiredFor,
   }) {
     hide();
-    final OverlayState? overlayState = Overlay.of(
+    final OverlayState overlayState = Overlay.of(
       context,
       rootOverlay: true,
       debugRequiredFor: debugRequiredFor,
@@ -89,7 +89,7 @@ class ContextMenuController {
         return capturedThemes.wrap(contextMenuBuilder(context));
       },
     );
-    overlayState!.insert(_menuOverlayEntry!);
+    overlayState.insert(_menuOverlayEntry!);
   }
 
   /// Cause the underlying [OverlayEntry] to rebuild during the next pipeline

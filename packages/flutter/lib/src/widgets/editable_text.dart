@@ -703,12 +703,12 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = selectionControls is TextSelectionHandleControls && toolbarOptions == null ? const ToolbarOptions() : toolbarOptions ??
+       toolbarOptions = selectionControls is TextSelectionHandleControls && toolbarOptions == null ? ToolbarOptions.empty : toolbarOptions ??
            (obscureText
                ? (readOnly
                    // No point in even offering "Select All" in a read-only obscured
                    // field.
-                   ? const ToolbarOptions()
+                   ? ToolbarOptions.empty
                    // Writable, but obscured.
                    : const ToolbarOptions(
                        selectAll: true,
