@@ -132,21 +132,21 @@ void main() {
     // after the first binding.doFrame() call.
     Map<String, dynamic> firstFrameResult;
     expect(binding.debugDidSendFirstFrameEvent, isFalse);
-    firstFrameResult = await binding.testExtension(didSendFirstFrameEventExtension, <String, String>{});
+    firstFrameResult = await binding.testExtension(WidgetsServiceExtensions.didSendFirstFrameEvent.name, <String, String>{});
     expect(firstFrameResult, <String, String>{'enabled': 'false'});
 
     expect(binding.firstFrameRasterized, isFalse);
-    firstFrameResult = await binding.testExtension(didSendFirstFrameRasterizedEventExtension, <String, String>{});
+    firstFrameResult = await binding.testExtension(WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name, <String, String>{});
     expect(firstFrameResult, <String, String>{'enabled': 'false'});
 
     await binding.doFrame();
 
     expect(binding.debugDidSendFirstFrameEvent, isTrue);
-    firstFrameResult = await binding.testExtension(didSendFirstFrameEventExtension, <String, String>{});
+    firstFrameResult = await binding.testExtension(WidgetsServiceExtensions.didSendFirstFrameEvent.name, <String, String>{});
     expect(firstFrameResult, <String, String>{'enabled': 'true'});
 
     expect(binding.firstFrameRasterized, isTrue);
-    firstFrameResult = await binding.testExtension(didSendFirstFrameRasterizedEventExtension, <String, String>{});
+    firstFrameResult = await binding.testExtension(WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name, <String, String>{});
     expect(firstFrameResult, <String, String>{'enabled': 'true'});
 
     expect(binding.frameScheduled, isFalse);
@@ -191,26 +191,26 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugAllowBannerOverride, true);
-    result = await binding.testExtension(debugAllowBannerExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.debugAllowBanner.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.debugAllowBannerOverride, true);
-    result = await binding.testExtension(debugAllowBannerExtension, <String, String>{'enabled': 'false'});
+    result = await binding.testExtension(WidgetsServiceExtensions.debugAllowBanner.name, <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(WidgetsApp.debugAllowBannerOverride, false);
-    result = await binding.testExtension(debugAllowBannerExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.debugAllowBanner.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(WidgetsApp.debugAllowBannerOverride, false);
-    result = await binding.testExtension(debugAllowBannerExtension, <String, String>{'enabled': 'true'});
+    result = await binding.testExtension(WidgetsServiceExtensions.debugAllowBanner.name, <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.debugAllowBannerOverride, true);
-    result = await binding.testExtension(debugAllowBannerExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.debugAllowBanner.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.debugAllowBannerOverride, true);
     expect(binding.frameScheduled, isFalse);
   });
 
   test('Service extensions - debugDumpApp', () async {
-    final Map<String, dynamic> result = await binding.testExtension(debugDumpAppExtension, <String, String>{});
+    final Map<String, dynamic> result = await binding.testExtension(WidgetsServiceExtensions.debugDumpApp.name, <String, String>{});
 
     expect(result, <String, dynamic>{
       'data': matches('TestServiceExtensionsBinding - DEBUG MODE\n<no tree currently mounted>'),
@@ -430,23 +430,23 @@ void main() {
     expect(binding.frameScheduled, isFalse);
     expect(debugProfileBuildsEnabled, false);
 
-    result = await binding.testExtension(profileWidgetBuildsExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileWidgetBuilds.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileBuildsEnabled, false);
 
-    result = await binding.testExtension(profileWidgetBuildsExtension, <String, String>{'enabled': 'true'});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileWidgetBuilds.name, <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileBuildsEnabled, true);
 
-    result = await binding.testExtension(profileWidgetBuildsExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileWidgetBuilds.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileBuildsEnabled, true);
 
-    result = await binding.testExtension(profileWidgetBuildsExtension, <String, String>{'enabled': 'false'});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileWidgetBuilds.name, <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileBuildsEnabled, false);
 
-    result = await binding.testExtension(profileWidgetBuildsExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileWidgetBuilds.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileBuildsEnabled, false);
 
@@ -459,23 +459,23 @@ void main() {
     expect(binding.frameScheduled, isFalse);
     expect(debugProfileBuildsEnabledUserWidgets, false);
 
-    result = await binding.testExtension(profileUserWidgetBuildsExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileUserWidgetBuilds.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileBuildsEnabledUserWidgets, false);
 
-    result = await binding.testExtension(profileUserWidgetBuildsExtension, <String, String>{'enabled': 'true'});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileUserWidgetBuilds.name, <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileBuildsEnabledUserWidgets, true);
 
-    result = await binding.testExtension(profileUserWidgetBuildsExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileUserWidgetBuilds.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileBuildsEnabledUserWidgets, true);
 
-    result = await binding.testExtension(profileUserWidgetBuildsExtension, <String, String>{'enabled': 'false'});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileUserWidgetBuilds.name, <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileBuildsEnabledUserWidgets, false);
 
-    result = await binding.testExtension(profileUserWidgetBuildsExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.profileUserWidgetBuilds.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileBuildsEnabledUserWidgets, false);
 
@@ -863,25 +863,25 @@ void main() {
 
     // The performance overlay service extension is disabled on the web.
     if (kIsWeb) {
-      expect(binding.extensions.containsKey(showPerformanceOverlayExtension), isFalse);
+      expect(binding.extensions.containsKey(WidgetsServiceExtensions.showPerformanceOverlay.name), isFalse);
       return;
     }
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
-    result = await binding.testExtension(showPerformanceOverlayExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.showPerformanceOverlay.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
-    result = await binding.testExtension(showPerformanceOverlayExtension, <String, String>{'enabled': 'true'});
+    result = await binding.testExtension(WidgetsServiceExtensions.showPerformanceOverlay.name, <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.showPerformanceOverlayOverride, true);
-    result = await binding.testExtension(showPerformanceOverlayExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.showPerformanceOverlay.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.showPerformanceOverlayOverride, true);
-    result = await binding.testExtension(showPerformanceOverlayExtension, <String, String>{'enabled': 'false'});
+    result = await binding.testExtension(WidgetsServiceExtensions.showPerformanceOverlay.name, <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
-    result = await binding.testExtension(showPerformanceOverlayExtension, <String, String>{});
+    result = await binding.testExtension(WidgetsServiceExtensions.showPerformanceOverlay.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     expect(binding.frameScheduled, isFalse);
