@@ -852,13 +852,23 @@ class SemanticsProperties extends DiagnosticableTree {
   /// or similar widget with a "checked" state, and what its current
   /// state is.
   ///
-  /// This is mutually exclusive with [toggled].
+  /// When the [Checkbox.value] of a tristate Checkbox is null,
+  /// indicating a mixed-state, this value shall be false, in which
+  /// case, [mixed] will be true.
+  ///
+  /// This is mutually exclusive with [toggled] and [mixed].
   final bool? checked;
 
-  /// If true, indicates that this subtree represents a checkbox
-  /// or similar widget with a "mixed" check state.
+  /// If non-null, indicates that this subtree represents a checkbox
+  /// or similar widget with a "half-checked" state or similar, and
+  /// whether it is currently in this half-checked state.
   ///
-  /// This must be false when [Checkbox.tristate] is false.
+  /// This must be null when [Checkbox.tristate] is false, or
+  /// when the widget is not a checkbox. When a tristate
+  /// checkbox is fully unchecked/checked, this value shall
+  /// be false.
+  ///
+  /// This is mutally exclusvie with [checked].
   final bool? mixed;
 
   /// If non-null, indicates that this subtree represents a toggle switch
