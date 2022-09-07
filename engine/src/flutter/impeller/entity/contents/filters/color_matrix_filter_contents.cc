@@ -77,16 +77,16 @@ std::optional<Snapshot> ColorMatrixFilterContents::RenderFilter(
     FS::FragInfo frag_info;
     const float* matrix = matrix_.array;
     frag_info.color_v = Vector4(matrix[4], matrix[9], matrix[14], matrix[19]);
+    frag_info.texture_sampler_y_coord_scale =
+        input_snapshot->texture->GetYCoordScale();
     // clang-format off
-  frag_info.color_m =
-      Matrix(
-        matrix[ 0], matrix[ 1], matrix[ 2], matrix[ 3],
-        matrix[ 5], matrix[ 6], matrix[ 7], matrix[ 8],
-        matrix[10], matrix[11], matrix[12], matrix[13],
-        matrix[15], matrix[16], matrix[17], matrix[18]
-      );
+    frag_info.color_m = Matrix(
+        matrix[0], matrix[5], matrix[10], matrix[15],
+        matrix[1], matrix[6], matrix[11], matrix[16],
+        matrix[2], matrix[7], matrix[12], matrix[17],
+        matrix[3], matrix[8], matrix[13], matrix[18]
+    );
     // clang-format on
-
     auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
     FS::BindInputTexture(cmd, input_snapshot->texture, sampler);
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));

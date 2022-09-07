@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <impeller/color.glsl>
+#include <impeller/texture.glsl>
 
 // A color filter that transforms colors through a 4x5 color matrix.
 //
@@ -28,6 +29,7 @@
 uniform FragInfo {
   mat4 color_m;
   vec4 color_v;
+  float texture_sampler_y_coord_scale;
 } frag_info;
 
 uniform sampler2D input_texture;
@@ -36,7 +38,8 @@ in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  vec4 input_color = texture(input_texture, v_position);
+  vec4 input_color = IPSample(input_texture, v_position,
+                              frag_info.texture_sampler_y_coord_scale);
 
   // unpremultiply first, as filter inputs are premultiplied.
   vec4 color = IPUnpremultiply(input_color);
