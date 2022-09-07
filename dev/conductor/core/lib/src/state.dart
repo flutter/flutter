@@ -28,7 +28,7 @@ const String stablePostReleaseMsg = """
   '\t\t Best practices: ${globals.hotfixDocumentationBestPractices}',
   '\t 2. Post announcement to flutter-announce group',
   '\t\t Flutter Announce: ${globals.flutterAnnounceGroup}',
-  '\t 3. Post announcement to discord and press the publish button.',
+  '\t 3. Post announcement to discord and press the publish button',
   '\t\t Discord: ${globals.discordReleaseChannel}',
   '\t 4. Post announcement flutter release hotline chat room',
   '\t\t Chatroom: ${globals.flutterReleaseHotline}',
