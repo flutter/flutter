@@ -3724,6 +3724,7 @@ targets:
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/111098
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
