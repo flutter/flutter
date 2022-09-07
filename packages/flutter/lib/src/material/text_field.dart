@@ -84,6 +84,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           );
           break;
       }
+      editableText.showMagnifier(details.globalPosition);
     }
   }
 
@@ -114,6 +115,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
       }
     }
+    editableText.showMagnifier(details.globalPosition);
   }
 }
 

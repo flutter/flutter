@@ -3324,6 +3324,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  void showMagnifier(Offset positionToShow) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.updateMagnifier(positionToShow);
+    } else {
+      _selectionOverlay!.showMagnifier(positionToShow);
+    }
+  }
+
+  void hideMagnifier() {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.hideMagnifier();
+    }
+  }
+
   // Tracks the location a [_ScribblePlaceholder] should be rendered in the
   // text.
   //

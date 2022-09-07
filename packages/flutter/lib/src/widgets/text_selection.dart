@@ -408,6 +408,34 @@ class TextSelectionOverlay {
     _selectionOverlay.showToolbar();
   }
 
+  void showMagnifier(Offset positionToShow) {
+    final TextPosition position = renderObject.getPositionForPoint(positionToShow);
+    _updateSelectionOverlay();
+    _selectionOverlay.showMagnifier(
+      _buildMagnifier(
+        currentTextPosition: position,
+        globalGesturePosition: positionToShow,
+        renderEditable: renderObject,
+      ),
+    );
+  }
+
+  void updateMagnifier(Offset positionToShow) {
+    final TextPosition position = renderObject.getPositionForPoint(positionToShow);
+    _updateSelectionOverlay();
+    _selectionOverlay.updateMagnifier(
+      _buildMagnifier(
+        currentTextPosition: position,
+        globalGesturePosition: positionToShow,
+        renderEditable: renderObject,
+      ),
+    );
+  }
+
+  void hideMagnifier() {
+    _selectionOverlay.hideMagnifier(shouldShowToolbar: false);
+  }
+
   /// Updates the overlay after the selection has changed.
   ///
   /// If this method is called while the [SchedulerBinding.schedulerPhase] is
@@ -456,6 +484,8 @@ class TextSelectionOverlay {
 
   /// Whether the toolbar is currently visible.
   bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
+
+  bool get magnifierIsVisible => _selectionOverlay._magnifierController.overlayEntry != null;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   void hide() => _selectionOverlay.hide();
@@ -554,11 +584,13 @@ class TextSelectionOverlay {
     _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
-    _selectionOverlay.showMagnifier(_buildMagnifier(
-      currentTextPosition: position,
-      globalGesturePosition: details.globalPosition,
-      renderEditable: renderObject,
-    ));
+    _selectionOverlay.showMagnifier(
+      _buildMagnifier(
+        currentTextPosition: position,
+        globalGesturePosition: details.globalPosition,
+        renderEditable: renderObject,
+      ),
+    );
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
@@ -629,11 +661,13 @@ class TextSelectionOverlay {
     _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
-    _selectionOverlay.showMagnifier(_buildMagnifier(
-      currentTextPosition: position,
-      globalGesturePosition: details.globalPosition,
-      renderEditable: renderObject,
-    ));
+    _selectionOverlay.showMagnifier(
+      _buildMagnifier(
+        currentTextPosition: position,
+        globalGesturePosition: details.globalPosition,
+        renderEditable: renderObject,
+      ),
+    );
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -1919,6 +1953,8 @@ class TextSelectionGestureDetectorBuilder {
         from: details.globalPosition,
         cause: SelectionChangedCause.longPress,
       );
+
+      editableText.showMagnifier(details.globalPosition);
     }
   }
 
@@ -1938,6 +1974,8 @@ class TextSelectionGestureDetectorBuilder {
         from: details.globalPosition,
         cause: SelectionChangedCause.longPress,
       );
+
+      editableText.showMagnifier(details.globalPosition);
     }
   }
 
@@ -1951,6 +1989,7 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
+    editableText.hideMagnifier();
     if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
     }
