@@ -22,12 +22,12 @@ class MockSettingsPlugin : public SettingsPlugin {
   virtual ~MockSettingsPlugin() = default;
 
   // |SettingsPlugin|
-  MOCK_METHOD0(StartWatching, void());
-  MOCK_METHOD0(StopWatching, void());
-
   MOCK_METHOD0(GetAlwaysUse24HourFormat, bool());
   MOCK_METHOD0(GetTextScaleFactor, float());
   MOCK_METHOD0(GetPreferredBrightness, PlatformBrightness());
+
+  MOCK_METHOD0(WatchPreferredBrightnessChanged, void());
+  MOCK_METHOD0(WatchTextScaleFactorChanged, void());
 };
 
 }  // namespace
@@ -56,6 +56,18 @@ TEST(SettingsPluginTest, SendSettingsGetsSettings) {
   EXPECT_CALL(settings_plugin, GetPreferredBrightness).Times(1);
 
   settings_plugin.SendSettings();
+}
+
+TEST(SettingsPluginTest, StartWatchingStartsWatchingChanges) {
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+  ::testing::NiceMock<MockSettingsPlugin> settings_plugin(&messenger, nullptr);
+
+  EXPECT_CALL(settings_plugin, WatchPreferredBrightnessChanged).Times(1);
+  EXPECT_CALL(settings_plugin, WatchTextScaleFactorChanged).Times(1);
+
+  settings_plugin.StartWatching();
 }
 
 }  // namespace testing
