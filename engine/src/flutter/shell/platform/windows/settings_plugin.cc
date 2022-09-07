@@ -36,7 +36,9 @@ SettingsPlugin::SettingsPlugin(BinaryMessenger* messenger,
           &JsonMessageCodec::GetInstance())),
       task_runner_(task_runner) {}
 
-SettingsPlugin::~SettingsPlugin() = default;
+SettingsPlugin::~SettingsPlugin() {
+  StopWatching();
+}
 
 void SettingsPlugin::SendSettings() {
   rapidjson::Document settings(rapidjson::kObjectType);
@@ -55,6 +57,12 @@ void SettingsPlugin::SendSettings() {
 }
 
 void SettingsPlugin::StartWatching() {
+  RegOpenKeyEx(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
+               RRF_RT_REG_DWORD, KEY_NOTIFY, &preferred_brightness_reg_hkey_);
+  RegOpenKeyEx(HKEY_CURRENT_USER, kGetTextScaleFactorRegKey, RRF_RT_REG_DWORD,
+               KEY_NOTIFY, &text_scale_factor_reg_hkey_);
+
+  // Start watching when the keys exist.
   if (preferred_brightness_reg_hkey_ != nullptr) {
     WatchPreferredBrightnessChanged();
   }
@@ -66,6 +74,13 @@ void SettingsPlugin::StartWatching() {
 void SettingsPlugin::StopWatching() {
   preferred_brightness_changed_watcher_ = nullptr;
   text_scale_factor_changed_watcher_ = nullptr;
+
+  if (preferred_brightness_reg_hkey_ != nullptr) {
+    RegCloseKey(preferred_brightness_reg_hkey_);
+  }
+  if (text_scale_factor_reg_hkey_ != nullptr) {
+    RegCloseKey(text_scale_factor_reg_hkey_);
+  }
 }
 
 bool SettingsPlugin::GetAlwaysUse24HourFormat() {
