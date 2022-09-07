@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'host_agent.dart';
-import 'task_result.dart';
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
@@ -83,12 +82,6 @@ Future<bool> containsBitcode(String pathToBinary) async {
     }
   });
   return !emptyBitcodeMarkerFound;
-}
-
-Future<void> checkContainsBitcode(String pathToBinary) async {
-  if (!await containsBitcode(pathToBinary)) {
-    throw TaskResult.failure('Expected bitcode in $pathToBinary');
-  }
 }
 
 /// Creates and boots a new simulator, passes the new simulator's identifier to

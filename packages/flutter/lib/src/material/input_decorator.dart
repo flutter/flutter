@@ -1957,7 +1957,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           : themeData.disabledColor;
     }
     if (decoration.errorText != null) {
-      return  themeData.errorColor;
+      return themeData.colorScheme.error;
     }
     if (isFocused) {
       return themeData.colorScheme.primary;
@@ -2641,7 +2641,7 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -2671,7 +2671,7 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -3124,7 +3124,7 @@ class InputDecoration {
   final String? counterText;
 
   /// Optional custom counter widget to go in the place otherwise occupied by
-  /// [counterText].  If this property is non null, then [counterText] is
+  /// [counterText]. If this property is non null, then [counterText] is
   /// ignored.
   final Widget? counter;
 
@@ -3317,7 +3317,7 @@ class InputDecoration {
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
   /// decorator's state. Only the border's shape is used. If custom  [BorderSide]
-  /// values are desired for  a given state, all four borders – [errorBorder],
+  /// values are desired for a given state, all four borders – [errorBorder],
   /// [focusedBorder], [enabledBorder], [disabledBorder] – must be set.
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -4345,7 +4345,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     if (states.contains(MaterialState.error)) {
-      return TextStyle(color: Theme.of(context).errorColor);
+      return TextStyle(color: Theme.of(context).colorScheme.error);
     }
     if (states.contains(MaterialState.focused)) {
       return TextStyle(color: Theme.of(context).colorScheme.primary);
@@ -4369,7 +4369,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
-    return themeData.textTheme.bodySmall!.copyWith(color: themeData.errorColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
   });
 
   @override

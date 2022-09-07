@@ -280,6 +280,7 @@ class ResidentWebRunner extends ResidentRunner {
         );
         final Uri url = await device!.devFS!.create();
         if (debuggingOptions.buildInfo.isDebug) {
+          await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
             _logger!.printError('Failed to compile application.');
@@ -614,11 +615,11 @@ class ResidentWebRunner extends ResidentRunner {
         _logger!.printStatus('💪 Running with sound null safety 💪', emphasis: true);
       } else {
         _logger!.printStatus(
-          'Running with unsound null safety',
+          'Running without sound null safety ⚠️',
           emphasis: true,
         );
         _logger!.printStatus(
-          'For more information see https://dart.dev/null-safety/unsound-null-safety',
+          'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
         );
       }
     }

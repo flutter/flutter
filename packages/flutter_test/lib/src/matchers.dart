@@ -500,7 +500,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// Asserts that a [SemanticsNode] contains the specified information.
 ///
 /// If either the label, hint, value, textDirection, or rect fields are not
-/// provided, then they are not part of the comparison.  All of the boolean
+/// provided, then they are not part of the comparison. All of the boolean
 /// flag and action fields must match, and default to false.
 ///
 /// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]

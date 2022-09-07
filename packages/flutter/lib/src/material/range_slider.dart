@@ -114,7 +114,7 @@ class RangeSlider extends StatefulWidget {
   /// the slider. To know when the value starts to change, or when it is done
   /// changing, set the optional callbacks [onChangeStart] and/or [onChangeEnd].
   ///
-  /// * [values], which  determines currently selected values for this range
+  /// * [values], which determines currently selected values for this range
   ///   slider.
   /// * [onChanged], which is called while the user is selecting a new value for
   ///   the range slider.
@@ -190,7 +190,7 @@ class RangeSlider extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [onChangeStart], which  is called when the user starts  changing the
+  ///  * [onChangeStart], which is called when the user starts changing the
   ///    values.
   ///  * [onChangeEnd], which is called when the user stops changing the values.
   final ValueChanged<RangeValues>? onChanged;
@@ -655,7 +655,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           );
         },
       );
-      Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
     }
   }
 }
@@ -1088,6 +1088,13 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _state.startPositionController.removeListener(markNeedsPaint);
     _state.endPositionController.removeListener(markNeedsPaint);
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _startLabelPainter.dispose();
+    _endLabelPainter.dispose();
+    super.dispose();
   }
 
   double _getValueFromVisualPosition(double visualPosition) {

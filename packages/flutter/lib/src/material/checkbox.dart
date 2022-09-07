@@ -5,6 +5,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'checkbox_theme.dart';
+import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
@@ -383,19 +385,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     });
   }
 
-  MaterialStateProperty<Color> get _defaultFillColor {
-    final ThemeData themeData = Theme.of(context);
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return themeData.disabledColor;
-      }
-      if (states.contains(MaterialState.selected)) {
-        return themeData.colorScheme.secondary;
-      }
-      return themeData.unselectedWidgetColor;
-    });
-  }
-
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide) {
       return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
@@ -409,14 +398,16 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
+    final CheckboxThemeData defaults = Theme.of(context).useMaterial3
+      ? _CheckboxDefaultsM3(context)
+      : _CheckboxDefaultsM2(context);
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
       ?? checkboxTheme.materialTapTargetSize
-      ?? themeData.materialTapTargetSize;
+      ?? defaults.materialTapTargetSize!;
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? checkboxTheme.visualDensity
-      ?? themeData.visualDensity;
+      ?? defaults.visualDensity!;
     Size size;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -438,40 +429,48 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     // so that they can be lerped between.
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
-    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
+    final Color? activeColor = widget.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
-      ?? checkboxTheme.fillColor?.resolve(activeStates)
-      ?? _defaultFillColor.resolve(activeStates);
-    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
+      ?? checkboxTheme.fillColor?.resolve(activeStates);
+    final Color effectiveActiveColor = activeColor
+      ?? defaults.fillColor!.resolve(activeStates)!;
+    final Color? inactiveColor = widget.fillColor?.resolve(inactiveStates)
       ?? _widgetFillColor.resolve(inactiveStates)
-      ?? checkboxTheme.fillColor?.resolve(inactiveStates)
-      ?? _defaultFillColor.resolve(inactiveStates);
+      ?? checkboxTheme.fillColor?.resolve(inactiveStates);
+    final Color effectiveInactiveColor = inactiveColor
+      ?? defaults.fillColor!.resolve(inactiveStates)!;
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
       ?? checkboxTheme.overlayColor?.resolve(focusedStates)
-      ?? themeData.focusColor;
+      ?? defaults.overlayColor!.resolve(focusedStates)!;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? checkboxTheme.overlayColor?.resolve(hoveredStates)
-        ?? themeData.hoverColor;
+      ?? widget.hoverColor
+      ?? checkboxTheme.overlayColor?.resolve(hoveredStates)
+      ?? defaults.overlayColor!.resolve(hoveredStates)!;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? checkboxTheme.overlayColor?.resolve(activePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+      ?? checkboxTheme.overlayColor?.resolve(activePressedStates)
+      ?? activeColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(activePressedStates)!;
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? checkboxTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+      ?? checkboxTheme.overlayColor?.resolve(inactivePressedStates)
+      ?? inactiveColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
 
     final Color effectiveCheckColor = widget.checkColor
       ?? checkboxTheme.checkColor?.resolve(states)
-      ?? const Color(0xFFFFFFFF);
+      ?? defaults.checkColor!.resolve(states)!;
+
+    final double effectiveSplashRadius = widget.splashRadius
+      ?? checkboxTheme.splashRadius
+      ?? defaults.splashRadius!;
 
     return Semantics(
       checked: widget.value ?? false,
@@ -489,7 +488,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..reactionColor = effectiveActivePressedOverlayColor
           ..hoverColor = effectiveHoverOverlayColor
           ..focusColor = effectiveFocusOverlayColor
-          ..splashRadius = widget.splashRadius ?? checkboxTheme.splashRadius ?? kRadialReactionRadius
+          ..splashRadius = effectiveSplashRadius
           ..downPosition = downPosition
           ..isFocused = states.contains(MaterialState.focused)
           ..isHovered = states.contains(MaterialState.hovered)
@@ -683,3 +682,172 @@ class _CheckboxPainter extends ToggleablePainter {
     }
   }
 }
+
+// Hand coded defaults based on Material Design 2.
+class _CheckboxDefaultsM2 extends CheckboxThemeData {
+  _CheckboxDefaultsM2(BuildContext context)
+    : _theme = Theme.of(context),
+      _colors = Theme.of(context).colorScheme;
+
+  final ThemeData _theme;
+  final ColorScheme _colors;
+
+  @override
+  MaterialStateProperty<Color> get fillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _theme.disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _colors.secondary;
+      }
+      return _theme.unselectedWidgetColor;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get checkColor {
+    return MaterialStateProperty.all<Color>(const Color(0xFFFFFFFF));
+  }
+
+  @override
+  MaterialStateProperty<Color?> get overlayColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _theme.hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _theme.focusColor;
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  double get splashRadius => kRadialReactionRadius;
+
+  @override
+  MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
+
+  @override
+  VisualDensity get visualDensity => _theme.visualDensity;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Checkbox
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_101
+
+class _CheckboxDefaultsM3 extends CheckboxThemeData {
+  _CheckboxDefaultsM3(BuildContext context)
+    : _theme = Theme.of(context),
+      _colors = Theme.of(context).colorScheme;
+
+  final ThemeData _theme;
+  final ColorScheme _colors;
+
+  @override
+  MaterialStateProperty<Color> get fillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return _colors.onSurface.withOpacity(0.38);
+        }
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.primary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.primary;
+        }
+        return _colors.primary;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface;
+      }
+      return _colors.onSurface;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get checkColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return _colors.surface;
+        }
+        return Colors.transparent; // No icons available when the checkbox is unselected.
+      }
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.onPrimary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.onPrimary;
+        }
+        return _colors.onPrimary;
+      }
+      return Colors.transparent; // No icons available when the checkbox is unselected.
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get overlayColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurface.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.primary.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.primary.withOpacity(0.12);
+        }
+        return Colors.transparent;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  double get splashRadius => 40.0 / 2;
+
+  @override
+  MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
+
+  @override
+  VisualDensity get visualDensity => _theme.visualDensity;
+}
+
+// END GENERATED TOKEN PROPERTIES - Checkbox

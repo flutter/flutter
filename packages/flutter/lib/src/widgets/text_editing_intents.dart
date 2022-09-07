@@ -99,7 +99,7 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   ///
   /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
   /// is received and the selection is already at the beginning/end of the line,
-  /// then the selection will be moved to the next/previous line.  If false, the
+  /// then the selection will be moved to the next/previous line. If false, the
   /// selection will remain at the wordwrap.
   final bool continuesAtWrap;
 }

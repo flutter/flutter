@@ -36,17 +36,30 @@ static const CGFloat kStandardTimeOut = 60.0;
   if ([appIcon waitForExistenceWithTimeout:kStandardTimeOut]) {
     NSLog(@"Deleting previously installed app.");
 
-    // Make icons wiggle
-    [appIcon pressForDuration:3];
+    // It's possible that app icon is not hittable yet.
+    NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
+    [self expectationForPredicate:hittable evaluatedWithObject:appIcon handler:nil];
+    [self waitForExpectationsWithTimeout:kStandardTimeOut handler:nil];
 
-    // Tap the "x" button
-    [appIcon.buttons[@"DeleteButton"] tap];
+    // Pressing for 2 seconds will bring up context menu.
+    // Pressing for 3 seconds will dismiss the context menu and make icons wiggle.
+    [appIcon pressForDuration:2];
+
+    // The "Remove App" button in context menu.
+    XCUIElement *contextMenuRemoveButton = springboard.buttons[@"Remove App"];
+    XCTAssert([contextMenuRemoveButton waitForExistenceWithTimeout:kStandardTimeOut], @"The context menu remove app button must appear.");
+    [contextMenuRemoveButton tap];
+
     // Tap the delete confirmation
-    [springboard.alerts.buttons[@"Delete App"] tap];
+    XCUIElement *deleteConfirmationButton = springboard.alerts.buttons[@"Delete App"];
+    XCTAssert([deleteConfirmationButton waitForExistenceWithTimeout:kStandardTimeOut], @"The first delete confirmation button must appear.");
+    [deleteConfirmationButton tap];
+
     // Tap the second delete confirmation
-    [springboard.alerts.buttons[@"Delete"] tap];
-    // Press home button to stop wiggling
-    [XCUIDevice.sharedDevice pressButton:XCUIDeviceButtonHome];
+    XCUIElement *secondDeleteConfirmationButton = springboard.alerts.buttons[@"Delete"];
+    XCTAssert([secondDeleteConfirmationButton waitForExistenceWithTimeout:kStandardTimeOut], @"The second delete confirmation button must appear.");
+    [secondDeleteConfirmationButton tap];
+
     [NSThread sleepForTimeInterval:3];
   } else {
     NSLog(@"No previously installed app found.");

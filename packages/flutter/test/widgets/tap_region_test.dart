@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('TapRegionSurface detects outside taps', (WidgetTester tester) async {
-    final Set<String> clickedOutside = <String>{};
+    final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -22,21 +22,21 @@ void main() {
                   const Text('Outside'),
                   TapRegion(
                     onTapOutside: (PointerEvent event) {
-                      clickedOutside.add('No Group');
+                      tappedOutside.add('No Group');
                     },
                     child: const Text('No Group'),
                   ),
                   TapRegion(
                     groupId: 1,
                     onTapOutside: (PointerEvent event) {
-                      clickedOutside.add('Group 1 A');
+                      tappedOutside.add('Group 1 A');
                     },
                     child: const Text('Group 1 A'),
                   ),
                   TapRegion(
                     groupId: 1,
                     onTapOutside: (PointerEvent event) {
-                      clickedOutside.add('Group 1 B');
+                      tappedOutside.add('Group 1 B');
                     },
                     child: const Text('Group 1 B'),
                   ),
@@ -59,48 +59,48 @@ void main() {
       await gesture.removePointer();
     }
 
-    expect(clickedOutside, isEmpty);
+    expect(tappedOutside, isEmpty);
 
     await click(find.text('No Group'));
     expect(
-        clickedOutside,
+        tappedOutside,
         unorderedEquals(<String>{
           'Group 1 A',
           'Group 1 B',
         }));
-    clickedOutside.clear();
+    tappedOutside.clear();
 
     await click(find.text('Group 1 A'));
     expect(
-        clickedOutside,
+        tappedOutside,
         equals(<String>{
           'No Group',
         }));
-    clickedOutside.clear();
+    tappedOutside.clear();
 
     await click(find.text('Group 1 B'));
     expect(
-        clickedOutside,
+        tappedOutside,
         equals(<String>{
           'No Group',
         }));
-    clickedOutside.clear();
+    tappedOutside.clear();
 
     await click(find.text('Outside'));
     expect(
-        clickedOutside,
+        tappedOutside,
         unorderedEquals(<String>{
           'No Group',
           'Group 1 A',
           'Group 1 B',
         }));
-    clickedOutside.clear();
+    tappedOutside.clear();
 
     await click(find.text('Outside Surface'));
-    expect(clickedOutside, isEmpty);
+    expect(tappedOutside, isEmpty);
   });
   testWidgets('TapRegionSurface detects inside taps', (WidgetTester tester) async {
-    final Set<String> clickedInside = <String>{};
+    final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -113,21 +113,21 @@ void main() {
                   const Text('Outside'),
                   TapRegion(
                     onTapInside: (PointerEvent event) {
-                      clickedInside.add('No Group');
+                      tappedInside.add('No Group');
                     },
                     child: const Text('No Group'),
                   ),
                   TapRegion(
                     groupId: 1,
                     onTapInside: (PointerEvent event) {
-                      clickedInside.add('Group 1 A');
+                      tappedInside.add('Group 1 A');
                     },
                     child: const Text('Group 1 A'),
                   ),
                   TapRegion(
                     groupId: 1,
                     onTapInside: (PointerEvent event) {
-                      clickedInside.add('Group 1 B');
+                      tappedInside.add('Group 1 B');
                     },
                     child: const Text('Group 1 B'),
                   ),
@@ -150,39 +150,139 @@ void main() {
       await gesture.removePointer();
     }
 
-    expect(clickedInside, isEmpty);
+    expect(tappedInside, isEmpty);
 
     await click(find.text('No Group'));
     expect(
-        clickedInside,
+        tappedInside,
         unorderedEquals(<String>{
           'No Group',
         }));
-    clickedInside.clear();
+    tappedInside.clear();
 
     await click(find.text('Group 1 A'));
     expect(
-        clickedInside,
+        tappedInside,
         equals(<String>{
           'Group 1 A',
           'Group 1 B',
         }));
-    clickedInside.clear();
+    tappedInside.clear();
 
     await click(find.text('Group 1 B'));
     expect(
-        clickedInside,
+        tappedInside,
         equals(<String>{
           'Group 1 A',
           'Group 1 B',
         }));
-    clickedInside.clear();
+    tappedInside.clear();
 
     await click(find.text('Outside'));
-    expect(clickedInside, isEmpty);
-    clickedInside.clear();
+    expect(tappedInside, isEmpty);
+    tappedInside.clear();
 
     await click(find.text('Outside Surface'));
-    expect(clickedInside, isEmpty);
+    expect(tappedInside, isEmpty);
+  });
+  testWidgets('Setting the group updates the registration', (WidgetTester tester) async {
+    final Set<String> tappedOutside = <String>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TapRegionSurface(
+          child: Row(
+            children: <Widget>[
+              const Text('Outside'),
+              TapRegion(
+                groupId: 1,
+                onTapOutside: (PointerEvent event) {
+                  tappedOutside.add('Group 1 A');
+                },
+                child: const Text('Group 1 A'),
+              ),
+              TapRegion(
+                groupId: 1,
+                onTapOutside: (PointerEvent event) {
+                  tappedOutside.add('Group 1 B');
+                },
+                child: const Text('Group 1 B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedOutside, isEmpty);
+
+    await click(find.text('Group 1 A'));
+    expect(tappedOutside, isEmpty);
+    await click(find.text('Group 1 B'));
+    expect(tappedOutside, isEmpty);
+    await click(find.text('Outside'));
+    expect(
+        tappedOutside,
+        equals(<String>[
+          'Group 1 A',
+          'Group 1 B',
+        ]));
+    tappedOutside.clear();
+
+    // Now change out the groups.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TapRegionSurface(
+          child: Row(
+            children: <Widget>[
+              const Text('Outside'),
+              TapRegion(
+                groupId: 1,
+                onTapOutside: (PointerEvent event) {
+                  tappedOutside.add('Group 1 A');
+                },
+                child: const Text('Group 1 A'),
+              ),
+              TapRegion(
+                groupId: 2,
+                onTapOutside: (PointerEvent event) {
+                  tappedOutside.add('Group 2 A');
+                },
+                child: const Text('Group 2 A'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await click(find.text('Group 1 A'));
+    expect(tappedOutside, equals(<String>['Group 2 A']));
+    tappedOutside.clear();
+
+    await click(find.text('Group 2 A'));
+    expect(tappedOutside, equals(<String>['Group 1 A']));
+    tappedOutside.clear();
+
+    await click(find.text('Outside'));
+    expect(
+        tappedOutside,
+        equals(<String>[
+          'Group 1 A',
+          'Group 2 A',
+        ]));
+    tappedOutside.clear();
   });
 }
