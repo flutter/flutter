@@ -229,7 +229,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLSkia::AcquireFrame(
         nullptr, std::move(framebuffer_info),
         [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
           return true;
-        });
+        },
+        size);
   }
 
   const auto root_surface_transformation = GetRootTransformation();
@@ -253,7 +254,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLSkia::AcquireFrame(
     framebuffer_info.existing_damage = existing_damage_;
   }
   return std::make_unique<SurfaceFrame>(surface, std::move(framebuffer_info),
-                                        submit_callback,
+                                        submit_callback, size,
                                         std::move(context_switch));
 }
 

@@ -193,7 +193,8 @@ ShellTestPlatformViewVulkan::OffScreenSurface::AcquireFrame(
   framebuffer_info.supports_readback = true;
 
   return std::make_unique<SurfaceFrame>(
-      std::move(surface), std::move(framebuffer_info), std::move(callback));
+      std::move(surface), std::move(framebuffer_info), std::move(callback),
+      /*frame_size=*/SkISize::Make(800, 600));
 }
 
 GrDirectContext* ShellTestPlatformViewVulkan::OffScreenSurface::GetContext() {
