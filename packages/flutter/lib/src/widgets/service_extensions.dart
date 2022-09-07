@@ -11,7 +11,6 @@
 /// The String value for each of these extension names should be accessed by
 /// calling the `.name` property on the enum value.
 enum WidgetsServiceExtensions {
-
   /// Name of service extension that, when called, will output a string
   /// representation of this app's widget tree to console.
   ///
@@ -20,7 +19,6 @@ enum WidgetsServiceExtensions {
   /// * [BindingBase.initServiceExtensions], where the service extension is
   ///   registered.
   debugDumpApp,
-
 
   /// Name of service extension that, when called, will overlay a performance
   /// graph on top of this app.
