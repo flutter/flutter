@@ -16,7 +16,7 @@ enum WidgetsServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   debugDumpApp,
 
@@ -27,7 +27,7 @@ enum WidgetsServiceExtensions {
   ///
   /// * [WidgetsApp.showPerformanceOverlayOverride], which is the flag
   ///   that this service extension exposes.
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   showPerformanceOverlay,
 
@@ -36,7 +36,7 @@ enum WidgetsServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   didSendFirstFrameEvent,
 
@@ -46,7 +46,7 @@ enum WidgetsServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   didSendFirstFrameRasterizedEvent,
 
@@ -55,7 +55,7 @@ enum WidgetsServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   fastReassemble,
 
@@ -67,7 +67,7 @@ enum WidgetsServiceExtensions {
   ///
   /// * [debugProfileBuildsEnabled], which is the flag that this service extension
   ///   exposes.
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   profileWidgetBuilds,
 
@@ -78,7 +78,7 @@ enum WidgetsServiceExtensions {
   /// See also:
   /// * [debugProfileBuildsEnabledUserWidgets], which is the flag that this
   ///   service extension exposes.
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   profileUserWidgetBuilds,
 
@@ -90,7 +90,7 @@ enum WidgetsServiceExtensions {
   ///
   /// * [WidgetsApp.debugAllowBannerOverride], which is the flag that this service
   ///   extension exposes.
-  /// * [BindingBase.initServiceExtensions], where the service extension is
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   debugAllowBanner,
 }
