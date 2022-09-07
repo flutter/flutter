@@ -1752,7 +1752,7 @@ Future<void> _runDartTest(String workingDirectory, {
   }
 
   const LocalFileSystem fileSystem = LocalFileSystem();
-  final File metricFile = fileSystem.file(path.join(flutterRoot, '$platformName.json'));
+  final File metricFile = fileSystem.file(path.join(flutterRoot, 'metrics.json'));
   final List<String> args = <String>[
     'run',
     'test',
