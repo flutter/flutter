@@ -120,7 +120,7 @@ abstract class TextSelectionControls {
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     // TODO(chunhtai): Change to ValueListenable<ClipboardStatus>? once
-    // mirgration is done. https://github.com/flutter/flutter/issues/99360
+    // migration is done. https://github.com/flutter/flutter/issues/99360
     ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   );
@@ -793,16 +793,16 @@ class SelectionOverlay {
   /// a magnifierBuilder will not be provided, or the magnifierBuilder will return null
   /// on platforms not mobile.
   ///
-  /// This is NOT the souce of truth for if the magnifier is up or not,
+  /// This is NOT the source of truth for if the magnifier is up or not,
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
-  void showMagnifier(MagnifierOverlayInfoBearer initalInfoBearer) {
+  void showMagnifier(MagnifierOverlayInfoBearer initialInfoBearer) {
     if (_toolbar != null) {
       hideToolbar();
     }
 
-    // Start from empty, so we don't utilize any rememnant values.
-    _magnifierOverlayInfoBearer.value = initalInfoBearer;
+    // Start from empty, so we don't utilize any remnant values.
+    _magnifierOverlayInfoBearer.value = initialInfoBearer;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
@@ -1062,8 +1062,7 @@ class SelectionOverlay {
       OverlayEntry(builder: _buildEndHandle),
     ];
 
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
-      .insertAll(_handles!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -1085,7 +1084,7 @@ class SelectionOverlay {
       return;
     }
     _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar!);
   }
 
   bool _buildScheduled = false;
@@ -1156,7 +1155,7 @@ class SelectionOverlay {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null) {
-      handle = Container();
+      handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
@@ -1183,7 +1182,7 @@ class SelectionOverlay {
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
       // Hide the second handle when collapsed.
-      handle = Container();
+      handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
@@ -1207,7 +1206,7 @@ class SelectionOverlay {
 
   Widget _buildToolbar(BuildContext context) {
     if (selectionControls == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
 
     final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;

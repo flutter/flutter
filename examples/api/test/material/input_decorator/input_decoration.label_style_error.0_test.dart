@@ -7,13 +7,13 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.la
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InputDecorator label uses errorColor', (WidgetTester tester) async {
+  testWidgets('InputDecorator label uses error color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );
     final Theme theme = tester.firstWidget(find.byType(Theme));
 
     final AnimatedDefaultTextStyle label = tester.firstWidget(find.ancestor(of: find.text('Name'), matching: find.byType(AnimatedDefaultTextStyle)));
-    expect(label.style.color, theme.data.errorColor);
+    expect(label.style.color, theme.data.colorScheme.error);
   });
 }

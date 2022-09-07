@@ -145,12 +145,16 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// parent widgets that also support this [Intent].
   ///
   /// {@tool dartpad}
-  /// This sample implements a custom text input field that handles the
-  /// [DeleteCharacterIntent] intent, as well as a US telephone number input
-  /// widget that consists of multiple text fields for area code, prefix and line
-  /// number. When the backspace key is pressed, the phone number input widget
-  /// sends the focus to the preceding text field when the currently focused
-  /// field becomes empty.
+  /// This sample shows how to implement a rudimentary `CopyableText` widget
+  /// that responds to Ctrl-C by copying its own content to the clipboard.
+  ///
+  /// if `CopyableText` is to be provided in a package, developers using the
+  /// widget may want to change how copying is handled. As the author of the
+  /// package, you can enable that by making the corresponding [Action]
+  /// overridable. In the second part of the code sample, three `CopyableText`
+  /// widgets are used to build a verification code widget which overrides the
+  /// "copy" action by copying the combined numbers from all three `CopyableText`
+  /// widgets.
   ///
   /// ** See code in examples/api/lib/widgets/actions/action.action_overridable.0.dart **
   /// {@end-tool}

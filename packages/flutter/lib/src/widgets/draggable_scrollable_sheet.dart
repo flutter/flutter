@@ -424,8 +424,8 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
   /// Creates a notification that the extent of a [DraggableScrollableSheet] has
   /// changed.
   ///
-  /// All parameters are required. The [minExtent] must be >= 0.  The [maxExtent]
-  /// must be <= 1.0.  The [extent] must be between [minExtent] and [maxExtent].
+  /// All parameters are required. The [minExtent] must be >= 0. The [maxExtent]
+  /// must be <= 1.0. The [extent] must be between [minExtent] and [maxExtent].
   DraggableScrollableNotification({
     required this.extent,
     required this.minExtent,

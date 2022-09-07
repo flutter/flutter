@@ -127,6 +127,7 @@ Future<void> main(List<String> args) async {
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
+    shutdownHooks: globals.shutdownHooks,
   );
 }
 
@@ -143,7 +144,7 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
     artifacts: globals.artifacts!,
     // new ProjectValidators should be added here for the --suggestions to run
-    allProjectValidators: <ProjectValidator>[],
+    allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
@@ -178,6 +179,8 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
     logger: globals.logger,
+    artifacts: globals.artifacts!,
+    processManager: globals.processManager,
   ),
   InstallCommand(),
   LogsCommand(),

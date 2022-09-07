@@ -23,30 +23,39 @@ String _testOutputDirectory(String testDirectory) {
   return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
 }
 
-TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createComplexLayoutScrollPerfTest({
+  bool measureCpuGpu = true,
+  bool badScroll = false,
+  bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-    'test_driver/scroll_perf.dart',
+    badScroll
+      ? 'test_driver/scroll_perf_bad.dart'
+      : 'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
     measureCpuGpu: measureCpuGpu,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
-TaskFunction createTilesScrollPerfTest() {
+TaskFunction createTilesScrollPerfTest({bool enableImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'tiles_scroll_perf',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfTest() {
+TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -108,22 +117,6 @@ TaskFunction createCubicBezierPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createCubicBezierPerfSkSlWarmupE2ETest() {
-  return PerfTestWithSkSL.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/cubic_bezier_perf_e2e.dart',
-  ).run;
-}
-
-TaskFunction createCubicBezierPerfSkSLWarmupTest() {
-  return PerfTestWithSkSL(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/run_app.dart',
-    'cubic_bezier_perf',
-    testDriver: 'test_driver/cubic_bezier_perf_test.dart',
-  ).run;
-}
-
 TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
@@ -132,15 +125,10 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
   ).run;
 }
 
-TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
-  return PerfTestWithSkSL.e2e(
-    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
-    'test_driver/transitions_perf_e2e.dart',
-    testDriver: 'test_driver/transitions_perf_e2e_test.dart',
-  ).run;
-}
-
-TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createBackdropFilterPerfTest({
+    bool measureCpuGpu = true,
+    bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -148,6 +136,7 @@ TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
     saveTraceFile: true,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -180,7 +169,10 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createSimpleAnimationPerfTest({
+  bool measureCpuGpu = true,
+  bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -188,6 +180,7 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/simple_animation_perf_test.dart',
     saveTraceFile: true,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -358,10 +351,13 @@ TaskFunction createFullscreenTextfieldPerfTest() {
   ).run;
 }
 
-TaskFunction createFullscreenTextfieldPerfE2ETest() {
+TaskFunction createFullscreenTextfieldPerfE2ETest({
+  bool enableImpeller = false,
+}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/fullscreen_textfield_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -382,10 +378,11 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
-TaskFunction createColorFilterAndFadePerfE2ETest() {
+TaskFunction createColorFilterAndFadePerfE2ETest({bool enableImpeller = false}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_and_fade_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -427,13 +424,16 @@ TaskFunction createFadingChildAnimationPerfTest() {
   ).run;
 }
 
-TaskFunction createImageFilteredTransformAnimationPerfTest() {
+TaskFunction createImageFilteredTransformAnimationPerfTest({
+  bool enableImpeller = false,
+}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
     saveTraceFile: true,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -617,10 +617,13 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createAnimatedComplexOpacityPerfE2ETest() {
+TaskFunction createAnimatedComplexOpacityPerfE2ETest({
+  bool enableImpeller = false,
+}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/animated_complex_opacity_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -688,18 +691,19 @@ class StartupTest {
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
+        case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+          break;
         case DeviceOperatingSystem.ios:
+        case DeviceOperatingSystem.macos:
           await flutter('build', options: <String>[
-            'ios',
+            if (deviceOperatingSystem == DeviceOperatingSystem.ios) 'ios' else 'macos',
              '-v',
             '--profile',
             '--target=$target',
           ]);
-          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
-          break;
-        case DeviceOperatingSystem.fake:
-        case DeviceOperatingSystem.fuchsia:
-        case DeviceOperatingSystem.macos:
+          final String buildRoot = path.join(testDirectory, 'build');
+          applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
           break;
         case DeviceOperatingSystem.windows:
           await flutter('build', options: <String>[
@@ -829,7 +833,7 @@ class DevtoolsStartupTest {
              '-v',
             '--profile',
           ]);
-          applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
+          applicationBinaryPath = _findDarwinAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
@@ -1400,28 +1404,42 @@ class CompileTest {
 
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
-        options.insert(0, 'ios');
+      case DeviceOperatingSystem.macos:
+        unawaited(stderr.flush());
+        late final String deviceId;
+        if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+          deviceId = 'ios';
+        } else if (deviceOperatingSystem == DeviceOperatingSystem.macos) {
+          deviceId = 'macos';
+        } else {
+          throw Exception('Attempted to run darwin compile workflow with $deviceOperatingSystem');
+        }
+
+        options.insert(0, deviceId);
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
-        final Directory? appBundle = appBuildDirectory
-            .listSync()
-            .whereType<Directory?>()
-            .singleWhere((Directory? directory) =>
-              directory != null && path.extension(directory.path) == '.app',
-              orElse: () => null);
-        if (appBundle == null) {
-          throw 'Failed to find app bundle in ${appBuildDirectory.path}';
+        final Directory buildDirectory = dir(path.join(
+          cwd,
+          'build',
+        ));
+        final String? appPath =
+            _findDarwinAppInBuildDirectory(buildDirectory.path);
+        if (appPath == null) {
+          throw 'Failed to find app bundle in ${buildDirectory.path}';
         }
-        final String appPath =  appBundle.path;
-        // IPAs are created manually, https://flutter.dev/ios-release/
-        await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
-        releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
+        // Validate changes in Dart snapshot format and data layout do not
+        // change compression size. This also simulates the size of an IPA on iOS.
+        await exec('tar', <String>['-zcf', 'build/app.tar.gz', appPath]);
+        releaseSizeInBytes = await file('$cwd/build/app.tar.gz').length();
         if (reportPackageContentSizes) {
-          metrics.addAll(await getSizesFromIosApp(appPath));
+          final Map<String, Object> sizeMetrics = await getSizesFromDarwinApp(
+            appPath: appPath,
+            operatingSystem: deviceOperatingSystem,
+          );
+          metrics.addAll(sizeMetrics);
         }
         break;
       case DeviceOperatingSystem.android:
@@ -1459,8 +1477,6 @@ class CompileTest {
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
-      case DeviceOperatingSystem.macos:
-        throw Exception('Unsupported option for macOS devices');
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -1520,7 +1536,9 @@ class CompileTest {
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.macos:
-        throw Exception('Unsupported option for Fuchsia devices');
+        unawaited(stderr.flush());
+        options.insert(0, 'macos');
+        break;
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -1535,19 +1553,52 @@ class CompileTest {
     };
   }
 
-  static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
-    // Thin the binary to only contain one architecture.
-    final String xcodeBackend = path.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
-    await exec(xcodeBackend, <String>['thin'], environment: <String, String>{
-      'ARCHS': 'arm64',
-      'WRAPPER_NAME': path.basename(appPath),
-      'TARGET_BUILD_DIR': path.dirname(appPath),
-    });
+  static Future<Map<String, Object>> getSizesFromDarwinApp({
+    required String appPath,
+    required DeviceOperatingSystem operatingSystem,
+  }) async {
+    late final File flutterFramework;
+    late final String frameworkDirectory;
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+        frameworkDirectory = path.join(
+          appPath,
+          'Frameworks',
+        );
+        flutterFramework = File(path.join(
+          frameworkDirectory,
+          'Flutter.framework',
+          'Flutter',
+        ));
+        break;
+      case DeviceOperatingSystem.macos:
+        frameworkDirectory = path.join(
+          appPath,
+          'Contents',
+          'Frameworks',
+        );
+        flutterFramework = File(path.join(
+          frameworkDirectory,
+          'FlutterMacOS.framework',
+          'FlutterMacOS',
+        )); // https://github.com/flutter/flutter/issues/70413
+        break;
+      case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
+      case DeviceOperatingSystem.androidArm64:
+      case DeviceOperatingSystem.fake:
+      case DeviceOperatingSystem.fuchsia:
+      case DeviceOperatingSystem.windows:
+        throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
+    }
 
-    final File appFramework = File(path.join(appPath, 'Frameworks', 'App.framework', 'App'));
-    final File flutterFramework = File(path.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
+    final File appFramework = File(path.join(
+      frameworkDirectory,
+      'App.framework',
+      'App',
+    ));
 
-    return <String, dynamic>{
+    return <String, Object>{
       'app_framework_uncompressed_bytes': await appFramework.length(),
       'flutter_framework_uncompressed_bytes': await flutterFramework.length(),
     };
@@ -1908,8 +1959,9 @@ Future<File> waitForFile(String path) async {
   throw StateError('Did not find vmservice out file after 1 hour');
 }
 
-String? _findIosAppInBuildDirectory(String searchDirectory) {
-  for (final FileSystemEntity entity in Directory(searchDirectory).listSync()) {
+String? _findDarwinAppInBuildDirectory(String searchDirectory) {
+  for (final FileSystemEntity entity in Directory(searchDirectory)
+    .listSync(recursive: true)) {
     if (entity.path.endsWith('.app')) {
       return entity.path;
     }

@@ -134,20 +134,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   bool get opaque;
 
-  /// {@template flutter.widgets.TransitionRoute.preferRasterization}
-  /// Whether the route transition will prefer to animate a rasterized
-  /// snapshot of the entering/exiting routes.
+  /// {@template flutter.widgets.TransitionRoute.allowSnapshotting}
+  /// Whether the route transition will prefer to animate a snapshot of the
+  /// entering/exiting routes.
   ///
   /// When this value is true, certain route transitions (such as the Android
-  /// zoom page transition) will rasterize the entering and exiting routes.
-  /// These textures are then animated in place of the underlying widgets to
+  /// zoom page transition) will snapshot the entering and exiting routes.
+  /// These snapshots are then animated in place of the underlying widgets to
   /// improve performance of the transition.
   ///
   /// Generally this means that animations that occur on the entering/exiting
   /// route while the route animation plays may appear frozen - unless they
   /// are a hero animation or something that is drawn in a separate overlay.
   /// {@endtemplate}
-  bool get preferRasterization => true;
+  bool get allowSnapshotting => true;
 
   // This ensures that if we got to the dismissed state while still current,
   // we will still be disposed when we are eventually popped.
@@ -419,7 +419,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// If true, and `nextRoute.canTransitionFrom()` is true, then the
   /// [ModalRoute.buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
-  /// when [nextRoute] is pushed on top of this one.  Similarly, if
+  /// when [nextRoute] is pushed on top of this one. Similarly, if
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
@@ -819,7 +819,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     ];
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -828,7 +828,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
     if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -863,7 +863,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
     if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
     setState(fn);
   }
@@ -1213,7 +1213,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   TickerFuture didPush() {
     if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
-      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
+      navigator!.focusNode.enclosingScope?.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     return super.didPush();
   }
@@ -1221,7 +1221,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didAdd() {
     if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
-      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
+      navigator!.focusNode.enclosingScope?.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     super.didAdd();
   }
@@ -1319,7 +1319,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
   /// ```
   ///
   /// {@end-tool}
@@ -1749,7 +1749,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   bool get maintainState => true;
 
   @override
-  bool get preferRasterization => false;
+  bool get allowSnapshotting => false;
 }
 
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the

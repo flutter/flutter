@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -28,21 +26,21 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
-        XcodeProjectBuildContext buildContext,
+        XcodeProjectBuildContext? buildContext,
         Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
       'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
       'WRAPPER_NAME': 'Runner.app',
-      if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam,
+      if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam!,
     };
   }
 
   /// The value of 'PRODUCT_BUNDLE_IDENTIFIER'.
-  final String productBundleIdentifier;
+  final String? productBundleIdentifier;
 
-  final String developmentTeam;
+  final String? developmentTeam;
 }
 
 final Platform macosPlatform = FakePlatform(
@@ -59,8 +57,8 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  TestUsage usage;
+  late FileSystem fileSystem;
+  late TestUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -90,7 +88,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpRsyncCommand({void Function() onRun}) {
+  FakeCommand setUpRsyncCommand({void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'rsync',
@@ -104,7 +102,7 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function() onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -125,10 +123,10 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler({
     bool verbose = false,
     bool simulator = false,
-    String deviceId,
+    String? deviceId,
     int exitCode = 0,
-    String stdout,
-    void Function() onRun,
+    String? stdout,
+    void Function()? onRun,
   }) {
     return FakeCommand(
       command: <String>[

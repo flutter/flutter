@@ -42,6 +42,7 @@ import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
+import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
 
 abstract class DoctorValidatorsProvider {
@@ -128,6 +129,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
+      ),
+      if (platform.isWindows) WindowsVersionValidator(
+        processManager: globals.processManager,
       ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),

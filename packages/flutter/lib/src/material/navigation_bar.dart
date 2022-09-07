@@ -268,7 +268,7 @@ class NavigationDestination extends StatelessWidget {
   ///
   /// The accompanying [Text] widget will use
   /// [NavigationBarThemeData.labelTextStyle]. If this are null, the default
-  /// text style would use [TextTheme.overline] with [ColorScheme.onSurface].
+  /// text style would use [TextTheme.labelSmall] with [ColorScheme.onSurface].
   final String label;
 
   /// The text to display in the tooltip for this [NavigationDestination], when
@@ -382,7 +382,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// Builds the label for an destination in a [NavigationBar].
   ///
   /// To animate between unselected and selected, build the icon based on
-  /// [_NavigationDestinationInfo.selectedAnimation].  When the animation is
+  /// [_NavigationDestinationInfo.selectedAnimation]. When the animation is
   /// 0, the destination is unselected, when the animation is 1, the destination
   /// is selected.
   ///
@@ -1224,7 +1224,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 
   @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
+  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(_theme.textTheme.labelSmall!.copyWith(color: _colors.onSurface));
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - NavigationBar

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -18,12 +16,12 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  Platform platform;
-  Terminal terminal;
-  ProcessManager processManager;
-  Directory appDir;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late Platform platform;
+  late Terminal terminal;
+  late ProcessManager processManager;
+  late Directory appDir;
 
   setUp(() {
     fileSystem = globals.localFileSystem;
