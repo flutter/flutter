@@ -13,7 +13,7 @@ class SwitchTemplate extends TokenTemplate {
   String generate() => '''
 class _${blockName}DefaultsM3 extends SwitchThemeData {
   _${blockName}DefaultsM3(BuildContext context)
-      : _colors = Theme.of(context).colorScheme;
+    : _colors = Theme.of(context).colorScheme;
 
   final ColorScheme _colors;
 
@@ -188,7 +188,7 @@ class _SwitchConfigM3 with _SwitchConfig {
   double get trackHeight => ${tokens['md.comp.switch.track.height']};
 
   @override
-    MaterialStateProperty<Color?> get trackOutlineColor {
+  MaterialStateProperty<Color?> get trackOutlineColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return null;

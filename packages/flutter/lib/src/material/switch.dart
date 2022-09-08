@@ -740,24 +740,24 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
 
     final Color? activeThumbColor = widget.thumbColor?.resolve(activeStates)
-        ?? _widgetThumbColor.resolve(activeStates)
-        ?? switchTheme.thumbColor?.resolve(activeStates);
+      ?? _widgetThumbColor.resolve(activeStates)
+      ?? switchTheme.thumbColor?.resolve(activeStates);
     final Color effectiveActiveThumbColor = activeThumbColor
-        ?? defaults.thumbColor!.resolve(activeStates)!;
+      ?? defaults.thumbColor!.resolve(activeStates)!;
     final Color? inactiveThumbColor = widget.thumbColor?.resolve(inactiveStates)
-        ?? _widgetThumbColor.resolve(inactiveStates)
-        ?? switchTheme.thumbColor?.resolve(inactiveStates);
+      ?? _widgetThumbColor.resolve(inactiveStates)
+      ?? switchTheme.thumbColor?.resolve(inactiveStates);
     final Color effectiveInactiveThumbColor = inactiveThumbColor
-        ?? defaults.thumbColor!.resolve(inactiveStates)!;
+      ?? defaults.thumbColor!.resolve(inactiveStates)!;
     final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
-        ?? _widgetTrackColor.resolve(activeStates)
-        ?? switchTheme.trackColor?.resolve(activeStates)
-        ?? _widgetThumbColor.resolve(activeStates)?.withAlpha(0x80)
-        ?? defaults.trackColor!.resolve(activeStates)!;
+      ?? _widgetTrackColor.resolve(activeStates)
+      ?? switchTheme.trackColor?.resolve(activeStates)
+      ?? _widgetThumbColor.resolve(activeStates)?.withAlpha(0x80)
+      ?? defaults.trackColor!.resolve(activeStates)!;
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
-        ?? _widgetTrackColor.resolve(inactiveStates)
-        ?? switchTheme.trackColor?.resolve(inactiveStates)
-        ?? defaults.trackColor!.resolve(inactiveStates)!;
+      ?? _widgetTrackColor.resolve(inactiveStates)
+      ?? switchTheme.trackColor?.resolve(inactiveStates)
+      ?? defaults.trackColor!.resolve(inactiveStates)!;
     final Color? effectiveInactiveTrackOutlineColor = switchConfig.trackOutlineColor?.resolve(inactiveStates);
 
     final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates)
@@ -770,32 +770,32 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
-        ?? widget.focusColor
-        ?? switchTheme.overlayColor?.resolve(focusedStates)
-        ?? defaults.overlayColor!.resolve(focusedStates)!;
+      ?? widget.focusColor
+      ?? switchTheme.overlayColor?.resolve(focusedStates)
+      ?? defaults.overlayColor!.resolve(focusedStates)!;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? switchTheme.overlayColor?.resolve(hoveredStates)
-        ?? defaults.overlayColor!.resolve(hoveredStates)!;
+      ?? widget.hoverColor
+      ?? switchTheme.overlayColor?.resolve(hoveredStates)
+      ?? defaults.overlayColor!.resolve(hoveredStates)!;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? switchTheme.overlayColor?.resolve(activePressedStates)
-        ?? activeThumbColor?.withAlpha(kRadialReactionAlpha)
-        ?? defaults.overlayColor!.resolve(activePressedStates)!;
+      ?? switchTheme.overlayColor?.resolve(activePressedStates)
+      ?? activeThumbColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(activePressedStates)!;
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? inactiveThumbColor?.withAlpha(kRadialReactionAlpha)
-        ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
+      ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
+      ?? inactiveThumbColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-          ?? switchTheme.mouseCursor?.resolve(states)
-          ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
+        ?? switchTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
     });
 
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? switchConfig.activeThumbRadius : switchConfig.thumbRadiusWithIcon;
@@ -1155,11 +1155,11 @@ class _SwitchPainter extends ToggleablePainter {
     }
 
     final double thumbRadius = isPressed
-        ? pressedThumbRadius
-        : lerpDouble(inactiveThumbRadius, activeThumbRadius, currentValue)!;
+      ? pressedThumbRadius
+      : lerpDouble(inactiveThumbRadius, activeThumbRadius, currentValue)!;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, currentValue)!;
     final Color? trackOutlineColor = inactiveTrackOutlineColor == null ? null
-        : Color.lerp(inactiveTrackOutlineColor, Colors.transparent, currentValue);
+      : Color.lerp(inactiveTrackOutlineColor, Colors.transparent, currentValue);
     final Color lerpedThumbColor = Color.lerp(inactiveColor, activeColor, currentValue)!;
     // Blend the thumb color against a `surfaceColor` background in case the
     // thumbColor is not opaque. This way we do not see through the thumb to the
@@ -1436,7 +1436,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 
   @override
   MaterialStateProperty<MouseCursor> get mouseCursor =>
-      MaterialStateProperty.resolveWith((Set<MaterialState> states) => MaterialStateMouseCursor.clickable.resolve(states));
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) => MaterialStateMouseCursor.clickable.resolve(states));
 
   @override
   MaterialStateProperty<Color?> get overlayColor {
@@ -1469,7 +1469,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 
 class _SwitchDefaultsM3 extends SwitchThemeData {
   _SwitchDefaultsM3(BuildContext context)
-      : _colors = Theme.of(context).colorScheme;
+    : _colors = Theme.of(context).colorScheme;
 
   final ColorScheme _colors;
 
@@ -1644,7 +1644,7 @@ class _SwitchConfigM3 with _SwitchConfig {
   double get trackHeight => 32.0;
 
   @override
-    MaterialStateProperty<Color?> get trackOutlineColor {
+  MaterialStateProperty<Color?> get trackOutlineColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return null;
