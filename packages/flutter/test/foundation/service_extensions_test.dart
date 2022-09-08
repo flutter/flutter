@@ -903,7 +903,7 @@ void main() {
     expect(timeDilation, 100.0);
     expect(extensionChangedEvents.length, 1);
     extensionChangedEvent = extensionChangedEvents.last;
-    expect(extensionChangedEvent['extension'], 'ext.flutter.timeDilation');
+    expect(extensionChangedEvent['extension'], 'ext.flutter.${SchedulerServiceExtensions.timeDilation.name}');
     expect(extensionChangedEvent['value'], 100.0.toString());
     result = await binding.testExtension(SchedulerServiceExtensions.timeDilation.name, <String, String>{});
     expect(result, <String, String>{SchedulerServiceExtensions.timeDilation.name: 100.0.toString()});
@@ -914,7 +914,7 @@ void main() {
     expect(timeDilation, 1.0);
     expect(extensionChangedEvents.length, 2);
     extensionChangedEvent = extensionChangedEvents.last;
-    expect(extensionChangedEvent['extension'], 'ext.flutter.timeDilation');
+    expect(extensionChangedEvent['extension'], 'ext.flutter.${SchedulerServiceExtensions.timeDilation.name}');
     expect(extensionChangedEvent['value'], 1.0.toString());
     result = await binding.testExtension(SchedulerServiceExtensions.timeDilation.name, <String, String>{});
     expect(result, <String, String>{SchedulerServiceExtensions.timeDilation.name: 1.0.toString()});
