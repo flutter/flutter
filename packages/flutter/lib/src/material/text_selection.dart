@@ -25,7 +25,7 @@ const double _kToolbarContentDistance = 8.0;
 /// [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `MaterialTextSelectionControls`. '
-  'This feature was deprecated after v2.12.0-4.1.pre.',
+  'This feature was deprecated after v3.3.0-0.5.pre',
 )
 class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls with TextSelectionHandleControls {
 }
@@ -42,7 +42,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style copy/paste text selection toolbar.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   @override
   Widget buildToolbar(
@@ -124,7 +124,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
@@ -311,7 +311,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 /// Text selection handle controls that follow the Material Design specification.
 @Deprecated(
   'Use `materialTextSelectionControls` instead. '
-  'This feature was deprecated after v2.12.0-4.1.pre.',
+  'This feature was deprecated after v3.3.0-0.5.pre',
 )
 final TextSelectionControls materialTextSelectionHandleControls = MaterialTextSelectionHandleControls();
 

@@ -31,7 +31,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
   /// Builder for the Material-style desktop copy/paste text selection toolbar.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   @override
   Widget buildToolbar(
@@ -72,7 +72,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
@@ -86,7 +86,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {
@@ -99,7 +99,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
 /// conventions.
 @Deprecated(
   'Use `desktopTextSelectionControls` instead. '
-  'This feature was deprecated after v2.12.0-4.1.pre.',
+  'This feature was deprecated after v3.3.0-0.5.pre',
 )
 final TextSelectionControls desktopTextSelectionHandleControls =
     _DesktopTextSelectionHandleControls();

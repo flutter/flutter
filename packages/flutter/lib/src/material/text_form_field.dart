@@ -113,7 +113,7 @@ class TextFormField extends FormField<String> {
     bool readOnly = false,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre',
     )
     ToolbarOptions? toolbarOptions,
     bool? showCursor,

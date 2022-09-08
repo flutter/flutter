@@ -101,7 +101,7 @@ class EditableTextContextMenuButtonItemsBuilder extends StatefulWidget {
   /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
   @Deprecated(
     'Use `contextMenuBuilder` instead of `toolbarOptions`. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   static List<ContextMenuButtonItem>? buttonItemsForToolbarOptions(EditableTextState editableTextState, [TargetPlatform? targetPlatform]) {
     final ToolbarOptions toolbarOptions = editableTextState.widget.toolbarOptions;

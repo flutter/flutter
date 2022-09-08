@@ -295,7 +295,7 @@ class TextField extends StatefulWidget {
     this.readOnly = false,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre',
     )
     this.toolbarOptions,
     this.showCursor,
@@ -520,7 +520,7 @@ class TextField extends StatefulWidget {
   /// paste and cut will be disabled regardless.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   final ToolbarOptions? toolbarOptions;
 

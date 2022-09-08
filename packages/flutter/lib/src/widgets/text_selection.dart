@@ -115,7 +115,7 @@ abstract class TextSelectionControls {
   /// is computable from the [endpoints] parameter.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   Widget buildToolbar(
     BuildContext context,
@@ -143,7 +143,7 @@ abstract class TextSelectionControls {
   /// functionality to the user.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   bool canCut(TextSelectionDelegate delegate) {
     return delegate.cutEnabled && !delegate.textEditingValue.selection.isCollapsed;
@@ -158,7 +158,7 @@ abstract class TextSelectionControls {
   /// functionality to the user.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   bool canCopy(TextSelectionDelegate delegate) {
     return delegate.copyEnabled && !delegate.textEditingValue.selection.isCollapsed;
@@ -175,7 +175,7 @@ abstract class TextSelectionControls {
   /// string.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   bool canPaste(TextSelectionDelegate delegate) {
     return delegate.pasteEnabled;
@@ -189,7 +189,7 @@ abstract class TextSelectionControls {
   /// functionality to the user.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   bool canSelectAll(TextSelectionDelegate delegate) {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
@@ -203,7 +203,7 @@ abstract class TextSelectionControls {
   // https://github.com/flutter/flutter/issues/99360
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
@@ -217,7 +217,7 @@ abstract class TextSelectionControls {
   // https://github.com/flutter/flutter/issues/99360
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.copySelection(SelectionChangedCause.toolbar);
@@ -234,7 +234,7 @@ abstract class TextSelectionControls {
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
     delegate.pasteText(SelectionChangedCause.toolbar);
@@ -249,7 +249,7 @@ abstract class TextSelectionControls {
   /// by the user.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
@@ -381,7 +381,7 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   @Deprecated(
     'Use `SelectionOverlay.fadeDuration` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.'
+    'This feature was deprecated after v3.3.0-0.5.pre'
   )
   static const Duration fadeDuration = SelectionOverlay.fadeDuration;
 
@@ -884,7 +884,7 @@ class SelectionOverlay {
     this.onSelectionHandleTapped,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre',
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
@@ -962,7 +962,7 @@ class SelectionOverlay {
     WidgetBuilder? contextMenuBuilder,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre',
     )
     bool shouldShowToolbar = false,
   }) {
@@ -1169,7 +1169,7 @@ class SelectionOverlay {
   /// in desktop devices.
   @Deprecated(
     'Use the `contextMenuBuilder` parameter in `showToolbar` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   Offset? get toolbarLocation => _toolbarLocation;
   Offset? _toolbarLocation;
@@ -2801,7 +2801,7 @@ enum ClipboardStatus {
 /// to leave that to [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `TextSelectionControls`. '
-  'This feature was deprecated after v2.12.0-4.1.pre.',
+  'This feature was deprecated after v3.3.0-0.5.pre',
 )
 mixin TextSelectionHandleControls on TextSelectionControls {
   @override

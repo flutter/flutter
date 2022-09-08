@@ -193,7 +193,7 @@ class SelectableText extends StatefulWidget {
     this.autofocus = false,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre',
     )
     this.toolbarOptions,
     this.minLines,
@@ -251,7 +251,7 @@ class SelectableText extends StatefulWidget {
     this.autofocus = false,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v2.12.0-4.1.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre',
     )
     this.toolbarOptions,
     this.minLines,
@@ -400,7 +400,7 @@ class SelectableText extends StatefulWidget {
   /// If not set, select all and copy will be enabled by default.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.',
+    'This feature was deprecated after v3.3.0-0.5.pre',
   )
   final ToolbarOptions? toolbarOptions;
 
