@@ -295,6 +295,7 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties (as well as primaryColorBrightness, and primarySwatch)
     // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
+    Color? bottomAppBarColor,
     Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
@@ -431,11 +432,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? backgroundColor,
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-    Color? bottomAppBarColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -509,6 +505,7 @@ class ThemeData with Diagnosticable {
     shadowColor ??= Colors.black;
     canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
     scaffoldBackgroundColor ??= canvasColor;
+    bottomAppBarColor ??= isDark ? Colors.grey[800]! : Colors.white;
     cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     // Create a ColorScheme that is backwards compatible as possible
@@ -604,7 +601,6 @@ class ThemeData with Diagnosticable {
     primaryColorBrightness = estimatedPrimaryColorBrightness;
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
-    bottomAppBarColor ??= colorSchemeSeed != null ? colorScheme.surface : isDark ? Colors.grey[800]! : Colors.white;
 
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
@@ -625,6 +621,7 @@ class ThemeData with Diagnosticable {
       useMaterial3: useMaterial3,
       visualDensity: visualDensity,
       // COLOR
+      bottomAppBarColor: bottomAppBarColor,
       canvasColor: canvasColor,
       cardColor: cardColor,
       colorScheme: colorScheme,
@@ -699,7 +696,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor: selectedRowColor,
       errorColor: errorColor,
       backgroundColor: backgroundColor,
-      bottomAppBarColor: bottomAppBarColor,
     );
   }
 
@@ -732,6 +728,7 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
+    required this.bottomAppBarColor,
     required this.canvasColor,
     required this.cardColor,
     required this.colorScheme,
@@ -864,12 +861,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? backgroundColor,
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-    Color? bottomAppBarColor,
-
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
@@ -883,7 +874,6 @@ class ThemeData with Diagnosticable {
        _selectedRowColor = selectedRowColor,
        _errorColor = errorColor,
        _backgroundColor = backgroundColor,
-       _bottomAppBarColor = bottomAppBarColor,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -896,6 +886,7 @@ class ThemeData with Diagnosticable {
        assert(useMaterial3 != null),
        assert(visualDensity != null),
         // COLOR
+       assert(bottomAppBarColor != null),
        assert(canvasColor != null),
        assert(cardColor != null),
        assert(colorScheme != null),
@@ -1313,12 +1304,9 @@ class ThemeData with Diagnosticable {
   // COLOR
 
   /// The default color of the [BottomAppBar].
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-  Color get bottomAppBarColor => _bottomAppBarColor!;
-  final Color? _bottomAppBarColor;
+  ///
+  /// This can be overridden by specifying [BottomAppBar.color].
+  final Color bottomAppBarColor;
 
   /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
@@ -1757,6 +1745,7 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
+    Color? bottomAppBarColor,
     Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
@@ -1890,11 +1879,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Color? backgroundColor,
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-    Color? bottomAppBarColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1916,6 +1900,7 @@ class ThemeData with Diagnosticable {
       useMaterial3: useMaterial3 ?? this.useMaterial3,
       visualDensity: visualDensity ?? this.visualDensity,
       // COLOR
+      bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
       canvasColor: canvasColor ?? this.canvasColor,
       cardColor: cardColor ?? this.cardColor,
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
@@ -1990,7 +1975,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
       errorColor: errorColor ?? _errorColor,
       backgroundColor: backgroundColor ?? _backgroundColor,
-      bottomAppBarColor: bottomAppBarColor ?? _bottomAppBarColor,
     );
   }
 
@@ -2116,6 +2100,7 @@ class ThemeData with Diagnosticable {
       useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       // COLOR
+      bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t)!,
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t)!,
       cardColor: Color.lerp(a.cardColor, b.cardColor, t)!,
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
@@ -2190,7 +2175,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
     );
   }
 
@@ -2218,6 +2202,7 @@ class ThemeData with Diagnosticable {
         other.useMaterial3 == useMaterial3 &&
         other.visualDensity == visualDensity &&
         // COLOR
+        other.bottomAppBarColor == bottomAppBarColor &&
         other.canvasColor == canvasColor &&
         other.cardColor == cardColor &&
         other.colorScheme == colorScheme &&
@@ -2291,8 +2276,7 @@ class ThemeData with Diagnosticable {
         other.toggleableActiveColor == toggleableActiveColor &&
         other.selectedRowColor == selectedRowColor &&
         other.errorColor == errorColor &&
-        other.backgroundColor == backgroundColor &&
-        other.bottomAppBarColor == bottomAppBarColor;
+        other.backgroundColor == backgroundColor;
   }
 
   @override
@@ -2317,6 +2301,7 @@ class ThemeData with Diagnosticable {
       useMaterial3,
       visualDensity,
       // COLOR
+      bottomAppBarColor,
       canvasColor,
       cardColor,
       colorScheme,
@@ -2391,7 +2376,6 @@ class ThemeData with Diagnosticable {
       selectedRowColor,
       errorColor,
       backgroundColor,
-      bottomAppBarColor,
     ];
     return Object.hashAll(values);
   }
@@ -2418,6 +2402,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
     // COLORS
+    properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
@@ -2492,7 +2477,6 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
   }
 }
 
