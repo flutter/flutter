@@ -9,6 +9,7 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_message_response_dart.h"
+#include "flutter/lib/ui/window/platform_message_response_dart_port.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/lib/ui/window/window.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -284,6 +285,25 @@ void PlatformConfigurationNativeApi::SetNeedsReportTimings(bool value) {
       ->SetNeedsReportTimings(value);
 }
 
+namespace {
+Dart_Handle HandlePlatformMessage(
+    UIDartState* dart_state,
+    const std::string& name,
+    Dart_Handle data_handle,
+    const fml::RefPtr<PlatformMessageResponse>& response) {
+  if (Dart_IsNull(data_handle)) {
+    return dart_state->HandlePlatformMessage(
+        std::make_unique<PlatformMessage>(name, response));
+  } else {
+    tonic::DartByteData data(data_handle);
+    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
+    return dart_state->HandlePlatformMessage(std::make_unique<PlatformMessage>(
+        name, fml::MallocMapping::Copy(buffer, data.length_in_bytes()),
+        response));
+  }
+}
+}  // namespace
+
 Dart_Handle PlatformConfigurationNativeApi::SendPlatformMessage(
     const std::string& name,
     Dart_Handle callback,
@@ -292,7 +312,8 @@ Dart_Handle PlatformConfigurationNativeApi::SendPlatformMessage(
 
   if (!dart_state->platform_configuration()) {
     return tonic::ToDart(
-        "Platform messages can only be sent from the main isolate");
+        "SendPlatformMessage only works on the root isolate, see "
+        "SendPortPlatformMessage.");
   }
 
   fml::RefPtr<PlatformMessageResponse> response;
@@ -301,17 +322,29 @@ Dart_Handle PlatformConfigurationNativeApi::SendPlatformMessage(
         tonic::DartPersistentValue(dart_state, callback),
         dart_state->GetTaskRunners().GetUITaskRunner(), name);
   }
-  if (Dart_IsNull(data_handle)) {
-    dart_state->platform_configuration()->client()->HandlePlatformMessage(
-        std::make_unique<PlatformMessage>(name, response));
-  } else {
-    tonic::DartByteData data(data_handle);
-    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
-    dart_state->platform_configuration()->client()->HandlePlatformMessage(
-        std::make_unique<PlatformMessage>(
-            name, fml::MallocMapping::Copy(buffer, data.length_in_bytes()),
-            response));
+
+  return HandlePlatformMessage(dart_state, name, data_handle, response);
+}
+
+Dart_Handle PlatformConfigurationNativeApi::SendPortPlatformMessage(
+    const std::string& name,
+    Dart_Handle identifier,
+    Dart_Handle send_port,
+    Dart_Handle data_handle) {
+  // This can be executed on any isolate.
+  UIDartState* dart_state = UIDartState::Current();
+
+  int64_t c_send_port = tonic::DartConverter<int64_t>::FromDart(send_port);
+  if (c_send_port == ILLEGAL_PORT) {
+    return tonic::ToDart("Invalid port specified");
   }
+
+  fml::RefPtr<PlatformMessageResponse> response =
+      fml::MakeRefCounted<PlatformMessageResponseDartPort>(
+          c_send_port, tonic::DartConverter<int64_t>::FromDart(identifier),
+          name);
+
+  HandlePlatformMessage(dart_state, name, data_handle, response);
 
   return Dart_Null();
 }
@@ -394,6 +427,25 @@ std::string PlatformConfigurationNativeApi::DefaultRouteName() {
       ->platform_configuration()
       ->client()
       ->DefaultRouteName();
+}
+
+int64_t PlatformConfigurationNativeApi::GetRootIsolateToken() {
+  UIDartState* dart_state = UIDartState::Current();
+  FML_DCHECK(dart_state);
+  return dart_state->GetRootIsolateToken();
+}
+
+void PlatformConfigurationNativeApi::RegisterBackgroundIsolate(
+    int64_t root_isolate_token) {
+  UIDartState* dart_state = UIDartState::Current();
+  FML_DCHECK(dart_state && !dart_state->IsRootIsolate());
+  auto platform_message_handler =
+      (*static_cast<std::shared_ptr<PlatformMessageHandlerStorage>*>(
+          Dart_CurrentIsolateGroupData()));
+  FML_DCHECK(platform_message_handler);
+  auto weak_platform_message_handler =
+      platform_message_handler->GetPlatformMessageHandler(root_isolate_token);
+  dart_state->SetPlatformMessageHandler(weak_platform_message_handler);
 }
 
 }  // namespace flutter

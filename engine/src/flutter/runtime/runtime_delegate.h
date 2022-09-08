@@ -14,6 +14,7 @@
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/platform_message.h"
+#include "flutter/shell/common/platform_message_handler.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter {
@@ -48,6 +49,9 @@ class RuntimeDelegate {
       const std::vector<std::string>& supported_locale_data) = 0;
 
   virtual void RequestDartDeferredLibrary(intptr_t loading_unit_id) = 0;
+
+  virtual std::weak_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
+      const = 0;
 
  protected:
   virtual ~RuntimeDelegate();

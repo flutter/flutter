@@ -64,4 +64,21 @@ void DartIsolateGroupData::SetChildIsolatePreparer(
   child_isolate_preparer_ = value;
 }
 
+void DartIsolateGroupData::SetPlatformMessageHandler(
+    int64_t root_isolate_token,
+    std::weak_ptr<PlatformMessageHandler> handler) {
+  std::scoped_lock lock(platform_message_handlers_mutex_);
+  platform_message_handlers_[root_isolate_token] = handler;
+}
+
+std::weak_ptr<PlatformMessageHandler>
+DartIsolateGroupData::GetPlatformMessageHandler(
+    int64_t root_isolate_token) const {
+  std::scoped_lock lock(platform_message_handlers_mutex_);
+  auto it = platform_message_handlers_.find(root_isolate_token);
+  return it == platform_message_handlers_.end()
+             ? std::weak_ptr<PlatformMessageHandler>()
+             : it->second;
+}
+
 }  // namespace flutter

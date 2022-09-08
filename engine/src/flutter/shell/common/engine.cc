@@ -540,6 +540,11 @@ void Engine::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
   return delegate_.RequestDartDeferredLibrary(loading_unit_id);
 }
 
+std::weak_ptr<PlatformMessageHandler> Engine::GetPlatformMessageHandler()
+    const {
+  return delegate_.GetPlatformMessageHandler();
+}
+
 void Engine::LoadDartDeferredLibrary(
     intptr_t loading_unit_id,
     std::unique_ptr<const fml::Mapping> snapshot_data,

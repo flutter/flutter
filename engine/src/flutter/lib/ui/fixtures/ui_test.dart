@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:isolate';
+import 'dart:ffi';
 
 void main() {}
 
@@ -235,6 +237,21 @@ void frameCallback(_Image, int) {
 }
 
 @pragma('vm:entry-point')
+void platformMessagePortResponseTest() async {
+  ReceivePort receivePort = ReceivePort();
+  _callPlatformMessageResponseDartPort(receivePort.sendPort.nativePort);
+  List<dynamic> resultList = await receivePort.first;
+  int identifier = resultList[0] as int;
+  Uint8List? bytes = resultList[1] as Uint8List?;
+  ByteData result = ByteData.sublistView(bytes!);
+  if (result.lengthInBytes == 100) {
+    _finishCallResponse(true);
+  } else {
+    _finishCallResponse(false);
+  }
+}
+
+@pragma('vm:entry-point')
 void platformMessageResponseTest() {
   _callPlatformMessageResponseDart((ByteData? result) {
     if (result is UnmodifiableByteDataView &&
@@ -246,6 +263,7 @@ void platformMessageResponseTest() {
   });
 }
 
+void _callPlatformMessageResponseDartPort(int port) native 'CallPlatformMessageResponseDartPort';
 void _callPlatformMessageResponseDart(void Function(ByteData? result) callback) native 'CallPlatformMessageResponseDart';
 void _finishCallResponse(bool didPass) native 'FinishCallResponse';
 
@@ -884,7 +902,53 @@ void hooksTests() {
     expectEquals(result, true);
   });
 
+  test('root isolate token', () async {
+    if (RootIsolateToken.instance == null) {
+      throw Exception('We should have a token on a root isolate.');
+    }
+    ReceivePort receivePort = ReceivePort();
+    Isolate.spawn(_backgroundRootIsolateTestMain, receivePort.sendPort);
+    bool didPass = await receivePort.first as bool;
+    if (!didPass) {
+      throw Exception('Background isolate found a root isolate id.');
+    }
+  });
+
+  test('send port message without registering', () async {
+    ReceivePort receivePort = ReceivePort();
+    Isolate.spawn(_backgroundIsolateSendWithoutRegistering, receivePort.sendPort);
+    bool didError = await receivePort.first as bool;
+    if (!didError) {
+      throw Exception('Expected an error when not registering a root isolate and sending port messages.');
+    }
+  });
+
   _finish();
+}
+
+/// Sends `true` on [port] if the isolate executing the function is not a root
+/// isolate.
+void _backgroundRootIsolateTestMain(SendPort port) {
+  port.send(RootIsolateToken.instance == null);
+}
+
+/// Sends `true` on [port] if [PlatformDispatcher.sendPortPlatformMessage]
+/// throws an exception without calling
+/// [PlatformDispatcher.registerBackgroundIsolate].
+void _backgroundIsolateSendWithoutRegistering(SendPort port) {
+  bool didError = false;
+  ReceivePort messagePort = ReceivePort();
+  try {
+    PlatformDispatcher.instance.sendPortPlatformMessage(
+      'foo',
+      null,
+      1,
+      messagePort.sendPort,
+    );
+  } catch (_) {
+    didError = true;
+  }
+  port.send(didError);
 }
 
 typedef _Callback<T> = void Function(T result);

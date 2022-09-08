@@ -210,6 +210,7 @@ source_set("ios_test_flutter_mrc") {
   deps = [
     ":flutter_framework_source",
     "//flutter/common:common",
+    "//flutter/lib/ui:ui",
     "//flutter/shell/common:common",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
