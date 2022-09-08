@@ -206,10 +206,9 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
 }
 
 BinaryMessenger _findBinaryMessenger() {
-  if (ui.RootIsolateToken.instance == null) {
-    return BackgroundIsolateBinaryMessenger.instance;
-  }
-  return ServicesBinding.instance.defaultBinaryMessenger;
+  return ServicesBinding.instance.useBackgroundIsolateBinaryMessenger
+      ? BackgroundIsolateBinaryMessenger.instance
+      : ServicesBinding.instance.defaultBinaryMessenger;
 }
 
 /// A named channel for communicating with platform plugins using asynchronous
