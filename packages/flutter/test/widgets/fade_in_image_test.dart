@@ -206,7 +206,7 @@ Future<void> main() async {
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
       final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
 
-      // precaching
+      // Pre-cache the initial image.
       imageProvider.resolve(ImageConfiguration.empty);
       imageProvider.complete();
       placeholderProvider.complete();
@@ -223,12 +223,12 @@ Future<void> main() async {
       ));
 
       FadeInImageParts parts = findFadeInImage(tester);
-      // Continually shows previously loaded image,
+      // Continually shows previously loaded image until the new image provider provides the image.
       expect(parts.placeholder, isNull);
       expect(parts.target.rawImage.image!.isCloneOf(targetImage), isTrue);
       expect(parts.target.opacity, 1);
 
-      // Until the new image provider provides the image.
+      // Now, provide the image.
       secondImageProvider.complete();
       await tester.pump();
 
