@@ -4,21 +4,25 @@
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/format.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('format', () {
     late Directory tempDir;
+    late FakeStdio mockStdio;
 
     setUp(() {
       Cache.disableLocking();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_format_test.');
+      mockStdio = FakeStdio();
     });
 
     tearDown(() {
@@ -38,6 +42,8 @@ void main() {
 
       final String formatted = srcFile.readAsStringSync();
       expect(formatted, original);
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
     });
 
     testUsingContext('dry-run', () async {

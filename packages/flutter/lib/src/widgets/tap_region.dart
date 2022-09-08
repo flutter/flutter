@@ -93,7 +93,7 @@ abstract class TapRegionRegistry {
 /// encompass the entire area where taps should be monitored. This is typically
 /// around the entire app. If the entire app isn't covered, then taps outside of
 /// the `TapRegionSurface` will be ignored and no [TapRegion.onTapOutside] calls
-/// wil be made for those events. The [WidgetsApp], [MaterialApp] and
+/// will be made for those events. The [WidgetsApp], [MaterialApp] and
 /// [CupertinoApp] automatically include a `TapRegionSurface` around their
 /// entire app.
 ///
@@ -155,7 +155,7 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// to encompass the entire area where taps should be monitored. This is
 /// typically around the entire app. If the entire app isn't covered, then taps
 /// outside of the `RenderTapRegionSurface` will be ignored and no
-/// [RenderTapRegion.onTapOutside] calls wil be made for those events. The
+/// [RenderTapRegion.onTapOutside] calls will be made for those events. The
 /// [WidgetsApp], [MaterialApp] and [CupertinoApp] automatically include a
 /// `RenderTapRegionSurface` around the entire app.
 ///
