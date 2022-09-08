@@ -845,7 +845,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
   _ContextMenuRouteStaticState createState() => _ContextMenuRouteStaticState();
 }
 
-class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with TickerProviderStateMixin 
+class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with TickerProviderStateMixin
 {
   // The child is scaled down as it is dragged down until it hits this minimum
   // value.
