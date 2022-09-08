@@ -11,7 +11,6 @@ import 'application_package.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'build_info.dart';
 import 'bundle_builder.dart';
 import 'cache.dart';
@@ -28,6 +27,43 @@ BundleBuilder _defaultBundleBuilder() {
   return BundleBuilder();
 }
 
+class PreviewDeviceDiscovery extends DeviceDiscovery {
+  PreviewDeviceDiscovery({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+  }) : _logger = logger,
+       _processManager = processManager,
+       _fileSystem = fileSystem;
+
+  final Logger _logger;
+  final ProcessManager _processManager;
+  final FileSystem _fileSystem;
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  Future<List<Device>> get devices async => <Device>[
+    PreviewDevice(
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: _processManager,
+    )
+  ];
+
+  @override
+  Future<List<Device>> discoverDevices({Duration? timeout}) {
+    return devices;
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  List<String> get wellKnownIds => <String>['preview'];
+}
+
 /// A device type that runs a prebuilt desktop binary alongside a locally compiled kernel file.
 ///
 /// This could be used to support debug local development without plugins on machines that
@@ -35,19 +71,16 @@ BundleBuilder _defaultBundleBuilder() {
 /// device is not currently discoverable.
 class PreviewDevice extends Device {
   PreviewDevice({
-    required Platform platform,
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
     @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
-  }) : _platform = platform,
-       _processManager = processManager,
+  }) : _processManager = processManager,
        _logger = logger,
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
        super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.custom);
 
-  final Platform _platform;
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -116,7 +149,7 @@ class PreviewDevice extends Device {
       await _bundleBuilderFactory().build(
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
-        platform: TargetPlatform.tester,
+        platform: TargetPlatform.windows_x64,
         assetDirPath: getAssetBuildDirectory(),
       );
       copyDirectory(_fileSystem.directory(
@@ -133,7 +166,7 @@ class PreviewDevice extends Device {
 
     final Process process = await _processManager.start(
       <String>[
-        assetDirectory.childFile('splash').path,
+        assetDirectory.childFile('hello_world').path,
       ],
     );
     _process = process;
@@ -169,10 +202,7 @@ class PreviewDevice extends Device {
 
   @override
   Future<TargetPlatform> get targetPlatform async {
-    if (_platform.isWindows) {
-      return TargetPlatform.windows_x64;
-    }
-    return TargetPlatform.tester;
+    return TargetPlatform.windows_x64;
   }
 
   @override
