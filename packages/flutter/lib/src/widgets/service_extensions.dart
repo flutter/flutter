@@ -94,3 +94,39 @@ enum WidgetsServiceExtensions {
   ///   registered.
   debugAllowBanner,
 }
+
+/// Service extension constants for the Widget Inspector.
+///
+/// These constants will be used when registering service extensions in the
+/// framework, and they will also be used by tools and services that call these
+/// service extensions.
+///
+/// The String value for each of these extension names should be accessed by
+/// calling the `.name` property on the enum value.
+enum WidgetInspectorServiceExtensions {
+  structuredErrors,
+  show,
+  trackRebuildDirtyWidgets,
+  trackRepaintWidgets,
+  disposeAllGroups,
+  disposeGroup,
+  isWidgetTreeReady,
+  setPubRootDirectories,
+  addPubRootDirectories,
+  removePubRootDirectories,
+  setSelectionById,
+  getParentChain,
+  getProperties,
+  getChildren,
+  getChildrenSummaryTree,
+  getChildrenDetailsSubtree,
+  getRootWidget,
+  getRootRenderObject,
+  getRootWidgetSummaryTree,
+  getDetailsSubtree,
+  getSelectedRenderObject,
+  getSelectedWidget,
+  getSelectedSummaryWidget,
+  isWidgetCreationTracked,
+  screenshot,
+}
