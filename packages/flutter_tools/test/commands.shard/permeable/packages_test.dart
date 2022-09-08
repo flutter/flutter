@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
@@ -32,7 +30,7 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeStdio mockStdio;
+  late FakeStdio mockStdio;
 
   setUp(() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
@@ -40,7 +38,7 @@ void main() {
 
   Cache.disableLocking();
   group('packages get/upgrade', () {
-    Directory tempDir;
+    late Directory tempDir;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -50,7 +48,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<String> createProjectWithPlugin(String plugin, { List<String> arguments }) async {
+    Future<String> createProjectWithPlugin(String plugin, { List<String>? arguments }) async {
       final String projectPath = await createProject(tempDir, arguments: arguments);
       final File pubspec = globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
@@ -66,7 +64,7 @@ void main() {
       return projectPath;
     }
 
-    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String> args }) async {
+    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String>? args }) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
@@ -261,7 +259,7 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
     }, overrides: <Type, Generator>{
@@ -285,7 +283,7 @@ void main() {
       final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
 
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
     }, overrides: <Type, Generator>{
@@ -307,7 +305,7 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
     }, overrides: <Type, Generator>{
@@ -329,7 +327,7 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
     }, overrides: <Type, Generator>{
@@ -360,7 +358,7 @@ void main() {
       androidManifest.writeAsStringSync(updatedAndroidManifestString);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
     }, overrides: <Type, Generator>{
@@ -382,7 +380,7 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
     }, overrides: <Type, Generator>{
@@ -474,11 +472,12 @@ void main() {
   });
 
   group('packages test/pub', () {
-    FakeProcessManager processManager;
-
+    late FakeProcessManager processManager;
+    late FakeStdio mockStdio;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
+      mockStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('test without bot', () async {

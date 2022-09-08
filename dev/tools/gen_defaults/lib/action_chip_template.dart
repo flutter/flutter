@@ -4,11 +4,12 @@
 
 import 'template.dart';
 
-class ChipInputTemplate extends TokenTemplate {
-  const ChipInputTemplate(super.blockName, super.fileName, super.tokens);
+class ChipActionTemplate extends TokenTemplate {
 
-  static const String tokenGroup = 'md.comp.input-chip';
-  static const String variant = '';
+  const ChipActionTemplate(super.blockName, super.fileName, super.tokens);
+
+  static const String tokenGroup = 'md.comp.assist-chip';
+  static const String variant = '.flat';
 
   @override
   String generate() => '''
@@ -30,10 +31,10 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => ${componentColor("$tokenGroup$variant.container")};
 
   @override
-  Color? get shadowColor => ${color("$tokenGroup.container.shadow-color")};
+  Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
 
   @override
-  @override Color? get surfaceTintColor => ${color("$tokenGroup.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
   Color? get selectedColor => ${componentColor("$tokenGroup$variant.selected.container")};
@@ -45,19 +46,19 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get disabledColor => ${componentColor("$tokenGroup$variant.disabled.container")};
 
   @override
-  Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
+  Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
 
   @override
   BorderSide? get side => isEnabled
-    ? ${border('$tokenGroup$variant.unselected.outline')}
-    : ${border('$tokenGroup$variant.disabled.unselected.outline')};
+    ? ${border('$tokenGroup$variant.outline')}
+    : ${border('$tokenGroup$variant.disabled.outline')};
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? ${color("$tokenGroup.with-leading-icon.leading-icon.color")}
-      : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
-    size: ${tokens["$tokenGroup.with-leading-icon.leading-icon.size"]},
+      ? ${color("$tokenGroup.with-icon.icon.color")}
+      : ${color("$tokenGroup.with-icon.disabled.icon.color")},
+    size: ${tokens["$tokenGroup.with-icon.icon.size"]},
   );
 
   @override

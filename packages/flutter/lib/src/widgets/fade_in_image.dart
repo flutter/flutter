@@ -562,7 +562,8 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   Widget build(BuildContext context) {
-    if (widget.wasSynchronouslyLoaded || _placeholderOpacityAnimation!.isCompleted) {
+    if (widget.wasSynchronouslyLoaded ||
+        (_placeholderOpacityAnimation?.isCompleted ?? true)) {
       return widget.target;
     }
 

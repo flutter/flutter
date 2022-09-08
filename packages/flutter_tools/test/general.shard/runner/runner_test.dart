@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -68,6 +69,7 @@ void main() {
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
             reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
           ));
           return null;
         },
@@ -120,6 +122,7 @@ void main() {
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
             reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
           ));
           return null;
         },
@@ -159,16 +162,17 @@ void main() {
       // catch it in a zone.
       unawaited(runZoned<Future<void>>(
         () {
-        unawaited(runner.run(
-          <String>['crash'],
-          () => <FlutterCommand>[
-            CrashingFlutterCommand(),
-          ],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          reportCrashes: true,
-        ));
-        return null;
+          unawaited(runner.run(
+            <String>['crash'],
+            () => <FlutterCommand>[
+              CrashingFlutterCommand(),
+            ],
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
+          ));
+          return null;
         },
         onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);

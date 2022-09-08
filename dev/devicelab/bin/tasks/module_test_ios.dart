@@ -440,6 +440,16 @@ end
           'Frameworks',
           'url_launcher_ios.framework',
         ));
+
+        checkFileExists(path.join(
+          '${objectiveCBuildArchiveDirectory.path}.xcarchive',
+          'dSYMs',
+          'App.framework.dSYM',
+          'Contents',
+          'Resources',
+          'DWARF',
+          'App'
+        ));
       });
 
       section('Run platform unit tests');
