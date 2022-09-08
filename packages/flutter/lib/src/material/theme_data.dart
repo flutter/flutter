@@ -292,9 +292,10 @@ class ThemeData with Diagnosticable {
     bool? useMaterial3,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The other color
-    // properties (as well as primaryColorBrightness, and primarySwatch)
-    // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
+    // [colorScheme] or [colorSchemeSeed] are the preferred way to configure
+    // colors. The other color properties (as well as primarySwatch) will
+    // gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
+    Color? bottomAppBarColor,
     Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
@@ -507,10 +508,8 @@ class ThemeData with Diagnosticable {
     }
     applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
-    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
-    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
-    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
+    final Color colorPrimary = colorScheme?.primary ?? (isDark ? Colors.grey[900]! : primarySwatch);
+    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(colorPrimary);
     final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
@@ -527,7 +526,7 @@ class ThemeData with Diagnosticable {
     // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
       primarySwatch: primarySwatch,
-      primaryColorDark: primaryColorDark,
+      primaryColorDark: primaryColorDark ?? (isDark ? Colors.black : primarySwatch[700]!),
       accentColor: accentColor,
       cardColor: cardColor,
       backgroundColor: isDark ? Colors.grey[700]! : primarySwatch[200]!,
@@ -539,7 +538,7 @@ class ThemeData with Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
+    indicatorColor ??= accentColor == colorPrimary ? Colors.white : accentColor;
     hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     // The default [buttonTheme] is here because it doesn't use the defaults for
     // [disabledColor], [highlightColor], and [splashColor].
@@ -617,6 +616,9 @@ class ThemeData with Diagnosticable {
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
     bottomAppBarColor ??= colorSchemeSeed != null ? colorScheme.surface : isDark ? Colors.grey[800]! : Colors.white;
+    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
+    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
+    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
 
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
