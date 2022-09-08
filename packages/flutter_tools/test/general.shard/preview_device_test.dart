@@ -8,7 +8,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
@@ -29,7 +28,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
     );
 
     expect(await device.isLocalEmulator, false);
@@ -64,7 +62,6 @@ void main() {
         ),
       ]),
       logger: logger,
-      platform: FakePlatform(),
       builderFactory: () => FakeBundleBuilder(fileSystem),
     );
     fileSystem
