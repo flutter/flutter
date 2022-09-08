@@ -408,6 +408,7 @@ class TextSelectionOverlay {
     _selectionOverlay.showToolbar();
   }
 
+  /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
   void showMagnifier(Offset positionToShow) {
     final TextPosition position = renderObject.getPositionForPoint(positionToShow);
     _updateSelectionOverlay();
@@ -420,6 +421,7 @@ class TextSelectionOverlay {
     );
   }
 
+  /// {@macro flutter.widgets.SelectionOverlay.updateMagnifier}
   void updateMagnifier(Offset positionToShow) {
     final TextPosition position = renderObject.getPositionForPoint(positionToShow);
     _updateSelectionOverlay();
@@ -432,8 +434,9 @@ class TextSelectionOverlay {
     );
   }
 
-  void hideMagnifier() {
-    _selectionOverlay.hideMagnifier(shouldShowToolbar: false);
+  /// {@macro flutter.widgets.SelectionOverlay.hideMagnifier}
+  void hideMagnifier({required bool shouldShowToolbar}) {
+    _selectionOverlay.hideMagnifier(shouldShowToolbar: shouldShowToolbar);
   }
 
   /// Updates the overlay after the selection has changed.
@@ -485,7 +488,8 @@ class TextSelectionOverlay {
   /// Whether the toolbar is currently visible.
   bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
 
-  bool get magnifierIsVisible => _selectionOverlay._magnifierController.overlayEntry != null;
+  /// Whether the magnifier is currently visible.
+  bool get magnifierIsVisible => _selectionOverlay._magnifierController.shown;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   void hide() => _selectionOverlay.hide();
@@ -822,6 +826,7 @@ class SelectionOverlay {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
+  /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
   /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]
   /// was called. This is safe to call on platforms not mobile, since
   /// a magnifierBuilder will not be provided, or the magnifierBuilder will return null
@@ -830,6 +835,7 @@ class SelectionOverlay {
   /// This is NOT the source of truth for if the magnifier is up or not,
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
+  /// {@endtemplate}
   void showMagnifier(MagnifierOverlayInfoBearer initialInfoBearer) {
     if (_toolbar != null) {
       hideToolbar();
@@ -859,10 +865,12 @@ class SelectionOverlay {
         builder: (_) => builtMagnifier);
   }
 
+  /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
   /// Hide the current magnifier, optionally immediately showing
   /// the toolbar.
   ///
   /// This does nothing if there is no magnifier.
+  /// {@endtemplate}
   void hideMagnifier({required bool shouldShowToolbar}) {
     // This cannot be a check on `MagnifierController.shown`, since
     // it's possible that the magnifier is still in the overlay, but
@@ -1284,6 +1292,7 @@ class SelectionOverlay {
     );
   }
 
+  /// {@template flutter.widgets.SelectionOverlay.updateMagnifier}
   /// Update the current magnifier with new selection data, so the magnifier
   /// can respond accordingly.
   ///
@@ -1292,6 +1301,7 @@ class SelectionOverlay {
   /// itself.
   ///
   /// If there is no magnifier in the overlay, this does nothing,
+  /// {@endtemplate}
   void updateMagnifier(MagnifierOverlayInfoBearer magnifierOverlayInfoBearer) {
     if (_magnifierController.overlayEntry == null) {
       return;
@@ -2012,7 +2022,7 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        editableText.hideMagnifier();
+        editableText.hideMagnifier(shouldShowToolbar: false);
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
