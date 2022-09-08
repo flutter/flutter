@@ -20,6 +20,7 @@
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/lib/ui/volatile_path_tracker.h"
+#include "flutter/shell/common/platform_message_handler.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/tonic/dart_microtask_queue.h"
@@ -30,6 +31,7 @@ namespace flutter {
 class FontSelector;
 class ImageGeneratorRegistry;
 class PlatformConfiguration;
+class PlatformMessage;
 
 class UIDartState : public tonic::DartState {
  public:
@@ -106,6 +108,10 @@ class UIDartState : public tonic::DartState {
     return platform_configuration_.get();
   }
 
+  void SetPlatformMessageHandler(std::weak_ptr<PlatformMessageHandler> handler);
+
+  Dart_Handle HandlePlatformMessage(std::unique_ptr<PlatformMessage> message);
+
   const TaskRunners& GetTaskRunners() const;
 
   void ScheduleMicrotask(Dart_Handle handle);
@@ -153,6 +159,10 @@ class UIDartState : public tonic::DartState {
     return unhandled_exception_callback_;
   }
 
+  /// Returns a enumeration that that uniquely represents this root isolate.
+  /// Returns `0` if called from a non-root isolate.
+  int64_t GetRootIsolateToken() const;
+
  protected:
   UIDartState(TaskObserverAdd add_callback,
               TaskObserverRemove remove_callback,
@@ -181,6 +191,7 @@ class UIDartState : public tonic::DartState {
   const bool is_root_isolate_;
   std::string debug_name_;
   std::unique_ptr<PlatformConfiguration> platform_configuration_;
+  std::weak_ptr<PlatformMessageHandler> platform_message_handler_;
   tonic::DartMicrotaskQueue microtask_queue_;
   UnhandledExceptionCallback unhandled_exception_callback_;
   LogMessageCallback log_message_callback_;

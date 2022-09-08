@@ -73,6 +73,24 @@ const String _kFlutterKeyDataChannel = 'flutter/keydata';
 ByteData? _wrapUnmodifiableByteData(ByteData? byteData) =>
     byteData == null ? null : UnmodifiableByteDataView(byteData);
 
+/// A token that represents a root isolate.
+class RootIsolateToken {
+  RootIsolateToken._(this._token);
+
+  /// An enumeration representing the root isolate (0 if not a root isolate).
+  final int _token;
+
+  /// The token for the root isolate that is executing this Dart code.  If this
+  /// Dart code is not executing on a root isolate [instance] will be null.
+  static final RootIsolateToken? instance = () {
+    final int token = __getRootIsolateToken();
+    return token == 0 ? null : RootIsolateToken._(token);
+  }();
+
+  @FfiNative<Int64 Function()>('PlatformConfigurationNativeApi::GetRootIsolateToken')
+  external static int __getRootIsolateToken();
+}
+
 /// Platform event dispatcher singleton.
 ///
 /// The most basic interface to the host operating system's interface.
@@ -532,11 +550,50 @@ class PlatformDispatcher {
     }
   }
 
-  String? _sendPlatformMessage(String name,PlatformMessageResponseCallback? callback, ByteData? data) =>
+  String? _sendPlatformMessage(String name, PlatformMessageResponseCallback? callback, ByteData? data) =>
       __sendPlatformMessage(name, callback, data);
 
   @FfiNative<Handle Function(Handle, Handle, Handle)>('PlatformConfigurationNativeApi::SendPlatformMessage')
   external static String? __sendPlatformMessage(String name, PlatformMessageResponseCallback? callback, ByteData? data);
+
+  /// Sends a message to a platform-specific plugin via a [SendPort].
+  ///
+  /// This operates similarly to [sendPlatformMessage] but is used when sending
+  /// messages from background isolates. The [port] parameter allows Flutter to
+  /// know which isolate to send the result to. The [name] parameter is the name
+  /// of the channel communication will happen on. The [data] parameter is the
+  /// payload of the message. The [identifier] parameter is a unique integer
+  /// assigned to the message.
+  void sendPortPlatformMessage(
+    String name,
+    ByteData? data,
+    int identifier,
+    SendPort port) {
+    final String? error =
+        _sendPortPlatformMessage(name, identifier, port.nativePort, data);
+    if (error != null) {
+      throw Exception(error);
+    }
+  }
+
+  String? _sendPortPlatformMessage(String name, int identifier, int port, ByteData? data) =>
+      __sendPortPlatformMessage(name, identifier, port, data);
+
+  @FfiNative<Handle Function(Handle, Handle, Handle, Handle)>('PlatformConfigurationNativeApi::SendPortPlatformMessage')
+  external static String? __sendPortPlatformMessage(String name, int identifier, int port, ByteData? data);
+
+  /// Registers the current isolate with the isolate identified with by the
+  /// [token]. This is required if platform channels are to be used on a
+  /// background isolate.
+  void registerBackgroundIsolate(RootIsolateToken token) {
+    if (!Platform.isIOS) {
+      // Issue: https://github.com/flutter/flutter/issues/13937
+      throw UnimplementedError("Platform doesn't yet support platform channels on background isolates.");
+    }
+    __registerBackgroundIsolate(token._token);
+  }
+  @FfiNative<Void Function(Int64)>('PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
+  external static void __registerBackgroundIsolate(int rootIsolateId);
 
   /// Called whenever this platform dispatcher receives a message from a
   /// platform-specific plugin.

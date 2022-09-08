@@ -107,11 +107,18 @@ UIDartState* UIDartState::Current() {
 
 void UIDartState::SetPlatformConfiguration(
     std::unique_ptr<PlatformConfiguration> platform_configuration) {
+  FML_DCHECK(IsRootIsolate());
   platform_configuration_ = std::move(platform_configuration);
   if (platform_configuration_) {
     platform_configuration_->client()->UpdateIsolateDescription(debug_name_,
                                                                 main_port_);
   }
+}
+
+void UIDartState::SetPlatformMessageHandler(
+    std::weak_ptr<PlatformMessageHandler> handler) {
+  FML_DCHECK(!IsRootIsolate());
+  platform_message_handler_ = handler;
 }
 
 const TaskRunners& UIDartState::GetTaskRunners() const {
@@ -212,6 +219,29 @@ void UIDartState::LogMessage(const std::string& tag,
 
 bool UIDartState::enable_skparagraph() const {
   return enable_skparagraph_;
+}
+
+Dart_Handle UIDartState::HandlePlatformMessage(
+    std::unique_ptr<PlatformMessage> message) {
+  if (platform_configuration_) {
+    platform_configuration_->client()->HandlePlatformMessage(
+        std::move(message));
+  } else {
+    std::shared_ptr<PlatformMessageHandler> handler =
+        platform_message_handler_.lock();
+    if (handler) {
+      handler->HandlePlatformMessage(std::move(message));
+    } else {
+      return tonic::ToDart(
+          "No platform channel handler registered for background isolate.");
+    }
+  }
+
+  return Dart_Null();
+}
+
+int64_t UIDartState::GetRootIsolateToken() const {
+  return IsRootIsolate() ? reinterpret_cast<int64_t>(this) : 0;
 }
 
 }  // namespace flutter
