@@ -43,9 +43,9 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 typedef ButtonItemsToolbarBuilder = Widget Function(
   BuildContext,
   List<ContextMenuButtonItem>,
-  Offset,
-  [Offset?]
-);
+  Offset, [
+  Offset?,
+]);
 
 /// A widget that introduces an area for user selections.
 ///
@@ -1939,11 +1939,9 @@ class SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
   /// The platform to base the button items on.
   TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
 
-  /// Returns true if the given [SelectableRegionState]
-  /// supports copy.
+  /// Returns true if the given [SelectableRegionState] currently supports copy.
   static bool canCopy(SelectableRegionState state) {
-    final String? selectedText = state._selectionDelegate.getSelectedContent()?.plainText;
-    return selectedText != null && selectedText.isNotEmpty;
+    return state._selectionDelegate.value.hasSelection;
   }
 
   /// Returns true if the given [SelectableRegionState]
