@@ -59,6 +59,12 @@ template("dart_embedder_resources") {
   }
 }
 
+source_set("platform_message_handler") {
+  sources = [ "platform_message_handler.h" ]
+  public_configs = [ "//flutter:config" ]
+  deps = [ "//flutter/fml:fml" ]
+}
+
 source_set("common") {
   sources = [
     "animator.cc",
@@ -75,7 +81,6 @@ source_set("common") {
     "engine.h",
     "pipeline.cc",
     "pipeline.h",
-    "platform_message_handler.h",
     "platform_view.cc",
     "platform_view.h",
     "pointer_data_dispatcher.cc",
@@ -115,6 +120,7 @@ source_set("common") {
   public_configs = [ "//flutter:config" ]
 
   public_deps = [
+    ":platform_message_handler",
     "//flutter/shell/version",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",

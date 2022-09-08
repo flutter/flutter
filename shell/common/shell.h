@@ -397,11 +397,9 @@ class Shell final : public PlatformView::Delegate,
   /// @see        `CreateCompatibleGenerator`
   void RegisterImageDecoder(ImageGeneratorFactory factory, int32_t priority);
 
-  //----------------------------------------------------------------------------
-  /// @brief Returns the delegate object that handles PlatformMessage's from
-  ///        Flutter to the host platform (and its responses).
+  // |Engine::Delegate|
   const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()
-      const;
+      const override;
 
   const std::weak_ptr<VsyncWaiter> GetVsyncWaiter() const;
 
