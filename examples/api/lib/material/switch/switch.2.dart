@@ -37,16 +37,6 @@ class _SwitchExampleState extends State<SwitchExample> {
   bool light1 = true;
   bool light2 = true;
 
-  final MaterialStateProperty<Image?> thumbImage =
-    MaterialStateProperty.resolveWith<Image?>((Set<MaterialState> states) {
-      // Thumb image when the switch is selected.
-      if (states.contains(MaterialState.selected)) {
-        return const Image(image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'));
-      }
-      return null;
-    },
-  );
-
   final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
     // Thumb icon when the switch is selected.
     if (states.contains(MaterialState.selected)) {
@@ -70,20 +60,11 @@ class _SwitchExampleState extends State<SwitchExample> {
           },
         ),
         Switch(
-          thumbImage: thumbIcon,
+          thumbIcon: thumbIcon,
           value: light1,
           onChanged: (bool value) {
             setState(() {
               light1 = value;
-            });
-          },
-        ),
-        Switch(
-          thumbImage: thumbImage,
-          value: light2,
-          onChanged: (bool value) {
-            setState(() {
-              light2 = value;
             });
           },
         ),

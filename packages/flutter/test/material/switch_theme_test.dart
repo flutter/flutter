@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:ui' as ui;
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -27,7 +23,7 @@ void main() {
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.overlayColor, null);
     expect(themeData.splashRadius, null);
-    expect(themeData.thumbImage, null);
+    expect(themeData.thumbIcon, null);
 
     const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
     expect(theme.data.thumbColor, null);
@@ -36,7 +32,7 @@ void main() {
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.overlayColor, null);
     expect(theme.data.splashRadius, null);
-    expect(theme.data.thumbImage, null);
+    expect(theme.data.thumbIcon, null);
   });
 
   testWidgets('Default SwitchThemeData debugFillProperties', (WidgetTester tester) async {
@@ -60,7 +56,7 @@ void main() {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       splashRadius: 1.0,
-      thumbImage: MaterialStatePropertyAll<Icon>(Icon(IconData(123))),
+      thumbIcon: MaterialStatePropertyAll<Icon>(Icon(IconData(123))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -74,7 +70,7 @@ void main() {
     expect(description[3], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
     expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
     expect(description[5], 'splashRadius: 1.0');
-    expect(description[6], 'thumbImage: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
+    expect(description[6], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
   });
 
   testWidgets('Switch is themeable', (WidgetTester tester) async {
@@ -93,6 +89,7 @@ void main() {
     const Icon icon2 = Icon(Icons.close);
 
     final ThemeData themeData = ThemeData(
+      useMaterial3: true,
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
@@ -118,7 +115,7 @@ void main() {
           return null;
         }),
         splashRadius: splashRadius,
-        thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return icon1;
           }
@@ -151,13 +148,15 @@ void main() {
         ..rrect(color: defaultTrackColor)
         ..rrect(color: themeData.colorScheme.outline)
         ..circle(color: defaultThumbColor)
-        ..paragraph())
+        ..paragraph()
+      )
       : (paints
         ..rrect(color: defaultTrackColor)
         ..circle()
         ..circle()
         ..circle()
-        ..circle(color: defaultThumbColor))
+        ..circle(color: defaultThumbColor)
+      )
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), material3 ? const Size(60.0, 40.0) : const Size(59.0, 40.0));
@@ -204,8 +203,6 @@ void main() {
     const Color themeFocusOverlayColor = Color(0xfffffff4);
     const Color themeHoverOverlayColor = Color(0xfffffff5);
     const double themeSplashRadius = 1.0;
-    final _TestImageProvider themeThumbImage1 = _TestImageProvider();
-    final _TestImageProvider themeThumbImage2 = _TestImageProvider();
 
     const Color defaultThumbColor = Color(0xffffff0f);
     const Color selectedThumbColor = Color(0xffffff1f);
@@ -216,8 +213,6 @@ void main() {
     const Color focusColor = Color(0xffffff4f);
     const Color hoverColor = Color(0xffffff5f);
     const double splashRadius = 2.0;
-    final _TestImageProvider defaultThumbImage = _TestImageProvider();
-    final _TestImageProvider selectedThumbImage = _TestImageProvider();
 
     final ThemeData themeData = ThemeData(
       switchTheme: SwitchThemeData(
@@ -245,11 +240,11 @@ void main() {
           return null;
         }),
         splashRadius: themeSplashRadius,
-        thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
-            return Image(image: themeThumbImage1);
+            return null;
           }
-          return Image(image: themeThumbImage2);
+          return null;
         }),
       ),
     );
@@ -280,11 +275,11 @@ void main() {
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
-            thumbImage: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return Image(image: selectedThumbImage);
+                return const Icon(Icons.add);
               }
-              return Image(image: defaultThumbImage);
+              return const Icon(Icons.access_alarm);
             }),
           ),
         ),
@@ -292,11 +287,6 @@ void main() {
     }
 
     // Switch.
-    expect(themeThumbImage1.loadCallCount, 0);
-    expect(themeThumbImage2.loadCallCount, 0);
-    expect(defaultThumbImage.loadCallCount, 0);
-    expect(selectedThumbImage.loadCallCount, 0);
-
     await tester.pumpWidget(buildSwitch());
     await tester.pumpAndSettle();
     expect(
@@ -305,7 +295,7 @@ void main() {
       ? (paints
         ..rrect(color: defaultTrackColor)
         ..rrect(color: themeData.colorScheme.outline)
-        ..circle(color: defaultThumbColor))
+        ..circle(color: defaultThumbColor)..paragraph(offset: const Offset(12, 16)))
       : (paints
         ..rrect(color: defaultTrackColor)
         ..circle()
@@ -313,10 +303,6 @@ void main() {
         ..circle()
         ..circle(color: defaultThumbColor))
     );
-    expect(themeThumbImage1.loadCallCount, 0);
-    expect(themeThumbImage2.loadCallCount, 0);
-    expect(defaultThumbImage.loadCallCount, 1);
-    expect(selectedThumbImage.loadCallCount, 0);
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), material3 ? const Size(60.0, 40.0) : const Size(59.0, 40.0));
 
@@ -336,10 +322,6 @@ void main() {
         ..circle()
         ..circle(color: selectedThumbColor))
     );
-    expect(themeThumbImage1.loadCallCount, 0);
-    expect(themeThumbImage2.loadCallCount, 0);
-    expect(defaultThumbImage.loadCallCount, 1);
-    expect(selectedThumbImage.loadCallCount, 1);
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
@@ -570,45 +552,4 @@ Future<void> _pointGestureToSwitch(WidgetTester tester) async {
 
 MaterialInkController? _getSwitchMaterial(WidgetTester tester) {
   return Material.of(tester.element(find.byType(Switch)));
-}
-
-class _TestImageProvider extends ImageProvider<Object> {
-  _TestImageProvider({ImageStreamCompleter? streamCompleter}) {
-    _streamCompleter = streamCompleter
-        ?? OneFrameImageStreamCompleter(_completer.future);
-  }
-
-  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
-  late ImageStreamCompleter _streamCompleter;
-
-  bool get loadCalled => _loadCallCount > 0;
-  int get loadCallCount => _loadCallCount;
-  int _loadCallCount = 0;
-
-  @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<_TestImageProvider>(this);
-  }
-
-  @override
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
-    super.resolveStreamForKey(configuration, stream, key, handleError);
-  }
-
-  @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
-    _loadCallCount += 1;
-    return _streamCompleter;
-  }
-
-  void complete(ui.Image image) {
-    _completer.complete(ImageInfo(image: image));
-  }
-
-  void fail(Object exception, StackTrace? stackTrace) {
-    _completer.completeError(exception, stackTrace);
-  }
-
-  @override
-  String toString() => '${describeIdentity(this)}()';
 }

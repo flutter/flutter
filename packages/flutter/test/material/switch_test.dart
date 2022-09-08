@@ -1865,42 +1865,6 @@ void main() {
       expect(imageCache.liveImageCount, 2);
     });
 
-    testWidgets('Using thumbImage, Switch does not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
-      final DelayedImageProvider imageProvider = DelayedImageProvider(image);
-
-      final MaterialStateProperty<Image?> thumbImage =
-      MaterialStateProperty.resolveWith<Image?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          return Image(image: imageProvider);
-        }
-        return null;
-      },
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: theme,
-          home: Material(
-            child: Center(
-              child: Switch(
-                value: true,
-                onChanged: null,
-                thumbImage: thumbImage,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(Switch), findsOneWidget);
-
-      // Dispose the switch by taking down the tree.
-      await tester.pumpWidget(Container());
-      expect(find.byType(Switch), findsNothing);
-
-      imageProvider.complete();
-      expect(tester.takeException(), isNull);
-    });
-
     testWidgets('do not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
       final DelayedImageProvider imageProvider = DelayedImageProvider(image);
 
@@ -2755,7 +2719,7 @@ void main() {
         colorSchemeSeed: const Color(0xff6750a4),
         brightness: Brightness.light);
 
-      MaterialStateProperty<Icon?> thumbImage(Icon? activeIcon, Icon? inactiveIcon) {
+      MaterialStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
         return MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return activeIcon;
@@ -2773,7 +2737,7 @@ void main() {
                 return Material(
                   child: Center(
                     child: Switch(
-                      thumbImage: thumbImage(activeIcon, inactiveIcon),
+                      thumbIcon: thumbIcon(activeIcon, inactiveIcon),
                       value: active,
                       onChanged: enabled ? (_) {} : null,
                     ),
