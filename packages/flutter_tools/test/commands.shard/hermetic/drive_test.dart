@@ -306,7 +306,7 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     PubContext? context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,

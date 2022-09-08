@@ -120,6 +120,14 @@ const ValidationResult invalidWindowsValidationResult = ValidationResult(
   statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
 );
 
+/// Expected return from a nonzero exitcode when
+/// running systeminfo
+const ValidationResult invalidExitCodeValidationResult = ValidationResult(
+  ValidationType.missing,
+  <ValidationMessage>[],
+  statusInfo: 'Exit status from running `systeminfo` was unsuccessful',
+);
+
 void main() {
   testWithoutContext('Successfully running windows version check on windows 10',
       () async {
@@ -186,9 +194,26 @@ void main() {
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
 
+  testWithoutContext(
+      'Running into an nonzero exit code from systeminfo command', () async {
+    final WindowsVersionValidator windowsVersionValidator =
+        WindowsVersionValidator(
+      processManager: FakeProcessManager.list(
+        <FakeCommand>[
+          const FakeCommand(command: <String>['systeminfo'], exitCode: 1),
+        ],
+      ),
+    );
+
+    final ValidationResult result = await windowsVersionValidator.validate();
+
+    expect(result.type, invalidExitCodeValidationResult.type,
+        reason: 'The ValidationResult type should be the same (missing)');
+    expect(result.statusInfo, invalidExitCodeValidationResult.statusInfo,
+        reason: 'The ValidationResult statusInfo messages should be the same');
+  });
+
   testWithoutContext('Unit testing on a regex pattern validator', () async {
-    const String regexPattern =
-        r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$';
     const String testStr = r'''
 OS Version:                10.0.19044 N/A Build 19044
 OSz Version:                10.0.19044 N/A Build 19044
@@ -200,8 +225,9 @@ OS Version:                10.0.19044 N/A Build 19044
 OS Version:                .0.19044 N/A Build 19044
 ''';
 
-    final Iterable<RegExpMatch> matches =
-        WindowsVersionValidator.validateString(regexPattern, testStr);
+    final RegExp regex =
+        RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
+    final Iterable<RegExpMatch> matches = regex.allMatches(testStr);
 
     expect(matches.length, 2,
         reason: 'There should be only two matches for the pattern provided');
