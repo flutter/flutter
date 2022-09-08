@@ -56,27 +56,22 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
             const SizedBox(height: 120.0),
-            PrimaryColorOverride(
-              color: kShrineBrown900,
-              child: Container(
-                decoration: _decoration,
-                child: TextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                  ),
+            Container(
+              decoration: _decoration,
+              child: TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(
+                  labelText: 'Username',
                 ),
               ),
             ),
             const SizedBox(height: 12.0),
-            PrimaryColorOverride(
-              color: kShrineBrown900,
-              child: Container(
-                decoration: _decoration,
-                child: TextField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
+            Container(
+              decoration: _decoration,
+              child: TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
                   ),
                 ),
               ),
@@ -118,21 +113,6 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class PrimaryColorOverride extends StatelessWidget {
-  const PrimaryColorOverride({super.key, this.color, this.child});
-
-  final Color? color;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(primaryColor: color),
-      child: child!,
     );
   }
 }

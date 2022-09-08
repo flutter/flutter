@@ -17,6 +17,297 @@
 
 version: 1
 transforms:
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Remove 'primaryColorDark'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorDark'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Remove 'primaryColorDark'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorDark'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Remove 'primaryColorDark'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorDark'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Remove 'primaryColorLight'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorLight'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Remove 'primaryColorLight'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorLight'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Remove 'primaryColorLight'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorLight'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Migrate to 'ColorScheme.primary'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'primaryColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.primary'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Migrate to 'ColorScheme.primary'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "primaryColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+    - if: "primaryColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "primaryColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+    - if: "primaryColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      primaryColor:
+        kind: 'fragment'
+        value: 'arguments[primaryColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Migrate to 'ColorScheme.primary'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "primaryColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+    - if: "primaryColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "primaryColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+    - if: "primaryColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      primaryColor:
+        kind: 'fragment'
+        value: 'arguments[primaryColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/110848
+  - title: "Migrate to 'ColorScheme.primary'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "primaryColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme(primary: {% primaryColor %})'
+            requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme == ''"
+        - kind: 'removeParameter'
+          name: 'primaryColor'
+    - if: "primaryColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "primaryColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+    - if: "primaryColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, primary: {% primaryColor %})'
+          requiredIf: "primaryColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'primaryColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      primaryColor:
+        kind: 'fragment'
+        value: 'arguments[primaryColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
   # Changes made in https://github.com/flutter/flutter/pull/111080
   - title: "Migrate to 'BottomAppBarTheme.color'"
     date: 2022-09-07

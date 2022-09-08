@@ -308,9 +308,6 @@ class ThemeData with Diagnosticable {
     Color? hintColor,
     Color? hoverColor,
     Color? indicatorColor,
-    Color? primaryColor,
-    Color? primaryColorDark,
-    Color? primaryColorLight,
     MaterialColor? primarySwatch,
     Color? scaffoldBackgroundColor,
     Color? secondaryHeaderColor,
@@ -436,6 +433,21 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
+    @Deprecated(
+      'Use colorScheme.primary instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColorDark,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColorLight,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -636,9 +648,6 @@ class ThemeData with Diagnosticable {
       hintColor: hintColor,
       hoverColor: hoverColor,
       indicatorColor: indicatorColor,
-      primaryColor: primaryColor,
-      primaryColorDark: primaryColorDark,
-      primaryColorLight: primaryColorLight,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       secondaryHeaderColor: secondaryHeaderColor,
       shadowColor: shadowColor,
@@ -700,6 +709,9 @@ class ThemeData with Diagnosticable {
       errorColor: errorColor,
       backgroundColor: backgroundColor,
       bottomAppBarColor: bottomAppBarColor,
+      primaryColor: primaryColor,
+      primaryColorDark: primaryColorDark,
+      primaryColorLight: primaryColorLight,
     );
   }
 
@@ -743,9 +755,6 @@ class ThemeData with Diagnosticable {
     required this.hintColor,
     required this.hoverColor,
     required this.indicatorColor,
-    required this.primaryColor,
-    required this.primaryColorDark,
-    required this.primaryColorLight,
     required this.scaffoldBackgroundColor,
     required this.secondaryHeaderColor,
     required this.shadowColor,
@@ -869,6 +878,21 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
+    @Deprecated(
+      'Use colorScheme.primary instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColorDark,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColorLight,
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
@@ -884,6 +908,9 @@ class ThemeData with Diagnosticable {
        _errorColor = errorColor,
        _backgroundColor = backgroundColor,
        _bottomAppBarColor = bottomAppBarColor,
+       _primaryColor = primaryColor,
+       _primaryColorDark = primaryColorDark,
+       _primaryColorLight = primaryColorLight,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -907,9 +934,6 @@ class ThemeData with Diagnosticable {
        assert(hintColor != null),
        assert(hoverColor != null),
        assert(indicatorColor != null),
-       assert(primaryColor != null),
-       assert(primaryColorDark != null),
-       assert(primaryColorLight != null),
        assert(scaffoldBackgroundColor != null),
        assert(secondaryHeaderColor != null),
        assert(shadowColor != null),
@@ -967,7 +991,10 @@ class ThemeData with Diagnosticable {
        assert(fixTextFieldOutlineLabel != null),
        assert(primaryColorBrightness != null),
        assert(errorColor != null),
-       assert(backgroundColor != null);
+       assert(backgroundColor != null),
+       assert(primaryColor != null),
+       assert(primaryColorDark != null),
+       assert(primaryColorLight != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1312,14 +1339,6 @@ class ThemeData with Diagnosticable {
 
   // COLOR
 
-  /// The default color of the [BottomAppBar].
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-  Color get bottomAppBarColor => _bottomAppBarColor!;
-  final Color? _bottomAppBarColor;
-
   /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
 
@@ -1369,20 +1388,6 @@ class ThemeData with Diagnosticable {
   /// The color of the selected tab indicator in a tab bar.
   final Color indicatorColor;
 
-  /// The background color for major parts of the app (toolbars, tab bars, etc)
-  ///
-  /// The theme's [colorScheme] property contains [ColorScheme.primary], as
-  /// well as a color that contrasts well with the primary color called
-  /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
-  /// visuals in terms of the theme's [colorScheme].
-  final Color primaryColor;
-
-  /// A darker version of the [primaryColor].
-  final Color primaryColorDark;
-
-  /// A lighter version of the [primaryColor].
-  final Color primaryColorLight;
-
   /// The default color of the [Material] that underlies the [Scaffold]. The
   /// background color for a typical material app or a page within the app.
   final Color scaffoldBackgroundColor;
@@ -1392,14 +1397,6 @@ class ThemeData with Diagnosticable {
   // https://material.io/archive/guidelines/components/data-tables.html#data-tables-tables-within-cards
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
-
-  /// The color used to highlight selected rows.
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  Color get selectedRowColor => _selectedRowColor!;
-  final Color? _selectedRowColor;
 
   /// The color that the [Material] widget uses to draw elevation shadows.
   ///
@@ -1417,11 +1414,6 @@ class ThemeData with Diagnosticable {
   /// See also:
   ///  * [splashFactory], which defines the appearance of the splash.
   final Color splashColor;
-
-  /// The color used to highlight the active states of toggleable widgets like
-  /// [Switch], [Radio], and [Checkbox].
-  Color get toggleableActiveColor => _toggleableActiveColor!;
-  final Color? _toggleableActiveColor;
 
   /// The color used for widgets in their inactive (but enabled)
   /// state. For example, an unchecked checkbox. See also [disabledColor].
@@ -1714,6 +1706,19 @@ class ThemeData with Diagnosticable {
   )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
+  /// The color used to highlight the active states of toggleable widgets like
+  /// [Switch], [Radio], and [Checkbox].
+  Color get toggleableActiveColor => _toggleableActiveColor!;
+  final Color? _toggleableActiveColor;
+
+  /// The color used to highlight selected rows.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
+  Color get selectedRowColor => _selectedRowColor!;
+  final Color? _selectedRowColor;
+
   /// Obsolete property that was used for input validation errors, e.g. in
   /// [TextField] fields. Use [ColorScheme.error] instead.
   @Deprecated(
@@ -1731,6 +1736,39 @@ class ThemeData with Diagnosticable {
   )
   Color get backgroundColor => _backgroundColor!;
   final Color? _backgroundColor;
+
+  /// Obsolete property that was the default color of the [BottomAppBar].
+  @Deprecated(
+    'Use BottomAppBarTheme.color instead. '
+    'This feature was deprecated after v3.3.0-0.6.pre.',
+  )
+  Color get bottomAppBarColor => _bottomAppBarColor!;
+  final Color? _bottomAppBarColor;
+
+  /// Obsolete property that was used as the background color for major parts of
+  /// the app (toolbars, tab bars, etc). Use [ColorScheme.primary] instead.
+  @Deprecated(
+    'Use colorScheme.primary instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  Color get primaryColor => _backgroundColor!;
+  final Color? _primaryColor;
+
+  /// Obsolete property that was used for [CircleAvatar] backgrounds.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  Color get primaryColorDark => _primaryColorDark!;
+  final Color? _primaryColorDark;
+
+  /// Obsolete property that was used for [CircleAvatar] backgrounds.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  Color get primaryColorLight => _primaryColorLight!;
+  final Color? _primaryColorLight;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
@@ -1769,9 +1807,6 @@ class ThemeData with Diagnosticable {
     Color? hintColor,
     Color? hoverColor,
     Color? indicatorColor,
-    Color? primaryColor,
-    Color? primaryColorDark,
-    Color? primaryColorLight,
     Color? scaffoldBackgroundColor,
     Color? secondaryHeaderColor,
     Color? shadowColor,
@@ -1882,12 +1917,12 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     @Deprecated(
       'Use colorScheme.error instead. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? errorColor,
     @Deprecated(
       'Use colorScheme.background instead. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? backgroundColor,
     @Deprecated(
@@ -1895,6 +1930,21 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
+    @Deprecated(
+      'Use colorScheme.primary instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColor,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColorDark,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    Color? primaryColorLight,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1927,9 +1977,6 @@ class ThemeData with Diagnosticable {
       hintColor: hintColor ?? this.hintColor,
       hoverColor: hoverColor ?? this.hoverColor,
       indicatorColor: indicatorColor ?? this.indicatorColor,
-      primaryColor: primaryColor ?? this.primaryColor,
-      primaryColorDark: primaryColorDark ?? this.primaryColorDark,
-      primaryColorLight: primaryColorLight ?? this.primaryColorLight,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
       shadowColor: shadowColor ?? this.shadowColor,
@@ -1991,6 +2038,9 @@ class ThemeData with Diagnosticable {
       errorColor: errorColor ?? _errorColor,
       backgroundColor: backgroundColor ?? _backgroundColor,
       bottomAppBarColor: bottomAppBarColor ?? _bottomAppBarColor,
+      primaryColor: primaryColor ?? _primaryColor,
+      primaryColorDark: primaryColorDark ?? _primaryColorDark,
+      primaryColorLight: primaryColorLight ?? _primaryColorLight,
     );
   }
 
@@ -2127,9 +2177,6 @@ class ThemeData with Diagnosticable {
       hintColor: Color.lerp(a.hintColor, b.hintColor, t)!,
       hoverColor: Color.lerp(a.hoverColor, b.hoverColor, t)!,
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t)!,
-      primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
-      primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t)!,
-      primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t)!,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
       shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
@@ -2191,6 +2238,9 @@ class ThemeData with Diagnosticable {
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
+      primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t),
+      primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t),
+      primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
     );
   }
 
@@ -2229,9 +2279,6 @@ class ThemeData with Diagnosticable {
         other.hintColor == hintColor &&
         other.hoverColor == hoverColor &&
         other.indicatorColor == indicatorColor &&
-        other.primaryColor == primaryColor &&
-        other.primaryColorDark == primaryColorDark &&
-        other.primaryColorLight == primaryColorLight &&
         other.scaffoldBackgroundColor == scaffoldBackgroundColor &&
         other.secondaryHeaderColor == secondaryHeaderColor &&
         other.shadowColor == shadowColor &&
@@ -2292,7 +2339,10 @@ class ThemeData with Diagnosticable {
         other.selectedRowColor == selectedRowColor &&
         other.errorColor == errorColor &&
         other.backgroundColor == backgroundColor &&
-        other.bottomAppBarColor == bottomAppBarColor;
+        other.bottomAppBarColor == bottomAppBarColor &&
+        other.primaryColor == primaryColor &&
+        other.primaryColorDark == primaryColorDark &&
+        other.primaryColorLight == primaryColorLight;
   }
 
   @override
@@ -2328,9 +2378,6 @@ class ThemeData with Diagnosticable {
       hintColor,
       hoverColor,
       indicatorColor,
-      primaryColor,
-      primaryColorDark,
-      primaryColorLight,
       scaffoldBackgroundColor,
       secondaryHeaderColor,
       shadowColor,
@@ -2392,6 +2439,9 @@ class ThemeData with Diagnosticable {
       errorColor,
       backgroundColor,
       bottomAppBarColor,
+      primaryColor,
+      primaryColorDark,
+      primaryColorLight,
     ];
     return Object.hashAll(values);
   }
@@ -2429,9 +2479,6 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
@@ -2493,6 +2540,9 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
   }
 }
 

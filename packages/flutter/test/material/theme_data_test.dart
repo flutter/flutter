@@ -661,9 +661,6 @@ void main() {
       hintColor: Colors.black,
       hoverColor: Colors.black,
       indicatorColor: Colors.black,
-      primaryColor: Colors.black,
-      primaryColorDark: Colors.black,
-      primaryColorLight: Colors.black,
       scaffoldBackgroundColor: Colors.black,
       secondaryHeaderColor: Colors.black,
       shadowColor: Colors.black,
@@ -725,6 +722,9 @@ void main() {
       errorColor: Colors.black,
       backgroundColor: Colors.black,
       bottomAppBarColor: Colors.black,
+      primaryColor: Colors.black,
+      primaryColorDark: Colors.black,
+      primaryColorLight: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -773,9 +773,6 @@ void main() {
       hintColor: Colors.white,
       hoverColor: Colors.white,
       indicatorColor: Colors.white,
-      primaryColor: Colors.white,
-      primaryColorDark: Colors.white,
-      primaryColorLight: Colors.white,
       scaffoldBackgroundColor: Colors.white,
       secondaryHeaderColor: Colors.white,
       shadowColor: Colors.white,
@@ -840,6 +837,9 @@ void main() {
       errorColor: Colors.white,
       backgroundColor: Colors.white,
       bottomAppBarColor: Colors.white,
+      primaryColor: Colors.white,
+      primaryColorDark: Colors.white,
+      primaryColorLight: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -873,9 +873,6 @@ void main() {
       hintColor: otherTheme.hintColor,
       hoverColor: otherTheme.hoverColor,
       indicatorColor: otherTheme.indicatorColor,
-      primaryColor: otherTheme.primaryColor,
-      primaryColorDark: otherTheme.primaryColorDark,
-      primaryColorLight: otherTheme.primaryColorLight,
       scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
       secondaryHeaderColor: otherTheme.secondaryHeaderColor,
       shadowColor: otherTheme.shadowColor,
@@ -940,6 +937,9 @@ void main() {
       errorColor: otherTheme.errorColor,
       backgroundColor: otherTheme.backgroundColor,
       bottomAppBarColor: otherTheme.bottomAppBarColor,
+      primaryColor: otherTheme.primaryColor,
+      primaryColorDark: otherTheme.primaryColorDark,
+      primaryColorLight: otherTheme.primaryColorLight,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -972,9 +972,6 @@ void main() {
     expect(themeDataCopy.hintColor, equals(otherTheme.hintColor));
     expect(themeDataCopy.hoverColor, equals(otherTheme.hoverColor));
     expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
-    expect(themeDataCopy.primaryColor, equals(otherTheme.primaryColor));
-    expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
-    expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
     expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
     expect(themeDataCopy.secondaryHeaderColor, equals(otherTheme.secondaryHeaderColor));
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
@@ -1044,6 +1041,9 @@ void main() {
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
+    expect(themeDataCopy.primaryColor, equals(otherTheme.primaryColor));
+    expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
+    expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1101,9 +1101,6 @@ void main() {
       'useMaterial3',
       // COLOR
       'colorScheme',
-      'primaryColor',
-      'primaryColorLight',
-      'primaryColorDark',
       'focusColor',
       'hoverColor',
       'shadowColor',
@@ -1175,6 +1172,9 @@ void main() {
       'errorColor',
       'backgroundColor',
       'bottomAppBarColor',
+      'primaryColor',
+      'primaryColorLight',
+      'primaryColorDark',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();

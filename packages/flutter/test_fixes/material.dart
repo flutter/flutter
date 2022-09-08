@@ -694,4 +694,37 @@ void main() {
   themeData = ThemeData(bottomAppBarColor: Colors.green);
   themeData = ThemeData.raw(bottomAppBarColor: Colors.green);
   themeData = ThemeData.copyWith(bottomAppBarColor: Colors.green);
+
+  // Changes made in https://github.com/flutter/flutter/pull/110848
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(primaryColor: Colors.grey);
+  themeData = ThemeData(primaryColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = ThemeData(primaryColor: Colors.grey, colorScheme: ColorScheme.light());
+  themeData = ThemeData(primaryColor: Colors.grey, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = ThemeData(otherParam: '');
+  themeData = ThemeData.raw(primaryColor: Colors.grey);
+  themeData = ThemeData.raw(primaryColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(primaryColor: Colors.grey, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(primaryColor: Colors.grey, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(otherParam: '');
+  themeData = themeData.copyWith(primaryColor: Colors.grey);
+  themeData = themeData.copyWith(otherParam: '');
+  themeData = themeData.copyWith(primaryColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(primaryColor: Colors.grey, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(primaryColor: Colors.grey, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData.primaryColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/110848
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(primaryColorLight: Colors.red);
+  themeData = ThemeData.raw(primaryColorLight: Colors.red);
+  themeData = themeData.copyWith(primaryColorLight: Colors.red);
+  themeData.primaryColorLight; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/110848
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(primaryColorDark: Colors.red);
+  themeData = ThemeData.raw(primaryColorDark: Colors.red);
+  themeData = themeData.copyWith(primaryColorDark: Colors.red);
+  themeData.primaryColorDark; // Removing field reference not supported.
 }

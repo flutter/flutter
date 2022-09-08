@@ -28,9 +28,6 @@ ThemeData _buildDarkTheme() {
   final ThemeData base = ThemeData(
     brightness: Brightness.dark,
     colorScheme: colorScheme,
-    primaryColor: primaryColor,
-    primaryColorDark: const Color(0xFF0050a0),
-    primaryColorLight: secondaryColor,
     indicatorColor: Colors.white,
     canvasColor: const Color(0xFF202124),
     scaffoldBackgroundColor: const Color(0xFF202124),
@@ -52,7 +49,6 @@ ThemeData _buildLightTheme() {
   final ThemeData base = ThemeData(
     brightness: Brightness.light,
     colorScheme: colorScheme,
-    primaryColor: primaryColor,
     indicatorColor: Colors.white,
     splashColor: Colors.white24,
     splashFactory: InkRipple.splashFactory,

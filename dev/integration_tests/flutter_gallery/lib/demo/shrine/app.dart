@@ -84,7 +84,6 @@ ThemeData _buildShrineTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
     colorScheme: kShrineColorScheme,
-    primaryColor: kShrinePink100,
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
     primaryIconTheme: _customIconTheme(base.iconTheme),
