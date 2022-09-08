@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 import 'package:flutter/services.dart';
 
 import 'pair.dart';
@@ -170,10 +169,11 @@ Future<TestStepResult> _basicMessageToUnknownChannel<T>(
 }
 
 String toString(dynamic message) {
-  if (message is ByteData)
+  if (message is ByteData) {
     return message.buffer
         .asUint8List(message.offsetInBytes, message.lengthInBytes)
         .toString();
-  else
+  } else {
     return '$message';
+  }
 }

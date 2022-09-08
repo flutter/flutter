@@ -174,15 +174,12 @@ class Table extends RenderObjectWidget {
                               : null {
     assert(() {
       final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children!).toList(growable: false);
-      if (debugChildrenHaveDuplicateKeys(this, flatChildren)) {
-        throw FlutterError(
-          'Two or more cells in this Table contain widgets with the same key.\n'
-          'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
-          'flattened out for processing, so separate cells cannot have duplicate keys even if they are in '
-          'different rows.',
-        );
-      }
-      return true;
+      return !debugChildrenHaveDuplicateKeys(this, flatChildren, message:
+        'Two or more cells in this Table contain widgets with the same key.\n'
+        'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
+        'flattened out for processing, so separate cells cannot have duplicate keys even if they are in '
+        'different rows.',
+      );
     }());
   }
 

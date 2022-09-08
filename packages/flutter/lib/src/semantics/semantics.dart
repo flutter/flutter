@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
-       TextDirection, StringAttribute;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
@@ -16,8 +14,13 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
-export 'dart:ui' show SemanticsAction, StringAttribute, SpellOutStringAttribute, LocaleStringAttribute;
-export 'semantics_event.dart';
+export 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, DiagnosticsTreeStyle, Key, TextTreeConfiguration;
+export 'package:flutter/services.dart' show TextSelection;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'semantics_event.dart' show SemanticsEvent;
 
 /// Signature for a function that is called for each [SemanticsNode].
 ///
@@ -2312,7 +2315,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     );
     assert(
       !_canPerformAction(SemanticsAction.decrease) || (value == '') == (decreasedValue == ''),
-      'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
+      'A SemanticsNode with action "decrease" needs to be annotated with either both "value" and "decreasedValue" or neither',
     );
   }
 
@@ -3535,8 +3538,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3553,8 +3556,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
@@ -3571,8 +3574,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3589,8 +3592,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }

@@ -31,7 +31,7 @@ void main() {
   const String releaseChannel = 'beta';
   const String stateFile = '/state-file.json';
   final String localPathSeparator = const LocalPlatform().pathSeparator;
-  final String localOperatingSystem = const LocalPlatform().pathSeparator;
+  final String localOperatingSystem = const LocalPlatform().operatingSystem;
 
   group('next command', () {
     late MemoryFileSystem fileSystem;
@@ -502,7 +502,8 @@ void main() {
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Create candidate branch version $candidateBranch for $releaseChannel'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -516,7 +517,8 @@ void main() {
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -593,7 +595,8 @@ void main() {
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Create candidate branch version $candidateBranch for $releaseChannel'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -607,7 +610,8 @@ void main() {
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -671,7 +675,8 @@ void main() {
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Create candidate branch version $candidateBranch for $releaseChannel'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -685,7 +690,8 @@ void main() {
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],

@@ -201,8 +201,9 @@ class AndroidSemanticsAction {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is AndroidSemanticsAction
         && other.id == id;
   }

@@ -14,12 +14,10 @@ require 'json'
 # target 'Runner' do
 # ...
 # end
-def flutter_ios_podfile_setup
-end
+def flutter_ios_podfile_setup; end
 
 # Same as flutter_ios_podfile_setup for macOS.
-def flutter_macos_podfile_setup
-end
+def flutter_macos_podfile_setup; end
 
 # Add iOS build settings to pod targets.
 #
@@ -60,13 +58,12 @@ def flutter_additional_ios_build_settings(target)
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
-      next if xcframework_file.start_with?(".") # Hidden file, possibly on external disk.
-      if xcframework_file.end_with?("-simulator") # ios-arm64_x86_64-simulator
+      next if xcframework_file.start_with?('.') # Hidden file, possibly on external disk.
+      if xcframework_file.end_with?('-simulator') # ios-arm64_x86_64-simulator
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
-      elsif xcframework_file.start_with?("ios-") # ios-arm64
+      elsif xcframework_file.start_with?('ios-') # ios-arm64
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
-      else
-        # Info.plist or another platform.
+       # else Info.plist or another platform.
       end
     end
     build_configuration.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Flutter'
@@ -95,11 +92,11 @@ def flutter_additional_macos_build_settings(target)
   # [target.deployment_target] is a [String] formatted as "10.8".
   deployment_target_major, deployment_target_minor = target.deployment_target.match(/(\d+).?(\d*)/).captures
 
-  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.9).
+  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.13).
   # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
   inherit_deployment_target = !target.deployment_target.blank? &&
     (deployment_target_major.to_i < 10) ||
-    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 9)
+    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 13)
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -158,7 +155,7 @@ end
 #                                      Optional, defaults to the Podfile directory.
 def flutter_install_ios_engine_pod(ios_application_path = nil)
   # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
-  ios_application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
+  ios_application_path ||= File.dirname(defined_in_file.realpath) if respond_to?(:defined_in_file)
   raise 'Could not find iOS application path' unless ios_application_path
 
   podspec_directory = File.join(ios_application_path, 'Flutter')
@@ -167,7 +164,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   # Generate a fake podspec to represent the Flutter framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'Flutter'`, and if this Podfile
   # does not add a `pod 'Flutter'` CocoaPods will try to download it from the CocoaPods trunk.
-  File.open(copied_podspec_path, 'w') { |podspec|
+  File.open(copied_podspec_path, 'w') do |podspec|
     podspec.write <<~EOF
       #
       # NOTE: This podspec is NOT to be published. It is only used as a local source!
@@ -177,9 +174,9 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
       Pod::Spec.new do |s|
         s.name             = 'Flutter'
         s.version          = '1.0.0'
-        s.summary          = 'High-performance, high-fidelity mobile apps.'
-        s.homepage         = 'https://flutter.io'
-        s.license          = { :type => 'MIT' }
+        s.summary          = 'A UI toolkit for beautiful and fast apps.'
+        s.homepage         = 'https://flutter.dev'
+        s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
         s.ios.deployment_target = '11.0'
@@ -188,16 +185,16 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
         s.vendored_frameworks = 'path/to/nothing'
       end
     EOF
-  }
+  end
 
   # Keep pod path relative so it can be checked into Podfile.lock.
-  pod 'Flutter', :path => flutter_relative_path_from_podfile(podspec_directory)
+  pod 'Flutter', path: flutter_relative_path_from_podfile(podspec_directory)
 end
 
 # Same as flutter_install_ios_engine_pod for macOS.
 def flutter_install_macos_engine_pod(mac_application_path = nil)
   # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
-  mac_application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
+  mac_application_path ||= File.dirname(defined_in_file.realpath) if respond_to?(:defined_in_file)
   raise 'Could not find macOS application path' unless mac_application_path
 
   copied_podspec_path = File.expand_path('FlutterMacOS.podspec', File.join(mac_application_path, 'Flutter', 'ephemeral'))
@@ -205,7 +202,7 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
   # Generate a fake podspec to represent the FlutterMacOS framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'FlutterMacOS'`, and if this Podfile
   # does not add a `pod 'FlutterMacOS'` CocoaPods will try to download it from the CocoaPods trunk.
-  File.open(copied_podspec_path, 'w') { |podspec|
+  File.open(copied_podspec_path, 'w') do |podspec|
     podspec.write <<~EOF
       #
       # NOTE: This podspec is NOT to be published. It is only used as a local source!
@@ -215,21 +212,21 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
       Pod::Spec.new do |s|
         s.name             = 'FlutterMacOS'
         s.version          = '1.0.0'
-        s.summary          = 'High-performance, high-fidelity mobile apps.'
-        s.homepage         = 'https://flutter.io'
-        s.license          = { :type => 'MIT' }
+        s.summary          = 'A UI toolkit for beautiful and fast apps.'
+        s.homepage         = 'https://flutter.dev'
+        s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.osx.deployment_target = '10.11'
+        s.osx.deployment_target = '10.13'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'FlutterMacOS'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
       end
     EOF
-  }
+  end
 
   # Keep pod path relative so it can be checked into Podfile.lock.
-  pod 'FlutterMacOS', :path => File.join('Flutter', 'ephemeral')
+  pod 'FlutterMacOS', path: File.join('Flutter', 'ephemeral')
 end
 
 # Install Flutter plugin pods.
@@ -238,7 +235,7 @@ end
 #                                   Optional, defaults to the Podfile directory.
 def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, platform)
   # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
-  application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
+  application_path ||= File.dirname(defined_in_file.realpath) if respond_to?(:defined_in_file)
   raise 'Could not find application path' unless application_path
 
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
@@ -256,15 +253,14 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
     has_native_build = plugin_hash.fetch('native_build', true)
-    if (plugin_name && plugin_path && has_native_build)
-      symlink = File.join(symlink_plugins_dir, plugin_name)
-      File.symlink(plugin_path, symlink)
+    next unless plugin_name && plugin_path && has_native_build
+    symlink = File.join(symlink_plugins_dir, plugin_name)
+    File.symlink(plugin_path, symlink)
 
-      # Keep pod path relative so it can be checked into Podfile.lock.
-      relative = flutter_relative_path_from_podfile(symlink)
+    # Keep pod path relative so it can be checked into Podfile.lock.
+    relative = flutter_relative_path_from_podfile(symlink)
 
-      pod plugin_name, :path => File.join(relative, platform)
-    end
+    pod plugin_name, path: File.join(relative, platform)
   end
 end
 
@@ -272,7 +268,7 @@ end
 # https://flutter.dev/go/plugins-list-migration
 def flutter_parse_plugins_file(file, platform)
   file_path = File.expand_path(file)
-  return [] unless File.exists? file_path
+  return [] unless File.exist? file_path
 
   dependencies_file = File.read(file)
   dependencies_hash = JSON.parse(dependencies_file)

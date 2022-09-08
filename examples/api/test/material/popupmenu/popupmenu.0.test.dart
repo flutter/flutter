@@ -26,4 +26,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('_selectedMenu: itemOne'), findsNothing);
   });
+
+  testWidgets('Does not show debug banner', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.MyApp());
+    expect(find.byType(CheckedModeBanner), findsNothing);
+  });
 }

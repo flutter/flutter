@@ -44,8 +44,9 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   double _maxHeight;
   set maxHeight(double value) {
     assert(maxHeight >= 0.0);
-    if (_maxHeight == value)
+    if (_maxHeight == value) {
       return;
+    }
     _maxHeight = value;
     markNeedsLayout();
   }
@@ -56,8 +57,9 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   double _scrollFactor;
   set scrollFactor(double value) {
     assert(scrollFactor >= 1.0);
-    if (_scrollFactor == value)
+    if (_scrollFactor == value) {
       return;
+    }
     _scrollFactor = value;
     markNeedsLayout();
   }
@@ -390,22 +392,27 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       // then snap it there. Similarly if the simulation is headed down past
       // midScrollOffset but will not reach zero, then snap it to zero.
       final double simulationEnd = simulation.x(double.infinity);
-      if (simulationEnd >= midScrollOffset)
+      if (simulationEnd >= midScrollOffset) {
         return simulation;
-      if (dragVelocity > 0.0)
+      }
+      if (dragVelocity > 0.0) {
         return _toMidScrollOffsetSimulation(offset, dragVelocity);
-      if (dragVelocity < 0.0)
+      }
+      if (dragVelocity < 0.0) {
         return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+      }
     } else {
       // The user ended the drag with little or no velocity. If they
       // didn't leave the offset above midScrollOffset, then
       // snap to midScrollOffset if they're more than halfway there,
       // otherwise snap to zero.
       final double snapThreshold = midScrollOffset / 2.0;
-      if (offset >= snapThreshold && offset < midScrollOffset)
+      if (offset >= snapThreshold && offset < midScrollOffset) {
         return _toMidScrollOffsetSimulation(offset, dragVelocity);
-      if (offset > 0.0 && offset < snapThreshold)
+      }
+      if (offset > 0.0 && offset < snapThreshold) {
         return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+      }
     }
     return simulation;
   }
@@ -439,10 +446,11 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   }
 
   void _handleBackButton(double midScrollOffset) {
-    if (_scrollController.offset >= midScrollOffset)
+    if (_scrollController.offset >= midScrollOffset) {
       _scrollController.animateTo(0.0, curve: _kScrollCurve, duration: _kScrollDuration);
-    else
+    } else {
       Navigator.maybePop(context);
+    }
   }
 
   // Only enable paging for the heading when the user has scrolled to midScrollOffset.
@@ -478,8 +486,9 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   bool _handlePageNotification(ScrollNotification notification, PageController leader, PageController follower) {
     if (notification.depth == 0 && notification is ScrollUpdateNotification) {
       selectedIndex.value = leader.page;
-      if (follower.page != leader.page)
+      if (follower.page != leader.page) {
         follower.position.jumpToWithoutSettling(leader.position.pixels); // ignore: deprecated_member_use
+      }
     }
     return false;
   }

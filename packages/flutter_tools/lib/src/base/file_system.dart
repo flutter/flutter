@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
+import 'common.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'process.dart';
@@ -176,17 +177,18 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
 /// directories and files that the tool creates under the system temporary
 /// directory when the tool exits either normally or when killed by a signal.
 class LocalFileSystem extends local_fs.LocalFileSystem {
-  LocalFileSystem(this._signals, this._fatalSignals, this._shutdownHooks);
+  LocalFileSystem(this._signals, this._fatalSignals, this.shutdownHooks);
 
   @visibleForTesting
   LocalFileSystem.test({
     required Signals signals,
     List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
-  }) : this(signals, fatalSignals, null);
+  }) : this(signals, fatalSignals, ShutdownHooks());
 
   Directory? _systemTemp;
   final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
-  final ShutdownHooks? _shutdownHooks;
+
+  final ShutdownHooks shutdownHooks;
 
   Future<void> dispose() async {
     _tryToDeleteTemp();
@@ -205,7 +207,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
         _systemTemp?.deleteSync(recursive: true);
       }
     } on FileSystemException {
-      // ignore.
+      // ignore
     }
     _systemTemp = null;
   }
@@ -218,7 +220,12 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   @override
   Directory get systemTempDirectory {
     if (_systemTemp == null) {
-      _systemTemp = super.systemTempDirectory.createTempSync('flutter_tools.')
+      if (!superSystemTempDirectory.existsSync()) {
+        throwToolExit('Your system temp directory (${superSystemTempDirectory.path}) does not exist. '
+          'Did you set an invalid override in your environment? See issue https://github.com/flutter/flutter/issues/74042 for more context.'
+        );
+      }
+      _systemTemp = superSystemTempDirectory.createTempSync('flutter_tools.')
         ..createSync(recursive: true);
       // Make sure that the temporary directory is cleaned up if the tool is
       // killed by a signal.
@@ -233,10 +240,14 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       }
       // Make sure that the temporary directory is cleaned up when the tool
       // exits normally.
-      _shutdownHooks?.addShutdownHook(
+      shutdownHooks.addShutdownHook(
         _tryToDeleteTemp,
       );
     }
     return _systemTemp!;
   }
+
+  // This only exist because the memory file system does not support a systemTemp that does not exists #74042
+  @visibleForTesting
+  Directory get superSystemTempDirectory => super.systemTempDirectory;
 }

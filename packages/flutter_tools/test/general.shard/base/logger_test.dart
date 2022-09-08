@@ -566,7 +566,6 @@ void main() {
               outputStdout().join('\n'),
               '$message' // initial message
               '${" " * 4}${" " * 8}' // margin (4) and space for the time at the end (8)
-              // ignore: missing_whitespace_between_adjacent_strings
               '$a' // first tick
               '$blankLine' // clearing the line
               'Rude Interrupting Cow\n' // message

@@ -35,6 +35,11 @@ class MyStatelessWidget extends StatelessWidget {
         thumbColor: Colors.blue,
         thumbVisibility: true,
         child: ListView(
+          // On mobile platforms, setting primary to true is not required, as
+          // the PrimaryScrollController automatically attaches to vertical
+          // ScrollPositions. On desktop platforms however, using the
+          // PrimaryScrollController requires ScrollView.primary be set.
+          primary: true,
           physics: const BouncingScrollPhysics(),
           children: List<Text>.generate(
               100, (int index) => Text((index * index).toString())),

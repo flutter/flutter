@@ -14,9 +14,9 @@ import 'build_aar.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
 import 'build_bundle.dart';
-import 'build_fuchsia.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
+import 'build_macos_framework.dart';
 import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
@@ -29,6 +29,10 @@ class BuildCommand extends FlutterCommand {
       buildSystem: globals.buildSystem,
       verboseHelp: verboseHelp,
     ));
+    _addSubcommand(BuildMacOSFrameworkCommand(
+      buildSystem: globals.buildSystem,
+      verboseHelp: verboseHelp,
+    ));
     _addSubcommand(BuildIOSArchiveCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
@@ -38,7 +42,6 @@ class BuildCommand extends FlutterCommand {
       verboseHelp: verboseHelp
     ));
     _addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
-    _addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
   }
 
   void _addSubcommand(BuildSubCommand command) {
@@ -78,15 +81,18 @@ abstract class BuildSubCommand extends FlutterCommand {
   @protected
   void displayNullSafetyMode(BuildInfo buildInfo) {
     globals.printStatus('');
-    if (buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-      globals.printStatus('💪 Building with sound null safety 💪', emphasis: true);
+    if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
+      globals.printStatus(
+        '💪 Building with sound null safety 💪',
+        emphasis: true,
+      );
     } else {
       globals.printStatus(
-        'Building without sound null safety',
+        'Building without sound null safety ⚠️',
         emphasis: true,
       );
       globals.printStatus(
-        'For more information see https://dart.dev/null-safety/unsound-null-safety',
+        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
       );
     }
     globals.printStatus('');

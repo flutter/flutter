@@ -61,6 +61,8 @@ typedef BottomSheetDragEndHandler = void Function(
 ///    non-modal "persistent" bottom sheets.
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
+///  * [BottomSheetThemeData], which can be used to customize the default
+///    bottom sheet property values.
 ///  * <https://material.io/design/components/sheets-bottom.html>
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.
@@ -468,6 +470,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     super.settings,
     this.transitionAnimationController,
     this.anchorPoint,
+    this.useSafeArea = false,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
        assert(enableDrag != null);
@@ -485,6 +488,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final bool enableDrag;
   final AnimationController? transitionAnimationController;
   final Offset? anchorPoint;
+  final bool useSafeArea;
 
   @override
   Duration get transitionDuration => _bottomSheetEnterDuration;
@@ -517,30 +521,36 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    // By definition, the bottom sheet is aligned to the bottom of the page
-    // and isn't exposed to the top padding of the MediaQuery.
-    final Widget bottomSheet = MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      child: DisplayFeatureSubScreen(
-        anchorPoint: anchorPoint,
-        child: Builder(
-          builder: (BuildContext context) {
-            final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-            return _ModalBottomSheet<T>(
-              route: this,
-              backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-              elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-              shape: shape,
-              clipBehavior: clipBehavior,
-              constraints: constraints,
-              isScrollControlled: isScrollControlled,
-              enableDrag: enableDrag,
-            );
-          },
-        ),
+    final Widget content = DisplayFeatureSubScreen(
+      anchorPoint: anchorPoint,
+      child: Builder(
+        builder: (BuildContext context) {
+          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+          return _ModalBottomSheet<T>(
+            route: this,
+            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+            shape: shape,
+            clipBehavior: clipBehavior,
+            constraints: constraints,
+            isScrollControlled: isScrollControlled,
+            enableDrag: enableDrag,
+          );
+        },
       ),
     );
+
+    // If useSafeArea is true, a SafeArea is inserted.
+    // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
+    // and isn't exposed to the top padding of the MediaQuery.
+    final Widget bottomSheet = useSafeArea
+      ? SafeArea(child: content)
+      : MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: content,
+        );
+
     return capturedThemes.wrap(bottomSheet);
   }
 }
@@ -636,6 +646,9 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
+/// The [useSafeArea] parameter specifies whether a SafeArea is inserted. Defaults to false.
+/// If false, no SafeArea is added and the top padding is consumed using MediaQuery.removePadding.
+///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
 /// [constraints] and [transitionAnimationController]
 /// parameters can be passed in to customize the appearance and behavior of
@@ -688,6 +701,7 @@ Future<T?> showModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
+  bool useSafeArea = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
@@ -718,6 +732,7 @@ Future<T?> showModalBottomSheet<T>({
     settings: routeSettings,
     transitionAnimationController: transitionAnimationController,
     anchorPoint: anchorPoint,
+    useSafeArea: useSafeArea,
   ));
 }
 

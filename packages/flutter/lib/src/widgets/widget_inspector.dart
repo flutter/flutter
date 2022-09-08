@@ -7,7 +7,6 @@ import 'dart:collection' show HashMap;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui
     show
         ClipOp,
@@ -35,7 +34,7 @@ import 'gesture_detector.dart';
 /// [WidgetInspector.selectButtonBuilder].
 typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-/// Signature for a  method that registers the service extension `callback` with
+/// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
 ///
 /// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
@@ -749,6 +748,12 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
+  /// the pubRootDirectories that are currently configured for the widget inspector.
+  ///
+  /// This is for testing use only.
+  @visibleForTesting
+  @protected
+  List<String>? get pubRootDirectories => _pubRootDirectories == null ? const <String>[] : List<String>.from(_pubRootDirectories!);
   List<String>? _pubRootDirectories;
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
@@ -973,7 +978,7 @@ mixin WidgetInspectorService {
     bool enabled = false;
     assert(() {
       // TODO(kenz): add support for structured errors on the web.
-      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb); // ignore: avoid_redundant_argument_values
+      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb);
       return true;
     }());
     return enabled;
@@ -1107,6 +1112,20 @@ mixin WidgetInspectorService {
         return null;
       },
     );
+    _registerServiceExtensionVarArgs(
+      name: 'addPubRootDirectories',
+      callback: (List<String> args) async {
+        addPubRootDirectories(args);
+        return null;
+      },
+    );
+    _registerServiceExtensionVarArgs(
+      name: 'removePubRootDirectories',
+      callback: (List<String> args) async {
+        removePubRootDirectories(args);
+        return null;
+      },
+    );
     _registerServiceExtensionWithArg(
       name: 'setSelectionById',
       callback: setSelectionById,
@@ -1234,7 +1253,7 @@ mixin WidgetInspectorService {
   void resetAllState() {
     disposeAllGroups();
     selection.clear();
-    setPubRootDirectories(<String>[]);
+    resetPubRootDirectories();
   }
 
   /// Free all references to objects in a group.
@@ -1356,12 +1375,66 @@ mixin WidgetInspectorService {
   /// project.
   ///
   /// The local project directories are used to distinguish widgets created by
-  /// the local project over widgets created from inside the framework.
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
   @protected
+  @Deprecated(
+    'Use addPubRootDirectories instead. '
+    'This feature was deprecated after v3.1.0-9.0.pre.',
+  )
   void setPubRootDirectories(List<String> pubRootDirectories) {
-    _pubRootDirectories = pubRootDirectories
-      .map<String>((String directory) => Uri.parse(directory).path)
-      .toList();
+    addPubRootDirectories(pubRootDirectories);
+  }
+
+  /// Resets the list of directories, that should be considered part of the
+  /// local project, to the value passed in [pubRootDirectories].
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
+  @visibleForTesting
+  @protected
+  void resetPubRootDirectories() {
+    _pubRootDirectories = <String>[];
+    _isLocalCreationCache.clear();
+  }
+
+  /// Add a list of directories that should be considered part of the local
+  /// project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
+  @protected
+  void addPubRootDirectories(List<String> pubRootDirectories) {
+    pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
+
+    final Set<String> directorySet = Set<String>.from(pubRootDirectories);
+    if(_pubRootDirectories != null) {
+      directorySet.addAll(_pubRootDirectories!);
+    }
+
+    _pubRootDirectories = directorySet.toList();
+    _isLocalCreationCache.clear();
+  }
+
+  /// Remove a list of directories that should no longer be considered part
+  /// of the local project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project from widgets created from inside the framework
+  /// or other packages.
+  @protected
+  void removePubRootDirectories(List<String> pubRootDirectories) {
+    if (_pubRootDirectories == null) {
+      return;
+    }
+    pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
+
+    final Set<String> directorySet = Set<String>.from(_pubRootDirectories!);
+    directorySet.removeAll(pubRootDirectories);
+
+    _pubRootDirectories = directorySet.toList();
     _isLocalCreationCache.clear();
   }
 
@@ -1458,7 +1531,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns JSON representing the chain of [DiagnosticsNode] instances from
-  /// root of thee tree to the [Element] or [RenderObject] matching `id`.
+  /// root of the tree to the [Element] or [RenderObject] matching `id`.
   ///
   /// The JSON contains all information required to display a tree view with
   /// all nodes other than nodes along the path collapsed.
@@ -2705,6 +2778,13 @@ class _InspectorOverlayLayer extends Layer {
   double? _textPainterMaxWidth;
 
   @override
+  void dispose() {
+    _textPainter?.dispose();
+    _textPainter = null;
+    super.dispose();
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder) {
     if (!selection.active) {
       return;
@@ -2805,6 +2885,7 @@ class _InspectorOverlayLayer extends Layer {
     final TextSpan? textSpan = _textPainter?.text as TextSpan?;
     if (_textPainter == null || textSpan!.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
+      _textPainter?.dispose();
       _textPainter = TextPainter()
         ..maxLines = _kMaxTooltipLines
         ..ellipsis = '...'
@@ -3224,45 +3305,6 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// This callback can be used to customize the serialization of DiagnosticsNode
   /// objects for experimental features in widget inspector clients such as
   /// [Dart DevTools](https://github.com/flutter/devtools).
-  /// For example, [Dart DevTools](https://github.com/flutter/devtools)
-  /// can evaluate the following expression to register a VM Service API
-  /// with a custom serialization to experiment with visualizing layouts.
-  ///
-  /// The following code samples demonstrates adding the [RenderObject] associated
-  /// with an [Element] to the serialized data for all elements in the tree:
-  ///
-  /// ```dart
-  /// Map<String, Object> getDetailsSubtreeWithRenderObject(
-  ///   String id,
-  ///   String groupName,
-  ///   int subtreeDepth,
-  /// ) {
-  ///   return _nodeToJson(
-  ///     root,
-  ///     InspectorSerializationDelegate(
-  ///       groupName: groupName,
-  ///       summaryTree: false,
-  ///       subtreeDepth: subtreeDepth,
-  ///       includeProperties: true,
-  ///       service: this,
-  ///       addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
-  ///         final Map<String, Object> additionalJson = <String, Object>{};
-  ///         final Object value = node.value;
-  ///         if (value is Element) {
-  ///           final renderObject = value.renderObject;
-  ///           additionalJson['renderObject'] = renderObject?.toDiagnosticsNode()?.toJsonMap(
-  ///             delegate.copyWith(
-  ///               subtreeDepth: 0,
-  ///               includeProperties: true,
-  ///             ),
-  ///           );
-  ///         }
-  ///         return additionalJson;
-  ///       },
-  ///     ),
-  ///  );
-  /// }
-  /// ```
   final Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback;
 
   final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];

@@ -138,7 +138,7 @@ void main() {
 
   group('Common text editing shortcuts: ',
     () {
-      final TargetPlatformVariant allExceptApple = TargetPlatformVariant(TargetPlatform.values.toSet()..removeAll(<TargetPlatform>[TargetPlatform.macOS, TargetPlatform.iOS]));
+      final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS});
 
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
@@ -1475,6 +1475,7 @@ void main() {
               offset: 2,
             );
             await tester.pumpWidget(buildEditableText());
+            await tester.pump(); // Wait for autofocus to take effect.
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
             await tester.pump();
@@ -1813,7 +1814,7 @@ void main() {
   }, skip: kIsWeb); // [intended] on web these keys are handled by the browser.
 
   group('Web does not accept', () {
-    final TargetPlatformVariant allExceptApple = TargetPlatformVariant(TargetPlatform.values.toSet()..removeAll(<TargetPlatform>[TargetPlatform.macOS, TargetPlatform.iOS]));
+    final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS });
     const TargetPlatformVariant appleOnly = TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.iOS });
     group('macOS shortcuts', () {
 

@@ -149,6 +149,7 @@ abstract class ChromiumDevice extends Device {
             .childDirectory('chrome-device'),
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
+        webBrowserFlags: debuggingOptions.webBrowserFlags,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});

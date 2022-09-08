@@ -389,10 +389,10 @@ class Cache {
         throw Exception('Could not find file at $versionFilePath');
       }
       final dynamic data = jsonDecode(versionFile.readAsStringSync());
-      if (data is! Map<String, Object>) {
-        throw Exception("Expected object of type 'Map<String, Object>' but got one of type '${data.runtimeType}'");
+      if (data is! Map<String, Object?>) {
+        throw Exception("Expected object of type 'Map<String, Object?>' but got one of type '${data.runtimeType}'");
       }
-      final dynamic version = data['version'];
+      final Object? version = data['version'];
       if (version == null) {
         throw Exception('Could not parse DevTools version from $version');
       }
@@ -520,7 +520,7 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
-    _logger.printStatus(
+    _logger.printError(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
     );

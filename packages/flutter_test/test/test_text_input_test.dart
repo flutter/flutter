@@ -8,6 +8,7 @@
 // Fails with "flutter test --test-randomize-ordering-seed=20210721"
 @Tags(<String>['no-shuffle'])
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,4 +55,24 @@ void main() {
       throwsA(isA<PlatformException>()),
     );
   });
+
+  testWidgets('selectors are called on macOS', (WidgetTester tester) async {
+    List<dynamic>? selectorNames;
+    await SystemChannels.textInput.invokeMethod('TextInput.setClient', <dynamic>[1, <String, dynamic>{}]);
+    await SystemChannels.textInput.invokeMethod('TextInput.show');
+    SystemChannels.textInput.setMethodCallHandler((MethodCall call) async {
+      if (call.method == 'TextInputClient.performSelectors') {
+        selectorNames = (call.arguments as List<dynamic>)[1] as List<dynamic>;
+      }
+    });
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      expect(selectorNames, <dynamic>['moveBackward:', 'moveToBeginningOfParagraph:']);
+    } else {
+      expect(selectorNames, isNull);
+    }
+  }, variant: TargetPlatformVariant.all());
 }

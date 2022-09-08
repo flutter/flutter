@@ -6,25 +6,22 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const GeneralDialogApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class GeneralDialogApp extends StatelessWidget {
+  const GeneralDialogApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       restorationScopeId: 'app',
-      title: _title,
-      home: MyStatelessWidget(),
+      home: GeneralDialogExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class GeneralDialogExample extends StatelessWidget {
+  const GeneralDialogExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +29,7 @@ class MyStatelessWidget extends StatelessWidget {
       body: Center(
         child: OutlinedButton(
           onPressed: () {
+            /// This shows an alert dialog.
             Navigator.of(context).restorablePush(_dialogBuilder);
           },
           child: const Text('Open Dialog'),

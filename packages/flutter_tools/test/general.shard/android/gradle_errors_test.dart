@@ -2,23 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
+  late FileSystem fileSystem;
+  late FakeProcessManager processManager;
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+    processManager = FakeProcessManager.empty();
+  });
+
   group('gradleErrors', () {
     testWithoutContext('list of errors', () {
       // If you added a new Gradle error, please update this test.
@@ -38,53 +47,13 @@ void main() {
           jvm11RequiredHandler,
           outdatedGradleHandler,
           sslExceptionHandler,
+          zipExceptionHandler,
         ])
       );
     });
   });
 
   group('network errors', () {
-    testUsingContext('retries and deletes zip if gradle fails to unzip', () async {
-      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
-      const String errorMessage = r'''
-Exception in thread "main" java.util.zip.ZipException: error in opening zip file
-at java.util.zip.ZipFile.open(Native Method)
-at java.util.zip.ZipFile.(ZipFile.java:225)
-at java.util.zip.ZipFile.(ZipFile.java:155)
-at java.util.zip.ZipFile.(ZipFile.java:169)
-at org.gradle.wrapper.Install.unzip(Install.java:214)
-at org.gradle.wrapper.Install.access$600(Install.java:27)
-at org.gradle.wrapper.Install$1.call(Install.java:74)
-at org.gradle.wrapper.Install$1.call(Install.java:48)
-at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
-at org.gradle.wrapper.Install.createDist(Install.java:48)
-at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
-at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-[!] Gradle threw an error while trying to update itself. Retrying the update...
-Exception in thread "main" java.util.zip.ZipException: error in opening zip file
-at java.util.zip.ZipFile.open(Native Method)
-at java.util.zip.ZipFile.(ZipFile.java:225)
-at java.util.zip.ZipFile.(ZipFile.java:155)
-at java.util.zip.ZipFile.(ZipFile.java:169)
-at org.gradle.wrapper.Install.unzip(Install.java:214)
-at org.gradle.wrapper.Install.access$600(Install.java:27)
-at org.gradle.wrapper.Install$1.call(Install.java:74)
-at org.gradle.wrapper.Install$1.call(Install.java:48)
-at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
-at org.gradle.wrapper.Install.createDist(Install.java:48)
-at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
-at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-''';
-
-      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
-      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
-    });
-
     testUsingContext('retries if gradle fails while downloading', () async {
       const String errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
@@ -101,7 +70,12 @@ at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -109,8 +83,8 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('retries if gradle fails downloading with proxy error', () async {
@@ -131,7 +105,12 @@ at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -139,8 +118,8 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('retries if gradle times out waiting for exclusive access to zip', () async {
@@ -152,7 +131,12 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -160,8 +144,8 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('retries if remote host closes connection', () async {
@@ -189,7 +173,12 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -197,8 +186,8 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('retries if file opening fails', () async {
@@ -218,7 +207,12 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -226,8 +220,8 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('retries if the connection is reset', () async {
@@ -258,7 +252,12 @@ Exception in thread "main" java.net.SocketException: Connection reset
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -266,8 +265,8 @@ Exception in thread "main" java.net.SocketException: Connection reset
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('retries if Gradle could not get a resource', () async {
@@ -285,7 +284,12 @@ A problem occurred configuring root project 'android'.
                      > Could not GET 'https://jcenter.bintray.com/net/sf/proguard/proguard-parent/6.0.3/proguard-parent-6.0.3.pom'. Received status code 504 from server: Gateway Time-out''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -293,8 +297,8 @@ A problem occurred configuring root project 'android'.
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('retries if Gradle could not get a resource (non-Gateway)', () async {
@@ -316,7 +320,12 @@ A problem occurred configuring root project 'android'.
                > Remote host closed connection during handshake''';
 
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(await networkErrorHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
       expect(testLogger.errorText,
         contains(
@@ -324,8 +333,8 @@ A problem occurred configuring root project 'android'.
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -355,7 +364,7 @@ Execution failed for task ':app:mergeDexDebug'.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: true, usesAndroidX: true, line: ''), equals(GradleBuildStatus.exit));
 
       expect(testLogger.statusText,
         contains(
@@ -373,8 +382,8 @@ Execution failed for task ':app:mergeDexDebug'.
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
     testUsingContext('retries if multidex support enabled', () async {
       const String errorMessage = r'''
@@ -400,7 +409,7 @@ Execution failed for task ':app:mergeDexDebug'.
      The number of method references in a .dex file cannot exceed 64K.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
-      final File manifest = globals.fs.currentDirectory
+      final File manifest = fileSystem.currentDirectory
           .childDirectory('android')
           .childDirectory('app')
           .childDirectory('src')
@@ -419,7 +428,7 @@ Execution failed for task ':app:mergeDexDebug'.
 ''', flush: true);
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.retry));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: true, line: '', usesAndroidX: true), equals(GradleBuildStatus.retry));
 
       expect(testLogger.statusText,
         contains(
@@ -432,8 +441,8 @@ Execution failed for task ':app:mergeDexDebug'.
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
       AnsiTerminal: () => _TestPromptTerminal('y'),
     });
 
@@ -461,7 +470,7 @@ Execution failed for task ':app:mergeDexDebug'.
      The number of method references in a .dex file cannot exceed 64K.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
-      final File manifest = globals.fs.currentDirectory
+      final File manifest = fileSystem.currentDirectory
           .childDirectory('android')
           .childDirectory('app')
           .childDirectory('src')
@@ -480,7 +489,7 @@ Execution failed for task ':app:mergeDexDebug'.
 ''', flush: true);
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: true, line: '', usesAndroidX: true), equals(GradleBuildStatus.exit));
 
       expect(testLogger.statusText,
         contains(
@@ -498,8 +507,8 @@ Execution failed for task ':app:mergeDexDebug'.
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
       AnsiTerminal: () => _TestPromptTerminal('n'),
     });
 
@@ -528,7 +537,7 @@ Execution failed for task ':app:mergeDexDebug'.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: false), equals(GradleBuildStatus.exit));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: false, line: '', usesAndroidX: true), equals(GradleBuildStatus.exit));
 
       expect(testLogger.statusText,
         contains(
@@ -536,8 +545,8 @@ Execution failed for task ':app:mergeDexDebug'.
         )
       );
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -548,7 +557,12 @@ Permission denied
 Command: /home/android/gradlew assembleRelease
 ''';
       expect(formatTestErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
-      expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
+      expect(await permissionDeniedErrorHandler.handler(
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+      ), equals(GradleBuildStatus.exit));
 
       expect(
         testLogger.statusText,
@@ -578,7 +592,12 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler', () async {
-      expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
+      expect(await permissionDeniedErrorHandler.handler(
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+      ), equals(GradleBuildStatus.exit));
 
       expect(
         testLogger.statusText,
@@ -611,7 +630,9 @@ Command: /home/android/gradlew assembleRelease
     testUsingContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
         line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
       );
 
       expect(
@@ -631,12 +652,6 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('flavor undefined', () {
-    FakeProcessManager fakeProcessManager;
-
-    setUp(() {
-      fakeProcessManager = FakeProcessManager.empty();
-    });
-
     testWithoutContext('pattern', () {
       expect(
         flavorUndefinedHandler.test(
@@ -665,7 +680,7 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler - with flavor', () async {
-      fakeProcessManager.addCommand(const FakeCommand(
+      processManager.addCommand(const FakeCommand(
         command: <String>[
       'gradlew',
         'app:tasks' ,
@@ -686,7 +701,10 @@ assembleFooTest
       ));
 
       await flavorUndefinedHandler.handler(
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
       );
 
       expect(
@@ -708,16 +726,16 @@ assembleFooTest
           '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('handler - without flavor', () async {
-      fakeProcessManager.addCommand(const FakeCommand(
+      processManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
           'app:tasks' ,
@@ -732,7 +750,10 @@ assembleProfile
       ));
 
       await flavorUndefinedHandler.handler(
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
       );
 
       expect(
@@ -747,12 +768,12 @@ assembleProfile
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -769,7 +790,9 @@ assembleProfile
     testUsingContext('suggestion', () async {
       await minSdkVersionHandler.handler(
         line: stdoutLine,
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
       );
 
       expect(
@@ -796,8 +819,8 @@ assembleProfile
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -814,7 +837,10 @@ assembleProfile
 
     testUsingContext('suggestion', () async {
       await transformInputIssueHandler.handler(
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
       );
 
       expect(
@@ -835,8 +861,8 @@ assembleProfile
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -856,7 +882,10 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
     testUsingContext('suggestion', () async {
       await lockFileDepMissingHandler.handler(
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
       );
 
       expect(
@@ -873,8 +902,8 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -892,7 +921,10 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
     testUsingContext('suggestion', () async {
       await incompatibleKotlinVersionHandler.handler(
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
       );
 
       expect(
@@ -910,8 +942,8 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -932,7 +964,9 @@ A problem occurred evaluating project ':app'.
     testUsingContext('suggestion', () async {
       await outdatedGradleHandler.handler(
         line: errorMessage,
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
       );
 
       expect(
@@ -945,18 +979,18 @@ A problem occurred evaluating project ':app'.
           '│ To fix this issue, replace the following content:                                │\n'
           '│ /android/build.gradle:                                                           │\n'
           "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-          "│     + classpath 'com.android.tools.build:gradle:7.1.2'                           │\n"
+          "│     + classpath 'com.android.tools.build:gradle:7.2.0'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-7.4-all.zip               │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.5-all.zip               │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -989,7 +1023,9 @@ Execution failed for task ':app:checkDebugAarMetadata'.
     testUsingContext('suggestion', () async {
       await minCompileSdkVersionHandler.handler(
         line: errorMessage,
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
       );
 
       expect(
@@ -1008,8 +1044,8 @@ Execution failed for task ':app:checkDebugAarMetadata'.
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -1031,7 +1067,12 @@ A problem occurred evaluating project ':flutter'.
     });
 
     testUsingContext('suggestion', () async {
-      await jvm11RequiredHandler.handler();
+      await jvm11RequiredHandler.handler(
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
+      );
 
       expect(
         testLogger.statusText,
@@ -1050,8 +1091,8 @@ A problem occurred evaluating project ':flutter'.
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
@@ -1106,7 +1147,12 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''
     });
 
     testUsingContext('suggestion', () async {
-      final GradleBuildStatus status = await sslExceptionHandler.handler();
+      final GradleBuildStatus status = await sslExceptionHandler.handler(
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
+      );
 
       expect(status, GradleBuildStatus.retry);
       expect(testLogger.errorText,
@@ -1117,11 +1163,146 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
+  group('Zip exception', () {
+    testWithoutContext('pattern', () {
+      expect(
+        zipExceptionHandler.test(r'''
+Exception in thread "main" java.util.zip.ZipException: error in opening zip file
+at java.util.zip.ZipFile.open(Native Method)
+at java.util.zip.ZipFile.(ZipFile.java:225)
+at java.util.zip.ZipFile.(ZipFile.java:155)
+at java.util.zip.ZipFile.(ZipFile.java:169)
+at org.gradle.wrapper.Install.unzip(Install.java:214)
+at org.gradle.wrapper.Install.access$600(Install.java:27)
+at org.gradle.wrapper.Install$1.call(Install.java:74)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
+      );
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+       expect(testLogger.statusText, '');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      BotDetector: () => const FakeBotDetector(false),
+    });
+
+    testUsingContext('suggestion if running as bot', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+        line: '',
+        multidexEnabled: true,
+      );
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), isNot(exists));
+
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(
+        testLogger.statusText,
+        contains('Deleting foo/.gradle\n'),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      BotDetector: () => const FakeBotDetector(true),
+    });
+
+    testUsingContext('suggestion if stdin has terminal and user entered y', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        line: '',
+        usesAndroidX: true,
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+      );
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), isNot(exists));
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(
+        testLogger.statusText,
+        contains('Deleting foo/.gradle\n'),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      AnsiTerminal: () => _TestPromptTerminal('y'),
+      BotDetector: () => const FakeBotDetector(false),
+    });
+
+    testUsingContext('suggestion if stdin has terminal and user entered n', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        line: '',
+        usesAndroidX: true,
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+      );
+
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        testLogger.errorText,
+        contains(
+          '[!] Your .gradle directory under the home directory might be corrupted.\n'
+        )
+      );
+      expect(testLogger.statusText, '');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      AnsiTerminal: () => _TestPromptTerminal('n'),
+      BotDetector: () => const FakeBotDetector(false),
+    });
+  });
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
@@ -1139,7 +1320,7 @@ Platform fakePlatform(String name) {
   );
 }
 
-class FakeGradleUtils extends GradleUtils {
+class FakeGradleUtils extends Fake implements GradleUtils {
   @override
   String getExecutable(FlutterProject project) {
     return 'gradlew';
@@ -1148,18 +1329,24 @@ class FakeGradleUtils extends GradleUtils {
 
 /// Simple terminal that returns the specified string when
 /// promptForCharInput is called.
-class _TestPromptTerminal extends AnsiTerminal {
+class _TestPromptTerminal extends Fake implements AnsiTerminal {
   _TestPromptTerminal(this.promptResult);
 
   final String promptResult;
 
   @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters, {
-    Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+  bool get stdinHasTerminal => true;
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) {
     return Future<String>.value(promptResult);
   }
 }
+
+class FakeFlutterProject extends Fake implements FlutterProject {}

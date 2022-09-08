@@ -56,7 +56,7 @@ class MyStatelessWidget extends StatelessWidget {
               return Center(
                 child: Text(
                   '${tab.text!} Tab',
-                  style: Theme.of(context).textTheme.headline5,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               );
             }).toList(),

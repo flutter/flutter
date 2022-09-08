@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icon_theme_data.dart';
 import 'text_theme.dart';
 
-export 'package:flutter/services.dart' show Brightness;
+export 'package:flutter/foundation.dart' show Brightness;
 
 // Values derived from https://developer.apple.com/design/resources/.
 const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(

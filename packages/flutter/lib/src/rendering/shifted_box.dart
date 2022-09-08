@@ -291,12 +291,6 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
-  /// A constructor to be used only when the extending class also has a mixin.
-  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/31543 is fixed.
-  @protected
-  RenderAligningShiftedBox.mixin(AlignmentGeometry alignment, TextDirection? textDirection, RenderBox? child)
-    : this(alignment: alignment, textDirection: textDirection, child: child);
-
   Alignment? _resolvedAlignment;
 
   void _resolve() {
@@ -662,9 +656,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
-/// A [RenderBox] that applies an arbitrary transform to its [constraints]
-/// before sizing its child using the new constraints, treating any overflow as
-/// error.
+/// A [RenderBox] that applies an arbitrary transform to its constraints,
+/// and sizes its child using the resulting [BoxConstraints], optionally
+/// clipping, or treating the overflow as an error.
 ///
 /// This [RenderBox] sizes its child using a [BoxConstraints] created by
 /// applying [constraintsTransform] to this [RenderBox]'s own [constraints].
@@ -674,9 +668,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// the entire child, the child will be clipped if [clipBehavior] is not
 /// [Clip.none].
 ///
-/// In debug mode, if the child overflows the box, a warning will be printed on
-/// the console, and black and yellow striped areas will appear where the
-/// overflow occurs.
+/// In debug mode, if [clipBehavior] is [Clip.none] and the child overflows the
+/// container, a warning will be printed on the console, and black and yellow
+/// striped areas will appear where the overflow occurs.
 ///
 /// When [child] is null, this [RenderBox] takes the smallest possible size and
 /// never overflows.
@@ -707,17 +701,16 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   ///
   /// The [alignment] and [clipBehavior] must not be null.
   RenderConstraintsTransformBox({
-    required AlignmentGeometry alignment,
-    required TextDirection? textDirection,
+    required super.alignment,
+    required super.textDirection,
     required BoxConstraintsTransform constraintsTransform,
-    RenderBox? child,
+    super.child,
     Clip clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
        assert(constraintsTransform != null),
        _constraintsTransform = constraintsTransform,
-       _clipBehavior = clipBehavior,
-       super.mixin(alignment, textDirection, child);
+       _clipBehavior = clipBehavior;
 
   /// {@macro flutter.widgets.constraintsTransform}
   BoxConstraintsTransform get constraintsTransform => _constraintsTransform;
@@ -739,7 +732,9 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// {@macro flutter.widgets.ConstraintsTransformBox.clipBehavior}
+  ///
+  /// Defaults to [Clip.none].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -837,9 +832,17 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
       oldLayer: _clipRectLayer.layer,
     );
 
-    // Display the overflow indicator.
+    // Display the overflow indicator if clipBehavior is Clip.none.
     assert(() {
-      paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
+      switch (clipBehavior) {
+        case Clip.none:
+          paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
+          break;
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          break;
+      }
       return true;
     }());
   }

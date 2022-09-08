@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:developer';
-import 'dart:ui' show PlatformMessageResponseCallback;
 
 import 'package:flutter/foundation.dart';
 
@@ -13,6 +12,9 @@ import 'binding.dart';
 import 'debug.dart' show debugProfilePlatformChannels;
 import 'message_codec.dart';
 import 'message_codecs.dart';
+
+export 'binary_messenger.dart' show BinaryMessenger;
+export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 
 bool _debugProfilePlatformChannelsIsRunning = false;
 const Duration _debugProfilePlatformChannelsRate = Duration(seconds: 1);
@@ -266,10 +268,10 @@ class MethodChannel {
   /// [binaryMessenger]'s [BinaryMessenger.send] method.
   ///
   /// If the result is null and `missingOk` is true, this returns null. (This is
-  /// the behaviour of [OptionalMethodChannel.invokeMethod].)
+  /// the behavior of [OptionalMethodChannel.invokeMethod].)
   ///
   /// If the result is null and `missingOk` is false, this throws a
-  /// [MissingPluginException]. (This is the behaviour of
+  /// [MissingPluginException]. (This is the behavior of
   /// [MethodChannel.invokeMethod].)
   ///
   /// Otherwise, the result is decoded using the [codec]'s

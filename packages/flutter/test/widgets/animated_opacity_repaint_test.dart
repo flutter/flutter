@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RenderAnimatedOpacityMixin avoids repainting child as it animates', (WidgetTester tester) async {
+  testWidgets('RenderAnimatedOpacityMixin does not drop layer when animating to 1', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
     final Tween<double> opacityTween = Tween<double>(begin: 0, end: 1);
@@ -40,10 +40,43 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
+  testWidgets('RenderAnimatedOpacityMixin avoids repainting child as it animates', (WidgetTester tester) async {
+    RenderTestObject.paintCount = 0;
+    final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
+    final Tween<double> opacityTween = Tween<double>(begin: 0, end: 0.99); // Layer is dropped at 1
+    await tester.pumpWidget(
+      Container(
+        color: Colors.red,
+        child: FadeTransition(
+          opacity: controller.drive(opacityTween),
+          child: const TestWidget(),
+        ),
+      )
+    );
+
+    expect(RenderTestObject.paintCount, 0);
+    controller.forward();
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(RenderTestObject.paintCount, 1);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(RenderTestObject.paintCount, 1);
+
+    controller.stop();
+    await tester.pump();
+
+    expect(RenderTestObject.paintCount, 1);
+  });
+
   testWidgets('RenderAnimatedOpacityMixin allows opacity layer to be disposed when animating to 0 opacity', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
-    final Tween<double> opacityTween = Tween<double>(begin: 1, end: 0);
+    final Tween<double> opacityTween = Tween<double>(begin: 0.99, end: 0);
     await tester.pumpWidget(
       Container(
         color: Colors.red,

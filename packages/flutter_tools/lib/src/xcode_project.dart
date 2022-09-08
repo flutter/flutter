@@ -518,6 +518,8 @@ class MacOSProject extends XcodeBasedProject {
   @override
   File get generatedXcodePropertiesFile => ephemeralDirectory.childFile('Flutter-Generated.xcconfig');
 
+  File get pluginRegistrantImplementation => managedDirectory.childFile('GeneratedPluginRegistrant.swift');
+
   @override
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
 

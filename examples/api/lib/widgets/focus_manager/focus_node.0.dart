@@ -121,7 +121,7 @@ class MyStatelessWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return DefaultTextStyle(
-      style: textTheme.headline4!,
+      style: textTheme.headlineMedium!,
       child: const ColorfulButton(),
     );
   }

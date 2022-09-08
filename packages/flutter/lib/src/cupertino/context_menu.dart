@@ -6,7 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
+import 'package:flutter/gestures.dart' show kLongPressTimeout, kMinFlingVelocity;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -363,7 +363,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         );
       },
     );
-    Overlay.of(context, rootOverlay: true)!.insert(_lastOverlayEntry!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(_lastOverlayEntry!);
     _openController.forward();
   }
 
@@ -738,8 +738,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     // buildTransitions as child, the idea being that buildTransitions will
     // animate the entire page into the scene. In the case of _ContextMenuRoute,
     // two individual pieces of the page are animated into the scene in
-    // buildTransitions, and a Container is returned here.
-    return Container();
+    // buildTransitions, and a SizedBox.shrink() is returned here.
+    return const SizedBox.shrink();
   }
 
   @override

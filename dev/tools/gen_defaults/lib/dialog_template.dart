@@ -5,16 +5,15 @@
 import 'template.dart';
 
 class DialogTemplate extends TokenTemplate {
-  const DialogTemplate(super.fileName, super.tokens)
-    : super(colorSchemePrefix: '_colors.',
-        textThemePrefix: '_textTheme.'
-      );
+  const DialogTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends DialogTheme {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends DialogTheme {
+  _${blockName}DefaultsM3(this.context)
     : super(
         alignment: Alignment.center,
         elevation: ${elevation("md.comp.dialog.container")},
@@ -25,9 +24,17 @@ class _TokenDefaultsM3 extends DialogTheme {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  // TODO(darrenaustin): overlay should be handled by Material widget: https://github.com/flutter/flutter/issues/9160
   @override
-  Color? get backgroundColor => ElevationOverlay.colorWithOverlay(${componentColor("md.comp.dialog.container")}, _colors.primary, ${elevation("md.comp.dialog.container")});
+  Color? get iconColor => _colors.secondary;
+
+  @override
+  Color? get backgroundColor => ${componentColor("md.comp.dialog.container")};
+
+  @override
+  Color? get shadowColor => ${colorOrTransparent("md.comp.dialog.container.shadow-color")};
+
+  @override
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.dialog.container.surface-tint-layer.color")};
 
   @override
   TextStyle? get titleTextStyle => ${textStyle("md.comp.dialog.headline")};

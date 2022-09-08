@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -17,12 +15,11 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  FileSystem fileSystem;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem
-      .file('.dart_tool/package_config.json')
+    fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   });
@@ -80,7 +77,7 @@ void main() {
         ),
       ), throwsAssertionError);
 
-      FlutterPlatform capturedPlatform;
+      FlutterPlatform? capturedPlatform;
       final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
         shellPath: 'abc',
@@ -100,7 +97,9 @@ void main() {
         icudtlPath: 'ghi',
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
-        });
+        },
+        uriConverter: (String input) => '$input/test',
+      );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
       expect(flutterPlatform.shellPath, equals('abc'));
@@ -116,6 +115,7 @@ void main() {
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));
+      expect(flutterPlatform.uriConverter?.call('hello'), 'hello/test');
     });
   });
 }
