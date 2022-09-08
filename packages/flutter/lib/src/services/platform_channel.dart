@@ -126,6 +126,7 @@ void _debugRecordDownStream(String channelTypeName, String name,
   _debugLaunchProfilePlatformChannels();
 }
 
+/// A [BinaryMessenger] for use on background (non-root) isolates.
 class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   BackgroundIsolateBinaryMessenger._();
 
