@@ -88,11 +88,11 @@ abstract class BuildSubCommand extends FlutterCommand {
       );
     } else {
       globals.printStatus(
-        'Building without sound null safety',
+        'Building without sound null safety ⚠️',
         emphasis: true,
       );
       globals.printStatus(
-        'For more information see https://dart.dev/null-safety/unsound-null-safety',
+        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
       );
     }
     globals.printStatus('');

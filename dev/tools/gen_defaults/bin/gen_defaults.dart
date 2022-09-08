@@ -17,16 +17,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
+import 'package:gen_defaults/banner_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
-import 'package:gen_defaults/chip_action_template.dart';
-import 'package:gen_defaults/chip_filter_template.dart';
-import 'package:gen_defaults/chip_input_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
+import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
+import 'package:gen_defaults/input_chip_template.dart';
 import 'package:gen_defaults/input_decorator_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
@@ -103,6 +104,7 @@ Future<void> main(List<String> args) async {
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
+  BannerTemplate('Banner', '$materialLib/banner.dart', tokens).updateFile();
   ButtonTemplate('md.comp.elevated-button', 'ElevatedButton', '$materialLib/elevated_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-button', 'FilledButton', '$materialLib/filled_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-tonal-button', 'FilledTonalButton', '$materialLib/filled_button.dart', tokens).updateFile();
@@ -110,10 +112,10 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
-  ChipActionTemplate('ActionChip', '$materialLib/chip_action.dart', tokens).updateFile();
-  ChipFilterTemplate('FilterChip', '$materialLib/chip_filter.dart', tokens).updateFile();
-  ChipFilterTemplate('FilterChip', '$materialLib/chip_choice.dart', tokens).updateFile();
-  ChipInputTemplate('InputChip', '$materialLib/chip_input.dart', tokens).updateFile();
+  ChipActionTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
+  ChipFilterTemplate('FilterChip', '$materialLib/filter_chip.dart', tokens).updateFile();
+  ChipFilterTemplate('FilterChip', '$materialLib/choice_chip.dart', tokens).updateFile();
+  ChipInputTemplate('InputChip', '$materialLib/input_chip.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   IconButtonTemplate('IconButton', '$materialLib/icon_button.dart', tokens).updateFile();

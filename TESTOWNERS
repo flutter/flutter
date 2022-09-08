@@ -114,7 +114,6 @@
 /dev/devicelab/bin/tasks/fading_child_animation_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_large_images__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/flutter_gallery_mac__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_view__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_android__compile.dart @zanderso @flutter/tool

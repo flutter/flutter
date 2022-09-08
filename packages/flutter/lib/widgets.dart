@@ -116,6 +116,7 @@ export 'src/widgets/scrollbar.dart';
 export 'src/widgets/selectable_region.dart';
 export 'src/widgets/selection_container.dart';
 export 'src/widgets/semantics_debugger.dart';
+export 'src/widgets/service_extensions.dart';
 export 'src/widgets/shared_app_data.dart';
 export 'src/widgets/shortcuts.dart';
 export 'src/widgets/single_child_scroll_view.dart';

@@ -519,7 +519,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  });
+  }, skip: true); // [intended] https://github.com/flutter/flutter/issues/110107
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {

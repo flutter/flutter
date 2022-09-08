@@ -35,6 +35,7 @@ void main() {
     painter.layout();
     caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
+    painter.dispose();
   });
 
   test('TextPainter caret test with WidgetSpan', () {
@@ -53,6 +54,7 @@ void main() {
     painter.layout();
     final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
+    painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter null text test', () {
@@ -78,6 +80,7 @@ void main() {
     expect(caretOffset.dx, 0);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 0);
+    painter.dispose();
   });
 
   test('TextPainter caret emoji test', () {
@@ -144,6 +147,7 @@ void main() {
     expect(caretOffset.dx, 98); // <medium skin tone modifier>
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
     expect(caretOffset.dx, 126); // end of string
+    painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret center space test', () {
@@ -166,6 +170,7 @@ void main() {
     expect(caretOffset.dx, 35);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
     expect(caretOffset.dx, 49);
+    painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter error test', () {
@@ -180,6 +185,7 @@ void main() {
       e.toString(),
       contains('TextPainter.paint called when text geometry was not yet calculated'),
     );
+    painter.dispose();
   });
 
   test('TextPainter requires textDirection', () {
@@ -203,6 +209,7 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(123.0, 123.0));
+    painter.dispose();
   });
 
   test('TextPainter textScaleFactor test', () {
@@ -220,6 +227,7 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(20.0, 20.0));
+    painter.dispose();
   });
 
   test('TextPainter textScaleFactor null style test', () {
@@ -232,6 +240,7 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(28.0, 28.0));
+    painter.dispose();
   });
 
   test('TextPainter default text height is 14 pixels', () {
@@ -242,6 +251,7 @@ void main() {
     painter.layout();
     expect(painter.preferredLineHeight, 14.0);
     expect(painter.size, const Size(14.0, 14.0));
+    painter.dispose();
   });
 
   test('TextPainter sets paragraph size from root', () {
@@ -252,6 +262,7 @@ void main() {
     painter.layout();
     expect(painter.preferredLineHeight, 100.0);
     expect(painter.size, const Size(100.0, 100.0));
+    painter.dispose();
   });
 
   test('TextPainter intrinsic dimensions', () {
@@ -273,6 +284,7 @@ void main() {
     expect(painter.size, const Size(50.0, 10.0));
     expect(painter.minIntrinsicWidth, 10.0);
     expect(painter.maxIntrinsicWidth, 50.0);
+    painter.dispose();
 
     painter = TextPainter(
       text: const TextSpan(
@@ -286,6 +298,7 @@ void main() {
     expect(painter.size, const Size(50.0, 10.0));
     expect(painter.minIntrinsicWidth, 50.0);
     expect(painter.maxIntrinsicWidth, 50.0);
+    painter.dispose();
 
     painter = TextPainter(
       text: const TextSpan(
@@ -299,6 +312,7 @@ void main() {
     expect(painter.size, const Size(80.0, 10.0));
     expect(painter.minIntrinsicWidth, 40.0);
     expect(painter.maxIntrinsicWidth, 80.0);
+    painter.dispose();
 
     painter = TextPainter(
       text: const TextSpan(
@@ -312,6 +326,7 @@ void main() {
     expect(painter.size, const Size(110.0, 10.0));
     expect(painter.minIntrinsicWidth, 70.0);
     expect(painter.maxIntrinsicWidth, 110.0);
+    painter.dispose();
 
     painter = TextPainter(
       text: const TextSpan(
@@ -325,6 +340,7 @@ void main() {
     expect(painter.size, const Size(180.0, 10.0));
     expect(painter.minIntrinsicWidth, 90.0);
     expect(painter.maxIntrinsicWidth, 180.0);
+    painter.dispose();
 
     painter = TextPainter(
       text: const TextSpan(
@@ -338,6 +354,7 @@ void main() {
     expect(painter.size, const Size(180.0, 10.0));
     expect(painter.minIntrinsicWidth, 90.0);
     expect(painter.maxIntrinsicWidth, 180.0);
+    painter.dispose();
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
   test('TextPainter handles newlines properly', () {
@@ -679,6 +696,7 @@ void main() {
     );
     expect(caretOffset.dx, moreOrLessEquals(0.0, epsilon: 0.0001));
     expect(caretOffset.dy, moreOrLessEquals(0.0, epsilon: 0.0001));
+    painter.dispose();
   });
 
   test('TextPainter widget span', () {
@@ -773,6 +791,7 @@ void main() {
     expect(painter.inlinePlaceholderBoxes![11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes![12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes![13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
+    painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87540
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
@@ -782,6 +801,7 @@ void main() {
 
     painter.textHeightBehavior = const TextHeightBehavior();
     painter.textHeightBehavior = null;
+    painter.dispose();
   });
 
   test('TextPainter line metrics', () {
@@ -846,6 +866,7 @@ void main() {
     expect(lines[1].lineNumber, 1);
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
+    painter.dispose();
   }, skip: true); // https://github.com/flutter/flutter/issues/62819
 
   test('TextPainter caret height and line height', () {
@@ -862,6 +883,7 @@ void main() {
       ui.Rect.zero,
     )!;
     expect(caretHeight, 50.0);
+    painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   group('TextPainter line-height', () {
@@ -886,6 +908,7 @@ void main() {
       expect(insets.top, insets.bottom);
       // The glyph box is exactly 1 logical pixel high.
       expect(insets.top, (20 - 1) / 2);
+      painter.dispose();
     });
 
     test('half-leading with small height', () {
@@ -910,6 +933,7 @@ void main() {
       // The glyph box is exactly 10 logical pixel high (the height multiplier
       // does not scale the glyph). Negative leading.
       expect(insets.top, (1 - 10) / 2);
+      painter.dispose();
     });
 
     test('half-leading with leading trim', () {
@@ -935,6 +959,7 @@ void main() {
       expect(painter.size, glyphBox.size);
       // The glyph box is still centered.
       expect(glyphBox.topLeft, Offset.zero);
+      painter.dispose();
     });
 
     test('TextLeadingDistribution falls back to paragraph style', () {
@@ -955,6 +980,7 @@ void main() {
       final RelativeRect insets = RelativeRect.fromSize(glyphBox, painter.size);
       expect(insets.top, insets.bottom);
       expect(insets.top, (20 - 1) / 2);
+      painter.dispose();
     });
 
     test('TextLeadingDistribution does nothing if height multiplier is null', () {
@@ -978,6 +1004,7 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 1),
       ).first.toRect();
       expect(glyphBox, newGlyphBox);
+      painter.dispose();
     });
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87543
 
@@ -997,6 +1024,7 @@ void main() {
     // The layout should include one replacement character.
     expect(painter.width, equals(fontSize));
     expect(exception, isNotNull);
+    painter.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87544
 
   test('Diacritic', () {
@@ -1013,6 +1041,7 @@ void main() {
             offset: text.length, affinity: TextAffinity.upstream),
         ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
+    painter.dispose();
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
 
   test('TextPainter line metrics update after layout', () {
@@ -1033,6 +1062,7 @@ void main() {
 
     lines = painter.computeLineMetrics();
     expect(lines.length, 1);
+    painter.dispose();
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/62819
 
   test('TextPainter throws with stack trace when accessing text layout', () {
@@ -1068,6 +1098,7 @@ void main() {
 
     expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
     exception = null;
+    painter.dispose();
   });
 
   test('TextPainter requires layout after providing different placeholder dimensions', () {
@@ -1105,6 +1136,7 @@ void main() {
       e.toString(),
       contains('TextPainter.paint called when text geometry was not yet calculated'),
     );
+    painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter does not require layout after providing identical placeholder dimensions', () {
@@ -1143,7 +1175,15 @@ void main() {
       e.toString(),
       isNot(contains('TextPainter.paint called when text geometry was not yet calculated')),
     );
+    painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter - debugDisposed', () {
+    final TextPainter painter = TextPainter();
+    expect(painter.debugDisposed, false);
+    painter.dispose();
+    expect(painter.debugDisposed, true);
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {
