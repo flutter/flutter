@@ -107,6 +107,7 @@ class FlutterDeviceManager extends DeviceManager {
       operatingSystemUtils: operatingSystemUtils,
     ),
     PreviewDeviceDiscovery(
+      artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
