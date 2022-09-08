@@ -284,7 +284,7 @@ class Stepper extends StatefulWidget {
   ///       },
   ///     steps: const <Step>[
   ///       Step(
-  ///       title: Text('B'),
+  ///       title: Text('A'),
   ///         content: SizedBox(
   ///           width: 100.0,
   ///           height: 100.0,
