@@ -22,8 +22,12 @@
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
+/// Registry key for app theme preference.
+///
+/// A value of 0 indicates apps should use dark mode. A non-zero or missing
+/// value indicates apps should use light mode.
 constexpr const wchar_t kGetPreferredBrightnessRegKey[] =
-L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+  L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
 constexpr const wchar_t kGetPreferredBrightnessRegValue[] = L"AppsUseLightTheme";
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
