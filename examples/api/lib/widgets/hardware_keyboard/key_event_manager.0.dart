@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Flutter code sample for [KeyEventManager.keyMessageHandler].
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-// This example app demonstrates a use case of patching
-// `KeyEventManager.keyMessageHandler`: be notified of key events that are not
-// handled by any focus handlers (such as shortcuts).
 
 void main() => runApp(
   const MaterialApp(

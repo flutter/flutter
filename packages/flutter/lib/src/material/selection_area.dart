@@ -28,7 +28,7 @@ import 'theme.dart';
 /// {@tool dartpad}
 /// This example shows how to make a screen selectable.
 ///
-/// ** See code in examples/api/lib/material/selection_area/selection_area.dart **
+/// ** See code in examples/api/lib/material/selection_area/selection_area.0.dart **
 /// {@end-tool}
 ///
 /// See also:
