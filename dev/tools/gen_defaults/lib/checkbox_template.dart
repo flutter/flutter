@@ -23,31 +23,13 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
-          return ${componentColor('md.comp.checkbox.selected.disabled.container')};
-        }
-        return ${componentColor('md.comp.checkbox.unselected.disabled.outline')}.withOpacity(${opacity('md.comp.checkbox.unselected.disabled.container.opacity')});
+        return ${componentColor('md.comp.checkbox.selected.disabled.container')};
+      }
+      if (states.contains(MaterialState.error)) {
+        return ${componentColor('md.comp.checkbox.unselected.error.outline')};
       }
       if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
-          return ${componentColor('md.comp.checkbox.selected.pressed.container')};
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return ${componentColor('md.comp.checkbox.selected.hover.container')};
-        }
-        if (states.contains(MaterialState.focused)) {
-          return ${componentColor('md.comp.checkbox.selected.focus.container')};
-        }
         return ${componentColor('md.comp.checkbox.selected.container')};
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return ${componentColor('md.comp.checkbox.unselected.pressed.outline')};
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return ${componentColor('md.comp.checkbox.unselected.hover.outline')};
-      }
-      if (states.contains(MaterialState.focused)) {
-        return ${componentColor('md.comp.checkbox.unselected.focus.outline')};
       }
       return ${componentColor('md.comp.checkbox.unselected.outline')};
     });
@@ -63,14 +45,8 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
         return Colors.transparent; // No icons available when the checkbox is unselected.
       }
       if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
-          return ${componentColor('md.comp.checkbox.selected.pressed.icon')};
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return ${componentColor('md.comp.checkbox.selected.hover.icon')};
-        }
-        if (states.contains(MaterialState.focused)) {
-          return ${componentColor('md.comp.checkbox.selected.focus.icon')};
+        if (states.contains(MaterialState.error)) {
+          return ${componentColor('md.comp.checkbox.selected.error.icon')};
         }
         return ${componentColor('md.comp.checkbox.selected.icon')};
       }
@@ -81,6 +57,17 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   @override
   MaterialStateProperty<Color> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('md.comp.checkbox.error.pressed.state-layer')};
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return ${componentColor('md.comp.checkbox.error.hover.state-layer')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.checkbox.error.focus.state-layer')}.withOpacity(0.12);
+        }
+      }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('md.comp.checkbox.selected.pressed.state-layer')};

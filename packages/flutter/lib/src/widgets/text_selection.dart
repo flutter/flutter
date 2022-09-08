@@ -2671,6 +2671,6 @@ enum ClipboardStatus {
   /// waiting to receive the clipboard contents for the first time.
   unknown,
 
-  /// The content on the clipboard is not pasteable, such as when it is empty.
+  /// The content on the clipboard is not pastable, such as when it is empty.
   notPasteable,
 }
