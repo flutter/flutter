@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 #include <optional>
-#include "impeller/geometry/path_builder.h"
-#include "impeller/renderer/formats.h"
-#include "impeller/renderer/vertex_buffer_builder.h"
-#include "linear_gradient_contents.h"
 
+#include "fml/logging.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
 
@@ -36,8 +36,32 @@ std::optional<Rect> ClipContents::GetCoverage(const Entity& entity) const {
   return std::nullopt;
 };
 
-bool ClipContents::ShouldRender(const Entity& entity,
-                                const ISize& target_size) const {
+Contents::StencilCoverage ClipContents::GetStencilCoverage(
+    const Entity& entity,
+    const std::optional<Rect>& current_stencil_coverage) const {
+  if (!current_stencil_coverage.has_value()) {
+    return {.type = StencilCoverage::Type::kAppend, .coverage = std::nullopt};
+  }
+  switch (clip_op_) {
+    case Entity::ClipOperation::kDifference:
+      // This can be optimized further by considering cases when the bounds of
+      // the current stencil will shrink.
+      return {.type = StencilCoverage::Type::kAppend,
+              .coverage = current_stencil_coverage};
+    case Entity::ClipOperation::kIntersect:
+      return {
+          .type = StencilCoverage::Type::kAppend,
+          .coverage = current_stencil_coverage->Intersection(
+              path_.GetTransformedBoundingBox(entity.GetTransformation())
+                  .value()),
+      };
+  }
+  FML_UNREACHABLE();
+}
+
+bool ClipContents::ShouldRender(
+    const Entity& entity,
+    const std::optional<Rect>& stencil_coverage) const {
   return true;
 }
 
@@ -119,8 +143,15 @@ std::optional<Rect> ClipRestoreContents::GetCoverage(
   return std::nullopt;
 };
 
-bool ClipRestoreContents::ShouldRender(const Entity& entity,
-                                       const ISize& target_size) const {
+Contents::StencilCoverage ClipRestoreContents::GetStencilCoverage(
+    const Entity& entity,
+    const std::optional<Rect>& current_stencil_coverage) const {
+  return {.type = StencilCoverage::Type::kRestore, .coverage = std::nullopt};
+}
+
+bool ClipRestoreContents::ShouldRender(
+    const Entity& entity,
+    const std::optional<Rect>& stencil_coverage) const {
   return true;
 }
 
