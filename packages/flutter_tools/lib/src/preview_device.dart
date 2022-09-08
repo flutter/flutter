@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -29,13 +30,16 @@ BundleBuilder _defaultBundleBuilder() {
 
 class PreviewDeviceDiscovery extends DeviceDiscovery {
   PreviewDeviceDiscovery({
+    required Artifacts artifacts,
     required FileSystem fileSystem,
     required Logger logger,
     required ProcessManager processManager,
-  }) : _logger = logger,
+  }) : _artifacts = artifacts,
+       _logger = logger,
        _processManager = processManager,
        _fileSystem = fileSystem;
 
+  final Artifacts _artifacts;
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
@@ -46,6 +50,7 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   @override
   Future<List<Device>> get devices async => <Device>[
     PreviewDevice(
+      artifacts: _artifacts,
       fileSystem: _fileSystem,
       logger: _logger,
       processManager: _processManager,
@@ -74,17 +79,20 @@ class PreviewDevice extends Device {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
+    required Artifacts artifacts,
     @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
   }) : _processManager = processManager,
        _logger = logger,
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
+       _artifacts = artifacts,
        super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.custom);
 
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
   final BundleBuilderFactory _bundleBuilderFactory;
+  final Artifacts _artifacts;
 
   @override
   void clearLogs() { }
@@ -163,6 +171,13 @@ class PreviewDevice extends Device {
     // Merge with precompiled executable.
     final Directory precompiledDirectory = _fileSystem.directory(_fileSystem.path.join(Cache.flutterRoot!, 'artifacts_temp', 'Debug'));
     copyDirectory(precompiledDirectory, assetDirectory);
+
+    final String windowsPath = _artifacts
+      .getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final File windowsDll = _fileSystem.file(_fileSystem.path.join(windowsPath, 'flutter_windows.dll'));
+    final File icu = _fileSystem.file(_fileSystem.path.join(windowsPath, 'icudtl.dat'));
+    windowsDll.copySync(assetDirectory.childFile('flutter_windows.dll').path);
+    icu.copySync(assetDirectory.childDirectory('data').childFile('icudtl.dat').path);
 
     final Process process = await _processManager.start(
       <String>[
