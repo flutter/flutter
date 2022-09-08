@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
                           },
                         ));
                       }
-                      return AdaptiveTextSelectionToolbar.buttonItems(
+                      return AdaptiveTextSelectionToolbarButtonItems(
                         primaryAnchor: primaryAnchor,
                         secondaryAnchor: secondaryAnchor,
                         buttonItems: buttonItems,

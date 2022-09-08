@@ -803,15 +803,13 @@ class TextField extends StatefulWidget {
           editableTextState,
         );
     if (buttonItems != null) {
-      return AdaptiveTextSelectionToolbar.buttonItems(
+      return AdaptiveTextSelectionToolbarButtonItems(
         primaryAnchor: primaryAnchor,
         secondaryAnchor: secondaryAnchor,
-        buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
-          editableTextState,
-        ),
+        buttonItems: buttonItems,
       );
     }
-    return AdaptiveTextSelectionToolbar.editableText(
+    return AdaptiveTextSelectionToolbarEditableText(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,

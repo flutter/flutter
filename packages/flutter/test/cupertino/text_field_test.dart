@@ -6114,7 +6114,7 @@ void main() {
       tester.state<EditableTextState>(textFinder).showToolbar();
       await tester.pumpAndSettle();
 
-      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbarEditableText), findsOneWidget);
     },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );

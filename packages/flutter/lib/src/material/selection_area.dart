@@ -93,7 +93,7 @@ class SelectionArea extends StatefulWidget {
   final Widget child;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, SelectableRegionState delegate, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return AdaptiveTextSelectionToolbar.selectableRegion(
+    return AdaptiveTextSelectionToolbarSelectableRegion(
       selectableRegionState: delegate,
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,

@@ -63,9 +63,7 @@ void main() {
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
     await tester.pumpAndSettle();
 
-    // AdaptiveTextSelectionToolbar is built twice, once for .selectablRegion
-    // and once for .buttonItems.
-    expect(find.byType(AdaptiveTextSelectionToolbar), findsNWidgets(2));
+    expect(find.byType(AdaptiveTextSelectionToolbarSelectableRegion), findsOneWidget);
   },
     skip: kIsWeb, // [intended]
   );

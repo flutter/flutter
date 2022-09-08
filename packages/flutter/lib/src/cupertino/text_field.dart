@@ -791,16 +791,13 @@ class CupertinoTextField extends StatefulWidget {
           editableTextState,
         );
     if (buttonItems != null) {
-      return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
+      return CupertinoAdaptiveTextSelectionToolbarButtonItems(
         primaryAnchor: primaryAnchor,
         secondaryAnchor: secondaryAnchor,
-        buttonItems: EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
-          editableTextState,
-          _cupertinoPlatform,
-        ),
+        buttonItems: buttonItems,
       );
     }
-    return CupertinoAdaptiveTextSelectionToolbar.editableText(
+    return CupertinoAdaptiveTextSelectionToolbarEditableText(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,

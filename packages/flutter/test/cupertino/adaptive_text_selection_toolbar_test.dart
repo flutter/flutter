@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoAdaptiveTextSelectionToolbar.buttonItems(
+          child: CupertinoAdaptiveTextSelectionToolbarButtonItems(
             primaryAnchor: Offset.zero,
             buttonItems: <ContextMenuButtonItem>[
               ContextMenuButtonItem(
