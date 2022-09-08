@@ -840,7 +840,7 @@ void main() {
   });
 
   testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
-    // Regression test for  https://github.com/flutter/flutter/issues/56892.
+    // Regression test for https://github.com/flutter/flutter/issues/56892.
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => const OnTapPage(
         id: '/',

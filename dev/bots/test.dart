@@ -186,7 +186,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
 const String kTestHarnessShardName = 'test_harness_tests';
 const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
-// The seed used to shuffle tests.  If not passed with
+// The seed used to shuffle tests. If not passed with
 // --test-randomize-ordering-seed=<seed> on the command line, it will be set the
 // first time it is accessed. Pass zero to turn off shuffling.
 String? _shuffleSeed;

@@ -278,7 +278,7 @@ class WidgetsApp extends StatefulWidget {
   /// ```
   ///
   /// It is possible to specify both [home] and [routes], but only if [routes] does
-  ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+  ///  _not_ contain an entry for `'/'`. Conversely, if [home] is omitted, [routes]
   /// _must_ contain an entry for `'/'`.
   ///
   /// If [home] or [routes] are not null, the routing implementation needs to know how
@@ -295,7 +295,7 @@ class WidgetsApp extends StatefulWidget {
   /// [onGenerateRoute] and [onUnknownRoute] parameters. These parameters correspond
   /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
   /// and [builder] are null, or if they fail to create a requested route,
-  /// [onGenerateRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
+  /// [onGenerateRoute] will be invoked. If that fails, [onUnknownRoute] will be invoked.
   ///
   /// The [pageRouteBuilder] is called to create a [PageRoute] that wraps newly built routes.
   /// If the [builder] is non-null and the [onGenerateRoute] argument is null, then the

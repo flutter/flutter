@@ -443,7 +443,7 @@ class _SnippetChecker {
 
   /// The directory for the dart:ui code to be analyzed with the flutter code.
   ///
-  /// If this is null, then no dart:ui code is included in the analysis.  It
+  /// If this is null, then no dart:ui code is included in the analysis. It
   /// defaults to the location inside of the flutter bin/cache directory that
   /// contains the dart:ui code supplied by the engine.
   final Directory? _dartUiLocation;

@@ -38,24 +38,32 @@ void main() async {
     const MethodChannel methodChannel =
         MethodChannel('tests.flutter.dev/windows_startup_test');
 
-    // TODO(loic-sharma): Make the window invisible until after the first frame.
-    // https://github.com/flutter/flutter/issues/41980
     final bool? visible = await methodChannel.invokeMethod('isWindowVisible');
-    if (visible == null || visible == false) {
-      throw 'Window should be visible at startup';
+    if (visible == null || visible == true) {
+      throw 'Window should be hidden at startup';
     }
 
+    bool firstFrame = true;
     ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) async {
       final bool? visible = await methodChannel.invokeMethod('isWindowVisible');
-      if (visible == null || visible == false) {
-        throw 'Window should be visible';
+      if (visible == null) {
+        throw 'Method channel unavailable';
       }
 
-      if (!completer.isCompleted) {
-        completer.complete('success');
+      if (visible == true) {
+        if (firstFrame) {
+          throw 'Window should be hidden on first frame';
+        }
+
+        if (!completer.isCompleted) {
+          completer.complete('success');
+        }
       }
 
+      // Draw something to trigger the first frame callback that displays the
+      // window.
       drawHelloWorld();
+      firstFrame = false;
     };
 
     ui.PlatformDispatcher.instance.scheduleFrame();

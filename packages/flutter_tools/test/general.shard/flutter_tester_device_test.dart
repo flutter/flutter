@@ -46,6 +46,7 @@ void main() {
       processManager: processManager,
       enableObservatory: enableObservatory,
       dartEntrypointArgs: dartEntrypointArgs,
+      uriConverter: (String input) => '$input/converted',
     );
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -182,6 +183,18 @@ void main() {
       final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
       expect(uri.port, 1234);
     });
+
+    testUsingContext('sets up UriConverter from context', () async {
+      await device.start('example.dill');
+      await device.observatoryUri;
+
+      final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
+      as FakeDartDevelopmentService;
+      final String? result = dds
+          .uriConverter
+          ?.call('test');
+      expect(result, 'test/converted');
+    });
   });
 }
 
@@ -195,6 +208,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.processManager,
     required super.enableObservatory,
     required List<String> dartEntrypointArgs,
+    required UriConverter uriConverter,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -215,16 +229,26 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     icudtlPath: null,
     compileExpression: null,
     fontConfigManager: FontConfigManager(),
+    uriConverter: uriConverter,
   );
+  late DartDevelopmentService dds;
 
   final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
 
   Future<Uri> ddsServiceUriFuture() => _ddsServiceUriCompleter.future;
 
   @override
-  Future<DartDevelopmentService> startDds(Uri uri) async {
+  Future<DartDevelopmentService> startDds(
+    Uri uri, {
+    UriConverter? uriConverter,
+  }) async {
     _ddsServiceUriCompleter.complete(uri);
-    return FakeDartDevelopmentService(Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'), Uri.parse('http://localhost:8080'));
+    dds = FakeDartDevelopmentService(
+      Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'),
+      Uri.parse('http://localhost:8080'),
+      uriConverter: uriConverter,
+    );
+    return dds;
   }
 
   @override
@@ -235,9 +259,10 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  FakeDartDevelopmentService(this.uri, this.original);
+  FakeDartDevelopmentService(this.uri, this.original, {this.uriConverter});
 
   final Uri original;
+  final UriConverter? uriConverter;
 
   @override
   final Uri uri;

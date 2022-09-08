@@ -295,6 +295,28 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('release macOS application creates App.framework.dSYM', () async {
+    fileSystem.file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+      .createSync(recursive: true);
+    fileSystem.file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+      .createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/App.framework/App')
+      .createSync(recursive: true);
+    fileSystem.file('${environment.buildDir.path}/App.framework.dSYM/Contents/Resources/DWARF/App')
+      .createSync(recursive: true);
+
+    await const ReleaseMacOSBundleFlutterAssets()
+      .build(environment..defines[kBuildMode] = 'release');
+
+    expect(fileSystem.file(
+      'App.framework.dSYM/Contents/Resources/DWARF/App'),
+      exists,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('release/profile macOS application updates when App.framework updates', () async {
     fileSystem.file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
       .createSync(recursive: true);
@@ -415,13 +437,20 @@ void main() {
     environment.defines[kDarwinArchs] = 'arm64 x86_64';
     environment.defines[kBuildMode] = 'release';
 
+    // Input dSYMs need to exist for `lipo` to combine them
+    environment.buildDir
+      .childFile('arm64/App.framework.dSYM/Contents/Resources/DWARF/App')
+      .createSync(recursive: true);
+    environment.buildDir
+      .childFile('x86_64/App.framework.dSYM/Contents/Resources/DWARF/App')
+      .createSync(recursive: true);
+
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         'Artifact.genSnapshot.TargetPlatform.darwin.release_arm64',
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
-        '--strip',
         environment.buildDir.childFile('app.dill').path,
       ]),
       FakeCommand(command: <String>[
@@ -429,7 +458,6 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
-        '--strip',
         environment.buildDir.childFile('app.dill').path,
       ]),
       FakeCommand(command: <String>[
@@ -459,12 +487,50 @@ void main() {
         environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
       ]),
       FakeCommand(command: <String>[
+        'xcrun',
+        'dsymutil',
+        '-o',
+        environment.buildDir.childFile('arm64/App.framework.dSYM').path,
+        environment.buildDir.childFile('arm64/App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'dsymutil',
+        '-o',
+        environment.buildDir.childFile('x86_64/App.framework.dSYM').path,
+        environment.buildDir.childFile('x86_64/App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'strip',
+        '-S',
+        environment.buildDir.childFile('arm64/App.framework/App').path,
+        '-o',
+        environment.buildDir.childFile('arm64/App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'strip',
+        '-S',
+        environment.buildDir.childFile('x86_64/App.framework/App').path,
+        '-o',
+        environment.buildDir.childFile('x86_64/App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
         'lipo',
         environment.buildDir.childFile('arm64/App.framework/App').path,
         environment.buildDir.childFile('x86_64/App.framework/App').path,
         '-create',
         '-output',
         environment.buildDir.childFile('App.framework/App').path,
+      ]),
+      FakeCommand(command: <String>[
+        'lipo',
+        environment.buildDir.childFile('arm64/App.framework.dSYM/Contents/Resources/DWARF/App').path,
+        environment.buildDir.childFile('x86_64/App.framework.dSYM/Contents/Resources/DWARF/App').path,
+        '-create',
+        '-output',
+        environment.buildDir.childFile('App.framework.dSYM/Contents/Resources/DWARF/App').path,
       ]),
     ]);
 

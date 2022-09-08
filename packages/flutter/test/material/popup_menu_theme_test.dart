@@ -13,6 +13,7 @@ PopupMenuThemeData _popupMenuTheme() {
     shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     elevation: 12.0,
     textStyle: TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
+    position: PopupMenuPosition.under,
   );
 }
 
@@ -29,6 +30,7 @@ void main() {
     expect(popupMenuTheme.elevation, null);
     expect(popupMenuTheme.textStyle, null);
     expect(popupMenuTheme.mouseCursor, null);
+    expect(popupMenuTheme.position, null);
   });
 
   testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
@@ -51,6 +53,7 @@ void main() {
       elevation: 2.0,
       textStyle: TextStyle(color: Color(0xffffffff)),
       mouseCursor: MaterialStateMouseCursor.clickable,
+      position: PopupMenuPosition.over,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -64,6 +67,7 @@ void main() {
       'elevation: 2.0',
       'text style: TextStyle(inherit: true, color: Color(0xffffffff))',
       'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'position: over'
     ]);
   });
 
@@ -78,16 +82,21 @@ void main() {
       home: Material(
         child: Column(
           children: <Widget>[
-            PopupMenuButton<void>(
-              key: popupButtonKey,
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<void>>[
-                  PopupMenuItem<void>(
-                    key: popupItemKey,
-                    child: const Text('Example'),
-                  ),
-                ];
-              },
+            Padding(
+              // The padding makes sure the menu as enough space to around to
+              // get properly aligned when displayed (`_kMenuScreenPadding`).
+              padding: const EdgeInsets.all(8.0),
+              child: PopupMenuButton<void>(
+                key: popupButtonKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    PopupMenuItem<void>(
+                      key: popupItemKey,
+                      child: const Text('Example'),
+                    ),
+                  ];
+                },
+              ),
             ),
           ],
         ),
@@ -123,6 +132,11 @@ void main() {
     );
     expect(text.style.fontFamily, 'Roboto');
     expect(text.style.color, const Color(0xdd000000));
+    expect(text.style.color, const Color(0xdd000000));
+
+    final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
+    final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
+    expect(topLeftMenu, topLeftButton);
   });
 
   testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
@@ -138,6 +152,10 @@ void main() {
         child: Column(
           children: <Widget>[
             PopupMenuButton<void>(
+              // The padding is used in the positioning of the menu when the
+              // position is `PopupMenuPosition.under`. Setting it to zero makes
+              // it easier to test.
+              padding: EdgeInsets.zero,
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<Object>>[
@@ -181,6 +199,10 @@ void main() {
       ).last,
     );
     expect(text.style, popupMenuTheme.textStyle);
+
+    final Offset bottomLeftButton = tester.getBottomLeft(find.byType(PopupMenuButton<void>));
+    final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
+    expect(topLeftMenu, bottomLeftButton);
   });
 
   testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
@@ -202,20 +224,26 @@ void main() {
       home: Material(
         child: Column(
           children: <Widget>[
-            PopupMenuButton<void>(
-              key: popupButtonKey,
-              elevation: elevation,
-              color: color,
-              shape: shape,
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<void>>[
-                  PopupMenuItem<void>(
-                    key: popupItemKey,
-                    textStyle: textStyle,
-                    child: const Text('Example'),
-                  ),
-                ];
-              },
+            Padding(
+              // The padding makes sure the menu as enough space to around to
+              // get properly aligned when displayed (`_kMenuScreenPadding`).
+              padding: const EdgeInsets.all(8.0),
+              child: PopupMenuButton<void>(
+                key: popupButtonKey,
+                elevation: elevation,
+                color: color,
+                shape: shape,
+                position: PopupMenuPosition.over,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    PopupMenuItem<void>(
+                      key: popupItemKey,
+                      textStyle: textStyle,
+                      child: const Text('Example'),
+                    ),
+                  ];
+                },
+              ),
             ),
           ],
         ),
@@ -250,6 +278,10 @@ void main() {
       ).last,
     );
     expect(text.style, textStyle);
+
+    final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
+    final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
+    expect(topLeftMenu, topLeftButton);
   });
 
   testWidgets('ThemeData.popupMenuTheme properties are utilized', (WidgetTester tester) async {

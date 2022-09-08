@@ -452,7 +452,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// If true, this focus node may request the primary focus.
   ///
-  /// Defaults to true.  Set to false if you want this node to do nothing when
+  /// Defaults to true. Set to false if you want this node to do nothing when
   /// [requestFocus] is called on it.
   ///
   /// If set to false on a [FocusScopeNode], will cause all of the children of
@@ -1694,7 +1694,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
           handled = false;
           break;
       }
-      // Only KeyEventResult.ignored will continue the for loop.  All other
+      // Only KeyEventResult.ignored will continue the for loop. All other
       // options will stop the event propagation.
       assert(result != KeyEventResult.ignored);
       break;

@@ -313,7 +313,6 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         usage: globals.flutterUsage,
       ),
-      ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       Usage: () => Usage(
