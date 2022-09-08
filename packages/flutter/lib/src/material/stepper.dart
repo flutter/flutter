@@ -133,7 +133,7 @@ class Step {
   ///
   /// The [title], [content], and [state] arguments must not be null.
   const Step({
-    required this.title,
+    this.title,
     this.subtitle,
     required this.content,
     this.state = StepState.indexed,
@@ -144,7 +144,7 @@ class Step {
        assert(state != null);
 
   /// The title of the step that typically describes it.
-  final Widget title;
+  final Widget? title;
 
   /// The subtitle of the step that appears below the title and has a smaller
   /// font size. It typically gives more details that complement the title.
@@ -284,7 +284,8 @@ class Stepper extends StatefulWidget {
   ///       },
   ///     steps: const <Step>[
   ///       Step(
-  ///         title: Text('A'),
+  ///         
+  : Text('A'),
   ///         content: SizedBox(
   ///           width: 100.0,
   ///           height: 100.0,
@@ -613,6 +614,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        if (widget.steps[index].title != null)
         AnimatedDefaultTextStyle(
           style: _titleStyle(index),
           duration: kThemeAnimationDuration,
@@ -766,7 +768,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 ),
               ),
               Container(
-                margin: const EdgeInsetsDirectional.only(start: 12.0),
                 child: _buildHeaderText(i),
               ),
             ],
@@ -775,7 +776,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         if (!_isLast(i))
           Expanded(
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
               height: 1.0,
               color: Colors.grey.shade400,
             ),
@@ -801,6 +801,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: children,
             ),
           ),
