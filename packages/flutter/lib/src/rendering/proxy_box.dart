@@ -4355,6 +4355,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.checked != null) {
       config.isChecked = _properties.checked;
     }
+    if (_properties.mixed != null) {
+      config.isCheckStateMixed = _properties.mixed;
+    }
     if (_properties.toggled != null) {
       config.isToggled = _properties.toggled;
     }
