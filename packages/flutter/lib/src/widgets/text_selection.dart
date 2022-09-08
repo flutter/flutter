@@ -853,7 +853,7 @@ class SelectionOverlay {
       _magnifierOverlayInfoBearer,
     );
 
-    if (builtMagnifier == null) {
+    if (builtMagnifier == null || _handles == null) {
       return;
     }
 
