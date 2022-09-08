@@ -282,8 +282,8 @@ class _ClipboardStatusBuilderState extends State<_ClipboardStatusBuilder> with T
 
   @override
   void dispose() {
-    super.dispose();
     widget.clipboardStatusNotifier?.removeListener(_onChangedClipboardStatus);
+    super.dispose();
   }
 
   @override
