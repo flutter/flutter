@@ -193,13 +193,6 @@ class MenuStyle with Diagnosticable {
   /// appear on the other side of the button. If there isn't enough space there
   /// either, then the menu will be pushed as far over as necessary to display
   /// as much of itself as possible, possibly overlapping the parent button.
-  ///
-  /// For menus created by [MenuButton] or [createMaterialMenu], defaults to
-  /// [AlignmentDirectional.topEnd], which means that in a left-to-right
-  /// context, the menu will appear with its origin at the upper right corner of
-  /// the [MenuButton] that owns it.
-  ///
-  /// For a [MenuBar], the default is [AlignmentDirectional.bottomStart].
   final AlignmentGeometry? alignment;
 
   /// Returns a copy of this MenuStyle with the given fields replaced with

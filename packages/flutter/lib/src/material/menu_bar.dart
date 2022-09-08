@@ -101,10 +101,11 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 /// sure that selecting a menu item and triggering the shortcut do the same
 /// thing, it is recommended that they call the same callback.
 ///
-/// {@tool dartpad} This example shows a [MenuBar] that contains a single top
-/// level menu, containing three items for "About", a checkbox menu item for
-/// showing a message, and "Quit". The items are identified with an enum value,
-/// and the shortcuts are registered globally with the [ShortcutRegistry].
+/// {@tool dartpad}
+/// This example shows a [MenuBar] that contains a single top level menu,
+/// containing three items for "About", a checkbox menu item for showing a
+/// message, and "Quit". The items are identified with an enum value, and the
+/// shortcuts are registered globally with the [ShortcutRegistry].
 ///
 /// ** See code in examples/api/lib/material/menu_bar/menu_bar.0.dart **
 /// {@end-tool}
@@ -1296,7 +1297,7 @@ class _MenuAnchorMarker extends InheritedWidget {
 /// specified, then the supplied build context is used to find the nearest
 /// ancestor [MenuAnchor]. That [MenuAnchor] is used to define the rectangle
 /// used in conjunction with the [MenuStyle.alignment] and
-/// [MenuStyle.alignmentOffset] to determine the location where the menu will
+/// `alignmentOffset` to determine the location where the menu will
 /// appear.
 ///
 /// The returned [MenuHandle] allows control of menu visibility, and
@@ -1354,13 +1355,22 @@ class _MenuAnchorMarker extends InheritedWidget {
 /// These are typically a tree made up of [MenuButton]s and [MenuItemButton]s,
 /// but can be any [Widget].
 ///
-/// {@tool dartpad} This example shows a menu created with `createMaterialMenu`
-/// that contains a single top level menu, containing three items: one for
-/// "About", a checkbox menu item for showing a message, and "Quit". The items
-/// are identified with an enum value.
+/// {@tool dartpad}
+/// This example shows a menu created with `createMaterialMenu` that contains a
+/// single top level menu containing several items, including one submenu. The
+/// items are identified with an enhanced enum value.
 ///
-/// ** See code in
-/// examples/api/lib/material/menu_bar/create_material_menu.0.dart **
+/// ** See code in examples/api/lib/material/menu_bar/create_material_menu.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a context menu created with `createMaterialMenu` that
+/// contains a single top level menu containing several items, including one
+/// submenu. The items are identified with an enhanced enum value. The context
+/// menu is opened by pressing "Ctrl" while clicking on the background of the
+/// application.
+///
+/// ** See code in examples/api/lib/material/menu_bar/create_material_menu.1.dart **
 /// {@end-tool}
 ///
 /// See also:
