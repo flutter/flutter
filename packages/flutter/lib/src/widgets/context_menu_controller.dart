@@ -76,7 +76,7 @@ class ContextMenuController {
     _shownInstance = this;
   }
 
-  /// Called when this menu is hidden.
+  /// Called when this menu is removed.
   final VoidCallback? onRemove;
 
   /// The currently shown instance, if any.
@@ -111,10 +111,16 @@ class ContextMenuController {
     overlayState.insert(_menuOverlayEntry!);
   }
 
-  /// Remove any currently shown menu from the UI.
+  /// Remove the currently shown context menu from the UI.
+  ///
+  /// Does nothing if no context menu is currently shown.
   ///
   /// If a menu is removed, and that menu provided an [onRemove] callback when
   /// it was created, then that callback will be called.
+  ///
+  /// See also:
+  ///
+  ///  * [remove], which removes only the current instance.
   static void removeAny() {
     _menuOverlayEntry?.remove();
     _menuOverlayEntry = null;
@@ -124,16 +130,16 @@ class ContextMenuController {
     }
   }
 
-  /// True if and only if this menu is currently being displayed.
+  /// True if and only if this menu is currently being shown.
   bool get isShown => _shownInstance == this;
 
   /// Cause the underlying [OverlayEntry] to rebuild during the next pipeline
   /// flush.
   ///
-  /// You need to call this function if the output of [contextMenuBuilder] has
-  /// changed.
+  /// It's necessary to call this function if the output of [contextMenuBuilder]
+  /// has changed.
   ///
-  /// If the context menu is not currently shown, does nothing.
+  /// Errors if the context menu is not currently shown.
   ///
   /// See also:
   ///
@@ -145,13 +151,17 @@ class ContextMenuController {
 
   /// Remove this menu from the UI.
   ///
-  /// If this instance is not currently shown, does nothing. In other words, if
+  /// Does nothing if this instance is not currently shown. In other words, if
   /// another context menu is currently shown, that menu will not be removed.
   ///
   /// This method should only be called once. The instance cannot be shown again
   /// after removing. Create a new instance.
   ///
   /// If an [onRemove] method was given to this instance, it will be called.
+  ///
+  /// See also:
+  ///
+  ///  * [removeAny], which removes any shown instance of the context menu.
   void remove() {
     if (!isShown) {
       return;
