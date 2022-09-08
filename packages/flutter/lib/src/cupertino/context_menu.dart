@@ -50,14 +50,12 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
-  final RenderBox renderBoxContainer =
-      globalKey.currentContext!.findRenderObject()! as RenderBox;
-  return Rect.fromPoints(
-      renderBoxContainer.localToGlobal(
-        renderBoxContainer.paintBounds.topLeft,
-      ),
-      renderBoxContainer
-          .localToGlobal(renderBoxContainer.paintBounds.bottomRight));
+  final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject()! as RenderBox;
+  return Rect.fromPoints(renderBoxContainer.localToGlobal(
+    renderBoxContainer.paintBounds.topLeft,
+  ), renderBoxContainer.localToGlobal(
+    renderBoxContainer.paintBounds.bottomRight
+  ));
 }
 
 // The context menu arranges itself slightly differently based on the location
@@ -201,8 +199,7 @@ class CupertinoContextMenu extends StatefulWidget {
   State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
 
-class _CupertinoContextMenuState extends State<CupertinoContextMenu>
-    with TickerProviderStateMixin {
+class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
   bool _childHidden = false;
   // Animates the child while it's opening.
@@ -433,8 +430,7 @@ class _DecoyChild extends StatefulWidget {
   _DecoyChildState createState() => _DecoyChildState();
 }
 
-class _DecoyChildState extends State<_DecoyChild>
-    with TickerProviderStateMixin {
+class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
   // TODO(justinmc): Dark mode support.
   // See https://github.com/flutter/flutter/issues/43211.
   late Animation<Rect?> _rect;
@@ -624,8 +620,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   // Get the alignment for the _ContextMenuSheet's Transform.scale based on the
   // contextMenuLocation.
-  static AlignmentDirectional getSheetAlignment(
-      _ContextMenuLocation contextMenuLocation) {
+  static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuLocation) {
     switch (contextMenuLocation) {
       case _ContextMenuLocation.center:
         return AlignmentDirectional.topCenter;
@@ -850,8 +845,8 @@ class _ContextMenuRouteStatic extends StatefulWidget {
   _ContextMenuRouteStaticState createState() => _ContextMenuRouteStaticState();
 }
 
-class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
-    with TickerProviderStateMixin {
+class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with TickerProviderStateMixin 
+{
   // The child is scaled down as it is dragged down until it hits this minimum
   // value.
   static const double _kMinScale = 0.8;
