@@ -351,7 +351,7 @@ class Switch extends StatelessWidget {
   ///   onChanged: (_) => true,
   ///   thumbIcon: MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
-  ///       return Icon(Icons.close);
+  ///       return const Icon(Icons.close);
   ///     }
   ///     return null; // All other states will use the default thumbIcon.
   ///   }),
