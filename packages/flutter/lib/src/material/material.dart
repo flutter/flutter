@@ -574,7 +574,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   @override
   void addInkFeature(InkFeature feature) {
-    assert(!feature._debugDisposed);
+    assert(!feature._disposed);
     assert(feature._controller == this);
     _inkFeatures ??= <InkFeature>[];
     assert(!_inkFeatures!.contains(feature));
@@ -585,7 +585,8 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   void _removeFeature(InkFeature feature) {
     assert(_inkFeatures != null);
     _inkFeatures!.remove(feature);
-    markNeedsPaint();
+    if (!feature._disposed)
+      markNeedsPaint();
   }
 
   void _didChangeLayout() {
@@ -610,6 +611,14 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.restore();
     }
     super.paint(context, offset);
+  }
+
+  @override
+  void dispose() {
+    // `InkFeature.dispose` will eventually call `_inkFeatures!.remove`.
+    while (_inkFeatures?.isNotEmpty ?? false)
+      _inkFeatures!.first.dispose();
+    super.dispose();
   }
 }
 
@@ -676,23 +685,37 @@ abstract class InkFeature {
   /// Called when the ink feature is no longer visible on the material.
   final VoidCallback? onRemoved;
 
-  bool _debugDisposed = false;
+  // Whether [dispose] has been called.
+  //
+  // This field is used in release code by [_InkFeatures], because an
+  // [InkFeature] might be removed after its disposal.
+  bool _disposed = false;
 
   /// Free up the resources associated with this ink feature.
+  ///
+  /// This method can only be called once per [InkFeature] instance.
   @mustCallSuper
   void dispose() {
-    assert(!_debugDisposed);
-    assert(() {
-      _debugDisposed = true;
-      return true;
-    }());
+    assert(!_disposed);
+    _disposed = true;
     _controller._removeFeature(this);
     onRemoved?.call();
   }
 
   void _paint(Canvas canvas) {
-    assert(referenceBox.attached);
-    assert(!_debugDisposed);
+    if (!referenceBox.attached) {
+      // The reference box might be detached in two situations:
+      //
+      //  * The reference box is being reparented (will re-attach later).
+      //  * The reference box is being disposed (will not re-attach later).
+      //
+      // In either case, [Material] might request a paint while it's detached.
+      // And it's impossible to tell between the two cases until the end of the
+      // frame. For more details, see
+      // https://github.com/flutter/flutter/pull/81445#issuecomment-924760580 .
+      return;
+    }
+    assert(!_disposed);
     // find the chain of renderers from us to the feature's referenceBox
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;

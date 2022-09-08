@@ -964,6 +964,12 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// It is an error to call [setState] unless [mounted] is true.
   bool get mounted => _element != null;
 
+  /// This field is used tracks [activate] and [deactivate], to assert that
+  /// they are called alternatively.
+  ///
+  /// This field is not set in release mode.
+  bool _debugActive = true;
+
   /// Called when this object is inserted into the tree.
   ///
   /// The framework will call this method exactly once for each [State] object
@@ -1144,7 +1150,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
     _element!.markNeedsBuild();
   }
 
-  /// Called when this object is removed from the tree.
+  /// Whenever the framework removes this [State] object from the tree, the
+  /// framework will call this method.
   ///
   /// The framework calls this method whenever it removes this [State] object
   /// from the tree. In some cases, the framework will reinsert the [State]
@@ -1172,7 +1179,12 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    from the tree permanently.
   @protected
   @mustCallSuper
-  void deactivate() { }
+  void deactivate() {
+    assert(() {
+      _debugActive = !_debugActive;
+      return !_debugActive;
+    }());
+  }
 
   /// Called when this object is reinserted into the tree after having been
   /// removed via [deactivate].
@@ -1206,7 +1218,12 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    transitions from the "inactive" to the "active" lifecycle state.
   @protected
   @mustCallSuper
-  void activate() { }
+  void activate() {
+    assert(() {
+      _debugActive = !_debugActive;
+      return _debugActive;
+    }());
+  }
 
   /// Called when this object is removed from the tree permanently.
   ///
