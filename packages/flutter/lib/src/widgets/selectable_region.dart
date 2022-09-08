@@ -949,6 +949,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   // TODO(chunhtai): remove this workaround after decoupling text selection
   // from text editing in TextSelectionDelegate.
+  // https://github.com/flutter/flutter/issues/111213
   @override
   TextEditingValue textEditingValue = const TextEditingValue(text: '_');
 
