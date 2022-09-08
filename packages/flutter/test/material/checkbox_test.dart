@@ -1543,7 +1543,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-        paints..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+      paints..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
     );
 
     // Start hovering

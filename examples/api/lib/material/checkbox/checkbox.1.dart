@@ -50,7 +50,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             setState(() {
               isChecked = value;
             });
-          }
+          },
         ),
         Checkbox(
           isError: true,
@@ -60,7 +60,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             setState(() {
               isChecked = value;
             });
-          }
+          },
         ),
         Checkbox(
           isError: true,
@@ -68,7 +68,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           value: isChecked,
           onChanged: null,
         ),
-      ]
+      ],
     );
   }
 }
