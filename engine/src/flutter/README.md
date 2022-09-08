@@ -1,7 +1,7 @@
 Flutter Engine
 ==============
 
-[![Build Status - Cirrus][]][Build status]
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/engine/badge)](https://api.securityscorecards.dev/projects/github.com/flutter/engine)
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
