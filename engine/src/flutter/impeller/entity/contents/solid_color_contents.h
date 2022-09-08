@@ -43,7 +43,7 @@ class SolidColorContents final : public Contents {
 
   // |Contents|
   bool ShouldRender(const Entity& entity,
-                    const ISize& target_size) const override;
+                    const std::optional<Rect>& stencil_coverage) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,

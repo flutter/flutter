@@ -32,12 +32,27 @@ class Contents {
 
   virtual ~Contents();
 
+  struct StencilCoverage {
+    enum class Type { kNone, kAppend, kRestore };
+
+    Type type = Type::kNone;
+    std::optional<Rect> coverage = std::nullopt;
+  };
+
   virtual bool Render(const ContentContext& renderer,
                       const Entity& entity,
                       RenderPass& pass) const = 0;
 
   /// @brief Get the screen space bounding rectangle that this contents affects.
   virtual std::optional<Rect> GetCoverage(const Entity& entity) const = 0;
+
+  /// @brief Given the current screen space bounding rectangle of the stencil,
+  ///        return the expected stencil coverage after this draw call. This
+  ///        should only be implemented for contents that may write to the
+  ///        stencil buffer.
+  virtual StencilCoverage GetStencilCoverage(
+      const Entity& entity,
+      const std::optional<Rect>& current_stencil_coverage) const;
 
   /// @brief Render this contents to a snapshot, respecting the entity's
   ///        transform, path, stencil depth, and blend mode.
@@ -48,7 +63,7 @@ class Contents {
       const Entity& entity) const;
 
   virtual bool ShouldRender(const Entity& entity,
-                            const ISize& target_size) const;
+                            const std::optional<Rect>& stencil_coverage) const;
 
  protected:
 

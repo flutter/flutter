@@ -97,13 +97,12 @@ class Entity {
 
   void SetTransformation(const Matrix& transformation);
 
-  void SetAddsToCoverage(bool adds);
-
-  bool AddsToCoverage() const;
-
   std::optional<Rect> GetCoverage() const;
 
-  bool ShouldRender(const ISize& target_size) const;
+  Contents::StencilCoverage GetStencilCoverage(
+      const std::optional<Rect>& current_stencil_coverage) const;
+
+  bool ShouldRender(const std::optional<Rect>& stencil_coverage) const;
 
   void SetContents(std::shared_ptr<Contents> contents);
 
@@ -128,7 +127,6 @@ class Entity {
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   uint32_t stencil_depth_ = 0u;
-  bool adds_to_coverage_ = true;
 };
 
 }  // namespace impeller

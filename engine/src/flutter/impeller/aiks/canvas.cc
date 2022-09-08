@@ -215,7 +215,6 @@ void Canvas::ClipPath(Path path, Entity::ClipOperation clip_op) {
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetContents(std::move(contents));
   entity.SetStencilDepth(GetStencilDepth());
-  entity.SetAddsToCoverage(false);
 
   GetCurrentPass().AddEntity(std::move(entity));
 
@@ -230,7 +229,6 @@ void Canvas::RestoreClip() {
   // takes up the full render target.
   entity.SetContents(std::make_shared<ClipRestoreContents>());
   entity.SetStencilDepth(GetStencilDepth());
-  entity.SetAddsToCoverage(false);
 
   GetCurrentPass().AddEntity(std::move(entity));
 }

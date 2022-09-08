@@ -41,9 +41,13 @@ std::optional<Rect> SolidColorContents::GetCoverage(
   return path_.GetTransformedBoundingBox(entity.GetTransformation());
 };
 
-bool SolidColorContents::ShouldRender(const Entity& entity,
-                                      const ISize& target_size) const {
-  return cover_ || Contents::ShouldRender(entity, target_size);
+bool SolidColorContents::ShouldRender(
+    const Entity& entity,
+    const std::optional<Rect>& stencil_coverage) const {
+  if (!stencil_coverage.has_value()) {
+    return false;
+  }
+  return cover_ || Contents::ShouldRender(entity, stencil_coverage);
 }
 
 VertexBuffer SolidColorContents::CreateSolidFillVertices(const Path& path,

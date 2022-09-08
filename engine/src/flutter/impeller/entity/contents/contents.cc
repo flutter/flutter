@@ -5,6 +5,7 @@
 #include "impeller/entity/contents/contents.h"
 #include <optional>
 
+#include "fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
@@ -28,6 +29,13 @@ ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
 Contents::Contents() = default;
 
 Contents::~Contents() = default;
+
+Contents::StencilCoverage Contents::GetStencilCoverage(
+    const Entity& entity,
+    const std::optional<Rect>& current_stencil_coverage) const {
+  return {.type = StencilCoverage::Type::kNone,
+          .coverage = current_stencil_coverage};
+}
 
 std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
@@ -58,10 +66,19 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
 }
 
 bool Contents::ShouldRender(const Entity& entity,
-                            const ISize& target_size) const {
+                            const std::optional<Rect>& stencil_coverage) const {
+  if (!stencil_coverage.has_value()) {
+    return false;
+  }
+  if (Entity::BlendModeShouldCoverWholeScreen(entity.GetBlendMode())) {
+    return true;
+  }
+
   auto coverage = GetCoverage(entity);
-  return coverage.has_value() &&
-         Rect::MakeSize(target_size).IntersectsWithRect(coverage.value());
+  if (!coverage.has_value()) {
+    return false;
+  }
+  return stencil_coverage->IntersectsWithRect(coverage.value());
 }
 
 }  // namespace impeller
