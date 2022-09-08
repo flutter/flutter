@@ -1261,6 +1261,7 @@ class ThemeData with Diagnosticable {
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
+  ///   * Checkbox: [Checkbox]
   ///   * Dialogs: [Dialog], [AlertDialog]
   ///   * Lists: [ListTile]
   ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
