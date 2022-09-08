@@ -12254,9 +12254,7 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
 
-    testWidgets(
-        'Can long press to show, unshow, and update magnifier',
-        (WidgetTester tester) async {
+    testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
       await tester.pumpWidget(
@@ -12312,8 +12310,7 @@ void main() {
       expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 11 : 9);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       // Expect the position the magnifier gets to have moved.
-      expect(firstLongPressGesturePosition,
-          isNot(infoBearer.value.globalGesturePosition));
+      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
 
       // End the long press to hide the magnifier.
       await gesture.up();

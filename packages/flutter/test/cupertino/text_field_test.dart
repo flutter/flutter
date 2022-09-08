@@ -6178,9 +6178,7 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets(
-        'Can long press to show, unshow, and update magnifier',
-        (WidgetTester tester) async {
+    testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
       await tester.pumpWidget(
@@ -6216,8 +6214,7 @@ void main() {
       expect(controller.selection.baseOffset, isTargetPlatformAndroid ? 5 : 4);
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
 
-      // Long press the 'e' to select 'def' on Android and show magnifier.
-      // Long press the 'e' to move the cursor in front of the 'e' on iOS and show the magnifier.
+      // Long press the 'e' to move the cursor in front of the 'e' and show the magnifier.
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, testValue.indexOf('e')));
       await tester.pumpAndSettle(const Duration(milliseconds: 1000));
       expect(controller.selection.baseOffset, 5);
@@ -6226,16 +6223,14 @@ void main() {
 
       final Offset firstLongPressGesturePosition = infoBearer.value.globalGesturePosition;
 
-      // Move the gesture to 'h' on Android to update the magnifier and select 'ghi'.
-      // Move the gesture to 'h' on iOS to update the magnifier and move the cursor to 'h'.
+      // Move the gesture to 'h' to update the magnifier and move the cursor to 'h'.
       await gesture.moveTo(textOffsetToPosition(tester, testValue.indexOf('h')));
       await tester.pumpAndSettle();
       expect(controller.selection.baseOffset, 9);
       expect(controller.selection.extentOffset, 9);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       // Expect the position the magnifier gets to have moved.
-      expect(firstLongPressGesturePosition,
-          isNot(infoBearer.value.globalGesturePosition));
+      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
 
       // End the long press to hide the magnifier.
       await gesture.up();
