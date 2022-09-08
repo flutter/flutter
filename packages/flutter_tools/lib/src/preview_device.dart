@@ -12,6 +12,7 @@ import 'artifacts.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'bundle_builder.dart';
 import 'cache.dart';
@@ -30,6 +31,7 @@ BundleBuilder _defaultBundleBuilder() {
 
 class PreviewDeviceDiscovery extends DeviceDiscovery {
   PreviewDeviceDiscovery({
+    required Platform platform,
     required Artifacts artifacts,
     required FileSystem fileSystem,
     required Logger logger,
@@ -37,24 +39,27 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   }) : _artifacts = artifacts,
        _logger = logger,
        _processManager = processManager,
-       _fileSystem = fileSystem;
+       _fileSystem = fileSystem,
+       _platform = platform;
 
+  final Platform _platform;
   final Artifacts _artifacts;
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
 
   @override
-  bool get canListAnything => true;
+  bool get canListAnything => _platform.isWindows;
 
   @override
   Future<List<Device>> get devices async => <Device>[
-    PreviewDevice(
-      artifacts: _artifacts,
-      fileSystem: _fileSystem,
-      logger: _logger,
-      processManager: _processManager,
-    )
+    if (_platform.isWindows)
+      PreviewDevice(
+        artifacts: _artifacts,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        processManager: _processManager,
+      )
   ];
 
   @override
