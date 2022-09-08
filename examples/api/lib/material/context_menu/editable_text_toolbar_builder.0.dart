@@ -38,8 +38,8 @@ class MyApp extends StatelessWidget {
                         primaryAnchor: primaryAnchor,
                         secondaryAnchor: secondaryAnchor,
                         // Build the default buttons, but make them look custom.
-                        // Note that in a real project you may want to build
-                        // different buttons depending on the platform.
+                        // In a real project you may want to build different
+                        // buttons depending on the platform.
                         children: buttonItems.map((ContextMenuButtonItem buttonItem) {
                           return CupertinoButton(
                             borderRadius: null,
