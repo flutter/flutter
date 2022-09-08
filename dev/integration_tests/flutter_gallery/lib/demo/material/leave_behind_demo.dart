@@ -244,7 +244,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           return false;
         },
         background: Container(
-          color: theme.primaryColor,
+          color: theme.colorScheme.primary,
           child: const Center(
             child: ListTile(
               leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
@@ -252,7 +252,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           ),
         ),
         secondaryBackground: Container(
-          color: theme.primaryColor,
+          color: theme.colorScheme.primary,
           child: const Center(
             child: ListTile(
               trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),

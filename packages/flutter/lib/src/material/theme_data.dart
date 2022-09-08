@@ -295,7 +295,6 @@ class ThemeData with Diagnosticable {
     // [colorScheme] or [colorSchemeSeed] are the preferred way to configure
     // colors. The other color properties (as well as primarySwatch) will
     // gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
-    Color? bottomAppBarColor,
     Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,

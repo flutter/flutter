@@ -151,13 +151,13 @@ class DialogDemoState extends State<DialogDemo> {
                   children: <Widget>[
                     DialogDemoItem(
                       icon: Icons.account_circle,
-                      color: theme.primaryColor,
+                      color: theme.colorScheme.primary,
                       text: 'username@gmail.com',
                       onPressed: () { Navigator.pop(context, 'username@gmail.com'); },
                     ),
                     DialogDemoItem(
                       icon: Icons.account_circle,
-                      color: theme.primaryColor,
+                      color: theme.colorScheme.primary,
                       text: 'user02@gmail.com',
                       onPressed: () { Navigator.pop(context, 'user02@gmail.com'); },
                     ),

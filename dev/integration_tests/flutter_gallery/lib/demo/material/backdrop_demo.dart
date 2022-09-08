@@ -360,7 +360,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
 
     return Container(
       key: _backdropKey,
-      color: theme.primaryColor,
+      color: theme.colorScheme.primary,
       child: Stack(
         children: <Widget>[
           ListTileTheme(
