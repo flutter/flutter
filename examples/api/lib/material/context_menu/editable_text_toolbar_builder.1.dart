@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
                         buttonItems.insert(0, ContextMenuButtonItem(
                           label: 'Send email',
                           onPressed: () {
-                            ContextMenuController.hide();
+                            ContextMenuController.removeAny();
                             _showDialog(context);
                           },
                         ));

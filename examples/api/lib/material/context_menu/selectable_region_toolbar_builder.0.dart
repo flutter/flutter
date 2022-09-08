@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
                         ...buttonItems,
                         ContextMenuButtonItem(
                           onPressed: () {
-                            ContextMenuController.hide();
+                            ContextMenuController.removeAny();
                             _showDialog(context);
                           },
                           label: 'Print',

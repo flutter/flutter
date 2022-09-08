@@ -555,7 +555,7 @@ class TextSelectionOverlay {
   /// Whether the toolbar is currently visible.
   bool get toolbarIsVisible {
     return selectionControls is TextSelectionHandleControls
-        ? ContextMenuController.isShown
+        ? _selectionOverlay._contextMenuController?.isShown ?? false
         : _selectionOverlay._toolbar != null;
   }
 
@@ -926,7 +926,7 @@ class SelectionOverlay {
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
   void showMagnifier(MagnifierOverlayInfoBearer initialInfoBearer) {
-    if (_toolbar != null || ContextMenuController.isShown) {
+    if (_toolbar != null || (_contextMenuController?.isShown ?? false)) {
       hideToolbar();
     }
 
@@ -1191,6 +1191,15 @@ class SelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
+  // Set when there is a visible context menu, null otherwise.
+  ContextMenuController? _contextMenuController;
+
+  // When the context menu is removed, clean up the dead instance of
+  // ContextMenuController.
+  void _onRemoveContextMenu() {
+    _contextMenuController = null;
+  }
+
   /// Returns a collapsed [Rect] where the top is the primary anchor and the
   /// bottom is the secondary anchor.
   Rect getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
@@ -1271,10 +1280,10 @@ class SelectionOverlay {
       return;
     }
 
-    ContextMenuController.hide();
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    ContextMenuController.show(
+    _contextMenuController = ContextMenuController(
       context: context,
+      onRemove: _onRemoveContextMenu,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
           layerLink: toolbarLayerLink,
@@ -1304,7 +1313,7 @@ class SelectionOverlay {
           _handles![1].markNeedsBuild();
         }
         _toolbar?.markNeedsBuild();
-        ContextMenuController.markNeedsBuild();
+        _contextMenuController?.markNeedsBuild();
       });
     } else {
       if (_handles != null) {
@@ -1312,7 +1321,7 @@ class SelectionOverlay {
         _handles![1].markNeedsBuild();
       }
       _toolbar?.markNeedsBuild();
-      ContextMenuController.markNeedsBuild();
+      _contextMenuController?.markNeedsBuild();
     }
   }
 
@@ -1326,7 +1335,7 @@ class SelectionOverlay {
       _handles![1].remove();
       _handles = null;
     }
-    if (_toolbar != null || ContextMenuController.isShown) {
+    if (_toolbar != null || (_contextMenuController?.isShown ?? false)) {
       hideToolbar();
     }
   }
@@ -1337,7 +1346,7 @@ class SelectionOverlay {
   /// To hide the whole overlay, see [hide].
   /// {@endtemplate}
   void hideToolbar() {
-    ContextMenuController.hide();
+    _contextMenuController?.remove();
     if (_toolbar == null) {
       return;
     }

@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
               buttonItems: <ContextMenuButtonItem>[
                 ContextMenuButtonItem(
                   onPressed: () {
-                    ContextMenuController.hide();
+                    ContextMenuController.removeAny();
                     _showDialog(context);
                   },
                   label: 'Print',
@@ -86,6 +86,8 @@ class _ContextMenuRegion extends StatefulWidget {
 class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   Offset? _longPressOffset;
 
+  ContextMenuController? contextMenuController;
+
   static bool get _longPressEnabled {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -104,7 +106,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   }
 
   void _onTap() {
-    if (!ContextMenuController.isShown) {
+    if (!_contextMenuController.isShown) {
       return;
     }
     _hide();
@@ -121,7 +123,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   }
 
   void _show(Offset position) {
-    ContextMenuController.show(
+    _contextMenuController = ContextMenuController(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return widget.contextMenuBuilder(context, position);
@@ -130,7 +132,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   }
 
   void _hide() {
-    ContextMenuController.hide();
+    _contextMenuController.hide();
   }
 
   @override

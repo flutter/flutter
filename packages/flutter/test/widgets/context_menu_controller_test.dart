@@ -41,7 +41,7 @@ void main() {
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsNothing);
 
-    ContextMenuController.show(
+    ContextMenuController(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: key1);
@@ -53,7 +53,7 @@ void main() {
     expect(find.byKey(key2), findsNothing);
 
     // Showing the same thing again does nothing and is not an error.
-    ContextMenuController.show(
+    ContextMenuController(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: key1);
@@ -66,7 +66,7 @@ void main() {
     expect(find.byKey(key2), findsNothing);
 
     // Showing a new menu hides the first.
-    ContextMenuController.show(
+    final ContextMenuController controller = ContextMenuController(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: key2);
@@ -77,7 +77,7 @@ void main() {
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsOneWidget);
 
-    ContextMenuController.hide();
+    controller.remove();
     await tester.pump();
 
     expect(find.byKey(key1), findsNothing);
@@ -101,7 +101,7 @@ void main() {
       ),
     );
 
-    ContextMenuController.show(
+    final ContextMenuController controller = ContextMenuController(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         buildCount++;
@@ -112,12 +112,12 @@ void main() {
     await tester.pump();
     expect(buildCount, 1);
 
-    ContextMenuController.markNeedsBuild();
+    controller.markNeedsBuild();
     expect(buildCount, 1);
     await tester.pump();
     expect(buildCount, 2);
 
-    ContextMenuController.hide();
+    controller.remove();
   });
 
   testWidgets('Calling show when a built-in widget is already showing its context menu hides the built-in menu', (WidgetTester tester) async {
@@ -166,7 +166,7 @@ void main() {
     expect(find.byKey(builtInKey), findsOneWidget);
     expect(find.byKey(directKey), findsNothing);
 
-    ContextMenuController.show(
+    final ContextMenuController controller = ContextMenuController(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: directKey);
@@ -176,19 +176,30 @@ void main() {
 
     expect(find.byKey(builtInKey), findsNothing);
     expect(find.byKey(directKey), findsOneWidget);
+    expect(controller.isShown, isTrue);
 
     // And showing the built-in menu hides the directly shown menu.
-    expect(state.showToolbar(), true);
+    expect(state.showToolbar(), isTrue);
     await tester.pump();
 
     expect(find.byKey(builtInKey), findsOneWidget);
     expect(find.byKey(directKey), findsNothing);
+    expect(controller.isShown, isFalse);
 
-    ContextMenuController.hide();
+    // Calling remove on the hidden ContextMenuController does not hide the
+    // built-in menu.
+    controller.remove();
     await tester.pump();
 
+    expect(find.byKey(builtInKey), findsOneWidget);
+    expect(find.byKey(directKey), findsNothing);
+    expect(controller.isShown, isFalse);
+
+    state.hideToolbar();
+    await tester.pump();
     expect(find.byKey(builtInKey), findsNothing);
     expect(find.byKey(directKey), findsNothing);
+    expect(controller.isShown, isFalse);
   },
     skip: isContextMenuProvidedByPlatform, // [intended] no Flutter-drawn text selection toolbar on web.
   );
