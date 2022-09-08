@@ -868,7 +868,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// checkbox is fully unchecked/checked, this value shall
   /// be false.
   ///
-  /// This is mutally exclusvie with [checked] and [toggled].
+  /// This is mutually exclusive with [checked] and [toggled].
   final bool? mixed;
 
   /// If non-null, indicates that this subtree represents a toggle switch
