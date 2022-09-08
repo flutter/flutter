@@ -883,7 +883,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _alpha > 0 &&;
+  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
 
   int _alpha;
 
