@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -32,13 +30,13 @@ import 'utils.dart';
 
 void main() {
   group('Flutter Command', () {
-    FakeCache cache;
-    TestUsage usage;
-    FakeClock clock;
-    FakeProcessInfo processInfo;
-    MemoryFileSystem fileSystem;
-    FakeProcessManager processManager;
-    PreRunValidator preRunValidator;
+    late FakeCache cache;
+    late TestUsage usage;
+    late FakeClock clock;
+    late FakeProcessInfo processInfo;
+    late MemoryFileSystem fileSystem;
+    late FakeProcessManager processManager;
+    late PreRunValidator preRunValidator;
 
     setUpAll(() {
       Cache.flutterRoot = '/path/to/sdk/flutter';
@@ -246,7 +244,7 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-        }
+        },
       );
       await expectLater(
         () => flutterCommand.run(),
@@ -324,9 +322,9 @@ void main() {
     });
 
     group('signals tests', () {
-      FakeIoProcessSignal mockSignal;
-      ProcessSignal signalUnderTest;
-      StreamController<io.ProcessSignal> signalController;
+      late FakeIoProcessSignal mockSignal;
+      late ProcessSignal signalUnderTest;
+      late StreamController<io.ProcessSignal> signalController;
 
       setUp(() {
         mockSignal = FakeIoProcessSignal();
@@ -350,7 +348,7 @@ void main() {
           commandFunction: () async {
             final Completer<void> c = Completer<void>();
             await c.future;
-            return null; // unreachable
+            throw UnsupportedError('Unreachable');
           }
         );
 
@@ -398,7 +396,7 @@ void main() {
           checkLockCompleter.complete();
           final Completer<void> c = Completer<void>();
           await c.future;
-          return null; // unreachable
+          throw UnsupportedError('Unreachable');
         });
 
         unawaited(flutterCommand.run());
@@ -454,7 +452,7 @@ void main() {
       final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
-        timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
+        timingLabelParts: <String?> ['blah1', 'blah2', null, 'blah3'],
         endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
@@ -701,7 +699,7 @@ class FakeTargetCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  String cachedTargetFile;
+  String? cachedTargetFile;
 
   @override
   String get description => '';
@@ -759,7 +757,7 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
-  Stream<io.ProcessSignal> stream;
+  late Stream<io.ProcessSignal> stream;
 
   @override
   Stream<io.ProcessSignal> watch() => stream;
@@ -779,8 +777,8 @@ class FakeCache extends Fake implements Cache {
 
 class FakeSignals implements Signals {
   FakeSignals({
-    this.subForSigTerm,
-    List<ProcessSignal> exitSignals,
+    required this.subForSigTerm,
+    required List<ProcessSignal> exitSignals,
   }) : delegate = Signals.test(exitSignals: exitSignals);
 
   final ProcessSignal subForSigTerm;
@@ -814,14 +812,12 @@ class FakeClock extends Fake implements SystemClock {
 class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
-    PubContext context,
-    FlutterProject project,
+    required PubContext context,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
