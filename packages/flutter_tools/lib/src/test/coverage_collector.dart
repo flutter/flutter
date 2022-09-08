@@ -12,11 +12,12 @@ import '../globals.dart' as globals;
 import '../vmservice.dart';
 
 import 'test_device.dart';
+import 'test_time_recorder.dart';
 import 'watcher.dart';
 
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryNames, this.verbose = true, required this.packagesPath, this.resolver});
+  CoverageCollector({this.libraryNames, this.verbose = true, required this.packagesPath, this.resolver, this.testTimeRecorder});
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -34,6 +35,8 @@ class CoverageCollector extends TestWatcher {
 
   final coverage.Resolver? resolver;
   final Map<String, List<List<int>>> _ignoredLinesInFilesCache = <String, List<List<int>>>{};
+
+  final TestTimeRecorder? testTimeRecorder;
 
   static Future<coverage.Resolver> getResolver(String? packagesPath) async {
     try {
@@ -63,11 +66,13 @@ class CoverageCollector extends TestWatcher {
   }
 
   void _addHitmap(Map<String, coverage.HitMap> hitmap) {
+    final Stopwatch? stopwatch = testTimeRecorder?.start(TestTimePhases.CoverageAddHitmap);
     if (_globalHitmap == null) {
       _globalHitmap = hitmap;
     } else {
       _globalHitmap!.merge(hitmap);
     }
+    testTimeRecorder?.stop(TestTimePhases.CoverageAddHitmap, stopwatch!);
   }
 
   /// The directory of the package for which coverage is being collected.
@@ -113,7 +118,11 @@ class CoverageCollector extends TestWatcher {
   ///
   /// The returned [Future] completes when the coverage is collected.
   Future<void> collectCoverage(TestDevice testDevice, {@visibleForTesting Future<FlutterVmService> Function(Uri?)? connector}) async {
+    final Stopwatch? totalTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageTotal);
+
     late Map<String, dynamic> data;
+
+    final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
     final Future<void> processComplete = testDevice.finished.catchError(
       (Object error) => throw Exception(
@@ -137,14 +146,20 @@ class CoverageCollector extends TestWatcher {
 
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
 
+    testTimeRecorder?.stop(TestTimePhases.CoverageCollect, collectTestTimeRecorderStopwatch!);
+
     _logMessage('Merging coverage data...');
+    final Stopwatch? parseTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageParseJson);
     final Map<String, coverage.HitMap> hitmap = coverage.HitMap.parseJsonSync(
         data['coverage'] as List<Map<String, dynamic>>,
         checkIgnoredLines: true,
         resolver: resolver ?? await CoverageCollector.getResolver(packageDirectory),
         ignoredLinesInFilesCache: _ignoredLinesInFilesCache);
+    testTimeRecorder?.stop(TestTimePhases.CoverageParseJson, parseTestTimeRecorderStopwatch!);
+
     _addHitmap(hitmap);
     _logMessage('Done merging coverage data into global coverage map.');
+    testTimeRecorder?.stop(TestTimePhases.CoverageTotal, totalTestTimeRecorderStopwatch!);
   }
 
   /// Returns formatted coverage data once all coverage data has been collected.
@@ -236,5 +251,5 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String>? libraryNames, 
   String? debugName,
   @visibleForTesting bool forceSequential = false,
 }) async {
-  return await coverage.collect(serviceUri, false, false, false, libraryNames, dedupeIsolateGroups: false);
+  return await coverage.collect(serviceUri, false, false, false, libraryNames);
 }

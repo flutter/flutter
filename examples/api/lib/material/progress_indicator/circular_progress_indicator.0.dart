@@ -62,7 +62,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           children: <Widget>[
             Text(
               'Circular progress indicator with a fixed color',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             CircularProgressIndicator(
               value: controller.value,

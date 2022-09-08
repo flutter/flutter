@@ -477,7 +477,6 @@ void main() {
         '--deterministic',
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
-        '--strip',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -519,6 +518,21 @@ void main() {
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'dsymutil',
+        '-o',
+        '$build/arm64/App.framework.dSYM',
+        '$build/arm64/App.framework/App',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'strip',
+        '-S',
+        '$build/arm64/App.framework/App',
+        '-o',
+        '$build/arm64/App.framework/App',
       ]),
       FakeCommand(command: <String>[
         'lipo',
@@ -553,7 +567,6 @@ void main() {
         '--trace-precompiler-to=code_size_1/trace.arm64.json',
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
-        '--strip',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -595,6 +608,21 @@ void main() {
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'dsymutil',
+        '-o',
+        '$build/arm64/App.framework.dSYM',
+        '$build/arm64/App.framework/App',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'strip',
+        '-S',
+        '$build/arm64/App.framework/App',
+        '-o',
+        '$build/arm64/App.framework/App',
       ]),
       FakeCommand(command: <String>[
         'lipo',

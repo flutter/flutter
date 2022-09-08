@@ -863,7 +863,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
 /// painted. In this case, the scrollbar cannot accurately represent the
 /// relative location of the visible area, or calculate the accurate delta to
-/// apply when  dragging on the thumb or tapping on the track.
+/// apply when dragging on the thumb or tapping on the track.
 ///
 /// ### Interaction
 ///
@@ -916,6 +916,28 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [PageView]
 ///   * [NestedScrollView]
 ///   * [DropdownButton]
+///
+/// Default Scrollbars can be disabled for the whole app by setting a
+/// [ScrollBehavior] with `scrollbars` set to false.
+///
+/// {@tool snippet}
+/// ```dart
+/// MaterialApp(
+///   scrollBehavior: const MaterialScrollBehavior()
+///     .copyWith(scrollbars: false),
+///   home: Scaffold(
+///     appBar: AppBar(title: const Text('Home')),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows how to disable the default Scrollbar for a [Scrollable]
+/// widget to avoid duplicate Scrollbars when running on desktop platforms.
+///
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
+/// {@end-tool}
 /// {@endtemplate}
 ///
 /// {@tool dartpad}
@@ -1112,7 +1134,7 @@ class RawScrollbar extends StatefulWidget {
   ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
-  ///              return  Text('item $index');
+  ///              return Text('item $index');
   ///            },
   ///          ),
   ///        ),
@@ -1197,7 +1219,7 @@ class RawScrollbar extends StatefulWidget {
   ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
-  ///              return  Text('item $index');
+  ///              return Text('item $index');
   ///            },
   ///          ),
   ///        ),

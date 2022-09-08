@@ -222,7 +222,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Theme.of(context).colorScheme.shadow;
 
   @override
-  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get selectedColor => isEnabled

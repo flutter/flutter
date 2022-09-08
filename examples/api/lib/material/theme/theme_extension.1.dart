@@ -26,7 +26,7 @@ class MyColors extends ThemeExtension<MyColors> {
   }
 
   @override
-  MyColors lerp(ThemeExtension<MyColors>? other, double t) {
+  MyColors lerp(MyColors? other, double t) {
     if (other is! MyColors) {
       return this;
     }

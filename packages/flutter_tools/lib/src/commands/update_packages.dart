@@ -16,6 +16,7 @@ import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
@@ -31,8 +32,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
-  // A gradle upgrade upstream causes a devicelab test to fail: https://github.com/flutter/flutter/issues/109397
-  'path_provider_android': '2.0.17',
   // Could potentially break color scheme tests on upgrade,
   // so pin and manually update as needed.
   'material_color_utilities': '0.2.0',
@@ -401,7 +400,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       // needed packages to the pub cache, upgrading if requested.
       await pub.get(
         context: PubContext.updatePackages,
-        directory: tempDir.path,
+        project: FlutterProject.fromDirectory(tempDir),
         upgrade: doUpgrade,
         offline: boolArgDeprecated('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
@@ -424,7 +423,6 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           filter: tree.fill,
-          retry: false, // errors here are usually fatal since we're not hitting the network
         );
       }
     } finally {
@@ -504,7 +502,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           stopwatch.start();
           await pub.get(
             context: PubContext.updatePackages,
-            directory: dir.path,
+            project: FlutterProject.fromDirectory(dir),
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,

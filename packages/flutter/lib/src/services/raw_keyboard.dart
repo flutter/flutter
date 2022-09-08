@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
@@ -88,7 +89,7 @@ enum ModifierKey {
 
   /// The SCROLL LOCK modifier key.
   ///
-  /// Typically, there is one of these.  Only shown as "pressed" when the scroll
+  /// Typically, there is one of these. Only shown as "pressed" when the scroll
   /// lock is on, so on a key up when the mode is turned on, on each key press
   /// when it's enabled, and on a key down when it is turned off.
   scrollLockModifier,
@@ -568,7 +569,7 @@ class RawKeyUpEvent extends RawKeyEvent {
 /// a handler that can determine if the key has been handled or not.
 ///
 /// The handler should return true if the key has been handled, and false if the
-/// key was not handled.  It must not return null.
+/// key was not handled. It must not return null.
 typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
 
 /// An interface for listening to raw key events.

@@ -1143,7 +1143,7 @@ void main() {
     );
 
     // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
+    // by textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, compactWidth);
 
@@ -1221,7 +1221,7 @@ void main() {
     );
 
     // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
+    // by textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, compactWidth);
 
@@ -3603,7 +3603,7 @@ void main() {
       );
 
       // Since the rail is icon only, its preferred width should not be affected
-      // by  textScaleFactor.
+      // by textScaleFactor.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
       expect(renderBox.size.width, 56.0);
 
@@ -3674,7 +3674,7 @@ void main() {
       );
 
       // Since the rail is icon only, its preferred width should not be affected
-      // by  textScaleFactor.
+      // by textScaleFactor.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
       expect(renderBox.size.width, 56.0);
 
