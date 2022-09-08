@@ -219,7 +219,7 @@ void main() {
 
   test('Service extensions - debugDumpRenderTree', () async {
     await binding.doFrame();
-    final Map<String, dynamic> result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
+    final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpRenderTree.name, <String, String>{});
 
     expect(result, <String, dynamic>{
       'data': matches(
@@ -236,7 +236,7 @@ void main() {
 
   test('Service extensions - debugDumpLayerTree', () async {
     await binding.doFrame();
-    final Map<String, dynamic> result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
+    final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpLayerTree.name, <String, String>{});
 
     expect(result, <String, dynamic>{
       'data': matches(
@@ -259,7 +259,7 @@ void main() {
 
   test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
     await binding.doFrame();
-    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
+    final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name, <String, String>{});
 
     expect(result, <String, String>{
       'data': 'Semantics not generated.\n'
@@ -271,7 +271,7 @@ void main() {
 
   test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
     await binding.doFrame();
-    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
+    final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name, <String, String>{});
 
     expect(result, <String, String>{
       'data': 'Semantics not generated.\n'
@@ -290,12 +290,12 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(debugPaintSizeEnabled, false);
-    result = await binding.testExtension('debugPaint', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugPaint.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugPaintSizeEnabled, false);
     expect(extensionChangedEvents, isEmpty);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugPaint', <String, String>{'enabled': 'true'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugPaint.name, <String, String>{'enabled': 'true'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -312,12 +312,12 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.debugPaint');
     expect(extensionChangedEvent['value'], 'true');
-    result = await binding.testExtension('debugPaint', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugPaint.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugPaintSizeEnabled, true);
     expect(extensionChangedEvents.length, 1);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugPaint', <String, String>{'enabled': 'false'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugPaint.name, <String, String>{'enabled': 'false'});
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame();
@@ -329,7 +329,7 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.debugPaint');
     expect(extensionChangedEvent['value'], 'false');
-    result = await binding.testExtension('debugPaint', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugPaint.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugPaintSizeEnabled, false);
     expect(extensionChangedEvents.length, 2);
@@ -343,11 +343,11 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(debugPaintBaselinesEnabled, false);
-    result = await binding.testExtension('debugPaintBaselinesEnabled', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugPaintBaselinesEnabled.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugPaintBaselinesEnabled, false);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugPaintBaselinesEnabled', <String, String>{'enabled': 'true'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugPaintBaselinesEnabled.name, <String, String>{'enabled': 'true'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -360,11 +360,11 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugPaintBaselinesEnabled, true);
-    result = await binding.testExtension('debugPaintBaselinesEnabled', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugPaintBaselinesEnabled.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugPaintBaselinesEnabled, true);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugPaintBaselinesEnabled', <String, String>{'enabled': 'false'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugPaintBaselinesEnabled.name, <String, String>{'enabled': 'false'});
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame();
@@ -372,7 +372,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugPaintBaselinesEnabled, false);
-    result = await binding.testExtension('debugPaintBaselinesEnabled', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugPaintBaselinesEnabled.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugPaintBaselinesEnabled, false);
     expect(binding.frameScheduled, isFalse);
@@ -385,12 +385,12 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(debugInvertOversizedImages, false);
-    result = await binding.testExtension('invertOversizedImages', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.invertOversizedImages.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
     expect(binding.frameScheduled, isFalse);
 
-    pendingResult = binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'true'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.invertOversizedImages.name, <String, String>{'enabled': 'true'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -404,12 +404,12 @@ void main() {
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugInvertOversizedImages, true);
 
-    result = await binding.testExtension('invertOversizedImages', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.invertOversizedImages.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugInvertOversizedImages, true);
     expect(binding.frameScheduled, isFalse);
 
-    pendingResult = binding.testExtension('invertOversizedImages', <String, String>{'enabled': 'false'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.invertOversizedImages.name, <String, String>{'enabled': 'false'});
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame();
@@ -418,7 +418,7 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
 
-    result = await binding.testExtension('invertOversizedImages', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.invertOversizedImages.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
     expect(binding.frameScheduled, isFalse);
@@ -488,23 +488,23 @@ void main() {
     expect(binding.frameScheduled, isFalse);
     expect(debugProfileBuildsEnabled, false);
 
-    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectPaints.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfilePaintsEnabled, false);
 
-    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{'enabled': 'true'});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectPaints.name, <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfilePaintsEnabled, true);
 
-    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectPaints.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfilePaintsEnabled, true);
 
-    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{'enabled': 'false'});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectPaints.name, <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfilePaintsEnabled, false);
 
-    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectPaints.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfilePaintsEnabled, false);
 
@@ -517,23 +517,23 @@ void main() {
     expect(binding.frameScheduled, isFalse);
     expect(debugProfileLayoutsEnabled, false);
 
-    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectLayouts.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileLayoutsEnabled, false);
 
-    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{'enabled': 'true'});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectLayouts.name, <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileLayoutsEnabled, true);
 
-    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectLayouts.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileLayoutsEnabled, true);
 
-    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{'enabled': 'false'});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectLayouts.name, <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileLayoutsEnabled, false);
 
-    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.profileRenderObjectLayouts.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileLayoutsEnabled, false);
 
@@ -674,11 +674,11 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(debugRepaintRainbowEnabled, false);
-    result = await binding.testExtension('repaintRainbow', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.repaintRainbow.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugRepaintRainbowEnabled, false);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('repaintRainbow', <String, String>{'enabled': 'true'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.repaintRainbow.name, <String, String>{'enabled': 'true'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -687,11 +687,11 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugRepaintRainbowEnabled, true);
-    result = await binding.testExtension('repaintRainbow', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.repaintRainbow.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugRepaintRainbowEnabled, true);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('repaintRainbow', <String, String>{'enabled': 'false'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.repaintRainbow.name, <String, String>{'enabled': 'false'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -704,7 +704,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugRepaintRainbowEnabled, false);
-    result = await binding.testExtension('repaintRainbow', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.repaintRainbow.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugRepaintRainbowEnabled, false);
     expect(binding.frameScheduled, isFalse);
@@ -717,11 +717,11 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(debugDisableClipLayers, false);
-    result = await binding.testExtension('debugDisableClipLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisableClipLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableClipLayers, false);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugDisableClipLayers', <String, String>{'enabled': 'true'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugDisableClipLayers.name, <String, String>{'enabled': 'true'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -734,11 +734,11 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugDisableClipLayers, true);
-    result = await binding.testExtension('debugDisableClipLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisableClipLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugDisableClipLayers, true);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugDisableClipLayers', <String, String>{'enabled': 'false'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugDisableClipLayers.name, <String, String>{'enabled': 'false'});
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame();
@@ -746,7 +746,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableClipLayers, false);
-    result = await binding.testExtension('debugDisableClipLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisableClipLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableClipLayers, false);
     expect(binding.frameScheduled, isFalse);
@@ -759,11 +759,11 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(debugDisablePhysicalShapeLayers, false);
-    result = await binding.testExtension('debugDisablePhysicalShapeLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisablePhysicalShapeLayers, false);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugDisablePhysicalShapeLayers', <String, String>{'enabled': 'true'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name, <String, String>{'enabled': 'true'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -776,11 +776,11 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugDisablePhysicalShapeLayers, true);
-    result = await binding.testExtension('debugDisablePhysicalShapeLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugDisablePhysicalShapeLayers, true);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugDisablePhysicalShapeLayers', <String, String>{'enabled': 'false'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name, <String, String>{'enabled': 'false'});
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame();
@@ -788,7 +788,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisablePhysicalShapeLayers, false);
-    result = await binding.testExtension('debugDisablePhysicalShapeLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisablePhysicalShapeLayers, false);
     expect(binding.frameScheduled, isFalse);
@@ -801,11 +801,11 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
     expect(debugDisableOpacityLayers, false);
-    result = await binding.testExtension('debugDisableOpacityLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisableOpacityLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableOpacityLayers, false);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugDisableOpacityLayers', <String, String>{'enabled': 'true'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugDisableOpacityLayers.name, <String, String>{'enabled': 'true'});
     completed = false;
     pendingResult.whenComplete(() { completed = true; });
     await binding.flushMicrotasks();
@@ -818,11 +818,11 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugDisableOpacityLayers, true);
-    result = await binding.testExtension('debugDisableOpacityLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisableOpacityLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugDisableOpacityLayers, true);
     expect(binding.frameScheduled, isFalse);
-    pendingResult = binding.testExtension('debugDisableOpacityLayers', <String, String>{'enabled': 'false'});
+    pendingResult = binding.testExtension(RenderingServiceExtensions.debugDisableOpacityLayers.name, <String, String>{'enabled': 'false'});
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame();
@@ -830,7 +830,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableOpacityLayers, false);
-    result = await binding.testExtension('debugDisableOpacityLayers', <String, String>{});
+    result = await binding.testExtension(RenderingServiceExtensions.debugDisableOpacityLayers.name, <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableOpacityLayers, false);
     expect(binding.frameScheduled, isFalse);
