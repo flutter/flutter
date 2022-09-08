@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -25,6 +26,7 @@ import '../src/context.dart';
 void main() {
   testWithoutContext('PreviewDevice defaults', () async {
     final PreviewDevice device = PreviewDevice(
+      artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
@@ -51,6 +53,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final PreviewDevice device = PreviewDevice(
+      artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
