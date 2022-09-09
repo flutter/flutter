@@ -6,8 +6,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'dom.dart';
-import 'text/font_collection.dart';
 import 'util.dart';
+
+const String ahemFontFamily = 'Ahem';
+const String ahemFontUrl = '/assets/fonts/ahem.ttf';
+const String robotoFontFamily = 'Roboto';
+const String robotoTestFontUrl = '/assets/fonts/Roboto-Regular.ttf';
+const String robotoVariableFontFamily = 'RobotoVariable';
+const String robotoVariableTestFontUrl = '/assets/fonts/RobotoSlab-VariableFont_wght.ttf';
 
 /// This class downloads assets over the network.
 ///
