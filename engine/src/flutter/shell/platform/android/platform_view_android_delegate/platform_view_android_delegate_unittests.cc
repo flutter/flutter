@@ -20,7 +20,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   node0.id = 0;
   node0.label = "label";
   node0.tooltip = "tooltip";
-  update.insert(std::make_pair(0, std::move(node0)));
+  update.insert(std::make_pair(0, node0));
 
   std::vector<uint8_t> expected_buffer(188);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args(0);
@@ -94,7 +94,7 @@ TEST(PlatformViewShell,
   node0.labelAttributes.push_back(spell_out_attribute);
   node0.hint = "hint";
   node0.hintAttributes.push_back(locale_attribute);
-  update.insert(std::make_pair(0, std::move(node0)));
+  update.insert(std::make_pair(0, node0));
 
   std::vector<uint8_t> expected_buffer(220);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args;
@@ -167,7 +167,7 @@ TEST(PlatformViewShell,
   action0.overrideId = 1;
   action0.label = "label";
   action0.hint = "hint";
-  actions.insert(std::make_pair(0, std::move(action0)));
+  actions.insert(std::make_pair(0, action0));
 
   std::vector<uint8_t> expected_actions_buffer(16);
   int32_t* actions_buffer_int32 =

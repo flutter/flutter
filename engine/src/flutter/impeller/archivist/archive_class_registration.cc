@@ -17,9 +17,9 @@ static constexpr const char* kArchivePrimaryKeyColumnName = "primary_key";
 ArchiveClassRegistration::ArchiveClassRegistration(ArchiveDatabase& database,
                                                    ArchiveDef definition)
     : database_(database), definition_(std::move(definition)) {
-  for (size_t i = 0; i < definition.members.size(); i++) {
+  for (size_t i = 0; i < definition_.members.size(); i++) {
     // The first index entry is the primary key. So add one to the index.
-    column_map_[definition.members[i]] = i + 1;
+    column_map_[definition_.members[i]] = i + 1;
   }
   is_valid_ = CreateTable();
 }

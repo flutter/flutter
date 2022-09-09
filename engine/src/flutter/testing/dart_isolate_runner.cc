@@ -144,8 +144,8 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
     return nullptr;
   }
 
-  return std::make_unique<AutoIsolateShutdown>(isolate,
-                                               task_runners.GetUITaskRunner());
+  return std::make_unique<AutoIsolateShutdown>(
+      isolate, context.task_runners.GetUITaskRunner());
 }
 
 std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(

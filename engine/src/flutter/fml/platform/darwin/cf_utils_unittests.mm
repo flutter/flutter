@@ -46,7 +46,7 @@ TEST(CFTest, CanCreateRefs) {
     auto string_source = string;
     ASSERT_TRUE(string_source);
     auto string_move = std::move(string_source);
-    ASSERT_FALSE(string_source);
+    ASSERT_FALSE(string_source);  // NOLINT(bugprone-use-after-move)
     ASSERT_EQ(ref_count + 1u, CFGetRetainCount(string));
     string_move.Reset();
     ASSERT_EQ(ref_count, CFGetRetainCount(string));
@@ -55,7 +55,7 @@ TEST(CFTest, CanCreateRefs) {
   // Move assign.
   {
     auto string_move_assign = std::move(string);
-    ASSERT_FALSE(string);
+    ASSERT_FALSE(string);  // NOLINT(bugprone-use-after-move)
     ASSERT_EQ(ref_count, CFGetRetainCount(string_move_assign));
   }
 }

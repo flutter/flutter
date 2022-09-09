@@ -7,7 +7,7 @@
 namespace impeller {
 
 TextRun::TextRun(Font font) : font_(std::move(font)) {
-  if (!font.IsValid()) {
+  if (!font_.IsValid()) {
     return;
   }
   is_valid_ = true;

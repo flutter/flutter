@@ -26,7 +26,8 @@ TEST(MallocMapping, MoveConstructor) {
   MallocMapping moved = std::move(mapping);
 
   ASSERT_EQ(nullptr,
-            mapping.GetMapping());  // NOLINT(clang-analyzer-cplusplus.Move)
+            mapping.GetMapping());  // NOLINT(clang-analyzer-cplusplus.Move,
+                                    // bugprone-use-after-move)
   ASSERT_EQ(0u, mapping.GetSize());
   ASSERT_NE(nullptr, moved.GetMapping());
   ASSERT_EQ(length, moved.GetSize());

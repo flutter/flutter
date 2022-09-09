@@ -21,7 +21,7 @@ std::shared_ptr<const Sampler> SamplerLibraryGLES::GetSampler(
   if (found != samplers_.end()) {
     return found->second;
   }
-  return samplers_[std::move(descriptor)] =
+  return samplers_[descriptor] =
              std::shared_ptr<SamplerGLES>(new SamplerGLES(descriptor));
 }
 

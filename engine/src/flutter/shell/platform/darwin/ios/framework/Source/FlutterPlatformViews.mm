@@ -83,8 +83,8 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetLayer
     // |    |    wrapper   |    |  == mask =>  | overlay_view |
     // |    +--------------+    |              +--------------+
     // +------------------------+
-    overlay_view_wrapper.get().clipsToBounds = YES;
-    [overlay_view_wrapper.get() addSubview:overlay_view];
+    layer->overlay_view_wrapper.get().clipsToBounds = YES;
+    [layer->overlay_view_wrapper.get() addSubview:layer->overlay_view];
     layers_.push_back(layer);
   }
   std::shared_ptr<FlutterPlatformViewLayer> layer = layers_[available_layer_index_];
