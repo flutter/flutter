@@ -325,8 +325,23 @@ TEST_F(DisplayListLayerDiffTest, FractionalTranslation) {
   tree1.root()->Add(
       CreateDisplayListLayer(display_list, SkPoint::Make(0.5, 0.5)));
 
-  auto damage = DiffLayerTree(tree1, MockLayerTree());
+  auto damage =
+      DiffLayerTree(tree1, MockLayerTree(), SkIRect::MakeEmpty(), 0, 0,
+                    /*use_raster_cache=*/false);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 61, 61));
+}
+
+TEST_F(DisplayListLayerDiffTest, FractionalTranslationWithRasterCache) {
+  auto display_list = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1);
+
+  MockLayerTree tree1;
+  tree1.root()->Add(
+      CreateDisplayListLayer(display_list, SkPoint::Make(0.5, 0.5)));
+
+  auto damage =
+      DiffLayerTree(tree1, MockLayerTree(), SkIRect::MakeEmpty(), 0, 0,
+                    /*use_raster_cache=*/true);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(11, 11, 61, 61));
 }
 
 TEST_F(DisplayListLayerDiffTest, DisplayListCompare) {

@@ -45,7 +45,8 @@ class DiffContext {
   explicit DiffContext(SkISize frame_size,
                        double device_pixel_aspect_ratio,
                        PaintRegionMap& this_frame_paint_region_map,
-                       const PaintRegionMap& last_frame_paint_region_map);
+                       const PaintRegionMap& last_frame_paint_region_map,
+                       bool has_raster_cache);
 
   // Starts a new subtree.
   void BeginSubtree();
@@ -156,6 +157,11 @@ class DiffContext {
   // frame layer tree.
   PaintRegion GetOldLayerPaintRegion(const Layer* layer) const;
 
+  // Whether or not a raster cache is being used. If so, we must snap
+  // all transformations to physical pixels if the layer may be raster
+  // cached.
+  bool has_raster_cache() const { return has_raster_cache_; }
+
   class Statistics {
    public:
     // Picture replaced by different picture
@@ -223,6 +229,7 @@ class DiffContext {
 
   PaintRegionMap& this_frame_paint_region_map_;
   const PaintRegionMap& last_frame_paint_region_map_;
+  bool has_raster_cache_;
 
   void AddDamage(const SkRect& rect);
 

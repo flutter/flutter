@@ -52,6 +52,10 @@ void DisplayListLayer::Diff(DiffContext* context, const Layer* old_layer) {
 #endif
   }
   context->PushTransform(SkMatrix::Translate(offset_.x(), offset_.y()));
+  if (context->has_raster_cache()) {
+    context->SetTransform(
+        RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+  }
   context->AddLayerBounds(display_list()->bounds());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
@@ -95,9 +99,13 @@ void DisplayListLayer::Preroll(PrerollContext* context,
                                const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "DisplayListLayer::Preroll");
   DisplayList* disp_list = display_list();
+  SkMatrix child_matrix = matrix;
+  if (context->raster_cache) {
+    child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
+  }
 
   AutoCache cache =
-      AutoCache(display_list_raster_cache_item_.get(), context, matrix);
+      AutoCache(display_list_raster_cache_item_.get(), context, child_matrix);
   if (disp_list->can_apply_group_opacity()) {
     context->subtree_can_inherit_opacity = true;
   }
@@ -111,6 +119,10 @@ void DisplayListLayer::Paint(PaintContext& context) const {
 
   SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
   context.leaf_nodes_canvas->translate(offset_.x(), offset_.y());
+  if (context.raster_cache) {
+    context.leaf_nodes_canvas->setMatrix(RasterCacheUtil::GetIntegralTransCTM(
+        context.leaf_nodes_canvas->getTotalMatrix()));
+  }
 
   if (context.raster_cache && display_list_raster_cache_item_) {
     AutoCachePaint cache_paint(context);

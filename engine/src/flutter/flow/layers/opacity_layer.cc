@@ -5,6 +5,7 @@
 #include "flutter/flow/layers/opacity_layer.h"
 
 #include "flutter/flow/layers/cacheable_layer.h"
+#include "flutter/flow/raster_cache_util.h"
 #include "third_party/skia/include/core/SkPaint.h"
 
 namespace flutter {
@@ -27,6 +28,10 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
     }
   }
   context->PushTransform(SkMatrix::Translate(offset_.fX, offset_.fY));
+  if (context->has_raster_cache()) {
+    context->SetTransform(
+        RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+  }
   DiffChildren(context, prev);
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
@@ -85,6 +90,11 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
+  if (context.raster_cache) {
+    context.internal_nodes_canvas->setMatrix(
+        RasterCacheUtil::GetIntegralTransCTM(
+            context.leaf_nodes_canvas->getTotalMatrix()));
+  }
 
   SkScalar inherited_opacity = context.inherited_opacity;
   SkScalar subtree_opacity = opacity() * inherited_opacity;

@@ -54,6 +54,39 @@ struct RasterCacheUtil {
     ctm.mapRect(&device_rect, rect);
     return device_rect;
   }
+
+  static SkRect GetRoundedOutDeviceBounds(const SkRect& rect,
+                                          const SkMatrix& ctm) {
+    SkRect device_rect;
+    ctm.mapRect(&device_rect, rect);
+    device_rect.roundOut(&device_rect);
+    return device_rect;
+  }
+
+  /**
+   * @brief Snap the translation components of the matrix to integers.
+   *
+   * The snapping will only happen if the matrix only has scale and translation
+   * transformations. This is used, along with GetRoundedOutDeviceBounds, to
+   * ensure that the textures drawn by the raster cache are exactly aligned to
+   * physical pixels. Any layers that participate in raster caching must align
+   * themselves to physical pixels even when not cached to prevent a change in
+   * apparent location if caching is later applied.
+   *
+   * @param ctm the current transformation matrix.
+   * @return SkMatrix the snapped transformation matrix.
+   */
+  static SkMatrix GetIntegralTransCTM(const SkMatrix& ctm) {
+    // Avoid integral snapping if the matrix has complex transformation to avoid
+    // the artifact observed in https://github.com/flutter/flutter/issues/41654.
+    if (!ctm.isScaleTranslate()) {
+      return ctm;
+    }
+    SkMatrix result = ctm;
+    result[SkMatrix::kMTransX] = SkScalarRoundToScalar(ctm.getTranslateX());
+    result[SkMatrix::kMTransY] = SkScalarRoundToScalar(ctm.getTranslateY());
+    return result;
+  }
 };
 
 }  // namespace flutter
