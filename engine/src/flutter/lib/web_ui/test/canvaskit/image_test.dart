@@ -24,6 +24,50 @@ void testMain() {
     image.dispose();
   // TODO(hterkelsen): https://github.com/flutter/flutter/issues/109265
   }, skip: isFirefox);
+
+  test('Image constructor invokes onCreate once', () async {
+    int onCreateInvokedCount = 0;
+    ui.Image? createdImage;
+    ui.Image.onCreate = (ui.Image image) {
+      onCreateInvokedCount++;
+      createdImage = image;
+    };
+
+    final ui.Image  image1 = await _createImage();
+
+    expect(onCreateInvokedCount, 1);
+    expect(createdImage, image1);
+
+    final ui.Image image2 = await _createImage();
+
+    expect(onCreateInvokedCount, 2);
+    expect(createdImage, image2);
+
+    ui.Image.onCreate = null;
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/109265
+  }, skip: isFirefox);
+
+  test('dispose() invokes onDispose once', () async {
+    int onDisposeInvokedCount = 0;
+    ui.Image? disposedImage;
+    ui.Image.onDispose = (ui.Image image) {
+      onDisposeInvokedCount++;
+      disposedImage = image;
+    };
+
+    final ui.Image image1 = await _createImage()..dispose();
+
+    expect(onDisposeInvokedCount, 1);
+    expect(disposedImage, image1);
+
+    final ui.Image image2 = await _createImage()..dispose();
+
+    expect(onDisposeInvokedCount, 2);
+    expect(disposedImage, image2);
+
+    ui.Image.onDispose = null;
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/109265
+  }, skip: isFirefox);
 }
 
 Future<ui.Image> _createImage() => _createPicture().toImage(10, 10);
