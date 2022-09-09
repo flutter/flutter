@@ -1751,7 +1751,7 @@ class ThemeData with Diagnosticable {
     'Use colorScheme.primary instead. '
     'This feature was deprecated after v3.3.0-0.6.pre.',
   )
-  Color get primaryColor => _backgroundColor!;
+  Color get primaryColor => _primaryColor!;
   final Color? _primaryColor;
 
   /// Obsolete property that was used for [CircleAvatar] backgrounds.
