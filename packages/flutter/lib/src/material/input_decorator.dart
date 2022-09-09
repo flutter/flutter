@@ -2892,7 +2892,7 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The prefix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}
@@ -3014,7 +3014,7 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The suffix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}

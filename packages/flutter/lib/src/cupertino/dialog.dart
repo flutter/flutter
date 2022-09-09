@@ -158,7 +158,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
 /// An alert dialog informs the user about situations that require
-/// acknowledgement. An alert dialog has an optional title, optional content,
+/// acknowledgment. An alert dialog has an optional title, optional content,
 /// and an optional list of actions. The title is displayed above the content
 /// and the actions are displayed below the content.
 ///
@@ -1589,7 +1589,7 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
 /// See also:
 ///
 ///  * [CupertinoAlertDialog], a dialog that informs the user about situations
-///    that require acknowledgement.
+///    that require acknowledgment.
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
