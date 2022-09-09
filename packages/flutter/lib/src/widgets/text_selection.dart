@@ -861,7 +861,7 @@ class SelectionOverlay {
         context: context,
         below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
             ? null
-            : _handles!.first,
+            : _handles?.first,
         builder: (_) => builtMagnifier);
   }
 
