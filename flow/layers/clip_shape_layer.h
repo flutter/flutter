@@ -8,6 +8,7 @@
 #include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/paint_utils.h"
+#include "flutter/flow/raster_cache_util.h"
 
 namespace flutter {
 
@@ -32,6 +33,10 @@ class ClipShapeLayer : public CacheableContainerLayer {
         context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
       }
     }
+    if (UsesSaveLayer() && context->has_raster_cache()) {
+      context->SetTransform(
+          RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+    }
     if (context->PushCullRect(clip_shape_bounds())) {
       DiffChildren(context, prev);
     }
@@ -45,12 +50,16 @@ class ClipShapeLayer : public CacheableContainerLayer {
     if (!context->cull_rect.intersect(clip_shape_bounds())) {
       context->cull_rect.setEmpty();
     }
+    SkMatrix child_matrix = matrix;
+    if (context->raster_cache && uses_save_layer) {
+      child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
+    }
     // We can use the raster_cache for children only when the use_save_layer is
     // true so if use_save_layer is false we pass the layer_raster_item is
     // nullptr which mean we don't do raster cache logic.
     AutoCache cache =
         AutoCache(uses_save_layer ? layer_raster_cache_item_.get() : nullptr,
-                  context, matrix);
+                  context, child_matrix);
 
     Layer::AutoPrerollSaveLayerState save =
         Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
@@ -89,6 +98,9 @@ class ClipShapeLayer : public CacheableContainerLayer {
 
     AutoCachePaint cache_paint(context);
     if (context.raster_cache) {
+      context.internal_nodes_canvas->setMatrix(
+          RasterCacheUtil::GetIntegralTransCTM(
+              context.leaf_nodes_canvas->getTotalMatrix()));
       if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
         return;
       }
