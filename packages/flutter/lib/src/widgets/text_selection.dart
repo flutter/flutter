@@ -865,7 +865,7 @@ class SelectionOverlay {
         builder: (_) => builtMagnifier);
   }
 
-  /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
+  /// {@template flutter.widgets.SelectionOverlay.hideMagnifier}
   /// Hide the current magnifier, optionally immediately showing
   /// the toolbar.
   ///
