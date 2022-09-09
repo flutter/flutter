@@ -88,8 +88,7 @@ TEST_F(ShellTest, EncodeImageGivesExternalTypedData) {
   AddNativeCallback("ValidateExternal",
                     CREATE_NATIVE_ENTRY(nativeValidateExternal));
 
-  std::unique_ptr<Shell> shell =
-      CreateShell(std::move(settings), std::move(task_runners));
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
 
   ASSERT_TRUE(shell->IsSetup());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -153,8 +152,7 @@ TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
 
   AddNativeCallback("EncodeImage", CREATE_NATIVE_ENTRY(native_encode_image));
 
-  std::unique_ptr<Shell> shell =
-      CreateShell(std::move(settings), std::move(task_runners));
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
 
   ASSERT_TRUE(shell->IsSetup());
   auto configuration = RunConfiguration::InferFromSettings(settings);
