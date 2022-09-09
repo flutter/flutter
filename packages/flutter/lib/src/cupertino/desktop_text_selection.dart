@@ -30,7 +30,7 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Builder for the MacOS-style copy/paste text selection toolbar.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
   Widget buildToolbar(
@@ -71,7 +71,7 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {
@@ -83,7 +83,7 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 /// Text selection handle controls that follow MacOS design conventions.
 @Deprecated(
   'Use `cupertinoDesktopTextSelectionControls` instead. '
-  'This feature was deprecated after v3.3.0-0.5.pre',
+  'This feature was deprecated after v3.3.0-0.5.pre.',
 )
 final TextSelectionControls cupertinoDesktopTextSelectionHandleControls =
     _CupertinoDesktopTextSelectionHandleControls();

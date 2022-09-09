@@ -272,7 +272,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// option.
 @Deprecated(
   'Use `contextMenuBuilder` instead. '
-  'This feature was deprecated after v3.3.0-0.5.pre',
+  'This feature was deprecated after v3.3.0-0.5.pre.',
 )
 class ToolbarOptions {
   /// Create a toolbar configuration with given options.
@@ -280,7 +280,7 @@ class ToolbarOptions {
   /// All options default to false if they are not explicitly set.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   const ToolbarOptions({
     this.copy = false,
@@ -654,7 +654,7 @@ class EditableText extends StatefulWidget {
     this.autocorrectionTextRectColor,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre',
+      'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
@@ -1906,28 +1906,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canCut` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
 
   @override
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canCopy` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
 
   @override
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canPaste` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
 
   @override
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canSelectAll` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
 

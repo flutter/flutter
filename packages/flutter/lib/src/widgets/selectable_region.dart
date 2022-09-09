@@ -910,14 +910,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
   bool get cutEnabled => false;
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
   bool get pasteEnabled => false;
@@ -958,7 +958,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
   void cutSelection(SelectionChangedCause cause) {
@@ -970,7 +970,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {

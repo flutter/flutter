@@ -1049,28 +1049,28 @@ mixin TextSelectionDelegate {
   /// Whether cut is enabled, must not be null.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get cutEnabled => true;
 
   /// Whether copy is enabled, must not be null.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get copyEnabled => true;
 
   /// Whether paste is enabled, must not be null.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get pasteEnabled => true;
 
   /// Whether select all is enabled, must not be null.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get selectAllEnabled => true;
 
@@ -1080,7 +1080,7 @@ mixin TextSelectionDelegate {
   /// will be hidden and the current selection will be scrolled into view.
   @Deprecated(
     'Use `contextMenuBuilder` with a custom cut button instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   void cutSelection(SelectionChangedCause cause);
 
@@ -1092,7 +1092,7 @@ mixin TextSelectionDelegate {
   /// will be hidden and the current selection will be scrolled into view.
   @Deprecated(
     'Use `contextMenuBuilder` with a custom paste button instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre',
+    'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   Future<void> pasteText(SelectionChangedCause cause);
 
