@@ -288,7 +288,10 @@ if (target_cpu == "arm64") {
   win_toolchains("arm64") {
     toolchain_arch = "arm64"
   }
-  win_toolchains(host_cpu) {
-    toolchain_arch = host_cpu
+  # Cross-compilation support for x64 hosts.
+  if (host_cpu != "arm64") {
+    win_toolchains(host_cpu) {
+        toolchain_arch = host_cpu
+    }
   }
 }

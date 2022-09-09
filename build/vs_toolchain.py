@@ -41,6 +41,12 @@ MSVS_VERSIONS = collections.OrderedDict([
   ('2022', '17.0'),
 ])
 
+VC_VERSIONS = {
+  '2017': 'VC141',
+  '2019': 'VC142',
+  '2022': 'VC143',
+}
+
 
 def SetEnvironmentAndGetRuntimeDllDirs():
   """Sets up os.environ to use the depot_tools VS toolchain with gyp, and
@@ -247,15 +253,19 @@ def _CopyUCRTRuntime(target_dir, source_dir, target_cpu, dll_pattern, suffix):
   """Copy both the msvcp and vccorlib runtime DLLs, only if the target doesn't
   exist, but the target directory does exist."""
   if target_cpu == 'arm64':
+    env_version = GetVisualStudioVersion()
+    vc_version = VC_VERSIONS[env_version]
+    prefix = 'Microsoft.' + vc_version
+
     # Windows ARM64 VCRuntime is located at {toolchain_root}/VC/Redist/MSVC/
-    # {x.y.z}/[debug_nonredist/]arm64/Microsoft.VC141.CRT/.
+    # {x.y.z}/[debug_nonredist/]arm64/Microsoft.VC14{1,2,3}.CRT/.
     vc_redist_root = FindVCRedistRoot()
     if suffix.startswith('.'):
       source_dir = os.path.join(vc_redist_root,
-                                'arm64', 'Microsoft.VC141.CRT')
+                                'arm64', prefix + '.CRT')
     else:
       source_dir = os.path.join(vc_redist_root, 'debug_nonredist',
-                                'arm64', 'Microsoft.VC141.DebugCRT')
+                                'arm64', prefix + '.DebugCRT')
   for file_part in ('msvcp', 'vccorlib', 'vcruntime'):
     dll = dll_pattern % file_part
     target = os.path.join(target_dir, dll)
