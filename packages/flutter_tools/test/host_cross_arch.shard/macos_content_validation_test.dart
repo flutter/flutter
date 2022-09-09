@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 import '../src/darwin_common.dart';
-import 'ios_content_validation_test.dart';
 
 void main() {
   final String flutterBin = fileSystem.path.join(
@@ -88,20 +87,13 @@ void main() {
         'App.framework',
       ));
 
-      const List<String> requiredSymbols = <String>[
-        '_kDartIsolateSnapshotData',
-        '_kDartIsolateSnapshotInstructions',
-        '_kDartVmSnapshotData',
-        '_kDartVmSnapshotInstructions'
-      ];
-
       final File libBinary = outputAppFramework.childFile('App');
       final File libDsymBinary =
         buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App');
 
       _checkFatBinary(libBinary, buildModeLower, 'dynamically linked shared library');
 
-      final List<String> libSymbols = getExportedSymbols(libBinary.path);
+      final List<String> libSymbols = AppleTestUtils.getExportedSymbols(libBinary.path);
 
       if (buildMode == 'Debug') {
         // dSYM is not created for a debug build.
@@ -109,9 +101,10 @@ void main() {
         expect(libSymbols, isEmpty);
       } else {
         _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
-        expect(libSymbols, equals(requiredSymbols));
-        final List<String> dSymSymbols = getExportedSymbols(libDsymBinary.path);
-        expect(dSymSymbols, containsAll(requiredSymbols));
+        expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
+        final List<String> dSymSymbols =
+            AppleTestUtils.getExportedSymbols(libDsymBinary.path);
+        expect(dSymSymbols, containsAll(AppleTestUtils.requiredSymbols));
         // The actual number of symbols is going to vary but there should
         // be "many" in the dSYM. At the time of writing, it was 19195.
         expect(dSymSymbols.length, greaterThanOrEqualTo(15000));

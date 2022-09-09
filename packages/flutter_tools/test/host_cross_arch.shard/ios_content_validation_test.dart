@@ -192,19 +192,13 @@ void main() {
           expect(localNetworkUsageFound, buildMode == BuildMode.debug);
         });
 
-        const List<String> requiredSymbols = <String>[
-          '_kDartIsolateSnapshotData',
-          '_kDartIsolateSnapshotInstructions',
-          '_kDartVmSnapshotData',
-          '_kDartVmSnapshotInstructions'
-        ];
-
         testWithoutContext('check symbols', () {
-          final List<String> symbols = getExportedSymbols(outputAppFrameworkBinary.path);
+          final List<String> symbols =
+              AppleTestUtils.getExportedSymbols(outputAppFrameworkBinary.path);
           if (buildMode == BuildMode.debug) {
             expect(symbols, isEmpty);
           } else {
-            expect(symbols, equals(requiredSymbols));
+            expect(symbols, equals(AppleTestUtils.requiredSymbols));
           }
         });
 
@@ -213,8 +207,9 @@ void main() {
             // dSYM is not created for a debug build.
             expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
           } else {
-            final List<String> symbols = getExportedSymbols(buildAppFrameworkDsymBinary.path);
-            expect(symbols, containsAll(requiredSymbols));
+            final List<String> symbols =
+                AppleTestUtils.getExportedSymbols(buildAppFrameworkDsymBinary.path);
+            expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
             // The actual number of symbols is going to vary but there should
             // be "many" in the dSYM. At the time of writing, it was 7656.
             expect(symbols.length, greaterThanOrEqualTo(5000));
@@ -362,20 +357,4 @@ void main() {
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
      timeout: const Timeout(Duration(minutes: 7))
   );
-}
-
-List<String> getExportedSymbols(String dwarfPath) {
-  final ProcessResult nm = processManager.runSync(
-    <String>[
-      'nm',
-      '--debug-syms',  // nm docs: 'Show all symbols, even debugger only'
-      '--defined-only',
-      '--just-symbol-name',
-      dwarfPath,
-      '-arch',
-      'arm64',
-    ],
-  );
-  final String nmOutput = (nm.stdout as String).trim();
-  return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
 }
