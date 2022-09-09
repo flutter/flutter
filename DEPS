@@ -30,6 +30,13 @@ vars = {
   # for the web engine.
   'download_emsdk': False,
 
+  # As Dart does, we use Fuchsia's GN and Clang toolchain. These revision
+  # should be kept up to date with the revisions pulled by Dart.
+  # The list of revisions for these tools comes from Fuchsia, here:
+  # https://fuchsia.googlesource.com/integration/+/HEAD/toolchain
+  # If there are problems with the toolchain, contact fuchsia-toolchain@.
+  'clang_revision': '039b969b32b64b64123dce30dd28ec4e343d893f',
+
   # When updating the Dart revision, ensure that all entries that are
   # dependencies of Dart are also updated to match the entries in the
   # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
@@ -606,10 +613,10 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-amd64',
-        'version': 'git_revision:60d276923902051192eba692e5312e605c9d9f65'
+        'version': 'git_revision:' + Var('clang_revision'),
       }
     ],
-    'condition': 'host_os == "mac"',
+    'condition': 'host_os == "mac"', # On ARM64 Macs too because Goma doesn't support the host-arm64 toolchain.
     'dep_type': 'cipd',
   },
 
@@ -617,7 +624,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-arm64',
-        'version': 'git_revision:3a20597776a5d2920e511d81653b4d2b6ca0c855'
+        'version': 'git_revision:' + Var('clang_revision'),
       }
     ],
     'condition': 'host_os == "mac" and host_cpu == "arm64"',
@@ -628,7 +635,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
-        'version': 'git_revision:039b969b32b64b64123dce30dd28ec4e343d893f'
+        'version': 'git_revision:' + Var('clang_revision'),
       }
     ],
     'condition': 'host_os == "linux" and host_cpu == "x64"',
@@ -639,7 +646,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-arm64',
-        'version': 'git_revision:d9e02a30b16ea65a7da87913c40af03e22c9571f'
+        'version': 'git_revision:' + Var('clang_revision'),
       }
     ],
     'condition': 'host_os == "linux" and host_cpu == "arm64"',
@@ -650,7 +657,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/windows-amd64',
-        'version': 'git_revision:41d4067d0b7c3c955b8b6cda328bcb46e268bd6a'
+        'version': 'git_revision:' + Var('clang_revision'),
       }
     ],
     'condition': 'download_windows_deps',
