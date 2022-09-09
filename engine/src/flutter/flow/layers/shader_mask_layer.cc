@@ -26,6 +26,10 @@ void ShaderMaskLayer::Diff(DiffContext* context, const Layer* old_layer) {
       context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
     }
   }
+  if (context->has_raster_cache()) {
+    context->SetTransform(
+        RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+  }
   DiffChildren(context, prev);
 
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
@@ -48,6 +52,12 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   AutoCachePaint cache_paint(context);
+
+  if (context.raster_cache) {
+    context.internal_nodes_canvas->setMatrix(
+        RasterCacheUtil::GetIntegralTransCTM(
+            context.leaf_nodes_canvas->getTotalMatrix()));
+  }
 
   if (context.raster_cache) {
     if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
