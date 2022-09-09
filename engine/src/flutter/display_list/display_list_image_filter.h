@@ -712,7 +712,11 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
     if (!image_filter_) {
       return nullptr;
     }
-    return image_filter_->skia_object()->makeWithLocalMatrix(matrix_);
+    sk_sp<SkImageFilter> skia_object = image_filter_->skia_object();
+    if (!skia_object) {
+      return nullptr;
+    }
+    return skia_object->makeWithLocalMatrix(matrix_);
   }
 
  protected:
