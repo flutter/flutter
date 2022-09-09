@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// import 'dart:ui' as ui;
+import 'dart:ui' as ui;
 
 import 'assertions.dart';
 import 'constants.dart';
@@ -264,35 +264,35 @@ class MemoryAllocations {
   }
 
   void _unSubscribeFromSdkObjects() {
-    // Uncomment and test cover before merging this PR,
-    // when https://github.com/flutter/engine/pull/35274 lands:
-    // assert(ui.Image.onCreate == _imageOnCreate);
-    // assert(ui.Image.onDispose == _imageOnDispose);
-    // assert(ui.Picture.onCreate == _pictureOnCreate);
-    // assert(ui.Picture.onDispose == _pictureOnDispose);
-    // ui.Image.onCreate = null;
-    // ui.Image.onDispose = null;
-    // ui.Picture.onCreate = null;
-    // ui.Picture.onDispose = null;
+    Uncomment and test cover before merging this PR,
+    when https://github.com/flutter/engine/pull/35274 lands:
+    assert(ui.Image.onCreate == _imageOnCreate);
+    assert(ui.Image.onDispose == _imageOnDispose);
+    assert(ui.Picture.onCreate == _pictureOnCreate);
+    assert(ui.Picture.onDispose == _pictureOnDispose);
+    ui.Image.onCreate = null;
+    ui.Image.onDispose = null;
+    ui.Picture.onCreate = null;
+    ui.Picture.onDispose = null;
   }
 
-  // void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
-  //   library: FlutterLibraries.dartUiLibrary,
-  //   className: 'Image',
-  //   object: image,
-  // ));
+  void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
+    library: FlutterLibraries.dartUiLibrary,
+    className: 'Image',
+    object: image,
+  ));
 
-  // void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
-  //   library: FlutterLibraries.dartUiLibrary,
-  //   className: 'Picture',
-  //   object: picture,
-  // ));
+  void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
+    library: FlutterLibraries.dartUiLibrary,
+    className: 'Picture',
+    object: picture,
+  ));
 
-  // void _imageOnDispose(ui.Image image) => dispatchObjectEvent(ObjectDisposed(
-  //   object: image,
-  // ));
+  void _imageOnDispose(ui.Image image) => dispatchObjectEvent(ObjectDisposed(
+    object: image,
+  ));
 
-  // void _pictureOnDispose(ui.Picture picture) => dispatchObjectEvent(ObjectDisposed(
-  //   object: picture,
-  // ));
+  void _pictureOnDispose(ui.Picture picture) => dispatchObjectEvent(ObjectDisposed(
+    object: picture,
+  ));
 }

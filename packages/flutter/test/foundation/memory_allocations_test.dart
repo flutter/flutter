@@ -117,12 +117,23 @@ void main() {
     expect(ma.hasListeners, isFalse);
   });
 
-  test('addListener subscribes to Flutter SDK events', () {
-    // TODO(polina-c): add test
-  });
-
   test('last removeListener unsubscribes from Flutter SDK events', () {
-    // TODO(polina-c): add test
+    void listener1(ObjectEvent event) => {};
+    void listener2(ObjectEvent event) => {};
+
+    _checkSdkHandlersNotSet();
+
+    ma.addListener(listener1);
+    _checkSdkHandlersSet();
+
+    ma.addListener(listener2);
+    _checkSdkHandlersSet();
+
+    ma.removeListener(listener1);
+    _checkSdkHandlersSet();
+
+    ma.removeListener(listener2);
+    _checkSdkHandlersNotSet();
   });
 
   test('kFlutterMemoryAllocationsEnabled is true in debug mode.', () {
@@ -142,25 +153,37 @@ void main() {
   });
 }
 
+void _checkSdkHandlersSet() {
+  expect(Image.onCreate, isNotNull);
+  expect(Picture.onCreate, isNotNull);
+  expect(Image.onDispose, isNotNull);
+  expect(Picture.onDispose, isNotNull);
+}
+
+void _checkSdkHandlersNotSet() {
+  expect(Image.onCreate, isNotNull);
+  expect(Picture.onCreate, isNotNull);
+  expect(Image.onDispose, isNotNull);
+  expect(Picture.onDispose, isNotNull);
+}
+
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
-  // TODO(polina-c): uncomment count increase for SDK events
-  // when https://github.com/flutter/engine/pull/35274 lands.
 
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {}); count++;
-  final Picture picture = _createPicture(); //count++;
+  final Picture picture = _createPicture(); count++;
 
   valueNotifier.dispose(); count++;
   changeNotifier.dispose(); count++;
-  picture.dispose(); //count++;
+  picture.dispose(); count++;
 
   // TODO(polina-c): Remove the condition after
-  // https://github.com/flutter/engine/pull/35791 is fixed.
+  // https://github.com/flutter/flutter/issues/110599 is fixed.
   if (!kIsWeb) {
-    final Image image = await _createImage(); //count++; count++; count++;
-    image.dispose(); //count++;
+    final Image image = await _createImage(); count++; count++; count++;
+    image.dispose(); count++;
   }
 
   return count;
