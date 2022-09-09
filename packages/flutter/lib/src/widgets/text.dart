@@ -373,8 +373,9 @@ class Text extends StatelessWidget {
   /// The [data] parameter must not be null.
   ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
-  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
-  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those
+  /// that follow, will not be rendered. Otherwise, it will be shown with the
+  /// given overflow option.
   const Text(
     String this.data, {
     super.key,

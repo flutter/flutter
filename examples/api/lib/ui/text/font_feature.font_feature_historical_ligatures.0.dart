@@ -27,7 +27,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Cardo font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Cardo font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'VIBRANT fish assisted his business.',
       style: TextStyle(

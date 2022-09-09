@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Source Code Pro font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       r'Agile Game - $100 initial bet',
       style: TextStyle(

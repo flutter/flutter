@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Gothic A1 font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Gothic A1 font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'abc 123',
       style: TextStyle(

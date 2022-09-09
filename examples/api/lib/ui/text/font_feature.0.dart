@@ -31,8 +31,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Cardo, Milonga and Raleway Dots fonts can be downloaded from
-    // Google Fonts (https://www.google.com/fonts).
+    // The Cardo, Milonga and Raleway Dots fonts can be downloaded from Google
+    // Fonts (https://www.google.com/fonts).
     return Scaffold(
       body: Center(
         child: Column(

@@ -51,7 +51,7 @@ class FallbackDemoState extends State<FallbackDemo> {
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 400),
         child: Column(
           children: <Widget>[
-            const Text('This area handles key pressses that are unhandled by any shortcuts by displaying them below. '
+            const Text('This area handles key presses that are unhandled by any shortcuts by displaying them below. '
               'Try text shortcuts such as Ctrl-A!'),
             Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
             const TextField(decoration: InputDecoration(label: Text('Text field 1'))),

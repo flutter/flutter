@@ -44,11 +44,10 @@ class MyStatelessWidget extends StatelessWidget {
       ];
     }, body: Builder(builder: (BuildContext context) {
       return CustomScrollView(
-        // The "controller" and "primary" members should be left
-        // unset, so that the NestedScrollView can control this
-        // inner scroll view.
-        // If the "controller" property is set, then this scroll
-        // view will not be associated with the NestedScrollView.
+        // The "controller" and "primary" members should be left unset, so that
+        // the NestedScrollView can control this inner scroll view.
+        // If the "controller" property is set, then this scroll view will not
+        // be associated with the NestedScrollView.
         slivers: <Widget>[
           SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),

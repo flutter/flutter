@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Piazzolla font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'C8H10N4O2',
       style: TextStyle(

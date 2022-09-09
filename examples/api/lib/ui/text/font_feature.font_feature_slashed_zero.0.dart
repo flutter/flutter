@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Source Code Pro font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'One million is: 1,000,000.00',
       style: TextStyle(

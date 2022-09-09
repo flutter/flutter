@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The BioRhyme Expanded font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The BioRhyme Expanded font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'Queer & Romantic',
       style: TextStyle(

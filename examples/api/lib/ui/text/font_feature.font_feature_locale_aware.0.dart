@@ -25,7 +25,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Noto family of fonts can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Noto family of fonts can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       '次 化 刃 直 入 令',
       locale: Locale('zh', 'CN'), // or Locale('ja'), Locale('ko'), Locale('zh', 'TW'), etc

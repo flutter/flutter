@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Raleway font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Raleway font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'The infamous Tuna Torture.',
       style: TextStyle(

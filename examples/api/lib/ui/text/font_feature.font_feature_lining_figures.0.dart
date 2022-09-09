@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Sorts Mill Goudy font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Sorts Mill Goudy font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'CALL 311-555-2368 NOW!',
       style: TextStyle(
