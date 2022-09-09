@@ -264,15 +264,26 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
-    return <String>[
-      'apk',
-      '--no-android-gradle-daemon',
-      '--profile',
-      '-t',
-      'test_driver/$testFile.dart',
-      '--target-platform',
-      'android-arm,android-arm64',
-    ];
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+      return <String>[
+        'apk',
+        '--no-android-gradle-daemon',
+        '--profile',
+        '-t',
+        'test_driver/$testFile.dart',
+        '--target-platform',
+        'android-arm,android-arm64',
+      ];
+    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      return <String>[
+        'ios',
+        '--no-codesign',
+        '--profile',
+        '-t',
+        'test_driver/$testFile.dart',
+      ];
+    }
+    throw Exception('$deviceOperatingSystem has no build configuration');
   }
 
   @override
