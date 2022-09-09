@@ -3135,7 +3135,8 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
       .where((String line) {
         return line.trim().isNotEmpty &&
             !line.startsWith('Analyzing') &&
-            !line.contains('flutter pub get');
+            !line.contains('flutter pub get') &&
+            !line.contains('Resolving dependencies');
       }).map(lineParser).toList();
   expect(errors, unorderedEquals(expectedFailures));
 }
