@@ -77,20 +77,28 @@ int64_t FlutterWindowsTextureRegistrar::EmplaceTexture(
   return texture_id;
 }
 
-bool FlutterWindowsTextureRegistrar::UnregisterTexture(int64_t texture_id) {
-  {
-    std::lock_guard<std::mutex> lock(map_mutex_);
-    auto it = textures_.find(texture_id);
-    if (it == textures_.end()) {
-      return false;
-    }
-    textures_.erase(it);
-  }
-
+void FlutterWindowsTextureRegistrar::UnregisterTexture(int64_t texture_id,
+                                                       fml::closure callback) {
   engine_->task_runner()->RunNowOrPostTask([engine = engine_, texture_id]() {
     engine->UnregisterExternalTexture(texture_id);
   });
-  return true;
+
+  bool posted = engine_->PostRasterThreadTask([this, texture_id, callback]() {
+    {
+      std::lock_guard<std::mutex> lock(map_mutex_);
+      auto it = textures_.find(texture_id);
+      if (it != textures_.end()) {
+        textures_.erase(it);
+      }
+    }
+    if (callback) {
+      callback();
+    }
+  });
+
+  if (!posted && callback) {
+    callback();
+  }
 }
 
 bool FlutterWindowsTextureRegistrar::MarkTextureFrameAvailable(

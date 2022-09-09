@@ -190,6 +190,9 @@ class FlutterWindowsEngine {
   // given |texture_id|.
   bool MarkExternalTextureFrameAvailable(int64_t texture_id);
 
+  // Posts the given callback onto the raster thread.
+  bool PostRasterThreadTask(fml::closure callback);
+
   // Invoke on the embedder's vsync callback to schedule a frame.
   void OnVsync(intptr_t baton);
 

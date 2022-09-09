@@ -109,15 +109,17 @@ int64_t FlutterDesktopTextureRegistrarRegisterExternalTexture(
   return result;
 }
 
-bool FlutterDesktopTextureRegistrarUnregisterExternalTexture(
+void FlutterDesktopTextureRegistrarUnregisterExternalTexture(
     FlutterDesktopTextureRegistrarRef texture_registrar,
-    int64_t texture_id) {
-  bool result = false;
+    int64_t texture_id,
+    void (*callback)(void* user_data),
+    void* user_data) {
   if (s_stub_implementation) {
-    result = s_stub_implementation->TextureRegistrarUnregisterExternalTexture(
-        texture_id);
+    s_stub_implementation->TextureRegistrarUnregisterExternalTexture(
+        texture_id, callback, user_data);
+  } else if (callback) {
+    callback(user_data);
   }
-  return result;
 }
 
 bool FlutterDesktopTextureRegistrarMarkExternalTextureFrameAvailable(

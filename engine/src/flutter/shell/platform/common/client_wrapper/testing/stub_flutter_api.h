@@ -65,18 +65,19 @@ class StubFlutterApi {
                                     FlutterDesktopMessageCallback callback,
                                     void* user_data) {}
 
-  // Called for FlutterDesktopRegisterExternalTexture.
+  // Called for FlutterDesktopTextureRegistrarRegisterExternalTexture.
   virtual int64_t TextureRegistrarRegisterExternalTexture(
       const FlutterDesktopTextureInfo* info) {
     return -1;
   }
 
-  // Called for FlutterDesktopUnregisterExternalTexture.
-  virtual bool TextureRegistrarUnregisterExternalTexture(int64_t texture_id) {
-    return false;
-  }
+  // Called for FlutterDesktopTextureRegistrarUnregisterExternalTexture.
+  virtual void TextureRegistrarUnregisterExternalTexture(
+      int64_t texture_id,
+      void (*callback)(void* user_data),
+      void* user_data) {}
 
-  // Called for FlutterDesktopMarkExternalTextureFrameAvailable.
+  // Called for FlutterDesktopTextureRegistrarMarkExternalTextureFrameAvailable.
   virtual bool TextureRegistrarMarkTextureFrameAvailable(int64_t texture_id) {
     return false;
   }
