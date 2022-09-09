@@ -1230,34 +1230,28 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = Builder(
-      key: _anchorKey,
-      builder: widget.builder,
-    );
-
-    if (widget.controller != null) {
-      child = ExcludeFocus(
-        excluding: !widget.controller.menuIsOpen,
-        child: TapRegion(
-          groupId: widget.controller,
-          onTapOutside: (PointerDownEvent event) {
-            assert(_debugMenuInfo('Tapped Outside ${widget.controller}'));
-            widget.controller.closeAll();
-          },
-          child: _MenuHandleMarker(
-            handle: widget.controller,
-            child: child,
-          ),
-        ),
-      );
-    }
-
     return CompositedTransformTarget(
       link: _link,
       child: _MenuAnchorMarker(
         link: _link,
         anchorKey: _anchorKey,
-        child: child,
+        child: ExcludeFocus(
+          excluding: !widget.controller.menuIsOpen,
+          child: TapRegion(
+            groupId: widget.controller,
+            onTapOutside: (PointerDownEvent event) {
+              assert(_debugMenuInfo('Tapped Outside ${widget.controller}'));
+              widget.controller.closeAll();
+            },
+            child: _MenuHandleMarker(
+              handle: widget.controller,
+              child: Builder(
+                key: _anchorKey,
+                builder: widget.builder,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
