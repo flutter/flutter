@@ -38,7 +38,12 @@ class CkPictureRecorder implements ui.PictureRecorder {
     final SkPicture skPicture = recorder.finishRecordingAsPicture();
     recorder.delete();
     _skRecorder = null;
-    return CkPicture(skPicture, _cullRect, _recordingCanvas!.pictureSnapshot);
+    final CkPicture result =
+      CkPicture(skPicture, _cullRect, _recordingCanvas!.pictureSnapshot);
+    // We invoke the handler here, not in the picture constructor, because we want
+    // [result.approximateBytesUsed] to be available for the handler.
+    ui.Picture.onCreate?.call(result);
+    return result;
   }
 
   @override
