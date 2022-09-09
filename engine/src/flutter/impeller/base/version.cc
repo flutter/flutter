@@ -26,7 +26,7 @@ std::optional<Version> Version::FromVector(const std::vector<size_t>& version) {
 
 std::string Version::ToString() const {
   std::stringstream stream;
-  stream << major << "." << minor << "." << patch;
+  stream << major_version << "." << minor_version << "." << patch_version;
   return stream.str();
 }
 
