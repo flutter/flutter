@@ -1,4 +1,4 @@
-Signature: 08f2f822c6b51e84b00e3ed8df34d7f8
+Signature: bee2e93a79ed1675c15ee41a2eb0f8c4
 
 UNUSED LICENSES:
 
@@ -3729,7 +3729,6 @@ FILE: ../../../third_party/skia/src/codec/SkStubHeifDecoderAPI.h
 FILE: ../../../third_party/skia/src/core/SkArenaAllocList.h
 FILE: ../../../third_party/skia/src/core/SkAutoBlitterChoose.h
 FILE: ../../../third_party/skia/src/core/SkBlendMode.cpp
-FILE: ../../../third_party/skia/src/core/SkBlitter_RGB565.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.h
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListRecorder.cpp
