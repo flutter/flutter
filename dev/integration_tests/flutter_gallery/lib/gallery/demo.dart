@@ -76,20 +76,22 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
-      showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            title: const Text("Couldn't display URL:"),
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(url),
-              ),
-            ],
-          );
-        },
-      );
+      if (mounted) {
+        showDialog<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return SimpleDialog(
+              title: const Text("Couldn't display URL:"),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(url),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
