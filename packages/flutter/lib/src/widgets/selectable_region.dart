@@ -153,7 +153,7 @@ typedef ButtonItemsToolbarBuilder = Widget Function(
 /// This sample demonstrates how to create an adapter widget that makes any
 /// child widget selectable.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_selectable.dart **
+/// ** See code in examples/api/lib/material/selectable_region/selectable_region.0.dart **
 /// {@end-tool}
 ///
 /// ## Complex layout
@@ -166,7 +166,7 @@ typedef ButtonItemsToolbarBuilder = Widget Function(
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// In the case where a group of widgets should be excluded from selection under
@@ -176,7 +176,7 @@ typedef ButtonItemsToolbarBuilder = Widget Function(
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// To create a separate selection system from its parent selection area,
@@ -485,6 +485,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
    } else {
     _selectionOverlay!.hideMagnifier(
+      shouldShowToolbar: false,
       contextMenuBuilder: (BuildContext context) {
         final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
         final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
@@ -1002,7 +1003,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectionDelegate.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier
     // so it doesn't remain stuck in the overlay forever.
-    _selectionOverlay?.hideMagnifier();
+    _selectionOverlay?.hideMagnifier(shouldShowToolbar: false);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     super.dispose();

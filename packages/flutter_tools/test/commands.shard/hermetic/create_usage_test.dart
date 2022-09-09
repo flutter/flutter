@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
@@ -27,17 +28,18 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     PubContext? context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fs.directory(directory).childFile('.packages').createSync();
+    project.directory.childFile('.packages').createSync();
     if (offline == true) {
       calledGetOffline += 1;
     } else {

@@ -584,7 +584,8 @@ void main() {
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling);
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isCheckStateMixed);
 
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -631,8 +632,50 @@ void main() {
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    await tester.pumpWidget(
+        Semantics(
+          key: const Key('a'),
+          container: true,
+          explicitChildNodes: true,
+          // flags
+          enabled: true,
+          hidden: true,
+          checked: false,
+          mixed: true,
+          selected: true,
+          button: true,
+          slider: true,
+          keyboardKey: true,
+          link: true,
+          textField: true,
+          readOnly: true,
+          focused: true,
+          focusable: true,
+          inMutuallyExclusiveGroup: true,
+          header: true,
+          obscured: true,
+          multiline: true,
+          scopesRoute: true,
+          namesRoute: true,
+          image: true,
+          liveRegion: true,
+        ),
+    );
+    flags
+      ..remove(SemanticsFlag.isChecked)
+      ..add(SemanticsFlag.isCheckStateMixed);
     semantics.dispose();
-  }, skip: true); // [intended] https://github.com/flutter/flutter/issues/110107
+    expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: flags,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+  });
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

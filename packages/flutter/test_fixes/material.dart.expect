@@ -892,4 +892,10 @@ void main() {
   themeData = ThemeData(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
   themeData = ThemeData.raw(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
   themeData = themeData.copyWith(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
+
+  // Changes made in https://github.com/flutter/flutter/pull/111080
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
+  themeData = ThemeData.raw(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
+  themeData = ThemeData.copyWith(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
 }
