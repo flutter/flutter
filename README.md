@@ -1,4 +1,7 @@
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/buildroot/badge)](https://api.securityscorecards.dev/projects/github.com/flutter/buildroot)
+
 # buildroot
+
 Build environment for the Flutter engine
 
 This repository is used by the [flutter/engine](https://github.com/flutter/engine) repository.
