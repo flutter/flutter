@@ -112,7 +112,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
       final TargetPlatform targetPlatform = Theme.of(_state.context).platform;
-      
+
       switch (targetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
