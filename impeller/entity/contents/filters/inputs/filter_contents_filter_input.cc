@@ -34,7 +34,7 @@ std::optional<Rect> FilterContentsFilterInput::GetCoverage(
 
 Matrix FilterContentsFilterInput::GetLocalTransform(
     const Entity& entity) const {
-  return filter_->GetLocalTransform();
+  return filter_->GetLocalTransform(entity.GetTransformation());
 }
 
 Matrix FilterContentsFilterInput::GetTransform(const Entity& entity) const {
