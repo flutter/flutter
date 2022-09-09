@@ -109,7 +109,7 @@ TEST_P(DisplayListTest, CanDrawArc) {
     static float sweep_angle = 270;
     static bool use_center = true;
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Start angle", &start_angle, -360, 360);
     ImGui::SliderFloat("Sweep angle", &sweep_angle, -360, 360);
     ImGui::Checkbox("Use center", &use_center);
@@ -581,6 +581,86 @@ TEST_P(DisplayListTest, CanDrawZeroWidthLine) {
     builder.translate(0, 150);
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
+  auto boston = CreateTextureForFixture("boston.jpg");
+
+  bool first_frame = true;
+  auto callback = [&]() {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowPos({10, 10});
+    }
+
+    static float ctm_translation[2] = {200, 200};
+    static float ctm_scale[2] = {0.65, 0.65};
+    static float ctm_skew[2] = {0, 0};
+
+    static bool enable = true;
+    static float translation[2] = {100, 100};
+    static float scale[2] = {0.8, 0.8};
+    static float skew[2] = {0.2, 0.2};
+
+    static bool enable_savelayer = true;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::TextWrapped("Current Transform");
+      ImGui::SliderFloat2("CTM Translation", ctm_translation, 0, 1000);
+      ImGui::SliderFloat2("CTM Scale", ctm_scale, 0, 3);
+      ImGui::SliderFloat2("CTM Skew", ctm_skew, -3, 3);
+
+      ImGui::TextWrapped(
+          "The MatrixFilter applies a matrix in world space as opposed to "
+          "local filter space.");
+      ImGui::Checkbox("Enable", &enable);
+      ImGui::SliderFloat2("Filter Translation", translation, 0, 1000);
+      ImGui::SliderFloat2("Filter Scale", scale, 0, 3);
+      ImGui::SliderFloat2("Filter Skew", skew, -3, 3);
+
+      ImGui::TextWrapped(
+          "Rendering the filtered image within a layer can expose bounds "
+          "issues. If the rendered image gets cut off when this setting is "
+          "enabled, there's a coverage bug in the filter.");
+      ImGui::Checkbox("Render in layer", &enable_savelayer);
+    }
+    ImGui::End();
+
+    flutter::DisplayListBuilder builder;
+    SkPaint paint;
+    builder.saveLayer(nullptr, nullptr);
+    {
+      auto content_scale = GetContentScale();
+      builder.scale(content_scale.x, content_scale.y);
+
+      // Set the current transform
+      auto ctm_matrix =
+          SkMatrix::MakeAll(ctm_scale[0], ctm_skew[0], ctm_translation[0],  //
+                            ctm_skew[1], ctm_scale[1], ctm_translation[1],  //
+                            0, 0, 1);
+      builder.transform(ctm_matrix);
+
+      // Set the matrix filter
+      auto filter_matrix =
+          SkMatrix::MakeAll(scale[0], skew[0], translation[0],  //
+                            skew[1], scale[1], translation[1],  //
+                            0, 0, 1);
+      auto filter = flutter::DlMatrixImageFilter(
+          filter_matrix, flutter::DlImageSampling::kLinear);
+      if (enable) {
+        builder.setImageFilter(&filter);
+      }
+
+      builder.drawImage(DlImageImpeller::Make(boston), {},
+                        flutter::DlImageSampling::kLinear, true);
+
+      builder.restore();
+    }
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

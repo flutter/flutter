@@ -48,6 +48,8 @@ class FilterInput {
   virtual std::optional<Snapshot> GetSnapshot(const ContentContext& renderer,
                                               const Entity& entity) const = 0;
 
+  std::optional<Rect> GetLocalCoverage(const Entity& entity) const;
+
   virtual std::optional<Rect> GetCoverage(const Entity& entity) const = 0;
 
   /// @brief  Get the local transform of this filter input. This transform is
