@@ -840,7 +840,6 @@ class TextSelectionOverlay {
     }
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     _selectionOverlay.hideMagnifier(
-      shouldShowToolbar: !_selection.isCollapsed,
       contextMenuBuilder: _selection.isCollapsed
         ? null
         : (BuildContext context) {
@@ -1007,8 +1006,10 @@ class SelectionOverlay {
       'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-    required bool shouldShowToolbar,
+    bool? shouldShowToolbar,
   }) {
+    assert(contextMenuBuilder == null || shouldShowToolbar == null);
+
     // This cannot be a check on `MagnifierController.shown`, since
     // it's possible that the magnifier is still in the overlay, but
     // not shown in cases where the magnifier hides itself.
@@ -1018,10 +1019,10 @@ class SelectionOverlay {
 
     _magnifierController.hide();
 
-    if (shouldShowToolbar) {
-      showToolbar();
-    } else if (contextMenuBuilder != null) {
+    if (contextMenuBuilder != null) {
       showToolbar(context: context, contextMenuBuilder: contextMenuBuilder);
+    } else if (shouldShowToolbar ?? false) {
+      showToolbar();
     }
   }
 
