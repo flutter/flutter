@@ -1,4 +1,4 @@
-Signature: bee2e93a79ed1675c15ee41a2eb0f8c4
+Signature: 6e6cf8ede211928f143dc434ffd11948
 
 UNUSED LICENSES:
 
@@ -5551,6 +5551,7 @@ FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderBase.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModuleLoader.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModuleLoader.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLHasSideEffects.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsTrivialExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
