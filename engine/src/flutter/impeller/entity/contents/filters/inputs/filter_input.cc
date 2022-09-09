@@ -53,6 +53,12 @@ Matrix FilterInput::GetLocalTransform(const Entity& entity) const {
   return Matrix();
 }
 
+std::optional<Rect> FilterInput::GetLocalCoverage(const Entity& entity) const {
+  Entity local_entity = entity;
+  local_entity.SetTransformation(GetLocalTransform(entity));
+  return GetCoverage(local_entity);
+}
+
 Matrix FilterInput::GetTransform(const Entity& entity) const {
   return entity.GetTransformation() * GetLocalTransform(entity);
 }

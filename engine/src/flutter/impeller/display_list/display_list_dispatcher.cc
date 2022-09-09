@@ -577,7 +577,15 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       };
       break;
     }
-    case flutter::DlImageFilterType::kMatrix:
+    case flutter::DlImageFilterType::kMatrix: {
+      auto matrix_filter = filter->asMatrix();
+      FML_DCHECK(matrix_filter);
+      auto matrix = ToMatrix(matrix_filter->matrix());
+      return [matrix](FilterInput::Ref input, const Matrix& effect_transform) {
+        return FilterContents::MakeMatrixFilter(input, matrix);
+      };
+      break;
+    }
     case flutter::DlImageFilterType::kLocalMatrixFilter:
     case flutter::DlImageFilterType::kComposeFilter:
     case flutter::DlImageFilterType::kColorFilter:
