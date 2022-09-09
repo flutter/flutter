@@ -13,6 +13,7 @@ _android_sources = [
   "app/src/androidTest/java/dev/flutter/scenariosui/MemoryLeakTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/PlatformTextureUiTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/PlatformViewUiTests.java",
+  "app/src/androidTest/java/dev/flutter/scenariosui/PlatformViewWithSurfaceViewBadContextUiTest.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/PlatformViewWithSurfaceViewUiTest.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/PlatformViewWithTextureViewUiTest.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/ScreenshotUtil.java",

@@ -6,6 +6,7 @@ package dev.flutter.scenarios;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,7 +25,9 @@ import java.nio.ByteBuffer;
 
 @TargetApi(23)
 public final class SurfacePlatformViewFactory extends PlatformViewFactory {
-  SurfacePlatformViewFactory() {
+  private boolean preserveContext;
+
+  SurfacePlatformViewFactory(boolean preserveContext) {
     super(
         new MessageCodec<Object>() {
           @Nullable
@@ -42,13 +45,19 @@ public final class SurfacePlatformViewFactory extends PlatformViewFactory {
             return StringCodec.INSTANCE.decodeMessage(byteBuffer);
           }
         });
+    this.preserveContext = preserveContext;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   @NonNull
   public PlatformView create(@NonNull Context context, int id, @Nullable Object args) {
-    return new SurfacePlatformView(context);
+    if (preserveContext) {
+      return new SurfacePlatformView(context);
+    } else {
+      final Context differentContext = new ContextWrapper(context);
+      return new SurfacePlatformView(differentContext);
+    }
   }
 
   private static class SurfacePlatformView implements PlatformView {
