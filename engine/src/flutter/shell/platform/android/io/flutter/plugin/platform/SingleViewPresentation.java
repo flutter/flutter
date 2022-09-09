@@ -53,6 +53,7 @@ import java.lang.reflect.Proxy;
 @Keep
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class SingleViewPresentation extends Presentation {
+  private static final String TAG = "PlatformViewsController";
 
   /*
    * When an embedded view is resized in Flutterverse we move the Android view to a new virtual display
@@ -184,10 +185,20 @@ class SingleViewPresentation extends Presentation {
       MutableContextWrapper currentContext = (MutableContextWrapper) embeddedView.getContext();
       currentContext.setBaseContext(baseContext);
     } else {
-      throw new IllegalStateException(
-          "Unexpected platform view context. "
-              + "When constructing a platform view in the factory, use the context from PlatformViewFactory#create, view id: "
-              + viewId);
+      // In some cases, such as when using LayoutInflator, the original context
+      // may not be preserved. For backward compatibility with previous
+      // implementations of Virtual Display, which didn't validate the context,
+      // continue, but log a warning indicating that some functionality may not
+      // work as expected.
+      // See https://github.com/flutter/flutter/issues/110146 for context.
+      Log.w(
+          TAG,
+          "Unexpected platform view context for view ID "
+              + viewId
+              + "; some functionality may not work correctly. When constructing a platform view "
+              + "in the factory, ensure that the view returned from PlatformViewFactory#create "
+              + "returns the provided context from getContext(). If you are unable to associate "
+              + "the view with that context, consider using Hybrid Composition instead.");
     }
 
     container.addView(embeddedView);

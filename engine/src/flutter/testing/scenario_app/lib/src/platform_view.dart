@@ -1144,6 +1144,11 @@ void addPlatformView(
       valueString,
       'width'.length,
       ...utf8.encode('width'),
+      // This is missing the 64-bit boundary alignment, making the entire
+      // message encoding fragile to changes before this point. Do not add new
+      // variable-length values such as strings before this point.
+      // TODO(stuartmorgan): Fix this to use the actual encoding logic,
+      // including alignment: https://github.com/flutter/flutter/issues/111188
       valueFloat64,
       ..._to64(width),
       valueString,
