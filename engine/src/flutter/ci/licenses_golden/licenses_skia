@@ -1,4 +1,4 @@
-Signature: 5e3e01a3c41a493d385d6e01adae46f0
+Signature: 24acee5ca35ab15159060af905e569d2
 
 UNUSED LICENSES:
 
@@ -501,86 +501,6 @@ FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_puppeteer_skottie_f
 FILE: ../../../third_party/skia/third_party/libjxl/jxl/jxl_export.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skcms
-LIBRARY: vulkan
-ORIGIN: ../../../third_party/skia/include/third_party/skcms/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/include/third_party/skcms/BUILD.bazel
-FILE: ../../../third_party/skia/include/third_party/vulkan/BUILD.bazel
-FILE: ../../../third_party/skia/third_party/skcms/BUILD.bazel
-FILE: ../../../third_party/skia/third_party/skcms/version.sha1
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2018 Google Inc. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skcms
-LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/include/third_party/skcms/skcms.h + ../../../third_party/skia/include/third_party/skcms/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/include/third_party/skcms/skcms.h
-FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
-FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
-FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
-FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
-FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
-----------------------------------------------------------------------------------------------------
-Copyright 2018 Google Inc.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -3825,7 +3745,6 @@ FILE: ../../../third_party/skia/src/core/SkMaskBlurFilter.h
 FILE: ../../../third_party/skia/src/core/SkPromiseImageTexture.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClipStack.h
 FILE: ../../../third_party/skia/src/core/SkSafeMath.h
-FILE: ../../../third_party/skia/src/core/SkSpriteBlitter_RGB565.cpp
 FILE: ../../../third_party/skia/src/core/SkVertices.cpp
 FILE: ../../../third_party/skia/src/core/SkWritePixelsRec.h
 FILE: ../../../third_party/skia/src/effects/SkDashImpl.h
@@ -6256,6 +6175,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/AffineMatrix.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/Tessellation.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLErrorReporter.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParsedModule.h
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
@@ -8043,5 +7963,76 @@ Materials are furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Materials.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: vulkan
+ORIGIN: ../../../third_party/skia/include/third_party/vulkan/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/include/third_party/vulkan/BUILD.bazel
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2018 Google Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: vulkanmemoryallocator
+ORIGIN: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp + ../../../third_party/skia/modules/canvaskit/npm_build/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
+FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
+----------------------------------------------------------------------------------------------------
+Copyright 2018 Google Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 Total license count: 69
