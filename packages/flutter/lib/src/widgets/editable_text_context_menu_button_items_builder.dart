@@ -12,12 +12,6 @@ import 'framework.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-/// A Widget builder that is passed the [ClipboardStatus].
-typedef _ClipboardStatusWidgetBuilder = Widget Function(
-  BuildContext context,
-  ClipboardStatus clipboardStatus,
-);
-
 /// Calls [builder] with the [ContextMenuButtonItem]s representing the
 /// buttons in this platform's default text selection menu.
 ///
