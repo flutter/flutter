@@ -247,8 +247,15 @@ void main() {
       final SimpleFormalParameter webParam =
           (webTypeDef.type as GenericFunctionType).parameters.parameters[i]
               as SimpleFormalParameter;
-
-      if (webParam.identifier!.name != uiParam.identifier!.name) {
+      if (webParam.identifier == null) {
+        failed = true;
+        print('Warning: lib/web_ui/ui.dart $typeDefName parameter $i should have name.');
+      }
+      if (uiParam.identifier == null) {
+        failed = true;
+        print('Warning: lib/ui/ui.dart $typeDefName parameter $i should have name.');
+      }
+      if (webParam.identifier?.name != uiParam.identifier?.name) {
         failed = true;
         print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
             '${uiParam.identifier!.name} has a different name in lib/web_ui/ui.dart.');

@@ -337,7 +337,12 @@ abstract class Gradient extends Shader {
     matrix4 != null ? engine.toMatrix32(matrix4) : null);
 }
 
+typedef ImageEventCallback = void Function(Image image);
+
 abstract class Image {
+  static ImageEventCallback? onCreate;
+  static ImageEventCallback? onDispose;
+
   int get width;
   int get height;
   Future<ByteData?> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba});

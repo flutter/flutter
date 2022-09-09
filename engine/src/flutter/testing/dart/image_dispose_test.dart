@@ -17,7 +17,7 @@ void main() {
   }());
 
   test('Handles are distinct', () async {
-    final Uint8List bytes = await readFile('2x2.png');
+    final Uint8List bytes = await _readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
 
@@ -36,7 +36,7 @@ void main() {
   });
 
   test('Canvas can paint image from handle and byte data from handle', () async {
-    final Uint8List bytes = await readFile('2x2.png');
+    final Uint8List bytes = await _readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
 
@@ -66,7 +66,7 @@ void main() {
   });
 
   test('Records stack traces', () async {
-    final Uint8List bytes = await readFile('2x2.png');
+    final Uint8List bytes = await _readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
 
@@ -92,7 +92,7 @@ void main() {
   }, skip: !assertsEnabled);
 
   test('Clones can be compared', () async {
-    final Uint8List bytes = await readFile('2x2.png');
+    final Uint8List bytes = await _readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
 
@@ -115,7 +115,7 @@ void main() {
   });
 
   test('debugDisposed works', () async {
-    final Uint8List bytes = await readFile('2x2.png');
+    final Uint8List bytes = await _readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
 
@@ -134,7 +134,7 @@ void main() {
   });
 }
 
-Future<Uint8List> readFile(String fileName) async {
+Future<Uint8List> _readFile(String fileName) async {
   final File file = File(path.join(
     'flutter',
     'testing',

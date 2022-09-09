@@ -125,7 +125,11 @@ abstract class Canvas {
   );
 }
 
+typedef PictureEventCallback = void Function(Picture picture);
+
 abstract class Picture {
+  static PictureEventCallback? onCreate;
+  static PictureEventCallback? onDispose;
   Future<Image> toImage(int width, int height);
   Image toImageSync(int width, int height);
   void dispose();

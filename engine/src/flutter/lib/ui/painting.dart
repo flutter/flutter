@@ -1625,6 +1625,9 @@ enum PixelFormat {
   bgra8888,
 }
 
+/// Signature for [Image] lifecycle events.
+typedef ImageEventCallback = void Function(Image image);
+
 /// Opaque handle to raw decoded image data (pixels).
 ///
 /// To obtain an [Image] object, use the [ImageDescriptor] API.
@@ -1656,11 +1659,26 @@ class Image {
       return true;
     }());
     _image._handles.add(this);
+    onCreate?.call(this);
   }
 
   // C++ unit tests access this.
   @pragma('vm:entry-point')
   final _Image _image;
+
+  /// A callback that is invoked to report an image creation.
+  ///
+  /// It's preferred to use [MemoryAllocations] in flutter/foundation.dart
+  /// than to use [onCreate] directly because [MemoryAllocations]
+  /// allows multiple callbacks.
+  static ImageEventCallback? onCreate;
+
+  /// A callback that is invoked to report the image disposal.
+  ///
+  /// It's preferred to use [MemoryAllocations] in flutter/foundation.dart
+  /// than to use [onDispose] directly because [MemoryAllocations]
+  /// allows multiple callbacks.
+  static ImageEventCallback? onDispose;
 
   StackTrace? _debugStack;
 
@@ -1682,6 +1700,7 @@ class Image {
   /// useful when trying to determine what parts of the program are keeping an
   /// image resident in memory.
   void dispose() {
+    onDispose?.call(this);
     assert(!_disposed && !_image._disposed);
     assert(_image._handles.contains(this));
     _disposed = true;
@@ -5745,6 +5764,9 @@ class Canvas extends NativeFieldWrapperClass1 {
   external void _drawShadow(Path path, int color, double elevation, bool transparentOccluder);
 }
 
+/// Signature for [Picture] lifecycle events.
+typedef PictureEventCallback = void Function(Picture picture);
+
 /// An object representing a sequence of recorded graphical operations.
 ///
 /// To create a [Picture], use a [PictureRecorder].
@@ -5760,6 +5782,20 @@ class Picture extends NativeFieldWrapperClass1 {
   /// To create a [Picture], use a [PictureRecorder].
   @pragma('vm:entry-point')
   Picture._();
+
+  /// A callback that is invoked to report a picture creation.
+  ///
+  /// It's preferred to use [MemoryAllocations] in flutter/foundation.dart
+  /// than to use [onCreate] directly because [MemoryAllocations]
+  /// allows multiple callbacks.
+  static PictureEventCallback? onCreate;
+
+  /// A callback that is invoked to report the picture disposal.
+  ///
+  /// It's preferred to use [MemoryAllocations] in flutter/foundation.dart
+  /// than to use [onDispose] directly because [MemoryAllocations]
+  /// allows multiple callbacks.
+  static PictureEventCallback? onDispose;
 
   /// Creates an image from this picture.
   ///
@@ -5824,6 +5860,7 @@ class Picture extends NativeFieldWrapperClass1 {
       _disposed = true;
       return true;
     }());
+    onDispose?.call(this);
     _dispose();
   }
 
@@ -5890,6 +5927,9 @@ class PictureRecorder extends NativeFieldWrapperClass1 {
     _endRecording(picture);
     _canvas!._recorder = null;
     _canvas = null;
+    // We invoke the handler here, not in the Picture constructor, because we want
+    // [picture.approximateBytesUsed] to be available for the handler.
+    Picture.onCreate?.call(picture);
     return picture;
   }
 
