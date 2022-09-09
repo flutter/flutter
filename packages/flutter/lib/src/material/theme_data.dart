@@ -1252,7 +1252,7 @@ class ThemeData with Diagnosticable {
   ///   * Typography: `typography` (see table above)
   ///
   /// ### Components
-  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton]
+  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
   ///   * FAB: [FloatingActionButton]
   ///   * Extended FAB: [FloatingActionButton.extended]
   ///   * Cards: [Card]
@@ -1266,6 +1266,7 @@ class ThemeData with Diagnosticable {
   ///   * Lists: [ListTile]
   ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
   ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * Switch: [Switch]
   ///   * Top app bar: [AppBar]
   ///
   /// In addition, this flag enables features introduced in Android 12.
