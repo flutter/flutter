@@ -2663,7 +2663,7 @@ class InputDecoration {
   /// When the [InputDecoration.labelText] is on top of the input field, the
   /// text uses the [labelStyle] instead.
   ///
-  /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `floatingLabelStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -2677,7 +2677,7 @@ class InputDecoration {
   /// It's possible to override the label style for just the error state, or
   /// just the default state, or both.
   ///
-  /// In this example the [floatingLabelStyle] is specified with a
+  /// In this example the `floatingLabelStyle` is specified with a
   /// [MaterialStateProperty] which resolves to a text style whose color depends
   /// on the decorator's error state.
   ///
@@ -2696,7 +2696,7 @@ class InputDecoration {
 
   /// The style to use for the [helperText].
   ///
-  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `helperStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
@@ -2724,7 +2724,7 @@ class InputDecoration {
 
   /// The style to use for the [hintText].
   ///
-  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `hintStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -2838,9 +2838,7 @@ class InputDecoration {
 
   /// The padding for the input decoration's container.
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
   /// By default the `contentPadding` reflects [isDense] and the type of the
   /// [border].
@@ -2887,10 +2885,7 @@ class InputDecoration {
   /// )
   /// ```
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
   /// The prefix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
@@ -2923,7 +2918,7 @@ class InputDecoration {
   ///
   /// {@tool dartpad}
   /// This example shows the differences between two `TextField` widgets when
-  /// [prefixIconConstraints] is set to the default value and when one is not.
+  /// `prefixIconConstraints` is set to the default value and when one is not.
   ///
   /// Note that [isDense] must be set to true to be able to
   /// set the constraints smaller than 48px.
@@ -2942,9 +2937,9 @@ class InputDecoration {
   /// front of the input. The widget's baseline is lined up with the input
   /// baseline.
   ///
-  /// Only one of [prefix] and [prefixText] can be specified.
+  /// Only one of `prefix` and [prefixText] can be specified.
   ///
-  /// The [prefix] appears after the [prefixIcon], if both are specified.
+  /// The `prefix` appears after the [prefixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -2957,9 +2952,9 @@ class InputDecoration {
   /// The prefix text is not returned as part of the user's input.
   ///
   /// If a more elaborate prefix is required, consider using [prefix] instead.
-  /// Only one of [prefix] and [prefixText] can be specified.
+  /// Only one of [prefix] and `prefixText` can be specified.
   ///
-  /// The [prefixText] appears after the [prefixIcon], if both are specified.
+  /// The `prefixText` appears after the [prefixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -2968,7 +2963,7 @@ class InputDecoration {
 
   /// The style to use for the [prefixText].
   ///
-  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `prefixStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -2983,7 +2978,7 @@ class InputDecoration {
   ///
   /// Defaults to [iconColor]
   ///
-  /// If [prefixIconColor] is a [MaterialStateColor], then the effective
+  /// If `prefixIconColor` is a [MaterialStateColor], then the effective
   /// color can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? prefixIconColor;
@@ -3040,9 +3035,9 @@ class InputDecoration {
   /// otherwise be specified using [suffixText], or to add a custom widget after
   /// the input. The widget's baseline is lined up with the input baseline.
   ///
-  /// Only one of [suffix] and [suffixText] can be specified.
+  /// Only one of `suffix` and [suffixText] can be specified.
   ///
-  /// The [suffix] appears before the [suffixIcon], if both are specified.
+  /// The `suffix` appears before the [suffixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -3055,9 +3050,9 @@ class InputDecoration {
   /// The suffix text is not returned as part of the user's input.
   ///
   /// If a more elaborate suffix is required, consider using [suffix] instead.
-  /// Only one of [suffix] and [suffixText] can be specified.
+  /// Only one of [suffix] and `suffixText` can be specified.
   ///
-  /// The [suffixText] appears before the [suffixIcon], if both are specified.
+  /// The `suffixText` appears before the [suffixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -3066,9 +3061,9 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
+  /// If `suffixStyle` is a [MaterialStateTextStyle], then the effective text
+  /// style can depend on the [MaterialState.focused] state, i.e. if the
+  /// [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3077,7 +3072,7 @@ class InputDecoration {
   ///  * [prefixStyle], the equivalent but on the leading edge.
   final TextStyle? suffixStyle;
 
-  /// Optional color of the suffixIcon
+  /// Optional color of the [suffixIcon].
   ///
   /// Defaults to [iconColor]
   ///
@@ -3130,7 +3125,7 @@ class InputDecoration {
 
   /// The style to use for the [counterText].
   ///
-  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `counterStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -3142,52 +3137,53 @@ class InputDecoration {
   /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
-  /// Typically this field set to true if [border] is an
-  /// [UnderlineInputBorder].
+  /// Typically this field set to true if [border] is an [UnderlineInputBorder].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@template flutter.material.input_decorator.container_description}
+  /// The decoration's container is the area which is filled if `filled` is true
+  /// and bordered per the [border]. It's the area adjacent to [icon] and above
+  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@endtemplate}
   ///
   /// This property is false by default.
   final bool? filled;
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [InputDecorator.isHovering] is true, the
-  /// [hoverColor] is also blended into the final fill color.
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
+  /// into the final fill color.
   ///
-  /// By default the fillColor is based on the current [Theme].
+  /// By default the `fillColor` is based on the current
+  /// [InputDecorationTheme.fillColor].
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? fillColor;
 
-  /// By default the [focusColor] is based on the current [Theme].
+  /// The fill color of the decoration's container when it has the input focus.
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// By default the `focusColor` is based on the current
+  /// [InputDecorationTheme.focusColor].
+  ///
+  /// This `focusColor` is ignored by [TextField] and [TextFormField] because
+  /// they don't respond to focus changes by changing their decorator's
+  /// container color, they respond by changing their border to the
+  /// [focusedBorder], which you can change the color of.
+  ///
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? focusColor;
 
-  /// The color of the focus highlight for the decoration shown if the container
+  /// The color of the highlight for the decoration shown if the container
   /// is being hovered over by a mouse.
   ///
-  /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container.
+  /// If [filled] is true, the `hoverColor` is blended with [fillColor] and
+  /// fills the decoration's container.
   ///
   /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
   /// is blended over the [enabledBorder]'s color.
   ///
-  /// By default the [hoverColor] is based on the current [Theme].
+  /// By default the `hoverColor` is based on the current [Theme].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? hoverColor;
 
   /// The border to display when the [InputDecorator] does not have the focus and
