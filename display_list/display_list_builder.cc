@@ -1041,9 +1041,9 @@ void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
                                      const SkMatrix* matrix,
                                      bool render_with_attributes) {
   matrix  //
-      ? Push<DrawSkPictureMatrixOp>(0, 1, std::move(picture), *matrix,
+      ? Push<DrawSkPictureMatrixOp>(0, 1, picture, *matrix,
                                     render_with_attributes)
-      : Push<DrawSkPictureOp>(0, 1, std::move(picture), render_with_attributes);
+      : Push<DrawSkPictureOp>(0, 1, picture, render_with_attributes);
   // The non-nested op count accumulated in the |Push| method will include
   // this call to |drawPicture| for non-nested op count metrics.
   // But, for nested op count metrics we want the |drawPicture| call itself
@@ -1056,7 +1056,7 @@ void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
 }
 void DisplayListBuilder::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
-  Push<DrawDisplayListOp>(0, 1, std::move(display_list));
+  Push<DrawDisplayListOp>(0, 1, display_list);
   // The non-nested op count accumulated in the |Push| method will include
   // this call to |drawDisplayList| for non-nested op count metrics.
   // But, for nested op count metrics we want the |drawDisplayList| call itself

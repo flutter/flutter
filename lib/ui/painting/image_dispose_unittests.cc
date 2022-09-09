@@ -69,7 +69,7 @@ TEST_F(ImageDisposeTest, ImageReleasedAfterFrameAndDisposePictureAndLayer) {
                     CREATE_NATIVE_ENTRY(native_capture_image_and_picture));
   AddNativeCallback("Finish", CREATE_NATIVE_ENTRY(native_finish));
 
-  std::unique_ptr<Shell> shell = CreateShell(std::move(settings), task_runners);
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
 
   ASSERT_TRUE(shell->IsSetup());
 

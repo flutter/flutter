@@ -74,7 +74,7 @@ DartVMRef DartVMRef::Create(Settings settings,
   // If there is no VM in the process. Initialize one, hold the weak reference
   // and pass a strong reference to the caller.
   auto isolate_name_server = std::make_shared<IsolateNameServer>();
-  auto vm = DartVM::Create(std::move(settings),          //
+  auto vm = DartVM::Create(settings,                     //
                            std::move(vm_snapshot),       //
                            std::move(isolate_snapshot),  //
                            isolate_name_server           //
