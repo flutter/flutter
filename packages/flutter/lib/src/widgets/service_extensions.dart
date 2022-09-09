@@ -111,6 +111,7 @@ enum WidgetInspectorServiceExtensions {
   disposeAllGroups,
   disposeGroup,
   isWidgetTreeReady,
+  disposeId,
   setPubRootDirectories,
   addPubRootDirectories,
   removePubRootDirectories,
