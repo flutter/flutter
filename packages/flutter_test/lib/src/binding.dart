@@ -104,9 +104,6 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   TestDefaultBinaryMessenger createBinaryMessenger() {
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
-
-  @override
-  bool get useBackgroundIsolateBinaryMessenger => false;
 }
 
 /// Base class for bindings used by widgets library tests.

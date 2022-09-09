@@ -90,8 +90,6 @@ class TestStepResult {
       ],
     );
   }
-
-  static bool deepEquals(dynamic a, dynamic b) => _deepEquals(a, b);
 }
 
 Future<TestStepResult> resultOfHandshake(
