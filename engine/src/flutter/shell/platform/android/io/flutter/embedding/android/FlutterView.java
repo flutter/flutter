@@ -1522,6 +1522,17 @@ public class FlutterView extends FrameLayout
     textInputPlugin.autofill(values);
   }
 
+  @Override
+  public void setVisibility(int visibility) {
+    super.setVisibility(visibility);
+    // For `FlutterSurfaceView`, setting visibility to the current `FlutterView` will not take
+    // effect since it is not in the view tree. So override this method and set the surfaceView.
+    // See https://github.com/flutter/flutter/issues/105203
+    if (renderSurface instanceof FlutterSurfaceView) {
+      ((FlutterSurfaceView) renderSurface).setVisibility(visibility);
+    }
+  }
+
   /**
    * Listener that is notified when a {@link io.flutter.embedding.engine.FlutterEngine} is attached
    * to/detached from a given {@code FlutterView}.

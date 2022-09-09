@@ -1062,6 +1062,31 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  public void flutterSurfaceViewVisibilityChangedWithFlutterView() {
+    // ---- Test setup ----
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+    delegate.onCreateView(null, null, null, 0, true);
+    // --- Execute the behavior under test ---
+    // For `FlutterSurfaceView`, setting visibility to the current `FlutterView` will not take
+    // effect since it is not in the view tree. So we need to make sure that when the visibility of
+    // `FlutterView` changes, the `FlutterSurfaceView` changes at the same time
+    // See https://github.com/flutter/flutter/issues/105203
+    assertEquals(FlutterSurfaceView.class, delegate.flutterView.renderSurface.getClass());
+    FlutterSurfaceView surfaceView = (FlutterSurfaceView) delegate.flutterView.renderSurface;
+    // Verify that the `FlutterSurfaceView` is gone.
+    delegate.flutterView.setVisibility(View.GONE);
+    assertEquals(View.GONE, surfaceView.getVisibility());
+    // Verify that the `FlutterSurfaceView` is visible.
+    delegate.flutterView.setVisibility(View.VISIBLE);
+    assertEquals(View.VISIBLE, surfaceView.getVisibility());
+    // Verify that the `FlutterSurfaceView` is invisible.
+    delegate.flutterView.setVisibility(View.INVISIBLE);
+    assertEquals(View.INVISIBLE, surfaceView.getVisibility());
+  }
+
+  @Test
   public void itDoesNotDelayTheFirstDrawWhenRequestedAndWithAProvidedSplashScreen() {
     when(mockHost.provideSplashScreen())
         .thenReturn(new DrawableSplashScreen(new ColorDrawable(Color.GRAY)));
