@@ -20,7 +20,7 @@ path = './' + sys.argv[1]
 args = [path] + sys.argv[2:]
 
 try:
-  subprocess.check_output(args, stderr=subprocess.STDOUT, universal_newlines=True)
+  subprocess.check_output(args, stderr=subprocess.STDOUT)
 except subprocess.CalledProcessError as ex:
-  print(ex.output)
+  print(ex.output.decode('utf-8', errors='replace'))
   sys.exit(ex.returncode)
