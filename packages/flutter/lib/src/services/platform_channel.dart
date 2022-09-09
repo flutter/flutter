@@ -140,7 +140,9 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   static BinaryMessenger get instance {
     if (_instance == null) {
       throw StateError(
-          'Must call BackgroundIsolateBinaryMessenger.ensureInitialized.');
+          'The BackgroundIsolateBinaryMessenger.instance value is invalid '
+          'until BackgroundIsolateBinaryMessenger.ensureInitialized is '
+          'executed.');
     }
     return _instance!;
   }
@@ -248,7 +250,12 @@ class BasicMessageChannel<T> {
   /// The message codec used by this channel, not null.
   final MessageCodec<T> codec;
 
-  /// The messenger which sends the bytes for this channel, not null.
+  /// The messenger which sends the bytes for this channel.
+  ///
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return !kReleaseMode && debugProfilePlatformChannels
@@ -333,9 +340,12 @@ class MethodChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages.
+  /// The messenger which sends the bytes for this channel.
   ///
-  /// The messenger may not be null.
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return !kReleaseMode && debugProfilePlatformChannels
@@ -686,7 +696,12 @@ class EventChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages, not null.
+  /// The messenger which sends the bytes for this channel.
+  ///
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger =>
       _binaryMessenger ?? _findBinaryMessenger();
   final BinaryMessenger? _binaryMessenger;
