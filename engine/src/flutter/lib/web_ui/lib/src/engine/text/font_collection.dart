@@ -14,13 +14,6 @@ import '../safe_browser_api.dart';
 import '../util.dart';
 import 'layout_service.dart';
 
-const String ahemFontFamily = 'Ahem';
-const String ahemFontUrl = '/assets/fonts/ahem.ttf';
-const String robotoFontFamily = 'Roboto';
-const String robotoTestFontUrl = '/assets/fonts/Roboto-Regular.ttf';
-const String robotoVariableFontFamily = 'RobotoVariable';
-const String robotoVariableTestFontUrl = '/assets/fonts/RobotoSlab-VariableFont_wght.ttf';
-
 /// This class is responsible for registering and loading fonts.
 ///
 /// Once an asset manager has been set in the framework, call
