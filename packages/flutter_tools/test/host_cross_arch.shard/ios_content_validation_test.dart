@@ -193,37 +193,28 @@ void main() {
         });
 
         testWithoutContext('check symbols', () {
-          final ProcessResult symbols = processManager.runSync(
-            <String>[
-              'nm',
-              '-g',
-              outputAppFrameworkBinary.path,
-              '-arch',
-              'arm64',
-            ],
-          );
-          final bool aotSymbolsFound = (symbols.stdout as String).contains('_kDartVmSnapshot');
-          expect(aotSymbolsFound, buildMode != BuildMode.debug);
+          final List<String> symbols =
+              AppleTestUtils.getExportedSymbols(outputAppFrameworkBinary.path);
+          if (buildMode == BuildMode.debug) {
+            expect(symbols, isEmpty);
+          } else {
+            expect(symbols, equals(AppleTestUtils.requiredSymbols));
+          }
         });
 
-        // dSYM is not created for a debug build so nothing to check.
-        if (buildMode != BuildMode.debug) {
-          testWithoutContext('check symbols in dSYM', () {
-            final ProcessResult nm = processManager.runSync(
-              <String>[
-                'nm',
-                '--debug-syms',
-                '--defined-only',
-                '--just-symbol-name',
-                buildAppFrameworkDsymBinary.path,
-                '-arch',
-                'arm64',
-              ],
-            );
-            final List<String> symbols = (nm.stdout as String).split('\n');
-            expect(symbols, contains('_kDartVmSnapshotInstructions'));
-          });
-        }
+        testWithoutContext('check symbols in dSYM', () {
+          if (buildMode == BuildMode.debug) {
+            // dSYM is not created for a debug build.
+            expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
+          } else {
+            final List<String> symbols =
+                AppleTestUtils.getExportedSymbols(buildAppFrameworkDsymBinary.path);
+            expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
+            // The actual number of symbols is going to vary but there should
+            // be "many" in the dSYM. At the time of writing, it was 7656.
+            expect(symbols.length, greaterThanOrEqualTo(5000));
+          }
+        });
 
         testWithoutContext('xcode_backend embed_and_thin', () {
           outputFlutterFramework.deleteSync(recursive: true);
