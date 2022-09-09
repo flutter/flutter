@@ -18,7 +18,7 @@ const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocation
 /// `--dart-define=flutter.memory_allocations=true`.
 const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kProfileMode || kDebugMode;
 
-// const String _dartUiLibrary = 'dart:ui';
+const String _dartUiLibrary = 'dart:ui';
 
 class _FieldNames {
   static const String eventType = 'eventType';
@@ -132,6 +132,9 @@ class MemoryAllocations {
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   void addListener(ObjectEventListener listener){
+    if (!kFlutterMemoryAllocationsEnabled) {
+      return;
+    }
     if (_listeners == null) {
       _listeners = <ObjectEventListener?>[];
       _subscribeToSdkObjects();
@@ -155,6 +158,9 @@ class MemoryAllocations {
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   void removeListener(ObjectEventListener listener){
+    if (!kFlutterMemoryAllocationsEnabled) {
+      return;
+    }
     final List<ObjectEventListener?>? listeners = _listeners;
     if (listeners == null) {
       return;
@@ -198,6 +204,9 @@ class MemoryAllocations {
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   bool get hasListeners {
+    if (!kFlutterMemoryAllocationsEnabled) {
+      return false;
+    }
     if (_listenersContainNulls) {
       return _listeners?.firstWhere((ObjectEventListener? l) => l != null) != null;
     }
@@ -217,6 +226,9 @@ class MemoryAllocations {
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
   void dispatchObjectEvent(ObjectEventBuilder objectEventBuilder) {
+    if (!kFlutterMemoryAllocationsEnabled) {
+      return;
+    }
     final List<ObjectEventListener?>? listeners = _listeners;
     if (listeners == null || listeners.isEmpty) {
       return;
@@ -251,21 +263,17 @@ class MemoryAllocations {
   }
 
   void _subscribeToSdkObjects() {
-    // Uncomment and test cover before merging this PR,
-    // when https://github.com/flutter/engine/pull/35274 lands:
-    // assert(ui.Image.onCreate == null);
-    // assert(ui.Image.onDispose == null);
-    // assert(ui.Picture.onCreate == null);
-    // assert(ui.Picture.onDispose == null);
-    // ui.Image.onCreate = _imageOnCreate;
-    // ui.Image.onDispose = _imageOnDispose;
-    // ui.Picture.onCreate = _pictureOnCreate;
-    // ui.Picture.onDispose = _pictureOnDispose;
+    assert(ui.Image.onCreate == null);
+    assert(ui.Image.onDispose == null);
+    assert(ui.Picture.onCreate == null);
+    assert(ui.Picture.onDispose == null);
+    ui.Image.onCreate = _imageOnCreate;
+    ui.Image.onDispose = _imageOnDispose;
+    ui.Picture.onCreate = _pictureOnCreate;
+    ui.Picture.onDispose = _pictureOnDispose;
   }
 
   void _unSubscribeFromSdkObjects() {
-    Uncomment and test cover before merging this PR,
-    when https://github.com/flutter/engine/pull/35274 lands:
     assert(ui.Image.onCreate == _imageOnCreate);
     assert(ui.Image.onDispose == _imageOnDispose);
     assert(ui.Picture.onCreate == _pictureOnCreate);
@@ -276,23 +284,39 @@ class MemoryAllocations {
     ui.Picture.onDispose = null;
   }
 
-  void _imageOnCreate(ui.Image image) => dispatchObjectEvent(ObjectCreated(
-    library: FlutterLibraries.dartUiLibrary,
-    className: 'Image',
-    object: image,
-  ));
+  void _imageOnCreate(ui.Image image) {
+    dispatchObjectEvent(() {
+      return ObjectCreated(
+        library: _dartUiLibrary,
+        className: 'Image',
+        object: image,
+      );
+    });
+  }
 
-  void _pictureOnCreate(ui.Picture picture) => dispatchObjectEvent(ObjectCreated(
-    library: FlutterLibraries.dartUiLibrary,
-    className: 'Picture',
-    object: picture,
-  ));
+  void _pictureOnCreate(ui.Picture picture) {
+    dispatchObjectEvent(() {
+      return ObjectCreated(
+        library: _dartUiLibrary,
+        className: 'Picture',
+        object: picture,
+      );
+    });
+  }
 
-  void _imageOnDispose(ui.Image image) => dispatchObjectEvent(ObjectDisposed(
-    object: image,
-  ));
+  void _imageOnDispose(ui.Image image) {
+    dispatchObjectEvent(() {
+      return ObjectDisposed(
+        object: image,
+      );
+    });
+  }
 
-  void _pictureOnDispose(ui.Picture picture) => dispatchObjectEvent(ObjectDisposed(
-    object: picture,
-  ));
+  void _pictureOnDispose(ui.Picture picture) {
+    dispatchObjectEvent(() {
+      return ObjectDisposed(
+        object: picture,
+      );
+    });
+  }
 }

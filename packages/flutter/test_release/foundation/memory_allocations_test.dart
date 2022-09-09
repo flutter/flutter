@@ -19,19 +19,30 @@ void main() {
   });
 
   test(
-    'Publishers in Flutter respect kFlutterMemoryAllocationsEnabled.',
+    '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
     () async {
       ObjectEvent? recievedEvent;
       ObjectEvent listener(ObjectEvent event) => recievedEvent = event;
+
       ma.addListener(listener);
+      _checkSdkHandlersNotSet();
 
       await _activateFlutterObjects();
-
+      _checkSdkHandlersNotSet();
       expect(recievedEvent, isNull);
-      expect(ma.hasListeners, isTrue);
+      expect(ma.hasListeners, isFalse);
+
       ma.removeListener(listener);
+      _checkSdkHandlersNotSet();
     },
   );
+}
+
+void _checkSdkHandlersNotSet() {
+  expect(Image.onCreate, isNull);
+  expect(Picture.onCreate, isNull);
+  expect(Image.onDispose, isNull);
+  expect(Picture.onDispose, isNull);
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.

@@ -12,15 +12,18 @@ void main() {
 
   setUp(() {
     assert(!ma.hasListeners);
+    _checkSdkHandlersNotSet();
   });
 
   test('addListener and removeListener add and remove listeners.', () {
+
     final ObjectEvent event = ObjectDisposed(object: 'object');
     ObjectEvent? recievedEvent;
     void listener(ObjectEvent event) => recievedEvent = event;
     expect(ma.hasListeners, isFalse);
 
     ma.addListener(listener);
+    _checkSdkHandlersSet();
     ma.dispatchObjectEvent(() => event);
     expect(recievedEvent, equals(event));
     expect(ma.hasListeners, isTrue);
@@ -30,6 +33,7 @@ void main() {
     ma.dispatchObjectEvent(() => event);
     expect(recievedEvent, isNull);
     expect(ma.hasListeners, isFalse);
+    _checkSdkHandlersNotSet();
   });
 
   testWidgets('dispatchObjectEvent handles bad listeners', (WidgetTester tester) async {
@@ -47,6 +51,7 @@ void main() {
     void listener2(ObjectEvent event) => log.add('listener2');
 
     ma.addListener(badListener1);
+    _checkSdkHandlersSet();
     ma.addListener(listener1);
     ma.addListener(badListener2);
     ma.addListener(listener2);
@@ -56,9 +61,11 @@ void main() {
     expect(tester.takeException(), contains('Multiple exceptions (2)'));
 
     ma.removeListener(badListener1);
+    _checkSdkHandlersSet();
     ma.removeListener(listener1);
     ma.removeListener(badListener2);
     ma.removeListener(listener2);
+    _checkSdkHandlersNotSet();
 
     log.clear();
     expect(ma.hasListeners, isFalse);
@@ -77,6 +84,7 @@ void main() {
     }
 
     ma.addListener(listener1);
+    _checkSdkHandlersSet();
 
     ma.dispatchObjectEvent(() => event);
     expect(log, <String>['listener1']);
@@ -88,6 +96,7 @@ void main() {
 
     ma.removeListener(listener1);
     ma.removeListener(listener2);
+    _checkSdkHandlersNotSet();
 
     expect(ma.hasListeners, isFalse);
     ma.dispatchObjectEvent(() => event);
@@ -113,6 +122,7 @@ void main() {
     log.clear();
 
     ma.removeListener(listener1);
+    _checkSdkHandlersNotSet();
 
     expect(ma.hasListeners, isFalse);
   });
@@ -149,6 +159,7 @@ void main() {
     expect(eventCount, expectedEventCount);
 
     ma.removeListener(listener);
+    _checkSdkHandlersNotSet();
     expect(ma.hasListeners, isFalse);
   });
 }
@@ -161,10 +172,10 @@ void _checkSdkHandlersSet() {
 }
 
 void _checkSdkHandlersNotSet() {
-  expect(Image.onCreate, isNotNull);
-  expect(Picture.onCreate, isNotNull);
-  expect(Image.onDispose, isNotNull);
-  expect(Picture.onDispose, isNotNull);
+  expect(Image.onCreate, isNull);
+  expect(Picture.onCreate, isNull);
+  expect(Image.onDispose, isNull);
+  expect(Picture.onDispose, isNull);
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
