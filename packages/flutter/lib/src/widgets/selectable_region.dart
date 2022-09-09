@@ -254,7 +254,7 @@ class SelectableRegion extends StatefulWidget {
 }
 
 /// State for a [SelectableRegion].
-class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
+class SelectableRegionState extends State<SelectableRegion> implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
@@ -313,7 +313,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
     if (orientation != _lastOrientation) {
       _lastOrientation = orientation;
-      hideToolbar(defaultTargetPlatform == TargetPlatform.android);
+      _hideToolbar(defaultTargetPlatform == TargetPlatform.android);
     }
   }
 
@@ -346,18 +346,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _updateSelectionStatus() {
-    final TextSelection selection;
-    final SelectionGeometry geometry = _selectionDelegate.value;
-    switch(geometry.status) {
-      case SelectionStatus.uncollapsed:
-      case SelectionStatus.collapsed:
-        selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-        break;
-      case SelectionStatus.none:
-        selection = const TextSelection.collapsed(offset: 1);
-        break;
-    }
-    textEditingValue = TextEditingValue(text: '__', selection: selection);
     if (_hasSelectionOverlayGeometry) {
       _updateSelectionOverlay();
     } else {
@@ -398,7 +386,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   void _startNewMouseSelectionGesture(DragDownDetails details) {
     widget.focusNode.requestFocus();
-    hideToolbar();
+    _hideToolbar();
     _clearSelection();
   }
 
@@ -661,7 +649,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       onEndHandleDragEnd: _onAnyDragEnd,
       selectionEndpoints: _points,
       selectionControls: widget.selectionControls,
-      selectionDelegate: this,
       clipboardStatus: null,
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
@@ -791,7 +778,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// A selection always contains a select start edge and selection end edge.
   /// They can be created by calling both [_selectStartTo] and [_selectEndTo], or
-  /// use other selection APIs, such as [_selectWordAt] or [selectAll].
+  /// use other selection APIs, such as [_selectWordAt] or [_selectAll].
   ///
   /// This method sets or updates the selection end edge by sending
   /// [SelectionEdgeUpdateEvent]s to the child [Selectable]s.
@@ -810,7 +797,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_finalizeSelection], which stops the `continuous` updates.
   ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
-  ///  * [selectAll], which selects the entire content.
+  ///  * [_selectAll], which selects the entire content.
   void _selectEndTo({required Offset offset, bool continuous = false}) {
     if (!continuous) {
       _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset));
@@ -826,7 +813,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// A selection always contains a select start edge and selection end edge.
   /// They can be created by calling both [_selectStartTo] and [_selectEndTo], or
-  /// use other selection APIs, such as [_selectWordAt] or [selectAll].
+  /// use other selection APIs, such as [_selectWordAt] or [_selectAll].
   ///
   /// This method sets or updates the selection start edge by sending
   /// [SelectionEdgeUpdateEvent]s to the child [Selectable]s.
@@ -845,7 +832,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_finalizeSelection], which stops the `continuous` updates.
   ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
-  ///  * [selectAll], which selects the entire content.
+  ///  * [_selectAll], which selects the entire content.
   void _selectStartTo({required Offset offset, bool continuous = false}) {
     if (!continuous) {
       _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: offset));
@@ -871,7 +858,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
   ///  * [_clearSelection], which clear the ongoing selection.
-  ///  * [selectAll], which selects the entire content.
+  ///  * [_selectAll], which selects the entire content.
   void _selectWordAt({required Offset offset}) {
     // There may be other selection ongoing.
     _finalizeSelection();
@@ -907,32 +894,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
-  // [TextSelectionDelegate] overrides.
-
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  bool get cutEnabled => false;
-
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  bool get pasteEnabled => false;
-
-  @override
-  void hideToolbar([bool hideHandles = true]) {
+  void _hideToolbar([bool hideHandles = true]) {
     _selectionOverlay?.hideToolbar();
     if (hideHandles) {
       _selectionOverlay?.hideHandles();
     }
   }
 
-  @override
-  void selectAll([SelectionChangedCause? cause]) {
+  void _selectAll([SelectionChangedCause? cause]) {
     _clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
@@ -940,42 +909,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _showHandles();
     }
     _updateSelectedContentIfNeeded();
-  }
-
-  @override
-  void copySelection(SelectionChangedCause cause) {
-    _copy();
-    _clearSelection();
-  }
-
-  // TODO(chunhtai): remove this workaround after decoupling text selection
-  // from text editing in TextSelectionDelegate.
-  // https://github.com/flutter/flutter/issues/111213
-  @override
-  TextEditingValue textEditingValue = const TextEditingValue(text: '_');
-
-  @override
-  void bringIntoView(TextPosition position) {/* SelectableRegion must be in view at this point. */}
-
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  void cutSelection(SelectionChangedCause cause) {
-    assert(false);
-  }
-
-  @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
-
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  Future<void> pasteText(SelectionChangedCause cause) async {
-    assert(false);
   }
 
   // [SelectionRegistrar] override.
@@ -1065,7 +998,7 @@ class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
 
   @override
   void invokeAction(SelectAllTextIntent intent, [BuildContext? context]) {
-    state.selectAll(SelectionChangedCause.keyboard);
+    state._selectAll(SelectionChangedCause.keyboard);
   }
 }
 
@@ -1958,12 +1891,12 @@ class SelectableRegionContextMenuButtonItemsBuilder extends StatelessWidget {
 
   void _handleCopy() {
     selectableRegionState._copy();
-    selectableRegionState.hideToolbar();
+    selectableRegionState._hideToolbar();
   }
 
   void _handleSelectAll() {
-    selectableRegionState.selectAll();
-    selectableRegionState.hideToolbar();
+    selectableRegionState._selectAll();
+    selectableRegionState._hideToolbar();
   }
 
   @override

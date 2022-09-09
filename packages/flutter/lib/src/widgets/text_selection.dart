@@ -913,7 +913,11 @@ class SelectionOverlay {
     this.toolbarVisible,
     required List<TextSelectionPoint> selectionEndpoints,
     required this.selectionControls,
-    required this.selectionDelegate,
+    @Deprecated(
+      'Use `contextMenuBuilder` in `showToolbar` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    this.selectionDelegate,
     required this.clipboardStatus,
     required this.startHandleLayerLink,
     required this.endHandleLayerLink,
@@ -921,7 +925,7 @@ class SelectionOverlay {
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
     @Deprecated(
-      'Use `contextMenuBuilder` instead. '
+      'Use `contextMenuBuilder` in `showToolbar` instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Offset? toolbarLocation,
@@ -1160,7 +1164,11 @@ class SelectionOverlay {
   /// The delegate for manipulating the current selection in the owning
   /// text field.
   /// {@endtemplate}
-  final TextSelectionDelegate selectionDelegate;
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  final TextSelectionDelegate? selectionDelegate;
 
   /// Determines the way that drag start behavior is handled.
   ///
@@ -1463,6 +1471,7 @@ class SelectionOverlay {
     if (selectionControls == null) {
       return const SizedBox.shrink();
     }
+    assert(selectionDelegate != null, 'If not using contextMenuBuilder, must pass selectionDelegate.');
 
     final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
 
@@ -1498,7 +1507,7 @@ class SelectionOverlay {
             lineHeightAtStart,
             midpoint,
             selectionEndpoints,
-            selectionDelegate,
+            selectionDelegate!,
             clipboardStatus,
             toolbarLocation,
           );
