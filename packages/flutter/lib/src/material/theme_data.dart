@@ -1345,12 +1345,12 @@ class ThemeData with Diagnosticable {
   /// The color of [Material] when it is used as a [Card].
   final Color cardColor;
 
-  /// A set of twelve colors that can be used to configure the
-  /// color properties of most components.
+  /// A set of colors that are used to configure the color properties of all
+  /// components.
   ///
   /// This property was added much later than the theme's set of highly
   /// specific colors, like [cardColor], [buttonColor], [canvasColor] etc.
-  /// New components can be defined exclusively in terms of [colorScheme].
+  /// New components are defined exclusively in terms of [colorScheme].
   /// Existing components will gradually migrate to it, to the extent
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
