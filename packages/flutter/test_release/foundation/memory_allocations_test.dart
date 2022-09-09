@@ -12,6 +12,7 @@ void main() {
 
   setUp(() {
     assert(!ma.hasListeners);
+    _checkSdkHandlersNotSet();
   });
 
   test('kFlutterMemoryAllocationsEnabled is false in release mode.', () {

@@ -131,8 +131,6 @@ void main() {
     void listener1(ObjectEvent event) {}
     void listener2(ObjectEvent event) {}
 
-    _checkSdkHandlersNotSet();
-
     ma.addListener(listener1);
     _checkSdkHandlersSet();
 
