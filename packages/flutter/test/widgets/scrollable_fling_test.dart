@@ -48,7 +48,7 @@ void main() {
     // Before changing these values, ensure the fling results in a distance that
     // makes sense. See issue for more context.
     expect(androidResult, greaterThan(394.0));
-    expect(androidResult, lessThan(408.2));
+    expect(androidResult, lessThan(395.0));
 
     await pumpTest(tester, TargetPlatform.linux);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
@@ -152,6 +152,6 @@ void main() {
     expect(log, equals(<String>['tap 21']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 21', 'tap 49']));
+    expect(log, equals(<String>['tap 21', 'tap 48']));
   });
 }

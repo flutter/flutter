@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -110,11 +111,17 @@ class _TestAppState extends State<TestApp> {
     () => methodCallStandardErrorHandshake('world'),
     () => methodCallStandardNotImplementedHandshake(),
     () => basicBinaryHandshake(null),
-    () => basicBinaryHandshake(ByteData(0)),
+    if (!Platform.isMacOS)
+      // Note, it was decided that this will function differently on macOS. See
+      // also: https://github.com/flutter/flutter/issues/110865.
+      () => basicBinaryHandshake(ByteData(0)),
     () => basicBinaryHandshake(ByteData(4)..setUint32(0, 0x12345678)),
     () => basicStringHandshake('hello, world'),
     () => basicStringHandshake('hello \u263A \u{1f602} unicode'),
-    () => basicStringHandshake(''),
+    if (!Platform.isMacOS)
+      // Note, it was decided that this will function differently on macOS. See
+      // also: https://github.com/flutter/flutter/issues/110865.
+      () => basicStringHandshake(''),
     () => basicStringHandshake(null),
     () => basicJsonHandshake(null),
     () => basicJsonHandshake(true),

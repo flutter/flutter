@@ -17,6 +17,80 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-07
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-07
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-06
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+
+
   # Changes made in https://github.com/flutter/flutter/pull/110162
   - title: "Migrate to 'ColorScheme.background'"
     date: 2022-08-24
