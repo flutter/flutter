@@ -446,5 +446,21 @@ TEST(FlutterWindowsEngine, UpdateHighContrastFeature) {
   EXPECT_FALSE(engine->high_contrast_enabled());
 }
 
+TEST(FlutterWindowsEngine, PostRasterThreadTask) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask, ([](auto engine, auto callback, auto context) {
+        callback(context);
+        return kSuccess;
+      }));
+
+  bool called = false;
+  engine->PostRasterThreadTask([&called]() { called = true; });
+
+  EXPECT_TRUE(called);
+}
+
 }  // namespace testing
 }  // namespace flutter
