@@ -1,4 +1,4 @@
-Signature: b55e042e926f748fa76e174ea2205304
+Signature: 28f4713d335c8688ec139b77ca58c657
 
 UNUSED LICENSES:
 
@@ -471,6 +471,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/meta.json
@@ -1224,6 +1225,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/meta.json
@@ -1874,6 +1876,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/meta.json
@@ -2305,6 +2308,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/log_settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/realm.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/agis.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/signal_processing.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec_connector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connector.fidl
