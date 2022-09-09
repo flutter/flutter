@@ -1511,11 +1511,49 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   _cachedFirstRect = kInvalidFirstRect;
 }
 
+// Returns the bounding CGRect of the transformed incomingRect, in the view's
+// coordinates.
+- (CGRect)localRectFromFrameworkTransform:(CGRect)incomingRect {
+  CGPoint points[] = {
+      incomingRect.origin,
+      CGPointMake(incomingRect.origin.x, incomingRect.origin.y + incomingRect.size.height),
+      CGPointMake(incomingRect.origin.x + incomingRect.size.width, incomingRect.origin.y),
+      CGPointMake(incomingRect.origin.x + incomingRect.size.width,
+                  incomingRect.origin.y + incomingRect.size.height)};
+
+  CGPoint origin = CGPointMake(CGFLOAT_MAX, CGFLOAT_MAX);
+  CGPoint farthest = CGPointMake(-CGFLOAT_MAX, -CGFLOAT_MAX);
+
+  for (int i = 0; i < 4; i++) {
+    const CGPoint point = points[i];
+
+    CGFloat x = _editableTransform.m11 * point.x + _editableTransform.m21 * point.y +
+                _editableTransform.m41;
+    CGFloat y = _editableTransform.m12 * point.x + _editableTransform.m22 * point.y +
+                _editableTransform.m42;
+
+    const CGFloat w = _editableTransform.m14 * point.x + _editableTransform.m24 * point.y +
+                      _editableTransform.m44;
+
+    if (w == 0.0) {
+      return kInvalidFirstRect;
+    } else if (w != 1.0) {
+      x /= w;
+      y /= w;
+    }
+
+    origin.x = MIN(origin.x, x);
+    origin.y = MIN(origin.y, y);
+    farthest.x = MAX(farthest.x, x);
+    farthest.y = MAX(farthest.y, y);
+  }
+  return CGRectMake(origin.x, origin.y, farthest.x - origin.x, farthest.y - origin.y);
+}
+
 // The following methods are required to support force-touch cursor positioning
 // and to position the
 // candidates view for multi-stage input methods (e.g., Japanese) when using a
 // physical keyboard.
-
 - (CGRect)firstRectForRange:(UITextRange*)range {
   NSAssert([range.start isKindOfClass:[FlutterTextPosition class]],
            @"Expected a FlutterTextPosition for range.start (got %@).", [range.start class]);
@@ -1524,22 +1562,21 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   NSUInteger start = ((FlutterTextPosition*)range.start).index;
   NSUInteger end = ((FlutterTextPosition*)range.end).index;
   if (_markedTextRange != nil) {
-    // The candidates view can't be shown if _editableTransform is not affine,
-    // or markedRect is invalid.
-    if (CGRectEqualToRect(kInvalidFirstRect, _markedRect) ||
-        !CATransform3DIsAffine(_editableTransform)) {
+    // The candidates view can't be shown if the framework has not sent the
+    // first caret rect.
+    if (CGRectEqualToRect(kInvalidFirstRect, _markedRect)) {
       return kInvalidFirstRect;
     }
 
     if (CGRectEqualToRect(_cachedFirstRect, kInvalidFirstRect)) {
       // If the width returned is too small, that means the framework sent us
-      // the caret rect instead of the marked text rect. Expand it to 0.1 so
-      // the IME candidates view show up.
-      double nonZeroWidth = MAX(_markedRect.size.width, 0.1);
+      // the caret rect instead of the marked text rect. Expand it to 0.2 so
+      // the IME candidates view would show up.
       CGRect rect = _markedRect;
-      rect.size = CGSizeMake(nonZeroWidth, rect.size.height);
-      _cachedFirstRect =
-          CGRectApplyAffineTransform(rect, CATransform3DGetAffineTransform(_editableTransform));
+      if (CGRectIsEmpty(rect)) {
+        rect = CGRectInset(rect, -0.1, 0);
+      }
+      _cachedFirstRect = [self localRectFromFrameworkTransform:rect];
     }
 
     return _cachedFirstRect;
