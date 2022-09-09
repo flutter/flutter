@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 
+#include <dxgi.h>
+#include <wrl/client.h>
 #include <thread>
 
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -251,6 +253,20 @@ TEST_F(WindowsTest, NextFrameCallback) {
   });
 
   captures.frame_drawn_latch.Wait();
+}
+
+TEST_F(WindowsTest, GetGraphicsAdapter) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto view = FlutterDesktopViewControllerGetView(controller.get());
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
+  dxgi_adapter = FlutterDesktopViewGetGraphicsAdapter(view);
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
 }
 
 }  // namespace testing
