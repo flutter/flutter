@@ -301,8 +301,6 @@ EGLSurface AngleSurfaceManager::CreateSurfaceFromHandle(
 }
 
 bool AngleSurfaceManager::GetDevice(ID3D11Device** device) {
-  using Microsoft::WRL::ComPtr;
-
   if (!resolved_device_) {
     PFNEGLQUERYDISPLAYATTRIBEXTPROC egl_query_display_attrib_EXT =
         reinterpret_cast<PFNEGLQUERYDISPLAYATTRIBEXTPROC>(
