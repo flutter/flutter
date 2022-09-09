@@ -242,7 +242,6 @@ targets:
       - master
     recipe: flutter/flutter
     presubmit: false
-    bringup: true # Marking as flaky to reopen the tree. https://github.com/flutter/flutter/issues/111193
     timeout: 60
     properties:
       dependencies: >-
@@ -259,8 +258,6 @@ targets:
 
   - name: Linux docs_test
     recipe: flutter/flutter
-    presubmit: false
-    bringup: true # Marking as flaky to reopen the tree. https://github.com/flutter/flutter/issues/111193
     timeout: 60
     properties:
       dependencies: >-
