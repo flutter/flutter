@@ -135,14 +135,13 @@ task:
         - (cd dev/bots; dart __deprecated_pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
-    # TODO(godofredoc): reenable after https://github.com/flutter/flutter/issues/111193 is fixed.
-    #- name: docs-linux # linux-only
-    #  environment:
-    #    CPU: 4
-    #    MEMORY: 12G
-    #  only_if: "$CIRRUS_PR != ''"
-    #  script:
-    #    - ./dev/bots/docs.sh
+    - name: docs-linux # linux-only
+      environment:
+        CPU: 4
+        MEMORY: 12G
+      only_if: "$CIRRUS_PR != ''"
+      script:
+        - ./dev/bots/docs.sh
 
     - name: customer_testing-linux
       only_if: "$CIRRUS_PR != ''"
