@@ -151,7 +151,7 @@ enum ThemeMode {
 /// MaterialApp(
 ///   theme: ThemeData(
 ///     brightness: Brightness.dark,
-///     colorScheme: const ColorScheme.light().copyWith(primary: Colors.blueGrey),
+///     colorScheme: const ColorScheme.dark().copyWith(surface: Colors.blueGrey),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
