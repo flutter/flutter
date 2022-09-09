@@ -262,7 +262,7 @@ void main() {
         const FakeCommand(command: <String>[
           'xcrun',
           'strip',
-          '-S',
+          '-x',
           'build/foo/App.framework/App',
           '-o',
           'build/foo/App.framework/App',
@@ -335,7 +335,7 @@ void main() {
         const FakeCommand(command: <String>[
           'xcrun',
           'strip',
-          '-S',
+          '-x',
           'build/foo/App.framework/App',
           '-o',
           'build/foo/App.framework/App',
@@ -407,7 +407,7 @@ void main() {
         const FakeCommand(command: <String>[
           'xcrun',
           'strip',
-          '-S',
+          '-x',
           'build/foo/App.framework/App',
           '-o',
           'build/foo/App.framework/App',
@@ -476,7 +476,7 @@ void main() {
         const FakeCommand(command: <String>[
           'xcrun',
           'strip',
-          '-S',
+          '-x',
           'build/foo/App.framework/App',
           '-o',
           'build/foo/App.framework/App',
