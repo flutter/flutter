@@ -3120,11 +3120,16 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   }
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
-    final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
-    final List<String> lineComponents = line.trim().split(analyzerSeparator);
-    final String lintName = lineComponents.removeLast();
-    final String location = lineComponents.removeLast();
-    return '$location: $lintName';
+    try {
+      final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
+      final List<String> lineComponents = line.trim().split(analyzerSeparator);
+      final String lintName = lineComponents.removeLast();
+      final String location = lineComponents.removeLast();
+      return '$location: $lintName';
+      // Add debugging for https://github.com/flutter/flutter/issues/111272
+    } on RangeError catch (err) {
+      fail('Received "$err" while trying to parse:\n\n$line');
+    }
   }
   final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
       .where((String line) {
