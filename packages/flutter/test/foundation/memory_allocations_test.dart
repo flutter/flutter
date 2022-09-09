@@ -128,8 +128,8 @@ void main() {
   });
 
   test('last removeListener unsubscribes from Flutter SDK events', () {
-    void listener1(ObjectEvent event) => {};
-    void listener2(ObjectEvent event) => {};
+    void listener1(ObjectEvent event) {};
+    void listener2(ObjectEvent event) {};
 
     _checkSdkHandlersNotSet();
 
