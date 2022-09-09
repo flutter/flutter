@@ -13,8 +13,8 @@ class ShowSharedValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The SharedAppData.getValue() call here causes this widget to depend on
-    // the value of the SharedAppData's 'foo' key. If it's changed, with
+    // The SharedAppData.getValue() call causes this widget to depend on the
+    // value of the SharedAppData's 'foo' key. If it's changed, with
     // SharedAppData.setValue(), then this widget will be rebuilt.
     final String value = SharedAppData.getValue<String, String>(context, appDataKey, () => 'initial');
     return Text('$appDataKey: $value');

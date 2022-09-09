@@ -32,8 +32,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   DateTime time = DateTime(2016, 5, 10, 22, 35);
   DateTime dateTime = DateTime(2016, 8, 3, 17, 45);
 
-  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts
-  // CupertinoDatePicker.
+  // This function displays a CupertinoModalPopup with a reasonable fixed height
+  // which hosts CupertinoDatePicker.
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
@@ -87,8 +87,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         },
                       ),
                     ),
-                    // In this example, the date value is formatted manually.
-                    // You can use intl package to format the value based on
+                    // In this example, the date is formatted manually. You can
+                    // use the intl package to format the value based on the
                     // user's locale settings.
                     child: Text('${date.month}-${date.day}-${date.year}',
                       style: const TextStyle(
@@ -115,8 +115,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                       ),
                     ),
                     // In this example, the time value is formatted manually.
-                    // You can use intl package to format the value based on the
-                    // user's locale settings.
+                    // You can use the intl package to format the value based on
+                    // the user's locale settings.
                     child: Text('${time.hour}:${time.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
@@ -140,8 +140,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         },
                       ),
                     ),
-                    // In this example, time value is formatted manually. You
-                    // can use intl package to format the value based on the
+                    // In this example, the time value is formatted manually. You
+                    // can use the intl package to format the value based on the
                     // user's locale settings.
                     child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
                       style: const TextStyle(
