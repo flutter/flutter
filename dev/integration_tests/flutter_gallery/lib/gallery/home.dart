@@ -57,8 +57,8 @@ class _CategoryItem extends StatelessWidget {
     // repainted when the button's ink splash animates.
     return RepaintBoundary(
       child: RawMaterialButton(
-        hoverColor: theme.primaryColor.withOpacity(0.05),
-        splashColor: theme.primaryColor.withOpacity(0.12),
+        hoverColor: theme.colorScheme.primary.withOpacity(0.05),
+        splashColor: theme.colorScheme.primary.withOpacity(0.12),
         highlightColor: Colors.transparent,
         onPressed: onTap,
         child: Column(
@@ -180,7 +180,7 @@ class _DemoItem extends StatelessWidget {
     final bool isDark = theme.brightness == Brightness.dark;
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return RawMaterialButton(
-      splashColor: theme.primaryColor.withOpacity(0.12),
+      splashColor: theme.colorScheme.primary.withOpacity(0.12),
       highlightColor: Colors.transparent,
       onPressed: () {
         _launchDemo(context);
@@ -321,7 +321,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
 
     Widget home = Scaffold(
       key: _scaffoldKey,
-      backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
+      backgroundColor: isDark ? _kFlutterBlue : theme.colorScheme.primary,
       body: SafeArea(
         bottom: false,
         child: WillPopScope(

@@ -331,7 +331,7 @@ class MiniIconWithText extends StatelessWidget {
             width: 16.0,
             height: 16.0,
             decoration: ShapeDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).colorScheme.primary,
               shape: const CircleBorder(),
             ),
             child: Icon(icon, color: Colors.white, size: 12.0),
@@ -525,7 +525,7 @@ class ItemGalleryBox extends StatelessWidget {
                           children: <Widget>[
                             Expanded(
                               child: Container(
-                                color: Theme.of(context).primaryColor,
+                                color: Theme.of(context).colorScheme.primary,
                                 child: Center(
                                   child: Text(tabName, style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white)),
                                 ),

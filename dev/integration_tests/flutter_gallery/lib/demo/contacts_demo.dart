@@ -30,7 +30,7 @@ class _ContactCategory extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 width: 72.0,
-                child: Icon(icon, color: themeData.primaryColor),
+                child: Icon(icon, color: themeData.colorScheme.primary),
               ),
               Expanded(child: Column(children: children!)),
             ],
@@ -73,7 +73,7 @@ class _ContactItem extends StatelessWidget {
                 width: 72.0,
                 child: IconButton(
                   icon: Icon(icon),
-                  color: themeData.primaryColor,
+                  color: themeData.colorScheme.primary,
                   onPressed: onPressed,
                 ),
               ),

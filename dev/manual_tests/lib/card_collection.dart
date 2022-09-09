@@ -327,7 +327,7 @@ class CardCollectionState extends State<CardCollection> {
         child: SingleChildScrollView(
           child: Container(
             height: cardModel.height,
-            color: theme.primaryColor,
+            color: theme.colorScheme.primary,
             child: Row(
               children: <Widget>[
                 leftArrowIcon,

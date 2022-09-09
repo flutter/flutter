@@ -435,17 +435,17 @@ class ThemeData with Diagnosticable {
     Color? bottomAppBarColor,
     @Deprecated(
       'Use colorScheme.primary instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColorDark,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColorLight,
   }) {
@@ -475,7 +475,7 @@ class ThemeData with Diagnosticable {
       ? useInkSparkle ? InkSparkle.splashFactory : InkRipple.splashFactory
       : InkSplash.splashFactory;
 
-    // COLOR
+    // COLOR. Note, some deprecated properties remain here for backwards compatibility.
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     assert(colorSchemeSeed == null || colorScheme == null);
     assert(colorSchemeSeed == null || primarySwatch == null);
@@ -507,8 +507,10 @@ class ThemeData with Diagnosticable {
     }
     applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
-    final Color colorPrimary = colorScheme?.primary ?? (isDark ? Colors.grey[900]! : primarySwatch);
-    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(colorPrimary);
+    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
+    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
+    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
+    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
     final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
@@ -525,7 +527,7 @@ class ThemeData with Diagnosticable {
     // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
       primarySwatch: primarySwatch,
-      primaryColorDark: primaryColorDark ?? (isDark ? Colors.black : primarySwatch[700]!),
+      primaryColorDark: primaryColorDark,
       accentColor: accentColor,
       cardColor: cardColor,
       backgroundColor: isDark ? Colors.grey[700]! : primarySwatch[200]!,
@@ -537,7 +539,7 @@ class ThemeData with Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    indicatorColor ??= accentColor == colorPrimary ? Colors.white : accentColor;
+    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     // The default [buttonTheme] is here because it doesn't use the defaults for
     // [disabledColor], [highlightColor], and [splashColor].
@@ -615,9 +617,6 @@ class ThemeData with Diagnosticable {
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
     bottomAppBarColor ??= colorSchemeSeed != null ? colorScheme.surface : isDark ? Colors.grey[800]! : Colors.white;
-    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
-    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
 
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
@@ -881,17 +880,17 @@ class ThemeData with Diagnosticable {
     Color? bottomAppBarColor,
     @Deprecated(
       'Use colorScheme.primary instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColorDark,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColorLight,
 
@@ -1750,7 +1749,7 @@ class ThemeData with Diagnosticable {
   /// the app (toolbars, tab bars, etc). Use [ColorScheme.primary] instead.
   @Deprecated(
     'Use colorScheme.primary instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
+    'This feature was deprecated after v3.3.0-0.6.pre.',
   )
   Color get primaryColor => _backgroundColor!;
   final Color? _primaryColor;
@@ -1758,7 +1757,7 @@ class ThemeData with Diagnosticable {
   /// Obsolete property that was used for [CircleAvatar] backgrounds.
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
+    'This feature was deprecated after v3.3.0-0.6.pre.',
   )
   Color get primaryColorDark => _primaryColorDark!;
   final Color? _primaryColorDark;
@@ -1766,7 +1765,7 @@ class ThemeData with Diagnosticable {
   /// Obsolete property that was used for [CircleAvatar] backgrounds.
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
+    'This feature was deprecated after v3.3.0-0.6.pre.',
   )
   Color get primaryColorLight => _primaryColorLight!;
   final Color? _primaryColorLight;
@@ -1933,17 +1932,17 @@ class ThemeData with Diagnosticable {
     Color? bottomAppBarColor,
     @Deprecated(
       'Use colorScheme.primary instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColorDark,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? primaryColorLight,
   }) {

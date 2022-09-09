@@ -123,7 +123,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         });
       },
       tooltip: 'Reset Transform',
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       child: const Icon(Icons.home),
     );
   }

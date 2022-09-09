@@ -72,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _passwordController,
                 decoration: const InputDecoration(
                   labelText: 'Password',
-                  ),
                 ),
               ),
             ),
