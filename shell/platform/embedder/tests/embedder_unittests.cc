@@ -1354,6 +1354,7 @@ TEST_F(EmbedderTest, CanSuccessfullyPopulateSpecificJITSnapshotCallbacks) {
   ASSERT_NE(settings.vm_snapshot_instr(), nullptr);
   ASSERT_NE(settings.isolate_snapshot_data(), nullptr);
   ASSERT_NE(settings.isolate_snapshot_instr(), nullptr);
+  ASSERT_NE(settings.dart_library_sources_kernel(), nullptr);
 }
 
 //------------------------------------------------------------------------------
