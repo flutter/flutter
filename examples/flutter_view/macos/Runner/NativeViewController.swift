@@ -8,6 +8,11 @@
 import Foundation
 import AppKit
 
+
+protocol NativeViewControllerDelegate: NSObjectProtocol {
+    func didTapIncrementButton()
+}
+
 class NativeViewController: NSViewController {
 
   var count: Int?
@@ -19,10 +24,12 @@ class NativeViewController: NSViewController {
     }
   }
 
+  var delegate: NativeViewControllerDelegate?
+
   @IBOutlet weak var incrementLabel: NSTextField!
 
   @IBAction func handleIncrement(_ sender: Any) {
-
+    self.delegate?.didTapIncrementButton()
   }
 
   override func viewDidLoad() {
