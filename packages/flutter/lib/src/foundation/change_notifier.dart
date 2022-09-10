@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'diagnostics.dart';
+import 'memory_allocations.dart';
 
 export 'dart:ui' show VoidCallback;
 
@@ -95,6 +96,8 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -121,6 +124,13 @@ class ChangeNotifier implements Listenable {
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
+
+  /// If true, the event [ObjectCreated] for this instance was dispatched to
+  /// [MemoryAllocations].
+  ///
+  /// As [ChangedNotifier] is used as mixin, it does not have constructor,
+  /// so we use [addListener] to dispatch the event.
+  bool _creationDispatched = false;
 
   /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
   /// disposed.
@@ -204,6 +214,16 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectEvent(() {
+        return ObjectCreated(
+          library: _flutterFoundationLibrary,
+          className: 'ChangeNotifier',
+          object: this,
+        );
+      });
+      _creationDispatched = true;
+    }
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -307,6 +327,9 @@ class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectDisposed(object: this));
+    }
     _listeners = _emptyListeners;
     _count = 0;
   }
@@ -441,7 +464,18 @@ class _MergingListenable extends Listenable {
 /// listeners.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
-  ValueNotifier(this._value);
+  ValueNotifier(this._value) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectEvent(() {
+        return ObjectCreated(
+          library: _flutterFoundationLibrary,
+          className: 'ValueNotifier',
+          object: this,
+        );
+      });
+    }
+    _creationDispatched = true;
+  }
 
   /// The current value stored in this notifier.
   ///
