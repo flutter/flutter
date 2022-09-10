@@ -218,7 +218,7 @@ class ChangeNotifier implements Listenable {
       MemoryAllocations.instance.dispatchObjectEvent(() {
         return ObjectCreated(
           library: _flutterFoundationLibrary,
-          className: 'ChangeNotifier',
+          className: '$ChangeNotifier',
           object: this,
         );
       });
@@ -469,7 +469,7 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
       MemoryAllocations.instance.dispatchObjectEvent(() {
         return ObjectCreated(
           library: _flutterFoundationLibrary,
-          className: 'ValueNotifier',
+          className: '$ValueNotifier',
           object: this,
         );
       });

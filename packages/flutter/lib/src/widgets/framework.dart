@@ -1004,7 +1004,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
     if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
         library: _flutterWidgetsLibrary,
-        className: 'State',
+        className: '$State',
         object: this,
       ));
     }
@@ -3196,7 +3196,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
         library: _flutterWidgetsLibrary,
-        className: 'Element',
+        className: '$Element',
         object: this,
       ));
     }

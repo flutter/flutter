@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -163,17 +165,52 @@ void main() {
 }
 
 void _checkSdkHandlersSet() {
-  expect(Image.onCreate, isNotNull);
-  expect(Picture.onCreate, isNotNull);
-  expect(Image.onDispose, isNotNull);
-  expect(Picture.onDispose, isNotNull);
+  expect(ui.Image.onCreate, isNotNull);
+  expect(ui.Picture.onCreate, isNotNull);
+  expect(ui.Image.onDispose, isNotNull);
+  expect(ui.Picture.onDispose, isNotNull);
 }
 
 void _checkSdkHandlersNotSet() {
-  expect(Image.onCreate, isNull);
-  expect(Picture.onCreate, isNull);
-  expect(Image.onDispose, isNull);
-  expect(Picture.onDispose, isNull);
+  expect(ui.Image.onCreate, isNull);
+  expect(ui.Picture.onCreate, isNull);
+  expect(ui.Image.onDispose, isNull);
+  expect(ui.Picture.onDispose, isNull);
+}
+
+
+class _TestElement extends Element {
+  _TestElement() : super(const Placeholder());
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
+}
+
+class _TestRenderObject extends RenderObject {
+  @override
+  void debugAssertDoesMeetConstraints() {}
+
+  @override
+  Rect get paintBounds => throw UnimplementedError();
+
+  @override
+  void performLayout() {}
+
+  @override
+  void performResize() {}
+
+  @override
+  Rect get semanticBounds => throw UnimplementedError();
+}
+
+class _TestLayer extends Layer{
+  @override
+  void addToScene(ui.SceneBuilder builder) {}
+}
+
+class _TestState extends State {
+  @override
+  Widget build(BuildContext context) => throw UnimplementedError();
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
@@ -182,31 +219,41 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
 
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {}); count++;
-  final Picture picture = _createPicture(); count++;
+  final ui.Picture picture = _createPicture(); count++;
+  final Element element = _TestElement(); count++;
+  final RenderObject renderObject = _TestRenderObject(); count++;
+  final Layer layer = _TestLayer(); count++;
+  final State state = _TestState(); count++;
 
   valueNotifier.dispose(); count++;
   changeNotifier.dispose(); count++;
   picture.dispose(); count++;
+  element.unmount(); count++;
+  renderObject.dispose(); count++;
+  layer.dispose(); count++;
+  // It is ok to invoke protected member for testing perposes.
+  // ignore: invalid_use_of_protected_member
+  state.dispose(); count++;
 
   // TODO(polina-c): Remove the condition after
   // https://github.com/flutter/flutter/issues/110599 is fixed.
   if (!kIsWeb) {
-    final Image image = await _createImage(); count++; count++; count++;
+    final ui.Image image = await _createImage(); count++; count++; count++;
     image.dispose(); count++;
   }
 
   return count;
 }
 
-Future<Image> _createImage() async {
-  final Picture picture = _createPicture();
-  final Image result = await picture.toImage(10, 10);
+Future<ui.Image> _createImage() async {
+  final ui.Picture picture = _createPicture();
+  final ui.Image result = await picture.toImage(10, 10);
   picture.dispose();
   return result;
 }
 
-Picture _createPicture() {
-  final PictureRecorder recorder = PictureRecorder();
+ui.Picture _createPicture() {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
   final Canvas canvas = Canvas(recorder);
   const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);

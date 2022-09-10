@@ -288,7 +288,7 @@ class MemoryAllocations {
     dispatchObjectEvent(() {
       return ObjectCreated(
         library: _dartUiLibrary,
-        className: 'Image',
+        className: '${ui.Image}',
         object: image,
       );
     });
@@ -298,7 +298,7 @@ class MemoryAllocations {
     dispatchObjectEvent(() {
       return ObjectCreated(
         library: _dartUiLibrary,
-        className: 'Picture',
+        className: '${ui.Picture}',
         object: picture,
       );
     });

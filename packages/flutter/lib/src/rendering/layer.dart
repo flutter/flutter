@@ -142,7 +142,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
         library: _flutterRenderingLibrary,
-        className: 'Layer',
+        className: '$Layer',
         object: this,
       ));
     }

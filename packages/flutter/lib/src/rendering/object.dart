@@ -1381,7 +1381,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
         library: _flutterRenderingLibrary,
-        className: 'RenderObject',
+        className: '$RenderObject',
         object: this,
       ));
     }
