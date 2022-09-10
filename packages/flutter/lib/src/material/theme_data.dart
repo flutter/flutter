@@ -2580,7 +2580,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   ///
   /// [MaterialBasedCupertinoThemeData.copyWith] cannot change the base
   /// Material [ThemeData]. To change the base Material [ThemeData], create a
-  /// new Material [Theme] and use `copyWith` on the Material [ThemeData]
+  /// new Material [Theme] and use [copyWith] on the Material [ThemeData]
   /// instead.
   @override
   MaterialBasedCupertinoThemeData copyWith({

@@ -990,7 +990,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
+  ///  * [MaterialApp.supportedLocales], which sets the [supportedLocales]
   ///    of the [WidgetsApp] it creates.
   ///  * [localeResolutionCallback], an app callback that resolves the app's locale
   ///    when the device's locale changes.

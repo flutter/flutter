@@ -338,7 +338,7 @@ class Container extends StatelessWidget {
   /// Additional constraints to apply to the child.
   ///
   /// The constructor `width` and `height` arguments are combined with the
-  /// `constraints` argument to set this property.
+  /// [constraints] argument to set this property.
   ///
   /// The [padding] goes inside the constraints.
   final BoxConstraints? constraints;

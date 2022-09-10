@@ -20,7 +20,7 @@
 ///
 ///  * [Bagwell, Phil. Ideal hash trees.](https://infoscience.epfl.ch/record/64398);
 ///  * [Steindorfer, Michael J., and Jurgen J. Vinju. "Optimizing hash-array mapped tries for fast and lean immutable JVM collections."](https://dl.acm.org/doi/abs/10.1145/2814270.2814312);
-///  * [Clojure's `PersistentHashMap`](https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/PersistentHashMap.java).
+///  * [Clojure's [PersistentHashMap]](https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/PersistentHashMap.java).
 ///
 class PersistentHashMap<K extends Object, V> {
   /// Creates an empty hash map.

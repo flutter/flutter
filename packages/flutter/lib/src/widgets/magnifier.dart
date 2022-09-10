@@ -297,7 +297,7 @@ class MagnifierController {
   /// of [OverlayEntry]s with animations.
   ///
   /// To allow the [OverlayEntry] to play its exit animation, consider calling
-  /// [hide] with `removeFromOverlay` true, and optionally awaiting the future
+  /// [hide] with [removeFromOverlay] true, and optionally awaiting the future
   @visibleForTesting
   void removeFromOverlay() {
     _overlayEntry?.remove();

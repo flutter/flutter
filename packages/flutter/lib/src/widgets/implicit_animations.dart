@@ -668,7 +668,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// The decoration to paint behind the [child].
   ///
   /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
+  /// constructor: set the `color` argument instead of the [decoration]
   /// argument.
   final Decoration? decoration;
 
@@ -678,7 +678,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Additional constraints to apply to the child.
   ///
   /// The constructor `width` and `height` arguments are combined with the
-  /// `constraints` argument to set this property.
+  /// [constraints] argument to set this property.
   ///
   /// The [padding] goes inside the constraints.
   final BoxConstraints? constraints;

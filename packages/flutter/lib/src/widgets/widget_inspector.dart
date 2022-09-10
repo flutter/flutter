@@ -3278,7 +3278,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// Service used by GUI tools to interact with the [WidgetInspector].
   final WidgetInspectorService service;
 
-  /// Optional `groupName` parameter which indicates that the json should
+  /// Optional [groupName] parameter which indicates that the json should
   /// contain live object ids.
   ///
   /// Object ids returned as part of the json will remain live at least until
