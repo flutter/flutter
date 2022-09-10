@@ -10,7 +10,6 @@ import AppKit
 import FlutterMacOS
 
 class MainViewController: NSViewController, NativeViewControllerDelegate {
-
   static let emptyString: String = ""
   static let ping: String = "ping"
   static let channel: String = "increment"
@@ -51,7 +50,7 @@ class MainViewController: NSViewController, NativeViewControllerDelegate {
   }
 
   func didTapIncrementButton() {
-
+    self.messageChannel?.sendMessage(MainViewController.ping)
   }
 
 }
