@@ -91,12 +91,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// executed from background isolates.
   ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
 
-  /// Returns `true` if executed on a background (non-root) isolate.
-  ///
-  /// The value `false` will always be returned on web since there is no notion
-  /// of root/background isolates on the web.
-  bool get useBackgroundIsolateBinaryMessenger => !kIsWeb && rootIsolateToken == null;
-
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
   /// the framework side.

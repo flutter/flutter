@@ -208,7 +208,7 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
 }
 
 BinaryMessenger _findBinaryMessenger() {
-  return ServicesBinding.instance.useBackgroundIsolateBinaryMessenger
+  return !kIsWeb && ui.RootIsolateToken.instance == null
       ? BackgroundIsolateBinaryMessenger.instance
       : ServicesBinding.instance.defaultBinaryMessenger;
 }
