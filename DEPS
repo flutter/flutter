@@ -22,7 +22,7 @@ vars = {
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
-  'canvaskit_cipd_instance': '8wh6J7ZXGCgo1vvCQIqkmskYQZfjhcXQG1YCKFNrzRUC',
+  'canvaskit_cipd_instance': 'C478RsheZD4Fqp1fStMPwFWnSz7nfhh7LMFsrU8M4dQC',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
