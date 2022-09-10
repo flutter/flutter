@@ -1,21 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17150" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21208.1" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17150"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21208.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
-        <scene sceneID="PEd-7d-5j0">
+        <!--Main View Controller-->
+        <scene sceneID="pUt-RQ-Psv">
             <objects>
-                <viewController id="bU7-R8-ocO" sceneMemberID="viewController">
-                    <view key="view" id="tOy-S4-hL0">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                <viewController storyboardIdentifier="MainViewController" id="8jE-29-RgM" customClass="MainViewController" customModule="flutter_view" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="mqu-72-3kI">
+                        <rect key="frame" x="0.0" y="0.0" width="913" height="683"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2IG-gh-IW6">
+                                <rect key="frame" x="0.0" y="0.0" width="913" height="683"/>
+                                <subviews>
+                                    <containerView translatesAutoresizingMaskIntoConstraints="NO" id="cMe-lQ-Lmg">
+                                        <rect key="frame" x="0.0" y="1" width="450" height="682"/>
+                                    </containerView>
+                                    <containerView translatesAutoresizingMaskIntoConstraints="NO" id="N5g-Cc-M3R">
+                                        <rect key="frame" x="458" y="1" width="455" height="682"/>
+                                    </containerView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="N5g-Cc-M3R" firstAttribute="height" secondItem="cMe-lQ-Lmg" secondAttribute="height" id="f0b-BP-EKz"/>
+                                    <constraint firstItem="N5g-Cc-M3R" firstAttribute="width" secondItem="cMe-lQ-Lmg" secondAttribute="width" multiplier="1.01111" id="pyX-3L-nNr"/>
+                                </constraints>
+                                <visibilityPriorities>
+                                    <integer value="1000"/>
+                                    <integer value="1000"/>
+                                </visibilityPriorities>
+                                <customSpacing>
+                                    <real value="3.4028234663852886e+38"/>
+                                    <real value="3.4028234663852886e+38"/>
+                                </customSpacing>
+                            </stackView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="2IG-gh-IW6" secondAttribute="trailing" id="5MF-6U-cEB"/>
+                            <constraint firstAttribute="bottom" secondItem="2IG-gh-IW6" secondAttribute="bottom" id="9Fr-N9-qrg"/>
+                            <constraint firstItem="2IG-gh-IW6" firstAttribute="leading" secondItem="mqu-72-3kI" secondAttribute="leading" id="GMg-7E-hfh"/>
+                            <constraint firstItem="2IG-gh-IW6" firstAttribute="top" secondItem="mqu-72-3kI" secondAttribute="top" id="iGl-Qd-Oya"/>
+                        </constraints>
                     </view>
                 </viewController>
-                <customObject id="9uD-mB-xHs" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <customObject id="rdb-Qa-dhw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="13.5" y="26.5"/>
         </scene>
     </scenes>
 </document>
