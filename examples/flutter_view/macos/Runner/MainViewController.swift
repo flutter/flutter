@@ -14,6 +14,10 @@ class MainViewController: NSViewController {
     super.viewDidLoad()
   }
 
+  override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
+
+  }
+
 }
 
 
