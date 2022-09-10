@@ -6,6 +6,9 @@ import Foundation
 import AppKit
 import FlutterMacOS
 
+/**
+The code behind a storyboard view which splits a flutter view and a macOS view.
+*/
 class MainViewController: NSViewController, NativeViewControllerDelegate {
   static let emptyString: String = ""
   static let ping: String = "ping"
@@ -22,6 +25,10 @@ class MainViewController: NSViewController, NativeViewControllerDelegate {
   override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
     if segue.identifier == "NativeViewControllerSegue" {
       self.nativeViewController = segue.destinationController as? NativeViewController
+
+      // Since`MainViewController` owns the platform channel, but not the
+      // UI elements that trigger an action, those UI elements need a reference
+      // to this controller to send messages on the platform channel.
       self.nativeViewController?.delegate = self
     }
 
@@ -32,6 +39,12 @@ class MainViewController: NSViewController, NativeViewControllerDelegate {
 
       weak var weakSelf = self
       messageChannel?.setMessageHandler({ (message, reply) in
+
+        // Dispatch an event, incrementing the counter in this case, when *any*
+        // message is received.
+
+        // Depending on the order of initialization, the nativeViewController
+        // might not be initialized until this point.
         weakSelf?.nativeViewController?.didReceiveIncrement()
         reply(MainViewController.emptyString)
       })
@@ -45,6 +58,9 @@ class MainViewController: NSViewController, NativeViewControllerDelegate {
       binaryMessenger: registrar.messenger,
       codec: FlutterStringCodec.sharedInstance())
   }
+
+  // Call in any instance where `ping` is to be sent through the `increment`
+  // channel.
 
   func didTapIncrementButton() {
     self.messageChannel?.sendMessage(MainViewController.ping)

@@ -9,6 +9,11 @@ protocol NativeViewControllerDelegate: NSObjectProtocol {
     func didTapIncrementButton()
 }
 
+/**
+The code behind a native view to be displayed in the `MainFlutterViewController`
+as an embed segue. If any storyboard view inherits from this class definition,
+it should contain a function to handle for `handleIncrement`
+*/
 class NativeViewController: NSViewController {
 
   var count: Int?
