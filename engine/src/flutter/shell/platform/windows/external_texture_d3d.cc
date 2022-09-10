@@ -4,9 +4,6 @@
 
 #include "flutter/shell/platform/windows/external_texture_d3d.h"
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 
