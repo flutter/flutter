@@ -418,51 +418,48 @@ void DisplayListDispatcher::setColorSource(
   UNIMPLEMENTED;
 }
 
-// |flutter::Dispatcher|
-void DisplayListDispatcher::setColorFilter(
+static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
     const flutter::DlColorFilter* filter) {
-  // Needs https://github.com/flutter/flutter/issues/95434
   if (filter == nullptr) {
-    // Reset everything
-    paint_.color_filter = std::nullopt;
-    return;
+    return std::nullopt;
   }
   switch (filter->type()) {
     case flutter::DlColorFilterType::kBlend: {
       auto dl_blend = filter->asBlend();
-
       auto blend_mode = ToBlendMode(dl_blend->mode());
       auto color = ToColor(dl_blend->color());
-
-      paint_.color_filter = [blend_mode, color](FilterInput::Ref input) {
+      return [blend_mode, color](FilterInput::Ref input) {
         return FilterContents::MakeBlend(blend_mode, {input}, color);
       };
-      return;
     }
     case flutter::DlColorFilterType::kMatrix: {
       const flutter::DlMatrixColorFilter* dl_matrix = filter->asMatrix();
       impeller::FilterContents::ColorMatrix color_matrix;
       dl_matrix->get_matrix(color_matrix.array);
-      paint_.color_filter = [color_matrix](FilterInput::Ref input) {
+      return [color_matrix](FilterInput::Ref input) {
         return FilterContents::MakeColorMatrix({input}, color_matrix);
       };
-      return;
     }
     case flutter::DlColorFilterType::kSrgbToLinearGamma:
-      paint_.color_filter = [](FilterInput::Ref input) {
+      return [](FilterInput::Ref input) {
         return FilterContents::MakeSrgbToLinearFilter({input});
       };
-      return;
     case flutter::DlColorFilterType::kLinearToSrgbGamma:
-      paint_.color_filter = [](FilterInput::Ref input) {
+      return [](FilterInput::Ref input) {
         return FilterContents::MakeLinearToSrgbFilter({input});
       };
-      return;
     case flutter::DlColorFilterType::kUnknown:
       FML_LOG(ERROR) << "requested DlColorFilterType::kUnknown";
       UNIMPLEMENTED;
-      break;
   }
+  return std::nullopt;
+}
+
+// |flutter::Dispatcher|
+void DisplayListDispatcher::setColorFilter(
+    const flutter::DlColorFilter* filter) {
+  // Needs https://github.com/flutter/flutter/issues/95434
+  paint_.color_filter = ToColorFilterProc(filter);
 }
 
 // |flutter::Dispatcher|
@@ -609,8 +606,21 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       };
       break;
     }
+    case flutter::DlImageFilterType::kColorFilter: {
+      auto color_filter_image_filter = filter->asColorFilter();
+      FML_DCHECK(color_filter_image_filter);
+      auto color_filter_proc =
+          ToColorFilterProc(color_filter_image_filter->color_filter().get());
+      if (!color_filter_proc.has_value()) {
+        return std::nullopt;
+      }
+      return [color_filter = color_filter_proc.value()](
+                 FilterInput::Ref input, const Matrix& effect_transform) {
+        return color_filter(input);
+      };
+      break;
+    }
     case flutter::DlImageFilterType::kLocalMatrixFilter:
-    case flutter::DlImageFilterType::kColorFilter:
     case flutter::DlImageFilterType::kUnknown:
       return std::nullopt;
   }
