@@ -1,4 +1,4 @@
-Signature: 28f4713d335c8688ec139b77ca58c657
+Signature: e9cd9a40e89e29d6c9ea83512403f526
 
 UNUSED LICENSES:
 
@@ -3638,6 +3638,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/media_buttons.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/mouse.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/registry.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/text.fidl
