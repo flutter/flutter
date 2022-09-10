@@ -28,6 +28,7 @@
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		F38F092928CC0D6C009892F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F38F092828CC0D6C009892F7 /* Main.storyboard */; };
 		F38F092B28CC0F0F009892F7 /* NativeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38F092A28CC0F0F009892F7 /* NativeViewController.swift */; };
+		F38F092D28CC0FC7009892F7 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38F092C28CC0FC7009892F7 /* MainViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +73,7 @@
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		F38F092828CC0D6C009892F7 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		F38F092A28CC0F0F009892F7 /* NativeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeViewController.swift; sourceTree = "<group>"; };
+		F38F092C28CC0FC7009892F7 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +145,7 @@
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				F38F092A28CC0F0F009892F7 /* NativeViewController.swift */,
+				F38F092C28CC0FC7009892F7 /* MainViewController.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
@@ -289,6 +292,7 @@
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 				F38F092B28CC0F0F009892F7 /* NativeViewController.swift in Sources */,
+				F38F092D28CC0FC7009892F7 /* MainViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
