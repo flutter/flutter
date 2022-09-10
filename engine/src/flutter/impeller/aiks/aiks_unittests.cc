@@ -336,7 +336,7 @@ TEST_P(AiksTest, CanRenderLinearGradient) {
     auto tile_mode = tile_modes[selected_tile_mode];
     paint.color_source = [tile_mode]() {
       std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
-                                   Color{0.1294, 0.5882, 0.9529, 1.0}};
+                                   Color{0.1294, 0.5882, 0.9529, 0.0}};
       std::vector<Scalar> stops = {0.0, 1.0};
 
       auto contents = std::make_shared<LinearGradientContents>();
