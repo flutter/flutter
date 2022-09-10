@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -2620,6 +2621,27 @@ void main() {
       // ignore: avoid_redundant_argument_values
       matchesSemantics(label: 'BottomSheet', hasDismissAction: false),
     );
+  });
+
+  testWidgets('backgroundDecoration works as expected', (WidgetTester tester) async {
+    const Color decorationColor = Color(0xFF00FF00);
+    const double decorationBorder = 2.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          backgroundDecoration: ShapeDecoration(
+            shape: Border.all(
+              width: decorationBorder,
+              color: decorationColor,
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Finder mainContainer = find.ancestor(of: find.byType(CustomMultiChildLayout), matching: find.byType(DecoratedBox));
+    expect(mainContainer, paints..rect(color: decorationColor, style: PaintingStyle.stroke, strokeWidth: decorationBorder));
   });
 }
 
