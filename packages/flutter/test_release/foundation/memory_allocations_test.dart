@@ -97,14 +97,14 @@ Future<void> _activateFlutterObjects() async {
   changeNotifier.dispose();
   image.dispose();
   picture.dispose();
-  element.unmount();
+  //element.unmount();
   renderObject.dispose();
   // It is ok to invoke protected and test only member for testing perposes.
   // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
   layer.dispose();
   // It is ok to invoke protected member for testing perposes.
   // ignore: invalid_use_of_protected_member
-  state.dispose();
+  //state.dispose();
 }
 
 Future<ui.Image> _createImage() async {

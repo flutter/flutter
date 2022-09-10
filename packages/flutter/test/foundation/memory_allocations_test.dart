@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/material/text_field.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -178,13 +179,25 @@ void _checkSdkHandlersNotSet() {
   expect(ui.Picture.onDispose, isNull);
 }
 
-
-class _TestElement extends Element {
-  _TestElement() : super(const Placeholder());
-
+class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
   @override
-  bool get debugDoingBuild => throw UnimplementedError();
+  RenderObject createRenderObject(BuildContext context) {
+    return _TestRenderObject();
+  }
 }
+
+class _TestElement extends RootRenderObjectElement{
+  _TestElement(): super(_TestLeafRenderObjectWidget());
+
+  void makeInactive() {
+
+    assignOwner(BuildOwner(focusManager: FocusManager()));
+    mount(null, null);
+    deactivate();
+  }
+}
+
+
 
 class _TestRenderObject extends RenderObject {
   @override
@@ -210,7 +223,22 @@ class _TestLayer extends Layer{
 
 class _TestState extends State {
   @override
-  Widget build(BuildContext context) => throw UnimplementedError();
+  Widget build(BuildContext context) => const Text('');
+
+}
+
+class MyWidget extends StatefulWidget {
+  const MyWidget({super.key});
+
+  @override
+  State<MyWidget> createState() => _MyWidgetState();
+}
+
+class _MyWidgetState extends State<MyWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
@@ -220,18 +248,18 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {}); count++;
   final ui.Picture picture = _createPicture(); count++;
-  final Element element = _TestElement(); count++;
+  final _TestElement element = _TestElement(); count++;
   final RenderObject renderObject = _TestRenderObject(); count++;
   final Layer layer = _TestLayer(); count++;
-  final State state = _TestState(); count++;
+  final _TestState state = _TestState(); count++;
 
   valueNotifier.dispose(); count++;
   changeNotifier.dispose(); count++;
   picture.dispose(); count++;
-  element.unmount(); count++;
+  element.makeInactive(); element.unmount(); count++;
   renderObject.dispose(); count++;
   layer.dispose(); count++;
-  // It is ok to invoke protected member for testing perposes.
+  // It is ok to invoke protected member for testing purposes.
   // ignore: invalid_use_of_protected_member
   state.dispose(); count++;
 
