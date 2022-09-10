@@ -1248,6 +1248,8 @@ class PipelineOwner {
   }
 }
 
+const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
+
 /// An object in the render tree.
 ///
 /// The [RenderObject] class hierarchy is the core of the rendering
@@ -1376,6 +1378,13 @@ class PipelineOwner {
 abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
+        library: _flutterRenderingLibrary,
+        className: 'RenderObject',
+        object: this,
+      ));
+    }
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
     _wasRepaintBoundary = isRepaintBoundary;
   }
