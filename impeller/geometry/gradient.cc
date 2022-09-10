@@ -9,7 +9,7 @@
 namespace impeller {
 
 static void AppendColor(const Color& color, std::vector<uint8_t>* colors) {
-  auto converted = color.Premultiply().ToR8G8B8A8();
+  auto converted = color.ToR8G8B8A8();
   colors->push_back(converted[0]);
   colors->push_back(converted[1]);
   colors->push_back(converted[2]);
