@@ -12,26 +12,37 @@ void beginFrame(Duration timeStamp) {
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
   final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
-    ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
+    ui.ParagraphStyle(
+      textDirection: ui.TextDirection.ltr,
+      fontSize: 20,
+      fontWeight: ui.FontWeight.bold,
+    ),
   )
+    ..pushStyle(
+        ui.TextStyle(color: const ui.Color.fromARGB(0xFF, 0x33, 0x33, 0x66)))
     ..addText('Hello, world.');
   final ui.Paragraph paragraph = paragraphBuilder.build()
     ..layout(ui.ParagraphConstraints(width: logicalSize.width));
 
-  final ui.Rect physicalBounds = ui.Offset.zero & (logicalSize * devicePixelRatio);
+  final ui.Rect physicalBounds =
+      ui.Offset.zero & (logicalSize * devicePixelRatio);
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder, physicalBounds);
   canvas.scale(devicePixelRatio, devicePixelRatio);
-  canvas.drawParagraph(paragraph, ui.Offset(
-    (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0,
-    (logicalSize.height - paragraph.height) / 2.0,
-  ));
+  canvas.drawParagraph(
+    paragraph,
+    ui.Offset(
+      logicalSize.width > paragraph.maxIntrinsicWidth
+          ? (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0
+          : 0,
+      logicalSize.height > paragraph.height
+          ? (logicalSize.height - paragraph.height) / 2.0
+          : 0,
+    ),
+  );
   final ui.Picture picture = recorder.endRecording();
 
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
-    // TODO(abarth): We should be able to add a picture without pushing a
-    // container layer first.
-    ..pushClipRect(physicalBounds)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
 
