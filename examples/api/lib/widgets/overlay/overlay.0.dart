@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Overlay
+/// Flutter code sample for [Overlay].
 
 import 'package:flutter/material.dart';
 
@@ -132,7 +132,7 @@ class _OverlayExampleState extends State<OverlayExample> {
     );
 
     // Add the OverlayEntry to the Overlay.
-    Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
+    Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
   }
 
   // Remove the OverlayEntry.

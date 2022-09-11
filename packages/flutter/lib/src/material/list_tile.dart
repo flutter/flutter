@@ -23,8 +23,8 @@ import 'theme_data.dart';
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
-/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyLarge]
+/// text style, which is a little smaller than the theme's [TextTheme.titleMedium]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -286,6 +286,7 @@ class ListTile extends StatelessWidget {
     this.selected = false,
     this.focusColor,
     this.hoverColor,
+    this.splashColor,
     this.focusNode,
     this.autofocus = false,
     this.tileColor,
@@ -323,14 +324,14 @@ class ListTile extends StatelessWidget {
   /// two lines. For example, you can use [Text.maxLines] to enforce the number
   /// of lines.
   ///
-  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
+  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyMedium] except
   /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
   /// and [selected].
   ///
   /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
   ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
-  /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
+  /// if it's not null and to [TextTheme.bodySmall]'s color if [ListTileTheme.textColor]
   /// is null.
   final Widget? subtitle;
 
@@ -495,6 +496,9 @@ class ListTile extends StatelessWidget {
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// The color of splash for the tile's [Material].
+  final Color? splashColor;
+
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
@@ -589,7 +593,13 @@ class ListTile extends StatelessWidget {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
-    final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
+    final Color? color = iconColor
+      ?? tileTheme.iconColor
+      ?? theme.listTileTheme.iconColor
+      // If [ThemeData.useMaterial3] is set to true the disabled icon color
+      // will be set to Theme.colorScheme.onSurface(0.38), if false, defaults to null,
+      // as described in: https://m3.material.io/components/icon-buttons/specs.
+      ?? (theme.useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : null);
     if (color != null) {
       return color;
     }
@@ -624,10 +634,10 @@ class ListTile extends StatelessWidget {
     final TextStyle textStyle;
     switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
       case ListTileStyle.drawer:
-        textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyText1!;
+        textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyLarge!;
         break;
       case ListTileStyle.list:
-        textStyle = theme.useMaterial3 ? theme.textTheme.titleMedium! : theme.textTheme.subtitle1!;
+        textStyle = theme.useMaterial3 ? theme.textTheme.titleMedium! : theme.textTheme.titleMedium!;
         break;
     }
     final Color? color = _textColor(theme, tileTheme, textStyle.color);
@@ -637,11 +647,11 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyText2!;
+    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyMedium!;
     final Color? color = _textColor(
       theme,
       tileTheme,
-      theme.useMaterial3 ? theme.textTheme.bodySmall!.color : theme.textTheme.caption!.color,
+      theme.useMaterial3 ? theme.textTheme.bodySmall!.color : theme.textTheme.bodySmall!.color,
     );
     return _isDenseLayout(theme, tileTheme)
       ? textStyle.copyWith(color: color, fontSize: 12.0)
@@ -649,7 +659,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyText2!;
+    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyMedium!;
     final Color? color = _textColor(theme, tileTheme, textStyle.color);
     return textStyle.copyWith(color: color);
   }
@@ -733,6 +743,7 @@ class ListTile extends StatelessWidget {
       focusNode: focusNode,
       focusColor: focusColor,
       hoverColor: hoverColor,
+      splashColor: splashColor,
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(

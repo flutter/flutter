@@ -1821,7 +1821,7 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
     final RenderBox container = tester.renderObject(find.descendant(
-      of: find.byType(RasterWidget),
+      of: find.byType(SnapshotWidget),
       matching: find.byType(SizedBox),
     ).first);
     expect(container.size, Size.zero);
@@ -3620,7 +3620,7 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style!.color, themeData.hintColor);
-    expect(helperText.style!.fontSize, Typography.englishLike2014.caption!.fontSize);
+    expect(helperText.style!.fontSize, Typography.englishLike2014.bodySmall!.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
@@ -7290,7 +7290,7 @@ void main() {
 
     final ThemeData themeData = ThemeData(
       textTheme: TextTheme(
-        subtitle1: TextStyle(
+        titleMedium: TextStyle(
           color: Colors.blue[500],
         ),
       ),
@@ -7312,12 +7312,12 @@ void main() {
     // Empty TextStyle is overridden by theme
     await tester.pumpWidget(buildFrame(const TextStyle()));
     EditableText editableText = tester.widget(find.byType(EditableText));
-    expect(editableText.style.color, themeData.textTheme.subtitle1!.color);
-    expect(editableText.style.background, themeData.textTheme.subtitle1!.background);
-    expect(editableText.style.shadows, themeData.textTheme.subtitle1!.shadows);
-    expect(editableText.style.decoration, themeData.textTheme.subtitle1!.decoration);
-    expect(editableText.style.locale, themeData.textTheme.subtitle1!.locale);
-    expect(editableText.style.wordSpacing, themeData.textTheme.subtitle1!.wordSpacing);
+    expect(editableText.style.color, themeData.textTheme.titleMedium!.color);
+    expect(editableText.style.background, themeData.textTheme.titleMedium!.background);
+    expect(editableText.style.shadows, themeData.textTheme.titleMedium!.shadows);
+    expect(editableText.style.decoration, themeData.textTheme.titleMedium!.decoration);
+    expect(editableText.style.locale, themeData.textTheme.titleMedium!.locale);
+    expect(editableText.style.wordSpacing, themeData.textTheme.titleMedium!.wordSpacing);
 
     // Properties set on TextStyle override theme
     const Color setColor = Colors.red;
@@ -12253,6 +12253,70 @@ void main() {
 
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
+
+    testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
+                      _,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                    ) {
+                      infoBearer = localInfoBearer;
+                      return fakeMagnifier;
+                    },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Tap at 'e' to set the selection to position 5 on Android.
+      // Tap at 'e' to set the selection to the closest word edge, which is position 4 on iOS.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, isTargetPlatformAndroid ? 5 : 4);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Long press the 'e' to select 'def' on Android and show magnifier.
+      // Long press the 'e' to move the cursor in front of the 'e' on iOS and show the magnifier.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+      expect(controller.selection.baseOffset, isTargetPlatformAndroid ? 4 : 5);
+      expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 7 : 5);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      final Offset firstLongPressGesturePosition = infoBearer.value.globalGesturePosition;
+
+      // Move the gesture to 'h' on Android to update the magnifier and select 'ghi'.
+      // Move the gesture to 'h' on iOS to update the magnifier and move the cursor to 'h'.
+      await gesture.moveTo(textOffsetToPosition(tester, testValue.indexOf('h')));
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, isTargetPlatformAndroid ? 4 : 9);
+      expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 11 : 9);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
+
+      // End the long press to hide the magnifier.
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
   group('TapRegion integration', () {
     testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {

@@ -776,6 +776,7 @@ class SemanticsProperties extends DiagnosticableTree {
   const SemanticsProperties({
     this.enabled,
     this.checked,
+    this.mixed,
     this.selected,
     this.toggled,
     this.button,
@@ -851,14 +852,30 @@ class SemanticsProperties extends DiagnosticableTree {
   /// or similar widget with a "checked" state, and what its current
   /// state is.
   ///
-  /// This is mutually exclusive with [toggled].
+  /// When the [Checkbox.value] of a tristate Checkbox is null,
+  /// indicating a mixed-state, this value shall be false, in which
+  /// case, [mixed] will be true.
+  ///
+  /// This is mutually exclusive with [toggled] and [mixed].
   final bool? checked;
+
+  /// If non-null, indicates that this subtree represents a checkbox
+  /// or similar widget with a "half-checked" state or similar, and
+  /// whether it is currently in this half-checked state.
+  ///
+  /// This must be null when [Checkbox.tristate] is false, or
+  /// when the widget is not a checkbox. When a tristate
+  /// checkbox is fully unchecked/checked, this value shall
+  /// be false.
+  ///
+  /// This is mutually exclusive with [checked] and [toggled].
+  final bool? mixed;
 
   /// If non-null, indicates that this subtree represents a toggle switch
   /// or similar widget with an "on" state, and what its current
   /// state is.
   ///
-  /// This is mutually exclusive with [checked].
+  /// This is mutually exclusive with [checked] and [mixed].
   final bool? toggled;
 
   /// If non-null indicates that this subtree represents something that can be
@@ -1490,6 +1507,7 @@ class SemanticsProperties extends DiagnosticableTree {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
@@ -4189,8 +4207,24 @@ class SemanticsConfiguration {
   /// checked/unchecked state.
   bool? get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
   set isChecked(bool? value) {
+    assert(value != true || isCheckStateMixed != true);
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value!);
+  }
+
+  /// If this node has tristate that can be controlled by the user, whether
+  /// that state is in its mixed state.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have checked/unchecked state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// mixed checked state.
+  bool? get isCheckStateMixed => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isCheckStateMixed) : null;
+  set isCheckStateMixed(bool? value) {
+    assert(value != true || isChecked != true);
+    _setFlag(SemanticsFlag.hasCheckedState, true);
+    _setFlag(SemanticsFlag.isCheckStateMixed, value!);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether

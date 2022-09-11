@@ -409,7 +409,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor
-        ?? theme.textTheme.subtitle1!.color
+        ?? theme.textTheme.titleMedium!.color
       ..end = widget.textColor ?? expansionTileTheme.textColor ?? colorScheme.primary;
     _iconColorTween
       ..begin = widget.collapsedIconColor

@@ -421,7 +421,6 @@ end
         if ((await fileType(builtFlutterBinary)).contains('armv7')) {
           throw TaskResult.failure('Unexpected armv7 architecture slice in $builtFlutterBinary');
         }
-        await checkContainsBitcode(builtFlutterBinary);
 
         final String builtAppBinary = path.join(
           archivedAppPath,
@@ -433,7 +432,6 @@ end
         if ((await fileType(builtAppBinary)).contains('armv7')) {
           throw TaskResult.failure('Unexpected armv7 architecture slice in $builtAppBinary');
         }
-        await checkContainsBitcode(builtAppBinary);
 
         // The host app example builds plugins statically, url_launcher_ios.framework
         // should not exist.
@@ -441,6 +439,16 @@ end
           archivedAppPath,
           'Frameworks',
           'url_launcher_ios.framework',
+        ));
+
+        checkFileExists(path.join(
+          '${objectiveCBuildArchiveDirectory.path}.xcarchive',
+          'dSYMs',
+          'App.framework.dSYM',
+          'Contents',
+          'Resources',
+          'DWARF',
+          'App'
         ));
       });
 

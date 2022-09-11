@@ -75,7 +75,7 @@ class TickerMode extends StatefulWidget {
   /// the `context` and the [TickerMode] and the widget owning the `context`
   /// does not rebuild when the ticker mode changes from true to false or vice
   /// versa. This is preferable when the ticker mode does not impact what is
-  /// currently rendered on screen, e.g. because it is ony used to mute/unmute a
+  /// currently rendered on screen, e.g. because it is only used to mute/unmute a
   /// [Ticker]. Since no dependency is established, the widget owning the
   /// `context` is also not informed when it is moved to a new location in the
   /// tree where it may have a different [TickerMode] ancestor. When this

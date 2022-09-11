@@ -1761,7 +1761,7 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, `baseStyle` defaults to the `subtitle1` style from the
+  /// If null, `baseStyle` defaults to the `titleMedium` style from the
   /// current [Theme], see [ThemeData.textTheme].
   ///
   /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
@@ -1957,7 +1957,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           : themeData.disabledColor;
     }
     if (decoration.errorText != null) {
-      return  themeData.errorColor;
+      return themeData.colorScheme.error;
     }
     if (isFocused) {
       return themeData.colorScheme.primary;
@@ -1991,17 +1991,20 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
+    return  MaterialStateProperty.resolveAs(decoration.iconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
       ?? MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
   Color _getPrefixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
+    return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
       ?? MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
   Color _getSuffixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
-    return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
+    return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
       ?? MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
 
@@ -2026,7 +2029,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
       .merge(style)
@@ -2041,7 +2044,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
       .merge(style);
@@ -2057,7 +2060,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
 
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .copyWith(height: 1)
       .merge(defaultTextStyle)
@@ -2638,7 +2641,7 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -2660,7 +2663,7 @@ class InputDecoration {
   /// When the [InputDecoration.labelText] is on top of the input field, the
   /// text uses the [labelStyle] instead.
   ///
-  /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `floatingLabelStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -2668,13 +2671,13 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
   /// just the default state, or both.
   ///
-  /// In this example the [floatingLabelStyle] is specified with a
+  /// In this example the `floatingLabelStyle` is specified with a
   /// [MaterialStateProperty] which resolves to a text style whose color depends
   /// on the decorator's error state.
   ///
@@ -2693,7 +2696,7 @@ class InputDecoration {
 
   /// The style to use for the [helperText].
   ///
-  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `helperStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
@@ -2721,7 +2724,7 @@ class InputDecoration {
 
   /// The style to use for the [hintText].
   ///
-  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `hintStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -2835,9 +2838,7 @@ class InputDecoration {
 
   /// The padding for the input decoration's container.
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
   /// By default the `contentPadding` reflects [isDense] and the type of the
   /// [border].
@@ -2884,12 +2885,9 @@ class InputDecoration {
   /// )
   /// ```
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
-  /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The prefix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}
@@ -2920,7 +2918,7 @@ class InputDecoration {
   ///
   /// {@tool dartpad}
   /// This example shows the differences between two `TextField` widgets when
-  /// [prefixIconConstraints] is set to the default value and when one is not.
+  /// `prefixIconConstraints` is set to the default value and when one is not.
   ///
   /// Note that [isDense] must be set to true to be able to
   /// set the constraints smaller than 48px.
@@ -2939,9 +2937,9 @@ class InputDecoration {
   /// front of the input. The widget's baseline is lined up with the input
   /// baseline.
   ///
-  /// Only one of [prefix] and [prefixText] can be specified.
+  /// Only one of `prefix` and [prefixText] can be specified.
   ///
-  /// The [prefix] appears after the [prefixIcon], if both are specified.
+  /// The `prefix` appears after the [prefixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -2954,9 +2952,9 @@ class InputDecoration {
   /// The prefix text is not returned as part of the user's input.
   ///
   /// If a more elaborate prefix is required, consider using [prefix] instead.
-  /// Only one of [prefix] and [prefixText] can be specified.
+  /// Only one of [prefix] and `prefixText` can be specified.
   ///
-  /// The [prefixText] appears after the [prefixIcon], if both are specified.
+  /// The `prefixText` appears after the [prefixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -2965,7 +2963,7 @@ class InputDecoration {
 
   /// The style to use for the [prefixText].
   ///
-  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `prefixStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -2980,7 +2978,7 @@ class InputDecoration {
   ///
   /// Defaults to [iconColor]
   ///
-  /// If [prefixIconColor] is a [MaterialStateColor], then the effective
+  /// If `prefixIconColor` is a [MaterialStateColor], then the effective
   /// color can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? prefixIconColor;
@@ -3011,7 +3009,7 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The suffix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}
@@ -3037,9 +3035,9 @@ class InputDecoration {
   /// otherwise be specified using [suffixText], or to add a custom widget after
   /// the input. The widget's baseline is lined up with the input baseline.
   ///
-  /// Only one of [suffix] and [suffixText] can be specified.
+  /// Only one of `suffix` and [suffixText] can be specified.
   ///
-  /// The [suffix] appears before the [suffixIcon], if both are specified.
+  /// The `suffix` appears before the [suffixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -3052,9 +3050,9 @@ class InputDecoration {
   /// The suffix text is not returned as part of the user's input.
   ///
   /// If a more elaborate suffix is required, consider using [suffix] instead.
-  /// Only one of [suffix] and [suffixText] can be specified.
+  /// Only one of [suffix] and `suffixText` can be specified.
   ///
-  /// The [suffixText] appears before the [suffixIcon], if both are specified.
+  /// The `suffixText` appears before the [suffixIcon], if both are specified.
   ///
   /// See also:
   ///
@@ -3063,9 +3061,9 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
+  /// If `suffixStyle` is a [MaterialStateTextStyle], then the effective text
+  /// style can depend on the [MaterialState.focused] state, i.e. if the
+  /// [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3074,7 +3072,7 @@ class InputDecoration {
   ///  * [prefixStyle], the equivalent but on the leading edge.
   final TextStyle? suffixStyle;
 
-  /// Optional color of the suffixIcon
+  /// Optional color of the [suffixIcon].
   ///
   /// Defaults to [iconColor]
   ///
@@ -3121,13 +3119,13 @@ class InputDecoration {
   final String? counterText;
 
   /// Optional custom counter widget to go in the place otherwise occupied by
-  /// [counterText].  If this property is non null, then [counterText] is
+  /// [counterText]. If this property is non null, then [counterText] is
   /// ignored.
   final Widget? counter;
 
   /// The style to use for the [counterText].
   ///
-  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
+  /// If `counterStyle` is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
@@ -3139,52 +3137,53 @@ class InputDecoration {
   /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
-  /// Typically this field set to true if [border] is an
-  /// [UnderlineInputBorder].
+  /// Typically this field set to true if [border] is an [UnderlineInputBorder].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@template flutter.material.input_decorator.container_description}
+  /// The decoration's container is the area which is filled if `filled` is true
+  /// and bordered per the [border]. It's the area adjacent to [icon] and above
+  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@endtemplate}
   ///
   /// This property is false by default.
   final bool? filled;
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [InputDecorator.isHovering] is true, the
-  /// [hoverColor] is also blended into the final fill color.
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
+  /// into the final fill color.
   ///
-  /// By default the fillColor is based on the current [Theme].
+  /// By default the `fillColor` is based on the current
+  /// [InputDecorationTheme.fillColor].
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? fillColor;
 
-  /// By default the [focusColor] is based on the current [Theme].
+  /// The fill color of the decoration's container when it has the input focus.
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// By default the `focusColor` is based on the current
+  /// [InputDecorationTheme.focusColor].
+  ///
+  /// This `focusColor` is ignored by [TextField] and [TextFormField] because
+  /// they don't respond to focus changes by changing their decorator's
+  /// container color, they respond by changing their border to the
+  /// [focusedBorder], which you can change the color of.
+  ///
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? focusColor;
 
-  /// The color of the focus highlight for the decoration shown if the container
+  /// The color of the highlight for the decoration shown if the container
   /// is being hovered over by a mouse.
   ///
-  /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container.
+  /// If [filled] is true, the `hoverColor` is blended with [fillColor] and
+  /// fills the decoration's container.
   ///
   /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
   /// is blended over the [enabledBorder]'s color.
   ///
-  /// By default the [hoverColor] is based on the current [Theme].
+  /// By default the `hoverColor` is based on the current [Theme].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? hoverColor;
 
   /// The border to display when the [InputDecorator] does not have the focus and
@@ -3314,7 +3313,7 @@ class InputDecoration {
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
   /// decorator's state. Only the border's shape is used. If custom  [BorderSide]
-  /// values are desired for  a given state, all four borders – [errorBorder],
+  /// values are desired for a given state, all four borders – [errorBorder],
   /// [focusedBorder], [enabledBorder], [disabledBorder] – must be set.
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -4342,7 +4341,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     if (states.contains(MaterialState.error)) {
-      return TextStyle(color: Theme.of(context).errorColor);
+      return TextStyle(color: Theme.of(context).colorScheme.error);
     }
     if (states.contains(MaterialState.focused)) {
       return TextStyle(color: Theme.of(context).colorScheme.primary);
@@ -4354,19 +4353,19 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.caption!.copyWith(color: Colors.transparent);
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
 
-    return themeData.textTheme.caption!.copyWith(color: themeData.hintColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.hintColor);
   });
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.caption!.copyWith(color: Colors.transparent);
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
-    return themeData.textTheme.caption!.copyWith(color: themeData.errorColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
   });
 
   @override

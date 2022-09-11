@@ -226,7 +226,7 @@ class NavigationRail extends StatefulWidget {
   /// When one of the [destinations] is selected the [selectedLabelTextStyle]
   /// will be used instead.
   ///
-  /// The default value is based on the [Theme]'s [TextTheme.bodyText1]. The
+  /// The default value is based on the [Theme]'s [TextTheme.bodyLarge]. The
   /// default color is based on the [Theme]'s [ColorScheme.onSurface].
   ///
   /// Properties from this text style, or
@@ -239,7 +239,7 @@ class NavigationRail extends StatefulWidget {
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedLabelTextStyle] will be used.
   ///
-  /// The default value is based on the [TextTheme.bodyText1] of
+  /// The default value is based on the [TextTheme.bodyLarge] of
   /// [ThemeData.textTheme]. The default color is based on the [Theme]'s
   /// [ColorScheme.primary].
   ///
@@ -936,11 +936,11 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
   @override Color? get backgroundColor => _colors.surface;
 
   @override TextStyle? get unselectedLabelTextStyle {
-    return _theme.textTheme.bodyText1!.copyWith(color: _colors.onSurface.withOpacity(0.64));
+    return _theme.textTheme.bodyLarge!.copyWith(color: _colors.onSurface.withOpacity(0.64));
   }
 
   @override TextStyle? get selectedLabelTextStyle {
-    return _theme.textTheme.bodyText1!.copyWith(color: _colors.primary);
+    return _theme.textTheme.bodyLarge!.copyWith(color: _colors.primary);
   }
 
   @override IconThemeData? get unselectedIconTheme {

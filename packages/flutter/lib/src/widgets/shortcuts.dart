@@ -65,7 +65,7 @@ class KeySet<T extends KeyboardKey> {
     assert(_keys.length == count, 'Two or more provided keys are identical. Each key must appear only once.');
   }
 
-  /// Create  a [KeySet] from a set of [KeyboardKey]s.
+  /// Create a [KeySet] from a set of [KeyboardKey]s.
   ///
   /// Do not mutate the `keys` set after passing it to this object.
   ///
@@ -272,7 +272,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     super.key4,
   ]);
 
-  /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
+  /// Create a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
   ///
   /// Do not mutate the `keys` set after passing it to this object.
   LogicalKeySet.fromSet(super.keys) : super.fromSet();

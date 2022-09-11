@@ -459,7 +459,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    Flutter would short-circuit most of the rebuild work.
 /// {@endtemplate}
 ///
-/// This video gives more explainations on why `const` constructors are important
+/// This video gives more explanations on why `const` constructors are important
 /// and why a [Widget] is better than a helper method.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
@@ -657,7 +657,7 @@ abstract class StatelessWidget extends Widget {
 ///    subtree and re-use it each time it can be used. To do this, simply assign
 ///    a widget to a `final` state variable and re-use it in the build method. It
 ///    is massively more efficient for a widget to be re-used than for a new (but
-///    identically-configured) widget to be created. Another caching stragegy
+///    identically-configured) widget to be created. Another caching strategy
 ///    consists in extracting the mutable part of the widget into a [StatefulWidget]
 ///    which accepts a child parameter.
 ///
@@ -682,7 +682,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// {@macro flutter.flutter.widgets.framework.prefer_const_over_helper}
 ///
-/// This video gives more explainations on why `const` constructors are important
+/// This video gives more explanations on why `const` constructors are important
 /// and why a [Widget] is better than a helper method.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
@@ -855,7 +855,7 @@ typedef StateSetter = void Function(VoidCallback fn);
 ///  * At this point, the [State] object is fully initialized and the framework
 ///    might call its [build] method any number of times to obtain a
 ///    description of the user interface for this subtree. [State] objects can
-///    spontaneously request to rebuild their subtree by callings their
+///    spontaneously request to rebuild their subtree by calling their
 ///    [setState] method, which indicates that some of their internal state
 ///    has changed in a way that might impact the user interface in this
 ///    subtree.
@@ -3263,7 +3263,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// Avoid overriding this field on [Element] subtypes to provide a more
   /// specific widget type (i.e. [StatelessElement] and [StatelessWidget]).
-  /// Instead, cast at any callsites where the more specific type is required.
+  /// Instead, cast at any call sites where the more specific type is required.
   /// This avoids significant cast overhead on the getter which is accessed
   /// throughout the framework internals during the build phase - and for which
   /// the more specific type information is not used.
@@ -4585,7 +4585,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
   ///
-  /// The method will only rebuild if [dirty] is true. To rebuild irregardless
+  /// The method will only rebuild if [dirty] is true. To rebuild regardless
   /// of the [dirty] flag, set `force` to true. Forcing a rebuild is convenient
   /// from [update], during which [dirty] is false.
   @pragma('vm:prefer-inline')
@@ -5518,7 +5518,7 @@ class InheritedElement extends ProxyElement {
 /// [RenderObjectElement] objects spend much of their time acting as
 /// intermediaries between their [widget] and their [renderObject]. It is
 /// generally recommended against specializing the [widget] getter and
-/// instead casting at the various callsites to avoid adding overhead
+/// instead casting at the various call sites to avoid adding overhead
 /// outside of this particular implementation.
 ///
 /// ```dart
@@ -5800,7 +5800,7 @@ abstract class RenderObjectElement extends Element {
   /// and then returns the new child list.
   ///
   /// During this function the `oldChildren` list must not be modified. If the
-  /// caller wishes to remove elements from `oldChildren` re-entrantly while
+  /// caller wishes to remove elements from `oldChildren` reentrantly while
   /// this function is on the stack, the caller can supply a `forgottenChildren`
   /// argument, which can be modified while this function is on the stack.
   /// Whenever this function reads from `oldChildren`, this function first
