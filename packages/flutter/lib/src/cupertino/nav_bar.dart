@@ -851,48 +851,20 @@ class _LargeTitleNavigationBarSliverDelegate
                                     .navLargeTitleTextStyle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                child: Builder(
-                                  builder: (_) {
-                                    double maxScale = 1.15;
-
-                                    // If the large title widget is Text we can compute 
-                                    // it's width and calculate the maximum scale value
-                                    // for the Transform widget to prevent the text from
-                                    // getting clipped.
-                                    if (components.largeTitle != null && components.largeTitle?.child is Text) {
-                                      final Text largeTitleText = components.largeTitle!.child as Text;
-
-                                      final TextPainter painter = TextPainter(
-                                        textDirection: Directionality.of(context),
-                                        text: TextSpan(
-                                          style: CupertinoTheme.of(context)
-                                            .textTheme
-                                            .navLargeTitleTextStyle,
-                                          text: largeTitleText.data,
-                                        ),
-                                      );
-                                      
-                                      // This operation dry-runs the layout in order
-                                      // to compute the width of the large title text.
-                                      painter.layout();
-
-                                      // Maximum scale lets us prevent the large title
-                                      // from getting clipped when it's width is greater than
-                                      // the navigation bar's max width constraint.
-                                      maxScale = ((constraints.maxWidth - _kNavBarEdgePadding) / painter.maxIntrinsicWidth).clamp(1.0, 1.15);
-                                    }
-
-                                    return Transform.scale(
-                                      // This scale is estimated from the settings app in iOS 14.
-                                      // The large title scales linearly from 1.0 up to 1.15 magnification.
-                                      // The `constraints.maxHeight` value is the height of the nav bar, 
-                                      // and `maxExtent` is the default large title height the nav bar snaps back to. 
-                                      // The difference between the two heights is used to scale the title.
-                                      scale: (1.0 + (constraints.maxHeight - maxExtent) / maxExtent *  0.12).clamp(1.0, maxScale),
-                                      alignment: AlignmentDirectional.bottomStart,
-                                      child: components.largeTitle,
-                                    );
-                                  }
+                                // Aligning the large title allows it to take up
+                                // only the space it needs instead of being
+                                // stretched to the size of the nav bar.
+                                // This is important for calculating the
+                                // magnification during overscrolls.
+                                child: Align(
+                                  alignment: AlignmentDirectional.bottomStart,
+                                  child: _LargeTitle(
+                                    key: components.largeTitle?.key,
+                                    constraints: constraints,
+                                    maxExtent: maxExtent,
+                                    textDirection: Directionality.of(context),
+                                    child: components.largeTitle?.child,
+                                  ),
                                 ),
                               ),
                             ),
@@ -956,6 +928,140 @@ class _LargeTitleNavigationBarSliverDelegate
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
         || heroTag != oldDelegate.heroTag;
+  }
+}
+
+/// The large title of the navigation bar.
+/// 
+/// Magnifies when overscrolled.
+class _LargeTitle extends SingleChildRenderObjectWidget {
+  const _LargeTitle({
+    super.key,
+    required this.constraints,
+    required this.maxExtent,
+    required this.textDirection,
+    super.child,
+  });
+
+  final BoxConstraints constraints;
+  final double maxExtent;
+  final TextDirection textDirection;
+
+  @override
+  _RenderLargeTitle createRenderObject(BuildContext context) {
+    return _RenderLargeTitle(
+      navBarConstraints: constraints, 
+      maxExtent: maxExtent, 
+      textDirection: textDirection,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLargeTitle renderObject) {
+    renderObject
+      ..navBarConstraints = constraints
+      ..maxExtent = maxExtent
+      ..textDirection = textDirection;
+  }
+}
+
+class _RenderLargeTitle extends RenderProxyBox {
+  _RenderLargeTitle({
+    required BoxConstraints navBarConstraints,
+    required double maxExtent,
+    required TextDirection textDirection,
+  }) : _navBarConstraints = navBarConstraints, 
+      _maxExtent = maxExtent,
+      _textDirection = textDirection;
+  
+  static const AlignmentDirectional alignment = AlignmentDirectional.bottomStart;
+
+  BoxConstraints get navBarConstraints => _navBarConstraints;
+  BoxConstraints _navBarConstraints;
+  set navBarConstraints(BoxConstraints value) {
+    if (_navBarConstraints == value) {
+      return;
+    }
+    _navBarConstraints = value;
+
+    markNeedsPaint();
+  }
+
+  double get maxExtent => _maxExtent;
+  double _maxExtent;
+  set maxExtent(double value) {
+    if (_maxExtent == value) {
+      return;
+    }
+    _maxExtent = value;
+
+    markNeedsPaint();
+  }
+  
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
+    
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  Matrix4? transform;
+
+  Matrix4? get _effectiveTransform {
+    // Maximum scale lets us prevent the large title
+    // from getting clipped when it's width is greater than
+    // the navigation bar's max width constraint.
+    final double maxScale = ((navBarConstraints.maxWidth - _kNavBarEdgePadding) / size.width).clamp(1.0, 1.15);
+
+    // This scale is estimated from the settings app in iOS 14.
+    // The large title scales linearly from 1.0 up to 1.15 magnification.
+    // The `navBarConstraints.maxHeight` value is the height of the nav bar, 
+    // and `maxExtent` is the default large title height the nav bar snaps back to. 
+    // The difference between the two heights is used to scale the title.
+    final double scale = (1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent *  0.12).clamp(1.0, maxScale);
+
+    transform = Matrix4.diagonal3Values(scale, scale, 1.0);
+    
+    final Alignment resolvedAlignment = alignment.resolve(textDirection);
+    final Matrix4 result = Matrix4.identity();
+
+    Offset? translation;
+    if (resolvedAlignment != null) {
+      translation = resolvedAlignment.alongSize(size);
+      result.translate(translation.dx, translation.dy);
+    }
+    result.multiply(transform!);
+    if (resolvedAlignment != null) {
+      result.translate(-translation!.dx, -translation.dy);
+    }
+
+    return result;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    transform = _effectiveTransform;
+
+    if (child != null) {
+      context.pushTransform(
+        needsCompositing, 
+        offset, 
+        transform!, 
+        super.paint,
+      );
+    } else {
+      return;
+    }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.multiply(_effectiveTransform!);
   }
 }
 
