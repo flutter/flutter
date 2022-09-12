@@ -195,7 +195,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(textFieldStart, kind: PointerDeviceKind.mouse);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     final FlutterError error = tester.takeException() as FlutterError;
     expect(
