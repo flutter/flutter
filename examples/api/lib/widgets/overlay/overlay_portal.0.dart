@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('OverlayPortal Example')),
         body: const Center(child: ClickableTooltipWidget()),
-      )
+      ),
     );
   }
 }

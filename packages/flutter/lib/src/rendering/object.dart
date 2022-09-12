@@ -1710,10 +1710,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// actively performing layout can not get accidently mutated. It's only
   /// implemented in debug mode and always returns null in release mode.
   ///
-  /// Typically this returns [parent]. A [RenderObject] subclass that expects
-  /// its [RenderObject.performLayout] to be called from a different
-  /// [RenderObject] that's not its [parent] should override this property to
-  /// return the actual layout parent.
+  /// The default implementation returns [parent] and overriding is rarely
+  /// needed. A [RenderObject] subclass that expects its
+  /// [RenderObject.performLayout] to be called from a different [RenderObject]
+  /// that's not its [parent] should override this property to return the actual
+  /// layout parent.
   @protected
   RenderObject? get debugLayoutParent {
     RenderObject? layoutParent;

@@ -721,7 +721,7 @@ abstract class InkFeature {
           return null;
         }
         fromPath.add(fromParent);
-        from  = fromParent;
+        from = fromParent;
       }
 
       if (fromDepth <= toDepth) {
@@ -730,7 +730,7 @@ abstract class InkFeature {
           return null;
         }
         toPath.add(toParent);
-        to  = toParent;
+        to = toParent;
       }
     }
     assert(identical(from, to));
