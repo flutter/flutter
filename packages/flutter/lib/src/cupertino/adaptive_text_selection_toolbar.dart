@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/src/material/adaptive_text_selection_toolbar.dart';
 import 'package:flutter/widgets.dart';
 
 import 'desktop_text_selection_toolbar.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_buttons_builder.dart';
 
+// TODO(justinmc): Refactor this similar to the material one.
 /// The default Cupertino context menu for text selection for the current
 /// platform with the given children.
 ///
@@ -121,16 +123,12 @@ class CupertinoAdaptiveTextSelectionToolbarEditableText extends StatelessWidget 
 
   @override
   Widget build(BuildContext context) {
-    return EditableTextContextMenuButtonItemsBuilder(
-      editableTextState: editableTextState,
-      targetPlatform: targetPlatform,
-      builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-        return _AdaptiveTextSelectionToolbarFromButtonItems(
-          primaryAnchor: primaryAnchor,
-          secondaryAnchor: secondaryAnchor,
-          buttonItems: buttonItems,
-        );
-      },
+    return _AdaptiveTextSelectionToolbarFromButtonItems(
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      buttonItems: AdaptiveTextSelectionToolbar.getEditableTextButtonItems(
+        editableTextState,
+      ),
     );
   }
 }

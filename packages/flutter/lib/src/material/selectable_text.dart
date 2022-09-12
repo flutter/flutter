@@ -444,17 +444,15 @@ class SelectableText extends StatefulWidget {
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
     final List<ContextMenuButtonItem>? buttonItems =
-        EditableTextContextMenuButtonItemsBuilder.buttonItemsForToolbarOptions(
-          editableTextState,
-        );
+        editableTextState.buttonItemsForToolbarOptions();
     if (buttonItems != null) {
-      return AdaptiveTextSelectionToolbarButtonItems(
+      return AdaptiveTextSelectionToolbar.buttonItems(
         primaryAnchor: primaryAnchor,
         secondaryAnchor: secondaryAnchor,
         buttonItems: buttonItems,
       );
     }
-    return AdaptiveTextSelectionToolbarEditableText(
+    return AdaptiveTextSelectionToolbar.editableText(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,

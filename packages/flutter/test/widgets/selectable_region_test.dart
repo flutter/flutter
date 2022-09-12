@@ -1209,8 +1209,8 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
-  group('SelectableRegionContextMenuButtonItemsBuilder', () {
-    testWidgets('builds the correct button items per-platform', (WidgetTester tester) async {
+  group('getSelectableRegionButtonItems', () {
+    testWidgets('builds the correct button items', (WidgetTester tester) async {
       Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
       await tester.pumpWidget(
         MaterialApp(
@@ -1223,15 +1223,12 @@ void main() {
               Offset primaryOffset,
               [Offset? secondaryOffset]
             ) {
-              return SelectableRegionContextMenuButtonItemsBuilder(
-                selectableRegionState: delegate,
-                builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-                  buttonTypes = buttonItems
-                    .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-                    .toSet();
-                  return const SizedBox.shrink();
-                },
-              );
+              final List<ContextMenuButtonItem> buttonItems =
+                  delegate.getSelectableRegionButtonItems();
+              buttonTypes = buttonItems
+                .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                .toSet();
+              return const SizedBox.shrink();
             },
             child: const Text('How are you?'),
           ),

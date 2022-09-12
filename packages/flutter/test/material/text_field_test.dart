@@ -12144,7 +12144,7 @@ void main() {
       tester.state<EditableTextState>(textFinder).showToolbar();
       await tester.pumpAndSettle();
 
-      expect(find.byType(AdaptiveTextSelectionToolbarEditableText), findsOneWidget);
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );

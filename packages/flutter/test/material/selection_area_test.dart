@@ -63,7 +63,7 @@ void main() {
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AdaptiveTextSelectionToolbarSelectableRegion), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
   },
     skip: kIsWeb, // [intended]
   );

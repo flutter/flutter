@@ -19,11 +19,11 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'context_menu_button_item.dart';
 import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
-import 'editable_text_context_menu_button_items_builder.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
@@ -1904,32 +1904,97 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
 
   @override
+  /*
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canCut` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
+  */
+  bool get cutEnabled {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
+    }
+    return !widget.readOnly
+        && !widget.obscureText
+        && !textEditingValue.selection.isCollapsed;
+  }
 
   @override
+  /*
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canCopy` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
+  */
+  bool get copyEnabled {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.copy && !widget.obscureText;
+    }
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed;
+  }
 
   @override
+  /*
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canPaste` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
+  */
+  bool get pasteEnabled {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.paste && !widget.readOnly;
+    }
+    return !widget.readOnly
+        && (clipboardStatus == null
+          || clipboardStatus!.value == ClipboardStatus.pasteable);
+  }
 
   @override
+  /*
   @Deprecated(
     'Use `TextSelectionToolbarButtonItemsBuilder.canSelectAll` instead, or `contextMenuBuilder` to change the toolbar. '
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
+  */
+  bool get selectAllEnabled {
+    return getSelectAllEnabled(defaultTargetPlatform);
+  }
+
+  /// Returns true if it's currently possible to perform a select-all operation.
+  ///
+  /// Identical to the [selectAllEnabled] getter, but allows the
+  /// [TargetPlatform] to be specified.
+  bool getSelectAllEnabled(TargetPlatform targetPlatform) {
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      return widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
+    }
+
+    if (!widget.enableInteractiveSelection
+        || (widget.readOnly
+            && widget.obscureText)) {
+      return false;
+    }
+
+    switch (targetPlatform) {
+      case TargetPlatform.macOS:
+        return false;
+      case TargetPlatform.iOS:
+        return textEditingValue.text.isNotEmpty
+            && textEditingValue.selection.isCollapsed;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return textEditingValue.text.isNotEmpty
+           && !(textEditingValue.selection.start == 0
+               && textEditingValue.selection.end == textEditingValue.text.length);
+    }
+  }
 
   void _onChangedClipboardStatus() {
     setState(() {
@@ -2109,6 +2174,49 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return configuration.copyWith(spellCheckService: spellCheckService);
   }
 
+  // TODO(justinmc): Still need to update all usages of this.
+  /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
+  @Deprecated(
+    'Use `contextMenuBuilder` instead of `toolbarOptions`. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  List<ContextMenuButtonItem>? buttonItemsForToolbarOptions([TargetPlatform? targetPlatform]) {
+    final ToolbarOptions toolbarOptions = widget.toolbarOptions;
+    if (toolbarOptions == ToolbarOptions.empty) {
+      return null;
+    }
+    return <ContextMenuButtonItem>[
+      if (toolbarOptions.cut && cutEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            selectAll(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.selectAll,
+        ),
+      if (toolbarOptions.copy && copyEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            copySelection(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.copy,
+        ),
+      if (toolbarOptions.paste && clipboardStatus != null && pasteEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            pasteText(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.paste,
+        ),
+      if (toolbarOptions.selectAll && selectAllEnabled)
+        ContextMenuButtonItem(
+          onPressed: () {
+            selectAll(SelectionChangedCause.toolbar);
+          },
+          type: ContextMenuButtonType.selectAll,
+        ),
+    ];
+  }
+
   // State lifecycle:
 
   @override
@@ -2236,7 +2344,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
-        ? EditableTextContextMenuButtonItemsBuilder.canPaste(this)
+        ? pasteEnabled
         : widget.selectionControls?.canPaste(this) ?? false;
     if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
       clipboardStatus!.update();
@@ -3544,7 +3652,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? EditableTextContextMenuButtonItemsBuilder.canCopy(this)
+            ? copyEnabled
             : copyEnabled && (widget.selectionControls?.canCopy(this) ?? false))
       ? () {
         controls?.handleCopy(this);
@@ -3557,7 +3665,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? EditableTextContextMenuButtonItemsBuilder.canCut(this)
+            ? cutEnabled
             : cutEnabled && (widget.selectionControls?.canCut(this) ?? false))
       ? () {
         controls?.handleCut(this);
@@ -3570,7 +3678,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return widget.selectionEnabled
         && _hasFocus
         && (widget.selectionControls is TextSelectionHandleControls
-            ? EditableTextContextMenuButtonItemsBuilder.canPaste(this)
+            ? pasteEnabled
             : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
         && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
       ? () {
@@ -5180,3 +5288,5 @@ _Throttled<T> _throttle<T>({
     return timer!;
   };
 }
+
+// TODO(justinmc): Rename canCopy etc. to copyEnabled etc.

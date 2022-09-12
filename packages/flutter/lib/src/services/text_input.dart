@@ -1046,6 +1046,7 @@ mixin TextSelectionDelegate {
   /// input.
   void bringIntoView(TextPosition position);
 
+  // TODO(justinmc): Are these still deprecated?
   /// Whether cut is enabled, must not be null.
   @Deprecated(
     'Use `contextMenuBuilder` instead. '

@@ -47,7 +47,6 @@ export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';
 export 'src/widgets/dual_transition_builder.dart';
 export 'src/widgets/editable_text.dart';
-export 'src/widgets/editable_text_context_menu_button_items_builder.dart';
 export 'src/widgets/fade_in_image.dart';
 export 'src/widgets/focus_manager.dart';
 export 'src/widgets/focus_scope.dart';
