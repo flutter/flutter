@@ -82,13 +82,19 @@ def generate_gen_snapshot(directory, destination):
     print('Cannot find gen_snapshot at %s' % gen_snapshot_dir)
     sys.exit(1)
 
-  result = subprocess.run([
+  command = [
       'xcrun', 'bitcode_strip', '-r', gen_snapshot_dir, '-o', destination
-  ])
-  if result.returncode != 0:
+  ]
+  process = subprocess.Popen(
+      command, stderr=subprocess.STDOUT, stdout=subprocess.PIPE
+  )
+  stdout, stderr = process.communicate()
+  exit_status = process.wait()
+
+  if exit_status != 0:
     print(
         'Error processing command with stdout[%s] and stderr[%s]' %
-        (result.stdout, result.stderr)
+        (stdout, stderr)
     )
     return 1
 
