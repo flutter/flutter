@@ -76,6 +76,7 @@ platform_properties:
         []
       os: Mac-12
       device_type: none
+      cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
   mac_arm64:
     properties:
@@ -2308,6 +2309,7 @@ targets:
 
   - name: Mac basic_material_app_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2323,7 +2325,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2357,7 +2358,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2377,7 +2377,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2397,7 +2396,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2417,7 +2415,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2434,10 +2431,10 @@ targets:
 
   - name: Mac complex_layout_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2452,7 +2449,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2476,7 +2472,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2493,10 +2488,10 @@ targets:
 
   - name: Mac flutter_gallery_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2564,7 +2559,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
@@ -2634,6 +2628,7 @@ targets:
 
   - name: Mac hello_world_macos__compile
     bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2703,7 +2698,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2750,7 +2744,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2771,7 +2764,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2828,7 +2820,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2875,8 +2866,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "arm64ruby", "version": "version:311_3"}
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
       runtime_versions: >-
         [
@@ -2897,7 +2887,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2923,7 +2912,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2949,7 +2937,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2975,7 +2962,6 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3052,7 +3038,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3767,7 +3752,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
