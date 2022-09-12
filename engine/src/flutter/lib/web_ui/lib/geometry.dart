@@ -341,6 +341,25 @@ class Radius {
   final double x;
   final double y;
   static const Radius zero = Radius.circular(0.0);
+  Radius clamp({Radius? minimum, Radius? maximum}) {
+    minimum ??= const Radius.circular(-double.infinity);
+    maximum ??= const Radius.circular(double.infinity);
+    return Radius.elliptical(
+      clampDouble(x, minimum.x, maximum.x),
+      clampDouble(y, minimum.y, maximum.y),
+    );
+  }
+  Radius clampValues({
+    double? minimumX,
+    double? minimumY,
+    double? maximumX,
+    double? maximumY,
+  }) {
+    return Radius.elliptical(
+      clampDouble(x, minimumX ?? -double.infinity, maximumX ?? double.infinity),
+      clampDouble(y, minimumY ?? -double.infinity, maximumY ?? double.infinity),
+    );
+  }
   Radius operator -() => Radius.elliptical(-x, -y);
   Radius operator -(Radius other) => Radius.elliptical(x - other.x, y - other.y);
   Radius operator +(Radius other) => Radius.elliptical(x + other.x, y + other.y);

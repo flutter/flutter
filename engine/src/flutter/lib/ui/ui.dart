@@ -31,6 +31,7 @@ part 'hooks.dart';
 part 'isolate_name_server.dart';
 part 'key.dart';
 part 'lerp.dart';
+part 'math.dart';
 part 'natives.dart';
 part 'painting.dart';
 part 'platform_dispatcher.dart';

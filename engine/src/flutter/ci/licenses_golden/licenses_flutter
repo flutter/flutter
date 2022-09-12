@@ -1005,6 +1005,7 @@ FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h
 FILE: ../../../flutter/lib/ui/key.dart
 FILE: ../../../flutter/lib/ui/lerp.dart
+FILE: ../../../flutter/lib/ui/math.dart
 FILE: ../../../flutter/lib/ui/natives.dart
 FILE: ../../../flutter/lib/ui/painting.dart
 FILE: ../../../flutter/lib/ui/painting/canvas.cc
@@ -1149,6 +1150,7 @@ FILE: ../../../flutter/lib/web_ui/lib/hash_codes.dart
 FILE: ../../../flutter/lib/web_ui/lib/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/key.dart
 FILE: ../../../flutter/lib/web_ui/lib/lerp.dart
+FILE: ../../../flutter/lib/web_ui/lib/math.dart
 FILE: ../../../flutter/lib/web_ui/lib/natives.dart
 FILE: ../../../flutter/lib/web_ui/lib/painting.dart
 FILE: ../../../flutter/lib/web_ui/lib/path.dart
