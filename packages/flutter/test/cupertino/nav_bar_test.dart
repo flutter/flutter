@@ -1396,23 +1396,23 @@ void main() {
       await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
       await tester.pump();
 
-      final Offset magnifiedTitleTextHeight =
+      final Offset magnifiedTitleTextOffset =
           tester.getBottomLeft(titleTextFinder) -
               tester.getTopLeft(titleTextFinder);
 
       expect(
-        magnifiedTitleTextHeight.dy.abs(),
+        magnifiedTitleTextOffset.dy.abs(),
         greaterThan(initialLargeTitleTextOffset.dy.abs()),
       );
 
       // Ensure title text retracts to original size after releasing gesture
       await tester.pumpAndSettle();
 
-      final Offset finalTitleTextHeight = tester.getBottomLeft(titleTextFinder) -
+      final Offset finalTitleTextOffset = tester.getBottomLeft(titleTextFinder) -
           tester.getTopLeft(titleTextFinder);
 
       expect(
-        finalTitleTextHeight.dy.abs(),
+        finalTitleTextOffset.dy.abs(),
         initialLargeTitleTextOffset.dy.abs(),
       );
     },
@@ -1446,7 +1446,7 @@ void main() {
       final Finder titleTextFinder = find.byWidget(titleText).first;
 
       // Gets the width of the large title
-      final Offset initialLargeTitleTextSize =
+      final Offset initialLargeTitleTextOffset =
           tester.getBottomLeft(titleTextFinder) -
               tester.getBottomRight(titleTextFinder);
 
@@ -1454,13 +1454,13 @@ void main() {
       await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
       await tester.pump();
 
-      final Offset magnifiedTitleTextSize =
+      final Offset magnifiedTitleTextOffset =
           tester.getBottomLeft(titleTextFinder) -
               tester.getBottomRight(titleTextFinder);
 
       expect(
-        magnifiedTitleTextSize.dx.abs(),
-        equals(initialLargeTitleTextSize.dx.abs()),
+        magnifiedTitleTextOffset.dx.abs(),
+        equals(initialLargeTitleTextOffset.dx.abs()),
       );
     },
   );
