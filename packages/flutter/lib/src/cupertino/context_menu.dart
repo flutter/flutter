@@ -19,7 +19,7 @@ const double _kOpenScale = 1.1;
 // The ratio for the borderRadius of the context menu preview image. This value
 // was eyeballed by overlapping the CupertinoContextMenu with a context menu 
 // from iOS 16.0 in the XCode iphone simulator
-const double _previewBorderRadiusRatio = 12.0
+const double _previewBorderRadiusRatio = 12.0;
 
 // The duration it takes for the CupertinoContextMenu to open.
 // This value was eyeballed from the XCode simulator running iOS 16.0
@@ -107,19 +107,11 @@ class CupertinoContextMenu extends StatefulWidget {
   /// [actions] is required and cannot be null or empty.
   ///
   /// [child] is required and cannot be null.
-  /// 
-  /// [previeBuilder] defaults to a fitted box with rounded corners.
   CupertinoContextMenu({
     super.key,
     required this.actions,
     required this.child,
-    this.previewBuilder = FittedBox(
-            fit: BoxFit.cover,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
-              child: widget.child,
-            ),
-          ),
+    this.previewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null);
 
@@ -274,6 +266,17 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
+        if(widget.previewBuilder == null) {
+          // borderRadius value comes from overlapping the CupertinoContextMenu
+          // with a context menu from iOS 16.0 in the XCode iphone simulator
+          return FittedBox(
+            fit: BoxFit.cover,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
+              child: widget.child,
+            ),
+          );
+        }
         return widget.previewBuilder!(context, animation, widget.child);
       },
     );
@@ -472,28 +475,21 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     _boxDecoration = DecorationTween(
       begin: BoxDecoration(
           color: const Color(0xFFFFFFFF),
-          borderRadius: widget.child.runtimeType == Container
-              ? ((widget.child as Container?)?.decoration as BoxDecoration?)
+          borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
                       ?.borderRadius ??
-                  BorderRadius.circular(0)
-              : BorderRadius.circular(0),
-          boxShadow: widget.child.runtimeType == Container
-              ? ((widget.child as Container?)?.decoration as BoxDecoration?)
-                      ?.boxShadow ??
-                  const <BoxShadow>[]
-              : const <BoxShadow>[]),
+                  BorderRadius.circular(0),
+          // boxShadow: ((widget.child as Container?)?.decoration as BoxDecoration?)
+          //             ?.boxShadow ??
+          //         const <BoxShadow>[],
+      ),
       end: BoxDecoration(
         color: const Color(0xFFFFFFFF),
-        borderRadius: widget.child.runtimeType == Container
-            ? ((widget.child as Container?)?.decoration as BoxDecoration?)
+        borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
                     ?.borderRadius ??
-                BorderRadius.circular(0)
-            : BorderRadius.circular(0),
-        boxShadow: widget.child.runtimeType == Container
-            ? ((widget.child as Container?)?.decoration as BoxDecoration?)
-                    ?.boxShadow ??
-                endBoxShadow
-            : endBoxShadow,
+                BorderRadius.circular(0),
+        // boxShadow: ((widget.child as Container?)?.decoration as BoxDecoration?)
+        //             ?.boxShadow ??
+        //         endBoxShadow,
       ),
     ).animate(widget.controller);
   }
