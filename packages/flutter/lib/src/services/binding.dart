@@ -15,6 +15,7 @@ import 'binary_messenger.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'restoration.dart';
+import 'service_extensions.dart';
 import 'system_channels.dart';
 import 'text_input.dart';
 
@@ -213,11 +214,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
     assert(() {
       registerStringServiceExtension(
-        // ext.flutter.evict value=foo.png will cause foo.png to be evicted from
-        // the rootBundle cache and cause the entire image cache to be cleared.
-        // This is used by hot reload mode to clear out the cache of resources
-        // that have changed.
-        name: 'evict',
+        name: ServicesServiceExtensions.evict.name,
         getter: () async => '',
         setter: (String value) async {
           evict(value);
