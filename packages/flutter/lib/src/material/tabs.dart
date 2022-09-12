@@ -1532,13 +1532,14 @@ class _TabBarViewState extends State<TabBarView> {
 
     if (duration == Duration.zero) {
       _pageController.jumpToPage(_currentIndex!);
-      return Future<void>.value();
+    } else {
+      await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
+
+      if (!mounted) {
+        return Future<void>.value();
+      }
     }
 
-    await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
-    if (!mounted) {
-      return Future<void>.value();
-    }
     setState(() {
       _warpUnderwayCount -= 1;
       if (widget.children != _children) {

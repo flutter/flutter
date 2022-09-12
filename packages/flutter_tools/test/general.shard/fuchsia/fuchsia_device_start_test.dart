@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -24,7 +22,6 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/pkgctl.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -33,14 +30,14 @@ import '../../src/fakes.dart';
 
 void main() {
   group('Fuchsia app start and stop: ', () {
-    MemoryFileSystem memoryFileSystem;
-    FakeOperatingSystemUtils osUtils;
-    FakeFuchsiaDeviceTools fuchsiaDeviceTools;
-    FakeFuchsiaSdk fuchsiaSdk;
-    Artifacts artifacts;
-    FakeProcessManager fakeSuccessfulProcessManager;
-    FakeProcessManager fakeFailedProcessManagerForHostAddress;
-    File sshConfig;
+    late MemoryFileSystem memoryFileSystem;
+    late FakeOperatingSystemUtils osUtils;
+    late FakeFuchsiaDeviceTools fuchsiaDeviceTools;
+    late FakeFuchsiaSdk fuchsiaSdk;
+    late Artifacts artifacts;
+    late FakeProcessManager fakeSuccessfulProcessManager;
+    late FakeProcessManager fakeFailedProcessManagerForHostAddress;
+    late File sshConfig;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -113,8 +110,8 @@ void main() {
     });
 
     Future<LaunchResult> setupAndStartApp({
-      @required bool prebuilt,
-      @required BuildMode mode,
+      required bool prebuilt,
+      required BuildMode mode,
     }) async {
       const String appName = 'app_name';
       final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
@@ -122,7 +119,7 @@ void main() {
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
 
-      FuchsiaApp app;
+      FuchsiaApp? app;
       if (prebuilt) {
         final File far = globals.fs.file('app_name-0.far')..createSync();
         app = FuchsiaApp.fromPrebuiltApp(far);
@@ -143,7 +140,7 @@ void main() {
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
           BuildInfo(mode, null, treeShakeIcons: false));
       return device.startApp(
-        app,
+        app!,
         prebuiltApplication: prebuilt,
         debuggingOptions: debuggingOptions,
       );
@@ -191,7 +188,7 @@ void main() {
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
-      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
+      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
           const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
@@ -217,7 +214,7 @@ void main() {
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
-      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
+      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
           const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
@@ -470,8 +467,7 @@ Process _createFakeProcess({
 }
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(String id, {String name})
-      : super(id, name: name);
+  FuchsiaDeviceWithFakeDiscovery(super.id, {super.name = ''});
 
   @override
   FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(
@@ -533,8 +529,8 @@ class FailingPkgctl implements FuchsiaPkgctl {
 
 class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
   FakeFuchsiaDeviceTools({
-    FuchsiaPkgctl pkgctl,
-    FuchsiaFfx ffx,
+    FuchsiaPkgctl? pkgctl,
+    FuchsiaFfx? ffx,
   })  : pkgctl = pkgctl ?? FakeFuchsiaPkgctl(),
         ffx = ffx ?? FakeFuchsiaFfx();
 
@@ -546,7 +542,7 @@ class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
 }
 
 class FakeFuchsiaPM implements FuchsiaPM {
-  String _appName;
+  String? _appName;
 
   @override
   Future<bool> init(String buildPath, String appName) async {
@@ -651,8 +647,8 @@ class FailingPM implements FuchsiaPM {
 class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
   @override
   Future<void> build({
-    @required FuchsiaProject fuchsiaProject,
-    @required String target, // E.g., lib/main.dart
+    required FuchsiaProject fuchsiaProject,
+    required String target, // E.g., lib/main.dart
     BuildInfo buildInfo = BuildInfo.debug,
   }) async {
     final String outDir = getFuchsiaBuildDirectory();
@@ -665,7 +661,7 @@ class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
 
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
@@ -675,7 +671,7 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 
   @override
-  Future<String> sessionShow() async {
+  Future<String?> sessionShow() async {
     return null;
   }
 
@@ -687,7 +683,7 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
 
 class FakeFuchsiaFfxWithSession implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
@@ -709,9 +705,9 @@ class FakeFuchsiaFfxWithSession implements FuchsiaFfx {
 
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM pm,
-    FuchsiaKernelCompiler compiler,
-    FuchsiaFfx ffx,
+    FuchsiaPM? pm,
+    FuchsiaKernelCompiler? compiler,
+    FuchsiaFfx? ffx,
   })  : fuchsiaPM = pm ?? FakeFuchsiaPM(),
         fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
         fuchsiaFfx = ffx ?? FakeFuchsiaFfx();

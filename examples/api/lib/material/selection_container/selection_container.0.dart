@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This sample demonstrates how to create a [SelectionContainer] that only
-// allows selecting everything or nothing with no partial selection.
+/// Flutter code sample for [SelectionContainer].
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

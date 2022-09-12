@@ -164,7 +164,7 @@ class ExpansionTile extends StatefulWidget {
   /// the tile is expanded.
   ///
   /// The internals of the expanded tile make use of a [Column] widget for
-  /// [children], and [Align] widget to align the column. The `expandedAlignment`
+  /// [children], and [Align] widget to align the column. The [expandedAlignment]
   /// parameter is passed directly into the [Align].
   ///
   /// Modifying this property controls the alignment of the column within the
@@ -174,7 +174,7 @@ class ExpansionTile extends StatefulWidget {
   /// The width of the column is the width of the widest child widget in [children].
   ///
   /// If this property is null then [ExpansionTileThemeData.expandedAlignment]is used. If that
-  /// is also null then the value of `expandedAlignment` is [Alignment.center].
+  /// is also null then the value of [expandedAlignment] is [Alignment.center].
   ///
   /// See also:
   ///
@@ -195,13 +195,13 @@ class ExpansionTile extends StatefulWidget {
   /// To align the [Column] along the expanded tile, use the [expandedAlignment] property
   /// instead.
   ///
-  /// When the value is null, the value of `expandedCrossAxisAlignment` is [CrossAxisAlignment.center].
+  /// When the value is null, the value of [expandedCrossAxisAlignment] is [CrossAxisAlignment.center].
   final CrossAxisAlignment? expandedCrossAxisAlignment;
 
   /// Specifies padding for [children].
   ///
   /// If this property is null then [ExpansionTileThemeData.childrenPadding] is used. If that
-  /// is also null then the value of `childrenPadding` is [EdgeInsets.zero].
+  /// is also null then the value of [childrenPadding] is [EdgeInsets.zero].
   ///
   /// See also:
   ///
@@ -256,7 +256,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
   ///
-  /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform],
+  /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform],
   /// which means that the expansion arrow icon will appear on the tile's trailing edge.
   final ListTileControlAffinity? controlAffinity;
 

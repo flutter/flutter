@@ -701,14 +701,14 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.toolbarHeight}
   /// Defines the height of the toolbar component of an [AppBar].
   ///
-  /// By default, the value of `toolbarHeight` is [kToolbarHeight].
+  /// By default, the value of [toolbarHeight] is [kToolbarHeight].
   /// {@endtemplate}
   final double? toolbarHeight;
 
   /// {@template flutter.material.appbar.leadingWidth}
   /// Defines the width of [leading] widget.
   ///
-  /// By default, the value of `leadingWidth` is 56.0.
+  /// By default, the value of [leadingWidth] is 56.0.
   /// {@endtemplate}
   final double? leadingWidth;
 

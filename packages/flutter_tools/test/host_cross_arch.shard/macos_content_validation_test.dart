@@ -87,19 +87,27 @@ void main() {
         'App.framework',
       ));
 
-      _checkFatBinary(
-        outputAppFramework.childFile('App'),
-        buildModeLower,
-        'dynamically linked shared library',
-      );
+      final File libBinary = outputAppFramework.childFile('App');
+      final File libDsymBinary =
+        buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App');
 
-      // dSYM is not created for a debug build so nothing to check.
-      if (buildMode != 'Debug') {
-        _checkFatBinary(
-          buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App'),
-          buildModeLower,
-          'dSYM companion file',
-        );
+      _checkFatBinary(libBinary, buildModeLower, 'dynamically linked shared library');
+
+      final List<String> libSymbols = AppleTestUtils.getExportedSymbols(libBinary.path);
+
+      if (buildMode == 'Debug') {
+        // dSYM is not created for a debug build.
+        expect(libDsymBinary.existsSync(), isFalse);
+        expect(libSymbols, isEmpty);
+      } else {
+        _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
+        expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
+        final List<String> dSymSymbols =
+            AppleTestUtils.getExportedSymbols(libDsymBinary.path);
+        expect(dSymSymbols, containsAll(AppleTestUtils.requiredSymbols));
+        // The actual number of symbols is going to vary but there should
+        // be "many" in the dSYM. At the time of writing, it was 19195.
+        expect(dSymSymbols.length, greaterThanOrEqualTo(15000));
       }
 
       expect(outputAppFramework.childLink('Resources'), exists);

@@ -529,7 +529,7 @@ void main() {
       FakeCommand(command: <String>[
         'xcrun',
         'strip',
-        '-S',
+        '-x',
         '$build/arm64/App.framework/App',
         '-o',
         '$build/arm64/App.framework/App',
@@ -619,7 +619,7 @@ void main() {
       FakeCommand(command: <String>[
         'xcrun',
         'strip',
-        '-S',
+        '-x',
         '$build/arm64/App.framework/App',
         '-o',
         '$build/arm64/App.framework/App',

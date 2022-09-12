@@ -503,7 +503,7 @@ void main() {
       FakeCommand(command: <String>[
         'xcrun',
         'strip',
-        '-S',
+        '-x',
         environment.buildDir.childFile('arm64/App.framework/App').path,
         '-o',
         environment.buildDir.childFile('arm64/App.framework/App').path,
@@ -511,7 +511,7 @@ void main() {
       FakeCommand(command: <String>[
         'xcrun',
         'strip',
-        '-S',
+        '-x',
         environment.buildDir.childFile('x86_64/App.framework/App').path,
         '-o',
         environment.buildDir.childFile('x86_64/App.framework/App').path,
