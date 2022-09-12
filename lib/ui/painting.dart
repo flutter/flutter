@@ -320,7 +320,7 @@ class Color {
   /// The [opacity] value may not be null.
   static int getAlphaFromOpacity(double opacity) {
     assert(opacity != null);
-    return (opacity.clamp(0.0, 1.0) * 255).round();
+    return (clampDouble(opacity, 0.0, 1.0) * 255).round();
   }
 
   @override

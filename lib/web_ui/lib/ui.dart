@@ -24,6 +24,7 @@ part 'hash_codes.dart';
 part 'initialization.dart';
 part 'key.dart';
 part 'lerp.dart';
+part 'math.dart';
 part 'natives.dart';
 part 'painting.dart';
 part 'path.dart';

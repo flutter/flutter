@@ -939,6 +939,37 @@ class Radius {
   /// You can use [Radius.zero] with [RRect] to have right-angle corners.
   static const Radius zero = Radius.circular(0.0);
 
+  /// Returns this [Radius], with values clamped to the given min and max
+  /// [Radius] values.
+  ///
+  /// The `min` value defaults to `Radius.circular(-double.infinity)`, and
+  /// the `max` value defaults to `Radius.circular(double.infinity)`.
+  Radius clamp({Radius? minimum, Radius? maximum}) {
+    minimum ??= const Radius.circular(-double.infinity);
+    maximum ??= const Radius.circular(double.infinity);
+    return Radius.elliptical(
+      clampDouble(x, minimum.x, maximum.x),
+      clampDouble(y, minimum.y, maximum.y),
+    );
+  }
+
+  /// Returns this [Radius], with values clamped to the given min and max
+  /// values in each dimension
+  ///
+  /// The `minimumX` and `minimumY` values default to `-double.infinity`, and
+  /// the `maximumX` and `maximumY` values default to `double.infinity`.
+  Radius clampValues({
+    double? minimumX,
+    double? minimumY,
+    double? maximumX,
+    double? maximumY,
+  }) {
+    return Radius.elliptical(
+      clampDouble(x, minimumX ?? -double.infinity, maximumX ?? double.infinity),
+      clampDouble(y, minimumY ?? -double.infinity, maximumY ?? double.infinity),
+    );
+  }
+
   /// Unary negation operator.
   ///
   /// Returns a Radius with the distances negated.
