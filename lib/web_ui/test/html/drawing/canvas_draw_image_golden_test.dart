@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:js_util' as js_util;
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -34,6 +36,28 @@ Future<void> testMain() async {
     rc.restore();
     await canvasScreenshot(rc, 'draw_image',
         region: const Rect.fromLTWH(0, 0, 500, 500));
+  });
+
+  test('Images from raw data are composited when picture is roundtripped through toImage', () async {
+    final Uint8List imageData = base64Decode(base64PngData);
+    final Codec codec = await instantiateImageCodec(imageData);
+    final FrameInfo frameInfo = await codec.getNextFrame();
+
+    const Rect bounds = Rect.fromLTRB(0, 0, 400, 300);
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
+    final RecordingCanvas scratchCanvas = recorder.beginRecording(bounds);
+    scratchCanvas.save();
+    scratchCanvas.drawImage(frameInfo.image, Offset.zero, SurfacePaint());
+    scratchCanvas.restore();
+    final Picture picture = recorder.endRecording();
+    final Image image = await picture.toImage(400, 300);
+
+    final RecordingCanvas rc = RecordingCanvas(bounds);
+    rc.save();
+    rc.drawImage(image, Offset.zero, SurfacePaint());
+    rc.restore();
+    await canvasScreenshot(rc, 'draw_raw_image',
+      region: const Rect.fromLTWH(0, 0, 500, 500));
   });
 
   test('Paints image with transform', () async {
@@ -592,9 +616,8 @@ Future<void> testMain() async {
         setupPerspective: true);
   });
 }
-
 // 9 slice test image that has a shiny/glass look.
-const String base64ImageData = 'data:image/png;base64,iVBORw0KGgoAAAANSUh'
+const String base64PngData = 'iVBORw0KGgoAAAANSUh'
     'EUgAAADwAAAA8CAYAAAA6/NlyAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPo'
     'AAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAApGVYSWZNTQAqAAAACAAFARIAAwAAAAEAAQA'
     'AARoABQAAAAEAAABKARsABQAAAAEAAABSATEAAgAAACAAAABah2kABAAAAAEAAAB6AAAAAAAA'
@@ -721,11 +744,12 @@ const String base64ImageData = 'data:image/png;base64,iVBORw0KGgoAAAANSUh'
     'Z2x0yEXi0PeqFO87AiFGCkemvOKYkSF/6yS1vnLOWTaHN/VcmnSWt0eHThELBHBiCGisGra'
     'SI5l6R3qD0q05ZR4TNVHES7bnltEgcg6JF3uVlyFsBpdB+lzgdRTMHeejneZR0H1BrnKECH'
     '7GyVy1BAmcsr17WxYs78QNqQF4bppFXqX9BBqIrzmcExwueASjAFzlaWncpqEpJCXVc7wv'
-    'Nj7eT/BbztCaofk+k0AAAAAElFTkSuQmCC';
+    'Nj7eT/BbztCaofk+k0AAAAAyBMj8AAAAAElFTkSuQmCC';
+const String base64ImageUrl = 'data:image/png;base64,$base64PngData';
 
 HtmlImage createNineSliceImage() {
   return HtmlImage(
-    createDomHTMLImageElement()..src = base64ImageData,
+    createDomHTMLImageElement()..src = base64ImageUrl,
     60,
     60,
   );
