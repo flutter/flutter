@@ -79,5 +79,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/foo.png
 
 # PUBSPEC CHECKSUM: 8eeb
