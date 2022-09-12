@@ -41,6 +41,30 @@ void main() {
     }
   });
 
+
+  test('Can return whether or not impeller is enabled', () async {
+    vms.VmService? vmService;
+    try {
+      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+      if (info.serverUri == null) {
+        fail('This test must not be run with --disable-observatory.');
+      }
+
+      vmService = await vmServiceConnectUri(
+        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
+      );
+      final String? isolateId = await getIsolateId(vmService);
+
+      final vms.Response response = await vmService.callServiceExtension(
+        'ext.ui.window.impellerEnabled',
+        isolateId: isolateId,
+      );
+      expect(response.json!['enabled'], false);
+    } finally {
+      await vmService?.dispose();
+    }
+  });
+
   test('Reload fonts request sends font change notification', () async {
     vms.VmService? vmService;
     try {
@@ -85,6 +109,17 @@ Future<String> getViewId(vms.VmService vmService) async {
   final vms.Response response = await vmService.callMethod('_flutter.listViews');
   final List<Object?>? rawViews = response.json!['views'] as List<Object?>?;
   return (rawViews![0]! as Map<String, Object?>?)!['id']! as String;
+}
+
+Future<String?> getIsolateId(vms.VmService vmService) async {
+  final vms.VM vm = await vmService.getVM();
+  for (final vms.IsolateRef isolate in vm.isolates!) {
+    if (isolate.isSystemIsolate ?? false) {
+      continue;
+    }
+    return isolate.id;
+  }
+  return null;
 }
 
 class PlatformResponse {

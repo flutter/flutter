@@ -73,6 +73,16 @@ Future<developer.ServiceExtensionResponse> _reinitializeShader(
   }));
 }
 
+Future<developer.ServiceExtensionResponse> _getImpellerEnabled(
+  String method,
+  Map<String, String> parameters,
+) async {
+  return developer.ServiceExtensionResponse.result(json.encode(<String, Object>{
+    'type': 'Success',
+    'enabled': _impellerEnabled,
+  }));
+}
+
 @pragma('vm:entry-point')
 void _setupHooks() {
   assert(() {
@@ -86,7 +96,17 @@ void _setupHooks() {
     );
     return true;
   }());
+
+  // In debug and profile mode, allow tools to display the current rendering backend.
+  if (!_kReleaseMode) {
+    developer.registerExtension(
+      'ext.ui.window.impellerEnabled',
+      _getImpellerEnabled,
+    );
+  }
 }
+
+const bool _kReleaseMode = bool.fromEnvironment('dart.vm.product');
 
 /// Returns runtime Dart compilation trace as a UTF-8 encoded memory buffer.
 ///
