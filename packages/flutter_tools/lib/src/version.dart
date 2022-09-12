@@ -76,16 +76,19 @@ class FlutterVersion {
   }) : _clock = clock,
        _workingDirectory = workingDirectory {
     _frameworkRevision = frameworkRevision ?? _runGit(
-      gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
+      gitLog(<String>['-n', '1', '--pretty=format:%H']),
       globals.processUtils,
-      _workingDirectory,
+      cache: _gitAnswersCache,
+      workingDirectory: _workingDirectory,
     );
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, gitRef: _frameworkRevision);
-    _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, gitRef: _frameworkRevision, gitAnswersCache: _gitAnswersCache);
+    _frameworkVersion = _gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
   final SystemClock _clock;
   final String? _workingDirectory;
+
+  final GitAnswersCache _gitAnswersCache = GitAnswersCache();
 
   /// Fetches tags from the upstream Flutter repository and re-calculates the
   /// version.
@@ -110,18 +113,20 @@ class FlutterVersion {
   String get channel {
     String? channel = _channel;
     if (channel == null) {
-      final String gitChannel = _runGit(
-        'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
+      final String gitChannel = _runGit(<String>[
+        'git', 'rev-parse', '--abbrev-ref', '--symbolic', kGitTrackingUpstream],
         globals.processUtils,
-        _workingDirectory,
+        cache: _gitAnswersCache,
+        workingDirectory: _workingDirectory,
       );
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
         final String remote = gitChannel.substring(0, slash);
-        _repositoryUrl = _runGit(
-          'git ls-remote --get-url $remote',
+        _repositoryUrl = _runGit(<String>[
+          'git', 'ls-remote', '--get-url', remote],
           globals.processUtils,
-          _workingDirectory,
+          cache: _gitAnswersCache,
+          workingDirectory: _workingDirectory,
         );
         channel = gitChannel.substring(slash + 1);
       } else if (gitChannel.isEmpty) {
@@ -147,15 +152,20 @@ class FlutterVersion {
 
   String? _frameworkAge;
   String get frameworkAge {
+    // The age is relative (e.g. "30 hours ago") so we can't cache that.
+    // Maybe we can get the non-relativized version (also currently done in
+    // `_gitCommitDate`) and relativize it ourselves (if that's something we need).
     return _frameworkAge ??= _runGit(
-      gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
+      gitLog(<String>['-n', '1', '--pretty=format:%ar']),
       globals.processUtils,
-      _workingDirectory,
+      workingDirectory: _workingDirectory,
     );
   }
 
   late String _frameworkVersion;
-  String get frameworkVersion => _frameworkVersion;
+  String get frameworkVersion {
+    return _frameworkVersion;
+  }
 
   String get devToolsVersion => globals.cache.devToolsVersion;
 
@@ -210,6 +220,7 @@ class FlutterVersion {
   static String _gitCommitDate({
     String gitRef = 'HEAD',
     bool lenient = false,
+    GitAnswersCache? cache,
   }) {
     final List<String> args = gitLog(<String>[
       gitRef,
@@ -221,7 +232,7 @@ class FlutterVersion {
     try {
       // Don't plumb 'lenient' through directly so that we can print an error
       // if something goes wrong.
-      return _runSync(args, lenient: false);
+      return _runGit(args, globals.processUtils, cache: cache, lenient: false);
     } on VersionCheckError catch (e) {
       if (lenient) {
         final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
@@ -252,7 +263,7 @@ class FlutterVersion {
     DateTime localFrameworkCommitDate;
     try {
       // Don't perform the update check if fetching the latest local commit failed.
-      localFrameworkCommitDate = DateTime.parse(_gitCommitDate());
+      localFrameworkCommitDate = DateTime.parse(_gitCommitDate(cache: _gitAnswersCache));
     } on VersionCheckError {
       return;
     }
@@ -298,7 +309,7 @@ class FlutterVersion {
   /// the branch name will be returned as `'[user-branch]'`.
   String getBranchName({ bool redactUnknownBranches = false }) {
     _branch ??= () {
-      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', globals.processUtils);
+      final String branch = _runGit(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'], globals.processUtils, cache: _gitAnswersCache);
       return branch == 'HEAD' ? channel : branch;
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
@@ -593,18 +604,101 @@ class VersionCheckError implements Exception {
   String toString() => '$VersionCheckError: $message';
 }
 
-/// Runs [command] and returns the standard output as a string.
+/// Represents the cache for calling git commands.
+class GitAnswersCache {
+  Map<String, dynamic>? _cache;
+
+  /// Gets the cached result from running [command] in [workingDirectory] or
+  /// null if the answer is not in the cache.
+  String? getCachedValue(List<String> command, String workingDirectory) {
+    final String escapedKey = _escape(command);
+    _ansureCache();
+    final dynamic cachedForCommand = _cache![escapedKey];
+    if (cachedForCommand is! Map<String, dynamic> ) {
+      return null;
+    }
+    final Map<String, dynamic> workingDirToResult = cachedForCommand;
+    final dynamic result = workingDirToResult[workingDirectory];
+    if (result is! String) {
+      return null;
+    }
+    return result;
+  }
+
+  /// Store the [result] from running [command] in [workingDirectory].
+  void cacheResult(List<String> command, String workingDirectory, String result) {
+    final String escapedKey = _escape(command);
+    _ansureCache();
+    dynamic cachedForCommand = _cache![escapedKey];
+    if (cachedForCommand is! Map<String, dynamic> ) {
+      cachedForCommand = _cache![escapedKey] = <String, dynamic>{};
+    }
+    final Map<String, dynamic> workingDirToResult = cachedForCommand;
+    workingDirToResult[workingDirectory] = result;
+    _saveCache();
+  }
+
+  String _escape(List<String> command) {
+    return command.map((String e) => '${e.length}:$e').join();
+  }
+
+  void _ansureCache() {
+    if (_cache != null) {
+      return;
+    }
+    final File cache = globals.cache.getRoot().childFile('git_answers_cache.json');
+    if (!cache.existsSync()) {
+      _cache = <String, dynamic>{};
+      return;
+    }
+    _cache = jsonDecode(cache.readAsStringSync()) as Map<String, dynamic>;
+  }
+
+  void _saveCache() {
+    if (_cache == null) {
+      return;
+    }
+    final File cache = globals.cache.getRoot().childFile('git_answers_cache.json');
+    const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
+    cache.writeAsStringSync(prettyJsonEncoder.convert(_cache));
+  }
+}
+
+/// Runs a `git` command and returns the result from stdout.
 ///
-/// If [lenient] is true and the command fails, returns an empty string.
-/// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, { bool lenient = true }) {
-  final ProcessResult results = globals.processManager.runSync(
+/// If [cache] is provided, caching is utilized and `git` will only be run
+/// if the answer isn't in the cache. In that case the result will be cached.
+///
+/// If [lenient] is false and the command fails it throws a [ToolExit] exception.
+/// If [lenient] is true it will return stdout even on failure unless
+/// [returnEmptyOnError] is true, then it returns an empty string on failure.
+String _runGit(List<String> command, ProcessUtils processUtils,
+    {GitAnswersCache? cache,
+    String? workingDirectory,
+    bool lenient = true,
+    bool returnEmptyOnError = false}) {
+  final String usedWorkingDirectory = workingDirectory ?? Cache.flutterRoot!;
+
+  if (cache != null) {
+    final String? cachedValue = cache.getCachedValue(command, usedWorkingDirectory);
+    if (cachedValue != null) {
+      return cachedValue;
+    }
+  }
+
+  final RunResult results = processUtils.runSync(
     command,
-    workingDirectory: Cache.flutterRoot,
+    workingDirectory: usedWorkingDirectory,
   );
 
+  final String result = results.stdout.trim();
+
   if (results.exitCode == 0) {
-    return (results.stdout as String).trim();
+    if (cache != null) {
+      cache.cacheResult(command, usedWorkingDirectory, result);
+    }
+
+    return result;
   }
 
   if (!lenient) {
@@ -615,14 +709,11 @@ String _runSync(List<String> command, { bool lenient = true }) {
     );
   }
 
-  return '';
-}
+  if (returnEmptyOnError) {
+    return '';
+  }
 
-String _runGit(String command, ProcessUtils processUtils, [String? workingDirectory]) {
-  return processUtils.runSync(
-    command.split(' '),
-    workingDirectory: workingDirectory ?? Cache.flutterRoot,
-  ).stdout.trim();
+  return result;
 }
 
 /// Runs [command] in the root of the Flutter installation and returns the
@@ -705,33 +796,48 @@ class GitTagVersion {
     Platform platform, {
     String? workingDirectory,
     bool fetchTags = false,
-    String gitRef = 'HEAD'
+    String gitRef = 'HEAD',
+    GitAnswersCache? gitAnswersCache,
   }) {
     if (fetchTags) {
-      final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
+      final String channel = _runGit(<String>['git' ,'rev-parse', '--abbrev-ref', 'HEAD'], processUtils, workingDirectory: workingDirectory);
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
         final String flutterGit = platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-        _runGit('git fetch $flutterGit --tags -f', processUtils, workingDirectory);
+        _runGit(<String>['git', 'fetch', flutterGit, '--tags', '-f'], processUtils, workingDirectory: workingDirectory);
       }
     }
     // find all tags attached to the given [gitRef]
     final List<String> tags = _runGit(
-      'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
-
-    // Check first for a stable tag
-    final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
-    for (final String tag in tags) {
-      if (stableTagPattern.hasMatch(tag.trim())) {
-        return parse(tag);
-      }
+            <String>['git', 'tag', '--points-at', gitRef], processUtils,
+            cache: gitAnswersCache,
+            workingDirectory: workingDirectory)
+        .trim()
+        .split('\n');
+    
+    // Guard against no tags to avoid paying for compiling RegExps we're not
+    // going to use.
+    bool tagsEmpty = tags.isEmpty;
+    if (tags.length == 1 && tags.single == '') {
+      tagsEmpty = true;
     }
-    // Next check for a dev tag
-    final RegExp devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
-    for (final String tag in tags) {
-      if (devTagPattern.hasMatch(tag.trim())) {
-        return parse(tag);
+
+    if (!tagsEmpty) {
+      // Check first for a stable tag
+      final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
+      for (final String tag in tags) {
+        if (stableTagPattern.hasMatch(tag.trim())) {
+          return parse(tag);
+        }
+      }
+
+      // Next check for a dev tag
+      final RegExp devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
+      for (final String tag in tags) {
+        if (devTagPattern.hasMatch(tag.trim())) {
+          return parse(tag);
+        }
       }
     }
 
@@ -739,9 +845,10 @@ class GitTagVersion {
     // recent tag and number of commits past.
     return parse(
       _runGit(
-        'git describe --match *.*.* --long --tags $gitRef',
+        <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', gitRef],
         processUtils,
-        workingDirectory,
+        cache: gitAnswersCache,
+        workingDirectory: workingDirectory,
       )
     );
   }

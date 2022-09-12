@@ -162,6 +162,9 @@ function upgrade_flutter () (
       mv "$SNAPSHOT_PATH" "$SNAPSHOT_PATH_OLD"
     fi
 
+    # Clean git answers cache
+    rm -f "$GIT_ANSWERS_CACHE"
+
     # Compile...
     "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
     echo "$compilekey" > "$STAMP_PATH"
@@ -192,6 +195,7 @@ function shared::execute() {
   FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
   SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
   STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
+  GIT_ANSWERS_CACHE="$FLUTTER_ROOT/bin/cache/git_answers_cache.json"
   SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
   DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 

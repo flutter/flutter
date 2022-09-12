@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -435,6 +437,93 @@ void main() {
     Cache: () => cache,
   });
 
+  testUsingContext('version uses cache json', () async {
+    const List<String> hashCommand = <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'];
+    const List<String> tagsCommand = <String>['git', 'tag', '--points-at', '1234abcd'];
+    const List<String> describeCommand = <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'];
+    const List<String> trackingBranchCommand = <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'];
+    const List<String> branchCommand = <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'];
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: hashCommand,
+        stdout: '1234abcd',
+      ),
+      const FakeCommand(
+        command: tagsCommand,
+      ),
+      const FakeCommand(
+        command: describeCommand,
+        stdout: '0.1.2-3-1234abcd',
+      ),
+      const FakeCommand(
+        command: trackingBranchCommand,
+        stdout: 'feature-branch',
+      ),
+      const FakeCommand(
+        command: branchCommand,
+        stdout: 'feature-branch',
+      ),
+    ]);
+
+    final FlutterVersion flutterVersion = globals.flutterVersion;
+    expect(flutterVersion.channel, 'feature-branch');
+    expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
+    expect(flutterVersion.getBranchName(), 'feature-branch');
+    expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
+    expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
+    expect(processManager, hasNoRemainingExpectations);
+
+    {
+      // Create another FlutterVersion, make sure answers are gotten from cache
+      // (i.e. we don't run any more processes).
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion();
+      expect(flutterVersion.channel, 'feature-branch');
+      expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
+      expect(flutterVersion.getBranchName(), 'feature-branch');
+      expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
+      expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
+    }
+
+    {
+      // Create another FlutterVersion, make sure answers are gotten from cache.
+      // (this time by modifying the cache first).
+      expect(processManager, hasNoRemainingExpectations);
+      final GitAnswersCache gitCache = GitAnswersCache();
+
+      // We don't change '1234abcd' as that's referenced in other commands.
+      expect(gitCache.getCachedValue(hashCommand, Cache.flutterRoot!), '1234abcd');
+
+      expect(gitCache.getCachedValue(tagsCommand, Cache.flutterRoot!), '');
+      gitCache.cacheResult(tagsCommand, Cache.flutterRoot!, 'testtag');
+      expect(gitCache.getCachedValue(tagsCommand, Cache.flutterRoot!), 'testtag');
+
+      expect(gitCache.getCachedValue(describeCommand, Cache.flutterRoot!), '0.1.2-3-1234abcd');
+      gitCache.cacheResult(describeCommand, Cache.flutterRoot!, '0.2.1-3-1234abcd');
+      expect(gitCache.getCachedValue(describeCommand, Cache.flutterRoot!), '0.2.1-3-1234abcd');
+
+      expect(gitCache.getCachedValue(trackingBranchCommand, Cache.flutterRoot!), 'feature-branch');
+      gitCache.cacheResult(trackingBranchCommand, Cache.flutterRoot!, 'feature-branchX');
+      expect(gitCache.getCachedValue(trackingBranchCommand, Cache.flutterRoot!), 'feature-branchX');
+
+      expect(gitCache.getCachedValue(branchCommand, Cache.flutterRoot!), 'feature-branch');
+      gitCache.cacheResult(branchCommand, Cache.flutterRoot!, 'feature-branchY');
+      expect(gitCache.getCachedValue(branchCommand, Cache.flutterRoot!), 'feature-branchY');
+
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion();
+      expect(flutterVersion.channel, 'feature-branchX');
+      expect(flutterVersion.getVersionString(), 'feature-branchY/1234abcd');
+      expect(flutterVersion.getBranchName(), 'feature-branchY');
+      expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
+      expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
+    }
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FlutterVersion(clock: _testClock),
+    ProcessManager: () => processManager,
+    Cache: () => cache,
+  });
+
   testUsingContext('GitTagVersion', () {
     const String hash = 'abcdef';
     GitTagVersion gitTagVersion;
@@ -673,6 +762,7 @@ void main() {
 class FakeCache extends Fake implements Cache {
   String? versionStamp;
   bool setVersionStamp = false;
+  final MemoryFileSystem fs = MemoryFileSystem();
 
   @override
   String get engineRevision => 'abcdefg';
@@ -699,6 +789,12 @@ class FakeCache extends Fake implements Cache {
     if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
       setVersionStamp = true;
     }
+  }
+
+  @override
+  Directory getRoot() {
+    // fs is a MemoryFileSystem so just report any "existing" dir.
+    return fs.systemTempDirectory;
   }
 }
 

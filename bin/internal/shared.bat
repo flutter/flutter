@@ -18,6 +18,7 @@ SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
 SET snapshot_path_old=%cache_dir%\flutter_tools.snapshot.old
 SET stamp_path=%cache_dir%\flutter_tools.stamp
+SET git_answers_cache=%cache_dir%\git_answers_cache.json
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
@@ -130,6 +131,7 @@ GOTO :after_subroutine
 
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
+    IF EXIST "%git_answers_cache%" DEL "%git_answers_cache%"
     ECHO: > "%cache_dir%\.dartignore"
     ECHO Building flutter tool... 1>&2
     PUSHD "%flutter_tools_dir%"
