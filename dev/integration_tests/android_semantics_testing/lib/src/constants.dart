@@ -211,7 +211,7 @@ class AndroidSemanticsAction {
   /// Creates a new [AndroidSemanticsAction] from an integer `value`.
   ///
   /// Returns `null` if the id is not a known Android accessibility action.
-  static AndroidSemanticsAction deserialize(int value) {
-    return _kActionById[value]!;
+  static AndroidSemanticsAction? deserialize(int value) {
+    return _kActionById[value];
   }
 }
