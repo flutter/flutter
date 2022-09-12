@@ -28,6 +28,13 @@ List<int> _to64(num value) {
   return temp;
 }
 
+List<int> _encodeString(String value) {
+  return <int>[
+    value.length, // This won't work if we use multi-byte characters.
+    ...utf8.encode(value),
+  ];
+}
+
 /// A simple platform view.
 class PlatformViewScenario extends Scenario
     with _BasePlatformViewScenarioMixin {
@@ -739,13 +746,11 @@ class PlatformViewForTouchIOSScenario extends Scenario
       const int valueMap = 13;
       final Uint8List message = Uint8List.fromList(<int>[
         valueString,
-        method.length,
-        ...utf8.encode(method),
+        ..._encodeString(method),
         valueMap,
         1,
         valueString,
-        'id'.length,
-        ...utf8.encode('id'),
+        ..._encodeString('id'),
         valueInt32,
         ..._to32(id),
       ]);
@@ -1107,12 +1112,12 @@ void addPlatformView(
     return;
   }
 
-  bool usesAndroidHybridComposition = false;
-  if (scenarioParams['use_android_view'] is bool) {
-    usesAndroidHybridComposition = scenarioParams['use_android_view'] as bool;
-  }
+  final bool usesAndroidHybridComposition = scenarioParams['use_android_view'] as bool? ?? false;
+  final bool expectAndroidHybridCompositionFallback =
+      scenarioParams['expect_android_view_fallback'] as bool? ?? false;
 
   const int valueTrue = 1;
+  const int valueFalse = 2;
   const int valueInt32 = 3;
   const int valueFloat64 = 6;
   const int valueString = 7;
@@ -1121,29 +1126,24 @@ void addPlatformView(
 
   final Uint8List message = Uint8List.fromList(<int>[
     valueString,
-    'create'.length, // this won't work if we use multi-byte characters.
-    ...utf8.encode('create'),
+    ..._encodeString('create'),
     valueMap,
     if (Platform.isIOS) 3, // 3 entries in map for iOS.
     if (Platform.isAndroid && !usesAndroidHybridComposition)
-      6, // 6 entries in map for texture on Android.
+      7, // 7 entries in map for texture on Android.
     if (Platform.isAndroid && usesAndroidHybridComposition)
       5, // 5 entries in map for hybrid composition on Android.
     valueString,
-    'id'.length,
-    ...utf8.encode('id'),
+    ..._encodeString('id'),
     valueInt32,
     ..._to32(id),
     valueString,
-    'viewType'.length,
-    ...utf8.encode('viewType'),
+    ..._encodeString('viewType'),
     valueString,
-    viewType.length,
-    ...utf8.encode(viewType),
+    ..._encodeString(viewType),
     if (Platform.isAndroid && !usesAndroidHybridComposition) ...<int>[
       valueString,
-      'width'.length,
-      ...utf8.encode('width'),
+      ..._encodeString('width'),
       // This is missing the 64-bit boundary alignment, making the entire
       // message encoding fragile to changes before this point. Do not add new
       // variable-length values such as strings before this point.
@@ -1152,33 +1152,31 @@ void addPlatformView(
       valueFloat64,
       ..._to64(width),
       valueString,
-      'height'.length,
-      ...utf8.encode('height'),
+      ..._encodeString('height'),
       valueFloat64,
       ..._to64(height),
       valueString,
-      'direction'.length,
-      ...utf8.encode('direction'),
+      ..._encodeString('direction'),
       valueInt32,
       ..._to32(0), // LTR
+      valueString,
+      ..._encodeString('hybridFallback'),
+      if (expectAndroidHybridCompositionFallback) valueTrue
+      else valueFalse,
     ],
     if (Platform.isAndroid && usesAndroidHybridComposition) ...<int>[
       valueString,
-      'hybrid'.length,
-      ...utf8.encode('hybrid'),
+      ..._encodeString('hybrid'),
       valueTrue,
       valueString,
-      'direction'.length,
-      ...utf8.encode('direction'),
+      ..._encodeString('direction'),
       valueInt32,
       ..._to32(0), // LTR
     ],
     valueString,
-    'params'.length,
-    ...utf8.encode('params'),
+    ..._encodeString('params'),
     valueUint8List,
-    text.length,
-    ...utf8.encode(text),
+    ..._encodeString(text),
   ]);
 
   dispatcher.sendPlatformMessage(
@@ -1189,11 +1187,17 @@ void addPlatformView(
       if (response != null &&
           Platform.isAndroid &&
           !usesAndroidHybridComposition) {
-        // This is the texture ID.
         assert(response.getUint8(0) == 0, 'expected envelope');
         final int type = response.getUint8(1);
-        assert(type == 4, 'expected int64');
-        textureId = response.getInt64(2, Endian.host);
+        if (expectAndroidHybridCompositionFallback) {
+          // Fallback is indicated with a null return.
+          assert(type == 0, 'expected null');
+          textureId = -1;
+        } else {
+          // This is the texture ID.
+          assert(type == 4, 'expected int64');
+          textureId = response.getInt64(2, Endian.host);
+        }
       } else {
         // There no texture ID.
         textureId = -1;
@@ -1215,8 +1219,12 @@ Future<void> addPlatformViewToSceneBuilder(
   if (Platform.isIOS) {
     sceneBuilder.addPlatformView(id, width: width, height: height);
   } else if (Platform.isAndroid) {
-    final bool? usesAndroidHybridComposition = scenarioParams['use_android_view'] as bool?;
-    if (usesAndroidHybridComposition != null && usesAndroidHybridComposition) {
+    final bool expectAndroidHybridCompositionFallback =
+      scenarioParams['expect_android_view_fallback'] as bool? ?? false;
+    final bool usesAndroidHybridComposition =
+      (scenarioParams['use_android_view'] as bool? ?? false) ||
+      expectAndroidHybridCompositionFallback;
+    if (usesAndroidHybridComposition) {
       sceneBuilder.addPlatformView(id, width: width, height: height);
     } else if (textureId != -1) {
       sceneBuilder.addTexture(textureId, width: width, height: height);

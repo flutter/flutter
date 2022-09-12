@@ -114,7 +114,6 @@ class VirtualDisplayController {
             view,
             accessibilityEventsDelegate,
             viewId,
-            createParams,
             focusChangeListener);
     presentation.show();
   }
