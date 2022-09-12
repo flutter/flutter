@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
@@ -53,13 +55,13 @@ class AndroidSemanticsNode {
   ///       ]
   ///     }
   factory AndroidSemanticsNode.deserialize(String value) {
-    return AndroidSemanticsNode._(json.decode(value) as Map<String, Object>);
+    return AndroidSemanticsNode._(json.decode(value));
   }
 
-  final Map<String, Object> _values;
+  final dynamic _values;
   final List<AndroidSemanticsNode> _children = <AndroidSemanticsNode>[];
 
-  Map<String, Object> get _flags => _values['flags'] as Map<String, Object>;
+  dynamic get _flags => _values['flags'];
 
   /// The text value of the semantics node.
   ///
@@ -132,13 +134,12 @@ class AndroidSemanticsNode {
 
   /// Gets a [Rect] which defines the position and size of the semantics node.
   Rect getRect() {
-    final Map<String, Object> rawRect = _values['rect'] as Map<String, Object>;
-    final Map<String, int> rect = rawRect.cast<String, int>();
+    final dynamic rawRect = _values['rect'];
     return Rect.fromLTRB(
-      rect['left'].toDouble(),
-      rect['top'].toDouble(),
-      rect['right'].toDouble(),
-      rect['bottom'].toDouble(),
+      (rawRect['left']! as int).toDouble(),
+      (rawRect['top']! as int).toDouble(),
+      (rawRect['right']! as int).toDouble(),
+      (rawRect['bottom']! as int).toDouble(),
     );
   }
 
@@ -150,7 +151,7 @@ class AndroidSemanticsNode {
 
   /// Gets a list of [AndroidSemanticsActions] which are defined for the node.
   List<AndroidSemanticsAction> getActions() => <AndroidSemanticsAction>[
-    for (final int id in (_values['actions'] as List<dynamic>).cast<int>()) AndroidSemanticsAction.deserialize(id),
+    for (final int id in (_values['actions']! as List<dynamic>).cast<int>()) AndroidSemanticsAction.deserialize(id)!,
   ];
 
   @override
