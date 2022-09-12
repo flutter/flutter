@@ -1,4 +1,4 @@
-Signature: 558e57bc36dcdb217ab4b8e1a9844530
+Signature: 6b1f5d3c66733fe0c7f11c2bd8ff3b47
 
 UNUSED LICENSES:
 
@@ -5523,6 +5523,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlQueueManager.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSampler.mm
+FILE: ../../../third_party/skia/src/gpu/graphite/render/AnalyticRRectRenderStep.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/render/AnalyticRRectRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/BitmapTextRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/BitmapTextRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/render/CommonDepthStencilSettings.h
