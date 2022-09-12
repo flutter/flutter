@@ -161,10 +161,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   // For local tap drag count
   int? _consecutiveTapCountWhileDragging;
-  // int get _effectiveConsecutiveTapCountWhileDragging => _consecutiveTapCountWhileDragging ?? 1;
 
   // Tap related state
-  _GestureState _tapState = _GestureState.ready;
   PointerUpEvent? _up;
   PointerDownEvent? _down;
 
@@ -233,15 +231,27 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    print('addAllowedPointer $event ${event.pointer} $_tapState');
+    print('addAllowedPointer $event ${event.pointer}');
     super.addAllowedPointer(event);
-    if (_tapState == _GestureState.ready) {
-      print('setting deadline');
-      _tapState = _GestureState.possible;
-      _primaryPointer = event.pointer;
-      if (deadline != null) {
-        print('setting deadline 2');
-        _deadlineTimer = Timer(deadline!, () => _didExceedDeadlineWithEvent(event));
+    print('setting deadline');
+    _primaryPointer = event.pointer;
+    if (deadline != null) {
+      print('setting deadline 2');
+      _deadlineTimer = Timer(deadline!, () => _didExceedDeadlineWithEvent(event));
+    }
+
+    // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
+    // because `acceptGesture` might be called before `handlePrimaryPointer`,
+    // which relies on `_down` to call `handleTapDown`.
+    if (_dragState == _GestureState.ready) {
+      print('drag down');
+      _globalDistanceMoved = 0.0;
+      _initialButtons = event.buttons;
+      _dragState = _GestureState.possible;
+      _down = event;
+
+      if (dragStartBehavior == DragStartBehavior.down) {
+        _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
       }
     }
   }
@@ -300,38 +310,21 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         break;
 
       case _GestureState.accepted:
+        // We only arrive here, after the recognizer has accepted the `PointerEvent`
+        // as a drag. Meaning `_checkTapDown`, and `_checkStart` have already ran.
         _checkEnd();
+        _initialButtons = null;
         break;
     }
     _stopDeadlineTimer();
-    // _up = null;
-    // _down = null;
-    print('buttons set to null');
-    _initialButtons = null;
-    print('buttons set to null');
     _dragState = _GestureState.ready;
-    _tapState = _GestureState.ready;
     _consecutiveTapCountWhileDragging = null;
   }
 
   @override
   void handleEvent(PointerEvent event) {
     print('handle event ${event.pointer}');
-    if (event is PointerDownEvent) {
-      print('handle PointerDownEvent $event $_dragState');
-      if (_dragState == _GestureState.ready) {
-        print('drag down');
-        _globalDistanceMoved = 0.0;
-        _initialButtons = event.buttons;
-        _dragState = _GestureState.possible;
-        _down = event;
-
-        if (dragStartBehavior == DragStartBehavior.down) {
-          _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-        }
-        // _checkTapDown(event);
-      }
-    } else if (event is PointerMoveEvent) {
+    if (event is PointerMoveEvent) {
       print('handle PointerMoveEvent $event');
       if (_initialButtons == kSecondaryButton) {
         resolve(GestureDisposition.rejected);
@@ -367,8 +360,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     } else if (event is PointerCancelEvent){
       print('cancel from pointercancel');
       _giveUpPointer(event.pointer);
-    } else {
-      print('handle unknown pointer $event');
     }
   }
 
@@ -385,6 +376,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     // This prevents an erroneous _up being sent when this recognizer is
     // accepted for a drag, following a previous rejection.
     _resetTaps();
+    consecutiveTapReset();
+    _initialButtons = null;
   }
 
   @override
@@ -440,14 +433,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     }
 
     print('checkTapDown');
-
-    _initialButtons = event.buttons;
-    // _dragState = _GestureState.possible;
-
-    if (dragStartBehavior == DragStartBehavior.down) {
-      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-    }
-
     final TapDownDetails details = TapDownDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
