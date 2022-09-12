@@ -168,7 +168,7 @@ class AndroidSemanticsAction {
       case _kSetText:
         return 'AndroidSemanticsAction.setText';
       default:
-        return null;
+        throw UnimplementedError();
     }
   }
 
@@ -212,6 +212,6 @@ class AndroidSemanticsAction {
   ///
   /// Returns `null` if the id is not a known Android accessibility action.
   static AndroidSemanticsAction deserialize(int value) {
-    return _kActionById[value];
+    return _kActionById[value]!;
   }
 }
