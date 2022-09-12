@@ -59,10 +59,9 @@ std::vector<uint8_t> CreateGradientBuffer(const std::vector<Color>& colors,
     AppendColor(previous_color, &color_stop_channels);
 
     for (auto i = 1u; i < texture_size - 1; i++) {
-      auto scaled_i = i / texture_size;
+      auto scaled_i = i / (texture_size * 1.0);
       Color next_color = colors[previous_color_index + 1];
       auto next_stop = stops[previous_color_index + 1];
-
       // We're almost exactly equal to the next stop.
       if (ScalarNearlyEqual(scaled_i, next_stop)) {
         AppendColor(next_color, &color_stop_channels);
@@ -77,16 +76,17 @@ std::vector<uint8_t> CreateGradientBuffer(const std::vector<Color>& colors,
 
         AppendColor(mixed_color, &color_stop_channels);
       } else {
-        // We've slightly overshot the next stop. In theory this only happens if
-        // we have scaled our texture such that not every stop gets their own
-        // index. For now I am simply ignoring the inbetween colors. Currently
-        // this requires a gradient with either an absurd number of textures
-        // or very small stops.
-        AppendColor(next_color, &color_stop_channels);
-
+        // We've slightly overshot the previous stop.
         previous_color = next_color;
         previous_stop = next_stop;
         previous_color_index += 1;
+        next_color = colors[previous_color_index + 1];
+        auto next_stop = stops[previous_color_index + 1];
+
+        auto t = (scaled_i - previous_stop) / (next_stop - previous_stop);
+        auto mixed_color = Color::lerp(previous_color, next_color, t);
+
+        AppendColor(mixed_color, &color_stop_channels);
       }
     }
     // The last index is always equal to the last color, exactly.

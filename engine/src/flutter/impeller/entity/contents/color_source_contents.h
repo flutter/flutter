@@ -21,6 +21,8 @@ class ColorSourceContents : public Contents {
 
   void SetMatrix(Matrix matrix);
 
+  void SetAlpha(Scalar alpha);
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
@@ -29,9 +31,12 @@ class ColorSourceContents : public Contents {
 
   const Matrix& GetInverseMatrix() const;
 
+  Scalar GetAlpha() const;
+
  private:
   Path path_;
   Matrix inverse_matrix_;
+  Scalar alpha_ = 1.0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ColorSourceContents);
 };

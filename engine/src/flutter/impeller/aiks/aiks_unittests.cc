@@ -313,7 +313,9 @@ TEST_P(AiksTest, CanRenderLinearGradient) {
         Entity::TileMode::kMirror, Entity::TileMode::kDecal};
 
     static int selected_tile_mode = 0;
+    static float alpha = 1;
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Alpha", &alpha, 0, 1);
     ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
                  sizeof(tile_mode_names) / sizeof(char*));
     static Matrix matrix = {
@@ -347,6 +349,7 @@ TEST_P(AiksTest, CanRenderLinearGradient) {
       contents->SetMatrix(matrix);
       return contents;
     };
+    paint.color = Color(1.0, 1.0, 1.0, alpha);
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -368,7 +371,9 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColors) {
         Entity::TileMode::kMirror, Entity::TileMode::kDecal};
 
     static int selected_tile_mode = 0;
+    static float alpha = 1;
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Alpha", &alpha, 0, 1);
     ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
                  sizeof(tile_mode_names) / sizeof(char*));
     static Matrix matrix = {
@@ -417,6 +422,7 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColors) {
       contents->SetMatrix(matrix);
       return contents;
     };
+    paint.color = Color(1.0, 1.0, 1.0, alpha);
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -533,8 +539,8 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
           Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
           Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
       std::vector<Scalar> stops = {
-          0.0 / 126.0,  2.0 / 126.0,  4.0 / 126.0, 8.0 / 126.0,
-          16.0 / 126.0, 32.0 / 126.0, 1.0,
+          0.0,         2.0 / 62.0,  4.0 / 62.0, 8.0 / 62.0,
+          16.0 / 62.0, 32.0 / 62.0, 1.0,
       };
 
       auto contents = std::make_shared<LinearGradientContents>();

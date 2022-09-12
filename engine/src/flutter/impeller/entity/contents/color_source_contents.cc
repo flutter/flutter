@@ -21,6 +21,14 @@ const Path& ColorSourceContents::GetPath() const {
   return path_;
 }
 
+void ColorSourceContents::SetAlpha(Scalar alpha) {
+  alpha_ = alpha;
+}
+
+Scalar ColorSourceContents::GetAlpha() const {
+  return alpha_;
+}
+
 void ColorSourceContents::SetMatrix(Matrix matrix) {
   inverse_matrix_ = matrix.Invert();
 }
