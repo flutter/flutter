@@ -133,11 +133,7 @@ class ScreenshotCommand extends FlutterCommand {
       throwToolExit('Error taking screenshot: $error');
     }
 
-    try {
-      _showOutputFileInfo(outputFile);
-    } on FileSystemException catch (error) {
-      throwToolExit('Error: $error');
-    }
+    _showOutputFileInfo(outputFile);
 
   }
 
