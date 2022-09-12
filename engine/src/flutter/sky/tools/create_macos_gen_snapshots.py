@@ -33,6 +33,10 @@ def main():
       if os.path.isabs(args.dst) else os.path.join(buildroot_dir, args.dst)
   )
 
+  # if dst folder does not exist create it.
+  if not os.path.exists(dst):
+    os.makedirs(dst)
+
   if args.x64_out_dir:
     x64_out_dir = (
         args.x64_out_dir if os.path.isabs(args.x64_out_dir) else
