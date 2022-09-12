@@ -72,17 +72,20 @@ mixin _ConsecutiveTapMixin {
 
   void incrementConsecutiveTapCountOnDown(Offset tapGlobalPosition) {
     if (lastTapOffset == null) {
+      // If last tap offset is false then we have restarted our consecutive tap count,
+      // so the consecutiveTapTimer should be null.ß
+      assert(consecutiveTapTimer == null);
       consecutiveTapCount += 1;
       lastTapOffset = tapGlobalPosition;
     } else {
       if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(tapGlobalPosition)) {
         consecutiveTapCount += 1;
-        consecutiveTapTimerReset();
+        consecutiveTapTimerStop();
       }
     }
   }
 
-  void consecutiveTapTimeout() {
+  void consecutiveTapReset() {
     print('consecutive tap timeout');
     consecutiveTapTimer?.cancel();
     consecutiveTapTimer = null;
@@ -90,11 +93,10 @@ mixin _ConsecutiveTapMixin {
     consecutiveTapCount = 0;
   }
 
-  void consecutiveTapTimerReset() {
-    print('consecutiveTapTimer reset');
+  void consecutiveTapTimerStop() {
+    print('consecutiveTapTimer stop');
     consecutiveTapTimer?.cancel();
     consecutiveTapTimer = null;
-    consecutiveTapTimer = Timer(kDoubleTapTimeout, consecutiveTapTimeout);
   }
 }
 
@@ -294,7 +296,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         } else {
           _checkDragCancel();
           _checkTapUp(_up!);
-          consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapTimeout);
         }
         break;
 
@@ -390,7 +391,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   @override
   void dispose() {
     _stopDeadlineTimer();
-    consecutiveTapTimeout();
+    consecutiveTapReset();
     super.dispose();
   }
 
@@ -478,6 +479,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     if (!_wonArenaForPrimaryPointer) {
       return;
     }
+
+    consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapReset);
+
     final TapUpDetails upDetails = TapUpDetails(
       kind: event.kind,
       globalPosition: event.position,
@@ -500,6 +504,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         break;
       default:
     }
+
     _resetTaps();
     if (!_acceptedActivePointers.remove(event.pointer)) {
       print('resolving pointer from _giveUp');
@@ -512,6 +517,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
     }
+
     final DragStartDetails details = DragStartDetails(
       sourceTimeStamp: event.timeStamp,
       globalPosition: _initialPosition.global,
@@ -520,12 +526,14 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     );
 
     invokeCallback<void>('onStart', () => onStart!(details, _effectiveConsecutiveTapCountWhileDragging));
+
     _start = null;
   }
 
   void _checkUpdate(PointerMoveEvent event) {
     final Offset globalPosition = _correctedPosition != null ? _correctedPosition!.global : event.position;
-    final Offset localPosition = _correctedPosition != null ? _correctedPosition!.local : event.localPosition; 
+    final Offset localPosition = _correctedPosition != null ? _correctedPosition!.local : event.localPosition;
+
     final DragUpdateDetails details =  DragUpdateDetails(
       sourceTimeStamp: event.timeStamp,
       delta: event.localDelta,
@@ -535,12 +543,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       offsetFromOrigin: globalPosition - _initialPosition.global,
       localOffsetFromOrigin: localPosition - _initialPosition.local,
     );
+
     invokeCallback<void>('onUpdate', () => onUpdate!(details, _effectiveConsecutiveTapCountWhileDragging));
   }
 
   void _checkEnd() {
     final DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
+
     invokeCallback<void>('onEnd', () => onEnd!(endDetails, _effectiveConsecutiveTapCountWhileDragging));
+
     _resetTaps();
   }
 
@@ -549,7 +560,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     _checkTapCancel();
     _checkDragCancel();
     _resetTaps();
-    consecutiveTapTimeout();
+    consecutiveTapReset();
   }
 
   void _checkTapCancel() {
