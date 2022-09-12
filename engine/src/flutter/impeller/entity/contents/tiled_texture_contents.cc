@@ -91,6 +91,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   frag_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
   frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
+  frag_info.alpha = GetAlpha();
 
   Command cmd;
   cmd.label = "TiledTextureFill";

@@ -118,7 +118,9 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
     static int selected_y_tile_mode = 0;
     static int selected_mip_filter = 0;
     static int selected_min_mag_filter = 0;
+    static float alpha = 1.0;
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Alpha", &alpha, 0.0, 1.0);
     ImGui::Combo("X tile mode", &selected_x_tile_mode, tile_mode_names,
                  sizeof(tile_mode_names) / sizeof(char*));
     ImGui::Combo("Y tile mode", &selected_y_tile_mode, tile_mode_names,
@@ -159,6 +161,7 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
       contents->SetMatrix(matrix);
       return contents;
     };
+    paint.color = Color(1, 1, 1, alpha);
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
