@@ -160,7 +160,7 @@ Future<void> run(List<String> args) async {
       // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
       // test files may appear to be in the root directory.
       if (coverageDirectory == null) {
-        globals.fs.currentDirectory = testDirectory?.parent;
+        globals.fs.currentDirectory = testDirectory!.parent;
       } else {
         globals.fs.currentDirectory = testDirectory;
       }
