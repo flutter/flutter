@@ -1181,24 +1181,24 @@ mixin WidgetInspectorService {
       },
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedRenderObject',
+      name: WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
       callback: _getSelectedRenderObject,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
       callback: _getSelectedWidget,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedSummaryWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
       callback: _getSelectedSummaryWidget,
     );
 
     _registerSignalServiceExtension(
-      name: 'isWidgetCreationTracked',
+      name: WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
       callback: isWidgetCreationTracked,
     );
     registerServiceExtension(
-      name: 'screenshot',
+      name: WidgetInspectorServiceExtensions.screenshot.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('id'));
         assert(parameters.containsKey('width'));
