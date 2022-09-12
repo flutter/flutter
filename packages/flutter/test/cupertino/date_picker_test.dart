@@ -1314,19 +1314,23 @@ void main() {
       ),
     );
 
-    await expectLater(
-      find.byType(CupertinoTimerPicker),
-      matchesGoldenFile('timer_picker_test.datetime.initial.png'),
-    );
+    if (!skipPerspectiveTextGoldens) {
+      await expectLater(
+        find.byType(CupertinoTimerPicker),
+        matchesGoldenFile('timer_picker_test.datetime.initial.png'),
+      );
+    }
 
     // Slightly drag the minute component to make the current minute off-center.
     await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
     await tester.pump();
 
-    await expectLater(
-      find.byType(CupertinoTimerPicker),
-      matchesGoldenFile('timer_picker_test.datetime.drag.png'),
-    );
+    if (!skipPerspectiveTextGoldens) {
+      await expectLater(
+        find.byType(CupertinoTimerPicker),
+        matchesGoldenFile('timer_picker_test.datetime.drag.png'),
+      );
+    }
   });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
