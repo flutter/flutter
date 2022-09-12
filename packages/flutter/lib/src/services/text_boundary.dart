@@ -19,10 +19,14 @@ abstract class TextBoundary {
   /// A constant constructor to enable subclass override.
   const TextBoundary();
 
-  /// Returns the leading text boundary at the given location, inclusive.
+  /// Returns the leading text boundary at the given location.
+  ///
+  /// The return value must be less or equal to the input position.
   TextPosition getLeadingTextBoundaryAt(TextPosition position);
 
   /// Returns the trailing text boundary at the given location, exclusive.
+  ///
+  /// The return value must be greater or equal to the input position.
   TextPosition getTrailingTextBoundaryAt(TextPosition position);
 
   /// Gets the text boundary range that encloses the input position.
