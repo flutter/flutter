@@ -1446,7 +1446,7 @@ void main() {
       final Finder titleTextFinder = find.byWidget(titleText).first;
 
       // Gets the width of the large title
-      final Offset initialLargeTitleTextSize = 
+      final Offset initialLargeTitleTextSize =
           tester.getBottomLeft(titleTextFinder) -
               tester.getBottomRight(titleTextFinder);
 
@@ -1454,7 +1454,7 @@ void main() {
       await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
       await tester.pump();
 
-      final Offset magnifiedTitleTextSize =  
+      final Offset magnifiedTitleTextSize =
           tester.getBottomLeft(titleTextFinder) -
               tester.getBottomRight(titleTextFinder);
 

@@ -809,8 +809,8 @@ class _LargeTitleNavigationBarSliverDelegate
       border: border,
       backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
       brightness: brightness,
-      // A LayoutBuilder lets us figure out the height of the nav bar after 
-      // stretching from overscrolls. This lets us determine how much to grow 
+      // A LayoutBuilder lets us figure out the height of the nav bar after
+      // stretching from overscrolls. This lets us determine how much to grow
       // the size of the large title text during overscrolls.
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -931,7 +931,7 @@ class _LargeTitleNavigationBarSliverDelegate
 }
 
 /// The large title of the navigation bar.
-/// 
+///
 /// Magnifies when overscrolled.
 class _LargeTitle extends SingleChildRenderObjectWidget {
   const _LargeTitle({
@@ -948,8 +948,8 @@ class _LargeTitle extends SingleChildRenderObjectWidget {
   @override
   _RenderLargeTitle createRenderObject(BuildContext context) {
     return _RenderLargeTitle(
-      navBarConstraints: constraints, 
-      maxExtent: maxExtent, 
+      navBarConstraints: constraints,
+      maxExtent: maxExtent,
       textDirection: textDirection,
     );
   }
@@ -968,10 +968,10 @@ class _RenderLargeTitle extends RenderProxyBox {
     required BoxConstraints navBarConstraints,
     required double maxExtent,
     required TextDirection textDirection,
-  }) : _navBarConstraints = navBarConstraints, 
+  }) : _navBarConstraints = navBarConstraints,
       _maxExtent = maxExtent,
       _textDirection = textDirection;
-  
+
   static const AlignmentDirectional alignment = AlignmentDirectional.bottomStart;
 
   BoxConstraints get navBarConstraints => _navBarConstraints;
@@ -995,7 +995,7 @@ class _RenderLargeTitle extends RenderProxyBox {
 
     markNeedsPaint();
   }
-  
+
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -1003,7 +1003,7 @@ class _RenderLargeTitle extends RenderProxyBox {
       return;
     }
     _textDirection = value;
-    
+
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -1018,13 +1018,13 @@ class _RenderLargeTitle extends RenderProxyBox {
 
     // This scale is estimated from the settings app in iOS 14.
     // The large title scales linearly from 1.0 up to 1.15 magnification.
-    // The `navBarConstraints.maxHeight` value is the height of the nav bar, 
-    // and `maxExtent` is the default large title height the nav bar snaps back to. 
+    // The `navBarConstraints.maxHeight` value is the height of the nav bar,
+    // and `maxExtent` is the default large title height the nav bar snaps back to.
     // The difference between the two heights is used to scale the title.
     final double scale = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent *  0.12, 1.0, maxScale);
 
     transform = Matrix4.diagonal3Values(scale, scale, 1.0);
-    
+
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
     final Matrix4 result = Matrix4.identity();
 
@@ -1047,9 +1047,9 @@ class _RenderLargeTitle extends RenderProxyBox {
 
     if (child != null) {
       context.pushTransform(
-        needsCompositing, 
-        offset, 
-        transform!, 
+        needsCompositing,
+        offset,
+        transform!,
         super.paint,
       );
     } else {
