@@ -161,7 +161,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   // For local tap drag count
   int? _consecutiveTapCountWhileDragging;
-  int get _effectiveConsecutiveTapCountWhileDragging => _consecutiveTapCountWhileDragging ?? 1;
+  // int get _effectiveConsecutiveTapCountWhileDragging => _consecutiveTapCountWhileDragging ?? 1;
 
   // Tap related state
   _GestureState _tapState = _GestureState.ready;
@@ -384,8 +384,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     // Reset down and up when the recognizer has been rejected.
     // This prevents an erroneous _up being sent when this recognizer is
     // accepted for a drag, following a previous rejection.
-    _down = null;
-    _up = null;
+    _resetTaps();
   }
 
   @override
@@ -509,7 +508,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     if (!_acceptedActivePointers.remove(event.pointer)) {
       print('resolving pointer from _giveUp');
       resolvePointer(event.pointer, GestureDisposition.rejected);
-    }
+    } // revisit
     _initialButtons = null;
   }
 
@@ -525,7 +524,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       kind: getKindForPointer(event.pointer),
     );
 
-    invokeCallback<void>('onStart', () => onStart!(details, _effectiveConsecutiveTapCountWhileDragging));
+    invokeCallback<void>('onStart', () => onStart!(details, _consecutiveTapCountWhileDragging!));
 
     _start = null;
   }
@@ -544,15 +543,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       localOffsetFromOrigin: localPosition - _initialPosition.local,
     );
 
-    invokeCallback<void>('onUpdate', () => onUpdate!(details, _effectiveConsecutiveTapCountWhileDragging));
+    invokeCallback<void>('onUpdate', () => onUpdate!(details, _consecutiveTapCountWhileDragging!));
   }
 
   void _checkEnd() {
     final DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
 
-    invokeCallback<void>('onEnd', () => onEnd!(endDetails, _effectiveConsecutiveTapCountWhileDragging));
+    invokeCallback<void>('onEnd', () => onEnd!(endDetails, _consecutiveTapCountWhileDragging!));
 
     _resetTaps();
+    consecutiveTapReset();
   }
 
   void _checkCancel() {
