@@ -254,9 +254,17 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   void copyArtifacts() {
-    if(applicationBinaryPath != null) {
+    if(applicationBinaryPath == null) {
+      return;
+    }
+    if(deviceOperatingSystem == DeviceOperatingSystem.android) {
       copy(
         file('${galleryDirectory.path}/build/app/outputs/flutter-apk/app-profile.apk'),
+        Directory(applicationBinaryPath!),
+      );
+    } else if(deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      recursiveCopy(
+        Directory('${galleryDirectory.path}/build/ios/iphoneos/Flutter Gallery.app'),
         Directory(applicationBinaryPath!),
       );
     }
@@ -374,7 +382,12 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   @override
   String getApplicationBinaryPath() {
     if (applicationBinaryPath != null) {
-      return '${applicationBinaryPath!}/app-profile.apk';
+      if(deviceOperatingSystem == DeviceOperatingSystem.android) {
+        return '${applicationBinaryPath!}/app-profile.apk';
+      }
+      else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        return '$applicationBinaryPath!';
+      }
     }
 
     return 'build/app/outputs/flutter-apk/app-profile.apk';
