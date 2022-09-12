@@ -1388,7 +1388,7 @@ void main() {
       final Finder titleTextFinder = find.byWidget(titleText).first;
 
       // Gets the height of the large title
-      final Offset initialLargeTitleTextHeight =
+      final Offset initialLargeTitleTextOffset =
           tester.getBottomLeft(titleTextFinder) -
               tester.getTopLeft(titleTextFinder);
 
@@ -1402,7 +1402,7 @@ void main() {
 
       expect(
         magnifiedTitleTextHeight.dy.abs(),
-        greaterThan(initialLargeTitleTextHeight.dy.abs()),
+        greaterThan(initialLargeTitleTextOffset.dy.abs()),
       );
 
       // Ensure title text retracts to original size after releasing gesture
@@ -1413,7 +1413,7 @@ void main() {
 
       expect(
         finalTitleTextHeight.dy.abs(),
-        initialLargeTitleTextHeight.dy.abs(),
+        initialLargeTitleTextOffset.dy.abs(),
       );
     },
   );

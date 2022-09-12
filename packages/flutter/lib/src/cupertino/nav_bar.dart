@@ -1014,14 +1014,14 @@ class _RenderLargeTitle extends RenderProxyBox {
     // Maximum scale lets us prevent the large title
     // from getting clipped when it's width is greater than
     // the navigation bar's max width constraint.
-    final double maxScale = ((navBarConstraints.maxWidth - _kNavBarEdgePadding) / size.width).clamp(1.0, 1.15);
+    final double maxScale = clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / size.width, 1.0, 1.15);
 
     // This scale is estimated from the settings app in iOS 14.
     // The large title scales linearly from 1.0 up to 1.15 magnification.
     // The `navBarConstraints.maxHeight` value is the height of the nav bar, 
     // and `maxExtent` is the default large title height the nav bar snaps back to. 
     // The difference between the two heights is used to scale the title.
-    final double scale = (1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent *  0.12).clamp(1.0, maxScale);
+    final double scale = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent *  0.12, 1.0, maxScale);
 
     transform = Matrix4.diagonal3Values(scale, scale, 1.0);
     
