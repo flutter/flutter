@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:html' as html;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:js/js.dart';
+import 'package:js/js_util.dart' as js_util;
 
 import '../image_data.dart';
 
@@ -21,13 +20,11 @@ void runTests() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
-        html.ProgressEvent('test error'),
-      ])
+      ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
-      return testHttpRequest;
+      return testHttpRequest.toJS() as DomXMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{
@@ -49,12 +46,11 @@ void runTests() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
-      ..onError = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
-        html.ProgressEvent('test error'),
-      ]);
+      ..mockEvent = MockEvent('error', createDomEvent('Event', 'test error'));
+
 
     httpRequestFactory = () {
-      return testHttpRequest;
+      return testHttpRequest.toJS() as DomXMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{
@@ -68,20 +64,18 @@ void runTests() {
     );
 
     await tester.pumpWidget(image);
-    expect((tester.takeException() as html.ProgressEvent).type, 'test error');
+    expect((tester.takeException() as DomProgressEvent).type, 'test error');
   });
 
   testWidgets('loads an image from the network with empty response',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
-        html.ProgressEvent('test error'),
-      ])
+      ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))
       ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
-      return testHttpRequest;
+      return testHttpRequest.toJS() as DomXMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{
@@ -100,121 +94,90 @@ void runTests() {
   });
 }
 
-// ignore: avoid_implementing_value_types
-class TestHttpRequest implements html.HttpRequest {
-  @override
-  String responseType = 'invalid';
+@JS()
+@staticInterop
+class DomDocument {}
 
-  @override
-  int? timeout = 10;
+extension DomDocumentExtension on DomDocument {
+  external DomEvent createEvent(String eventType);
+}
 
-  @override
-  bool? withCredentials = false;
+@JS('window.document')
+external DomDocument get domDocument;
 
-  @override
-  void abort() {
-    throw UnimplementedError();
+DomEvent createDomEvent(String type, String name) {
+  final DomEvent event = domDocument.createEvent(type);
+  event.initEvent(name, true, true);
+  return event;
+}
+
+@JS('Object.defineProperty')
+external void objectDefineProperty(Object o, String symbol, dynamic desc);
+
+@JS()
+@staticInterop
+@anonymous
+class DomXMLHttpRequestMock {
+  external factory DomXMLHttpRequestMock(
+      {void Function(String method, String url, bool async)? open,
+        String responseType = 'invalid',
+        int timeout = 10,
+        bool withCredentials = false,
+        void Function()? send,
+        void Function(String name, String value)? setRequestHeader,
+        void Function(String type, DomEventListener listener) addEventListener});
+}
+
+class TestHttpRequest {
+  TestHttpRequest() {
+    _mock = DomXMLHttpRequestMock(
+        open: allowInterop(open),
+        send: allowInterop(send),
+        setRequestHeader: allowInterop(setRequestHeader),
+        addEventListener: allowInterop(addEventListener),
+    );
+    createGetter('headers', () => headers);
+    createGetter('responseHeaders', () => responseHeaders);
+    createGetter('status', () => status);
+    createGetter('response', () => response);
   }
 
-  @override
-  void addEventListener(String type, html.EventListener? listener,
-      [bool? useCapture]) {
-    throw UnimplementedError();
-  }
-
-  @override
-  bool dispatchEvent(html.Event event) {
-    throw UnimplementedError();
-  }
-
-  @override
-  String getAllResponseHeaders() {
-    throw UnimplementedError();
-  }
-
-  @override
-  String getResponseHeader(String name) {
-    throw UnimplementedError();
-  }
-
-  @override
-  html.Events get on => throw UnimplementedError();
-
-  @override
-  Stream<html.ProgressEvent> get onAbort => throw UnimplementedError();
-
-  @override
-  Stream<html.ProgressEvent> onError =
-      Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[]);
-
-  @override
-  Stream<html.ProgressEvent> onLoad =
-      Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[]);
-
-  @override
-  Stream<html.ProgressEvent> get onLoadEnd => throw UnimplementedError();
-
-  @override
-  Stream<html.ProgressEvent> get onLoadStart => throw UnimplementedError();
-
-  @override
-  Stream<html.ProgressEvent> get onProgress => throw UnimplementedError();
-
-  @override
-  Stream<html.Event> get onReadyStateChange => throw UnimplementedError();
-
-  @override
-  Stream<html.ProgressEvent> get onTimeout => throw UnimplementedError();
-
-  @override
-  void open(String method, String url,
-      {bool? async, String? user, String? password}) {}
-
-  @override
-  void overrideMimeType(String mime) {
-    throw UnimplementedError();
-  }
-
-  @override
-  int get readyState => throw UnimplementedError();
-
-  @override
-  void removeEventListener(String type, html.EventListener? listener,
-      [bool? useCapture]) {
-    throw UnimplementedError();
-  }
-
-  @override
+  late DomXMLHttpRequestMock _mock;
+  MockEvent? mockEvent;
+  Map<String, String> headers = <String, String>{};
+  int status = -1;
   dynamic response;
 
-  Map<String, String> headers = <String, String>{};
+  void createGetter<T>(String key, T Function() get) {
+    objectDefineProperty(
+        _mock,
+        key,
+        js_util.jsify(
+            <dynamic, dynamic>{
+              'get': allowInterop(() => get())
+            }
+        ));
+  }
 
-  @override
   Map<String, String> get responseHeaders => headers;
-
-  @override
-  String get responseText => throw UnimplementedError();
-
-  @override
-  String get responseUrl => throw UnimplementedError();
-
-  @override
-  html.Document get responseXml => throw UnimplementedError();
-
-  @override
-  void send([dynamic bodyOrData]) {}
-
-  @override
+  void open(String method, String url, bool async) {}
+  void send() {}
   void setRequestHeader(String name, String value) {
     headers[name] = value;
   }
 
-  @override
-  int status = -1;
+  void addEventListener(String type, DomEventListener listener) {
+    if (type == mockEvent?.type) {
+      listener(mockEvent!.event);
+    }
+  }
 
-  @override
-  String get statusText => throw UnimplementedError();
+  DomXMLHttpRequestMock toJS() => _mock;
+}
 
-  @override
-  html.HttpRequestUpload get upload => throw UnimplementedError();
+class MockEvent {
+  MockEvent(this.type, this.event);
+
+  final String type;
+  final DomEvent event;
 }
