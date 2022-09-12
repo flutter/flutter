@@ -64,6 +64,7 @@ void main() {
   late LoggingProcessManager loggingProcessManager;
   late FakeProcessManager fakeProcessManager;
   late BufferLogger logger;
+  late FakeStdio mockStdio;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -80,6 +81,7 @@ void main() {
       channel: frameworkChannel,
     );
     fakeProcessManager = FakeProcessManager.empty();
+    mockStdio = FakeStdio();
   });
 
   tearDown(() {
@@ -171,6 +173,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -218,6 +221,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -244,6 +248,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -273,6 +278,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -298,6 +304,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
     ...noColorTerminalOverride,
   });
@@ -323,6 +330,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
     ...noColorTerminalOverride,
   });
@@ -356,6 +364,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -388,6 +397,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -415,6 +425,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -453,6 +464,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -482,6 +494,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -520,6 +533,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -550,6 +564,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -580,6 +595,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
     Logger: ()=>logger,
   });
@@ -607,6 +623,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -728,6 +745,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1426,6 +1444,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1454,6 +1473,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1711,6 +1731,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1735,6 +1756,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1885,6 +1907,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1909,13 +1932,14 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
-      Pub: () => Pub(
+        Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+      stdio: mockStdio,
       ),
     },
   );
@@ -2869,6 +2893,7 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -3095,18 +3120,32 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   }
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
-    final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
-    final List<String> lineComponents = line.trim().split(analyzerSeparator);
-    final String lintName = lineComponents.removeLast();
-    final String location = lineComponents.removeLast();
-    return '$location: $lintName';
+    try {
+      final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
+      final List<String> lineComponents = line.trim().split(analyzerSeparator);
+      final String lintName = lineComponents.removeLast();
+      final String location = lineComponents.removeLast();
+      return '$location: $lintName';
+    } on RangeError catch (err) {
+      throw RangeError('Received "$err" while trying to parse: "$line".');
+    }
   }
-  final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
+  final String stdout = exec.stdout.toString();
+  final List<String> errors;
+  try {
+    errors = const LineSplitter().convert(stdout)
       .where((String line) {
         return line.trim().isNotEmpty &&
             !line.startsWith('Analyzing') &&
-            !line.contains('flutter pub get');
+            !line.contains('flutter pub get') &&
+            !line.contains('Resolving dependencies') &&
+            !line.contains('Got dependencies');
       }).map(lineParser).toList();
+
+    // Add debugging for https://github.com/flutter/flutter/issues/111272
+  } on RangeError catch (err) {
+    fail('$err\n\nComplete STDOUT was:\n\n$stdout');
+  }
   expect(errors, unorderedEquals(expectedFailures));
 }
 

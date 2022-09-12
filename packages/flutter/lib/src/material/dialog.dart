@@ -225,7 +225,7 @@ class Dialog extends StatelessWidget {
 /// A Material Design alert dialog.
 ///
 /// An alert dialog (also known as a basic dialog) informs the user about
-/// situations that require acknowledgement. An alert dialog has an optional
+/// situations that require acknowledgment. An alert dialog has an optional
 /// title and an optional list of actions. The title is displayed above the
 /// content and the actions are displayed below the content.
 ///
@@ -1130,7 +1130,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// This function takes a `builder` which typically builds a [Dialog] widget.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
 /// returned by the `builder` does not share a context with the location that
-/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// [showDialog] is originally called from. Use a [StatefulBuilder] or a
 /// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for

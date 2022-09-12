@@ -82,6 +82,15 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   late final BinaryMessenger _defaultBinaryMessenger;
 
+  /// A token that represents the root isolate, used for coordinating with background
+  /// isolates.
+  ///
+  /// This property is primarily intended for use with
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
+  /// [RootIsolateToken] as its argument. The value `null` is returned when
+  /// executed from background isolates.
+  ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
+
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
   /// the framework side.

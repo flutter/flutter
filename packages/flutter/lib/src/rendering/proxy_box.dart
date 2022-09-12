@@ -883,7 +883,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0 && _alpha < 255);
+  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
 
   int _alpha;
 
@@ -948,11 +948,6 @@ class RenderOpacity extends RenderProxyBox {
       // No need to keep the layer. We'll create a new one if necessary.
       layer = null;
       return;
-    }
-    if (_alpha == 255) {
-      // No need to keep the layer. We'll create a new one if necessary.
-      layer = null;
-      return super.paint(context, offset);
     }
 
     assert(needsCompositing);
@@ -1060,7 +1055,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0 && _alpha! < 255;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary) {
         markNeedsCompositingBitsUpdate();
       }
@@ -4359,6 +4354,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
     if (_properties.checked != null) {
       config.isChecked = _properties.checked;
+    }
+    if (_properties.mixed != null) {
+      config.isCheckStateMixed = _properties.mixed;
     }
     if (_properties.toggled != null) {
       config.isToggled = _properties.toggled;

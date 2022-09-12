@@ -147,7 +147,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// {@tool snippet}
   ///
-  /// Below is an example of using `previewBuilder` to show an image tile that's
+  /// Below is an example of using [previewBuilder] to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of
   /// these could be used in a GridView for a similar effect.
   ///
