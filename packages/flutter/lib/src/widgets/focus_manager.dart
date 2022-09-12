@@ -531,8 +531,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///   traversal for a subtree.
   /// * [Focus], a widget that exposes this setting as a parameter.
   /// * [FocusTraversalGroup], a widget used to group together and configure
-  ///   the focus traversal policy for a widget subtree that also has an
-  ///   [descendantsAreFocusable] parameter that prevents its children from
+  ///   the focus traversal policy for a widget subtree that also has a
+  ///   `descendantsAreFocusable` parameter that prevents its children from
   ///   being focused.
   bool get descendantsAreFocusable => _descendantsAreFocusable;
   bool _descendantsAreFocusable;

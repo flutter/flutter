@@ -159,15 +159,16 @@ class AndroidView extends StatefulWidget {
   /// ```
   ///
   /// {@template flutter.widgets.AndroidView.gestureRecognizers.descFoot}
-  /// A platform view can be configured to consume all pointers that were put down in its bounds
-  /// by passing a factory for an [EagerGestureRecognizer] in [gestureRecognizers].
-  /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
-  /// after a pointer down event.
+  /// A platform view can be configured to consume all pointers that were put
+  /// down in its bounds by passing a factory for an [EagerGestureRecognizer] in
+  /// [gestureRecognizers]. [EagerGestureRecognizer] is a special gesture
+  /// recognizer that immediately claims the gesture after a pointer down event.
   ///
-  /// The [gestureRecognizers] property must not contain more than one factory with the same [Factory.type].
+  /// The [gestureRecognizers] property must not contain more than one factory
+  /// with the same [Factory.type].
   ///
-  /// Changing [gestureRecognizers] results in rejection of any active gesture arenas (if the
-  /// platform view is actively participating in an arena).
+  /// Changing [gestureRecognizers] results in rejection of any active gesture
+  /// arenas (if the platform view is actively participating in an arena).
   /// {@endtemplate}
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.

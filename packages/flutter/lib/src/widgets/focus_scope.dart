@@ -293,7 +293,7 @@ class Focus extends StatefulWidget {
   ///   traversal for a subtree.
   /// * [FocusTraversalGroup], a widget used to group together and configure the
   ///   focus traversal policy for a widget subtree that has a
-  ///   [descendantsAreFocusable] parameter to conditionally block focus for a
+  ///   `descendantsAreFocusable` parameter to conditionally block focus for a
   ///   subtree.
   /// {@endtemplate}
   bool get descendantsAreFocusable => _descendantsAreFocusable ?? focusNode?.descendantsAreFocusable ?? true;

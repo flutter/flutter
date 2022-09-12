@@ -4936,7 +4936,7 @@ abstract class ComponentElement extends Element {
   }
 
   /// Subclasses should override this function to actually call the appropriate
-  /// [build] function (e.g., [StatelessWidget.build] or [State.build]) for
+  /// `build` function (e.g., [StatelessWidget.build] or [State.build]) for
   /// their widget.
   @protected
   Widget build();

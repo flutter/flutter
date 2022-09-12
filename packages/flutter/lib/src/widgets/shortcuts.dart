@@ -495,7 +495,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   ///
   /// If [includeRepeats] is true, the activator is checked on all
   /// [RawKeyDownEvent] events for the [trigger] key. If [includeRepeats] is
-  /// false, only the [trigger] key events with a false [RawKeyDownEvent.repeat]
+  /// false, only [trigger] key events with a false [RawKeyDownEvent.repeat]
   /// attribute will be considered.
   final bool includeRepeats;
 
