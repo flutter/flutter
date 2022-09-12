@@ -398,7 +398,13 @@ class CanvasPool extends _SaveStackTracking {
 
   /// Returns a "data://" URI containing a representation of the image in this
   /// canvas in PNG format.
-  String toDataUrl() => _canvas?.toDataURL() ?? '';
+  String toDataUrl() {
+    if (_canvas == null) {
+      _createCanvas();
+    }
+    return _canvas!.toDataURL();
+  }
+
 
   @override
   void save() {
@@ -771,6 +777,10 @@ class CanvasPool extends _SaveStackTracking {
           -shaderBounds.left, -shaderBounds.top);
     }
     contextHandle.paintPath(style, path.fillType);
+  }
+
+  void drawImage(DomHTMLImageElement element, ui.Offset p) {
+    context.drawImage(element, p.dx, p.dy);
   }
 
   /// Draws a shadow for a Path representing the given material elevation.

@@ -366,27 +366,35 @@ class BitmapCanvas extends EngineCanvas {
   /// - Pictures typically have large rect/rounded rectangles as background
   ///   prefer DOM if canvas has not been allocated yet.
   ///
-  bool _useDomForRenderingFill(SurfacePaintData paint) =>
-      _renderStrategy.isInsideSvgFilterTree ||
-      (_preserveImageData == false && _contains3dTransform) ||
+  bool _useDomForRenderingFill(SurfacePaintData paint) {
+    if (_preserveImageData) {
+      return false;
+    }
+    return _renderStrategy.isInsideSvgFilterTree ||
+      _contains3dTransform ||
       (_childOverdraw &&
           !_canvasPool.hasCanvas &&
           paint.maskFilter == null &&
           paint.shader == null &&
           paint.style != ui.PaintingStyle.stroke);
+  }
 
   /// Same as [_useDomForRenderingFill] but allows stroke as well.
   ///
   /// DOM canvas is generated for simple strokes using borders.
-  bool _useDomForRenderingFillAndStroke(SurfacePaintData paint) =>
-      _renderStrategy.isInsideSvgFilterTree ||
-      (_preserveImageData == false && _contains3dTransform) ||
+  bool _useDomForRenderingFillAndStroke(SurfacePaintData paint) {
+    if (_preserveImageData) {
+      return false;
+    }
+    return _renderStrategy.isInsideSvgFilterTree ||
+      _contains3dTransform ||
       ((_childOverdraw ||
               _renderStrategy.hasImageElements ||
               _renderStrategy.hasParagraphs) &&
           !_canvasPool.hasCanvas &&
           paint.maskFilter == null &&
           paint.shader == null);
+  }
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
@@ -626,7 +634,9 @@ class BitmapCanvas extends EngineCanvas {
       _applyTargetSize(
           imageElement, image.width.toDouble(), image.height.toDouble());
     }
-    _closeCanvas();
+    if (!_preserveImageData) {
+      _closeCanvas();
+    }
   }
 
   DomHTMLImageElement _reuseOrCreateImage(HtmlImage htmlImage) {
@@ -668,26 +678,40 @@ class BitmapCanvas extends EngineCanvas {
       imgElement = _reuseOrCreateImage(htmlImage);
     }
     imgElement.style.mixBlendMode = blendModeToCssMixBlendMode(blendMode) ?? '';
-    if (_canvasPool.isClipped) {
-      // Reset width/height since they may have been previously set.
-      imgElement.style..removeProperty('width')..removeProperty('height');
-      final List<DomElement> clipElements = _clipContent(
-          _canvasPool.clipStack!, imgElement, p, _canvasPool.currentTransform);
-      for (final DomElement clipElement in clipElements) {
-        rootElement.append(clipElement);
-        _children.add(clipElement);
-      }
+    if (_preserveImageData && imgElement is DomHTMLImageElement) {
+      // If we're preserving image data, we have to actually draw the image
+      // element onto the canvas.
+      // TODO(jacksongardner): Make this actually work with color filters.
+      setUpPaint(paint, null);
+      _canvasPool.drawImage(imgElement, p);
+      tearDownPaint();
     } else {
-      final String cssTransform = float64ListToCssTransform(
-          transformWithOffset(_canvasPool.currentTransform, p).storage);
-      imgElement.style
-        ..transformOrigin = '0 0 0'
-        ..transform = cssTransform
+      if (_canvasPool.isClipped) {
         // Reset width/height since they may have been previously set.
-        ..removeProperty('width')
-        ..removeProperty('height');
-      rootElement.append(imgElement);
-      _children.add(imgElement);
+        imgElement.style
+          ..removeProperty('width')
+          ..removeProperty('height');
+        final List<DomElement> clipElements = _clipContent(
+            _canvasPool.clipStack!,
+            imgElement,
+            p,
+            _canvasPool.currentTransform);
+        for (final DomElement clipElement in clipElements) {
+          rootElement.append(clipElement);
+          _children.add(clipElement);
+        }
+      } else {
+        final String cssTransform = float64ListToCssTransform(
+            transformWithOffset(_canvasPool.currentTransform, p).storage);
+        imgElement.style
+          ..transformOrigin = '0 0 0'
+          ..transform = cssTransform
+          // Reset width/height since they may have been previously set.
+          ..removeProperty('width')
+          ..removeProperty('height');
+        rootElement.append(imgElement);
+        _children.add(imgElement);
+      }
     }
     return imgElement;
   }
