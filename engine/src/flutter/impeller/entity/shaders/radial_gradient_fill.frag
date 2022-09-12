@@ -11,6 +11,7 @@ uniform GradientInfo {
   float radius;
   float tile_mode;
   float texture_sampler_y_coord_scale;
+  float alpha;
 } gradient_info;
 
 in vec2 v_position;
@@ -26,5 +27,5 @@ void main() {
     gradient_info.texture_sampler_y_coord_scale,
     gradient_info.tile_mode,
     gradient_info.tile_mode);
-  frag_color = vec4(frag_color.xyz * frag_color.a, frag_color.a);
+  frag_color = vec4(frag_color.xyz * frag_color.a, frag_color.a) * gradient_info.alpha;
 }
