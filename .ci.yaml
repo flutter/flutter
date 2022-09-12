@@ -2248,17 +2248,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
-  - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      openpay: "true"
-      tags: >
-        ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
-      task_name: openpay_benchmarks__scroll_perf
-
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
