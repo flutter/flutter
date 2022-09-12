@@ -1283,15 +1283,20 @@ void main() {
     });
 
     testWidgets('can show magnifier when no handles exist', (WidgetTester tester) async {
+      final GlobalKey magnifierKey = GlobalKey();
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
         magnifierConfiguration: TextMagnifierConfiguration(
           shouldDisplayHandlesInMagnifier: false,
           magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierOverlayInfoBearer>? notifier) {
-            return const SizedBox.shrink();
+            return SizedBox.shrink(
+              key: magnifierKey,
+            );
           },
         ),
       );
+
+      expect(find.byKey(magnifierKey), findsNothing);
 
       final MagnifierOverlayInfoBearer info = MagnifierOverlayInfoBearer(
         globalGesturePosition: Offset.zero,
@@ -1300,8 +1305,10 @@ void main() {
         currentLineBoundaries: Offset.zero & const Size(200.0, 50.0),
       );
       selectionOverlay.showMagnifier(info);
+      await tester.pump();
 
       expect(tester.takeException(), isNull);
+      expect(find.byKey(magnifierKey), findsOneWidget);
     });
   });
 
