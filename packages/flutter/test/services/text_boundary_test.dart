@@ -6,21 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Code Unit boundary works', () {
-    const CodeUnitBoundary boundary = CodeUnitBoundary('abc');
-    const TextPosition midPosition = TextPosition(offset: 1);
-    expect(boundary.getLeadingTextBoundaryAt(midPosition), const TextPosition(offset: 1));
-    expect(boundary.getTrailingTextBoundaryAt(midPosition), const TextPosition(offset: 2, affinity: TextAffinity.upstream));
-
-    const TextPosition startPosition = TextPosition(offset: 0);
-    expect(boundary.getLeadingTextBoundaryAt(startPosition), const TextPosition(offset: 0));
-    expect(boundary.getTrailingTextBoundaryAt(startPosition), const TextPosition(offset: 1, affinity: TextAffinity.upstream));
-
-    const TextPosition endPosition = TextPosition(offset: 3);
-    expect(boundary.getLeadingTextBoundaryAt(endPosition), const TextPosition(offset: 3, affinity: TextAffinity.upstream));
-    expect(boundary.getTrailingTextBoundaryAt(endPosition), const TextPosition(offset: 3, affinity: TextAffinity.upstream));
-  });
-
   test('Character boundary works', () {
     const CharacterBoundary boundary = CharacterBoundary('abc');
     const TextPosition midPosition = TextPosition(offset: 1);

@@ -12,11 +12,11 @@ import 'text_layout_metrics.dart';
 /// An interface for retrieving the logical text boundary (left-closed-right-open)
 /// at a given location in a document.
 ///
-/// The input [TextPosition] points a position between 2 code units (which can
-/// be visually represented by the caret if the selection were to collapse to
-/// that position).
+/// The input [TextPosition] points to a position between 2 code units (which
+/// can be visually represented by the caret if the selection were to collapse
+/// to that position).
 abstract class TextBoundary {
-  /// A constant constructor to be enable subclass override.
+  /// A constant constructor to enable subclass override.
   const TextBoundary();
 
   /// Returns the leading text boundary at the given location, inclusive.
@@ -32,55 +32,6 @@ abstract class TextBoundary {
       end: getTrailingTextBoundaryAt(position).offset,
     );
   }
-}
-
-/// A text boundary that uses code units as logical boundaries.
-///
-/// This text boundary treats every character in input string as an utf-16 code
-/// unit. This can be useful when handling text without any grapheme cluster,
-/// e.g. the obscure string in [EditableText]. If you are handling text that may
-/// include grapheme clusters, consider using [CharacterBoundary].
-class CodeUnitBoundary extends TextBoundary {
-  /// Creates a [CodeUnitBoundary] with the text.
-  const CodeUnitBoundary(this._text);
-
-
-  final String _text;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    if (position.offset <= 0) {
-      return const TextPosition(offset: 0);
-    }
-    if (position.offset > _text.length ||
-        (position.offset == _text.length && position.affinity == TextAffinity.downstream)) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
-    }
-    switch (position.affinity) {
-      case TextAffinity.upstream:
-        return TextPosition(offset: math.min(position.offset - 1, _text.length));
-      case TextAffinity.downstream:
-        return TextPosition(offset: math.min(position.offset, _text.length));
-    }
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    if (position.offset < 0 ||
-        (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
-      return const TextPosition(offset: 0);
-    }
-    if (position.offset >= _text.length) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
-    }
-    switch (position.affinity) {
-      case TextAffinity.upstream:
-        return TextPosition(offset: math.min(position.offset, _text.length), affinity: TextAffinity.upstream);
-      case TextAffinity.downstream:
-        return TextPosition(offset: math.min(position.offset + 1, _text.length), affinity: TextAffinity.upstream);
-    }
-  }
-
 }
 
 /// A text boundary that uses characters as logical boundaries.

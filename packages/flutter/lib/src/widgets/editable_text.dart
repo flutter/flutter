@@ -3479,7 +3479,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // --------------------------- Text Editing Actions ---------------------------
 
   TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
-    final TextBoundary atomicTextBoundary = widget.obscureText ? CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
+    final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
     return _CollapsedSelectionBoundary(atomicTextBoundary, intent.forward);
   }
 
@@ -3488,7 +3488,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextBoundary boundary;
 
     if (widget.obscureText) {
-      atomicTextBoundary = CodeUnitBoundary(_value.text);
+      atomicTextBoundary = _CodeUnitBoundary(_value.text);
       boundary = DocumentBoundary(_value.text);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
@@ -3510,7 +3510,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextBoundary boundary;
 
     if (widget.obscureText) {
-      atomicTextBoundary = CodeUnitBoundary(_value.text);
+      atomicTextBoundary = _CodeUnitBoundary(_value.text);
       boundary = DocumentBoundary(_value.text);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
@@ -4220,6 +4220,53 @@ class _ScribblePlaceholder extends WidgetSpan {
   }
 }
 
+/// A text boundary that uses code units as logical boundaries.
+///
+/// This text boundary treats every character in input string as an utf-16 code
+/// unit. This can be useful when handling text without any grapheme cluster,
+/// e.g. the obscure string in [EditableText]. If you are handling text that may
+/// include grapheme clusters, consider using [CharacterBoundary].
+class _CodeUnitBoundary extends TextBoundary {
+  const _CodeUnitBoundary(this._text);
+
+
+  final String _text;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    if (position.offset <= 0) {
+      return const TextPosition(offset: 0);
+    }
+    if (position.offset > _text.length ||
+        (position.offset == _text.length && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    }
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        return TextPosition(offset: math.min(position.offset - 1, _text.length));
+      case TextAffinity.downstream:
+        return TextPosition(offset: math.min(position.offset, _text.length));
+    }
+  }
+
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    if (position.offset < 0 ||
+        (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
+      return const TextPosition(offset: 0);
+    }
+    if (position.offset >= _text.length) {
+      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    }
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        return TextPosition(offset: math.min(position.offset, _text.length), affinity: TextAffinity.upstream);
+      case TextAffinity.downstream:
+        return TextPosition(offset: math.min(position.offset + 1, _text.length), affinity: TextAffinity.upstream);
+    }
+  }
+}
+
 // ------------------------  Text Boundary Combinators ------------------------
 
 /// A text boundary that use the first non-whitespace character as the logical
@@ -4378,7 +4425,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     assert(selection.isValid);
     assert(!selection.isCollapsed);
     final TextBoundary atomicBoundary = state.widget.obscureText
-      ? CodeUnitBoundary(value.text)
+      ? _CodeUnitBoundary(value.text)
       : CharacterBoundary(value.text);
 
     return TextRange(
