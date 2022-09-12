@@ -192,7 +192,7 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// * [WidgetInspectorService.isWidgetTreeReady], the method that this service
   ///   extension calls.
-  /// * [WidgetsBinding.instance.debugDidSendFirstFrameEvent], which stores the
+  /// * [WidgetsBinding.debugDidSendFirstFrameEvent], which stores the
   ///   value of whether the first frame has been rendered.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
