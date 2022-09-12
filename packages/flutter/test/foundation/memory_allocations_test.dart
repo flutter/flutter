@@ -10,6 +10,8 @@ import 'package:flutter/src/material/text_field.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+int eventCount = 0;
+
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
@@ -151,13 +153,37 @@ void main() {
     expect(kFlutterMemoryAllocationsEnabled, isTrue);
   });
 
-  test('publishers in Flutter dispatch events in debug mode', () async {
-    int eventCount = 0;
-    void listener(ObjectEvent event) => eventCount++;
+
+  testWidgets('publishers in Flutter dispatch events in debug mode', (WidgetTester tester) async {
+
+    eventCount = 0;
+    void listener(ObjectEvent event) =>  eventCount++;
     ma.addListener(listener);
 
-    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
+    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents(tester);
     expect(eventCount, expectedEventCount);
+
+    ma.removeListener(listener);
+    _checkSdkHandlersNotSet();
+    expect(ma.hasListeners, isFalse);
+  });
+
+  testWidgets('State dispatch events in debug mode', (WidgetTester tester) async {
+    bool stateCreated = false;
+    bool stateDisposed = false;
+
+    void listener(ObjectEvent event) {
+      if (event is ObjectCreated && event.object is State) {
+        stateCreated = true;
+      }
+      if (event is ObjectDisposed && event.object is State) {
+        stateDisposed = true;
+      }
+    }
+    ma.addListener(listener);
+
+    await tester.pumpWidget(const MyStateFulWidget());
+    await tester.pumpWidget(const SizedBox.shrink());
 
     ma.removeListener(listener);
     _checkSdkHandlersNotSet();
@@ -197,8 +223,6 @@ class _TestElement extends RootRenderObjectElement{
   }
 }
 
-
-
 class _TestRenderObject extends RenderObject {
   @override
   void debugAssertDoesMeetConstraints() {}
@@ -221,20 +245,14 @@ class _TestLayer extends Layer{
   void addToScene(ui.SceneBuilder builder) {}
 }
 
-class _TestState extends State {
-  @override
-  Widget build(BuildContext context) => const Text('');
-
-}
-
-class MyWidget extends StatefulWidget {
-  const MyWidget({super.key});
+class MyStateFulWidget extends StatefulWidget {
+  const MyStateFulWidget({super.key});
 
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<MyStateFulWidget> createState() => _MyStateFulWidgetState();
 }
 
-class _MyWidgetState extends State<MyWidget> {
+class _MyStateFulWidgetState extends State<MyStateFulWidget> {
   @override
   Widget build(BuildContext context) {
     return Container();
@@ -242,7 +260,7 @@ class _MyWidgetState extends State<MyWidget> {
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
+Future<int> _activateFlutterObjectsAndReturnCountOfEvents(WidgetTester tester) async {
   int count = 0;
 
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
@@ -251,7 +269,6 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   final _TestElement element = _TestElement(); count++;
   final RenderObject renderObject = _TestRenderObject(); count++;
   final Layer layer = _TestLayer(); count++;
-  final _TestState state = _TestState(); count++;
 
   valueNotifier.dispose(); count++;
   changeNotifier.dispose(); count++;
@@ -259,9 +276,6 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   element.makeInactive(); element.unmount(); count++;
   renderObject.dispose(); count++;
   layer.dispose(); count++;
-  // It is ok to invoke protected member for testing purposes.
-  // ignore: invalid_use_of_protected_member
-  state.dispose(); count++;
 
   // TODO(polina-c): Remove the condition after
   // https://github.com/flutter/flutter/issues/110599 is fixed.
@@ -272,6 +286,7 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
 
   return count;
 }
+
 
 Future<ui.Image> _createImage() async {
   final ui.Picture picture = _createPicture();
