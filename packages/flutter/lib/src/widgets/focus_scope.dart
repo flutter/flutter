@@ -163,7 +163,7 @@ class Focus extends StatefulWidget {
   ///
   /// If one is not supplied, then one will be automatically allocated, owned,
   /// and managed by this widget. The widget will be focusable even if a
-  /// [focusNode] is not supplied. If supplied, the given `focusNode` will be
+  /// [focusNode] is not supplied. If supplied, the given [focusNode] will be
   /// _hosted_ by this widget, but not owned. See [FocusNode] for more
   /// information on what being hosted and/or owned implies.
   ///
@@ -274,7 +274,7 @@ class Focus extends StatefulWidget {
   /// descendants): for that, use [FocusNode.canRequestFocus].
   ///
   /// If any descendants are focused when this is set to false, they will be
-  /// unfocused. When `descendantsAreFocusable` is set to true again, they will
+  /// unfocused. When [descendantsAreFocusable] is set to true again, they will
   /// not be refocused, although they will be able to accept focus again.
   ///
   /// Does not affect the value of [FocusNode.canRequestFocus] on the
@@ -877,7 +877,7 @@ class ExcludeFocus extends StatelessWidget {
   /// Defaults to true.
   ///
   /// If any descendants are focused when this is set to true, they will be
-  /// unfocused. When `excluding` is set to false again, they will not be
+  /// unfocused. When [excluding] is set to false again, they will not be
   /// refocused, although they will be able to accept focus again.
   ///
   /// Does not affect the value of [FocusNode.canRequestFocus] on the
