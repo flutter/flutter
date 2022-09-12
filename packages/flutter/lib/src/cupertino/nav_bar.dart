@@ -859,11 +859,10 @@ class _LargeTitleNavigationBarSliverDelegate
                                 child: Align(
                                   alignment: AlignmentDirectional.bottomStart,
                                   child: _LargeTitle(
-                                    key: components.largeTitle?.key,
                                     constraints: constraints,
                                     maxExtent: maxExtent,
                                     textDirection: Directionality.of(context),
-                                    child: components.largeTitle?.child,
+                                    child: components.largeTitle,
                                   ),
                                 ),
                               ),
@@ -936,7 +935,6 @@ class _LargeTitleNavigationBarSliverDelegate
 /// Magnifies when overscrolled.
 class _LargeTitle extends SingleChildRenderObjectWidget {
   const _LargeTitle({
-    super.key,
     required this.constraints,
     required this.maxExtent,
     required this.textDirection,
