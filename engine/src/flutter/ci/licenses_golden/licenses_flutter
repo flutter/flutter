@@ -867,6 +867,7 @@ FILE: ../../../flutter/impeller/renderer/compute_pipeline_builder.cc
 FILE: ../../../flutter/impeller/renderer/compute_pipeline_builder.h
 FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.h
+FILE: ../../../flutter/impeller/renderer/compute_unittests.cc
 FILE: ../../../flutter/impeller/renderer/context.cc
 FILE: ../../../flutter/impeller/renderer/context.h
 FILE: ../../../flutter/impeller/renderer/descriptor_set_layout.h
