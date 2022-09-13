@@ -13,10 +13,6 @@ void main() {
 }
 
 Future<void> testMain() async {
-  const double screenWidth = 500.0;
-  const double screenHeight = 500.0;
-  const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-
   setUp(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
@@ -34,7 +30,6 @@ Future<void> testMain() async {
       rc.drawRect(Rect.fromLTWH(15.0, 15.0 + blurSigma * 40, 200, 20), paint);
     }
     await canvasScreenshot(rc, 'dom_mask_filter_blur',
-        region: screenRect,
         maxDiffRatePercent: 0.01);
   });
 }

@@ -7,8 +7,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide window;
 
+import '../screenshot.dart';
 import 'helper.dart';
-import 'text_scuba.dart';
 
 const Rect bounds = Rect.fromLTWH(0, 0, 800, 600);
 
