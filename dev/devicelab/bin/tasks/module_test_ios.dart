@@ -495,6 +495,7 @@ end
                 <String>[
                   '-r',
                   '-9',
+                  '-q',
                   zipPath,
                   'result.xcresult',
                 ],
