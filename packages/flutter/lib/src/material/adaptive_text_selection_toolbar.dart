@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
@@ -11,7 +10,6 @@ import 'desktop_text_selection_toolbar.dart';
 import 'desktop_text_selection_toolbar_button.dart';
 import 'material_localizations.dart';
 import 'text_selection_toolbar.dart';
-import 'text_selection_toolbar_buttons_builder.dart';
 import 'text_selection_toolbar_text_button.dart';
 import 'theme.dart';
 
@@ -171,7 +169,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required this.primaryAnchor,
     this.secondaryAnchor,
   }) : children = null,
-       buttonItems = SelectableRegionState.getSelectableButtonItems(
+       buttonItems = getSelectableButtonItems(
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onHideToolbar: onHideToolbar,
@@ -196,8 +194,10 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   }) : children = null,
        buttonItems = selectableRegionState.getSelectableRegionButtonItems();
 
+  /// {@template flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
   /// widgets for the current platform.
+  /// {@endtemplate}
   final List<ContextMenuButtonItem>? buttonItems;
 
   /// The children of the toolbar, typically buttons.
@@ -227,7 +227,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return CupertinoTextSelectionToolbarButtonsBuilder.getButtonLabel(
+        return CupertinoAdaptiveTextSelectionToolbar.getButtonLabel(
           context,
           buttonItem,
         );
@@ -303,143 +303,11 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     }
   }
 
-  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
-  /// platform's default selection menu for [EditableText].
-  ///
-  /// By default the [targetPlatform] will be [defaultTargetPlatform].
-  ///
-  /// See also:
-  ///
-  /// * [getEditableButtonItems], which is like this function but generic to any
-  ///   editable field.
-  /// * [SelectableRegionState.getSelectableRegionButtonItems], which is like
-  ///   this function but for a [SelectableRegion] instead of an [EditableText].
-  /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-  ///   given [ContextMenuButtonItem]s.
-  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself.
-  static List<ContextMenuButtonItem> getEditableTextButtonItems(
-    EditableTextState editableTextState,
-    [
-      TargetPlatform? targetPlatform,
-    ]
-  ) {
-    return getEditableButtonItems(
-      readOnly: editableTextState.widget.readOnly,
-      clipboardStatus: editableTextState.clipboardStatus?.value,
-      copyEnabled: editableTextState.copyEnabled,
-      cutEnabled: editableTextState.cutEnabled,
-      pasteEnabled: editableTextState.pasteEnabled,
-      selectAllEnabled: editableTextState.getSelectAllEnabled(targetPlatform ?? defaultTargetPlatform),
-      onCopy: () => editableTextState.copySelection(SelectionChangedCause.toolbar),
-      onCut: () => editableTextState.cutSelection(SelectionChangedCause.toolbar),
-      onPaste: () => editableTextState.pasteText(SelectionChangedCause.toolbar),
-      onSelectAll: () => editableTextState.selectAll(SelectionChangedCause.toolbar),
-    );
-  }
-
-  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
-  /// platform's default selection menu for an editable field.
-  ///
-  /// See also:
-  ///
-  /// * [getEditableTextButtonItems], which is like this function but specific to
-  ///   [EditableText].
-  /// * [getSelectableButtonItems], which performs a similar role but for a
-  ///   selection that is not editable.
-  /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-  ///   given [ContextMenuButtonItem]s.
-  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself.
-  static List<ContextMenuButtonItem> getEditableButtonItems({
-    required final bool readOnly,
-    required final ClipboardStatus? clipboardStatus,
-    required final bool copyEnabled,
-    required final bool cutEnabled,
-    required final bool pasteEnabled,
-    required final bool selectAllEnabled,
-    required final VoidCallback onCopy,
-    required final VoidCallback onCut,
-    required final VoidCallback onPaste,
-    required final VoidCallback onSelectAll,
-  }) {
-    // If the paste button is enabled, don't render anything until the state
-    // of the clipboard is known, since it's used to determine if paste is
-    // shown.
-    if (pasteEnabled && clipboardStatus == ClipboardStatus.unknown) {
-      return <ContextMenuButtonItem>[];
-    }
-
-    return <ContextMenuButtonItem>[
-      if (cutEnabled)
-        ContextMenuButtonItem(
-          onPressed: onCut,
-          type: ContextMenuButtonType.cut,
-        ),
-      if (copyEnabled)
-        ContextMenuButtonItem(
-          onPressed: onCopy,
-          type: ContextMenuButtonType.copy,
-        ),
-      if (pasteEnabled)
-        ContextMenuButtonItem(
-          onPressed: onPaste,
-          type: ContextMenuButtonType.paste,
-        ),
-      if (selectAllEnabled)
-        ContextMenuButtonItem(
-          onPressed: onSelectAll,
-          type: ContextMenuButtonType.selectAll,
-        ),
-    ];
-  }
-
-  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
-  /// platform's default selection menu.
-  ///
-  /// See also:
-  ///
-  /// * [SelectableRegionState.getSelectableRegionButtonItems], which is like
-  ///   this function but specific to [SelectableRegion].
-  /// * [getEditableTextButtonItems], which performs a similar role but for
-  ///   an editable field's context menu.
-  /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-  ///   given [ContextMenuButtonItem]s.
-  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself.
-  static List<ContextMenuButtonItem> getSelectableButtonItems({
-    required final SelectionGeometry selectionGeometry,
-    required final VoidCallback onCopy,
-    required final VoidCallback onHideToolbar,
-    required final VoidCallback onSelectAll,
-  }) {
-    final bool canCopy = selectionGeometry.hasSelection;
-    final bool canSelectAll = selectionGeometry.hasContent;
-
-    // Determine which buttons will appear so that the order and total number is
-    // known. A button's position in the menu can slightly affect its
-    // appearance.
-    return <ContextMenuButtonItem>[
-      if (canCopy)
-        ContextMenuButtonItem(
-          onPressed: () {
-            onCopy();
-            onHideToolbar();
-          },
-          type: ContextMenuButtonType.copy,
-        ),
-      if (canSelectAll)
-        ContextMenuButtonItem(
-          onPressed: () {
-            onSelectAll();
-            onHideToolbar();
-          },
-          type: ContextMenuButtonType.selectAll,
-        ),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
-    if ((children != null && children!.isEmpty) || (buttonItems != null && buttonItems!.isEmpty)) {
+    if ((children != null && children!.isEmpty)
+      || (buttonItems != null && buttonItems!.isEmpty)) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -454,8 +322,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     );
   }
 }
-
-// TODO(justinmc): Remove "Text" from these names?
 
 /// The default text selection toolbar by platform given the [children] for the
 /// platform.

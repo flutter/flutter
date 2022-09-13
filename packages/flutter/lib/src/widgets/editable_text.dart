@@ -1936,6 +1936,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && !textEditingValue.selection.isCollapsed;
   }
 
+  // TODO(justinmc): Remove these commented out lines around here.
   @override
   /*
   @Deprecated(

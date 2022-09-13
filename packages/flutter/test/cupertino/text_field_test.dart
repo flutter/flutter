@@ -1833,7 +1833,7 @@ void main() {
   );
 
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor',
+    'double tap selects word',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1854,7 +1854,7 @@ void main() {
       await tester.pump();
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: index),
+       const TextSelection.collapsed(offset: index),
       );
 
       // Double tap on the same location to select the word around the cursor.
@@ -1867,10 +1867,23 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-    },
-  );
+      if (isContextMenuProvidedByPlatform) {
+        expect(find.byType(CupertinoButton), findsNothing);
+      } else {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.macOS:
+          case TargetPlatform.iOS:
+            expect(find.byType(CupertinoButton), findsNWidgets(3));
+            break;
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            expect(find.byType(CupertinoButton), findsNWidgets(4));
+            break;
+        }
+      }
+    });
 
   testWidgets(
     'double tap does not select word on read-only obscured field',
@@ -2004,8 +2017,24 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      final Matcher matchToolbarButtons;
+      if (isContextMenuProvidedByPlatform) {
+        matchToolbarButtons = findsNothing;
+      } else {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.macOS:
+          case TargetPlatform.iOS:
+            matchToolbarButtons = findsNWidgets(3);
+            break;
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            matchToolbarButtons = findsNWidgets(4);
+            break;
+        }
+      }
+      expect(find.byType(CupertinoButton), matchToolbarButtons);
 
       await gesture.up();
       await tester.pump();
@@ -2015,7 +2044,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), matchToolbarButtons);
     },
   );
 
@@ -2889,7 +2918,24 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     // Shows toolbar.
-    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+    final Matcher matchToolbarButtons;
+    if (isContextMenuProvidedByPlatform) {
+      matchToolbarButtons = findsNothing;
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          matchToolbarButtons = findsNWidgets(3);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          matchToolbarButtons = findsNWidgets(4);
+          break;
+      }
+    }
+    expect(find.byType(CupertinoButton), matchToolbarButtons);
   });
 
   testWidgets('force press on unsupported devices falls back to tap', (WidgetTester tester) async {
@@ -6114,7 +6160,7 @@ void main() {
       tester.state<EditableTextState>(textFinder).showToolbar();
       await tester.pumpAndSettle();
 
-      expect(find.byType(CupertinoAdaptiveTextSelectionToolbarEditableText), findsOneWidget);
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
     },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );

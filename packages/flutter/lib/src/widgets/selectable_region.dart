@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'actions.dart';
+import 'adaptive_text_selection_toolbar.dart';
 import 'basic.dart';
 import 'context_menu_button_item.dart';
 import 'context_menu_controller.dart';
@@ -912,13 +913,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// See also:
   ///
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
   /// * [getSelectableButtonItems], which is like this function but generic to any
   ///   selectable and not editable content.
   /// * [getEditableTextButtonItems], which performs a similar role but for
   ///   [EditableText]'s context menu.
   /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
   ///   given [ContextMenuButtonItem]s.
-  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself.
   List<ContextMenuButtonItem> getSelectableRegionButtonItems() {
     return getSelectableButtonItems(
       selectionGeometry: _selectionDelegate.value,
@@ -926,50 +929,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       onHideToolbar: hideToolbar,
       onSelectAll: selectAll,
     );
-  }
-
-  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
-  /// platform's default selection menu.
-  ///
-  /// See also:
-  ///
-  /// * [getSelectableRegionButtonItems], which is like this function but specific
-  ///   to [SelectableRegion].
-  /// * [getEditableTextButtonItems], which performs a similar role but for
-  ///   an editable field's context menu.
-  /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-  ///   given [ContextMenuButtonItem]s.
-  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself.
-  static List<ContextMenuButtonItem> getSelectableButtonItems({
-    required final SelectionGeometry selectionGeometry,
-    required final VoidCallback onCopy,
-    required final VoidCallback onHideToolbar,
-    required final VoidCallback onSelectAll,
-  }) {
-    final bool canCopy = selectionGeometry.hasSelection;
-    final bool canSelectAll = selectionGeometry.hasContent;
-
-    // Determine which buttons will appear so that the order and total number is
-    // known. A button's position in the menu can slightly affect its
-    // appearance.
-    return <ContextMenuButtonItem>[
-      if (canCopy)
-        ContextMenuButtonItem(
-          onPressed: () {
-            onCopy();
-            onHideToolbar();
-          },
-          type: ContextMenuButtonType.copy,
-        ),
-      if (canSelectAll)
-        ContextMenuButtonItem(
-          onPressed: () {
-            onSelectAll();
-            onHideToolbar();
-          },
-          type: ContextMenuButtonType.selectAll,
-        ),
-    ];
   }
 
   // [TextSelectionDelegate] overrides.

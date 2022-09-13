@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoAdaptiveTextSelectionToolbarButtonItems(
+          child: CupertinoAdaptiveTextSelectionToolbar.buttonItems(
             primaryAnchor: Offset.zero,
             buttonItems: <ContextMenuButtonItem>[
               ContextMenuButtonItem(
@@ -50,12 +50,12 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
         break;
       case TargetPlatform.macOS:
-      case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
@@ -86,5 +86,51 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   },
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+  );
+
+  testWidgets('Builds the correct button per-platform', (WidgetTester tester) async {
+    const String buttonText = 'Click me';
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                  context,
+                  <ContextMenuButtonItem>[
+                    ContextMenuButtonItem(
+                      label: buttonText,
+                      onPressed: () {
+                      },
+                    ),
+                  ],
+                ).toList(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(buttonText), findsOneWidget);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
+        break;
+    }
+  },
+    variant: TargetPlatformVariant.all(),
   );
 }
