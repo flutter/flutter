@@ -977,7 +977,7 @@ public class FlutterJNI {
     nativeCleanupMessageData(messageData);
   }
 
-  // Called by native on the ui thread.
+  // Called by native on any thread.
   // TODO(mattcarroll): determine if message is nonull or nullable
   @SuppressWarnings("unused")
   @VisibleForTesting

@@ -1140,7 +1140,7 @@ PlatformViewAndroidJNIImpl::~PlatformViewAndroidJNIImpl() = default;
 void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
     std::unique_ptr<flutter::PlatformMessage> message,
     int responseId) {
-  // Called from the ui thread.
+  // Called from any thread.
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);
