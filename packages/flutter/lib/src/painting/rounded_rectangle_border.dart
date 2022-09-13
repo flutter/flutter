@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math'as math;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -140,10 +139,10 @@ class RoundedRectangleBorder extends OutlinedBorder {
           // TODO(gspencergoog): Remove this once https://github.com/flutter/engine/pull/36062 rolls into the framework.
           inner = RRect.fromLTRBAndCorners(
             inner.left, inner.top, inner.right, inner.bottom,
-            topLeft: inner.tlRadius.clamp(minimum: Radius.zero),
-            topRight: inner.trRadius.clamp(minimum: Radius.zero),
-            bottomLeft: inner.blRadius.clamp(minimum: Radius.zero),
-            bottomRight: inner.brRadius.clamp(minimum: Radius.zero),
+            topLeft: inner.tlRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+            topRight: inner.trRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+            bottomLeft: inner.blRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+            bottomRight: inner.brRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
           );
           final RRect outer = borderRect.inflate(side.strokeOutset);
           canvas.drawDRRect(outer, inner, paint);

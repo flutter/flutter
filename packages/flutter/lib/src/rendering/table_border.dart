@@ -278,10 +278,10 @@ class TableBorder {
       // TODO(gspencergoog): Remove this once https://github.com/flutter/engine/pull/36062 rolls into the framework.
       inner = RRect.fromLTRBAndCorners(
         inner.left, inner.top, inner.right, inner.bottom,
-        topLeft: inner.tlRadius.clamp(minimum: Radius.zero),
-        topRight: inner.trRadius.clamp(minimum: Radius.zero),
-        bottomLeft: inner.blRadius.clamp(minimum: Radius.zero),
-        bottomRight: inner.brRadius.clamp(minimum: Radius.zero),
+        topLeft: inner.tlRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+        topRight: inner.trRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+        bottomLeft: inner.blRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+        bottomRight: inner.brRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
       );
       final Paint paint = Paint()..color = top.color;
       canvas.drawDRRect(outer, inner, paint);
