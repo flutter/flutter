@@ -206,9 +206,9 @@ class RefreshIndicator extends StatefulWidget {
   /// {@macro flutter.progress_indicator.ProgressIndicator.semanticsValue}
   final String? semanticsValue;
 
-  /// Defines `strokeWidth` for `RefreshIndicator`.
+  /// Defines [strokeWidth] for `RefreshIndicator`.
   ///
-  /// By default, the value of `strokeWidth` is 2.0 pixels.
+  /// By default, the value of [strokeWidth] is 2.0 pixels.
   final double strokeWidth;
 
   /// Defines how this [RefreshIndicator] can be triggered when users overscroll.

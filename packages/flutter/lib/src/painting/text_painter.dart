@@ -168,6 +168,13 @@ class _CaretMetrics {
 ///
 /// 3. Call [paint] as often as desired to paint the paragraph.
 ///
+/// 4. Call [dispose] when the object will no longer be accessed to release
+///    native resources. For [TextPainter] objects that are used repeatedly and
+///    stored on a [State] or [RenderObject], call [dispose] from
+///    [State.dispose] or [RenderObject.dispose] or similar. For [TextPainter]
+///    objects that are only used ephemerally, it is safe to immediately dispose
+///    them after the last call to methods or properties on the object.
+///
 /// If the width of the area into which the text is being painted
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
