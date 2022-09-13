@@ -3989,7 +3989,7 @@ class IndexedStack extends Stack {
 }
 
 class _IndexedStackElement extends MultiChildRenderObjectElement {
-  _IndexedStackElement(IndexedStack widget): super(widget);
+  _IndexedStackElement(IndexedStack super.widget);
 
   @override
   IndexedStack get widget => super.widget as IndexedStack;
