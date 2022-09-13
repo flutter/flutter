@@ -174,16 +174,16 @@ void main() {
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
     expect(singleTapUpCount, 0);
-    expect(tapCount, 1);//changed
-    expect(singleTapCancelCount, 1);//changed
+    expect(tapCount, 1);
+    expect(singleTapCancelCount, 1);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
 
     await gesture.up();
     // Nothing else happens on up.
     expect(singleTapUpCount, 0);
-    expect(tapCount, 1);//changed
-    expect(singleTapCancelCount, 1);//changed
+    expect(tapCount, 1);
+    expect(singleTapCancelCount, 1);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
