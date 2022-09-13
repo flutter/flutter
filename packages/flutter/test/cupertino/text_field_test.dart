@@ -4399,7 +4399,7 @@ void main() {
       );
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      await tester.pump(const Duration(milliseconds: 300)); // skip past the frame where the opacity is zero
 
       // Verify the selection toolbar position
       Offset toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
