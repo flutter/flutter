@@ -225,9 +225,6 @@ class TextPainter {
   /// resources. Doing this operation is expensive and should be avoided
   /// whenever it is possible to preserve the [TextPainter] to paint the
   /// text or get other information about it.
-  ///
-  /// Unlike the [TextPainter] constructor, the [textDirection] parameter is
-  /// required because it cannot be set or changed later.
   static double computeWidth({
     required InlineSpan text,
     required TextDirection textDirection,
@@ -270,9 +267,6 @@ class TextPainter {
   /// underlying resources. Doing this operation is expensive and should be avoided
   /// whenever it is possible to preserve the [TextPainter] to paint the
   /// text or get other information about it.
-  ///
-  /// Unlike the [TextPainter] constructor, the [textDirection] parameter is
-  /// required because it cannot be set or changed later.
   static double computeMaxIntrinsicWidth({
     required InlineSpan text,
     required TextDirection textDirection,
