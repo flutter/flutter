@@ -181,7 +181,7 @@ void main() {
     }
     ma.addListener(listener);
 
-    await tester.pumpWidget(const _MyStateFulWidget());
+    await tester.pumpWidget(const _TestStatefulWidget());
     await tester.pumpWidget(const SizedBox.shrink());
 
     expect(stateCreated, isTrue);
@@ -245,14 +245,14 @@ class _TestLayer extends Layer{
   void addToScene(ui.SceneBuilder builder) {}
 }
 
-class _MyStateFulWidget extends StatefulWidget {
-  const _MyStateFulWidget();
+class _TestStatefulWidget extends StatefulWidget {
+  const _TestStatefulWidget();
 
   @override
-  State<_MyStateFulWidget> createState() => _MyStateFulWidgetState();
+  State<_TestStatefulWidget> createState() => _TestStatefulWidgetState();
 }
 
-class _MyStateFulWidgetState extends State<_MyStateFulWidget> {
+class _TestStatefulWidgetState extends State<_TestStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Container();
