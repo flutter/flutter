@@ -3200,7 +3200,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         object: this,
       ));
     }
-
   }
 
   Element? _parent;

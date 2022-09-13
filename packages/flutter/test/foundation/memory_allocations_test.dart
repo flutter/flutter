@@ -9,8 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-int eventCount = 0;
-
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
@@ -152,10 +150,8 @@ void main() {
     expect(kFlutterMemoryAllocationsEnabled, isTrue);
   });
 
-
   testWidgets('publishers in Flutter dispatch events in debug mode', (WidgetTester tester) async {
-
-    eventCount = 0;
+    int eventCount = 0;
     void listener(ObjectEvent event) =>  eventCount++;
     ma.addListener(listener);
 
@@ -260,7 +256,7 @@ class _TestStatefulWidgetState extends State<_TestStatefulWidget> {
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<int> _activateFlutterObjectsAndReturnCountOfEvents(WidgetTester tester) async {
+Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
 
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
@@ -286,7 +282,6 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents(WidgetTester tester) a
 
   return count;
 }
-
 
 Future<ui.Image> _createImage() async {
   final ui.Picture picture = _createPicture();
