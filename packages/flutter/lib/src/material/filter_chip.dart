@@ -230,7 +230,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     : Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
   @override
-  Color? get checkmarkColor => null;
+  Color? get checkmarkColor => Theme.of(context).colorScheme.onSecondaryContainer;
 
   @override
   Color? get disabledColor => isSelected
@@ -238,7 +238,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
    : null;
 
   @override
-  Color? get deleteIconColor => null;
+  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
 
   @override
   BorderSide? get side => !isSelected
@@ -251,7 +251,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
       ? null
-      : null,
+      : Theme.of(context).colorScheme.onSurface,
     size: 18.0,
   );
 

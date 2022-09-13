@@ -31,6 +31,9 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
       if (states.contains(MaterialState.selected)) {
         return ${componentColor('md.comp.checkbox.selected.container')};
       }
+      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+        return ${componentColor('md.comp.checkbox.unselected.hover.outline')};
+      }
       return ${componentColor('md.comp.checkbox.unselected.outline')};
     });
   }
