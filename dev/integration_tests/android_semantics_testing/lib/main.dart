@@ -23,11 +23,11 @@ void main() {
 
 const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
-Future<String> dataHandler(String? message) async {
-  if (message != null && message.contains('getSemanticsNode')) {
+Future<String> dataHandler(String message) async {
+  if (message.contains('getSemanticsNode')) {
     final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;
-    Future<void> completeSemantics([Object? _]) async {
+    Future<void> completeSemantics([Object _]) async {
       final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
         'id': id,
       });
@@ -40,10 +40,10 @@ Future<String> dataHandler(String? message) async {
     }
     return completer.future;
   }
-  if (message != null && message.contains('setClipboard')) {
+  if (message.contains('setClipboard')) {
     final Completer<String> completer = Completer<String>();
     final String str = message.split('#')[1];
-    Future<void> completeSetClipboard([Object? _]) async {
+    Future<void> completeSetClipboard([Object _]) async {
       await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
         'message': str,
       });
@@ -67,7 +67,7 @@ Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 };
 
 class TestApp extends StatelessWidget {
-  const TestApp({super.key});
+  const TestApp({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

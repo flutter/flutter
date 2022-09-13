@@ -9,7 +9,7 @@ export 'headings_constants.dart';
 
 /// A test page with an app bar and some body text for testing heading flags.
 class HeadingsPage extends StatelessWidget {
-  const HeadingsPage({super.key});
+  const HeadingsPage({Key key}) : super(key: key);
 
   static const ValueKey<String> _appBarTitleKey = ValueKey<String>(appBarTitleKeyValue);
   static const ValueKey<String> _bodyTextKey = ValueKey<String>(bodyTextKeyValue);
