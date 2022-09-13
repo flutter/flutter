@@ -29,6 +29,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'service_extensions.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
@@ -1007,7 +1008,7 @@ mixin WidgetInspectorService {
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     _registerBoolServiceExtension(
-      name: 'structuredErrors',
+      name: WidgetInspectorServiceExtensions.structuredErrors.name,
       getter: () async => FlutterError.presentError == _reportStructuredError,
       setter: (bool value) {
         FlutterError.presentError = value ? _reportStructuredError : defaultExceptionHandler;
@@ -1016,7 +1017,7 @@ mixin WidgetInspectorService {
     );
 
     _registerBoolServiceExtension(
-      name: 'show',
+      name: WidgetInspectorServiceExtensions.show.name,
       getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
       setter: (bool value) {
         if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
@@ -1031,7 +1032,7 @@ mixin WidgetInspectorService {
       // Service extensions that are only supported if widget creation locations
       // are tracked.
       _registerBoolServiceExtension(
-        name: 'trackRebuildDirtyWidgets',
+        name: WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
         getter: () async => _trackRebuildDirtyWidgets,
         setter: (bool value) async {
           if (value == _trackRebuildDirtyWidgets) {
@@ -1054,7 +1055,7 @@ mixin WidgetInspectorService {
       );
 
       _registerBoolServiceExtension(
-        name: 'trackRepaintWidgets',
+        name: WidgetInspectorServiceExtensions.trackRepaintWidgets.name,
         getter: () async => _trackRepaintWidgets,
         setter: (bool value) async {
           if (value == _trackRepaintWidgets) {
@@ -1081,92 +1082,92 @@ mixin WidgetInspectorService {
     }
 
     _registerSignalServiceExtension(
-      name: 'disposeAllGroups',
+      name: WidgetInspectorServiceExtensions.disposeAllGroups.name,
       callback: () async {
         disposeAllGroups();
         return null;
       },
     );
     _registerObjectGroupServiceExtension(
-      name: 'disposeGroup',
+      name: WidgetInspectorServiceExtensions.disposeGroup.name,
       callback: (String name) async {
         disposeGroup(name);
         return null;
       },
     );
     _registerSignalServiceExtension(
-      name: 'isWidgetTreeReady',
+      name: WidgetInspectorServiceExtensions.isWidgetTreeReady.name,
       callback: isWidgetTreeReady,
     );
     _registerServiceExtensionWithArg(
-      name: 'disposeId',
+      name: WidgetInspectorServiceExtensions.disposeId.name,
       callback: (String? objectId, String objectGroup) async {
         disposeId(objectId, objectGroup);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'setPubRootDirectories',
+      name: WidgetInspectorServiceExtensions.setPubRootDirectories.name,
       callback: (List<String> args) async {
         setPubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'addPubRootDirectories',
+      name: WidgetInspectorServiceExtensions.addPubRootDirectories.name,
       callback: (List<String> args) async {
         addPubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'removePubRootDirectories',
+      name: WidgetInspectorServiceExtensions.removePubRootDirectories.name,
       callback: (List<String> args) async {
         removePubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionWithArg(
-      name: 'setSelectionById',
+      name: WidgetInspectorServiceExtensions.setSelectionById.name,
       callback: setSelectionById,
     );
     _registerServiceExtensionWithArg(
-      name: 'getParentChain',
+      name: WidgetInspectorServiceExtensions.getParentChain.name,
       callback: _getParentChain,
     );
     _registerServiceExtensionWithArg(
-      name: 'getProperties',
+      name: WidgetInspectorServiceExtensions.getProperties.name,
       callback: _getProperties,
     );
     _registerServiceExtensionWithArg(
-      name: 'getChildren',
+      name: WidgetInspectorServiceExtensions.getChildren.name,
       callback: _getChildren,
     );
 
     _registerServiceExtensionWithArg(
-      name: 'getChildrenSummaryTree',
+      name: WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
       callback: _getChildrenSummaryTree,
     );
 
     _registerServiceExtensionWithArg(
-      name: 'getChildrenDetailsSubtree',
+      name: WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
       callback: _getChildrenDetailsSubtree,
     );
 
     _registerObjectGroupServiceExtension(
-      name: 'getRootWidget',
+      name: WidgetInspectorServiceExtensions.getRootWidget.name,
       callback: _getRootWidget,
     );
     _registerObjectGroupServiceExtension(
-      name: 'getRootRenderObject',
+      name: WidgetInspectorServiceExtensions.getRootRenderObject.name,
       callback: _getRootRenderObject,
     );
     _registerObjectGroupServiceExtension(
-      name: 'getRootWidgetSummaryTree',
+      name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
     );
     registerServiceExtension(
-      name: 'getDetailsSubtree',
+      name: WidgetInspectorServiceExtensions.getDetailsSubtree.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
         final String? subtreeDepth = parameters['subtreeDepth'];
@@ -1180,24 +1181,24 @@ mixin WidgetInspectorService {
       },
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedRenderObject',
+      name: WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
       callback: _getSelectedRenderObject,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
       callback: _getSelectedWidget,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedSummaryWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
       callback: _getSelectedSummaryWidget,
     );
 
     _registerSignalServiceExtension(
-      name: 'isWidgetCreationTracked',
+      name: WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
       callback: isWidgetCreationTracked,
     );
     registerServiceExtension(
-      name: 'screenshot',
+      name: WidgetInspectorServiceExtensions.screenshot.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('id'));
         assert(parameters.containsKey('width'));
