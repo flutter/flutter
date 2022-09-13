@@ -4229,7 +4229,6 @@ class _ScribblePlaceholder extends WidgetSpan {
 class _CodeUnitBoundary extends TextBoundary {
   const _CodeUnitBoundary(this._text);
 
-
   final String _text;
 
   @override
