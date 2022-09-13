@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
 import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
@@ -22,35 +25,35 @@ enum _GestureState {
 /// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
 /// 
 /// Used by [TapAndDragGestureRecognizer.onTapDown].
-typedef GestureTapDownWithConsecutiveTapCountCallback  = void Function(TapDownDetails details, int consecutiveTapCount);
+typedef GestureTapDownWithTapStatusCallback  = void Function(TapDownDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.tap.GestureTapUpCallback}
 /// 
 /// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
 /// 
 /// Used by [TapAndDragGestureRecognizer.onTapUp].
-typedef GestureTapUpWithConsecutiveTapCountCallback  = void Function(TapUpDetails details, int consecutiveTapCount);
+typedef GestureTapUpWithTapStatusCallback  = void Function(TapUpDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.dragdetails.GestureDragStartCallback}
 ///
 /// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onStart].
-typedef GestureDragStartWithConsecutiveTapCountCallback = void Function(DragStartDetails details, int consecutiveTapCount);
+typedef GestureDragStartWithTapStatusCallback = void Function(DragStartDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.dragdetails.GestureDragUpdateCallback}
 /// 
 /// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onUpdate].
-typedef GestureDragUpdateWithConsecutiveTapCountCallback = void Function(DragUpdateDetails details, int consecutiveTapCount);
+typedef GestureDragUpdateWithTapStatusCallback = void Function(DragUpdateDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.monodrag.GestureDragEndCallback}
 ///
 /// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onEnd].
-typedef GestureDragEndWithConsecutiveTapCountCallback = void Function(DragEndDetails endDetails, int consecutiveTapCount);
+typedef GestureDragEndWithTapStatusCallback = void Function(DragEndDetails endDetails, TapStatus status);
 
 mixin _ConsecutiveTapMixin {
   // For consecutive tap
@@ -94,6 +97,24 @@ mixin _ConsecutiveTapMixin {
     consecutiveTapTimer?.cancel();
     consecutiveTapTimer = null;
   }
+}
+
+/// An object that includes supplementary details of a tap event, such as
+/// if the shift key was pressed when the tap occured, and what the tap count
+/// is.
+class TapStatus {
+  /// Creates a [TapStatus].
+  const TapStatus({
+    required this.consecutiveTapCount,
+    required this.isShiftPressed,
+  });
+
+  /// If this tap is in a series of taps, the `consecutiveTapCount` is
+  /// what number in the series this tap is.
+  final int consecutiveTapCount;
+
+  /// Whether the shift key was pressed when this tap happened.
+  final bool isShiftPressed;
 }
 
 /// Recognizes taps and movements.
@@ -145,10 +166,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   final double? postAcceptSlopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
-  GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
+  GestureTapDownWithTapStatusCallback? onTapDown;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapUp}
-  GestureTapUpWithConsecutiveTapCountCallback? onTapUp;
+  GestureTapUpWithTapStatusCallback? onTapUp;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
   // TODO(Renzo-Olivares): Explain cases when onTapCancel is called.
@@ -164,13 +185,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   GestureTapUpCallback? onSecondaryTapUp;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onStart}
-  GestureDragStartWithConsecutiveTapCountCallback? onStart;
+  GestureDragStartWithTapStatusCallback? onStart;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
-  GestureDragUpdateWithConsecutiveTapCountCallback? onUpdate;
+  GestureDragUpdateWithTapStatusCallback? onUpdate;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
-  GestureDragEndWithConsecutiveTapCountCallback? onEnd;
+  GestureDragEndWithTapStatusCallback? onEnd;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onCancel}
   // TODO(Renzo-Olivares): Explain cases when onDragCancel is called.
@@ -199,6 +220,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   late double _globalDistanceMoved;
   OffsetPair? _correctedPosition;
 
+  // For shift aware.
+  static bool get _isShiftPressed {
+    return HardwareKeyboard.instance.logicalKeysPressed
+        .any(<LogicalKeyboardKey>{
+      LogicalKeyboardKey.shiftLeft,
+      LogicalKeyboardKey.shiftRight,
+    }.contains);
+  }
+
+  bool _isShiftTapping = false;
 
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
@@ -260,6 +291,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _initialButtons = event.buttons;
       _dragState = _GestureState.possible;
       _down = event;
+
+      if (_isShiftPressed) {
+        _isShiftTapping = true;
+      }
 
       if (dragStartBehavior == DragStartBehavior.down) {
         _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
@@ -450,10 +485,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     incrementConsecutiveTapCountOnDown(details.globalPosition);
     _consecutiveTapCountWhileDragging = consecutiveTapCount;
 
+    final TapStatus status = TapStatus(
+      consecutiveTapCount: consecutiveTapCount,
+      isShiftPressed: _isShiftTapping,
+    );
+
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapDown != null) {
-          invokeCallback('onTapDown', () => onTapDown!(details, consecutiveTapCount));
+          invokeCallback('onTapDown', () => onTapDown!(details, status));
         }
         break;
       case kSecondaryButton:
@@ -480,10 +520,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       localPosition: event.localPosition,
     );
 
+    final TapStatus status = TapStatus(
+      consecutiveTapCount: consecutiveTapCount,
+      isShiftPressed: _isShiftTapping,
+    );
+
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapUp != null) {
-          invokeCallback('onTapUp', () => onTapUp!(upDetails, consecutiveTapCount));
+          invokeCallback('onTapUp', () => onTapUp!(upDetails, status));
         }
         break;
       case kSecondaryButton:
@@ -502,6 +547,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       resolvePointer(event.pointer, GestureDisposition.rejected);
     } // revisit
     _initialButtons = null;
+    _isShiftTapping = false;
   }
 
   void _checkStart(PointerMoveEvent event) {    
@@ -516,7 +562,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       kind: getKindForPointer(event.pointer),
     );
 
-    invokeCallback<void>('onStart', () => onStart!(details, _consecutiveTapCountWhileDragging!));
+    final TapStatus status = TapStatus(
+      consecutiveTapCount: _consecutiveTapCountWhileDragging!,
+      isShiftPressed: _isShiftTapping,
+    );
+
+    invokeCallback<void>('onStart', () => onStart!(details, status));
 
     _start = null;
   }
@@ -535,16 +586,27 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       localOffsetFromOrigin: localPosition - _initialPosition.local,
     );
 
-    invokeCallback<void>('onUpdate', () => onUpdate!(details, _consecutiveTapCountWhileDragging!));
+    final TapStatus status = TapStatus(
+      consecutiveTapCount: _consecutiveTapCountWhileDragging!,
+      isShiftPressed: _isShiftTapping,
+    );
+
+    invokeCallback<void>('onUpdate', () => onUpdate!(details, status));
   }
 
   void _checkEnd() {
     final DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
 
-    invokeCallback<void>('onEnd', () => onEnd!(endDetails, _consecutiveTapCountWhileDragging!));
+    final TapStatus status = TapStatus(
+      consecutiveTapCount: _consecutiveTapCountWhileDragging!,
+      isShiftPressed: _isShiftTapping,
+    );
+
+    invokeCallback<void>('onEnd', () => onEnd!(endDetails, status));
 
     _resetTaps();
     consecutiveTapReset();
+    _isShiftTapping = false;
   }
 
   void _checkCancel() {
