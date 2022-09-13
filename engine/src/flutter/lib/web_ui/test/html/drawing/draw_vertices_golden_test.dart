@@ -25,8 +25,7 @@ Future<void> testMain() async {
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-      double maxDiffRatePercent = 0.0,
-      bool write = false}) async {
+      double maxDiffRatePercent = 0.0}) async {
     final EngineCanvas engineCanvas =
         BitmapCanvas(screenRect, RenderStrategy());
     rc.endRecording();
@@ -47,7 +46,6 @@ Future<void> testMain() async {
       await matchGoldenFile(
         '$fileName.png',
         region: region,
-        write: write,
         maxDiffRatePercent: maxDiffRatePercent,
       );
     } finally {
@@ -70,13 +68,12 @@ Future<void> testMain() async {
   });
 
   Future<void> testVertices(
-      String fileName, Vertices vertices, BlendMode blendMode, Paint paint,
-      {bool write = false}) async {
+      String fileName, Vertices vertices, BlendMode blendMode, Paint paint) async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.drawVertices(
         vertices as SurfaceVertices, blendMode, paint as SurfacePaint);
-    await checkScreenshot(rc, fileName, write: write);
+    await checkScreenshot(rc, fileName);
   }
 
   test('Should draw green hairline triangles when colors array is null.',

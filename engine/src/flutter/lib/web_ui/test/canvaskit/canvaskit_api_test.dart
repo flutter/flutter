@@ -1571,7 +1571,6 @@ void _paragraphTests() {
         'paragraph_kitchen_sink.png',
         region: const ui.Rect.fromLTRB(0, 0, 400, 160),
         maxDiffRatePercent: 0.0,
-        write: true,
       );
     }
 

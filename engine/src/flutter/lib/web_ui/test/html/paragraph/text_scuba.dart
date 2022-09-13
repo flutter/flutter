@@ -43,13 +43,11 @@ class EngineScubaTester {
     String fileName, {
     ui.Rect? region,
     double? maxDiffRatePercent,
-    bool write = false,
   }) async {
     await matchGoldenFile(
       '$fileName.png',
       region: region ?? viewportRegion,
       maxDiffRatePercent: maxDiffRatePercent,
-      write: write,
     );
   }
 
@@ -62,7 +60,6 @@ class EngineScubaTester {
     String fileName, {
     ui.Rect? region,
     double? maxDiffRatePercent,
-    bool write = false,
   }) async {
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final DomElement sceneElement = createDomElement('flt-scene');
@@ -83,7 +80,6 @@ class EngineScubaTester {
         screenshotName,
         region: region,
         maxDiffRatePercent: maxDiffRatePercent,
-        write: write,
       );
     } finally {
       // The page is reused across tests, so remove the element after taking the
