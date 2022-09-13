@@ -11,6 +11,8 @@ import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
+export 'package:flutter/rendering.dart' show PaintingContextCallback;
+
 /// Controls how the [SnapshotWidget] paints its child.
 enum SnapshotMode {
   /// The child is snapshotted, but only if all descendants can be snapshotted.

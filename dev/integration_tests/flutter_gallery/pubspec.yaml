@@ -108,6 +108,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  shaders:
+    - shaders/page_transition.glsl
   assets:
     - lib/gallery/example_code.dart
     - packages/flutter_gallery_assets/people/ali_landscape.png

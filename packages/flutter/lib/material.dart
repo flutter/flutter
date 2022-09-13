@@ -138,6 +138,7 @@ export 'src/material/scrollbar_theme.dart';
 export 'src/material/search.dart';
 export 'src/material/selectable_text.dart';
 export 'src/material/selection_area.dart';
+export 'src/material/shader_page.dart';
 export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';

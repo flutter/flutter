@@ -38,6 +38,10 @@ ThemeData _buildDarkTheme() {
   return base.copyWith(
     textTheme: _buildTextTheme(base.textTheme),
     primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
+    pageTransitionsTheme:  PageTransitionsTheme(builders: {
+      for (TargetPlatform platform in TargetPlatform.values)
+        platform: const ShaderPageTransitionBuilder(shader: 'shaders/page_transition.glsl')
+    })
   );
 }
 
@@ -62,5 +66,9 @@ ThemeData _buildLightTheme() {
   return base.copyWith(
     textTheme: _buildTextTheme(base.textTheme),
     primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
+    pageTransitionsTheme:  PageTransitionsTheme(builders: {
+      for (TargetPlatform platform in TargetPlatform.values)
+        platform: const ShaderPageTransitionBuilder(shader: 'shaders/page_transition.glsl')
+    })
   );
 }
