@@ -282,6 +282,7 @@ class ListTile extends StatelessWidget {
     this.enabled = true,
     this.onTap,
     this.onLongPress,
+    this.onFocusChange,
     this.mouseCursor,
     this.selected = false,
     this.focusColor,
@@ -455,6 +456,12 @@ class ListTile extends StatelessWidget {
   ///
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback? onLongPress;
+
+  /// Handler called when the focus changes.
+  ///
+  /// Called with true if this widget's node gains focus, and false if it loses
+  /// focus.
+  final ValueChanged<bool>? onFocusChange;
 
   /// {@template flutter.material.ListTile.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -738,6 +745,7 @@ class ListTile extends StatelessWidget {
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      onFocusChange: onFocusChange,
       mouseCursor: effectiveMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
