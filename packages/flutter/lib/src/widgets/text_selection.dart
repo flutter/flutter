@@ -1864,7 +1864,6 @@ class TextSelectionGestureDetectorBuilder {
     }
 
     final TextPosition textPosition = renderEditable.getPositionForPoint(position);
-    print('return ${targetSelection.start} <= ${textPosition.offset} && ${targetSelection.end} >= ${textPosition.offset}');
 
     return targetSelection.start <= textPosition.offset
         && targetSelection.end >= textPosition.offset;
@@ -2200,10 +2199,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onSingleTapCancel], which triggers
   ///    this callback.
   @protected
-  void onSingleTapCancel() {
-    /* Subclass should override this method if needed. */
-    print('on cancel');
-  }
+  void onSingleTapCancel() { /* Subclass should override this method if needed. */ }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapStart].
   ///
@@ -2338,7 +2334,6 @@ class TextSelectionGestureDetectorBuilder {
   /// By default, selects the word if possible and shows the toolbar.
   @protected
   void onSecondaryTap() {
-    print('onSecondaryTap');
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2374,7 +2369,6 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [onSecondaryTap], which is typically called after this.
   @protected
   void onSecondaryTapDown(TapDownDetails details) {
-    print('onSecondaryTapDown');
     renderEditable.handleSecondaryTapDown(details);
     _shouldShowSelectionToolbar = true;
   }
@@ -2758,22 +2752,18 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDownDetails details, int consecutiveTapCount) {
-    print('tap down? and tap count $consecutiveTapCount');
     widget.onTapDown?.call(details, consecutiveTapCount);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
     if (consecutiveTapCount.isEven) {
-      print('double tap');
       widget.onDoubleTapDown?.call(details);
     }
   }
 
   void _handleTapUp(TapUpDetails details, int consecutiveTapCount) {
-    print('tap up');
     if (consecutiveTapCount == 1) {
-      print('running tap up');
       widget.onSingleTapUp?.call(details);
     }
   }
@@ -2788,16 +2778,12 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   int? _dragTapCount;
 
   void _handleDragStart(DragStartDetails details, int consecutiveTapCount) {
-    print('drag start');
-    print('tap count $consecutiveTapCount');
     if (consecutiveTapCount == 1) {
       widget.onDragSelectionStart?.call(details, consecutiveTapCount);
     }
   }
 
   void _handleDragUpdate(DragUpdateDetails details, int consecutiveTapCount) {
-    print('drag update');
-    print('tap count $consecutiveTapCount');
     _lastDragUpdateDetails = details;
     _dragTapCount = consecutiveTapCount;
     // Only schedule a new timer if there's no one pending.
@@ -2818,8 +2804,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleDragEnd(DragEndDetails endDetails, int consecutiveTapCount) {
-    print('drag end');
-    print('tap count $consecutiveTapCount');
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
@@ -2841,25 +2825,19 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    print('long press start');
     if (widget.onSingleLongTapStart != null) {
-      // print('long press start run');
       widget.onSingleLongTapStart!(details);
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    print('long press update');
     if (widget.onSingleLongTapMoveUpdate != null) {
-      print('long press update run');
       widget.onSingleLongTapMoveUpdate!(details);
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    print('long press end');
     if (widget.onSingleLongTapEnd != null) {
-      print('long press end run');
       widget.onSingleLongTapEnd!(details);
     }
   }
