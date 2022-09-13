@@ -223,10 +223,13 @@ class TextPainter {
   /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
   /// returns its [TextPainter.width] making sure to dispose the underlying
   /// resources.
+  ///
+  /// Unlike the [TextPainter] constructor, the [textDirection] parameter is
+  /// required because it cannot be set or changed later.
   static double computeWidth({
     required InlineSpan text,
+    required TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
-    TextDirection? textDirection,
     double textScaleFactor = 1.0,
     int? maxLines,
     String? ellipsis,
@@ -263,10 +266,13 @@ class TextPainter {
   /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
   /// returns its [TextPainter.maxIntrinsicWidth] making sure to dispose the
   /// underlying resources.
+  ///
+  /// Unlike the [TextPainter] constructor, the [textDirection] parameter is
+  /// required because it cannot be set or changed later.
   static double computeMaxIntrinsicWidth({
     required InlineSpan text,
+    required TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
-    TextDirection? textDirection,
     double textScaleFactor = 1.0,
     int? maxLines,
     String? ellipsis,
