@@ -18,6 +18,8 @@ jobs:
       security-events: write
       actions: read
       contents: read
+      # Needed to access OIDC token.
+      id-token: write
 
     steps:
       - name: "Checkout code"
@@ -26,7 +28,7 @@ jobs:
           persist-credentials: false
 
       - name: "Run analysis"
-        uses: ossf/scorecard-action@68bf5b3327e4fd443d2add8ab122280547b4a16d
+        uses: ossf/scorecard-action@865b4092859256271290c77adbd10a43f4779972
         with:
           results_file: results.sarif
           results_format: sarif
