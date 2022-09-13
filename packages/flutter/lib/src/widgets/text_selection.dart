@@ -2742,7 +2742,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleTapUp(TapUpDetails details, TapStatus status) {
-    if (status.consecutiveTapCount == 1) {
+    if (status.consecutiveTapCount.isOdd) {
       widget.onSingleTapUp?.call(details, status);
     }
     _isDoubleTap = false;
