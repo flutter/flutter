@@ -483,7 +483,7 @@ end
           canFail: true,
         );
 
-        if (testResultExit == 0) {
+        if (testResultExit != 0) {
           final Directory? dumpDirectory = hostAgent.dumpDirectory;
           if (dumpDirectory != null) {
             // Zip the test results to the artifacts directory for upload.

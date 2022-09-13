@@ -216,7 +216,7 @@ Future<bool> runXcodeTests({
     canFail: true,
   );
 
-  if (testResultExit == 0) {
+  if (testResultExit != 0) {
     final Directory? dumpDirectory = hostAgent.dumpDirectory;
     final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
     if (dumpDirectory != null) {
