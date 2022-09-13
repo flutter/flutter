@@ -7,11 +7,9 @@ import 'dart:async';
 import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
-import 'long_press.dart' show GestureLongPressCancelCallback, GestureLongPressEndCallback, GestureLongPressMoveUpdateCallback, GestureLongPressStartCallback, LongPressEndDetails, LongPressMoveUpdateDetails, LongPressStartDetails;
 import 'monodrag.dart' show GestureDragCancelCallback;
 import 'recognizer.dart';
 import 'tap.dart' show GestureTapCallback, GestureTapCancelCallback, GestureTapDownCallback, GestureTapUpCallback, TapDownDetails, TapUpDetails;
-import 'velocity_tracker.dart';
 
 enum _GestureState {
   ready,
@@ -579,7 +577,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   double _getGlobalDistance(PointerEvent event) {
-    final Offset offset = event.position - _initialPosition!.global;
+    final Offset offset = event.position - _initialPosition.global;
     return offset.distance;
   }
 
@@ -606,4 +604,3 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     }
   }
 }
-
