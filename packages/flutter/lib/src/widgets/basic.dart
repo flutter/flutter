@@ -3218,6 +3218,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///    subtly).
 ///  * [TickerMode], which can be used to disable animations in a subtree.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///  * [debugVisitOnstageChildren], for non-offstage children discoverability.
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ super.key, this.offstage = true, super.child })
