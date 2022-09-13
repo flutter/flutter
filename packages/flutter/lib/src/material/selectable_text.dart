@@ -84,7 +84,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapUpDetails details, TapStatus status) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {

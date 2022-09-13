@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
-import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
+import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton, TapStatus;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -25,16 +25,16 @@ void main() {
   late int dragEndCount;
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  void handleTapDown(TapDownDetails details, int consecutiveTapCount) { tapCount++; }
-  void handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
+  void handleTapDown(TapDownDetails details, TapStatus status) { tapCount++; }
+  void handleSingleTapUp(TapUpDetails details, TapStatus status) { singleTapUpCount++; }
   void handleSingleTapCancel() { singleTapCancelCount++; }
   void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
   void handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
   void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void handleDragSelectionStart(DragStartDetails details, int consecutiveTapCount) { dragStartCount++; }
-  void handleDragSelectionUpdate(DragUpdateDetails details, int consecutiveTapCount) { dragUpdateCount++; }
-  void handleDragSelectionEnd(DragEndDetails details, int consecutiveTapCount) { dragEndCount++; }
+  void handleDragSelectionStart(DragStartDetails details, TapStatus status) { dragStartCount++; }
+  void handleDragSelectionUpdate(DragUpdateDetails details, TapStatus status) { dragUpdateCount++; }
+  void handleDragSelectionEnd(DragEndDetails details, TapStatus status) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
