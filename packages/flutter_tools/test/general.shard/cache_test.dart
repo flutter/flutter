@@ -582,8 +582,7 @@ void main() {
     expect(artifacts.getBinaryDirs(), containsAll(<List<String>>[
       <String>['darwin-x64', 'darwin-x64/gen_snapshot.zip'],
       <String>['darwin-x64-profile', 'darwin-x64-profile/gen_snapshot.zip'],
-      <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot_arm64.zip'],
-      <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot_x64.zip'],
+      <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot.zip'],
     ]));
   });
 
