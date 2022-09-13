@@ -39,7 +39,7 @@ const double _kInnerRadius = 4.5;
 /// to what you could get with the RadioListTile widget.
 ///
 /// The currently selected character is passed into `groupValue`, which is
-/// maintained by the example's `State`. In this case, the first `Radio`
+/// maintained by the example's `State`. In this case, the first [Radio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///

@@ -82,7 +82,7 @@ export 'package:flutter/services.dart' show
 // BIDIRECTIONAL TEXT SUPPORT
 
 /// An [InheritedElement] that has hundreds of dependencies but will
-/// infrequently change.  This provides a performance tradeoff where building
+/// infrequently change. This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
 ///
 /// |                     | _UbiquitiousInheritedElement | InheritedElement |
@@ -101,7 +101,7 @@ class _UbiquitousInheritedElement extends InheritedElement {
   @override
   void setDependencies(Element dependent, Object? value) {
     // This is where the cost of [InheritedElement] is incurred during build
-    // time of the widget tree.  Omitting this bookkeeping is where the
+    // time of the widget tree. Omitting this bookkeeping is where the
     // performance savings come from.
     assert(value == null);
   }
@@ -2687,10 +2687,10 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// {@template flutter.widgets.ConstraintsTransformBox.clipBehavior}
-  /// In debug mode, if `clipBehavior` is [Clip.none], and the child overflows
+  /// In debug mode, if [clipBehavior] is [Clip.none], and the child overflows
   /// its constraints, a warning will be printed on the console, and black and
   /// yellow striped areas will appear where the overflow occurs. For other
-  /// values of `clipBehavior`, the contents are clipped accordingly.
+  /// values of [clipBehavior], the contents are clipped accordingly.
   /// {@endtemplate}
   ///
   /// Defaults to [Clip.none].
@@ -3411,7 +3411,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// See also:
   ///
   ///  * [RenderBox.getMaxIntrinsicWidth], which defines a widget's max
-  ///    intrinsic width  in general.
+  ///    intrinsic width in general.
   final double? stepWidth;
 
   /// If non-null, force the child's height to be a multiple of this value.
@@ -6878,6 +6878,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool excludeSemantics = false,
     bool? enabled,
     bool? checked,
+    bool? mixed,
     bool? selected,
     bool? toggled,
     bool? button,
@@ -6943,6 +6944,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     properties: SemanticsProperties(
       enabled: enabled,
       checked: checked,
+      mixed: mixed,
       toggled: toggled,
       selected: selected,
       button: button,

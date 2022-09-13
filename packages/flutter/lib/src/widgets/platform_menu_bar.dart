@@ -171,7 +171,7 @@ mixin MenuSerializableShortcut implements ShortcutActivator {
 /// [PlatformMenuBar] menu hierarchy changes.
 ///
 /// This delegate doesn't handle the results of clicking on a menu item, which
-/// is left to the implementor of subclasses of `PlatformMenuDelegate` to
+/// is left to the implementor of subclasses of [PlatformMenuDelegate] to
 /// handle for their implementation.
 ///
 /// This delegate typically knows how to serialize a [PlatformMenu]
@@ -198,7 +198,7 @@ abstract class PlatformMenuDelegate {
   /// The `topLevelMenus` argument is the list of menus that appear in the menu
   /// bar, which themselves can have children.
   ///
-  /// To update the menu hierarchy or menu item state, call `setMenus` with the
+  /// To update the menu hierarchy or menu item state, call [setMenus] with the
   /// modified hierarchy, and it will overwrite the previous menu state.
   ///
   /// See also:
@@ -220,10 +220,10 @@ abstract class PlatformMenuDelegate {
   /// This is called by [PlatformMenuBar] when it is initialized, to be sure that
   /// only one is active at a time.
   ///
-  /// The `debugLockDelegate` function should be called before the first call to
+  /// The [debugLockDelegate] function should be called before the first call to
   /// [setMenus].
   ///
-  /// If the lock is successfully acquired, `debugLockDelegate` will return
+  /// If the lock is successfully acquired, [debugLockDelegate] will return
   /// true.
   ///
   /// If your implementation of a [PlatformMenuDelegate] can have only limited
@@ -237,7 +237,7 @@ abstract class PlatformMenuDelegate {
   /// This is called by [PlatformMenuBar] when it is disposed, so that another
   /// one can take over.
   ///
-  /// If the `debugUnlockDelegate` successfully unlocks the delegate, it will
+  /// If the [debugUnlockDelegate] successfully unlocks the delegate, it will
   /// return true.
   ///
   /// See also:
@@ -408,7 +408,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 /// {@end-tool}
 ///
 /// The menus could just as effectively be managed without using the widget tree
-/// by using the following code, but mixing this usage with `PlatformMenuBar` is
+/// by using the following code, but mixing this usage with [PlatformMenuBar] is
 /// not recommended, since it will overwrite the menu configuration when it is
 /// rebuilt:
 ///
@@ -449,12 +449,12 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// The list of menu items that are the top level children of the
   /// [PlatformMenuBar].
   ///
-  /// The `menus` member contains [PlatformMenuItem]s. They will not be part of
+  /// The [menus] member contains [PlatformMenuItem]s. They will not be part of
   /// the widget tree, since they are not widgets. They are provided to
   /// configure the properties of the menus on the platform menu bar.
   ///
   /// Also, a Widget in Flutter is immutable, so directly modifying the
-  /// `menus` with `List` APIs such as
+  /// [menus] with `List` APIs such as
   /// `somePlatformMenuBarWidget.menus.add(...)` will result in incorrect
   /// behaviors. Whenever the menus list is modified, a new list object
   /// should be provided.

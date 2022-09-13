@@ -168,6 +168,13 @@ class _CaretMetrics {
 ///
 /// 3. Call [paint] as often as desired to paint the paragraph.
 ///
+/// 4. Call [dispose] when the object will no longer be accessed to release
+///    native resources. For [TextPainter] objects that are used repeatedly and
+///    stored on a [State] or [RenderObject], call [dispose] from
+///    [State.dispose] or [RenderObject.dispose] or similar. For [TextPainter]
+///    objects that are only used ephemerally, it is safe to immediately dispose
+///    them after the last call to methods or properties on the object.
+///
 /// If the width of the area into which the text is being painted
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
@@ -222,6 +229,7 @@ class TextPainter {
   bool _rebuildParagraphForPaint = true;
 
   bool get _debugAssertTextLayoutIsValid {
+    assert(!debugDisposed);
     if (_paragraph == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Text layout not available'),
@@ -247,6 +255,7 @@ class TextPainter {
       }
       return true;
     }());
+    _paragraph?.dispose();
     _paragraph = null;
     _lineMetricsCache = null;
     _previousCaretPosition = null;
@@ -271,6 +280,7 @@ class TextPainter {
       return;
     }
     if (_text?.style != value?.style) {
+      _layoutTemplate?.dispose();
       _layoutTemplate = null;
     }
 
@@ -329,6 +339,7 @@ class TextPainter {
     }
     _textDirection = value;
     markNeedsLayout();
+    _layoutTemplate?.dispose();
     _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
   }
 
@@ -347,6 +358,7 @@ class TextPainter {
     }
     _textScaleFactor = value;
     markNeedsLayout();
+    _layoutTemplate?.dispose();
     _layoutTemplate = null;
   }
 
@@ -1059,5 +1071,34 @@ class TextPainter {
   List<ui.LineMetrics> computeLineMetrics() {
     assert(_debugAssertTextLayoutIsValid);
     return  _lineMetricsCache ??= _paragraph!.computeLineMetrics();
+  }
+
+  bool _disposed = false;
+
+  /// Whether this object has been disposed or not.
+  ///
+  /// Only for use when asserts are enabled.
+  bool get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _disposed;
+      return true;
+    }());
+    return disposed ?? (throw StateError('debugDisposed only available when asserts are on.'));
+  }
+
+  /// Releases the resources associated with this painter.
+  ///
+  /// After disposal this painter is unusable.
+  void dispose() {
+    assert(() {
+      _disposed = true;
+      return true;
+    }());
+    _layoutTemplate?.dispose();
+    _layoutTemplate = null;
+    _paragraph?.dispose();
+    _paragraph = null;
+    _text = null;
   }
 }

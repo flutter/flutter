@@ -2415,7 +2415,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// [showModalBottomSheet] function.
   ///
   /// {@tool dartpad}
-  /// This example demonstrates how to use `showBottomSheet` to display a
+  /// This example demonstrates how to use [showBottomSheet] to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
   /// close a bottom sheet using the Navigator.
   ///
@@ -2484,7 +2484,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   double get _floatingActionButtonVisibilityValue => _floatingActionButtonVisibilityController.value;
 
   /// Sets the current value of the visibility animation for the
-  /// [Scaffold.floatingActionButton].  This value must not be null.
+  /// [Scaffold.floatingActionButton]. This value must not be null.
   set _floatingActionButtonVisibilityValue(double newValue) {
     assert(newValue != null);
     _floatingActionButtonVisibilityController.value = clampDouble(newValue,
@@ -2522,7 +2522,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // iOS FEATURES - status bar tap, back gesture
 
   // On iOS, tapping the status bar scrolls the app's primary scrollable to the
-  // top. We implement this by looking up the  primary scroll controller and
+  // top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
     final ScrollController? primaryScrollController = PrimaryScrollController.of(context);

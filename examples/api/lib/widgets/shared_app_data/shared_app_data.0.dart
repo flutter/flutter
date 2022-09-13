@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SharedAppData
+/// Flutter code sample for [SharedAppData].
 
 import 'package:flutter/material.dart';
 
@@ -13,16 +13,16 @@ class ShowSharedValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The SharedAppData.getValue() call here causes this widget to depend
-    // on the value of the SharedAppData's 'foo' key. If it's changed, with
+    // The SharedAppData.getValue() call causes this widget to depend on the
+    // value of the SharedAppData's 'foo' key. If it's changed, with
     // SharedAppData.setValue(), then this widget will be rebuilt.
     final String value = SharedAppData.getValue<String, String>(context, appDataKey, () => 'initial');
     return Text('$appDataKey: $value');
   }
 }
 
-// Demonstrates that changes to the SharedAppData _only_ cause the dependent widgets
-// to be rebuilt. In this case that's the ShowSharedValue widget that's
+// Demonstrates that changes to the SharedAppData _only_ cause the dependent
+// widgets to be rebuilt. In this case that's the ShowSharedValue widget that's
 // displaying the value of a key whose value has been updated.
 class Home extends StatefulWidget {
   const Home({ super.key });
@@ -50,8 +50,8 @@ class _HomeState extends State<Home> {
               child: const Text('change foo'),
               onPressed: () {
                 _fooVersion += 1;
-                // Changing the SharedAppData's value for 'foo' causes the widgets that
-                // depend on 'foo' to be rebuilt.
+                // Changing the SharedAppData's value for 'foo' causes the
+                // widgets that depend on 'foo' to be rebuilt.
                 SharedAppData.setValue<String, String?>(context, 'foo', 'FOO $_fooVersion'); // note: no setState()
               },
             ),

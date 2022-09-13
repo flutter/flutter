@@ -280,6 +280,7 @@ class ResidentWebRunner extends ResidentRunner {
         );
         final Uri url = await device!.devFS!.create();
         if (debuggingOptions.buildInfo.isDebug) {
+          await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
             _logger!.printError('Failed to compile application.');
@@ -520,9 +521,9 @@ class ResidentWebRunner extends ResidentRunner {
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
-      final ChromeTab chromeTab = await (chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+      final ChromeTab? chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
         return !chromeTab.url.startsWith('chrome-extension');
-      }, retryFor: const Duration(seconds: 5)) as FutureOr<ChromeTab>);
+      }, retryFor: const Duration(seconds: 5));
       if (chromeTab == null) {
         throwToolExit('Failed to connect to Chrome instance.');
       }
@@ -614,11 +615,11 @@ class ResidentWebRunner extends ResidentRunner {
         _logger!.printStatus('💪 Running with sound null safety 💪', emphasis: true);
       } else {
         _logger!.printStatus(
-          'Running with unsound null safety',
+          'Running without sound null safety ⚠️',
           emphasis: true,
         );
         _logger!.printStatus(
-          'For more information see https://dart.dev/null-safety/unsound-null-safety',
+          'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
         );
       }
     }
