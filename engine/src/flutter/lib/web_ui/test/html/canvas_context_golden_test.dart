@@ -5,10 +5,9 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
-import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 
-import 'package:web_engine_tester/golden_tester.dart';
+import 'screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -19,36 +18,6 @@ Future<void> testMain() async {
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-
-  // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> checkScreenshot(engine.RecordingCanvas rc, String fileName,
-      {Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
-    final engine.EngineCanvas engineCanvas = engine.BitmapCanvas(screenRect,
-        engine.RenderStrategy());
-
-    rc.endRecording();
-    rc.apply(engineCanvas, screenRect);
-
-    // Wrap in <flt-scene> so that our CSS selectors kick in.
-    final engine.DomElement sceneElement = engine.createDomElement('flt-scene');
-    if (isIosSafari) {
-      // Shrink to fit on the iPhone screen.
-      sceneElement.style.position = 'absolute';
-      sceneElement.style.transformOrigin = '0 0 0';
-      sceneElement.style.transform = 'scale(0.3)';
-    }
-
-    try {
-      sceneElement.append(engineCanvas.rootElement);
-      engine.domDocument.body!.append(sceneElement);
-      // TODO(yjbanov): 10% diff rate is excessive. Update goldens.
-      await matchGoldenFile('$fileName.png', region: region);
-    } finally {
-      // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
-      sceneElement.remove();
-    }
-  }
 
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
@@ -83,7 +52,7 @@ Future<void> testMain() async {
     // The rectangle should paint without clipping since we restored
     // context.
     rc.drawRect(const Rect.fromLTWH(0, 0, 4, 200), paint);
-    await checkScreenshot(rc, 'context_save_restore_transform');
+    await canvasScreenshot(rc, 'context_save_restore_transform', canvasRect: screenRect);
   });
 
   test('Should restore clip path', () async {
@@ -108,6 +77,6 @@ Future<void> testMain() async {
     // The rectangle should paint without clipping since we restored
     // context.
     rc.drawRect(const Rect.fromLTWH(0, 0, 200, 200), goodPaint as engine.SurfacePaint);
-    await checkScreenshot(rc, 'context_save_restore_clip');
+    await canvasScreenshot(rc, 'context_save_restore_clip', canvasRect: screenRect);
   });
 }

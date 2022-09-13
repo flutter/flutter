@@ -6,9 +6,9 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
-import 'package:web_engine_tester/golden_tester.dart';
 
 import '../matchers.dart';
+import 'screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -21,33 +21,6 @@ Future<void> testMain() async {
   const Color black12Color = Color(0x1F000000);
   const Color redAccentColor = Color(0xFFFF1744);
   const double kDashLength = 5.0;
-
-  // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> checkScreenshot(RecordingCanvas rc, String fileName,
-      {Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
-        RenderStrategy());
-    rc.endRecording();
-    rc.apply(engineCanvas, screenRect);
-
-    // Wrap in <flt-scene> so that our CSS selectors kick in.
-    final DomElement sceneElement = createDomElement('flt-scene');
-    if (isIosSafari) {
-      // Shrink to fit on the iPhone screen.
-      sceneElement.style.position = 'absolute';
-      sceneElement.style.transformOrigin = '0 0 0';
-      sceneElement.style.transform = 'scale(0.3)';
-    }
-    try {
-      sceneElement.append(engineCanvas.rootElement);
-      domDocument.body!.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: region);
-    } finally {
-      // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
-      sceneElement.remove();
-    }
-  }
 
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
@@ -150,7 +123,7 @@ Future<void> testMain() async {
       }
     }
     rc.drawPath(dashedPath, redPaint);
-    await checkScreenshot(rc, 'path_dash_quadratic');
+    await canvasScreenshot(rc, 'path_dash_quadratic', canvasRect: screenRect);
   });
 
   // Test for extractPath to draw 5 pixel length dashed line using cubic curve.
@@ -204,6 +177,6 @@ Future<void> testMain() async {
       }
     }
     rc.drawPath(dashedPath, redPaint);
-    await checkScreenshot(rc, 'path_dash_cubic');
+    await canvasScreenshot(rc, 'path_dash_cubic', canvasRect: screenRect);
   });
 }

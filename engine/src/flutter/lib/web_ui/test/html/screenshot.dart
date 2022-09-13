@@ -9,11 +9,21 @@ import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
 /// Commit a recording canvas to a bitmap, and compare with the expected.
-Future<void> canvasScreenshot(RecordingCanvas rc, String fileName,
-    {ui.Rect region = const ui.Rect.fromLTWH(0, 0, 600, 800),
-      double maxDiffRatePercent = 0.0, bool setupPerspective = false}) async {
-  final EngineCanvas engineCanvas = BitmapCanvas(region,
-      RenderStrategy());
+///
+/// [region] specifies the area of the canvas that will be included in the
+/// golden.
+///
+/// If [canvasRect] is omitted, it defaults to the value of [region].
+Future<void> canvasScreenshot(
+  RecordingCanvas rc,
+  String fileName, {
+  ui.Rect region = const ui.Rect.fromLTWH(0, 0, 500, 500),
+  ui.Rect? canvasRect,
+  double maxDiffRatePercent = 0.0,
+  bool setupPerspective = false,
+}) async {
+  canvasRect ??= region;
+  final EngineCanvas engineCanvas = BitmapCanvas(canvasRect, RenderStrategy());
 
   rc.endRecording();
   rc.apply(engineCanvas, region);

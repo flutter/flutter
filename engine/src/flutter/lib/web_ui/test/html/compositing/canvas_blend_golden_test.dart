@@ -58,7 +58,6 @@ Future<void> testMain() async {
     rc.restore();
 
     await canvasScreenshot(rc, 'canvas_blend_circle_diff_color',
-        region: const Rect.fromLTWH(0, 0, 500, 500),
         maxDiffRatePercent: operatingSystem == OperatingSystem.macOs ? 2.95 :
             operatingSystem == OperatingSystem.iOs ? 1.0 : 0);
   });
@@ -97,7 +96,6 @@ Future<void> testMain() async {
         SurfacePaint()..blendMode = BlendMode.multiply);
     rc.restore();
     await canvasScreenshot(rc, 'canvas_blend_image_multiply',
-        region: const Rect.fromLTWH(0, 0, 500, 500),
         maxDiffRatePercent: operatingSystem == OperatingSystem.macOs ? 2.95 :
         operatingSystem == OperatingSystem.iOs ? 2.0 : 0);
   });

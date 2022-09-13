@@ -124,13 +124,3 @@ CanvasParagraph paragraph(
   paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
   return paragraph;
 }
-
-/// Configures the test to use bundled Roboto and Ahem fonts to avoid golden
-/// screenshot differences due to differences in the preinstalled system fonts.
-void setUpStableTestFonts() {
-  setUpAll(() async {
-    await ui.webOnlyInitializePlatform();
-    renderer.fontCollection.debugRegisterTestFonts();
-    await renderer.fontCollection.ensureFontsLoaded();
-  });
-}

@@ -18,10 +18,6 @@ void main() {
 }
 
 Future<void> testMain() async {
-  const double screenWidth = 500.0;
-  const double screenHeight = 500.0;
-  const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
@@ -40,7 +36,6 @@ Future<void> testMain() async {
     rc.drawRect(shaderRect, paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_rect',
-        region: screenRect,
         maxDiffRatePercent: 0.01);
   });
 
@@ -61,7 +56,6 @@ Future<void> testMain() async {
     rc.drawRect(shaderRect, paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_rect_alpha',
-        region: screenRect,
         maxDiffRatePercent: 0.01);
   });
 
@@ -94,7 +88,6 @@ Future<void> testMain() async {
     }
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_oval_matrix',
-        region: screenRect,
         maxDiffRatePercent: 0.2);
   });
 
@@ -110,7 +103,6 @@ Future<void> testMain() async {
     rc.drawRRect(RRect.fromRectAndRadius(shaderRect, const Radius.circular(16)), paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_rounded_rect',
-        region: screenRect,
         maxDiffRatePercent: 0.1);
   });
 
@@ -137,8 +129,7 @@ Future<void> testMain() async {
       yOffset += 120;
     }
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
-    await canvasScreenshot(rc, 'linear_gradient_tiled_repeated_rect',
-        region: screenRect);
+    await canvasScreenshot(rc, 'linear_gradient_tiled_repeated_rect');
   }, skip: isFirefox);
 
   test('Should draw tiled mirrored linear gradient with transform.', () async {
@@ -164,7 +155,6 @@ Future<void> testMain() async {
       yOffset += 120;
     }
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
-    await canvasScreenshot(rc, 'linear_gradient_tiled_mirrored_rect',
-        region: screenRect);
+    await canvasScreenshot(rc, 'linear_gradient_tiled_mirrored_rect');
   }, skip: isFirefox);
 }

@@ -9,8 +9,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'package:web_engine_tester/golden_tester.dart';
-
 import 'common.dart';
 
 void main() {
@@ -18,14 +16,6 @@ void main() {
 }
 
 const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
-
-Future<void> matchPictureGolden(String goldenFile, CkPicture picture) async {
-  final LayerSceneBuilder sb = LayerSceneBuilder();
-  sb.pushOffset(0, 0);
-  sb.addPicture(ui.Offset.zero, picture);
-  CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
-  await matchGoldenFile(goldenFile, region: region);
-}
 
 void testMain() {
   group('Linear', () {
@@ -62,6 +52,7 @@ void testMain() {
       await matchPictureGolden(
         'canvaskit_linear_gradient.png',
         recorder.endRecording(),
+        region: region,
       );
     });
 
@@ -96,6 +87,7 @@ void testMain() {
       await matchPictureGolden(
         'canvaskit_linear_gradient_rotated.png',
         recorder.endRecording(),
+        region: region,
       );
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
