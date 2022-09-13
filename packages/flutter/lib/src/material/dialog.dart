@@ -1389,7 +1389,7 @@ class _DialogDefaultsM2 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_127
 
 class _DialogDefaultsM3 extends DialogTheme {
   _DialogDefaultsM3(this.context)
