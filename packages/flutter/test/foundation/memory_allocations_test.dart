@@ -150,12 +150,12 @@ void main() {
     expect(kFlutterMemoryAllocationsEnabled, isTrue);
   });
 
-  testWidgets('publishers in Flutter dispatch events in debug mode', (WidgetTester tester) async {
+  test('publishers in Flutter dispatch events in debug mode', () async {
     int eventCount = 0;
     void listener(ObjectEvent event) =>  eventCount++;
     ma.addListener(listener);
 
-    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents(tester);
+    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
     expect(eventCount, expectedEventCount);
 
     ma.removeListener(listener);
