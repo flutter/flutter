@@ -175,6 +175,13 @@ class TestCollector implements Collector {
   }
 }
 
+Future<void> matchSceneGolden(String goldenFile, LayerScene scene, {
+  required ui.Rect region,
+}) async {
+  CanvasKitRenderer.instance.rasterizer.draw(scene.layerTree);
+  await matchGoldenFile(goldenFile, region: region);
+}
+
 /// Checks that a [picture] matches the [goldenFile].
 ///
 /// The picture is drawn onto the UI at [ui.Offset.zero] with no additional

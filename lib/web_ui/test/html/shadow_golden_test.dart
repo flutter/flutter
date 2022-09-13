@@ -9,7 +9,7 @@ import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import 'paragraph/text_scuba.dart';
+import 'screenshot.dart';
 
 const Color _kShadowColor = Color.fromARGB(255, 0, 0, 0);
 

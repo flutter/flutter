@@ -7,8 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'package:web_engine_tester/golden_tester.dart';
-
 import 'common.dart';
 
 void main() {
@@ -16,11 +14,6 @@ void main() {
 }
 
 const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
-
-Future<void> matchSceneGolden(String goldenFile, LayerScene scene) async {
-  CanvasKitRenderer.instance.rasterizer.draw(scene.layerTree);
-  await matchGoldenFile(goldenFile, region: region);
-}
 
 void testMain() {
   group('ColorFilter', () {
@@ -66,7 +59,7 @@ void testMain() {
 
       builder.addPicture(ui.Offset.zero, greyCircle);
 
-      await matchSceneGolden('canvaskit_colorfilter.png', builder.build());
+      await matchSceneGolden('canvaskit_colorfilter.png', builder.build(), region: region);
     });
 
     test('invertColors inverts the colors', () async {
@@ -102,7 +95,7 @@ void testMain() {
 
       builder.addPicture(ui.Offset.zero, invertedCircle);
 
-      await matchSceneGolden('canvaskit_invertcolors.png', builder.build());
+      await matchSceneGolden('canvaskit_invertcolors.png', builder.build(), region: region);
     });
 
     test('ColorFilter.matrix works for inverse matrix', () async {
@@ -131,7 +124,7 @@ void testMain() {
 
       builder.addPicture(ui.Offset.zero, invertedSquares);
 
-      await matchSceneGolden('canvaskit_inverse_colormatrix.png', builder.build());
+      await matchSceneGolden('canvaskit_inverse_colormatrix.png', builder.build(), region: region);
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);

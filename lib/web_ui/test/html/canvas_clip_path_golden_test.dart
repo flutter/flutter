@@ -16,10 +16,6 @@ void main() {
 }
 
 Future<void> testMain() async {
-  const double screenWidth = 500.0;
-  const double screenHeight = 500.0;
-  const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
@@ -42,8 +38,7 @@ Future<void> testMain() async {
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTWH(100, 30, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
-    await canvasScreenshot(rc, 'image_clipped_by_oval',
-      region: screenRect);
+    await canvasScreenshot(rc, 'image_clipped_by_oval');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/48683
@@ -67,8 +62,7 @@ Future<void> testMain() async {
           ..color = const Color(0xFF00FF00)
           ..style = PaintingStyle.fill);
     rc.restore();
-    await canvasScreenshot(rc, 'triangle_clipped_by_oval',
-      region: screenRect);
+    await canvasScreenshot(rc, 'triangle_clipped_by_oval');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/78782
@@ -96,7 +90,8 @@ Future<void> testMain() async {
     rc.drawImageRect(createTestImage(), const Rect.fromLTRB(0, 0, testWidth, testHeight),
         const Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
-    await canvasScreenshot(rc, 'image_clipped_by_triangle_off_screen');
+    await canvasScreenshot(rc, 'image_clipped_by_triangle_off_screen',
+        region: const Rect.fromLTWH(0, 0, 600, 800));
   });
 
   // Tests oval clipping using border radius 50%.
@@ -121,7 +116,8 @@ Future<void> testMain() async {
     rc.drawImageRect(createTestImage(), const Rect.fromLTRB(0, 0, testWidth, testHeight),
         const Rect.fromLTWH(-50, 0, testWidth, testHeight), engine.SurfacePaint());
     rc.restore();
-    await canvasScreenshot(rc, 'image_clipped_by_oval_path');
+    await canvasScreenshot(rc, 'image_clipped_by_oval_path',
+        region: const Rect.fromLTWH(0, 0, 600, 800));
   });
 }
 

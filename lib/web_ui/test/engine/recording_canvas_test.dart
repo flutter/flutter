@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../html/paragraph/text_scuba.dart';
+import '../html/screenshot.dart';
 import '../mock_engine_canvas.dart';
 
 void main() {

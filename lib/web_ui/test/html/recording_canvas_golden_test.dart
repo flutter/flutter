@@ -12,7 +12,7 @@ import 'package:ui/ui.dart' hide TextStyle;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../matchers.dart';
-import 'paragraph/text_scuba.dart';
+import 'screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
