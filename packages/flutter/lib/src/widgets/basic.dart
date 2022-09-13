@@ -3981,6 +3981,31 @@ class IndexedStack extends Stack {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
+
+  @override
+  MultiChildRenderObjectElement createElement() {
+    return _IndexedStackElement(this);
+  }
+}
+
+class _IndexedStackElement extends MultiChildRenderObjectElement {
+  _IndexedStackElement(IndexedStack widget): super(widget);
+
+  @override
+  IndexedStack get widget => super.widget as IndexedStack;
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    final int? index = widget.index;
+    if (index == null) {
+      return super.debugVisitOnstageChildren(visitor);
+    } else {
+      final Iterator<Element> onlyOnstageChild = children.skip(index).iterator;
+      if (onlyOnstageChild.moveNext()) {
+        visitor(onlyOnstageChild.current);
+      }
+    }
+  }
 }
 
 /// A widget that controls where a child of a [Stack] is positioned.
