@@ -86,7 +86,6 @@ mixin _ConsecutiveTapMixin {
   }
 
   void consecutiveTapReset() {
-    print('consecutive tap timeout');
     consecutiveTapTimer?.cancel();
     consecutiveTapTimer = null;
     lastTapOffset = null;
@@ -94,7 +93,6 @@ mixin _ConsecutiveTapMixin {
   }
 
   void consecutiveTapTimerStop() {
-    print('consecutiveTapTimer stop');
     consecutiveTapTimer?.cancel();
     consecutiveTapTimer = null;
   }
@@ -216,7 +214,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   bool isPointerAllowed(PointerEvent event) {
-    print('isPointerAllowed');
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
@@ -242,9 +239,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       }
     } else {
       // There can be multiple drags simultaneously. Their effects are combined.
-      print('hmmmm');
       if (event.buttons != _initialButtons) {
-        print('cant have different buttons ${event.buttons} != $_initialButtons');
         return false;
       }
     }
@@ -253,12 +248,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    print('addAllowedPointer $event ${event.pointer}');
     super.addAllowedPointer(event);
-    print('setting deadline');
     _primaryPointer = event.pointer;
     if (deadline != null) {
-      print('setting deadline 2');
       _deadlineTimer = Timer(deadline!, () => _didExceedDeadlineWithEvent(event));
     }
 
@@ -266,7 +258,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     // because `acceptGesture` might be called before `handlePrimaryPointer`,
     // which relies on `_down` to call `handleTapDown`.
     if (_dragState == _GestureState.ready) {
-      print('drag down');
       _globalDistanceMoved = 0.0;
       _initialButtons = event.buttons;
       _dragState = _GestureState.possible;
@@ -280,7 +271,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void acceptGesture(int pointer) {
-    print('accept gesture $pointer');
     if (pointer == primaryPointer) {
       _stopDeadlineTimer();
     }
@@ -290,14 +280,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     // Called when this recognizer is accepted by the `GestureArena`.
     if (pointer == primaryPointer) {
-      print('$pointer == $primaryPointer');
       if (_down != null) {
-        print('down not null');
         _checkTapDown(_down!);
       }
       _wonArenaForPrimaryPointer = true;
       if (_up != null) {
-        print('up not null');
         _checkTapUp(_up!);
       }
     }
@@ -306,7 +293,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     // moved a sufficient global distance.
     if (_dragState == _GestureState.accepted) {
       if (_start != null) {
-        print('start not null');
         _acceptDrag(_start!);
       }
     }
@@ -314,7 +300,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    print('didStopTrackingLastPointer $_dragState $pointer');
     switch (_dragState) {
       case _GestureState.ready:
         resolve(GestureDisposition.rejected);
@@ -346,24 +331,19 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void handleEvent(PointerEvent event) {
-    print('handle event ${event.pointer}');
     if (event is PointerMoveEvent) {
-      print('handle PointerMoveEvent $event');
       if (_initialButtons == kSecondaryButton) {
         resolve(GestureDisposition.rejected);
         return;
       }
 
       if (event.buttons != _initialButtons) {
-        print('event.buttons ${event.buttons} != $_initialButtons initialButtons');
         _giveUpPointer(event.pointer);
       }
 
       if (_dragState == _GestureState.accepted) {
-        print('PointerMoveEvent while drag is accepted');
         _checkUpdate(event);
       } else if (_dragState == _GestureState.possible) {
-        print('PointerMoveEvent while drag is is possible');
         final bool isPreAcceptSlopPastTolerance =
             !_wonArenaForPrimaryPointer &&
             preAcceptSlopTolerance != null &&
@@ -380,30 +360,24 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         _checkDrag(event);
 
         if (_start != null && _wonArenaForPrimaryPointer) {
-          print('start not null');
           _acceptDrag(_start!);
         }
       }
     } else if (event is PointerUpEvent) {
-      print('handle PointerUpEvent $event');
       if (_dragState == _GestureState.possible) {
         // The drag is not accepted yet, so we should call tap up on a `PointerUpEvent`.
         _up = event;
         stopTrackingIfPointerNoLongerDown(event);
-        // _giveUpPointer(event.pointer);
       } else {
         _giveUpPointer(event.pointer);
       }
     } else if (event is PointerCancelEvent){
-      print('cancel from pointercancel');
       _giveUpPointer(event.pointer);
     }
   }
 
   @override
   void rejectGesture(int pointer) {
-    print('reject gesture $pointer');
-    print('cancel from reject');
     if (pointer == primaryPointer) {
       _stopDeadlineTimer();
     }
@@ -428,11 +402,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   String get debugDescription => 'tap_and_drag';
 
   void _acceptDrag(PointerMoveEvent event) {
-    print('drag accepted');
     _checkTapCancel();
     _checkStart(event);
     if (event.localDelta != Offset.zero) {
-      print('should call dragupdate here ${event.localDelta} != ${Offset.zero}');
       final Matrix4? localToGlobal = event.transform != null ? Matrix4.tryInvert(event.transform!) : null;
       final Offset correctedLocalPosition = _initialPosition.local + event.localDelta;
       final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
@@ -448,7 +420,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _checkDrag(PointerMoveEvent event) {
-    print('checking drag');
     final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
     _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
       transform: localToGlobalTransform,
@@ -456,7 +427,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       untransformedEndPosition: event.localPosition
     ).distance * 1.sign;
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
-      print('has sufficient global distance to accept');
       _start = event;
       _dragState = _GestureState.accepted;
       resolve(GestureDisposition.accepted);
@@ -470,11 +440,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   void _checkTapDown(PointerDownEvent event) {
     if (_sentTapDown) {
-      print('already sent tap down');
       return;
     }
 
-    print('checkTapDown');
     final TapDownDetails details = TapDownDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
@@ -533,7 +501,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     _resetTaps();
     if (!_acceptedActivePointers.remove(event.pointer)) {
-      print('resolving pointer from _giveUp');
       resolvePointer(event.pointer, GestureDisposition.rejected);
     } // revisit
     _initialButtons = null;
@@ -583,7 +550,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _checkCancel() {
-    print('state when cancel is called $_dragState');
     _checkTapCancel();
     _checkDragCancel();
     _resetTaps();
@@ -591,14 +557,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _checkTapCancel() {
-    print('tap cancel $_dragState');
     if (onTapCancel != null) {
       invokeCallback<void>('onTapCancel', onTapCancel!);
     }
   }
 
   void _checkDragCancel() {
-    print('drag cancel $_dragState');
     if (onDragCancel != null) {
       invokeCallback<void>('onDragCancel', onDragCancel!);
     }
@@ -609,9 +573,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _didExceedDeadline() {
-    print('did exceed deadline');
     if (_down != null) {
-      print('down not null');
       _checkTapDown(_down!);
     }
   }
@@ -622,15 +584,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _giveUpPointer(int pointer) {
-    print('give up pointer $pointer');
     stopTrackingPointer(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
     if (!_acceptedActivePointers.remove(pointer)) {
-      print('resolving pointer from _giveUp');
       resolvePointer(pointer, GestureDisposition.rejected);
-    } else {
-      print('succesfully removed accepted pointer $pointer');
     }
   }
 
