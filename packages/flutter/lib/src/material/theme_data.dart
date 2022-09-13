@@ -292,9 +292,9 @@ class ThemeData with Diagnosticable {
     bool? useMaterial3,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] or [colorSchemeSeed] are the preferred way to configure
-    // colors. The other color properties (as well as primarySwatch) will
-    // gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
+    /// [colorScheme] or [colorSchemeSeed] are the preferred way to configure
+    /// colors. The other color properties (as well as [primarySwatch]) will
+    /// gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
     Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
