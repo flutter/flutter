@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/common.dart';
@@ -61,10 +63,10 @@ Future<void> run(List<String> args) async {
   Cache.flutterRoot = globals.platform.environment['FLUTTER_ROOT'];
 
   final String assetDir = argResults[_kOptionAsset] as String;
-  final AssetBundle? assets = await buildAssets(
-    manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
+  final AssetBundle assets = await buildAssets(
+    manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
     assetDirPath: assetDir,
-    packagesPath: argResults[_kOptionPackages] as String?,
+    packagesPath: argResults[_kOptionPackages] as String,
     targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
   );
 
@@ -82,9 +84,8 @@ Future<void> run(List<String> args) async {
   final String outputMan = argResults[_kOptionAssetManifestOut] as String;
   await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
 
-  final String? depfilePath = argResults[_kOptionDepfile] as String?;
-  if (depfilePath != null) {
-    await writeDepfile(assets, outputMan, depfilePath);
+  if (argResults.options.contains(_kOptionDepfile)) {
+    await writeDepfile(assets, outputMan, argResults[_kOptionDepfile] as String);
   }
 }
 
