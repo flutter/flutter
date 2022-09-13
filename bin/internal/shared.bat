@@ -25,19 +25,6 @@ SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
 
-REM Detect which PowerShell executable is available on the Host
-REM PowerShell version <= 5: PowerShell.exe
-REM PowerShell version >= 6: pwsh.exe
-WHERE /Q pwsh.exe && (
-    SET powershell_executable=pwsh.exe
-) || WHERE /Q PowerShell.exe && (
-    SET powershell_executable=PowerShell.exe
-) || (
-    ECHO Error: PowerShell executable not found.                        1>&2
-    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
-    EXIT 1
-)
-
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
@@ -66,9 +53,18 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
-  PUSHD "%flutter_root%"
-  FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
-  POPD
+  REM Check that git exists and get the revision
+  SET git_exists=false
+  2>NUL (
+    PUSHD "%flutter_root%"
+    FOR /f %%r IN ('git rev-parse HEAD') DO (
+      SET git_exists=true
+      SET revision=%%r
+    )
+    POPD
+  )
+  REM If git didn't execute we don't have git. Exit without /B to avoid retrying.
+  if %git_exists% == false echo Error: Unable to find git in your PATH. && EXIT 1
   SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
 
   REM Invalidate cache if:
@@ -101,6 +97,18 @@ GOTO :after_subroutine
   EXIT /B
 
   :do_sdk_update_and_snapshot
+    REM Detect which PowerShell executable is available on the Host
+    REM PowerShell version <= 5: PowerShell.exe
+    REM PowerShell version >= 6: pwsh.exe
+    WHERE /Q pwsh.exe && (
+        SET powershell_executable=pwsh.exe
+    ) || WHERE /Q PowerShell.exe && (
+        SET powershell_executable=PowerShell.exe
+    ) || (
+        ECHO Error: PowerShell executable not found.                        1>&2
+        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
+        EXIT 1
+    )
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
