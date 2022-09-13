@@ -2353,10 +2353,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: build_tests
       subshard: "1_4"
       tags: >
@@ -2375,10 +2371,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: build_tests
       subshard: "2_4"
@@ -2399,10 +2391,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: build_tests
       subshard: "3_4"
       tags: >
@@ -2421,10 +2409,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: build_tests
       subshard: "4_4"
@@ -2691,10 +2675,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_test_ios
@@ -2743,10 +2723,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_dependencies_test
@@ -2764,10 +2740,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       tags: >
         ["devicelab", "hostonly"]
@@ -2825,10 +2797,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_test_ios
@@ -2847,10 +2815,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: tool_host_cross_arch_tests
       tags: >
@@ -2875,10 +2839,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: tool_integration_tests
       subshard: "1_4"
@@ -2905,10 +2865,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: tool_integration_tests
       subshard: "2_4"
       tags: >
@@ -2934,10 +2890,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: tool_integration_tests
       subshard: "3_4"
       tags: >
@@ -2962,10 +2914,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: tool_integration_tests
       subshard: "4_4"
