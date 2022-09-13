@@ -1411,10 +1411,6 @@ class OverlayPortalController {
 /// from being a part of [OverlayPortal]'s subtree, consider using an
 /// [OverlayEntry] instead.
 ///
-/// ### Limitations
-///
-///
-///
 /// See also:
 ///
 ///  * [OverlayEntry], an alternative API for inserting widgets into an
