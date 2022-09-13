@@ -93,6 +93,7 @@ class DowngradeCommand extends FlutterCommand {
     String workingDirectory = Cache.flutterRoot!;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArgDeprecated('working-directory')!;
+      await FlutterVersion.resetFlutterVersionCache();
       _flutterVersion = FlutterVersion(workingDirectory: workingDirectory);
     }
 
@@ -174,7 +175,7 @@ class DowngradeCommand extends FlutterCommand {
         'and retry again.\nError: $error.'
       );
     }
-    await FlutterVersion.resetFlutterVersionFreshnessCheck();
+    await FlutterVersion.resetFlutterVersionCache();
     logger.printStatus('Success');
     return FlutterCommandResult.success();
   }

@@ -171,6 +171,7 @@ class UpgradeCommandRunner {
     if (!testFlow) {
       await flutterUpgradeContinue();
     }
+    await FlutterVersion.resetFlutterVersionCache();
   }
 
   void recordState(FlutterVersion flutterVersion) {

@@ -106,6 +106,9 @@ void main() {
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
+      // Ensure the the cache root exists so caching will work.
+      await globals.cache.getRoot().create(recursive: true);
+
       testConfig.setValue(flutterWebFeature.configSetting!, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
@@ -124,6 +127,9 @@ void main() {
     });
 
     testUsingContext('Usage records multiple features in experiment setting', () async {
+      // Ensure the the cache root exists so caching will work.
+      await globals.cache.getRoot().create(recursive: true);
+
       testConfig.setValue(flutterWebFeature.configSetting!, true);
       testConfig.setValue(flutterLinuxDesktopFeature.configSetting!, true);
       testConfig.setValue(flutterMacOSDesktopFeature.configSetting!, true);

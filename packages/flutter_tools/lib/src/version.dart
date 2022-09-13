@@ -321,17 +321,28 @@ class FlutterVersion {
     return _branch!;
   }
 
-  /// Reset the version freshness information by removing the stamp file.
+  /// Reset the version cache, including the freshness information and git cache
+  /// by removing the cache files.
   ///
   /// New version freshness information will be regenerated when
   /// [checkFlutterVersionFreshness] is called after this. This is typically
   /// used when switching channels so that stale information from another
   /// channel doesn't linger.
-  static Future<void> resetFlutterVersionFreshnessCheck() async {
+  ///
+  /// New json cache files will be generated when needed.
+  static Future<void> resetFlutterVersionCache() async {
     try {
       await globals.cache.getStampFileFor(
         VersionCheckStamp.flutterVersionCheckStampFile,
       ).delete();
+    } on FileSystemException {
+      // Ignore, since we don't mind if the file didn't exist in the first place.
+    }
+    try {
+      await globals.cache
+          .getRoot()
+          .childFile(GitAnswersCache.flutterGitCacheFile)
+          .delete();
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
     }
@@ -606,6 +617,7 @@ class VersionCheckError implements Exception {
 
 /// Represents the cache for calling git commands.
 class GitAnswersCache {
+  static const String flutterGitCacheFile = 'git_answers_cache.json';
   Map<String, dynamic>? _cache;
 
   /// Gets the cached result from running [command] in [workingDirectory] or
@@ -646,7 +658,7 @@ class GitAnswersCache {
     if (_cache != null) {
       return;
     }
-    final File cache = globals.cache.getRoot().childFile('git_answers_cache.json');
+    final File cache = globals.cache.getRoot().childFile(flutterGitCacheFile);
     if (!cache.existsSync()) {
       _cache = <String, dynamic>{};
       return;
@@ -658,7 +670,7 @@ class GitAnswersCache {
     if (_cache == null) {
       return;
     }
-    final File cache = globals.cache.getRoot().childFile('git_answers_cache.json');
+    final File cache = globals.cache.getRoot().childFile(flutterGitCacheFile);
     const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
     cache.writeAsStringSync(prettyJsonEncoder.convert(_cache));
   }
@@ -815,7 +827,7 @@ class GitTagVersion {
             workingDirectory: workingDirectory)
         .trim()
         .split('\n');
-    
+
     // Guard against no tags to avoid paying for compiling RegExps we're not
     // going to use.
     bool tagsEmpty = tags.isEmpty;

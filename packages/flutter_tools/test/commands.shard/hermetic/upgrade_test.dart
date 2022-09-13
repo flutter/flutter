@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 
 import '../../src/context.dart';
@@ -40,6 +41,9 @@ void main() {
   });
 
   testUsingContext('can auto-migrate a user from dev to beta', () async {
+    // Ensure the the cache root exists so caching will work.
+    await globals.cache.getRoot().create(recursive: true);
+
     const String startingTag = '3.0.0-1.2.pre';
     flutterVersion = FakeFlutterVersion(channel: 'dev');
     const String latestUpstreamTag = '3.0.0-1.3.pre';
