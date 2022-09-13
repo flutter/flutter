@@ -715,9 +715,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _scrollController.extent = _extent;
     // If an external facing controller was provided, let it know that the
     // extent has been replaced.
-    if (widget.controller?.isAttached ?? false) {
-      widget.controller?._onExtentReplaced(previousExtent);
-    }
+    widget.controller?._onExtentReplaced(previousExtent);
     if (widget.snap
         && (widget.snap != oldWidget.snap || widget.snapSizes != oldWidget.snapSizes)
         && _scrollController.hasClients
