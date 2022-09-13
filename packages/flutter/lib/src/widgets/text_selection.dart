@@ -2178,6 +2178,9 @@ class TextSelectionGestureDetectorBuilder {
                 );
               } else {
               }
+              break;
+            case null:
+              break;
           }
           return;
         case TargetPlatform.android:
@@ -2201,6 +2204,9 @@ class TextSelectionGestureDetectorBuilder {
                   cause: SelectionChangedCause.drag,
                 );
               }
+              break;
+            case null:
+              break;
           }
           return;
         case TargetPlatform.macOS:
