@@ -10345,50 +10345,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.byType(TextButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
-
-  testWidgets('force press does not select a word (Desktop)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            controller: controller,
-          ),
-        ),
-      ),
-    );
-
-    final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 9.0);
-
-    final int pointerValue = tester.nextPointer;
-    final TestGesture gesture = await tester.createGesture();
-    await gesture.downWithCustomEvent(
-      offset,
-      PointerDownEvent(
-          pointer: pointerValue,
-          position: offset,
-          pressure: 0.0,
-          pressureMax: 6.0,
-          pressureMin: 0.0,
-      ),
-    );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(
-      pointer: pointerValue,
-      position: offset + const Offset(150.0, 9.0),
-      pressure: 0.5,
-      pressureMin: 0,
-    ));
-
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, 9);
-
-    await gesture.up();
-    await tester.pump();
-    expect(find.byType(TextButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('force press selects word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
