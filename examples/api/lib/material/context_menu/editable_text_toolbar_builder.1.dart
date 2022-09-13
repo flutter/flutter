@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
                   // context menu for the current platform, but only if an email
                   // address is currently selected.
                   final List<ContextMenuButtonItem> buttonItems =
-                      AdaptiveTextSelectionToolbar.getEditableButtonItems(
+                      getEditableButtonItems(
                         editableTextState,
                       );
                   final TextEditingValue value = editableTextState.textEditingValue;

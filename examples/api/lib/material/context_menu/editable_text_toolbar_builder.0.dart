@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
                     // Build the default buttons, but make them look custom.
                     // In a real project you may want to build different
                     // buttons depending on the platform.
-                    children: AdaptiveTextSelectionToolbar.getEditableTextButtonItems(editableTextState)
+                    children: getEditableTextButtonItems(editableTextState)
                       .map((ContextMenuButtonItem buttonItem) {
                         return CupertinoButton(
                           borderRadius: null,
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
                           child: SizedBox(
                             width: 200.0,
                             child: Text(
-                              CupertinoTextSelectionToolbarButtonsBuilder.getButtonLabel(context, buttonItem),
+                              CupertinoAdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem),
                             ),
                           ),
                         );
