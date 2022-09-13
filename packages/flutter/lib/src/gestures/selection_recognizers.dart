@@ -111,6 +111,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapAndDragGestureRecognizer({
     this.deadline = kPressTimeout,
+    this.preAcceptSlopTolerance = kTouchSlop,
+    this.postAcceptSlopTolerance = kTouchSlop,
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
     super.kind,
@@ -126,6 +128,25 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.dragStartBehavior}
   DragStartBehavior dragStartBehavior;
+
+  /// The maximum distance in logical pixels the gesture is allowed to drift
+  /// from the initial touch down position before the gesture is accepted.
+  ///
+  /// Drifting past the allowed slop amount causes the gesture to be rejected.
+  ///
+  /// Can be null to indicate that the gesture can drift for any distance.
+  /// Defaults to 18 logical pixels.
+  final double? preAcceptSlopTolerance;
+
+  /// The maximum distance in logical pixels the gesture is allowed to drift
+  /// after the gesture has been accepted.
+  ///
+  /// Drifting past the allowed slop amount causes the gesture to stop tracking
+  /// and signaling subsequent callbacks.
+  ///
+  /// Can be null to indicate that the gesture can drift for any distance.
+  /// Defaults to 18 logical pixels.
+  final double? postAcceptSlopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
@@ -166,6 +187,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   PointerUpEvent? _up;
   PointerDownEvent? _down;
 
+  bool _pastTapTolerance = false;
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
@@ -318,6 +340,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     }
     _stopDeadlineTimer();
     _dragState = _GestureState.ready;
+    _pastTapTolerance = false;
     _consecutiveTapCountWhileDragging = null;
   }
 
@@ -341,7 +364,21 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         _checkUpdate(event);
       } else if (_dragState == _GestureState.possible) {
         print('PointerMoveEvent while drag is is possible');
+        final bool isPreAcceptSlopPastTolerance =
+            !_wonArenaForPrimaryPointer &&
+            preAcceptSlopTolerance != null &&
+            _getGlobalDistance(event) > preAcceptSlopTolerance!;
+        final bool isPostAcceptSlopPastTolerance =
+            _wonArenaForPrimaryPointer &&
+            postAcceptSlopTolerance != null &&
+            _getGlobalDistance(event) > postAcceptSlopTolerance!;
+
+        if (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance) {
+          _pastTapTolerance = true;
+        }
+
         _checkDrag(event);
+
         if (_start != null && _wonArenaForPrimaryPointer) {
           print('start not null');
           _acceptDrag(_start!);
@@ -423,6 +460,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _start = event;
       _dragState = _GestureState.accepted;
       resolve(GestureDisposition.accepted);
+    } else if (!_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop) && _pastTapTolerance) {
+      // The `PointerMoveEvent` has not reached the minimum global distance to be accepted as a drag,
+      // and it has exceeded the maximum global distance it is allowed to drift from the initial `PointerDownEvent`,
+      // to be accepted as a tap. Therefore we reject this recognizer at this point.
+      resolve(GestureDisposition.rejected);
     }
   }
 
@@ -572,6 +614,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       print('down not null');
       _checkTapDown(_down!);
     }
+  }
+
+  double _getGlobalDistance(PointerEvent event) {
+    final Offset offset = event.position - _initialPosition!.global;
+    return offset.distance;
   }
 
   void _giveUpPointer(int pointer) {
