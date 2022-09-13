@@ -21,16 +21,17 @@ void main() {
     expect(kFlutterMemoryAllocationsEnabled, isFalse);
   });
 
-  test(
+  testWidgets(
     '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    () async {
+    (WidgetTester tester) async {
       ObjectEvent? recievedEvent;
       ObjectEvent listener(ObjectEvent event) => recievedEvent = event;
 
       ma.addListener(listener);
       _checkSdkHandlersNotSet();
+      expect(ma.hasListeners, isFalse);
 
-      await _activateFlutterObjects();
+      await _activateFlutterObjects(tester);
       _checkSdkHandlersNotSet();
       expect(recievedEvent, isNull);
       expect(ma.hasListeners, isFalse);
@@ -48,11 +49,21 @@ void _checkSdkHandlersNotSet() {
   expect(ui.Picture.onDispose, isNull);
 }
 
-class _TestElement extends Element {
-  _TestElement() : super(const Placeholder());
-
+class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
   @override
-  bool get debugDoingBuild => throw UnimplementedError();
+  RenderObject createRenderObject(BuildContext context) {
+    return _TestRenderObject();
+  }
+}
+
+class _TestElement extends RootRenderObjectElement{
+  _TestElement(): super(_TestLeafRenderObjectWidget());
+
+  void makeInactive() {
+    assignOwner(BuildOwner(focusManager: FocusManager()));
+    mount(null, null);
+    deactivate();
+  }
 }
 
 class _TestRenderObject extends RenderObject {
@@ -72,39 +83,53 @@ class _TestRenderObject extends RenderObject {
   Rect get semanticBounds => throw UnimplementedError();
 }
 
+class _MyStateFulWidget extends StatefulWidget {
+  const _MyStateFulWidget();
+
+  @override
+  State<_MyStateFulWidget> createState() => _MyStateFulWidgetState();
+}
+
+class _MyStateFulWidgetState extends State<_MyStateFulWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
 class _TestLayer extends Layer{
   @override
   void addToScene(ui.SceneBuilder builder) {}
 }
 
-class _TestState extends State {
-  @override
-  Widget build(BuildContext context) => throw UnimplementedError();
-}
-
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<void> _activateFlutterObjects() async {
+Future<void> _activateFlutterObjects(WidgetTester tester) async {
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {});
-  final ui.Image image = await _createImage();
   final ui.Picture picture = _createPicture();
-   final Element element = _TestElement();
+  final _TestElement element = _TestElement();
   final RenderObject renderObject = _TestRenderObject();
   final Layer layer = _TestLayer();
-  final State state = _TestState();
 
   valueNotifier.dispose();
   changeNotifier.dispose();
-  image.dispose();
   picture.dispose();
-  //element.unmount();
+  element.makeInactive(); element.unmount();
   renderObject.dispose();
-  // It is ok to invoke protected and test only member for testing perposes.
-  // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+  // It is ok to use protected members for testing.
+  // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
   layer.dispose();
-  // It is ok to invoke protected member for testing perposes.
-  // ignore: invalid_use_of_protected_member
-  //state.dispose();
+
+  // TODO(polina-c): Remove the condition after
+  // https://github.com/flutter/flutter/issues/110599 is fixed.
+  if (!kIsWeb) {
+    final ui.Image image = await _createImage();
+    image.dispose();
+  }
+
+  // Create and dispose State:
+  await tester.pumpWidget(const _MyStateFulWidget());
+  await tester.pumpWidget(const SizedBox.shrink());
 }
 
 Future<ui.Image> _createImage() async {

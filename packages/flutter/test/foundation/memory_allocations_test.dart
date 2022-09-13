@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/text_field.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -182,9 +181,11 @@ void main() {
     }
     ma.addListener(listener);
 
-    await tester.pumpWidget(const MyStateFulWidget());
+    await tester.pumpWidget(const _MyStateFulWidget());
     await tester.pumpWidget(const SizedBox.shrink());
 
+    expect(stateCreated, isTrue);
+    expect(stateDisposed, isTrue);
     ma.removeListener(listener);
     _checkSdkHandlersNotSet();
     expect(ma.hasListeners, isFalse);
@@ -216,7 +217,6 @@ class _TestElement extends RootRenderObjectElement{
   _TestElement(): super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {
-
     assignOwner(BuildOwner(focusManager: FocusManager()));
     mount(null, null);
     deactivate();
@@ -245,14 +245,14 @@ class _TestLayer extends Layer{
   void addToScene(ui.SceneBuilder builder) {}
 }
 
-class MyStateFulWidget extends StatefulWidget {
-  const MyStateFulWidget({super.key});
+class _MyStateFulWidget extends StatefulWidget {
+  const _MyStateFulWidget();
 
   @override
-  State<MyStateFulWidget> createState() => _MyStateFulWidgetState();
+  State<_MyStateFulWidget> createState() => _MyStateFulWidgetState();
 }
 
-class _MyStateFulWidgetState extends State<MyStateFulWidget> {
+class _MyStateFulWidgetState extends State<_MyStateFulWidget> {
   @override
   Widget build(BuildContext context) {
     return Container();
