@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
 
 import 'constants.dart';
 import 'drag_details.dart';
@@ -21,16 +20,16 @@ enum _GestureState {
 }
 
 /// {@macro flutter.gestures.tap.GestureTapDownCallback}
-/// 
+///
 /// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
-/// 
+///
 /// Used by [TapAndDragGestureRecognizer.onTapDown].
 typedef GestureTapDownWithTapStatusCallback  = void Function(TapDownDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.tap.GestureTapUpCallback}
-/// 
+///
 /// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
-/// 
+///
 /// Used by [TapAndDragGestureRecognizer.onTapUp].
 typedef GestureTapUpWithTapStatusCallback  = void Function(TapUpDetails details, TapStatus status);
 
@@ -42,7 +41,7 @@ typedef GestureTapUpWithTapStatusCallback  = void Function(TapUpDetails details,
 typedef GestureDragStartWithTapStatusCallback = void Function(DragStartDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.dragdetails.GestureDragUpdateCallback}
-/// 
+///
 /// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onUpdate].
@@ -118,7 +117,7 @@ class TapStatus {
 }
 
 /// Recognizes taps and movements.
-/// 
+///
 /// Takes on the responsibilities of [TapGestureRecognizer] and [DragGestureRecognizer] in one [GestureRecognizer].
 class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _ConsecutiveTapMixin {
   /// Initialize the object.
@@ -208,11 +207,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
+  /// Primary pointer being tracked by this recognizer.
   int? get primaryPointer => _primaryPointer;
   int? _primaryPointer;
 
   Timer? _deadlineTimer;
-  
+
   // Drag related state
   _GestureState _dragState = _GestureState.ready;
   PointerMoveEvent? _start;
@@ -550,7 +550,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     _isShiftTapping = false;
   }
 
-  void _checkStart(PointerMoveEvent event) {    
+  void _checkStart(PointerMoveEvent event) {
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
     }
