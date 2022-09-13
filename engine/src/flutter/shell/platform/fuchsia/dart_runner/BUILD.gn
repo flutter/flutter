@@ -20,12 +20,10 @@ template("runner_sources") {
       "builtin_libraries.h",
       "dart_component_controller.cc",
       "dart_component_controller.h",
-      "dart_component_controller_v2.cc",
-      "dart_component_controller_v2.h",
       "dart_runner.cc",
       "dart_runner.h",
-      "dart_test_component_controller_v2.cc",
-      "dart_test_component_controller_v2.h",
+      "dart_test_component_controller.cc",
+      "dart_test_component_controller.h",
       "logging.h",
       "service_isolate.cc",
       "service_isolate.h",
@@ -179,7 +177,6 @@ template("aot_runner_package") {
 
     binary = "dart_aot${product_suffix}_runner"
 
-    cmx_file = rebase_path("meta/dart_aot${product_suffix}_runner.cmx")
     cml_file = rebase_path("meta/dart_aot${product_suffix}_runner.cml")
 
     libraries = common_libs
@@ -240,7 +237,6 @@ template("jit_runner_package") {
 
     binary = "dart_jit${product_suffix}_runner"
 
-    cmx_file = rebase_path("meta/dart_jit${product_suffix}_runner.cmx")
     cml_file = rebase_path("meta/dart_jit${product_suffix}_runner.cml")
 
     libraries = common_libs

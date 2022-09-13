@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dart_test_component_controller_v2.h"
+#include "dart_test_component_controller.h"
 
 #include <fcntl.h>
 #include <fml/logging.h>
@@ -101,7 +101,7 @@ std::string GetComponentNameFromUrl(const std::string& url) {
 
 }  // namespace
 
-DartTestComponentControllerV2::DartTestComponentControllerV2(
+DartTestComponentController::DartTestComponentController(
     fuchsia::component::runner::ComponentStartInfo start_info,
     std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
     fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
@@ -146,7 +146,7 @@ DartTestComponentControllerV2::DartTestComponentControllerV2(
   start_info_.clear_runtime_dir();
 }
 
-DartTestComponentControllerV2::~DartTestComponentControllerV2() {
+DartTestComponentController::~DartTestComponentController() {
   if (namespace_) {
     fdio_ns_destroy(namespace_);
     namespace_ = nullptr;
@@ -155,7 +155,7 @@ DartTestComponentControllerV2::~DartTestComponentControllerV2() {
   close(stderr_fd_);
 }
 
-void DartTestComponentControllerV2::SetUp() {
+void DartTestComponentController::SetUp() {
   // Name the thread after the url of the component being launched.
   zx::thread::self()->set_property(ZX_PROP_NAME, label_.c_str(), label_.size());
   Dart_SetThreadName(label_.c_str());
@@ -183,7 +183,7 @@ void DartTestComponentControllerV2::SetUp() {
   loop_->Run();
 }
 
-bool DartTestComponentControllerV2::CreateAndBindNamespace() {
+bool DartTestComponentController::CreateAndBindNamespace() {
   if (!start_info_.has_ns()) {
     FX_LOG(ERROR, LOG_TAG, "Component start info does not have a namespace.");
     return false;
@@ -229,7 +229,7 @@ bool DartTestComponentControllerV2::CreateAndBindNamespace() {
   return true;
 }
 
-bool DartTestComponentControllerV2::SetUpFromKernel() {
+bool DartTestComponentController::SetUpFromKernel() {
   dart_utils::MappedResource manifest;
   if (!dart_utils::MappedResource::LoadFromNamespace(
           namespace_, data_path_ + "/app.dilplist", manifest)) {
@@ -299,7 +299,7 @@ bool DartTestComponentControllerV2::SetUpFromKernel() {
   return true;
 }
 
-bool DartTestComponentControllerV2::SetUpFromAppSnapshot() {
+bool DartTestComponentController::SetUpFromAppSnapshot() {
 #if !defined(AOT_RUNTIME)
   return false;
 #else
@@ -328,7 +328,7 @@ bool DartTestComponentControllerV2::SetUpFromAppSnapshot() {
 #endif  // defined(AOT_RUNTIME)
 }
 
-bool DartTestComponentControllerV2::CreateIsolate(
+bool DartTestComponentController::CreateIsolate(
     const uint8_t* isolate_snapshot_data,
     const uint8_t* isolate_snapshot_instructions) {
   // Create the isolate from the snapshot.
@@ -370,7 +370,7 @@ bool DartTestComponentControllerV2::CreateIsolate(
 }
 
 // |fuchsia::test::CaseIterator|
-DartTestComponentControllerV2::CaseIterator::CaseIterator(
+DartTestComponentController::CaseIterator::CaseIterator(
     fidl::InterfaceRequest<fuchsia::test::CaseIterator> request,
     async_dispatcher_t* dispatcher,
     std::string test_component_name,
@@ -380,7 +380,7 @@ DartTestComponentControllerV2::CaseIterator::CaseIterator(
       done_callback_(std::move(done_callback)) {}
 
 // |fuchsia::test::CaseIterator|
-void DartTestComponentControllerV2::CaseIterator::GetNext(
+void DartTestComponentController::CaseIterator::GetNext(
     GetNextCallback callback) {
   // Dart test suites run as multiple tests behind one
   // test case. Flip flag once the one test case has been retrieved.
@@ -402,12 +402,10 @@ void DartTestComponentControllerV2::CaseIterator::GetNext(
 }
 
 // |fuchsia::test::CaseIterator|
-std::unique_ptr<DartTestComponentControllerV2::CaseIterator>
-DartTestComponentControllerV2::RemoveCaseInterator(
-    CaseIterator* case_iterator) {
+std::unique_ptr<DartTestComponentController::CaseIterator>
+DartTestComponentController::RemoveCaseInterator(CaseIterator* case_iterator) {
   auto it = case_iterators_.find(case_iterator);
-  std::unique_ptr<DartTestComponentControllerV2::CaseIterator>
-      case_iterator_ptr;
+  std::unique_ptr<DartTestComponentController::CaseIterator> case_iterator_ptr;
   if (it != case_iterators_.end()) {
     case_iterator_ptr = std::move(it->second);
     case_iterators_.erase(it);
@@ -416,7 +414,7 @@ DartTestComponentControllerV2::RemoveCaseInterator(
 }
 
 // |fuchsia::test::Suite|
-void DartTestComponentControllerV2::GetTests(
+void DartTestComponentController::GetTests(
     fidl::InterfaceRequest<fuchsia::test::CaseIterator> iterator) {
   auto case_iterator = std::make_unique<CaseIterator>(
       std::move(iterator), loop_->dispatcher(), test_component_name_,
@@ -427,7 +425,7 @@ void DartTestComponentControllerV2::GetTests(
 }
 
 // |fuchsia::test::Suite|
-void DartTestComponentControllerV2::Run(
+void DartTestComponentController::Run(
     std::vector<fuchsia::test::Invocation> tests,
     fuchsia::test::RunOptions options,
     fidl::InterfaceHandle<fuchsia::test::RunListener> listener) {
@@ -517,7 +515,7 @@ void DartTestComponentControllerV2::Run(
   Stop();
 }
 
-fpromise::promise<> DartTestComponentControllerV2::RunDartMain() {
+fpromise::promise<> DartTestComponentController::RunDartMain() {
   FML_CHECK(namespace_ != nullptr);
   Dart_EnterScope();
 
@@ -596,7 +594,7 @@ fpromise::promise<> DartTestComponentControllerV2::RunDartMain() {
   return fpromise::make_ok_promise();
 }
 
-void DartTestComponentControllerV2::Kill() {
+void DartTestComponentController::Kill() {
   done_callback_(this);
   close(stdout_fd_);
   close(stderr_fd_);
@@ -619,7 +617,7 @@ void DartTestComponentControllerV2::Kill() {
   }
 }
 
-void DartTestComponentControllerV2::MessageEpilogue(Dart_Handle result) {
+void DartTestComponentController::MessageEpilogue(Dart_Handle result) {
   auto dart_state = tonic::DartState::Current();
   // If the Dart program has set a return code, then it is intending to shut
   // down by way of a fatal error, and so there is no need to override
@@ -647,15 +645,14 @@ void DartTestComponentControllerV2::MessageEpilogue(Dart_Handle result) {
   }
 }
 
-void DartTestComponentControllerV2::Stop() {
+void DartTestComponentController::Stop() {
   Kill();
 }
 
-void DartTestComponentControllerV2::OnIdleTimer(
-    async_dispatcher_t* dispatcher,
-    async::WaitBase* wait,
-    zx_status_t status,
-    const zx_packet_signal* signal) {
+void DartTestComponentController::OnIdleTimer(async_dispatcher_t* dispatcher,
+                                              async::WaitBase* wait,
+                                              zx_status_t status,
+                                              const zx_packet_signal* signal) {
   if ((status != ZX_OK) || !(signal->observed & ZX_TIMER_SIGNALED) ||
       !Dart_CurrentIsolate()) {
     // Timer closed or isolate shutdown.
