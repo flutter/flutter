@@ -132,27 +132,7 @@ class ScreenshotCommand extends FlutterCommand {
       'png',
     );
 
-    // Additional error checks below for valid file name
-    // and directory because ios/xcode screenshot binary will
-    // return a 0 exit code even if outputFile is not valid
-
-    // Conditional for validating directory is valid
-    if (!fs.directory(outputFile.dirname).existsSync()) {
-      throwToolExit(
-        'The provided path to file needs to have a directory that exists\n'
-        'Directory: "${outputFile.dirname}" does not exist'
-      );
-    }
-
-    // Conditional for validating filename with allowed extensions
-    if (!RegExp(_kFileNamePattern).hasMatch(outputFile.basename)) {
-      throwToolExit(
-        'The provided filename is invalid\n'
-        'Allowed filename characters: "a-z", "A-Z", "0-9", "_", "-"\n'
-        'Allowed extensions: jpeg, jpg, png)\n'
-        'Filename provided: "${outputFile.basename}"'
-      );
-    }
+    _validateOutputFile(outputFile, fs);
 
     try {
       await device!.takeScreenshot(outputFile);
@@ -210,6 +190,30 @@ class ScreenshotCommand extends FlutterCommand {
     _showOutputFileInfo(outputFile);
     _ensureOutputIsNotJsonRpcError(outputFile);
     return true;
+  }
+
+  /// Additional error checks below for valid file name
+  /// and directory because ios/xcode screenshot binary will
+  /// return a 0 exit code even if outputFile is not valid
+  static void _validateOutputFile(File outputFile, FileSystem fs) {
+
+    // Conditional for validating directory is valid
+    if (!fs.directory(outputFile.dirname).existsSync()) {
+      throwToolExit(
+        'The provided path to file needs to have a directory that exists\n'
+        'Directory: "${outputFile.dirname}" does not exist'
+      );
+    }
+
+    // Conditional for validating filename with allowed extensions
+    if (!RegExp(_kFileNamePattern).hasMatch(outputFile.basename)) {
+      throwToolExit(
+        'The provided filename is invalid\n'
+        'Allowed filename characters: "a-z", "A-Z", "0-9", "_", "-"\n'
+        'Allowed extensions: jpeg, jpg, png)\n'
+        'Filename provided: "${outputFile.basename}"'
+      );
+    }
   }
 
   void _ensureOutputIsNotJsonRpcError(File outputFile) {
