@@ -46,25 +46,24 @@ class MyApp extends StatelessWidget {
                   // Here we add an "Email" button to the default TextField
                   // context menu for the current platform, but only if an email
                   // address is currently selected.
-                  return EditableTextContextMenuButtonItemsBuilder(
-                    editableTextState: editableTextState,
-                    builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-                      final TextEditingValue value = editableTextState.textEditingValue;
-                      if (_isValidEmail(value.selection.textInside(value.text))) {
-                        buttonItems.insert(0, ContextMenuButtonItem(
-                          label: 'Send email',
-                          onPressed: () {
-                            ContextMenuController.removeAny();
-                            _showDialog(context);
-                          },
-                        ));
-                      }
-                      return AdaptiveTextSelectionToolbarButtonItems(
-                        primaryAnchor: primaryAnchor,
-                        secondaryAnchor: secondaryAnchor,
-                        buttonItems: buttonItems,
+                  final List<ContextMenuButtonItem> buttonItems =
+                      AdaptiveTextSelectionToolbar.getEditableButtonItems(
+                        editableTextState,
                       );
-                    },
+                  final TextEditingValue value = editableTextState.textEditingValue;
+                  if (_isValidEmail(value.selection.textInside(value.text))) {
+                    buttonItems.insert(0, ContextMenuButtonItem(
+                      label: 'Send email',
+                      onPressed: () {
+                        ContextMenuController.removeAny();
+                        _showDialog(context);
+                      },
+                    ));
+                  }
+                  return AdaptiveTextSelectionToolbar.buttonItems(
+                    primaryAnchor: primaryAnchor,
+                    secondaryAnchor: secondaryAnchor,
+                    buttonItems: buttonItems,
                   );
                 },
               ),

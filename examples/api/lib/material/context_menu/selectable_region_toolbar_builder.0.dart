@@ -42,24 +42,21 @@ class MyApp extends StatelessWidget {
                 Offset primaryAnchor,
                 [Offset? secondaryAnchor]
               ) {
-                return SelectableRegionContextMenuButtonItemsBuilder(
-                  selectableRegionState: selectableRegionState,
-                  builder: (BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-                    return AdaptiveTextSelectionToolbarButtonItems(
-                      primaryAnchor: primaryAnchor,
-                      secondaryAnchor: secondaryAnchor,
-                      buttonItems: <ContextMenuButtonItem>[
-                        ...buttonItems,
-                        ContextMenuButtonItem(
-                          onPressed: () {
-                            ContextMenuController.removeAny();
-                            _showDialog(context);
-                          },
-                          label: 'Print',
-                        ),
-                      ],
-                    );
-                  },
+                final List<ContextMenuButtonItem> buttonItems =
+                    selectableRegionState.getSelectableRegionButtonItems();
+                return AdaptiveTextSelectionToolbar.buttonItems(
+                  primaryAnchor: primaryAnchor,
+                  secondaryAnchor: secondaryAnchor,
+                  buttonItems: <ContextMenuButtonItem>[
+                    ...buttonItems,
+                    ContextMenuButtonItem(
+                      onPressed: () {
+                        ContextMenuController.removeAny();
+                        _showDialog(context);
+                      },
+                      label: 'Print',
+                    ),
+                  ],
                 );
               },
               child: ListView(

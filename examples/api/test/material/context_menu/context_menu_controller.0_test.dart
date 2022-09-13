@@ -13,7 +13,7 @@ void main() {
       const example.MyApp(),
     );
 
-    expect(find.byType(AdaptiveTextSelectionToolbarButtonItems), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
     // Right clicking the middle of the app shows the custom context menu.
     final Offset center = tester.getCenter(find.byType(Scaffold));
@@ -26,19 +26,19 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.byType(AdaptiveTextSelectionToolbarButtonItems), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.text('Print'), findsOneWidget);
 
     // Tap to dismiss.
     await tester.tapAt(center);
     await tester.pumpAndSettle();
 
-    expect(find.byType(AdaptiveTextSelectionToolbarButtonItems), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
     // Long pressing also shows the custom context menu.
     await tester.longPressAt(center);
 
-    expect(find.byType(AdaptiveTextSelectionToolbarButtonItems), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.text('Print'), findsOneWidget);
   });
 }

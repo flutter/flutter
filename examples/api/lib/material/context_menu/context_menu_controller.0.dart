@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           contextMenuBuilder: (BuildContext context, Offset primaryAnchor, [Offset? secondaryAnchor]) {
             // The custom context menu will look like the default context menu
             // on the current platform with a single 'Print' button.
-            return AdaptiveTextSelectionToolbarButtonItems(
+            return AdaptiveTextSelectionToolbar.buttonItems(
               primaryAnchor: primaryAnchor,
               secondaryAnchor: secondaryAnchor,
               buttonItems: <ContextMenuButtonItem>[
