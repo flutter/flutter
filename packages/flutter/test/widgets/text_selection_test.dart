@@ -113,33 +113,32 @@ void main() {
     expect(tapCount, 6);
   });
 
-  // TODO(Renzo-Olivares): Now that the gesture recognizer detects consecutive taps, and not just double taps, this test is no longer true.
-  // testWidgets('in a series of rapid taps, onTapDown and onDoubleTapDown alternate', (WidgetTester tester) async {
-  //   await pumpGestureDetector(tester);
-  //   await tester.tapAt(const Offset(200, 200));
-  //   await tester.pump(const Duration(milliseconds: 50));
-  //   expect(singleTapUpCount, 1);
-  //   await tester.tapAt(const Offset(200, 200));
-  //   await tester.pump(const Duration(milliseconds: 50));
-  //   expect(singleTapUpCount, 1);
-  //   expect(doubleTapDownCount, 1);
-  //   await tester.tapAt(const Offset(200, 200));
-  //   await tester.pump(const Duration(milliseconds: 50));
-  //   expect(singleTapUpCount, 2);
-  //   expect(doubleTapDownCount, 1);
-  //   await tester.tapAt(const Offset(200, 200));
-  //   await tester.pump(const Duration(milliseconds: 50));
-  //   expect(singleTapUpCount, 2);
-  //   expect(doubleTapDownCount, 2);
-  //   await tester.tapAt(const Offset(200, 200));
-  //   await tester.pump(const Duration(milliseconds: 50));
-  //   expect(singleTapUpCount, 3);
-  //   expect(doubleTapDownCount, 2);
-  //   await tester.tapAt(const Offset(200, 200));
-  //   expect(singleTapUpCount, 3);
-  //   expect(doubleTapDownCount, 3);
-  //   expect(tapCount, 6);
-  // });
+  testWidgets('in a series of rapid taps, onTapDown and onDoubleTapDown alternate', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 1);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 1);
+    expect(doubleTapDownCount, 1);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 2);
+    expect(doubleTapDownCount, 1);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 2);
+    expect(doubleTapDownCount, 2);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 3);
+    expect(doubleTapDownCount, 2);
+    await tester.tapAt(const Offset(200, 200));
+    expect(singleTapUpCount, 3);
+    expect(doubleTapDownCount, 3);
+    expect(tapCount, 6);
+  });
 
   testWidgets('quick tap-tap-hold is a double tap down', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
