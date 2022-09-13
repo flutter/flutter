@@ -50,7 +50,6 @@ class GestureArenaEntry {
   /// It's fine to attempt to resolve a gesture recognizer for an arena that is
   /// already resolved.
   void resolve(GestureDisposition disposition) {
-    print('member is resolving $_pointer, $_member, $disposition');
     _arena._resolve(_pointer, _member, disposition);
   }
 }
@@ -110,7 +109,6 @@ class GestureArenaManager {
 
   /// Adds a new member (e.g., gesture recognizer) to the arena.
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
-    print('add');
     final _GestureArena state = _arenas.putIfAbsent(pointer, () {
       assert(_debugLogDiagnostic(pointer, '★ Opening new gesture arena.'));
       return _GestureArena();
@@ -124,7 +122,6 @@ class GestureArenaManager {
   ///
   /// Called after the framework has finished dispatching the pointer down event.
   void close(int pointer) {
-    print('close');
     final _GestureArena? state = _arenas[pointer];
     if (state == null) {
       return; // This arena either never existed or has been resolved.
@@ -148,7 +145,6 @@ class GestureArenaManager {
   ///  * [hold]
   ///  * [release]
   void sweep(int pointer) {
-    print('sweep');
     final _GestureArena? state = _arenas[pointer];
     if (state == null) {
       return; // This arena either never existed or has been resolved.
@@ -163,7 +159,6 @@ class GestureArenaManager {
     _arenas.remove(pointer);
     if (state.members.isNotEmpty) {
       // First member wins.
-      print('first member in arena is winning');
       assert(_debugLogDiagnostic(pointer, 'Winner: ${state.members.first}'));
       state.members.first.acceptGesture(pointer);
       // Give all the other members the bad news.
@@ -171,7 +166,6 @@ class GestureArenaManager {
         state.members[i].rejectGesture(pointer);
       }
     }
-    print('arena is empty');
   }
 
   /// Prevents the arena from being swept.
@@ -187,7 +181,6 @@ class GestureArenaManager {
   ///  * [sweep]
   ///  * [release]
   void hold(int pointer) {
-    print('hold');
     final _GestureArena? state = _arenas[pointer];
     if (state == null) {
       return; // This arena either never existed or has been resolved.
@@ -206,7 +199,6 @@ class GestureArenaManager {
   ///  * [sweep]
   ///  * [hold]
   void release(int pointer) {
-    print('release');
     final _GestureArena? state = _arenas[pointer];
     if (state == null) {
       return; // This arena either never existed or has been resolved.
@@ -222,10 +214,8 @@ class GestureArenaManager {
   ///
   /// This is called by calling [GestureArenaEntry.resolve] on the object returned from [add].
   void _resolve(int pointer, GestureArenaMember member, GestureDisposition disposition) {
-    print('_resolve');
     final _GestureArena? state = _arenas[pointer];
     if (state == null) {
-      print('arena has already resolved');
       return; // This arena has already resolved.
     }
     assert(_debugLogDiagnostic(pointer, '${ disposition == GestureDisposition.accepted ? "Accepting" : "Rejecting" }: $member'));
@@ -248,27 +238,20 @@ class GestureArenaManager {
   }
 
   void _tryToResolveArena(int pointer, _GestureArena state) {
-    print('_tryToResolveArena before assert');
     assert(_arenas[pointer] == state);
     assert(!state.isOpen);
-    print('_tryToResolveArena after assert');
     if (state.members.length == 1) {
-      print('_tryToResolveArena -1');
       scheduleMicrotask(() => _resolveByDefault(pointer, state));
     } else if (state.members.isEmpty) {
-      print('_tryToResolveArena -2');
       _arenas.remove(pointer);
       assert(_debugLogDiagnostic(pointer, 'Arena empty.'));
     } else if (state.eagerWinner != null) {
-      print('_tryToResolveArena -3');
       assert(_debugLogDiagnostic(pointer, 'Eager winner: ${state.eagerWinner}'));
       _resolveInFavorOf(pointer, state, state.eagerWinner!);
     }
-    print('_tryToResolveArena end');
   }
 
   void _resolveByDefault(int pointer, _GestureArena state) {
-    print('_resolveByDefault');
     if (!_arenas.containsKey(pointer)) {
       return; // This arena has already resolved.
     }
@@ -282,7 +265,6 @@ class GestureArenaManager {
   }
 
   void _resolveInFavorOf(int pointer, _GestureArena state, GestureArenaMember member) {
-    print('_resolveinFavor');
     assert(state == _arenas[pointer]);
     assert(state != null);
     assert(state.eagerWinner == null || state.eagerWinner == member);
