@@ -174,6 +174,11 @@ void main() {
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
     expect(singleTapUpCount, 0);
+    // Before the move to TapAndDragGestureRecognizer the tapCount and singleTapCancelCount
+    // where 0 because the TapGestureRecognizer rejected itself when the initial pointer
+    // has moved past a certain threshold. With TapAndDragGestureRecognizer, we have two thresholds,
+    // a normal tap threshold, and a drag threshold, so it is possible for the tap count
+    // to increase even though the original pointer has moved beyond the tap threshold.
     expect(tapCount, 1);
     expect(singleTapCancelCount, 1);
     expect(doubleTapDownCount, 0);
