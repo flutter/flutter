@@ -51,41 +51,41 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_NE(paint, DlPaint().setStrokeWidth(6));
   EXPECT_NE(paint, DlPaint().setStrokeMiter(7));
 
-  DlColorColorSource colorSource(DlColor::kMagenta());
-  EXPECT_NE(paint, DlPaint().setColorSource(colorSource.shared()));
+  DlColorColorSource color_source(DlColor::kMagenta());
+  EXPECT_NE(paint, DlPaint().setColorSource(color_source.shared()));
 
-  DlBlendColorFilter colorFilter(DlColor::kYellow(), DlBlendMode::kDstIn);
-  EXPECT_NE(paint, DlPaint().setColorFilter(colorFilter.shared()));
+  DlBlendColorFilter color_filter(DlColor::kYellow(), DlBlendMode::kDstIn);
+  EXPECT_NE(paint, DlPaint().setColorFilter(color_filter.shared()));
 
-  DlBlurImageFilter imageFilter(1.3, 4.7, DlTileMode::kClamp);
-  EXPECT_NE(paint, DlPaint().setImageFilter(imageFilter.shared()));
+  DlBlurImageFilter image_filter(1.3, 4.7, DlTileMode::kClamp);
+  EXPECT_NE(paint, DlPaint().setImageFilter(image_filter.shared()));
 
-  DlBlurMaskFilter maskFilter(SkBlurStyle::kInner_SkBlurStyle, 3.14);
-  EXPECT_NE(paint, DlPaint().setMaskFilter(maskFilter.shared()));
+  DlBlurMaskFilter mask_filter(SkBlurStyle::kInner_SkBlurStyle, 3.14);
+  EXPECT_NE(paint, DlPaint().setMaskFilter(mask_filter.shared()));
 }
 
 TEST(DisplayListPaint, NullPointerSetGet) {
-  DlColorSource* nullColorSource = nullptr;
-  DlColorFilter* nullColorFilter = nullptr;
-  DlImageFilter* nullImageFilter = nullptr;
-  DlMaskFilter* nullMaskFilter = nullptr;
+  DlColorSource* null_color_source = nullptr;
+  DlColorFilter* null_color_filter = nullptr;
+  DlImageFilter* null_image_filter = nullptr;
+  DlMaskFilter* null_mask_filter = nullptr;
   DlPaint paint;
-  EXPECT_EQ(paint.setColorSource(nullColorSource).getColorSource(), nullptr);
-  EXPECT_EQ(paint.setColorFilter(nullColorFilter).getColorFilter(), nullptr);
-  EXPECT_EQ(paint.setImageFilter(nullImageFilter).getImageFilter(), nullptr);
-  EXPECT_EQ(paint.setMaskFilter(nullMaskFilter).getMaskFilter(), nullptr);
+  EXPECT_EQ(paint.setColorSource(null_color_source).getColorSource(), nullptr);
+  EXPECT_EQ(paint.setColorFilter(null_color_filter).getColorFilter(), nullptr);
+  EXPECT_EQ(paint.setImageFilter(null_image_filter).getImageFilter(), nullptr);
+  EXPECT_EQ(paint.setMaskFilter(null_mask_filter).getMaskFilter(), nullptr);
 }
 
 TEST(DisplayListPaint, NullSharedPointerSetGet) {
-  std::shared_ptr<DlColorSource> nullColorSource;
-  std::shared_ptr<DlColorFilter> nullColorFilter;
-  std::shared_ptr<DlImageFilter> nullImageFilter;
-  std::shared_ptr<DlMaskFilter> nullMaskFilter;
+  std::shared_ptr<DlColorSource> null_color_source;
+  std::shared_ptr<DlColorFilter> null_color_filter;
+  std::shared_ptr<DlImageFilter> null_image_filter;
+  std::shared_ptr<DlMaskFilter> null_mask_filter;
   DlPaint paint;
-  EXPECT_EQ(paint.setColorSource(nullColorSource).getColorSource(), nullptr);
-  EXPECT_EQ(paint.setColorFilter(nullColorFilter).getColorFilter(), nullptr);
-  EXPECT_EQ(paint.setImageFilter(nullImageFilter).getImageFilter(), nullptr);
-  EXPECT_EQ(paint.setMaskFilter(nullMaskFilter).getMaskFilter(), nullptr);
+  EXPECT_EQ(paint.setColorSource(null_color_source).getColorSource(), nullptr);
+  EXPECT_EQ(paint.setColorFilter(null_color_filter).getColorFilter(), nullptr);
+  EXPECT_EQ(paint.setImageFilter(null_image_filter).getImageFilter(), nullptr);
+  EXPECT_EQ(paint.setMaskFilter(null_mask_filter).getMaskFilter(), nullptr);
 }
 
 TEST(DisplayListPaint, ChainingConstructor) {

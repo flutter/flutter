@@ -988,9 +988,9 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             [](DisplayListBuilder& b) {
               static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
               static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
-              static SkRect cullRect = {0, 0, 200, 200};
+              static SkRect cull_rect = {0, 0, 200, 200};
               b.drawAtlas(TestImage2, xforms, texs, nullptr, 2,
-                          DlBlendMode::kSrcIn, kNearestSampling, &cullRect,
+                          DlBlendMode::kSrcIn, kNearestSampling, &cull_rect,
                           false);
             }},
            {1, 48 + 32 + 8 + 8, -1, 48 + 32 + 32 + 8,
@@ -1007,9 +1007,9 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
               static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
               static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
               static DlColor colors[] = {DlColor::kBlue(), DlColor::kGreen()};
-              static SkRect cullRect = {0, 0, 200, 200};
+              static SkRect cull_rect = {0, 0, 200, 200};
               b.drawAtlas(TestImage1, xforms, texs, colors, 2,
-                          DlBlendMode::kSrcIn, kNearestSampling, &cullRect,
+                          DlBlendMode::kSrcIn, kNearestSampling, &cull_rect,
                           false);
             }},
        }},
@@ -1099,19 +1099,20 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
 
 std::vector<DisplayListInvocationGroup> CreateAllGroups() {
   std::vector<DisplayListInvocationGroup> result;
-  auto allAttributesOps = CreateAllAttributesOps();
-  std::move(allAttributesOps.begin(), allAttributesOps.end(),
+  auto all_attribute_ops = CreateAllAttributesOps();
+  std::move(all_attribute_ops.begin(), all_attribute_ops.end(),
             std::back_inserter(result));
-  auto allSaveRestoreOps = CreateAllSaveRestoreOps();
-  std::move(allSaveRestoreOps.begin(), allSaveRestoreOps.end(),
+  auto all_save_restore_ops = CreateAllSaveRestoreOps();
+  std::move(all_save_restore_ops.begin(), all_save_restore_ops.end(),
             std::back_inserter(result));
-  auto allTransformOps = CreateAllTransformOps();
-  std::move(allTransformOps.begin(), allTransformOps.end(),
+  auto all_transform_ops = CreateAllTransformOps();
+  std::move(all_transform_ops.begin(), all_transform_ops.end(),
             std::back_inserter(result));
-  auto allClipOps = CreateAllClipOps();
-  std::move(allClipOps.begin(), allClipOps.end(), std::back_inserter(result));
-  auto allRenderingOps = CreateAllRenderingOps();
-  std::move(allRenderingOps.begin(), allRenderingOps.end(),
+  auto all_clip_ops = CreateAllClipOps();
+  std::move(all_clip_ops.begin(), all_clip_ops.end(),
+            std::back_inserter(result));
+  auto all_rendering_ops = CreateAllRenderingOps();
+  std::move(all_rendering_ops.begin(), all_rendering_ops.end(),
             std::back_inserter(result));
   return result;
 }
