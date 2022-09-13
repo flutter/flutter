@@ -132,7 +132,7 @@ class ScreenshotCommand extends FlutterCommand {
       'png',
     );
 
-    _validateOutputFile(outputFile, fs);
+    validateOutputFile(outputFile, fs);
 
     try {
       await device!.takeScreenshot(outputFile);
@@ -195,7 +195,7 @@ class ScreenshotCommand extends FlutterCommand {
   /// Additional error checks below for valid file name
   /// and directory because ios/xcode screenshot binary will
   /// return a 0 exit code even if outputFile is not valid
-  static void _validateOutputFile(File outputFile, FileSystem fs) {
+  static void validateOutputFile(File outputFile, FileSystem fs) {
 
     // Conditional for validating directory is valid
     if (!fs.directory(outputFile.dirname).existsSync()) {

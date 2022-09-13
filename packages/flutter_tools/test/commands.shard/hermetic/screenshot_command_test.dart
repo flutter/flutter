@@ -65,4 +65,36 @@ void main() {
       );
     });
   });
+
+  group('Screenshot file validation', () {
+    testWithoutContext('successful', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      expect(
+          () => ScreenshotCommand.validateOutputFile(fs.file('test.png'), fs),
+          returnsNormally);
+    });
+
+    testWithoutContext('failed due to incorrect filename', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      expect(() => ScreenshotCommand.validateOutputFile(fs.file('.'), fs),
+          throwsToolExit(message: 'The provided filename is invalid'));
+    });
+
+    testWithoutContext('failed due to incorrect file type', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      expect(
+          () => ScreenshotCommand.validateOutputFile(fs.file('test.pngg'), fs),
+          throwsToolExit(message: 'The provided filename is invalid'));
+    });
+
+    testWithoutContext('failed due to invalid directory', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      expect(
+          () => ScreenshotCommand.validateOutputFile(
+              fs.file('test/test.png'), fs),
+          throwsToolExit(
+              message:
+                  'The provided path to file needs to have a directory that exists'));
+    });
+  });
 }
