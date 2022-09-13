@@ -222,7 +222,9 @@ class TextPainter {
   /// This is a convenience method that creates a text painter with the supplied
   /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
   /// returns its [TextPainter.width] making sure to dispose the underlying
-  /// resources.
+  /// resources. Doing this operation is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the
+  /// text or get other information about it.
   ///
   /// Unlike the [TextPainter] constructor, the [textDirection] parameter is
   /// required because it cannot be set or changed later.
@@ -265,7 +267,9 @@ class TextPainter {
   /// This is a convenience method that creates a text painter with the supplied
   /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
   /// returns its [TextPainter.maxIntrinsicWidth] making sure to dispose the
-  /// underlying resources.
+  /// underlying resources. Doing this operation is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the
+  /// text or get other information about it.
   ///
   /// Unlike the [TextPainter] constructor, the [textDirection] parameter is
   /// required because it cannot be set or changed later.
