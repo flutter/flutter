@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_TEST_COMPONENT_CONTROLLER_V2_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_TEST_COMPONENT_CONTROLLER_V2_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_TEST_COMPONENT_CONTROLLER_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_TEST_COMPONENT_CONTROLLER_H_
 
 #include <memory>
 
@@ -26,27 +26,27 @@
 namespace dart_runner {
 
 /// Starts a Dart test component written in CFv2. It's different from
-/// DartComponentControllerV2 in that it must implement the
+/// DartComponentController in that it must implement the
 /// |fuchsia.test.Suite| protocol. It was forked to avoid a naming clash
 /// between the two classes' methods as the Suite protocol requires a Run()
 /// method for the test_manager to call on. This way, we avoid an extra layer
 /// between the test_manager and actual test execution.
 /// TODO(fxb/98369): Look into combining the two component classes once dart
 /// testing is stable.
-class DartTestComponentControllerV2
+class DartTestComponentController
     : public fuchsia::component::runner::ComponentController,
       public fuchsia::test::Suite {
-  using DoneCallback = fit::function<void(DartTestComponentControllerV2*)>;
+  using DoneCallback = fit::function<void(DartTestComponentController*)>;
 
  public:
-  DartTestComponentControllerV2(
+  DartTestComponentController(
       fuchsia::component::runner::ComponentStartInfo start_info,
       std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
       fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
           controller,
       DoneCallback done_callback);
 
-  ~DartTestComponentControllerV2() override;
+  ~DartTestComponentController() override;
 
   /// Sets up the controller.
   ///
@@ -153,16 +153,16 @@ class DartTestComponentControllerV2
 
   zx::time idle_start_{0};
   zx::timer idle_timer_;
-  async::WaitMethod<DartTestComponentControllerV2,
-                    &DartTestComponentControllerV2::OnIdleTimer>
+  async::WaitMethod<DartTestComponentController,
+                    &DartTestComponentController::OnIdleTimer>
       idle_wait_{this};
 
   // Disallow copy and assignment.
-  DartTestComponentControllerV2(const DartTestComponentControllerV2&) = delete;
-  DartTestComponentControllerV2& operator=(
-      const DartTestComponentControllerV2&) = delete;
+  DartTestComponentController(const DartTestComponentController&) = delete;
+  DartTestComponentController& operator=(const DartTestComponentController&) =
+      delete;
 };
 
 }  // namespace dart_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_TEST_COMPONENT_CONTROLLER_V2_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_TEST_COMPONENT_CONTROLLER_H_
