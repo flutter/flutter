@@ -1502,4 +1502,48 @@ void main() {
     // DraggableScrollableSheet has rebuilt, so expect the builder to be called.
     expect(buildCount, 2);
   });
+
+  testWidgets('DraggableScrollableSheet controller can be changed', (WidgetTester tester) async {
+    final DraggableScrollableController controller1 = DraggableScrollableController();
+    final DraggableScrollableController controller2 = DraggableScrollableController();
+    DraggableScrollableController controller = controller1;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => Scaffold(
+          body: DraggableScrollableSheet(
+            initialChildSize: 0.25,
+            snap: true,
+            snapSizes: const <double>[0.25, 0.5, 1.0],
+            controller: controller,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return ListView(
+                controller: scrollController,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => setState(() {
+                      controller = controller2;
+                    }),
+                    child: const Text('Switch controller'),
+                  ),
+                  Container(
+                    height: 10000,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(controller1.isAttached, true);
+    expect(controller2.isAttached, false);
+
+    await tester.tap(find.text('Switch controller'));
+    await tester.pump();
+
+    expect(controller1.isAttached, false);
+    expect(controller2.isAttached, true);
+  });
 }
