@@ -38,9 +38,6 @@ enum PixelComparison {
 
 /// Attempts to match the current browser state with the screenshot [filename].
 ///
-/// If [write] is true, will overwrite the golden file and fail the test. Use
-/// it to update golden files.
-///
 /// If [region] is not null, the golden will only include the part contained by
 /// the rectangle.
 ///
@@ -51,10 +48,9 @@ enum PixelComparison {
 /// [pixelComparison] determines the algorithm used to compare pixels. Uses
 /// fuzzy comparison by default.
 Future<void> matchGoldenFile(String filename,
-    {bool write = false, Rect? region, double? maxDiffRatePercent, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
+    {Rect? region, double? maxDiffRatePercent, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
   final Map<String, dynamic> serverParams = <String, dynamic>{
     'filename': filename,
-    'write': write,
     'region': region == null
         ? null
         : <String, dynamic>{

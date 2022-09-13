@@ -24,7 +24,6 @@ Future<void> testMain() async {
   Future<void> testGradient(String fileName, Shader shader,
       {Rect paintRect = const Rect.fromLTRB(50, 50, 300, 300),
       Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300),
-      bool write = false,
       double maxDiffRatePercent = 0,
       Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
     final RecordingCanvas rc = RecordingCanvas(region);
@@ -32,7 +31,7 @@ Future<void> testMain() async {
     final Path path = Path();
     path.addRect(paintRect);
     rc.drawPath(path, paint);
-    await canvasScreenshot(rc, fileName, write: write, region: region,
+    await canvasScreenshot(rc, fileName, region: region,
         maxDiffRatePercent: maxDiffRatePercent);
   }
 
