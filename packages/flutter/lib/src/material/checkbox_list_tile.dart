@@ -275,7 +275,7 @@ class CheckboxListTile extends StatelessWidget {
   /// This value will surround the [Checkbox], [title], [subtitle], and [secondary]
   /// widgets in [CheckboxListTile].
   ///
-  /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  /// When the value is null, the [contentPadding] is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry? contentPadding;
 
   /// If true the checkbox's [value] can be true, false, or null.

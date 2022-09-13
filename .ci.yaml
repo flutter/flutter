@@ -242,7 +242,6 @@ targets:
       - master
     recipe: flutter/flutter
     presubmit: false
-    bringup: true # Marking as flaky to reopen the tree. https://github.com/flutter/flutter/issues/111193
     timeout: 60
     properties:
       dependencies: >-
@@ -259,8 +258,6 @@ targets:
 
   - name: Linux docs_test
     recipe: flutter/flutter
-    presubmit: false
-    bringup: true # Marking as flaky to reopen the tree. https://github.com/flutter/flutter/issues/111193
     timeout: 60
     properties:
       dependencies: >-
@@ -2251,17 +2248,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
-  - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      openpay: "true"
-      tags: >
-        ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
-      task_name: openpay_benchmarks__scroll_perf
-
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -2738,6 +2724,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: platform_view_macos__start_up

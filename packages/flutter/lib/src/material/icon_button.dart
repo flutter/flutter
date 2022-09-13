@@ -52,7 +52,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// how the icon itself is positioned within the hit region.
 ///
 /// {@tool dartpad}
-/// This sample shows an `IconButton` that uses the Material icon "volume_up" to
+/// This sample shows an [IconButton] that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)

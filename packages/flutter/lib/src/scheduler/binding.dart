@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 import 'priority.dart';
+import 'service_extensions.dart';
 
 export 'dart:developer' show Flow;
 export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback;
@@ -355,7 +356,7 @@ mixin SchedulerBinding on BindingBase {
 
     if (!kReleaseMode) {
       registerNumericServiceExtension(
-        name: 'timeDilation',
+        name: SchedulerServiceExtensions.timeDilation.name,
         getter: () async => timeDilation,
         setter: (double value) async {
           timeDilation = value;
