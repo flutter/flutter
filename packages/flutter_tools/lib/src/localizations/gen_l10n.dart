@@ -13,6 +13,7 @@ import '../flutter_manifest.dart';
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
+import 'message_parser.dart';
 
 /// Run the localizations generation script with the configuration [options].
 LocalizationsGenerator generateLocalizations({
@@ -412,6 +413,80 @@ bool _needsCurlyBracketStringInterpolation(String messageString, String placehol
 }
 
 String _generateMethod(Message message, String translationForMessage) {
+  final NonterminalNode node = parse(lex(translationForMessage)) as NonterminalNode;
+
+  // Do some sanity checks. (i.e. ensure all placeholders are properly defined etc.)
+  // TODO: do this part
+
+  List<String> helperMethods = <String>[];
+
+  final String parameters = generateMethodParameters(message).join(', ');
+
+  // Get a unique helper method name. Should only call after adding all existing
+  // helpers to helperMethods to guarantee uniqueness.
+  String getHelperMethodName() {
+    return '_${message.resourceId}${helperMethods.length}';
+  }
+
+  // Do a DFS post order traversal, generating dependent 
+  // placeholder, plural, select helper methods, and combine these into
+  // one message. Return the name of the method generated for that node
+  String generateHelperMethods(NonterminalNode node) {
+    switch (node.type) {
+      case ST.message:
+        String messageString = '';
+        // Recall that message nodes are linked lists of string, placeholder, plural, and selects
+        // where node.children[0] is the value and node.children[1] is the next node until
+        // node.children.length == 1.
+        NonterminalNode messageNode = node;
+        while (messageNode.children.length == 2) {
+          final Node child = messageNode.children[0];
+          if (child.type == ST.string) {
+            messageString += (child as TokenNode).value;
+          } else {
+            messageString += '\${${generateHelperMethods(child as NonterminalNode)}($parameters)}';
+          }
+          assert(messageNode.children[1].type == ST.message);
+          messageNode = messageNode.children[1] as NonterminalNode;
+        }
+        final String helperMethodName = getHelperMethodName();
+        helperMethods.add(messageHelperTemplate
+          .replaceAll('@(name)', helperMethodName)
+          .replaceAll('@(message)', messageString)
+        );
+        return helperMethodName;
+
+      case ST.placeholderExpr:
+        assert(node.children[1].type == ST.identifier);
+        final String identifier = (node.children[1] as TokenNode).value;
+        final String helperMethodName = getHelperMethodName();
+        helperMethods.add(placeholderHelperTemplate
+          .replaceAll('@(name)', helperMethodName)
+          .replaceAll('@(placeholderName)', identifier)
+        );
+        return helperMethodName;
+
+      case ST.pluralExpr:
+        assert(node.children[1].type == ST.identifier);
+        assert(node.children[5].type == ST.pluralParts);
+        final String identifier = (node.children[1] as TokenNode).value;
+        NonterminalNode pluralParts = (node.children[5] as NonterminalNode);
+        while
+    }
+  }
+  final List<Node> traversalStack = <Node>[node];
+  while (traversalStack.isNotEmpty) {
+
+    traversalStack.addAll(n)
+    if (node.type == ST.placeholderExpr) {
+      helperMethods.add(placeholderHelperTemplate
+        .replaceAll(@name))
+    }
+    if (node.type == ST.string) {
+      
+    }
+  }
+
   String generateMessage() {
     return _replacePlaceholdersWithVariables(generateString(translationForMessage), message.placeholders);
   }

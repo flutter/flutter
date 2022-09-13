@@ -148,6 +148,30 @@ const String formatMethodTemplate = '''
     return @(message);
   }''';
 
+const String messageHelperTemplate = '''
+  String @(name)(@(parameters)) {
+    return @(message);
+  }
+''';
+
+const String placeholderHelperTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return @(placeholderName);
+  }
+''';
+
+const String pluralHelperTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return intl.Intl.pluralLogic(
+      @(count),
+      locale: localeName,
+@(pluralLogicArgs),
+    );
+  }
+''';
+
 const String pluralMethodTemplate = '''
   @override
   String @(name)(@(parameters)) {
