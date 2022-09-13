@@ -27,7 +27,6 @@ Future<void> testMain() async {
   Future<void> testPath(Path path, String scubaFileName,
       {SurfacePaint? paint,
       double? maxDiffRatePercent,
-      bool write = false,
       PaintMode mode = PaintMode.kStrokeAndFill}) async {
     const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 400);
     final BitmapCanvas bitmapCanvas =
@@ -75,7 +74,7 @@ Future<void> testMain() async {
     sceneElement.append(svgElement);
 
     await matchGoldenFile('$scubaFileName.png',
-        region: region, maxDiffRatePercent: maxDiffRatePercent, write: write);
+        region: region, maxDiffRatePercent: maxDiffRatePercent);
 
     bitmapCanvas.rootElement.remove();
     svgElement.remove();

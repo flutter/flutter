@@ -30,7 +30,7 @@ Future<void> testMain() async {
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 240),
-        double maxDiffRatePercent = 0.0, bool write = false}) async {
+        double maxDiffRatePercent = 0.0}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
         RenderStrategy());
 
@@ -49,7 +49,7 @@ Future<void> testMain() async {
       sceneElement.append(engineCanvas.rootElement);
       domDocument.body!.append(sceneElement);
       await matchGoldenFile('$fileName.png',
-          region: region, maxDiffRatePercent: maxDiffRatePercent, write: write);
+          region: region, maxDiffRatePercent: maxDiffRatePercent);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.

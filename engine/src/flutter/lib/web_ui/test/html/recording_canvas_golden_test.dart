@@ -32,8 +32,7 @@ Future<void> testMain() async {
 
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> checkScreenshot(RecordingCanvas rc, String fileName,
-      { Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-        bool write = false }) async {
+      { Rect region = const Rect.fromLTWH(0, 0, 500, 500) }) async {
 
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
         RenderStrategy());
@@ -63,8 +62,7 @@ Future<void> testMain() async {
     try {
       sceneElement.append(engineCanvas.rootElement);
       domDocument.body!.append(sceneElement);
-      await matchGoldenFile('paint_bounds_for_$fileName.png', region: region,
-        write: write);
+      await matchGoldenFile('paint_bounds_for_$fileName.png', region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.

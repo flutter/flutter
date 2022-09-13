@@ -817,8 +817,7 @@ void testMain() {
 }
 
 Future<void> testSampleText(String language, String text,
-    {ui.TextDirection textDirection = ui.TextDirection.ltr,
-    bool write = false}) async {
+    {ui.TextDirection textDirection = ui.TextDirection.ltr}) async {
   const double testWidth = 300;
   double paragraphHeight = 0;
   final CkPicture picture = await generatePictureWhenFontsStable(() {
@@ -840,7 +839,6 @@ Future<void> testSampleText(String language, String text,
       'canvaskit_sample_text_$language.png',
       picture,
       region: ui.Rect.fromLTRB(0, 0, testWidth, paragraphHeight + 20),
-      write: write,
     );
   }
 }
@@ -1176,13 +1174,10 @@ CkImage generateTestImage() {
 /// well as in the golden file name. Avoid special characters. Spaces are OK;
 /// they are replaced by "_" in the file name.
 ///
-/// Set [write] to true to overwrite the golden file.
-///
 /// Use [layoutWidth] to customize the width of the paragraph constraints.
 Future<void> testTextStyle(
   // Test properties
   String name, {
-  bool write = false,
   double? layoutWidth,
   // Top-level text where only paragraph style applies
   String outerText = 'Hello ',
@@ -1324,7 +1319,6 @@ Future<void> testTextStyle(
     'canvaskit_text_styles_${name.replaceAll(' ', '_')}.png',
     picture,
     region: region,
-    write: write,
   );
   expect(notoDownloadQueue.debugIsLoadingFonts, isFalse);
   expect(notoDownloadQueue.pendingFonts, isEmpty);

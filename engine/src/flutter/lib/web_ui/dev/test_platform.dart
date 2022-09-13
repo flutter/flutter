@@ -329,7 +329,6 @@ class BrowserPlatform extends PlatformPlugin {
       return shelf.Response.ok(json.encode('OK'));
     }
 
-    final bool write = requestData['write'] as bool;
     final double maxDiffRate = requestData.containsKey('maxdiffrate')
         ? (requestData['maxdiffrate'] as num)
             .toDouble() // can be parsed as either int or double
@@ -341,22 +340,17 @@ class BrowserPlatform extends PlatformPlugin {
             value.toString() == requestData['pixelComparison']);
     final bool isCanvaskitTest = requestData['isCanvaskitTest'] as bool;
     final String result = await _diffScreenshot(
-        filename, write, maxDiffRate, region, pixelComparison, isCanvaskitTest);
+        filename, maxDiffRate, region, pixelComparison, isCanvaskitTest);
     return shelf.Response.ok(json.encode(result));
   }
 
   Future<String> _diffScreenshot(
     String filename,
-    bool write,
     double maxDiffRateFailure,
     Map<String, dynamic> region,
     PixelComparison pixelComparison,
     bool isCanvaskitTest,
   ) async {
-    if (doUpdateScreenshotGoldens) {
-      write = true;
-    }
-
     final Rectangle<num> regionAsRectange = Rectangle<num>(
       region['x'] as num,
       region['y'] as num,

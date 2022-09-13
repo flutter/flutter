@@ -17,10 +17,9 @@ void main() {
 
 const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
-Future<void> matchSceneGolden(String goldenFile, LayerScene scene,
-    {bool write = false}) async {
+Future<void> matchSceneGolden(String goldenFile, LayerScene scene) async {
   CanvasKitRenderer.instance.rasterizer.draw(scene.layerTree);
-  await matchGoldenFile(goldenFile, region: region, write: write);
+  await matchGoldenFile(goldenFile, region: region);
 }
 
 void testMain() {
@@ -132,7 +131,7 @@ void testMain() {
 
       builder.addPicture(ui.Offset.zero, invertedSquares);
 
-      await matchSceneGolden('canvaskit_inverse_colormatrix.png', builder.build(), write: true);
+      await matchSceneGolden('canvaskit_inverse_colormatrix.png', builder.build());
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
