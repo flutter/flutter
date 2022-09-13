@@ -140,35 +140,35 @@ TEST(DisplayListComplexity, SaveLayers) {
 
 TEST(DisplayListComplexity, DrawPath) {
   DisplayListBuilder builder_line;
-  SkPath linePath;
-  linePath.moveTo(SkPoint::Make(0, 0));
-  linePath.lineTo(SkPoint::Make(10, 10));
-  linePath.close();
-  builder_line.drawPath(linePath);
+  SkPath line_path;
+  line_path.moveTo(SkPoint::Make(0, 0));
+  line_path.lineTo(SkPoint::Make(10, 10));
+  line_path.close();
+  builder_line.drawPath(line_path);
   auto display_list_line = builder_line.Build();
 
   DisplayListBuilder builder_quad;
-  SkPath quadPath;
-  quadPath.moveTo(SkPoint::Make(0, 0));
-  quadPath.quadTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20));
-  quadPath.close();
-  builder_quad.drawPath(quadPath);
+  SkPath quad_path;
+  quad_path.moveTo(SkPoint::Make(0, 0));
+  quad_path.quadTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20));
+  quad_path.close();
+  builder_quad.drawPath(quad_path);
   auto display_list_quad = builder_quad.Build();
 
   DisplayListBuilder builder_conic;
-  SkPath conicPath;
-  conicPath.moveTo(SkPoint::Make(0, 0));
-  conicPath.conicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20), 1.5f);
-  conicPath.close();
-  builder_conic.drawPath(conicPath);
+  SkPath conic_path;
+  conic_path.moveTo(SkPoint::Make(0, 0));
+  conic_path.conicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20), 1.5f);
+  conic_path.close();
+  builder_conic.drawPath(conic_path);
   auto display_list_conic = builder_conic.Build();
 
   DisplayListBuilder builder_cubic;
-  SkPath cubicPath;
-  cubicPath.moveTo(SkPoint::Make(0, 0));
-  cubicPath.cubicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20),
-                    SkPoint::Make(20, 20));
-  builder_cubic.drawPath(cubicPath);
+  SkPath cubic_path;
+  cubic_path.moveTo(SkPoint::Make(0, 0));
+  cubic_path.cubicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20),
+                     SkPoint::Make(20, 20));
+  builder_cubic.drawPath(cubic_path);
   auto display_list_cubic = builder_cubic.Build();
 
   auto calculators = AccumulatorCalculators();
@@ -182,35 +182,35 @@ TEST(DisplayListComplexity, DrawPath) {
 
 TEST(DisplayListComplexity, DrawShadow) {
   DisplayListBuilder builder_line;
-  SkPath linePath;
-  linePath.moveTo(SkPoint::Make(0, 0));
-  linePath.lineTo(SkPoint::Make(10, 10));
-  linePath.close();
-  builder_line.drawShadow(linePath, SK_ColorRED, 10.0f, false, 1.0f);
+  SkPath line_path;
+  line_path.moveTo(SkPoint::Make(0, 0));
+  line_path.lineTo(SkPoint::Make(10, 10));
+  line_path.close();
+  builder_line.drawShadow(line_path, SK_ColorRED, 10.0f, false, 1.0f);
   auto display_list_line = builder_line.Build();
 
   DisplayListBuilder builder_quad;
-  SkPath quadPath;
-  quadPath.moveTo(SkPoint::Make(0, 0));
-  quadPath.quadTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20));
-  quadPath.close();
-  builder_quad.drawShadow(quadPath, SK_ColorRED, 10.0f, false, 1.0f);
+  SkPath quad_path;
+  quad_path.moveTo(SkPoint::Make(0, 0));
+  quad_path.quadTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20));
+  quad_path.close();
+  builder_quad.drawShadow(quad_path, SK_ColorRED, 10.0f, false, 1.0f);
   auto display_list_quad = builder_quad.Build();
 
   DisplayListBuilder builder_conic;
-  SkPath conicPath;
-  conicPath.moveTo(SkPoint::Make(0, 0));
-  conicPath.conicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20), 1.5f);
-  conicPath.close();
-  builder_conic.drawShadow(conicPath, SK_ColorRED, 10.0f, false, 1.0f);
+  SkPath conic_path;
+  conic_path.moveTo(SkPoint::Make(0, 0));
+  conic_path.conicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20), 1.5f);
+  conic_path.close();
+  builder_conic.drawShadow(conic_path, SK_ColorRED, 10.0f, false, 1.0f);
   auto display_list_conic = builder_conic.Build();
 
   DisplayListBuilder builder_cubic;
-  SkPath cubicPath;
-  cubicPath.moveTo(SkPoint::Make(0, 0));
-  cubicPath.cubicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20),
-                    SkPoint::Make(20, 20));
-  builder_cubic.drawShadow(cubicPath, SK_ColorRED, 10.0f, false, 1.0f);
+  SkPath cubic_path;
+  cubic_path.moveTo(SkPoint::Make(0, 0));
+  cubic_path.cubicTo(SkPoint::Make(10, 10), SkPoint::Make(10, 20),
+                     SkPoint::Make(20, 20));
+  builder_cubic.drawShadow(cubic_path, SK_ColorRED, 10.0f, false, 1.0f);
   auto display_list_cubic = builder_cubic.Build();
 
   auto calculators = AccumulatorCalculators();

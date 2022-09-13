@@ -81,12 +81,12 @@ TEST(DisplayListColorFilter, FromSkiaLinearToSrgbFilter) {
 }
 
 TEST(DisplayListColorFilter, FromSkiaUnrecognizedFilter) {
-  sk_sp<SkColorFilter> sk_inputA =
+  sk_sp<SkColorFilter> sk_input_a =
       SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kOverlay);
-  sk_sp<SkColorFilter> sk_inputB =
+  sk_sp<SkColorFilter> sk_input_b =
       SkColorFilters::Blend(SK_ColorBLUE, SkBlendMode::kScreen);
   sk_sp<SkColorFilter> sk_filter =
-      SkColorFilters::Compose(sk_inputA, sk_inputB);
+      SkColorFilters::Compose(sk_input_a, sk_input_b);
   std::shared_ptr<DlColorFilter> filter = DlColorFilter::From(sk_filter);
   ASSERT_EQ(filter->type(), DlColorFilterType::kUnknown);
   ASSERT_EQ(filter->skia_object(), sk_filter);
@@ -153,25 +153,25 @@ TEST(DisplayListColorFilter, MatrixAsMatrix) {
 }
 
 TEST(DisplayListColorFilter, MatrixContents) {
-  float matrix_[20];
-  memcpy(matrix_, kMatrix, sizeof(matrix_));
-  DlMatrixColorFilter filter(matrix_);
+  float matrix[20];
+  memcpy(matrix, kMatrix, sizeof(matrix));
+  DlMatrixColorFilter filter(matrix);
 
   // Test deref operator []
   for (int i = 0; i < 20; i++) {
-    ASSERT_EQ(filter[i], matrix_[i]);
+    ASSERT_EQ(filter[i], matrix[i]);
   }
 
   // Test get_matrix
   float matrix2[20];
   filter.get_matrix(matrix2);
   for (int i = 0; i < 20; i++) {
-    ASSERT_EQ(matrix2[i], matrix_[i]);
+    ASSERT_EQ(matrix2[i], matrix[i]);
   }
 
   // Test perturbing original array does not affect filter
-  float original_value = matrix_[4];
-  matrix_[4] += 101;
+  float original_value = matrix[4];
+  matrix[4] += 101;
   ASSERT_EQ(filter[4], original_value);
 }
 
@@ -182,11 +182,11 @@ TEST(DisplayListColorFilter, MatrixEquals) {
 }
 
 TEST(DisplayListColorFilter, MatrixNotEquals) {
-  float matrix_[20];
-  memcpy(matrix_, kMatrix, sizeof(matrix_));
-  DlMatrixColorFilter filter1(matrix_);
-  matrix_[4] += 101;
-  DlMatrixColorFilter filter2(matrix_);
+  float matrix[20];
+  memcpy(matrix, kMatrix, sizeof(matrix));
+  DlMatrixColorFilter filter1(matrix);
+  matrix[4] += 101;
+  DlMatrixColorFilter filter2(matrix);
   TestNotEquals(filter1, filter2, "Matrix differs");
 }
 

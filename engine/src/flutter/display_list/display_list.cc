@@ -41,9 +41,9 @@ DisplayList::DisplayList(uint8_t* ptr,
       bounds_({0, 0, -1, -1}),
       bounds_cull_(cull_rect),
       can_apply_group_opacity_(can_apply_group_opacity) {
-  static std::atomic<uint32_t> nextID{1};
+  static std::atomic<uint32_t> next_id{1};
   do {
-    unique_id_ = nextID.fetch_add(+1, std::memory_order_relaxed);
+    unique_id_ = next_id.fetch_add(+1, std::memory_order_relaxed);
   } while (unique_id_ == 0);
 }
 
@@ -128,8 +128,8 @@ static bool CompareOps(uint8_t* ptrA,
   // These conditions are checked by the caller...
   FML_DCHECK((endA - ptrA) == (endB - ptrB));
   FML_DCHECK(ptrA != ptrB);
-  uint8_t* bulkStartA = ptrA;
-  uint8_t* bulkStartB = ptrB;
+  uint8_t* bulk_start_a = ptrA;
+  uint8_t* bulk_start_b = ptrB;
   while (ptrA < endA && ptrB < endB) {
     auto opA = reinterpret_cast<const DLOp*>(ptrA);
     auto opB = reinterpret_cast<const DLOp*>(ptrB);
@@ -164,23 +164,23 @@ static bool CompareOps(uint8_t* ptrA,
       case DisplayListCompare::kEqual:
         // Check if we have a backlog of bytes to bulk compare and then
         // reset the bulk compare pointers to the address following this op
-        auto bulkBytes = reinterpret_cast<const uint8_t*>(opA) - bulkStartA;
-        if (bulkBytes > 0) {
-          if (memcmp(bulkStartA, bulkStartB, bulkBytes) != 0) {
+        auto bulk_bytes = reinterpret_cast<const uint8_t*>(opA) - bulk_start_a;
+        if (bulk_bytes > 0) {
+          if (memcmp(bulk_start_a, bulk_start_b, bulk_bytes) != 0) {
             return false;
           }
         }
-        bulkStartA = ptrA;
-        bulkStartB = ptrB;
+        bulk_start_a = ptrA;
+        bulk_start_b = ptrB;
         break;
     }
   }
   if (ptrA != endA || ptrB != endB) {
     return false;
   }
-  if (bulkStartA < ptrA) {
+  if (bulk_start_a < ptrA) {
     // Perform a final bulk compare if we have remaining bytes waiting
-    if (memcmp(bulkStartA, bulkStartB, ptrA - bulkStartA) != 0) {
+    if (memcmp(bulk_start_a, bulk_start_b, ptrA - bulk_start_a) != 0) {
       return false;
     }
   }
