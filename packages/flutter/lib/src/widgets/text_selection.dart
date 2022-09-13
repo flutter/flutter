@@ -1956,15 +1956,6 @@ class TextSelectionGestureDetectorBuilder {
   /// The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
 
-  // Returns true iff either shift key is currently down.
-  bool get _isShiftPressed {
-    return HardwareKeyboard.instance.logicalKeysPressed
-      .any(<LogicalKeyboardKey>{
-        LogicalKeyboardKey.shiftLeft,
-        LogicalKeyboardKey.shiftRight,
-      }.contains);
-  }
-
   double get _scrollPosition {
     final ScrollableState? scrollableState =
         delegate.editableTextKey.currentContext == null
@@ -1974,9 +1965,6 @@ class TextSelectionGestureDetectorBuilder {
         ? 0.0
         : scrollableState.position.pixels;
   }
-
-  // True iff a tap + shift has been detected but the tap has not yet come up.
-  bool _isShiftTapping = false;
 
   // For a shift + tap + drag gesture, the TextSelection at the point of the
   // tap. Mac uses this value to reset to the original selection when an
@@ -1992,7 +1980,7 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
-  void onTapDown(TapDownDetails details, int tapCount) {
+  void onTapDown(TapDownDetails details, TapStatus status) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2010,21 +1998,17 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
+    final bool isShiftPressedValid = status.isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         // On mobile platforms the selection is set on tap up.
-        if (_isShiftTapping) {
-          _isShiftTapping = false;
-        }
         break;
       case TargetPlatform.macOS:
         // On macOS, a shift-tapped unfocused field expands from 0, not from the
         // previous selection.
         if (isShiftPressedValid) {
-          _isShiftTapping = true;
           final TextSelection? fromSelection = renderEditable.hasFocus
               ? null
               : const TextSelection.collapsed(offset: 0);
@@ -2044,7 +2028,6 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (isShiftPressedValid) {
-          _isShiftTapping = true;
           _extendSelection(details.globalPosition, SelectionChangedCause.tap);
           return;
         }
@@ -2108,25 +2091,21 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onSingleTapUp], which triggers
   ///    this callback.
   @protected
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapUpDetails details, TapStatus status) {
     if (delegate.selectionEnabled) {
       // Handle shift + click selection if needed.
-      final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
+      final bool isShiftPressedValid = status.isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           editableText.hideToolbar();
           // On desktop platforms the selection is set on tap down.
-          if (_isShiftTapping) {
-            _isShiftTapping = false;
-          }
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           editableText.hideToolbar();
           if (isShiftPressedValid) {
-            _isShiftTapping = true;
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
             return;
           }
@@ -2136,7 +2115,6 @@ class TextSelectionGestureDetectorBuilder {
           if (isShiftPressedValid) {
             // On iOS, a shift-tapped unfocused field expands from 0, not from
             // the previous selection.
-            _isShiftTapping = true;
             final TextSelection? fromSelection = renderEditable.hasFocus
                 ? null
                 : const TextSelection.collapsed(offset: 0);
@@ -2401,7 +2379,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionStart], which triggers
   ///    this callback.
   @protected
-  void onDragSelectionStart(DragStartDetails details, int consecutiveTapCount) {
+  void onDragSelectionStart(DragStartDetails details, TapStatus status) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2410,8 +2388,7 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
 
-    if (_isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
-      _isShiftTapping = true;
+    if (status.isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -2446,12 +2423,12 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(DragUpdateDetails details, int consecutiveTapCount) {
+  void onDragSelectionUpdate(DragUpdateDetails details, TapStatus status) {
     if (!delegate.selectionEnabled) {
       return;
     }
 
-    if (!_isShiftTapping) {
+    if (!status.isShiftPressed) {
       // Adjust the drag start offset for possible viewport offset changes.
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
@@ -2463,7 +2440,7 @@ class TextSelectionGestureDetectorBuilder {
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
       // Select word by word.
-      if (consecutiveTapCount == 2) {
+      if (status.consecutiveTapCount == 2) {
         return renderEditable.selectWordsInRange(
           from: dragStartGlobalPosition - editableOffset - scrollableOffset,
           to: details.globalPosition,
@@ -2495,13 +2472,11 @@ class TextSelectionGestureDetectorBuilder {
                   && editableText.textEditingValue.selection.isCollapsed
                   && _lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)
               ) {
-                print('hi from drag for ios');
                 return renderEditable.selectPositionAt(
                   from: details.globalPosition,
                   cause: SelectionChangedCause.drag,
                 );
               } else {
-                print('guess that didnt work ${renderEditable.hasFocus}, ${editableText.textEditingValue.selection.isCollapsed}, ${_lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)}');
               }
           }
           return;
@@ -2591,9 +2566,8 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionEnd], which triggers this
   ///    callback.
   @protected
-  void onDragSelectionEnd(DragEndDetails details, int consecutiveTapCount) {
-    if (_isShiftTapping) {
-      _isShiftTapping = false;
+  void onDragSelectionEnd(DragEndDetails details, TapStatus status) {
+    if (status.isShiftPressed) {
       _shiftTapDragSelection = null;
     }
   }
@@ -2669,7 +2643,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
-  final GestureTapDownWithConsecutiveTapCountCallback? onTapDown;
+  final GestureTapDownWithTapStatusCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
@@ -2689,7 +2663,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
   /// down, followed by a double tap down, followed by a single tap down.
-  final GestureTapUpCallback? onSingleTapUp;
+  final GestureTapUpWithTapStatusCallback? onSingleTapUp;
 
   /// Called for each touch that becomes recognized as a gesture that is not a
   /// short tap, such as a long tap or drag. It is called at the moment when
@@ -2712,17 +2686,17 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapDownCallback? onDoubleTapDown;
 
   /// Called when a mouse starts dragging to select text.
-  final GestureDragStartWithConsecutiveTapCountCallback? onDragSelectionStart;
+  final GestureDragStartWithTapStatusCallback? onDragSelectionStart;
 
   /// Called repeatedly as a mouse moves while dragging.
   ///
   /// The frequency of calls is throttled to avoid excessive text layout
   /// operations in text fields. The throttling is controlled by the constant
   /// [_kDragSelectionUpdateThrottle].
-  final GestureDragUpdateWithConsecutiveTapCountCallback? onDragSelectionUpdate;
+  final GestureDragUpdateWithTapStatusCallback? onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
-  final GestureDragEndWithConsecutiveTapCountCallback? onDragSelectionEnd;
+  final GestureDragEndWithTapStatusCallback? onDragSelectionEnd;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -2745,20 +2719,20 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
-  void _handleTapDown(TapDownDetails details, int consecutiveTapCount) {
-    widget.onTapDown?.call(details, consecutiveTapCount);
+  void _handleTapDown(TapDownDetails details, TapStatus status) {
+    widget.onTapDown?.call(details, status);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (consecutiveTapCount.isEven) {
+    if (status.consecutiveTapCount.isEven) {
       widget.onDoubleTapDown?.call(details);
     }
   }
 
-  void _handleTapUp(TapUpDetails details, int consecutiveTapCount) {
-    if (consecutiveTapCount == 1) {
-      widget.onSingleTapUp?.call(details);
+  void _handleTapUp(TapUpDetails details, TapStatus status) {
+    if (status.consecutiveTapCount == 1) {
+      widget.onSingleTapUp?.call(details, status);
     }
   }
 
@@ -2769,17 +2743,17 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   // TODO(Renzo-Olivares): Can this be moved into the TapAndDragGestureRecognizer?
   DragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
-  int? _dragTapCount;
+  TapStatus? _dragTapStatus;
 
-  void _handleDragStart(DragStartDetails details, int consecutiveTapCount) {
-    if (consecutiveTapCount == 1) {
-      widget.onDragSelectionStart?.call(details, consecutiveTapCount);
+  void _handleDragStart(DragStartDetails details, TapStatus status) {
+    if (status.consecutiveTapCount == 1) {
+      widget.onDragSelectionStart?.call(details, status);
     }
   }
 
-  void _handleDragUpdate(DragUpdateDetails details, int consecutiveTapCount) {
+  void _handleDragUpdate(DragUpdateDetails details, TapStatus status) {
     _lastDragUpdateDetails = details;
-    _dragTapCount = consecutiveTapCount;
+    _dragTapStatus = status;
     // Only schedule a new timer if there's no one pending.
     _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
   }
@@ -2792,20 +2766,20 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   /// immediately. See [_handleDragEnd].
   void _handleDragUpdateThrottled() {
     assert(_lastDragUpdateDetails != null);
-    widget.onDragSelectionUpdate?.call(_lastDragUpdateDetails!, _dragTapCount!);
+    widget.onDragSelectionUpdate?.call(_lastDragUpdateDetails!, _dragTapStatus!);
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
 
-  void _handleDragEnd(DragEndDetails endDetails, int consecutiveTapCount) {
+  void _handleDragEnd(DragEndDetails endDetails, TapStatus status) {
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
       _dragUpdateThrottleTimer!.cancel();
       _handleDragUpdateThrottled();
     }
-    widget.onDragSelectionEnd?.call(endDetails, consecutiveTapCount);
-    _dragTapCount = null;
+    widget.onDragSelectionEnd?.call(endDetails, _dragTapStatus!);
+    _dragTapStatus = null;
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
@@ -2871,7 +2845,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             ..onUpdate = _handleDragUpdate
             ..onEnd = _handleDragEnd
             ..onTapUp = _handleTapUp
-            ..onTapCancel = _handleTapCancel;
+            ..onCancel = _handleTapCancel;
         },
       );
     }
