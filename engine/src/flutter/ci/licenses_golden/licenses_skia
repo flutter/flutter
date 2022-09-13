@@ -1,4 +1,4 @@
-Signature: 3903e2b6f5ba0763a8493f44e7fffbef
+Signature: cd1cc409c8626f8118263484a48c13c6
 
 UNUSED LICENSES:
 
@@ -540,6 +540,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/npm_build/multicanvas.html
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/node.example.js
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/package-lock.json
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/paragraphs.html
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/shaping.html
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/textapi_utils.js
 FILE: ../../../third_party/skia/modules/canvaskit/npm_build/types/canvaskit-wasm-tests.ts
