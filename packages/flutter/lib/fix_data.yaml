@@ -110,7 +110,7 @@ transforms:
         name: 'colorScheme'
         style: optional_named
         argumentValue:
-          expression: 'ColorScheme(primary: {% primaryColor %})'
+          expression: 'ColorScheme.light().copyWith(primary: {% primaryColor %})'
           requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme ==''"
       - kind: 'removeParameter'
         name: 'primaryColor'
@@ -181,7 +181,7 @@ transforms:
         name: 'colorScheme'
         style: optional_named
         argumentValue:
-          expression: 'ColorScheme(primary: {% primaryColor %})'
+          expression: 'ColorScheme.light().copyWith(primary: {% primaryColor %})'
           requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme ==''"
       - kind: 'removeParameter'
         name: 'primaryColor'
@@ -252,7 +252,7 @@ transforms:
           name: 'colorScheme'
           style: optional_named
           argumentValue:
-            expression: 'ColorScheme(primary: {% primaryColor %})'
+            expression: 'ColorScheme.light().copyWith(primary: {% primaryColor %})'
             requiredIf: "primaryColor != '' && primarySwatch == '' && colorScheme == ''"
         - kind: 'removeParameter'
           name: 'primaryColor'
