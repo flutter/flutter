@@ -395,10 +395,10 @@ class BorderRadius extends BorderRadiusGeometry {
   RRect toRRect(Rect rect) {
     return RRect.fromRectAndCorners(
       rect,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottomLeft: bottomLeft,
-      bottomRight: bottomRight,
+      topLeft: topLeft.clamp(minimum: Radius.zero),
+      topRight: topRight.clamp(minimum: Radius.zero),
+      bottomLeft: bottomLeft.clamp(minimum: Radius.zero),
+      bottomRight: bottomRight.clamp(minimum: Radius.zero),
     );
   }
 
