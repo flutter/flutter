@@ -383,10 +383,10 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   String getApplicationBinaryPath() {
     if (applicationBinaryPath != null) {
       if(deviceOperatingSystem == DeviceOperatingSystem.android) {
-        return '${applicationBinaryPath!}/app-profile.apk';
+        return '$applicationBinaryPath/app-profile.apk';
       }
       else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-        return '$applicationBinaryPath!';
+        return '$applicationBinaryPath';
       }
     }
 
