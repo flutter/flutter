@@ -212,20 +212,20 @@ void ClipBoundsDispatchHelper::clipPath(const SkPath& path,
   }
 }
 void ClipBoundsDispatchHelper::intersect(const SkRect& rect, bool is_aa) {
-  SkRect devClipBounds = matrix().mapRect(rect);
+  SkRect dev_clip_bounds = matrix().mapRect(rect);
   if (is_aa) {
-    devClipBounds.roundOut(&devClipBounds);
+    dev_clip_bounds.roundOut(&dev_clip_bounds);
   }
   if (has_clip_) {
-    if (!bounds_.intersect(devClipBounds)) {
+    if (!bounds_.intersect(dev_clip_bounds)) {
       bounds_.setEmpty();
     }
   } else {
     has_clip_ = true;
-    if (devClipBounds.isEmpty()) {
+    if (dev_clip_bounds.isEmpty()) {
       bounds_.setEmpty();
     } else {
-      bounds_ = devClipBounds;
+      bounds_ = dev_clip_bounds;
     }
   }
 }
@@ -559,11 +559,11 @@ void DisplayListBoundsCalculator::drawPoints(SkCanvas::PointMode mode,
                                              uint32_t count,
                                              const SkPoint pts[]) {
   if (count > 0) {
-    RectBoundsAccumulator ptBounds;
+    RectBoundsAccumulator pt_bounds;
     for (size_t i = 0; i < count; i++) {
-      ptBounds.accumulate(pts[i]);
+      pt_bounds.accumulate(pts[i]);
     }
-    SkRect point_bounds = ptBounds.bounds();
+    SkRect point_bounds = pt_bounds.bounds();
     switch (mode) {
       case SkCanvas::kPoints_PointMode:
         AccumulateOpBounds(point_bounds, kDrawPointsAsPointsFlags);
@@ -640,19 +640,19 @@ void DisplayListBoundsCalculator::drawAtlas(const sk_sp<DlImage> atlas,
                                             const SkRect* cullRect,
                                             bool render_with_attributes) {
   SkPoint quad[4];
-  RectBoundsAccumulator atlasBounds;
+  RectBoundsAccumulator atlas_bounds;
   for (int i = 0; i < count; i++) {
     const SkRect& src = tex[i];
     xform[i].toQuad(src.width(), src.height(), quad);
     for (int j = 0; j < 4; j++) {
-      atlasBounds.accumulate(quad[j]);
+      atlas_bounds.accumulate(quad[j]);
     }
   }
-  if (atlasBounds.is_not_empty()) {
+  if (atlas_bounds.is_not_empty()) {
     DisplayListAttributeFlags flags = render_with_attributes  //
                                           ? kDrawAtlasWithPaintFlags
                                           : kDrawAtlasFlags;
-    AccumulateOpBounds(atlasBounds.bounds(), flags);
+    AccumulateOpBounds(atlas_bounds.bounds(), flags);
   }
 }
 void DisplayListBoundsCalculator::drawPicture(const sk_sp<SkPicture> picture,

@@ -205,12 +205,12 @@ class BoundsTolerance {
       allowed.setEmpty();
     }
     SkIRect rounded = allowed.roundOut();
-    int padLeft = std::max(0, pix_bounds.fLeft - rounded.fLeft);
-    int padTop = std::max(0, pix_bounds.fTop - rounded.fTop);
-    int padRight = std::max(0, pix_bounds.fRight - rounded.fRight);
-    int padBottom = std::max(0, pix_bounds.fBottom - rounded.fBottom);
-    int allowed_pad_x = std::max(padLeft, padRight);
-    int allowed_pad_y = std::max(padTop, padBottom);
+    int pad_left = std::max(0, pix_bounds.fLeft - rounded.fLeft);
+    int pad_top = std::max(0, pix_bounds.fTop - rounded.fTop);
+    int pad_right = std::max(0, pix_bounds.fRight - rounded.fRight);
+    int pad_bottom = std::max(0, pix_bounds.fBottom - rounded.fBottom);
+    int allowed_pad_x = std::max(pad_left, pad_right);
+    int allowed_pad_y = std::max(pad_top, pad_bottom);
     if (worst_bounds_pad_x > allowed_pad_x ||
         worst_bounds_pad_y > allowed_pad_y) {
       FML_LOG(ERROR) << "allowed pad: "  //
@@ -496,23 +496,23 @@ class TestParameters {
     if (adjust == 0) {
       return tolerance;
     }
-    SkScalar hTolerance;
-    SkScalar vTolerance;
+    SkScalar h_tolerance;
+    SkScalar v_tolerance;
     if (is_horizontal_line()) {
       FML_DCHECK(!is_vertical_line());
-      hTolerance = adjust;
-      vTolerance = 0;
+      h_tolerance = adjust;
+      v_tolerance = 0;
     } else if (is_vertical_line()) {
-      hTolerance = 0;
-      vTolerance = adjust;
+      h_tolerance = 0;
+      v_tolerance = adjust;
     } else {
       // The perpendicular miters just do not impact the bounds of
       // diagonal lines at all as they are aimed in the wrong direction
       // to matter. So allow tolerance in both axes.
-      hTolerance = vTolerance = adjust;
+      h_tolerance = v_tolerance = adjust;
     }
     BoundsTolerance new_tolerance =
-        tolerance.addBoundsPadding(hTolerance, vTolerance);
+        tolerance.addBoundsPadding(h_tolerance, v_tolerance);
     return new_tolerance;
   }
 
@@ -1085,7 +1085,7 @@ class CanvasCompareTester {
 
     {
       // half opaque cyan
-      DlColor blendableColor = DlColor::kCyan().withAlpha(0x7f);
+      DlColor blendable_color = DlColor::kCyan().withAlpha(0x7f);
       DlColor bg = DlColor::kWhite();
 
       RenderWith(testP, env, tolerance,
@@ -1093,11 +1093,11 @@ class CanvasCompareTester {
                      "Blend == SrcIn",
                      [=](SkCanvas*, SkPaint& p) {
                        p.setBlendMode(SkBlendMode::kSrcIn);
-                       p.setColor(blendableColor);
+                       p.setColor(blendable_color);
                      },
                      [=](DisplayListBuilder& b) {
                        b.setBlendMode(DlBlendMode::kSrcIn);
-                       b.setColor(blendableColor);
+                       b.setColor(blendable_color);
                      })
                      .with_bg(bg));
       RenderWith(testP, env, tolerance,
@@ -1105,11 +1105,11 @@ class CanvasCompareTester {
                      "Blend == DstIn",
                      [=](SkCanvas*, SkPaint& p) {
                        p.setBlendMode(SkBlendMode::kDstIn);
-                       p.setColor(blendableColor);
+                       p.setColor(blendable_color);
                      },
                      [=](DisplayListBuilder& b) {
                        b.setBlendMode(DlBlendMode::kDstIn);
-                       b.setColor(blendableColor);
+                       b.setColor(blendable_color);
                      })
                      .with_bg(bg));
     }
@@ -1151,9 +1151,9 @@ class CanvasCompareTester {
       };
       blur_env.init_ref(cv_blur_setup, testP.cv_renderer(), dl_blur_setup);
       DlBlurImageFilter filter_decal_5(5.0, 5.0, DlTileMode::kDecal);
-      BoundsTolerance blur5Tolerance = tolerance.addBoundsPadding(4, 4);
+      BoundsTolerance blur_5_tolerance = tolerance.addBoundsPadding(4, 4);
       {
-        RenderWith(testP, blur_env, blur5Tolerance,
+        RenderWith(testP, blur_env, blur_5_tolerance,
                    CaseParameters(
                        "ImageFilter == Decal Blur 5",
                        [=](SkCanvas* cv, SkPaint& p) {
@@ -1167,7 +1167,7 @@ class CanvasCompareTester {
       }
       DlBlurImageFilter filter_clamp_5(5.0, 5.0, DlTileMode::kClamp);
       {
-        RenderWith(testP, blur_env, blur5Tolerance,
+        RenderWith(testP, blur_env, blur_5_tolerance,
                    CaseParameters(
                        "ImageFilter == Clamp Blur 5",
                        [=](SkCanvas* cv, SkPaint& p) {
@@ -1352,10 +1352,10 @@ class CanvasCompareTester {
 
     {
       const DlBlurMaskFilter filter(kNormal_SkBlurStyle, 5.0);
-      BoundsTolerance blur5Tolerance = tolerance.addBoundsPadding(4, 4);
+      BoundsTolerance blur_5_tolerance = tolerance.addBoundsPadding(4, 4);
       {
         // Stroked primitives need some non-trivial stroke size to be blurred
-        RenderWith(testP, env, blur5Tolerance,
+        RenderWith(testP, env, blur_5_tolerance,
                    CaseParameters(
                        "MaskFilter == Blur 5",
                        [=](SkCanvas*, SkPaint& p) {
@@ -1561,9 +1561,9 @@ class CanvasCompareTester {
                    }));
 
     {
-      const SkScalar TestDashes1[] = {29.0, 2.0};
-      const SkScalar TestDashes2[] = {17.0, 1.5};
-      auto effect = DlDashPathEffect::Make(TestDashes1, 2, 0.0f);
+      const SkScalar test_dashes_1[] = {29.0, 2.0};
+      const SkScalar test_dashes_2[] = {17.0, 1.5};
+      auto effect = DlDashPathEffect::Make(test_dashes_1, 2, 0.0f);
       {
         RenderWith(testP, stroke_base_env, tolerance,
                    CaseParameters(
@@ -1583,7 +1583,7 @@ class CanvasCompareTester {
                          b.setPathEffect(effect.get());
                        }));
       }
-      effect = DlDashPathEffect::Make(TestDashes2, 2, 0.0f);
+      effect = DlDashPathEffect::Make(test_dashes_2, 2, 0.0f);
       {
         RenderWith(testP, stroke_base_env, tolerance,
                    CaseParameters(
@@ -1898,9 +1898,9 @@ class CanvasCompareTester {
       // renders both back under a transform (scale(2x)) to see if their
       // rendering is affected differently by a change of matrix between
       // recording time and rendering time.
-      const int TestWidth2 = kTestWidth * 2;
-      const int TestHeight2 = kTestHeight * 2;
-      const SkScalar TestScale = 2.0;
+      const int test_width_2 = kTestWidth * 2;
+      const int test_height_2 = kTestHeight * 2;
+      const SkScalar test_scale = 2.0;
 
       SkPictureRecorder sk_x2_recorder;
       SkCanvas* ref_canvas = sk_x2_recorder.beginRecording(kTestBounds);
@@ -1909,27 +1909,27 @@ class CanvasCompareTester {
       sk_sp<SkPicture> ref_x2_picture =
           sk_x2_recorder.finishRecordingAsPicture();
       std::unique_ptr<RenderSurface> ref_x2_surface =
-          env.MakeSurface(bg, TestWidth2, TestHeight2);
+          env.MakeSurface(bg, test_width_2, test_height_2);
       SkCanvas* ref_x2_canvas = ref_x2_surface->canvas();
-      ref_x2_canvas->scale(TestScale, TestScale);
+      ref_x2_canvas->scale(test_scale, test_scale);
       ref_x2_picture->playback(ref_x2_canvas);
       const SkPixmap* ref_x2_pixels = ref_x2_surface->pixmap();
-      ASSERT_EQ(ref_x2_pixels->width(), TestWidth2) << info;
-      ASSERT_EQ(ref_x2_pixels->height(), TestHeight2) << info;
+      ASSERT_EQ(ref_x2_pixels->width(), test_width_2) << info;
+      ASSERT_EQ(ref_x2_pixels->height(), test_height_2) << info;
       ASSERT_EQ(ref_x2_pixels->info().bytesPerPixel(), 4) << info;
 
       DisplayListBuilder builder_x2(kTestBounds);
       caseP.render_to(builder_x2, testP);
       sk_sp<DisplayList> display_list_x2 = builder_x2.Build();
       std::unique_ptr<RenderSurface> test_x2_surface =
-          env.MakeSurface(bg, TestWidth2, TestHeight2);
+          env.MakeSurface(bg, test_width_2, test_height_2);
       SkCanvas* test_x2_canvas = test_x2_surface->canvas();
-      test_x2_canvas->scale(TestScale, TestScale);
+      test_x2_canvas->scale(test_scale, test_scale);
       display_list_x2->RenderTo(test_x2_canvas);
       compareToReference(test_x2_surface->pixmap(), ref_x2_pixels,
                          info + " (Both rendered scaled 2x)", nullptr, nullptr,
                          bg, caseP.fuzzy_compare_components(),  //
-                         TestWidth2, TestHeight2, false);
+                         test_width_2, test_height_2, false);
     }
   }
 
@@ -2068,26 +2068,26 @@ class CanvasCompareTester {
 
     int pixels_different = 0;
     int pixels_oob = 0;
-    int minX = width;
-    int minY = height;
-    int maxX = 0;
-    int maxY = 0;
+    int min_x = width;
+    int min_y = height;
+    int max_x = 0;
+    int max_y = 0;
     for (int y = 0; y < height; y++) {
       const uint32_t* ref_row = ref_pixels->addr32(0, y);
       const uint32_t* test_row = test_pixels->addr32(0, y);
       for (int x = 0; x < width; x++) {
         if (bounds && test_row[x] != untouched) {
-          if (minX > x) {
-            minX = x;
+          if (min_x > x) {
+            min_x = x;
           }
-          if (minY > y) {
-            minY = y;
+          if (min_y > y) {
+            min_y = y;
           }
-          if (maxX <= x) {
-            maxX = x + 1;
+          if (max_x <= x) {
+            max_x = x + 1;
           }
-          if (maxY <= y) {
-            maxY = y + 1;
+          if (max_y <= y) {
+            max_y = y + 1;
           }
           if (!i_bounds.contains(x, y)) {
             pixels_oob++;
@@ -2107,15 +2107,15 @@ class CanvasCompareTester {
     }
     if (pixels_oob > 0) {
       FML_LOG(ERROR) << "pix bounds["  //
-                     << minX << ", " << minY << " => " << maxX << ", " << maxY
-                     << "]";
+                     << min_x << ", " << min_y << " => " << max_x << ", "
+                     << max_y << "]";
       FML_LOG(ERROR) << "dl_bounds["                               //
                      << bounds->fLeft << ", " << bounds->fTop      //
                      << " => "                                     //
                      << bounds->fRight << ", " << bounds->fBottom  //
                      << "]";
     } else if (bounds) {
-      showBoundsOverflow(info, i_bounds, tolerance, minX, minY, maxX, maxY);
+      showBoundsOverflow(info, i_bounds, tolerance, min_x, min_y, max_x, max_y);
     }
     ASSERT_EQ(pixels_oob, 0) << info;
     ASSERT_EQ(pixels_different, 0) << info;
@@ -2135,8 +2135,8 @@ class CanvasCompareTester {
     SkIRect pix_bounds =
         SkIRect::MakeLTRB(pixLeft, pixTop, pixRight, pixBottom);
     SkISize pix_size = pix_bounds.size();
-    int pixWidth = pix_size.width();
-    int pixHeight = pix_size.height();
+    int pix_width = pix_size.width();
+    int pix_height = pix_size.height();
     int worst_pad_x = std::max(pad_left, pad_right);
     int worst_pad_y = std::max(pad_top, pad_bottom);
     if (tolerance->overflows(pix_bounds, worst_pad_x, worst_pad_y)) {
@@ -2150,10 +2150,10 @@ class CanvasCompareTester {
                      << " => "                                   //
                      << bounds.fRight << ", " << bounds.fBottom  //
                      << "]";
-      FML_LOG(ERROR) << "Bounds overflowed by up to "             //
-                     << worst_pad_x << ", " << worst_pad_y        //
-                     << " (" << (worst_pad_x * 100.0 / pixWidth)  //
-                     << "%, " << (worst_pad_y * 100.0 / pixHeight) << "%)";
+      FML_LOG(ERROR) << "Bounds overflowed by up to "              //
+                     << worst_pad_x << ", " << worst_pad_y         //
+                     << " (" << (worst_pad_x * 100.0 / pix_width)  //
+                     << "%, " << (worst_pad_y * 100.0 / pix_height) << "%)";
       int pix_area = pix_size.area();
       int dl_area = bounds.width() * bounds.height();
       FML_LOG(ERROR) << "Total overflow area: " << (dl_area - pix_area)  //
@@ -2368,8 +2368,8 @@ TEST_F(DisplayListCanvas, DrawRRect) {
 TEST_F(DisplayListCanvas, DrawDRRect) {
   SkRRect outer = SkRRect::MakeRectXY(kRenderBounds, kRenderCornerRadius,
                                       kRenderCornerRadius);
-  SkRect innerBounds = kRenderBounds.makeInset(30.0, 30.0);
-  SkRRect inner = SkRRect::MakeRectXY(innerBounds, kRenderCornerRadius,
+  SkRect inner_bounds = kRenderBounds.makeInset(30.0, 30.0);
+  SkRRect inner = SkRRect::MakeRectXY(inner_bounds, kRenderCornerRadius,
                                       kRenderCornerRadius);
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -2825,18 +2825,18 @@ TEST_F(DisplayListCanvas, DrawImageNineLinear) {
 
 TEST_F(DisplayListCanvas, DrawImageLatticeNearest) {
   const SkRect dst = kRenderBounds.makeInset(10.5, 10.5);
-  const int divX[] = {
+  const int div_x[] = {
       kRenderWidth * 1 / 4,
       kRenderWidth * 2 / 4,
       kRenderWidth * 3 / 4,
   };
-  const int divY[] = {
+  const int div_y[] = {
       kRenderHeight * 1 / 4,
       kRenderHeight * 2 / 4,
       kRenderHeight * 3 / 4,
   };
   SkCanvas::Lattice lattice = {
-      divX, divY, nullptr, 3, 3, nullptr, nullptr,
+      div_x, div_y, nullptr, 3, 3, nullptr, nullptr,
   };
   sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
   CanvasCompareTester::RenderAll(  //
@@ -2854,18 +2854,18 @@ TEST_F(DisplayListCanvas, DrawImageLatticeNearest) {
 
 TEST_F(DisplayListCanvas, DrawImageLatticeNearestNoPaint) {
   const SkRect dst = kRenderBounds.makeInset(10.5, 10.5);
-  const int divX[] = {
+  const int div_x[] = {
       kRenderWidth * 1 / 4,
       kRenderWidth * 2 / 4,
       kRenderWidth * 3 / 4,
   };
-  const int divY[] = {
+  const int div_y[] = {
       kRenderHeight * 1 / 4,
       kRenderHeight * 2 / 4,
       kRenderHeight * 3 / 4,
   };
   SkCanvas::Lattice lattice = {
-      divX, divY, nullptr, 3, 3, nullptr, nullptr,
+      div_x, div_y, nullptr, 3, 3, nullptr, nullptr,
   };
   sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
   CanvasCompareTester::RenderAll(  //
@@ -2883,18 +2883,18 @@ TEST_F(DisplayListCanvas, DrawImageLatticeNearestNoPaint) {
 
 TEST_F(DisplayListCanvas, DrawImageLatticeLinear) {
   const SkRect dst = kRenderBounds.makeInset(10.5, 10.5);
-  const int divX[] = {
+  const int div_x[] = {
       kRenderWidth / 4,
       kRenderWidth / 2,
       kRenderWidth * 3 / 4,
   };
-  const int divY[] = {
+  const int div_y[] = {
       kRenderHeight / 4,
       kRenderHeight / 2,
       kRenderHeight * 3 / 4,
   };
   SkCanvas::Lattice lattice = {
-      divX, divY, nullptr, 3, 3, nullptr, nullptr,
+      div_x, div_y, nullptr, 3, 3, nullptr, nullptr,
   };
   sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
   CanvasCompareTester::RenderAll(  //
@@ -3130,18 +3130,18 @@ TEST_F(DisplayListCanvas, DrawTextBlob) {
 #endif  // OS_FUCHSIA
   sk_sp<SkTextBlob> blob =
       CanvasCompareTester::MakeTextBlob("Testing", kRenderHeight * 0.33f);
-  SkScalar RenderY1_3 = kRenderTop + kRenderHeight * 0.3;
-  SkScalar RenderY2_3 = kRenderTop + kRenderHeight * 0.6;
+  SkScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;
+  SkScalar render_y_2_3 = kRenderTop + kRenderHeight * 0.6;
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            canvas->drawTextBlob(blob, kRenderLeft, RenderY1_3, paint);
-            canvas->drawTextBlob(blob, kRenderLeft, RenderY2_3, paint);
+            canvas->drawTextBlob(blob, kRenderLeft, render_y_1_3, paint);
+            canvas->drawTextBlob(blob, kRenderLeft, render_y_2_3, paint);
             canvas->drawTextBlob(blob, kRenderLeft, kRenderBottom, paint);
           },
           [=](DisplayListBuilder& builder) {  //
-            builder.drawTextBlob(blob, kRenderLeft, RenderY1_3);
-            builder.drawTextBlob(blob, kRenderLeft, RenderY2_3);
+            builder.drawTextBlob(blob, kRenderLeft, render_y_1_3);
+            builder.drawTextBlob(blob, kRenderLeft, render_y_2_3);
             builder.drawTextBlob(blob, kRenderLeft, kRenderBottom);
           },
           kDrawTextBlobFlags)

@@ -308,15 +308,15 @@ void DisplayListCanvasDispatcher::DrawShadow(SkCanvas* canvas,
                        ? SkShadowFlags::kTransparentOccluder_ShadowFlag
                        : SkShadowFlags::kNone_ShadowFlag;
   flags |= SkShadowFlags::kDirectionalLight_ShadowFlag;
-  SkColor inAmbient = SkColorSetA(color, kAmbientAlpha * SkColorGetA(color));
-  SkColor inSpot = SkColorSetA(color, kSpotAlpha * SkColorGetA(color));
-  SkColor ambientColor, spotColor;
-  SkShadowUtils::ComputeTonalColors(inAmbient, inSpot, &ambientColor,
-                                    &spotColor);
+  SkColor in_ambient = SkColorSetA(color, kAmbientAlpha * SkColorGetA(color));
+  SkColor in_spot = SkColorSetA(color, kSpotAlpha * SkColorGetA(color));
+  SkColor ambient_color, spot_color;
+  SkShadowUtils::ComputeTonalColors(in_ambient, in_spot, &ambient_color,
+                                    &spot_color);
   SkShadowUtils::DrawShadow(canvas, path, SkPoint3::Make(0, 0, dpr * elevation),
                             SkPoint3::Make(0, -1, 1),
-                            kLightRadius / kLightHeight, ambientColor,
-                            spotColor, flags);
+                            kLightRadius / kLightHeight, ambient_color,
+                            spot_color, flags);
 }
 
 void DisplayListCanvasDispatcher::drawShadow(const SkPath& path,
