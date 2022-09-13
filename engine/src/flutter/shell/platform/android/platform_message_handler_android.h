@@ -28,7 +28,7 @@ class PlatformMessageHandlerAndroid : public PlatformMessageHandler {
 
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-  int next_response_id_ = 1;
+  std::atomic<int> next_response_id_ = 1;
   std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
       pending_responses_;
   std::mutex pending_responses_mutex_;

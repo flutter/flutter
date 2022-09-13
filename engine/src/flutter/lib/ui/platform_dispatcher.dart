@@ -586,7 +586,7 @@ class PlatformDispatcher {
   /// [token]. This is required if platform channels are to be used on a
   /// background isolate.
   void registerBackgroundIsolate(RootIsolateToken token) {
-    if (!Platform.isIOS) {
+    if (!(Platform.isIOS || Platform.isAndroid)) {
       // Issue: https://github.com/flutter/flutter/issues/13937
       throw UnimplementedError("Platform doesn't yet support platform channels on background isolates.");
     }

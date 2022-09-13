@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 
 /** Handler that receives messages from Dart code. */
 public interface PlatformMessageHandler {
+  /** Called from any thread. */
   void handleMessageFromDart(
       @NonNull final String channel,
       @Nullable ByteBuffer message,

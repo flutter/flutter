@@ -311,6 +311,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       @Nullable ByteBuffer message,
       int replyId,
       long messageData) {
+    // Called from any thread.
     final DartMessengerTaskQueue taskQueue = (handlerInfo != null) ? handlerInfo.taskQueue : null;
     TraceSection.beginAsyncSection("PlatformChannel ScheduleHandler on " + channel, replyId);
     Runnable myRunnable =
@@ -338,11 +339,13 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   @Override
   public void handleMessageFromDart(
       @NonNull String channel, @Nullable ByteBuffer message, int replyId, long messageData) {
-    // Called from the ui thread.
+    // Called from any thread.
     Log.v(TAG, "Received message from Dart over channel '" + channel + "'");
 
     HandlerInfo handlerInfo;
     boolean messageDeferred;
+    // This lock can potentially be a bottleneck and could replaced with a
+    // read/write lock.
     synchronized (handlersLock) {
       handlerInfo = messageHandlers.get(channel);
       messageDeferred = (enableBufferingIncomingMessages.get() && handlerInfo == null);
