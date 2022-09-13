@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dart_runner/dart_test_component_controller_v2.h"
+#include "dart_runner/dart_test_component_controller.h"
 
 #include "gtest/gtest.h"
 

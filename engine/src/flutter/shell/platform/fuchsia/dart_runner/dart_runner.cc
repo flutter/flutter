@@ -17,8 +17,6 @@
 #include <utility>
 
 #include "dart_component_controller.h"
-#include "dart_component_controller_v2.h"
-#include "dart_test_component_controller_v2.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -104,20 +102,20 @@ void IsolateGroupCleanupCallback(void* isolate_group_data) {
   delete static_cast<std::shared_ptr<tonic::DartState>*>(isolate_group_data);
 }
 
-// Runs the application for a V1 component.
-void RunApplicationV1(
+// Runs the application for a Dart component.
+void RunApplication(
     DartRunner* runner,
-    fuchsia::sys::Package package,
-    fuchsia::sys::StartupInfo startup_info,
+    fuchsia::component::runner::ComponentStartInfo start_info,
     std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
-    ::fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller) {
-  int64_t start = Dart_TimelineGetMicros();
+    fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
+        controller) {
+  const int64_t start = Dart_TimelineGetMicros();
 
-  DartComponentController app(std::move(package), std::move(startup_info),
-                              runner_incoming_services, std::move(controller));
-  bool success = app.Setup();
+  DartComponentController app(std::move(start_info), runner_incoming_services,
+                              std::move(controller));
+  const bool success = app.SetUp();
 
-  int64_t end = Dart_TimelineGetMicros();
+  const int64_t end = Dart_TimelineGetMicros();
   Dart_TimelineEvent("DartComponentController::SetUp", start, end,
                      Dart_Timeline_Event_Duration, 0, NULL, NULL);
   if (success) {
@@ -129,43 +127,18 @@ void RunApplicationV1(
   }
 }
 
-// Runs the application for a V2 component.
-void RunApplicationV2(
-    DartRunner* runner,
-    fuchsia::component::runner::ComponentStartInfo start_info,
-    std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
-    fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
-        controller) {
-  const int64_t start = Dart_TimelineGetMicros();
-
-  DartComponentControllerV2 app(std::move(start_info), runner_incoming_services,
-                                std::move(controller));
-  const bool success = app.SetUp();
-
-  const int64_t end = Dart_TimelineGetMicros();
-  Dart_TimelineEvent("DartComponentControllerV2::SetUp", start, end,
-                     Dart_Timeline_Event_Duration, 0, NULL, NULL);
-  if (success) {
-    app.Run();
-  }
-
-  if (Dart_CurrentIsolate()) {
-    Dart_ShutdownIsolate();
-  }
-}
-
-void RunTestApplicationV2(
+void RunTestApplication(
     DartRunner* runner,
     fuchsia::component::runner::ComponentStartInfo start_info,
     std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
     fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
         controller,
-    fit::function<void(std::shared_ptr<DartTestComponentControllerV2>)>
+    fit::function<void(std::shared_ptr<DartTestComponentController>)>
         component_created_callback,
-    fit::function<void(DartTestComponentControllerV2*)> done_callback) {
+    fit::function<void(DartTestComponentController*)> done_callback) {
   const int64_t start = Dart_TimelineGetMicros();
 
-  auto test_component = std::make_shared<DartTestComponentControllerV2>(
+  auto test_component = std::make_shared<DartTestComponentController>(
       std::move(start_info), runner_incoming_services, std::move(controller),
       std::move(done_callback));
 
@@ -175,7 +148,7 @@ void RunTestApplicationV2(
   test_component->SetUp();
 
   const int64_t end = Dart_TimelineGetMicros();
-  Dart_TimelineEvent("DartTestComponentControllerV2::SetUp", start, end,
+  Dart_TimelineEvent("DartTestComponentController::SetUp", start, end,
                      Dart_Timeline_Event_Duration, 0, NULL, NULL);
 }
 
@@ -214,11 +187,6 @@ bool IsTestProgram(const fuchsia::data::Dictionary& program_metadata) {
 }
 
 DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
-  context_->outgoing()->AddPublicService<fuchsia::sys::Runner>(
-      [this](fidl::InterfaceRequest<fuchsia::sys::Runner> request) {
-        bindings_.AddBinding(this, std::move(request));
-      });
-
   context_->outgoing()
       ->AddPublicService<fuchsia::component::runner::ComponentRunner>(
           [this](fidl::InterfaceRequest<
@@ -280,43 +248,25 @@ DartRunner::~DartRunner() {
     FX_LOGF(FATAL, LOG_TAG, "Dart_Cleanup failed: %s", error);
 }
 
-void DartRunner::StartComponent(
-    fuchsia::sys::Package package,
-    fuchsia::sys::StartupInfo startup_info,
-    fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller) {
-  // TRACE_DURATION currently requires that the string data does not change
-  // in the traced scope. Since |package| gets moved in the construction of
-  // |thread| below, we cannot ensure that |package.resolved_url| does not
-  // move or change, so we make a copy to pass to TRACE_DURATION.
-  // TODO(PT-169): Remove this copy when TRACE_DURATION reads string arguments
-  // eagerly.
-  std::string url_copy = package.resolved_url;
-  TRACE_EVENT1("dart", "StartComponent", "url", url_copy.c_str());
-  std::thread thread(RunApplicationV1, this, std::move(package),
-                     std::move(startup_info), context_->svc(),
-                     std::move(controller));
-  thread.detach();
-}
-
 void DartRunner::Start(
     fuchsia::component::runner::ComponentStartInfo start_info,
     fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
         controller) {
   // Parse the program field of the component's cml and check if it is a test
   // component. If so, serve the |fuchsia.test.Suite| protocol from the
-  // component's outgoing directory, via DartTestComponentControllerV2.
+  // component's outgoing directory, via DartTestComponentController.
   if (IsTestProgram(start_info.program())) {
     std::string url_copy = start_info.resolved_url();
     TRACE_EVENT1("dart", "Start", "url", url_copy.c_str());
     std::thread thread(
-        RunTestApplicationV2, this, std::move(start_info), context_->svc(),
+        RunTestApplication, this, std::move(start_info), context_->svc(),
         std::move(controller),
         // component_created_callback
-        [this](std::shared_ptr<DartTestComponentControllerV2> ptr) {
+        [this](std::shared_ptr<DartTestComponentController> ptr) {
           test_components_.emplace(ptr.get(), std::move(ptr));
         },
         // done_callback
-        [this](DartTestComponentControllerV2* ptr) {
+        [this](DartTestComponentController* ptr) {
           auto it = test_components_.find(ptr);
           if (it != test_components_.end()) {
             test_components_.erase(it);
@@ -326,7 +276,7 @@ void DartRunner::Start(
   } else {
     std::string url_copy = start_info.resolved_url();
     TRACE_EVENT1("dart", "Start", "url", url_copy.c_str());
-    std::thread thread(RunApplicationV2, this, std::move(start_info),
+    std::thread thread(RunApplication, this, std::move(start_info),
                        context_->svc(), std::move(controller));
     thread.detach();
   }

@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include <fuchsia/component/runner/cpp/fidl.h>
 #include <fuchsia/sys/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async/cpp/wait.h>
@@ -21,34 +22,46 @@
 
 namespace dart_runner {
 
-class DartComponentController : public fuchsia::sys::ComponentController {
+/// Starts a Dart component written in CFv2.
+class DartComponentController
+    : public fuchsia::component::runner::ComponentController {
  public:
   DartComponentController(
-      fuchsia::sys::Package package,
-      fuchsia::sys::StartupInfo startup_info,
+      fuchsia::component::runner::ComponentStartInfo start_info,
       std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
-      fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller);
+      fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
+          controller);
   ~DartComponentController() override;
 
-  bool Setup();
+  /// Sets up the controller.
+  ///
+  /// This should be called before |Run|.
+  bool SetUp();
+
+  /// Runs the Dart component in a task, sending the return code back to
+  /// the Fuchsia component controller.
+  ///
+  /// This should be called after |SetUp|.
   void Run();
-  bool Main();
-  void SendReturnCode();
 
  private:
-  bool SetupNamespace();
+  /// Helper for actually running the Dart main. Returns true if successful,
+  /// false otherwise.
+  bool RunDartMain();
 
-  bool SetupFromKernel();
-  bool SetupFromAppSnapshot();
+  /// Creates and binds the namespace for this component. Returns true if
+  /// successful, false otherwise.
+  bool CreateAndBindNamespace();
+
+  bool SetUpFromKernel();
+  bool SetUpFromAppSnapshot();
 
   bool CreateIsolate(const uint8_t* isolate_snapshot_data,
                      const uint8_t* isolate_snapshot_instructions);
 
-  int SetupFileDescriptor(fuchsia::sys::FileDescriptorPtr fd);
-
   // |ComponentController|
   void Kill() override;
-  void Detach() override;
+  void Stop() override;
 
   // Idle notification.
   void MessageEpilogue(Dart_Handle result);
@@ -60,18 +73,20 @@ class DartComponentController : public fuchsia::sys::ComponentController {
   // The loop must be the first declared member so that it gets destroyed after
   // binding_ which expects the existence of a loop.
   std::unique_ptr<async::Loop> loop_;
+
   std::string label_;
   std::string url_;
-  fuchsia::sys::Package package_;
-  fuchsia::sys::StartupInfo startup_info_;
   std::shared_ptr<sys::ServiceDirectory> runner_incoming_services_;
   std::string data_path_;
-  fidl::Binding<fuchsia::sys::ComponentController> binding_;
   std::unique_ptr<sys::ComponentContext> context_;
 
+  fuchsia::component::runner::ComponentStartInfo start_info_;
+  fidl::Binding<fuchsia::component::runner::ComponentController> binding_;
+
   fdio_ns_t* namespace_ = nullptr;
-  int stdoutfd_ = -1;
-  int stderrfd_ = -1;
+  int stdout_fd_ = -1;
+  int stderr_fd_ = -1;
+
   dart_utils::ElfSnapshot elf_snapshot_;                      // AOT snapshot
   dart_utils::MappedResource isolate_snapshot_data_;          // JIT snapshot
   dart_utils::MappedResource isolate_snapshot_instructions_;  // JIT snapshot
