@@ -28,7 +28,6 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-/// {@template flutter.material.AdaptiveTextSelectionToolbar.seeAlso}
 /// * [getEditableButtonItems], which returns the default
 ///   [ContextMenuButtonItem]s for [EditableText] on the platform.
 /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
@@ -40,7 +39,6 @@ import 'theme.dart';
 ///    other than MacOS.
 /// * [CupertinoTextSelectionToolbar], the default toolbar for iOS.
 /// * [CupertinoDesktopTextSelectionToolbar], the default toolbar for MacOS.
-/// {@endtemplate}
 class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the
   /// given [children].

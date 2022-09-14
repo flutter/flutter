@@ -25,12 +25,6 @@ import 'text_selection_toolbar_button.dart';
 ///
 /// See also:
 ///
-/// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.seeAlso}
-/// * [CupertinoAdaptiveTextSelectionToolbarButtonItems], which is like this
-///   widget but creates its children from a list of [ContextMenuButtonItem]s.
-/// * [CupertinoAdaptiveTextSelectionToolbarEditableText], which is like this
-///   widget but uses the default children for an editable text field.
-/// {@endtemplate}
 /// * [getEditableTextButtonItems], which generates the default
 ///   [ContextMenuButtonItem]s for a context menu displaying inside of an
 ///   [EditableText] on the current platform.
@@ -103,7 +97,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// * [AdaptiveTextSelectionToolbar.editable], which is similar to this but
   ///   includes Material and Cupertino toolbars.
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectioasdfnToolbar.new}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
