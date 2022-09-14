@@ -279,9 +279,12 @@ abstract class Domain {
     }).then<Object?>((Object? result) {
       daemon.connection.sendResponse(id, _toJsonable(result));
       return null;
-    }).catchError((Object error, StackTrace stackTrace) {
+    })
+      // TODO(srawlins): Fix this static issue,
+      // https://github.com/flutter/flutter/issues/105750.
+      // ignore: body_might_complete_normally_catch_error
+      .catchError((Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
-      return null;
     });
   }
 
