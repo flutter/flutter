@@ -68,6 +68,18 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 // iPad Mini 6th Gen according to ios-resolution.com.
 const double _kIPadWidth = 1488.0;
 
+/// The default mime types to be used when [contentCommitMimeTypes] is not provided.
+/// The default value supports inserting images of any format.
+const List<String> kDefaultContentCommitMimeTypes = <String>[
+  'image/png',
+  'image/bmp',
+  'image/jpg',
+  'image/tiff',
+  'image/gif',
+  'image/jpeg',
+  'image/webp'
+];
+
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
@@ -687,18 +699,15 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       assert(
+          (contentCommitMimeTypes != null && onContentCommitted != null) ||
+          contentCommitMimeTypes == null ||
+          onContentCommitted == null
+       ),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        contentCommitMimeTypes = contentCommitMimeTypes ??
             (onContentCommitted == null
-                ? const <String>[] : const <String>[
-              'image/png',
-              'image/bmp',
-              'image/jpg',
-              'image/tiff',
-              'image/gif',
-              'image/jpeg',
-              'image/webp'
-            ]),
+                ? const <String>[] : kDefaultContentCommitMimeTypes),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -1627,7 +1636,7 @@ class EditableText extends StatefulWidget {
   /// {@tool dartpad}
   /// This example shows how to limit image insertion to specific file types.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.content_commit_mime_types.0.dart **
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_committed.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1836,15 +1845,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
     properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes,
-        defaultValue: onContentCommitted == null ? null : <String>[
-          'image/png',
-          'image/bmp',
-          'image/jpg',
-          'image/tiff',
-          'image/gif',
-          'image/jpeg',
-          'image/webp'
-        ]));
+        defaultValue: onContentCommitted == null ? null : kDefaultContentCommitMimeTypes));
   }
 }
 
@@ -2394,7 +2395,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void commitContent(Map<String, dynamic> content) {
-    widget.onContentCommitted?.call(CommittedContent.fromMap(content));
+    final CommittedContent cc = CommittedContent.fromMap(content);
+    assert(widget.contentCommitMimeTypes.contains(cc.mimeType ?? ''));
+    widget.onContentCommitted?.call(cc);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.

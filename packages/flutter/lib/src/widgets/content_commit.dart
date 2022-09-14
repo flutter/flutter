@@ -11,17 +11,17 @@ import 'package:flutter/foundation.dart';
 /// content.
 @immutable
 class CommittedContent {
-  /// Creates an object to represent content that is committed from a text field
+  /// Creates an object to represent content that is committed from a text field.
   ///
   /// Any parameters can be null.
   const CommittedContent({this.mimeType, this.uri, this.data});
 
   /// Converts Map received from Flutter Engine into the Dart class.
   CommittedContent.fromMap(Map<String, dynamic>? metadata):
-        mimeType = metadata != null && metadata.isNotEmpty ? metadata['mimeType'] as String? : null,
-        uri = metadata != null && metadata.isNotEmpty ? metadata['uri'] as String? : null,
-        data = metadata != null && metadata.isNotEmpty ? Uint8List.fromList(
-            List<int>.from(metadata['data'] as Iterable<dynamic>)) : null;
+      mimeType = metadata != null && metadata.isNotEmpty ? metadata['mimeType'] as String? : null,
+      uri = metadata != null && metadata.isNotEmpty ? metadata['uri'] as String? : null,
+      data = metadata != null && metadata.isNotEmpty ? Uint8List.fromList(
+          List<int>.from(metadata['data'] as Iterable<dynamic>)) : null;
 
   /// Mime type of inserted content.
   final String? mimeType;

@@ -377,15 +377,7 @@ class TextField extends StatefulWidget {
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        contentCommitMimeTypes = contentCommitMimeTypes ??
            (onContentCommitted == null
-               ? const <String>[] : const <String>[
-                 'image/png',
-                 'image/bmp',
-                 'image/jpg',
-                 'image/tiff',
-                 'image/gif',
-                 'image/jpeg',
-                 'image/webp'
-               ]),
+               ? const <String>[] : kDefaultContentCommitMimeTypes),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly

@@ -31,6 +31,7 @@ class MyStatefulWidget extends StatefulWidget {
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   final TextEditingController _controller = TextEditingController();
+  Uint8List? bytes;
 
   @override
   void dispose() {
@@ -44,15 +45,22 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text("Here's a text field that supports inserting gif content:"),
+          const Text("Here's a text field that supports inserting only png or gif content:"),
           TextField(
             controller: _controller,
+            contentCommitMimeTypes: const <String>['image/png', 'image/gif'],
             onContentCommitted: (CommittedContent data) async {
-              if (data.mimeType == 'image/gif' && data.data != null) {
-                // handle Uint8List (e.g. upload to server, display a MemoryImage, etc)
+              if (data.data != null) {
+                setState(() {
+                  bytes = data.data;
+                });
               }
             },
           ),
+          if (bytes != null)
+            const Text("Here's the most recently inserted content:"),
+          if (bytes != null)
+            Image.memory(bytes),
         ],
       ),
     );

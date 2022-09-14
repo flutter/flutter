@@ -318,15 +318,7 @@ class CupertinoTextField extends StatefulWidget {
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        contentCommitMimeTypes = contentCommitMimeTypes ??
             (onContentCommitted == null
-                ? const <String>[] : const <String>[
-              'image/png',
-              'image/bmp',
-              'image/jpg',
-              'image/tiff',
-              'image/gif',
-              'image/jpeg',
-              'image/webp'
-            ]),
+                ? const <String>[] : kDefaultContentCommitMimeTypes),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -495,15 +487,7 @@ class CupertinoTextField extends StatefulWidget {
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        contentCommitMimeTypes = contentCommitMimeTypes ??
             (onContentCommitted == null
-                ? const <String>[] : const <String>[
-              'image/png',
-              'image/bmp',
-              'image/jpg',
-              'image/tiff',
-              'image/gif',
-              'image/jpeg',
-              'image/webp'
-            ]),
+                ? const <String>[] : kDefaultContentCommitMimeTypes),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -899,15 +883,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
     properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes,
-        defaultValue: onContentCommitted == null ? <String>[] : <String>[
-          'image/png',
-          'image/bmp',
-          'image/jpg',
-          'image/tiff',
-          'image/gif',
-          'image/jpeg',
-          'image/webp'
-        ]));
+        defaultValue: onContentCommitted == null ? <String>[] : kDefaultContentCommitMimeTypes));
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
