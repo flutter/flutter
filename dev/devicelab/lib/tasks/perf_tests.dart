@@ -1412,7 +1412,7 @@ class CompileTest {
     await flutter('clean');
     if (deleteGradleCache) {
       final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
-      gradleCacheDir.deleteSync(recursive: true);
+      rmTree(gradleCacheDir);
     }
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes;
@@ -1536,7 +1536,7 @@ class CompileTest {
     }
     if (deleteGradleCache) {
       final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
-      gradleCacheDir.deleteSync(recursive: true);
+      rmTree(gradleCacheDir);
     }
     final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];
