@@ -2026,6 +2026,7 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
   external set fontStyle(SkFontStyle? value);
   external set shadows(List<SkTextShadow>? value);
   external set fontFeatures(List<SkFontFeature>? value);
+  external set fontVariations(List<SkFontVariation>? value);
 }
 
 @JS()
@@ -2073,6 +2074,16 @@ class SkFontFeature {}
 extension SkFontFeatureExtension on SkFontFeature {
   external set name(String? value);
   external set value(int? value);
+}
+
+@JS()
+@anonymous
+@staticInterop
+class SkFontVariation {}
+
+extension SkFontVariationExtension on SkFontVariation {
+  external set axis(String? value);
+  external set value(double? value);
 }
 
 @JS()
