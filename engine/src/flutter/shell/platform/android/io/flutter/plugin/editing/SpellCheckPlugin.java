@@ -89,7 +89,6 @@ public class SpellCheckPlugin
 
   /** Calls on the Android spell check API to spell check specified text. */
   public void performSpellCheck(@NonNull String locale, @NonNull String text) {
-    String[] localeCodes = locale.split("-");
     Locale localeFromString = LocalizationPlugin.localeFromString(locale);
 
     if (mSpellCheckerSession == null) {

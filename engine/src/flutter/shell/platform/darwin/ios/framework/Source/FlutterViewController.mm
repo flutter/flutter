@@ -1654,7 +1654,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     @"textScaleFactor" : @([self textScaleFactor]),
     @"alwaysUse24HourFormat" : @([self isAlwaysUse24HourFormat]),
     @"platformBrightness" : [self brightnessMode],
-    @"platformContrast" : [self contrastMode]
+    @"platformContrast" : [self contrastMode],
+    @"nativeSpellCheckServiceDefined" : @true
   }];
 }
 
