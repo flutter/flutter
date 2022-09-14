@@ -13,7 +13,7 @@ import 'goldens.dart';
 /// An unsupported [GoldenFileComparator] that exists for API compatibility.
 class LocalFileComparator extends GoldenFileComparator {
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
 

@@ -53,8 +53,15 @@ abstract class GoldenFileComparator {
   /// Compares the pixels of decoded png [imageBytes] against the golden file
   /// identified by [golden].
   ///
-  /// The returned future completes with a boolean value that indicates whether
-  /// the pixels decoded from [imageBytes] match the golden file's pixels.
+  /// If [isFlaky] is false, the returned future completes with a boolean value
+  /// that indicates whether the pixels decoded from [imageBytes] match the
+  /// golden file's pixels.
+  ///
+  /// If [isFlaky] is true, the comparison always passes. Implementations should
+  /// strive to assist developers with managing flaky golden tests effectively.
+  /// For example, the comparator could submit the screenshot to the goldens
+  /// storage and/or management system for manual review, tracking, and
+  /// alerting.
   ///
   /// In the case of comparison mismatch, the comparator may choose to throw a
   /// [TestFailure] if it wants to control the failure message, often in the
@@ -65,7 +72,7 @@ abstract class GoldenFileComparator {
   /// is left up to the implementation class. For instance, some implementations
   /// may load files from the local file system, whereas others may load files
   /// over the network or from a remote repository.
-  Future<bool> compare(Uint8List imageBytes, Uri golden);
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false });
 
   /// Updates the golden file identified by [golden] with [imageBytes].
   ///
@@ -273,7 +280,7 @@ class TrivialComparator implements GoldenFileComparator {
   const TrivialComparator._();
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) {
     // Ideally we would use markTestSkipped here but in some situations,
     // comparators are called outside of tests.
     // See also: https://github.com/flutter/flutter/issues/91285

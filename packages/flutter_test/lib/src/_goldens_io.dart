@@ -90,17 +90,27 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   final path.Context _path;
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) async {
     final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
       await getGoldenBytes(golden),
     );
 
+    if (isFlaky) {
+      print('Golden $golden is marked as flaky and will not fail the test.');
+    }
+
     if (!result.passed) {
       final String error = await generateFailureOutput(result, golden, basedir);
-      throw FlutterError(error);
+      if (!isFlaky) {
+        throw FlutterError(error);
+      } else {
+        // The test was marked as flaky. Simply print the error to console, but
+        // do not fail the test.
+        print(error);
+      }
     }
-    return result.passed;
+    return true;
   }
 
   @override

@@ -1341,7 +1341,7 @@ class _FakeComparator implements GoldenFileComparator {
   Uri? golden;
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) {
     invocation = _ComparatorInvocation.compare;
     this.imageBytes = imageBytes;
     this.golden = golden;

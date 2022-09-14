@@ -244,13 +244,13 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) async {
     await skiaClient.imgtestInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    return skiaClient.imgtestAdd(golden.path, goldenFile);
+    return skiaClient.imgtestAdd(golden.path, goldenFile, isFlaky: isFlaky);
   }
 
   /// Decides based on the current environment if goldens tests should be
@@ -328,13 +328,13 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) async {
     await skiaClient.tryjobInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    await skiaClient.tryjobAdd(golden.path, goldenFile);
+    await skiaClient.tryjobAdd(golden.path, goldenFile, isFlaky: isFlaky);
 
     // This will always return true since golden file test failures are managed
     // in pre-submit checks by the flutter-gold status check.
@@ -397,7 +397,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) async {
     // Ideally we would use markTestSkipped here but in some situations,
     // comparators are called outside of tests.
     // See also: https://github.com/flutter/flutter/issues/91285
@@ -505,7 +505,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   }
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(Uint8List imageBytes, Uri golden, { bool isFlaky = false }) async {
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     late String? testExpectation;
@@ -535,11 +535,23 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       goldenBytes,
     );
 
+    if (isFlaky) {
+      print('Golden $golden is marked as flaky and will not fail the test.');
+    }
+
     if (result.passed) {
       return true;
     }
 
     final String error = await generateFailureOutput(result, golden, basedir);
-    throw FlutterError(error);
+    if (!isFlaky) {
+      throw FlutterError(error);
+    } else {
+      // The test was marked as flaky. Simply print the error to console, but
+      // do not fail the test.
+      print(error);
+    }
+
+    return true;
   }
 }

@@ -43,16 +43,22 @@ const bool canCaptureImage = true;
 /// test is running on a VM using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  const MatchesGoldenFile(this.key, this.version);
+  const MatchesGoldenFile(this.key, this.version, { this.isFlaky = false });
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(String path, this.version, { this.isFlaky = false }) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
 
   /// The [version] of the golden image.
   final int? version;
+
+  /// Whether this matcher allows goldens that do not match the master golden to pass.
+  ///
+  /// If set to true, the underlying implementation of [goldenFileComparator]
+  /// should
+  final bool isFlaky;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
