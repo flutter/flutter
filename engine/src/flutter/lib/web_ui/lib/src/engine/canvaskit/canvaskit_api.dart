@@ -1900,6 +1900,7 @@ extension SkParagraphStylePropertiesExtension on SkParagraphStyleProperties {
   external set ellipsis(String? value);
   external set textStyle(SkTextStyleProperties? value);
   external set strutStyle(SkStrutStyleProperties? strutStyle);
+  external set replaceTabCharacters(bool? bool);
 }
 
 @JS()

@@ -178,6 +178,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           toSkStrutStyleProperties(strutStyle, textHeightBehavior);
     }
 
+    properties.replaceTabCharacters = true;
     properties.textStyle = toSkTextStyleProperties(
         fontFamily, fontSize, height, fontWeight, fontStyle);
 

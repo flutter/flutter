@@ -28,7 +28,6 @@ SET DEV_DIR="%WEB_UI_DIR%dev"
 SET OUT_DIR="%ENGINE_SRC_DIR%out"
 SET HOST_DEBUG_UNOPT_DIR="%ENGINE_SRC_DIR%out\host_debug_unopt"
 SET DART_SDK_DIR=%ENGINE_SRC_DIR%out\host_debug_unopt\dart-sdk
-SET PUB_DIR="%DART_SDK_DIR%\bin\pub"
 SET SCRIPT_PATH="%DEV_DIR%felt.dart"
 SET STAMP_PATH="%DART_TOOL_DIR%felt.snapshot.stamp"
 SET GN="%FLUTTER_DIR%tools\gn"
@@ -48,18 +47,18 @@ IF %orTempValue%==0 (
   CALL python %GN% --unoptimized --full-dart-sdk
   CALL ninja -C %HOST_DEBUG_UNOPT_DIR%)
 
-:: TODO(yjbanov): The batch script does not support snanphot option.
+:: TODO(yjbanov): The batch script does not support snapshot option.
 :: Support snapshot option.
 CALL :installdeps
-IF %1==test (%DART_SDK_DIR%\bin\dart "%DEV_DIR%\felt.dart" %* --browser=chrome) ELSE ( %DART_SDK_DIR%\bin\dart "%DEV_DIR%\felt.dart" %* )
+IF "%1"=="test" (%DART_SDK_DIR%\bin\dart %DEV_DIR%\felt.dart %* --browser=chrome) ELSE ( %DART_SDK_DIR%\bin\dart %DEV_DIR%\felt.dart %* )
 
 EXIT /B %ERRORLEVEL%
 
 :installdeps
 ECHO "Running \`pub get\` in 'engine/src/flutter/web_sdk/web_engine_tester'"
 cd "%FLUTTER_DIR%web_sdk\web_engine_tester"
-CALL %PUB_DIR% get
+CALL %DART_SDK_DIR%\bin\dart pub get
 ECHO "Running \`pub get\` in 'engine/src/flutter/lib/web_ui'"
 cd %WEB_UI_DIR%
-CALL %PUB_DIR% get
+CALL %DART_SDK_DIR%\bin\dart pub get
 EXIT /B 0
