@@ -603,7 +603,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors;the key is json filed key, the value is json value.',
+          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.',
       valueHelp: 'use-define-config.json'
     );
   }

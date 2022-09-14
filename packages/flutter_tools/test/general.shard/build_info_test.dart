@@ -5,8 +5,10 @@
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   late BufferLogger logger;
@@ -278,5 +280,32 @@ void main() {
     expect(decodeDartDefines(<String, String>{
       kDartDefines: 'MTIzMiw0NTY=,Mg==',
     }, kDartDefines), <String>['1232,456', '2']);
+  });
+
+  group('Check repeated buildInfo variables', () {
+    testUsingContext('toEnvironmentConfig repeated variable', () async {
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+          treeShakeIcons: true,
+          trackWidgetCreation: true,
+          dartDefines: <String>['foo=2', 'bar=2'],
+          dartDefineConfigJsonMap: <String,Object>{ 'DART_DEFINES' : 'Define a variable, but it occupies the variable name of the system'},
+          dartObfuscation: true,
+      );
+      buildInfo.toEnvironmentConfig();
+      expect(testLogger.warningText, contains('The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
+    });
+
+    testUsingContext('toGradleConfig repeated variable', () async {
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+          treeShakeIcons: true,
+          trackWidgetCreation: true,
+          dartDefines: <String>['foo=2', 'bar=2'],
+          dartDefineConfigJsonMap: <String,Object>{ 'dart-defines' : 'Define a variable, but it occupies the variable name of the system'},
+          dartObfuscation: true,
+      );
+      buildInfo.toGradleConfig();
+      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system!'));
+    });
+
   });
 }

@@ -135,10 +135,10 @@ class BuildInfo {
   /// Additional constant values to be made available in the Dart program.
   ///
   /// These values can be used with the const `fromEnvironment` constructors of
-  ///  [String],the key is json field,the value is
+  ///  [String] the key and field are json values
   /// json value
   ///
-  /// An additional field `defineConfigJsonRawValue` is provided to represent the native JSON value of the configuration file
+  /// An additional field `dartDefineConfigJsonMap` is provided to represent the native JSON value of the configuration file
   ///
   final Map<String, Object>? dartDefineConfigJsonMap;
 
