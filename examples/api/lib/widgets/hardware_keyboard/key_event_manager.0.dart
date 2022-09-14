@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Flutter code sample for [KeyEventManager.keyMessageHandler].
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-// This example app demonstrates a use case of patching
-// `KeyEventManager.keyMessageHandler`: be notified of key events that are not
-// handled by any focus handlers (such as shortcuts).
 
 void main() => runApp(
   const MaterialApp(
@@ -53,8 +51,8 @@ class FallbackDemoState extends State<FallbackDemo> {
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 400),
         child: Column(
           children: <Widget>[
-            const Text('This area handles key pressses that are unhandled by any shortcuts by displaying them below. '
-              'Try text shortcuts such as Ctrl-A!'),
+            const Text('This area handles key presses that are unhandled by any shortcuts, by '
+              'displaying them below. Try text shortcuts such as Ctrl-A!'),
             Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
             const TextField(decoration: InputDecoration(label: Text('Text field 1'))),
             Shortcuts(
@@ -62,7 +60,9 @@ class FallbackDemoState extends State<FallbackDemo> {
                 const SingleActivator(LogicalKeyboardKey.keyQ): VoidCallbackIntent(() {}),
               },
               child: const TextField(
-                decoration: InputDecoration(label: Text('This field also considers key Q as a shortcut (that does nothing).')),
+                decoration: InputDecoration(
+                  label: Text('This field also considers key Q as a shortcut (that does nothing).'),
+                ),
               ),
             ),
           ],
@@ -75,7 +75,7 @@ class FallbackDemoState extends State<FallbackDemo> {
 /// A node used by [FallbackKeyEventRegistrar] to register fallback key handlers.
 ///
 /// This class must not be replaced by bare [KeyEventCallback] because Dart
-/// does not allow comparing with `==` on annonymous functions (always returns
+/// does not allow comparing with `==` on anonymous functions (always returns
 /// false.)
 class FallbackFocusNode {
   FallbackFocusNode({required this.onKeyEvent});

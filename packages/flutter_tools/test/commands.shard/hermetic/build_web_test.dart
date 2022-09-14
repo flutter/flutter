@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -23,7 +21,7 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
+  late FileSystem fileSystem;
   final Platform fakePlatform = FakePlatform(
     environment: <String, String>{
       'FLUTTER_ROOT': '/',
@@ -243,7 +241,7 @@ class TestWebBuildCommand extends FlutterCommand {
   final String description = 'Build a test executable app.';
 
   @override
-  Future<FlutterCommandResult> runCommand() async => null;
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 
   @override
   bool get shouldRunPub => false;
