@@ -65,8 +65,8 @@ void TraceSetTimelineMicrosSource(TimelineMicrosSource source) {
 }
 
 size_t TraceNonce() {
-  static std::atomic_size_t gLastItem;
-  return ++gLastItem;
+  static std::atomic_size_t last_item;
+  return ++last_item;
 }
 
 void TraceTimelineEvent(TraceArg category_group,

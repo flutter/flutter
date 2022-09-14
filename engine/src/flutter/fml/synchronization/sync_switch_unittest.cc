@@ -11,49 +11,49 @@
 using fml::SyncSwitch;
 
 TEST(SyncSwitchTest, Basic) {
-  SyncSwitch syncSwitch;
-  bool switchValue = false;
-  syncSwitch.Execute(SyncSwitch::Handlers()
-                         .SetIfTrue([&] { switchValue = true; })
-                         .SetIfFalse([&] { switchValue = false; }));
-  EXPECT_FALSE(switchValue);
-  syncSwitch.SetSwitch(true);
-  syncSwitch.Execute(SyncSwitch::Handlers()
-                         .SetIfTrue([&] { switchValue = true; })
-                         .SetIfFalse([&] { switchValue = false; }));
-  EXPECT_TRUE(switchValue);
+  SyncSwitch sync_switch;
+  bool switch_value = false;
+  sync_switch.Execute(SyncSwitch::Handlers()
+                          .SetIfTrue([&] { switch_value = true; })
+                          .SetIfFalse([&] { switch_value = false; }));
+  EXPECT_FALSE(switch_value);
+  sync_switch.SetSwitch(true);
+  sync_switch.Execute(SyncSwitch::Handlers()
+                          .SetIfTrue([&] { switch_value = true; })
+                          .SetIfFalse([&] { switch_value = false; }));
+  EXPECT_TRUE(switch_value);
 }
 
 TEST(SyncSwitchTest, NoopIfUndefined) {
-  SyncSwitch syncSwitch;
-  bool switchValue = false;
-  syncSwitch.Execute(SyncSwitch::Handlers());
-  EXPECT_FALSE(switchValue);
+  SyncSwitch sync_switch;
+  bool switch_value = false;
+  sync_switch.Execute(SyncSwitch::Handlers());
+  EXPECT_FALSE(switch_value);
 }
 
 TEST(SyncSwitchTest, SharedLock) {
-  SyncSwitch syncSwitch;
-  syncSwitch.SetSwitch(true);
-  bool switchValue1 = false;
-  bool switchValue2 = false;
+  SyncSwitch sync_switch;
+  sync_switch.SetSwitch(true);
+  bool switch_value1 = false;
+  bool switch_value2 = false;
 
   std::thread thread1([&] {
-    syncSwitch.Execute(
+    sync_switch.Execute(
         SyncSwitch::Handlers()
             .SetIfTrue([&] {
-              switchValue1 = true;
+              switch_value1 = true;
 
               std::thread thread2([&]() {
-                syncSwitch.Execute(
+                sync_switch.Execute(
                     SyncSwitch::Handlers()
-                        .SetIfTrue([&] { switchValue2 = true; })
-                        .SetIfFalse([&] { switchValue2 = false; }));
+                        .SetIfTrue([&] { switch_value2 = true; })
+                        .SetIfFalse([&] { switch_value2 = false; }));
               });
               thread2.join();
             })
-            .SetIfFalse([&] { switchValue1 = false; }));
+            .SetIfFalse([&] { switch_value1 = false; }));
   });
   thread1.join();
-  EXPECT_TRUE(switchValue1);
-  EXPECT_TRUE(switchValue2);
+  EXPECT_TRUE(switch_value1);
+  EXPECT_TRUE(switch_value2);
 }
