@@ -100,7 +100,7 @@ Future<void> testMain() async {
   test('Renders text with linear gradient shader mask', () async {
     _renderTextScene(BlendMode.srcIn);
     await matchGoldenFile('shadermask_linear_text.png',
-        region: const Rect.fromLTWH(0, 0, 360, 200), maxDiffRatePercent: 2.0);
+        region: const Rect.fromLTWH(0, 0, 360, 200));
   }, skip: isSafari || isFirefox);
 }
 

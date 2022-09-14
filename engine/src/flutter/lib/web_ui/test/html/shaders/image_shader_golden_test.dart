@@ -65,8 +65,7 @@ Future<void> testMain() async {
   }
 
   Future<void> testImageShader(
-      TileMode tmx, TileMode tmy, String fileName,
-      {double maxDiffRatePercent = 0.0}) async {
+      TileMode tmx, TileMode tmy, String fileName) async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, screenWidth, screenHeight));
     //Rect shaderRect = const Rect.fromLTRB(20, 20, 100, 100);
@@ -80,49 +79,42 @@ Future<void> testMain() async {
 
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, fileName,
-        region: screenRect, maxDiffRatePercent: maxDiffRatePercent);
+        region: screenRect);
   }
 
   test('Should draw with tiled imageshader.', () async {
     await testImageShader(
-        TileMode.repeated, TileMode.repeated, 'image_shader_tiled',
-        maxDiffRatePercent: 5.0);
+        TileMode.repeated, TileMode.repeated, 'image_shader_tiled');
   });
 
   test('Should draw with horizontally mirrored imageshader.', () async {
     await testImageShader(
-        TileMode.mirror, TileMode.repeated, 'image_shader_horiz_mirror',
-        maxDiffRatePercent: 6.0);
+        TileMode.mirror, TileMode.repeated, 'image_shader_horiz_mirror');
   });
 
   test('Should draw with vertically mirrored imageshader.', () async {
     await testImageShader(
-        TileMode.repeated, TileMode.mirror, 'image_shader_vert_mirror',
-        maxDiffRatePercent: 5.0);
+        TileMode.repeated, TileMode.mirror, 'image_shader_vert_mirror');
   });
 
   test('Should draw with mirrored imageshader.', () async {
     await testImageShader(
-        TileMode.mirror, TileMode.mirror, 'image_shader_mirror',
-        maxDiffRatePercent: 6.0);
+        TileMode.mirror, TileMode.mirror, 'image_shader_mirror');
   });
 
   test('Should draw with horizontal clamp imageshader.', () async {
     await testImageShader(
-        TileMode.clamp, TileMode.repeated, 'image_shader_clamp_horiz',
-        maxDiffRatePercent: 13.0);
+        TileMode.clamp, TileMode.repeated, 'image_shader_clamp_horiz');
   }, skip: isFirefox);
 
   test('Should draw with vertical clamp imageshader.', () async {
     await testImageShader(
-        TileMode.repeated, TileMode.clamp, 'image_shader_clamp_vertical',
-        maxDiffRatePercent: 1.0);
+        TileMode.repeated, TileMode.clamp, 'image_shader_clamp_vertical');
   }, skip: isFirefox);
 
   test('Should draw with clamp imageshader.', () async {
     await testImageShader(
-        TileMode.clamp, TileMode.clamp, 'image_shader_clamp',
-        maxDiffRatePercent: 1.0);
+        TileMode.clamp, TileMode.clamp, 'image_shader_clamp');
   }, skip: isFirefox);
 }
 

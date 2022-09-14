@@ -42,12 +42,10 @@ class EngineScubaTester {
   Future<void> diffScreenshot(
     String fileName, {
     ui.Rect? region,
-    double? maxDiffRatePercent,
   }) async {
     await matchGoldenFile(
       '$fileName.png',
       region: region ?? viewportRegion,
-      maxDiffRatePercent: maxDiffRatePercent,
     );
   }
 
@@ -59,7 +57,6 @@ class EngineScubaTester {
     EngineCanvas canvas,
     String fileName, {
     ui.Rect? region,
-    double? maxDiffRatePercent,
   }) async {
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final DomElement sceneElement = createDomElement('flt-scene');
@@ -79,7 +76,6 @@ class EngineScubaTester {
       await diffScreenshot(
         screenshotName,
         region: region,
-        maxDiffRatePercent: maxDiffRatePercent,
       );
     } finally {
       // The page is reused across tests, so remove the element after taking the
@@ -92,8 +88,7 @@ class EngineScubaTester {
 typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
 
 /// Runs the given test [body] with each type of canvas.
-void testEachCanvas(String description, CanvasTest body,
-    {double? maxDiffRate}) {
+void testEachCanvas(String description, CanvasTest body) {
   const ui.Rect bounds = ui.Rect.fromLTWH(0, 0, 600, 800);
   test('$description (bitmap + canvas measurement)', () async {
     return body(BitmapCanvas(bounds, RenderStrategy()));

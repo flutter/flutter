@@ -19,7 +19,6 @@ Future<void> canvasScreenshot(
   String fileName, {
   ui.Rect region = const ui.Rect.fromLTWH(0, 0, 500, 500),
   ui.Rect? canvasRect,
-  double maxDiffRatePercent = 0.0,
   bool setupPerspective = false,
 }) async {
   canvasRect ??= region;
@@ -47,7 +46,7 @@ Future<void> canvasScreenshot(
     sceneElement.append(engineCanvas.rootElement);
     domDocument.body!.append(sceneElement);
     await matchGoldenFile('$fileName.png',
-        region: region, maxDiffRatePercent: maxDiffRatePercent);
+        region: region);
   } finally {
     // The page is reused across tests, so remove the element after taking the
     // Scuba screenshot.
@@ -56,8 +55,7 @@ Future<void> canvasScreenshot(
 }
 
 Future<void> sceneScreenshot(SurfaceSceneBuilder sceneBuilder, String fileName,
-    {ui.Rect region = const ui.Rect.fromLTWH(0, 0, 600, 800),
-    double maxDiffRatePercent = 0.0}) async {
+    {ui.Rect region = const ui.Rect.fromLTWH(0, 0, 600, 800)}) async {
   DomElement? sceneElement;
   try {
     sceneElement = sceneBuilder
@@ -65,7 +63,7 @@ Future<void> sceneScreenshot(SurfaceSceneBuilder sceneBuilder, String fileName,
         .webOnlyRootElement;
     domDocument.body!.append(sceneElement!);
     await matchGoldenFile('$fileName.png',
-        region: region, maxDiffRatePercent: maxDiffRatePercent);
+        region: region);
   } finally {
     // The page is reused across tests, so remove the element after taking the
     // Scuba screenshot.

@@ -85,8 +85,7 @@ Future<void> testMain() async {
               ..colorFilter = EngineColorFilter.mode(black, blendMode));
       }
       rc.restore();
-      await canvasScreenshot(rc, 'canvas_image_blend_group$blendGroup',
-          maxDiffRatePercent: 8.0);
+      await canvasScreenshot(rc, 'canvas_image_blend_group$blendGroup');
     },
         skip: isSafari);
   }
@@ -110,8 +109,7 @@ Future<void> testMain() async {
     rc.drawParagraph(paragraph, const Offset(textLeft, textTop));
 
     rc.restore();
-    await canvasScreenshot(rc, 'canvas_image_blend_and_text',
-        maxDiffRatePercent: 8.0);
+    await canvasScreenshot(rc, 'canvas_image_blend_and_text');
   });
 }
 
