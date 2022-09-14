@@ -26,6 +26,8 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/autocomplete/autocomplete.1.dart **
 /// {@end-tool}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
+ ///
 /// See also:
 ///
 ///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
@@ -154,7 +156,6 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.options,
     required this.maxOptionsHeight,
     required this.maxOptionsWidth,
-    this.fieldWidth = double.maxFinite,
   });
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -164,8 +165,6 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final Iterable<T> options;
   final double maxOptionsHeight;
   final double maxOptionsWidth;
-
-  final double fieldWidth;
 
   @override
   Widget build(BuildContext context) {
