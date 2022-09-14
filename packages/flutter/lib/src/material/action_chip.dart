@@ -18,9 +18,10 @@ import 'theme_data.dart';
 /// content. Action chips should appear dynamically and contextually in a UI.
 ///
 /// Action chips can be tapped to trigger an action or show progress and
-/// confirmation. They cannot be disabled; if the action is not applicable, the
-/// chip should not be included in the interface. (This contrasts with buttons,
-/// where unavailable choices are usually represented as disabled controls.)
+/// confirmation. For Material 3, a disabled state is supported for Action
+/// chips and is specified with [onPressed] being null. For previous versions
+/// of Material Design, it is recommended to remove the Action chip from the
+/// the interface entirely rather than display a disabled chip.
 ///
 /// Action chips are displayed after primary content, such as below a card or
 /// persistently at the bottom of a screen.
