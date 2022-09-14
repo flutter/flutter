@@ -9,8 +9,32 @@ on:
 permissions: read-all
 
 jobs:
-  analysis:
+  setup:
+    name: setup
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/engine' }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          persist-credentials: false
+
+  vuln-scan:
+    name: Vulnerability scanning
+    runs-on: ubuntu-latest
+    needs: setup
+    if: ${{ github.repository == 'flutter/engine' }}
+    steps:
+      - name: "setup python"
+        uses: actions/setup-python@b55428b1882923874294fa556849718a1d7f2ca5
+        with:
+          python-version: '3.7.7' # install the python version needed
+      - name: "execute py script"
+        run: python ci/deps_parser.py
+
+  scorecards:
     name: Scorecards analysis
+    needs: setup
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/engine' }}
     permissions:
@@ -22,19 +46,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-        with:
-          persist-credentials: false
-
-      - name: setup python
-        uses: actions/setup-python@b55428b1882923874294fa556849718a1d7f2ca5
-        with:
-          python-version: '3.7.7' # install the python version needed
-
-      - name: execute py script
-        run: python ci/deps_parser.py
-
       - name: "Run analysis"
         uses: ossf/scorecard-action@865b4092859256271290c77adbd10a43f4779972
         with:
