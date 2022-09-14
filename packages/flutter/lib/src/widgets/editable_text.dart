@@ -1605,10 +1605,12 @@ class EditableText extends StatefulWidget {
   ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
   ///     toolbar for the current platform, but allows customization of the
   ///     buttons.
-  ///   * [TextSelectionToolbarButtonsBuilder], which builds the default buttons
-  ///     for the current platform given [ContextMenuButtonItem]s.
-  ///   * [EditableTextContextMenuButtonItemsBuilder], which generates the default
-  ///     [ContextMenuButtonItem]s for the current platform.
+  ///   * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
+  ///     button Widgets for the current platform given
+  ///     [ContextMenuButtonItem]s.
+  ///   * [getEditableTextButtonItems], which generates the default
+  ///     [ContextMenuButtonItem]s for a given [EditableText] on the current
+  ///     platform.
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.

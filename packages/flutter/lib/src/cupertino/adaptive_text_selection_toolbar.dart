@@ -31,24 +31,40 @@ import 'text_selection_toolbar_button.dart';
 /// * [CupertinoAdaptiveTextSelectionToolbarEditableText], which is like this
 ///   widget but uses the default children for an editable text field.
 /// {@endtemplate}
-/// * [EditableTextContextMenuButtonItemsBuilder], which generates the default
-///   [ContextMenuButtonItem]s for the current platform for a context menu
-///   displaying inside of an [EditableText].
-/// * [TextSelectionToolbarButtonsBuilder], which builds the native-looking
-///   button Widgets for the current platform given [ContextMenuButtonItem]s.
+/// * [getEditableTextButtonItems], which generates the default
+///   [ContextMenuButtonItem]s for a context menu displaying inside of an
+///   [EditableText] on the current platform.
 /// * [AdaptiveTextSelectionToolbar], which does the same thing as this widget
 ///   but for all platforms, not just the Cupertino-styled platforms.
+/// * [CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds
+///   the Cupertino button Widgets for the current platform given
+///   [ContextMenuButtonItem]s.
 class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// given [children].
   ///
   /// See also:
   ///
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
+  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
+  /// * [CupertinoAdaptiveTextSelectionToolbar.buttonItems], which takes a list
+  ///   of [ContextMenuButtonItem]s instead of [children] widgets.
+  /// {@endtemplate}
+  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
+  /// * [CupertinoAdaptiveTextSelectionToolbar.editable], which builds the
+  ///   default Cupertino children for an editable field.
+  /// {@endtemplate}
+  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
+  /// * [CupertinoAdaptiveTextSelectionToolbar.editableText], which builds the
+  ///   default Cupertino children for an [EditableText].
+  /// {@endtemplate}
+  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
+  /// * [CupertinoAdaptiveTextSelectionToolbar.selectable], which builds the
+  ///   Cupertino children for content that is selectable but not editable.
+  /// {@endtemplate}
+  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
+  /// * [CupertinoAdaptiveTextSelectionToolbar.selectableRegion], which builds
+  ///   the default Cupertino children for a [SelectableRegion].
+  /// {@endtemplate}
   const CupertinoAdaptiveTextSelectionToolbar({
     super.key,
     required this.children,
@@ -63,9 +79,9 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// See also:
   ///
-  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
-  /// * [CupertinoAdaptiveTextSelectionToolbar.constructor], which takes the
-  ///   children directly as a list of widgets.
+  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
+  /// * [CupertinoAdaptiveTextSelectionToolbar.new], which takes the children
+  ///   directly as a list of widgets.
   /// {@endtemplate}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
@@ -87,7 +103,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// * [AdaptiveTextSelectionToolbar.editable], which is similar to this but
   ///   includes Material and Cupertino toolbars.
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectioasdfnToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
@@ -129,7 +145,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// * [AdaptiveTextSelectionToolbar.editableText], which is similar to this
   ///   but includes Material and Cupertino toolbars.
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
@@ -151,7 +167,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// * [AdaptiveTextSelectionToolbar.selectable], which is similar to this but
   ///   includes Material and Cupertino toolbars.
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
@@ -181,7 +197,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// * [AdaptiveTextSelectionToolbar.selectableRegion], which is similar to
   ///   this but includes Material and Cupertino toolbars.
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.constructor}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}

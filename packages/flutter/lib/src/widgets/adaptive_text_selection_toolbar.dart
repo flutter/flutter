@@ -21,8 +21,8 @@ import 'text_selection.dart';
 ///   [EditableText].
 /// * [getSelectableButtonItems], which performs a similar role but for a
 ///   selection that is not editable.
-/// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextMenuButtonItem]s.
+/// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+///   Widgets for the current platform given [ContextMenuButtonItem]s.
 List<ContextMenuButtonItem> getEditableButtonItems({
   required final bool readOnly,
   required final ClipboardStatus? clipboardStatus,
@@ -80,8 +80,8 @@ List<ContextMenuButtonItem> getEditableButtonItems({
 ///   editable field.
 /// * [SelectableRegionState.getSelectableRegionButtonItems], which is like
 ///   this function but for a [SelectableRegion] instead of an [EditableText].
-/// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextMenuButtonItem]s.
+/// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+///   Widgets for the current platform given [ContextMenuButtonItem]s.
 List<ContextMenuButtonItem> getEditableTextButtonItems(
   EditableTextState editableTextState,
   [
@@ -114,8 +114,8 @@ List<ContextMenuButtonItem> getEditableTextButtonItems(
 ///   this function but specific to [SelectableRegion].
 /// * [getEditableTextButtonItems], which performs a similar role but for
 ///   an editable field's context menu.
-/// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextMenuButtonItem]s.
+/// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+///   Widgets for the current platform given [ContextMenuButtonItem]s.
 List<ContextMenuButtonItem> getSelectableButtonItems({
   required final SelectionGeometry selectionGeometry,
   required final VoidCallback onCopy,

@@ -4,7 +4,6 @@
 
 import 'package:flutter/services.dart';
 
-import 'context_menu_button_item.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
@@ -17,18 +16,6 @@ typedef ContextMenuBuilder = Widget Function(
   BuildContext context,
   Offset primaryAnchor,
   [Offset? secondaryAnchor]
-);
-
-/// Signature for a builder function that builds a context menu given a list of
-/// [ContextMenuButtonItem]s representing its children.
-///
-/// See also:
-///
-///   * [EditableTextContextMenuButtonItemsBuilder], which receives this as a
-///     parameter.
-typedef ToolbarButtonWidgetBuilder = Widget Function(
-  BuildContext context,
-  List<ContextMenuButtonItem> buttonItems,
 );
 
 /// Signature for a function that builds a widget to use as the text selection

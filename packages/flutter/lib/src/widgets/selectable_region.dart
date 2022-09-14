@@ -920,8 +920,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///   selectable and not editable content.
   /// * [getEditableTextButtonItems], which performs a similar role but for
   ///   [EditableText]'s context menu.
-  /// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-  ///   given [ContextMenuButtonItem]s.
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
+  ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
   List<ContextMenuButtonItem> getSelectableRegionButtonItems() {
     return getSelectableButtonItems(
       selectionGeometry: _selectionDelegate.value,
