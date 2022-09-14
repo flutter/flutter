@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -12,7 +10,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -22,7 +21,6 @@ import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -59,8 +57,8 @@ final String _packageConfigContents = json.encode(<String, Object>{
 
 void main() {
   Cache.disableLocking();
-  MemoryFileSystem fs;
-  LoggingLogger logger;
+  late MemoryFileSystem fs;
+  late LoggingLogger logger;
 
   setUp(() {
     fs = MemoryFileSystem.test();
@@ -790,51 +788,47 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   FakeFlutterTestRunner(this.exitCode, [this.leastRunTime]);
 
   int exitCode;
-  Duration leastRunTime;
-  bool lastEnableObservatoryValue;
-  DebuggingOptions lastDebuggingOptionsValue;
+  Duration? leastRunTime;
+  bool? lastEnableObservatoryValue;
+  late DebuggingOptions lastDebuggingOptionsValue;
 
   @override
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
-    @required DebuggingOptions debuggingOptions,
-    Directory workDir,
+    required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String tags,
-    String excludeTags,
+    String? tags,
+    String? excludeTags,
     bool enableObservatory = false,
     bool ipv6 = false,
     bool machine = false,
-    String precompiledDillPath,
-    Map<String, String> precompiledDillFiles,
-    BuildMode buildMode,
-    bool trackWidgetCreation = false,
+    String? precompiledDillPath,
+    Map<String, String>? precompiledDillFiles,
     bool updateGoldens = false,
-    TestWatcher watcher,
-    int concurrency,
-    String testAssetDirectory,
-    FlutterProject flutterProject,
-    String icudtlPath,
-    Directory coverageDirectory,
+    TestWatcher? watcher,
+    required int? concurrency,
+    String? testAssetDirectory,
+    FlutterProject? flutterProject,
+    String? icudtlPath,
+    Directory? coverageDirectory,
     bool web = false,
-    String randomSeed,
-    @override List<String> extraFrontEndOptions,
-    String reporter,
-    String timeout,
+    String? randomSeed,
+    String? reporter,
+    String? timeout,
     bool runSkipped = false,
-    int shardIndex,
-    int totalShards,
-    Device integrationTestDevice,
-    String integrationTestUserIdentifier,
-    TestTimeRecorder testTimeRecorder,
+    int? shardIndex,
+    int? totalShards,
+    Device? integrationTestDevice,
+    String? integrationTestUserIdentifier,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
 
     if (leastRunTime != null) {
-      await Future<void>.delayed(leastRunTime);
+      await Future<void>.delayed(leastRunTime!);
     }
 
     return exitCode;
@@ -842,7 +836,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
 }
 
 class FakePackageTest implements TestWrapper {
-  List<String> lastArgs;
+  List<String>? lastArgs;
 
   @override
   Future<void> main(List<String> args) async {
@@ -857,7 +851,7 @@ class FakePackageTest implements TestWrapper {
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager(this._connectedDevices);
+  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger, terminal: Terminal.test(), userMessages: userMessages);
 
   final List<Device> _connectedDevices;
 

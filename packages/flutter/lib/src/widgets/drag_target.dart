@@ -311,7 +311,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// the semantics tree.
   ///
   /// This value should be set to false when the [feedback] widget is intended
-  /// to be the same object as the [child].  Placing a [GlobalKey] on this
+  /// to be the same object as the [child]. Placing a [GlobalKey] on this
   /// widget will ensure semantic focus is kept on the element as it moves in
   /// and out of the feedback position.
   ///
@@ -555,7 +555,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       _activeCount += 1;
     });
     final _DragAvatar<T> avatar = _DragAvatar<T>(
-      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay)!,
+      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay),
       data: widget.data,
       axis: widget.axis,
       initialPosition: position,

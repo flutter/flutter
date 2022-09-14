@@ -36,7 +36,7 @@ typedef InputCounterWidgetBuilder = Widget? Function(
   required int currentLength,
   /// The maximum string length that can be entered into the TextField.
   required int? maxLength,
-  /// Whether or not the TextField is currently focused.  Mainly provided for
+  /// Whether or not the TextField is currently focused. Mainly provided for
   /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
   required bool isFocused,
 });
@@ -65,7 +65,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
+      final TargetPlatform targetPlatform = Theme.of(_state.context).platform;
+
+      switch (targetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -84,6 +86,18 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           );
           break;
       }
+
+      switch (targetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+          editableText.showMagnifier(details.globalPosition);
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          break;
+      }
     }
   }
 
@@ -97,7 +111,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
+      final TargetPlatform targetPlatform = Theme.of(_state.context).platform;
+
+      switch (targetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -111,6 +127,18 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
         case TargetPlatform.windows:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
+          break;
+      }
+
+      switch (targetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+          editableText.showMagnifier(details.globalPosition);
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
           break;
       }
     }
@@ -246,7 +274,7 @@ class TextField extends StatefulWidget {
   /// [maxLength] is set a character counter will be displayed below the
   /// field showing how many characters have been entered. If the value is
   /// set to a positive integer it will also display the maximum allowed
-  /// number of characters to be entered.  If the value is set to
+  /// number of characters to be entered. If the value is set to
   /// [TextField.noMaxLength] then only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
@@ -409,9 +437,9 @@ class TextField extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
-  /// Android, and builds nothing on all other platforms. If it is desired to supress
-  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
+  /// on Android, and builds nothing on all other platforms. If it is desired to
+  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// Controls the text being edited.
@@ -449,7 +477,7 @@ class TextField extends StatefulWidget {
   ///
   /// On Android, the user can hide the keyboard - without changing the focus -
   /// with the system back button. They can restore the keyboard's visibility
-  /// by tapping on a text field.  The user might hide the keyboard and
+  /// by tapping on a text field. The user might hide the keyboard and
   /// switch to a physical keyboard, or they might just need to get it
   /// out of the way for a moment, to expose something it's
   /// obscuring. In this case requesting the focus again will not
@@ -741,7 +769,7 @@ class TextField extends StatefulWidget {
   /// Callback that generates a custom [InputDecoration.counter] widget.
   ///
   /// See [InputCounterWidgetBuilder] for an explanation of the passed in
-  /// arguments.  The returned widget will be placed below the line in place of
+  /// arguments. The returned widget will be placed below the line in place of
   /// the default widget built when [InputDecoration.counterText] is specified.
   ///
   /// The returned widget will be wrapped in a [Semantics] widget for
@@ -1452,7 +1480,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 }
 
 TextStyle _m2CounterErrorStyle(BuildContext context) =>
-  Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).errorColor);
+  Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // BEGIN GENERATED TOKEN PROPERTIES - TextField
 
@@ -1461,9 +1489,9 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_127
 
-// Generated version v0_101
+// Generated version v0_127
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 

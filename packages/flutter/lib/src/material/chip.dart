@@ -2068,7 +2068,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   // Set this to true to have outlines of the tap targets drawn over
-  // the chip.  This should never be checked in while set to 'true'.
+  // the chip. This should never be checked in while set to 'true'.
   static const bool _debugShowTapTargetOutlines = false;
 
   @override

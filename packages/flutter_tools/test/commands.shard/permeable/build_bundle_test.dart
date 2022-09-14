@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -27,8 +25,8 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
-  Directory tempDir;
-  FakeBundleBuilder fakeBundleBuilder;
+  late Directory tempDir;
+  late FakeBundleBuilder fakeBundleBuilder;
   final FileSystemStyle fileSystemStyle = globals.fs.path.separator == '/' ?
     FileSystemStyle.posix : FileSystemStyle.windows;
 
@@ -46,7 +44,7 @@ void main() {
     return MemoryFileSystem.test(style: fileSystemStyle);
   }
 
-  Future<BuildBundleCommand> runCommandIn(String projectPath, { List<String> arguments }) async {
+  Future<BuildBundleCommand> runCommandIn(String projectPath, { List<String>? arguments }) async {
     final BuildBundleCommand command = BuildBundleCommand(bundleBuilder: fakeBundleBuilder);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
@@ -470,14 +468,14 @@ void main() {
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   @override
   Future<void> build({
-    @required TargetPlatform platform,
-    @required BuildInfo buildInfo,
-    FlutterProject project,
-    String mainPath,
+    required TargetPlatform platform,
+    required BuildInfo buildInfo,
+    FlutterProject? project,
+    String? mainPath,
     String manifestPath = defaultManifestPath,
-    String applicationKernelFilePath,
-    String depfilePath,
-    String assetDirPath,
-    @visibleForTesting BuildSystem buildSystem,
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    @visibleForTesting BuildSystem? buildSystem,
   }) async {}
 }

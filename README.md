@@ -57,7 +57,7 @@ Flutter's [layered architecture] gives you control over every pixel on the
 screen and its powerful compositing capabilities let you overlay and animate
 graphics, video, text, and controls without limitation. Flutter includes a full
 [set of widgets][widget catalog] that deliver pixel-perfect experiences whether
-you're building for iOS ([Cupertino]) or Android ([Material]), along with
+you're building for iOS ([Cupertino]) or other platforms ([Material]), along with
 support for customizing or creating entirely new visual components.
 
 <p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
@@ -75,7 +75,7 @@ as JavaScript for the web and Intel x64 for desktop devices.
 
 ### Productive development
 
-Flutter offers stateful hot reload, allowing you to make changes to your code
+Flutter offers [stateful hot reload][Hot reload], allowing you to make changes to your code
 and see the results instantly without restarting your app or losing its state.
 
 [![Hot reload animation][]][Hot reload]
@@ -87,7 +87,8 @@ editor plug-ins for both [Visual Studio Code] and [IntelliJ / Android Studio].
 Flutter provides [tens of thousands of packages][Flutter packages] to speed your
 development, regardless of your target platform. And accessing other native code
 is easy, with support for both FFI ([on Android][Android FFI], [on iOS][iOS FFI],
-and [on macOS][macOS FFI]) as well as [platform-specific APIs][platform channels].
+[on macOS][macOS FFI], and [on Windows][Windows FFI]) as well as
+[platform-specific APIs][platform channels].
 
 Flutter is a fully open-source project, and we welcome contributions.
 Information on how to get started can be found in our
@@ -113,7 +114,8 @@ Information on how to get started can be found in our
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
 [Flutter packages]: https://pub.dev/flutter
 [Android FFI]: https://docs.flutter.dev/development/platform-integration/android/c-interop
-[iOS FFI]: https://docs.flutter.dev/development/platform-integration/android/c-interop
+[iOS FFI]: https://docs.flutter.dev/development/platform-integration/ios/c-interop
 [macOS FFI]: https://docs.flutter.dev/development/platform-integration/macos/c-interop
+[Windows FFI]: https://docs.flutter.dev/development/platform-integration/windows/building#integrating-with-windows
 [platform channels]: https://docs.flutter.dev/development/platform-integration/platform-channels
 [interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel

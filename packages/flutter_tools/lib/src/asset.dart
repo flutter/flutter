@@ -270,7 +270,7 @@ class ManifestAssetBundle implements AssetBundle {
       return 1;
     }
 
-    // Parse assets for  deferred components.
+    // Parse assets for deferred components.
     final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants = _parseDeferredComponentsAssets(
       flutterManifest,
       packageConfig,

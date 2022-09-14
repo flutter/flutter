@@ -34,17 +34,19 @@ void main() {
       trackHeight: 7.0,
       activeTrackColor: Color(0xFF000001),
       inactiveTrackColor: Color(0xFF000002),
-      disabledActiveTrackColor: Color(0xFF000003),
-      disabledInactiveTrackColor: Color(0xFF000004),
-      activeTickMarkColor: Color(0xFF000005),
-      inactiveTickMarkColor: Color(0xFF000006),
-      disabledActiveTickMarkColor: Color(0xFF000007),
-      disabledInactiveTickMarkColor: Color(0xFF000008),
-      thumbColor: Color(0xFF000009),
-      overlappingShapeStrokeColor: Color(0xFF000010),
-      disabledThumbColor: Color(0xFF000011),
-      overlayColor: Color(0xFF000012),
-      valueIndicatorColor: Color(0xFF000013),
+      secondaryActiveTrackColor: Color(0xFF000003),
+      disabledActiveTrackColor: Color(0xFF000004),
+      disabledInactiveTrackColor: Color(0xFF000005),
+      disabledSecondaryActiveTrackColor: Color(0xFF000006),
+      activeTickMarkColor: Color(0xFF000007),
+      inactiveTickMarkColor: Color(0xFF000008),
+      disabledActiveTickMarkColor: Color(0xFF000009),
+      disabledInactiveTickMarkColor: Color(0xFF000010),
+      thumbColor: Color(0xFF000011),
+      overlappingShapeStrokeColor: Color(0xFF000012),
+      disabledThumbColor: Color(0xFF000013),
+      overlayColor: Color(0xFF000014),
+      valueIndicatorColor: Color(0xFF000015),
       overlayShape: RoundSliderOverlayShape(),
       tickMarkShape: RoundSliderTickMarkShape(),
       thumbShape: RoundSliderThumbShape(),
@@ -68,17 +70,19 @@ void main() {
       'trackHeight: 7.0',
       'activeTrackColor: Color(0xff000001)',
       'inactiveTrackColor: Color(0xff000002)',
-      'disabledActiveTrackColor: Color(0xff000003)',
-      'disabledInactiveTrackColor: Color(0xff000004)',
-      'activeTickMarkColor: Color(0xff000005)',
-      'inactiveTickMarkColor: Color(0xff000006)',
-      'disabledActiveTickMarkColor: Color(0xff000007)',
-      'disabledInactiveTickMarkColor: Color(0xff000008)',
-      'thumbColor: Color(0xff000009)',
-      'overlappingShapeStrokeColor: Color(0xff000010)',
-      'disabledThumbColor: Color(0xff000011)',
-      'overlayColor: Color(0xff000012)',
-      'valueIndicatorColor: Color(0xff000013)',
+      'secondaryActiveTrackColor: Color(0xff000003)',
+      'disabledActiveTrackColor: Color(0xff000004)',
+      'disabledInactiveTrackColor: Color(0xff000005)',
+      'disabledSecondaryActiveTrackColor: Color(0xff000006)',
+      'activeTickMarkColor: Color(0xff000007)',
+      'inactiveTickMarkColor: Color(0xff000008)',
+      'disabledActiveTickMarkColor: Color(0xff000009)',
+      'disabledInactiveTickMarkColor: Color(0xff000010)',
+      'thumbColor: Color(0xff000011)',
+      'overlappingShapeStrokeColor: Color(0xff000012)',
+      'disabledThumbColor: Color(0xff000013)',
+      'overlayColor: Color(0xff000014)',
+      'valueIndicatorColor: Color(0xff000015)',
       "overlayShape: Instance of 'RoundSliderOverlayShape'",
       "tickMarkShape: Instance of 'RoundSliderTickMarkShape'",
       "thumbShape: Instance of 'RoundSliderThumbShape'",
@@ -103,16 +107,18 @@ void main() {
     final SliderThemeData customTheme = sliderTheme.copyWith(
       activeTrackColor: Colors.purple,
       inactiveTrackColor: Colors.purple.withAlpha(0x3d),
+      secondaryActiveTrackColor: Colors.purple.withAlpha(0x8a),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, secondaryTrackValue: 0.75, enabled: false));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
     expect(
       material,
       paints
         ..rrect(color: customTheme.disabledActiveTrackColor)
-        ..rrect(color: customTheme.disabledInactiveTrackColor),
+        ..rrect(color: customTheme.disabledInactiveTrackColor)
+        ..rrect(color: customTheme.disabledSecondaryActiveTrackColor),
     );
   });
 
@@ -125,16 +131,18 @@ void main() {
     final SliderThemeData customTheme = sliderTheme.copyWith(
       activeTrackColor: Colors.purple,
       inactiveTrackColor: Colors.purple.withAlpha(0x3d),
+      secondaryActiveTrackColor: Colors.purple.withAlpha(0x8a),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, secondaryTrackValue: 0.75, enabled: false));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
     expect(
       material,
       paints
         ..rrect(color: customTheme.disabledActiveTrackColor)
-        ..rrect(color: customTheme.disabledInactiveTrackColor),
+        ..rrect(color: customTheme.disabledInactiveTrackColor)
+        ..rrect(color: customTheme.disabledSecondaryActiveTrackColor),
     );
   });
 
@@ -153,8 +161,10 @@ void main() {
 
     expect(sliderTheme.activeTrackColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.inactiveTrackColor, equals(customColor1.withAlpha(0x3d)));
+    expect(sliderTheme.secondaryActiveTrackColor, equals(customColor1.withAlpha(0x8a)));
     expect(sliderTheme.disabledActiveTrackColor, equals(customColor2.withAlpha(0x52)));
     expect(sliderTheme.disabledInactiveTrackColor, equals(customColor2.withAlpha(0x1f)));
+    expect(sliderTheme.disabledSecondaryActiveTrackColor, equals(customColor2.withAlpha(0x1f)));
     expect(sliderTheme.activeTickMarkColor, equals(customColor3.withAlpha(0x8a)));
     expect(sliderTheme.inactiveTickMarkColor, equals(customColor1.withAlpha(0x8a)));
     expect(sliderTheme.disabledActiveTickMarkColor, equals(customColor3.withAlpha(0x1f)));
@@ -209,8 +219,10 @@ void main() {
     expect(lerp.trackHeight, equals(4.0));
     expect(lerp.activeTrackColor, equals(middleGrey.withAlpha(0xff)));
     expect(lerp.inactiveTrackColor, equals(middleGrey.withAlpha(0x3d)));
+    expect(lerp.secondaryActiveTrackColor, equals(middleGrey.withAlpha(0x8a)));
     expect(lerp.disabledActiveTrackColor, equals(middleGrey.withAlpha(0x52)));
     expect(lerp.disabledInactiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledSecondaryActiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.activeTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
     expect(lerp.inactiveTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
     expect(lerp.disabledActiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
@@ -229,7 +241,7 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryTrackValue: 0.5));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
 
     const Radius radius = Radius.circular(2);
@@ -241,10 +253,11 @@ void main() {
       material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor)
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 400.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.secondaryActiveTrackColor),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryTrackValue: 0.5, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
     // The disabled slider thumb is the same size as the enabled thumb.
@@ -252,7 +265,8 @@ void main() {
       material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor)
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 400.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledSecondaryActiveTrackColor),
     );
   });
 
@@ -1348,17 +1362,19 @@ class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight extends R
     required Animation<double> enableAnimation,
     required TextDirection textDirection,
     required Offset thumbCenter,
+    Offset? secondaryOffset,
     bool isDiscrete = false,
     bool isEnabled = false,
     double additionalActiveTrackHeight = 2.0,
   }) {
-    super.paint(context, offset, parentBox: parentBox, sliderTheme: sliderTheme, enableAnimation: enableAnimation, textDirection: textDirection, thumbCenter: thumbCenter, additionalActiveTrackHeight: this.additionalActiveTrackHeight);
+    super.paint(context, offset, parentBox: parentBox, sliderTheme: sliderTheme, enableAnimation: enableAnimation, textDirection: textDirection, thumbCenter: thumbCenter, secondaryOffset: secondaryOffset, additionalActiveTrackHeight: this.additionalActiveTrackHeight);
   }
 }
 
 Widget _buildApp(
     SliderThemeData sliderTheme, {
       double value = 0.0,
+      double? secondaryTrackValue,
       bool enabled = true,
       int? divisions,
     }) {
@@ -1370,6 +1386,7 @@ Widget _buildApp(
           data: sliderTheme,
           child: Slider(
             value: value,
+            secondaryTrackValue: secondaryTrackValue,
             label: '$value',
             onChanged: onChanged,
             divisions: divisions,
