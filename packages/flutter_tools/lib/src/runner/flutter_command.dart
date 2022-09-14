@@ -1144,7 +1144,7 @@ abstract class FlutterCommand extends Command<void> {
         final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
         try {
           defineConfigJsonMap = <String, Object>{};
-          //fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
             defineConfigJsonMap?[key]=value as Object;
           });
