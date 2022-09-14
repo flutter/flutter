@@ -299,20 +299,20 @@ TEST_F(ClipRectLayerTest, OpacityInheritance) {
 
   {
     // ClipRectLayer(aa with saveLayer) will always be compatible
-    auto clip_rect_saveLayer = std::make_shared<ClipRectLayer>(
+    auto clip_path_savelayer = std::make_shared<ClipRectLayer>(
         clip_rect, Clip::antiAliasWithSaveLayer);
-    clip_rect_saveLayer->Add(mock1);
-    clip_rect_saveLayer->Add(mock2);
+    clip_path_savelayer->Add(mock1);
+    clip_path_savelayer->Add(mock2);
 
     // Double check first two children are compatible and non-overlapping
     context->subtree_can_inherit_opacity = false;
-    clip_rect_saveLayer->Preroll(context, SkMatrix::I());
+    clip_path_savelayer->Preroll(context, SkMatrix::I());
     EXPECT_TRUE(context->subtree_can_inherit_opacity);
 
     // Now add the overlapping child and test again, should still be compatible
-    clip_rect_saveLayer->Add(mock3);
+    clip_path_savelayer->Add(mock3);
     context->subtree_can_inherit_opacity = false;
-    clip_rect_saveLayer->Preroll(context, SkMatrix::I());
+    clip_path_savelayer->Preroll(context, SkMatrix::I());
     EXPECT_TRUE(context->subtree_can_inherit_opacity);
   }
 
@@ -343,20 +343,20 @@ TEST_F(ClipRectLayerTest, OpacityInheritance) {
 
   {
     // ClipRectLayer(aa with saveLayer) will always be compatible
-    auto clip_rect_saveLayer_bad_child = std::make_shared<ClipRectLayer>(
+    auto clip_path_savelayer_bad_child = std::make_shared<ClipRectLayer>(
         clip_rect, Clip::antiAliasWithSaveLayer);
-    clip_rect_saveLayer_bad_child->Add(mock1);
-    clip_rect_saveLayer_bad_child->Add(mock2);
+    clip_path_savelayer_bad_child->Add(mock1);
+    clip_path_savelayer_bad_child->Add(mock2);
 
     // Double check first two children are compatible and non-overlapping
     context->subtree_can_inherit_opacity = false;
-    clip_rect_saveLayer_bad_child->Preroll(context, SkMatrix::I());
+    clip_path_savelayer_bad_child->Preroll(context, SkMatrix::I());
     EXPECT_TRUE(context->subtree_can_inherit_opacity);
 
     // Now add the incompatible child and test again, should still be compatible
-    clip_rect_saveLayer_bad_child->Add(mock4);
+    clip_path_savelayer_bad_child->Add(mock4);
     context->subtree_can_inherit_opacity = false;
-    clip_rect_saveLayer_bad_child->Preroll(context, SkMatrix::I());
+    clip_path_savelayer_bad_child->Preroll(context, SkMatrix::I());
     EXPECT_TRUE(context->subtree_can_inherit_opacity);
   }
 }

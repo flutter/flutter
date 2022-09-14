@@ -57,15 +57,15 @@ class SkiaGpuObjectTest : public ThreadTest {
     // The unref queues must be created in the same thread of the
     // unref_task_runner so the queue can access the same-thread-only WeakPtr of
     // the GrContext constructed during the creation.
-    std::promise<bool> queuesCreated;
-    unref_task_runner_->PostTask([this, &queuesCreated]() {
+    std::promise<bool> queues_created;
+    unref_task_runner_->PostTask([this, &queues_created]() {
       unref_queue_ = fml::MakeRefCounted<SkiaUnrefQueue>(
           unref_task_runner(), fml::TimeDelta::FromSeconds(0));
       delayed_unref_queue_ = fml::MakeRefCounted<SkiaUnrefQueue>(
           unref_task_runner(), fml::TimeDelta::FromSeconds(3));
-      queuesCreated.set_value(true);
+      queues_created.set_value(true);
     });
-    queuesCreated.get_future().wait();
+    queues_created.get_future().wait();
     ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   }
 

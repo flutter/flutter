@@ -94,7 +94,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
     context.leaf_nodes_canvas->drawPath(path_, paint);
   }
 
-  int saveCount = context.internal_nodes_canvas->save();
+  int save_count = context.internal_nodes_canvas->save();
   switch (clip_behavior_) {
     case Clip::hardEdge:
       context.internal_nodes_canvas->clipPath(path_, false);
@@ -121,7 +121,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
 
   PaintChildren(context);
 
-  context.internal_nodes_canvas->restoreToCount(saveCount);
+  context.internal_nodes_canvas->restoreToCount(save_count);
 
   if (UsesSaveLayer()) {
     if (context.checkerboard_offscreen_layers) {
