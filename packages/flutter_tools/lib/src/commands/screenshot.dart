@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:path/path.dart' as p;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
@@ -18,8 +19,6 @@ const String _kObservatoryUrl = 'observatory-url';
 const String _kDeviceType = 'device';
 const String _kSkiaType = 'skia';
 const String _kRasterizerType = 'rasterizer';
-
-const String _kFileNamePattern = r'^([\w,\s\-]+)\.(png|jpe?g)$';
 
 class ScreenshotCommand extends FlutterCommand {
   ScreenshotCommand({required this.fs}) {
@@ -132,7 +131,8 @@ class ScreenshotCommand extends FlutterCommand {
       'png',
     );
 
-    validateOutputFile(outputFile, fs);
+    // Validate and transform path as necessary
+    outputFile = validateOutputFile(outputFile, fs);
 
     try {
       await device!.takeScreenshot(outputFile);
@@ -195,25 +195,32 @@ class ScreenshotCommand extends FlutterCommand {
   /// Additional error checks below for valid file name
   /// and directory because ios/xcode screenshot binary will
   /// return a 0 exit code even if outputFile is not valid
-  static void validateOutputFile(File outputFile, FileSystem fs) {
+  static File validateOutputFile(File outputFile, FileSystem fs) {
+
+    // Will make sure that if the user passes '-o image.png/' the file
+    // generated will become '$PWD/image.png'
+    outputFile = fs.file(p.join(
+      outputFile.absolute.dirname,
+      outputFile.absolute.basename
+    ));
 
     // Conditional for validating directory is valid
-    if (!fs.directory(outputFile.dirname).existsSync()) {
+    if (!fs.directory(outputFile.absolute.dirname).existsSync()) {
       throwToolExit(
         'The provided path to file needs to have a directory that exists\n'
-        'Directory: "${outputFile.dirname}" does not exist'
+        'Directory: "${outputFile.absolute.dirname}" does not exist'
       );
     }
 
-    // Conditional for validating filename with allowed extensions
-    if (!RegExp(_kFileNamePattern).hasMatch(outputFile.basename)) {
+    // Conditional for validating filename
+    if (outputFile.basename.isEmpty || outputFile.basename == '.') {
       throwToolExit(
-        'The provided filename is invalid\n'
-        'Allowed filename characters: "a-z", "A-Z", "0-9", "_", "-"\n'
-        'Allowed extensions: jpeg, jpg, png)\n'
+        'Please provide a non-empty file name\n'
         'Filename provided: "${outputFile.basename}"'
       );
     }
+
+    return outputFile;
   }
 
   void _ensureOutputIsNotJsonRpcError(File outputFile) {

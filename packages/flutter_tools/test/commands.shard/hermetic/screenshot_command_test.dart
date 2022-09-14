@@ -67,24 +67,32 @@ void main() {
   });
 
   group('Screenshot file validation', () {
-    testWithoutContext('successful', () async {
+    testWithoutContext('successful when specifing filename', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       expect(
           () => ScreenshotCommand.validateOutputFile(fs.file('test.png'), fs),
           returnsNormally);
     });
 
+    testWithoutContext('successful when specifing filename with a trailing directory delimiter', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      expect(
+          () => ScreenshotCommand.validateOutputFile(fs.file('test.png/'), fs),
+          returnsNormally);
+    });
+
+    testWithoutContext('successful when specifing filename within sub directory and trailing delimiter', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      fs.directory('sub_dir').createSync();
+      expect(
+          () => ScreenshotCommand.validateOutputFile(fs.file('sub_dir/test.png/'), fs),
+          returnsNormally);
+    });
+
     testWithoutContext('failed due to incorrect filename', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       expect(() => ScreenshotCommand.validateOutputFile(fs.file('.'), fs),
-          throwsToolExit(message: 'The provided filename is invalid'));
-    });
-
-    testWithoutContext('failed due to incorrect file type', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      expect(
-          () => ScreenshotCommand.validateOutputFile(fs.file('test.pngg'), fs),
-          throwsToolExit(message: 'The provided filename is invalid'));
+          throwsToolExit(message: 'Please provide a non-empty file name'));
     });
 
     testWithoutContext('failed due to invalid directory', () async {
