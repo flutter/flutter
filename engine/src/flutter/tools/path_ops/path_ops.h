@@ -43,6 +43,8 @@ API void DestroyPath(SkPath* path);
 
 API void Op(SkPath* one, SkPath* two, SkPathOp op);
 
+API int GetFillType(SkPath* path);
+
 struct API PathData {
   uint8_t* verbs;
   size_t verb_count;

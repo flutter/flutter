@@ -131,7 +131,7 @@ class SvgPathProxy implements PathProxy {
 /// [dispose] has been called, this class must not be used again.
 class Path implements PathProxy {
   /// Creates an empty path object with the specified fill type.
-  Path([this.fillType = FillType.nonZero])
+  Path([FillType fillType = FillType.nonZero])
       : _path = _createPathFn(fillType.index);
 
   /// Creates a copy of this path.
@@ -142,7 +142,10 @@ class Path implements PathProxy {
   }
 
   /// The [FillType] of this path.
-  final FillType fillType;
+  FillType get fillType {
+    assert(_path != null);
+    return FillType.values[_getFillTypeFn(_path!)];
+  }
 
   ffi.Pointer<_SkPath>? _path;
   ffi.Pointer<_PathData>? _pathData;
@@ -388,3 +391,9 @@ typedef _destroy_data_type = ffi.Void Function(ffi.Pointer<_PathData>);
 
 final _DestroyDataType _destroyDataFn =
     _dylib.lookupFunction<_destroy_data_type, _DestroyDataType>('DestroyData');
+
+typedef _GetFillTypeType = int Function(ffi.Pointer<_SkPath>);
+typedef _get_fill_type_type = ffi.Int32 Function(ffi.Pointer<_SkPath>);
+
+final _GetFillTypeType _getFillTypeFn =
+    _dylib.lookupFunction<_get_fill_type_type, _GetFillTypeType>('GetFillType');
