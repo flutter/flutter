@@ -1141,10 +1141,13 @@ abstract class FlutterCommand extends Command<void> {
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
       if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
-        configJsonRaw=configJsonRaw.replaceAll(r'\n',r'\\n');
+        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
         try {
-          defineConfigJsonMap = json.decode(configJsonRaw) as Map<String, Object>;
+          defineConfigJsonMap = <String, Object>{};
+          //fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
+            defineConfigJsonMap?[key]=value as Object;
+          });
           defineConfigJsonMap.forEach((String key, Object value) {
             dartDefines.add('$key=$value');
           });
