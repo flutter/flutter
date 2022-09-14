@@ -786,7 +786,13 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
       if (states.contains(MaterialState.selected)) {
         return _colors.primary;
       }
-      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.focused)) {
         return _colors.onSurface;
       }
       return _colors.onSurfaceVariant;
