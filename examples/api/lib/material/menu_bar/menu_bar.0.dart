@@ -15,19 +15,20 @@ void main() => runApp(const MenuBarApp());
 ///
 /// This sort of class is not required, but illustrates one way defining menus
 /// could be done in an app.
-class MenuSelection {
-  const MenuSelection({required this.label, this.shortcut, this.onPressed, this.menuChildren});
+class MenuEntry {
+  const MenuEntry({required this.label, this.shortcut, this.onPressed, this.menuChildren})
+    : assert(menuChildren == null || onPressed == null, 'onPressed is ignored if menuChildren are provided');
 
   final String label;
   final MenuSerializableShortcut? shortcut;
   final VoidCallback? onPressed;
-  final List<MenuSelection>? menuChildren;
+  final List<MenuEntry>? menuChildren;
 
-  static List<Widget> build(List<MenuSelection> selections) {
-    Widget buildSelection(MenuSelection selection) {
+  static List<Widget> build(List<MenuEntry> selections) {
+    Widget buildSelection(MenuEntry selection) {
       if (selection.menuChildren != null) {
         return MenuButton(
-          menuChildren: MenuSelection.build(selection.menuChildren!),
+          menuChildren: MenuEntry.build(selection.menuChildren!),
           child: Text(selection.label),
         );
       }
@@ -41,11 +42,11 @@ class MenuSelection {
     return selections.map<Widget>(buildSelection).toList();
   }
 
-  static Map<MenuSerializableShortcut, Intent> shortcuts(List<MenuSelection> selections) {
+  static Map<MenuSerializableShortcut, Intent> shortcuts(List<MenuEntry> selections) {
     final Map<MenuSerializableShortcut, Intent> result = <MenuSerializableShortcut, Intent>{};
-    for (final MenuSelection selection in selections) {
+    for (final MenuEntry selection in selections) {
       if (selection.menuChildren != null) {
-        result.addAll(MenuSelection.shortcuts(selection.menuChildren!));
+        result.addAll(MenuEntry.shortcuts(selection.menuChildren!));
       } else {
         if (selection.shortcut != null && selection.onPressed != null) {
           result[selection.shortcut!] = VoidCallbackIntent(selection.onPressed!);
@@ -99,12 +100,12 @@ class _MyMenuBarState extends State<MyMenuBar> {
     }
   }
 
-  List<MenuSelection> _getMenus() {
-    final List<MenuSelection> result = <MenuSelection>[
-      MenuSelection(
+  List<MenuEntry> _getMenus() {
+    final List<MenuEntry> result = <MenuEntry>[
+      MenuEntry(
         label: 'Menu Demo',
-        menuChildren: <MenuSelection>[
-          MenuSelection(
+        menuChildren: <MenuEntry>[
+          MenuEntry(
             label: 'About',
             onPressed: () {
               setState(() {
@@ -118,7 +119,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
             },
           ),
           // Toggles the message.
-          MenuSelection(
+          MenuEntry(
             label: showingMessage ? 'Hide Message' : 'Show Message',
             onPressed: () {
               setState(() {
@@ -130,7 +131,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
           ),
           // Hides the message, but is only enabled if the message isn't
           // already hidden.
-          MenuSelection(
+          MenuEntry(
             label: 'Reset Message',
             onPressed: showingMessage
                 ? () {
@@ -143,10 +144,10 @@ class _MyMenuBarState extends State<MyMenuBar> {
                 : null,
             shortcut: const SingleActivator(LogicalKeyboardKey.escape),
           ),
-          MenuSelection(
+          MenuEntry(
             label: 'Background Color',
-            menuChildren: <MenuSelection>[
-              MenuSelection(
+            menuChildren: <MenuEntry>[
+              MenuEntry(
                 label: 'Red Background',
                 onPressed: () {
                   setState(() {
@@ -156,7 +157,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
                 },
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyR, control: true),
               ),
-              MenuSelection(
+              MenuEntry(
                 label: 'Green Background',
                 onPressed: () {
                   setState(() {
@@ -166,7 +167,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
                 },
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyG, control: true),
               ),
-              MenuSelection(
+              MenuEntry(
                 label: 'Blue Background',
                 onPressed: () {
                   setState(() {
@@ -184,7 +185,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
     // (Re-)register the shortcuts with the ShortcutRegistry so that they are
     // available to the entire application, and update them if they've changed.
     _shortcutsEntry?.dispose();
-    _shortcutsEntry = ShortcutRegistry.of(context).addAll(MenuSelection.shortcuts(result));
+    _shortcutsEntry = ShortcutRegistry.of(context).addAll(MenuEntry.shortcuts(result));
     return result;
   }
 
@@ -203,7 +204,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
           children: <Widget>[
             Expanded(
               child: MenuBar(
-                children: MenuSelection.build(_getMenus()),
+                children: MenuEntry.build(_getMenus()),
               ),
             ),
           ],

@@ -189,7 +189,6 @@ class _Controls extends StatefulWidget {
 }
 
 class _ControlsState extends State<_Controls> {
-  final GlobalKey _buttonKey = GlobalKey();
   final FocusNode _focusNode = FocusNode(debugLabel: 'Floating');
   MenuHandle? _menuEntry;
 
@@ -226,7 +225,6 @@ class _ControlsState extends State<_Controls> {
             controller: widget.menuController,
             builder: (BuildContext context) {
               return TextButton(
-                key: _buttonKey,
                 focusNode: _focusNode,
                 onPressed: () {
                   if (_menuEntry!.isOpen) {

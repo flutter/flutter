@@ -13,7 +13,7 @@ void main() => runApp(const MenuApp());
 ///
 /// Using an enum for menu definition is not required, but this illustrates how
 /// they could be used for simple menu systems.
-enum MenuSelection {
+enum MenuEntry {
   about('About'),
   showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
   resetMessage('Reset Message', SingleActivator(LogicalKeyboardKey.escape)),
@@ -23,7 +23,7 @@ enum MenuSelection {
   colorGreen('Green Background', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
   colorBlue('Blue Background', SingleActivator(LogicalKeyboardKey.keyB, control: true));
 
-  const MenuSelection(this.label, [this.shortcut]);
+  const MenuEntry(this.label, [this.shortcut]);
   final String label;
   final MenuSerializableShortcut? shortcut;
 }
@@ -51,7 +51,7 @@ class MyCascadingMenu extends StatefulWidget {
 }
 
 class _MyCascadingMenuState extends State<MyCascadingMenu> {
-  MenuSelection? _lastSelection;
+  MenuEntry? _lastSelection;
   final MenuController _controller = MenuController();
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   late MenuHandle _menuHandle;
@@ -67,7 +67,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
     final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
-      for (final MenuSelection item in MenuSelection.values)
+      for (final MenuEntry item in MenuEntry.values)
         if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
     };
     // Register the shortcuts with the ShortcutRegistry so that they are
@@ -104,35 +104,35 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     }
   }
 
-  void _activate(MenuSelection selection) {
+  void _activate(MenuEntry selection) {
     setState(() {
       _lastSelection = selection;
     });
 
     switch (selection) {
-      case MenuSelection.about:
+      case MenuEntry.about:
         showAboutDialog(
           context: context,
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
         break;
-      case MenuSelection.showMessage:
+      case MenuEntry.showMessage:
         showingMessage = !showingMessage;
         break;
-      case MenuSelection.resetMessage:
-      case MenuSelection.hideMessage:
+      case MenuEntry.resetMessage:
+      case MenuEntry.hideMessage:
         showingMessage = false;
         break;
-      case MenuSelection.colorMenu:
+      case MenuEntry.colorMenu:
         break;
-      case MenuSelection.colorRed:
+      case MenuEntry.colorRed:
         backgroundColor = Colors.red;
         break;
-      case MenuSelection.colorGreen:
+      case MenuEntry.colorGreen:
         backgroundColor = Colors.green;
         break;
-      case MenuSelection.colorBlue:
+      case MenuEntry.colorBlue:
         backgroundColor = Colors.blue;
         break;
     }
@@ -144,39 +144,39 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
       controller: _controller,
       children: <Widget>[
         MenuItemButton(
-          child: Text(MenuSelection.about.label),
-          onPressed: () => _activate(MenuSelection.about),
+          child: Text(MenuEntry.about.label),
+          onPressed: () => _activate(MenuEntry.about),
         ),
         // Toggles the message.
         MenuItemButton(
-          onPressed: () => _activate(MenuSelection.showMessage),
-          shortcut: MenuSelection.showMessage.shortcut,
+          onPressed: () => _activate(MenuEntry.showMessage),
+          shortcut: MenuEntry.showMessage.shortcut,
           child: Text(
-            showingMessage ? MenuSelection.hideMessage.label : MenuSelection.showMessage.label,
+            showingMessage ? MenuEntry.hideMessage.label : MenuEntry.showMessage.label,
           ),
         ),
         // Hides the message, but is only enabled if the message isn't already hidden.
         MenuItemButton(
-          onPressed: showingMessage ? () => _activate(MenuSelection.resetMessage) : null,
-          shortcut: MenuSelection.resetMessage.shortcut,
-          child: Text(MenuSelection.resetMessage.label),
+          onPressed: showingMessage ? () => _activate(MenuEntry.resetMessage) : null,
+          shortcut: MenuEntry.resetMessage.shortcut,
+          child: Text(MenuEntry.resetMessage.label),
         ),
         MenuButton(
           menuChildren: <Widget>[
             MenuItemButton(
-              onPressed: () => _activate(MenuSelection.colorRed),
-              shortcut: MenuSelection.colorRed.shortcut,
-              child: Text(MenuSelection.colorRed.label),
+              onPressed: () => _activate(MenuEntry.colorRed),
+              shortcut: MenuEntry.colorRed.shortcut,
+              child: Text(MenuEntry.colorRed.label),
             ),
             MenuItemButton(
-              onPressed: () => _activate(MenuSelection.colorGreen),
-              shortcut: MenuSelection.colorGreen.shortcut,
-              child: Text(MenuSelection.colorGreen.label),
+              onPressed: () => _activate(MenuEntry.colorGreen),
+              shortcut: MenuEntry.colorGreen.shortcut,
+              child: Text(MenuEntry.colorGreen.label),
             ),
             MenuItemButton(
-              onPressed: () => _activate(MenuSelection.colorBlue),
-              shortcut: MenuSelection.colorBlue.shortcut,
-              child: Text(MenuSelection.colorBlue.label),
+              onPressed: () => _activate(MenuEntry.colorBlue),
+              shortcut: MenuEntry.colorBlue.shortcut,
+              child: Text(MenuEntry.colorBlue.label),
             ),
           ],
           child: const Text('Background Color'),

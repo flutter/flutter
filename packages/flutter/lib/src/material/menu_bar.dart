@@ -170,13 +170,22 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// A Widget in Flutter is immutable, so directly modifying the `children`
   /// with [List] APIs such as `someMenuBarWidget.menus.add(...)` will result in
   /// incorrect behaviors. Whenever the menus list is modified, a new list
-  /// object should be provided.
+  /// object must be provided.
   ///
   /// {@macro flutter.material.menu_bar.shortcuts_note}
   final List<Widget> children;
 
   @override
   State<MenuBar> createState() => _MenuBarState();
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return <DiagnosticsNode>[
+      ...children.map<DiagnosticsNode>(
+        (Widget item) => item.toDiagnosticsNode(),
+      ),
+    ];
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -187,7 +196,7 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   }
 }
 
-class _MenuBarState extends State<MenuBar> with DiagnosticableTreeMixin {
+class _MenuBarState extends State<MenuBar> {
   // If a controller isn't given to the widget, then we have to manage our own
   // internal controller.
   MenuController? _internalController;
@@ -246,15 +255,6 @@ class _MenuBarState extends State<MenuBar> with DiagnosticableTreeMixin {
         ),
       ),
     );
-  }
-
-  @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[
-      ...widget.children.map<DiagnosticsNode>(
-        (Widget item) => item.toDiagnosticsNode(),
-      ),
-    ];
   }
 }
 
@@ -545,7 +545,6 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
-  bool get _enabled => widget.onPressed != null;
 
   @override
   void initState() {
@@ -594,9 +593,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
             widget.defaultStyleOf(context);
 
     return TextButton(
-      onPressed: _enabled ? _handleSelect : null,
-      onHover: _enabled ? _handleHover : null,
-      onFocusChange: _enabled ? widget.onFocusChange : null,
+      onPressed: widget.enabled ? _handleSelect : null,
+      onHover: widget.enabled ? _handleHover : null,
+      onFocusChange: widget.enabled ? widget.onFocusChange : null,
       focusNode: _focusNode,
       style: mergedStyle,
       statesController: widget.statesController,
@@ -626,10 +625,8 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
     if (hovering) {
-      setState(() {
-        assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
-        _focusNode.requestFocus();
-      });
+      assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
+      _focusNode.requestFocus();
     }
   }
 
@@ -940,6 +937,7 @@ class _MenuButtonState extends State<MenuButton> {
   bool get _enabled => widget.menuChildren.isNotEmpty;
   FocusNode? _internalFocusNode;
   MenuController? _internalMenuController;
+  MenuController get _menuController => MenuController.maybeOf(context) ?? (_internalMenuController ??= MenuController());
   FocusNode get _buttonFocusNode => widget.focusNode ?? _internalFocusNode!;
   bool _waitingToFocusMenu = false;
   final GlobalKey _buttonKey = GlobalKey();
@@ -970,7 +968,14 @@ class _MenuButtonState extends State<MenuButton> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateChildMenu(context);
+  }
+
+  @override
   void didUpdateWidget(MenuButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.focusNode == null) {
         _internalFocusNode?.removeListener(_handleFocusChange);
@@ -990,11 +995,11 @@ class _MenuButtonState extends State<MenuButton> {
       }
       _buttonFocusNode.addListener(_handleFocusChange);
     }
-    super.didUpdateWidget(oldWidget);
+    _updateChildMenu(context);
   }
 
-  void _updateChildMenu(BuildContext context, MenuController controller) {
-    final _MenuHandleBase parent = _MenuHandleBase.maybeOf(context) ?? controller._root;
+  void _updateChildMenu(BuildContext context) {
+    final _MenuHandleBase parent = _MenuHandleBase.maybeOf(context) ?? _menuController._root;
     final MenuStyle? themeStyle = MenuTheme.of(context).style;
     final MenuStyle defaultStyle = _MenuDefaultsM3(context);
 
@@ -1046,10 +1051,8 @@ class _MenuButtonState extends State<MenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    final MenuController controller = MenuController.maybeOf(context) ?? (_internalMenuController ??= MenuController());
-    _updateChildMenu(context, controller);
     return MenuAnchor(
-      controller: controller,
+      controller: _menuController,
       builder: (BuildContext context) {
         // Since we don't want to use the theme style or default style from the
         // TextButton, we merge the styles, merging them in the right order when
@@ -1105,7 +1108,7 @@ class _MenuButtonState extends State<MenuButton> {
     // Don't open the root menu bar menus on hover unless something else
     // is already open. This means that the user has to first click to open a
     // menu on the menu bar before hovering allows them to traverse it.
-    if (_handle!._isTopLevel && !_handle!._root._descendantIsOpen) {
+    if (_handle!._isTopLevel && !_handle!._root._childIsOpen) {
       return;
     }
 
@@ -1132,10 +1135,17 @@ class _MenuButtonState extends State<MenuButton> {
 /// A widget used to mark the "anchor" for a set of submenus created by
 /// [createMaterialMenu].
 ///
-/// When creating a menu, it is necessary to either provide it with a specific
+/// When creating a menu with [createMaterialMenu], it needs to know where it
+/// should be placed. One way to do this is to provide it with a specific
 /// location to be shown, via the `globalMenuPosition` argument to
-/// [createMaterialMenu], or to provide it with a region that forms the button
-/// it should be aligned to.  This widget does the latter.
+/// [createMaterialMenu], via the `position` argument to [MenuHandle.open]. If a
+/// specific location is provided, then a [MenuAnchor] is not needed.
+///
+/// When creating a menu with [MenuBar] or a [MenuButton], a [MenuAnchor] is
+/// also not needed, since it provides its own internally.
+///
+/// However, if a specific location isn't provided, then [MenuAnchor] is used to
+/// provide the menu with a region that it should align itself to.
 ///
 /// The [controller] is required, and the same [controller] should be supplied
 /// to [createMaterialMenu].
@@ -1169,7 +1179,11 @@ class MenuAnchor extends StatefulWidget {
 }
 
 class _MenuAnchorState extends State<MenuAnchor> {
+  // This links the anchor's region with the menu's location in the overlay.
   final LayerLink _link = LayerLink();
+  // This is the global key that is used later to determine the bounding rect
+  // for the anchor's region that the custom layout uses to determine where to
+  // place the menu.
   final GlobalKey _anchorKey = GlobalKey(debugLabel: kReleaseMode ? null : 'MenuAnchor');
   bool _controllerChangeScheduled = false;
   bool _disposed = false;
@@ -1236,7 +1250,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
         link: _link,
         anchorKey: _anchorKey,
         child: ExcludeFocus(
-          excluding: !widget.controller.menuIsOpen,
+          excluding: !widget.controller.isOpen,
           child: TapRegion(
             groupId: widget.controller,
             onTapOutside: (PointerDownEvent event) {
@@ -1976,6 +1990,10 @@ abstract class _MenuHandleBase with DiagnosticableTreeMixin, ChangeNotifier {
   @protected
   final List<_MenuHandleBase> _children = <_MenuHandleBase>[];
 
+  // Children call _notifyListenersSafely when they want to post notifications
+  // to listeners, to make sure that it asserts when called after being
+  // disposed. Notifications typically happen when menus open or close.
+  @protected
   void _notifyListenersSafely() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     notifyListeners();
@@ -2028,14 +2046,14 @@ abstract class _MenuHandleBase with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   @protected
-  bool get _descendantIsOpen {
+  bool get _childIsOpen {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     for (final _MenuHandleBase child in _children) {
-      if (child._descendantIsOpen) {
+      if (child.isOpen) {
         return true;
       }
     }
-    return isOpen;
+    return false;
   }
 
   @protected
@@ -2114,9 +2132,6 @@ class MenuController extends _MenuHandleBase {
   // so that when the last menu is dismissed, the focus can be restored.
   FocusNode? _previousFocus;
 
-  /// Returns true if any menu served by this controller is currently open.
-  bool get menuIsOpen => _descendantIsOpen;
-
   final FocusScopeNode _menuScopeNode;
 
   @override
@@ -2125,9 +2140,9 @@ class MenuController extends _MenuHandleBase {
   @override
   MenuController? get _parent => null;
 
-  /// The root menu is always "closed".
+  /// Returns true if any child menu of the [MenuController] is open.
   @override
-  bool get isOpen => false;
+  bool get isOpen => _childIsOpen;
 
   @override
   MenuController get _root => this;
@@ -2145,7 +2160,7 @@ class MenuController extends _MenuHandleBase {
   /// Close any open menus controlled by this [MenuController].
   void closeAll() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (menuIsOpen) {
+    if (_childIsOpen) {
       assert(_debugMenuInfo('Controller closing all open menus'));
       _closeChildren();
     }
@@ -2190,7 +2205,7 @@ class MenuController extends _MenuHandleBase {
   // been opened.
   void _menuOpened(MenuHandle open, {required bool wasOpen}) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (!wasOpen && !menuIsOpen) {
+    if (!wasOpen && !_childIsOpen) {
       // We're opening the first menu, so cache the primary focus so that we can
       // try to return to it when the menu is dismissed. Skips any focus nodes
       // that are part of a menu system, since we don't want to return to those
@@ -2211,7 +2226,7 @@ class MenuController extends _MenuHandleBase {
   // been closed.
   void _menuClosed(_MenuHandleBase close, {bool inDispose = false}) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (!menuIsOpen && _previousFocus != null) {
+    if (!_childIsOpen && _previousFocus != null) {
       // This needs to happen in the next frame so that in cases where we're
       // closing everything, and the _previousFocus is a focus scope that
       // currently thinks its first focus is in the menu bar, the menu bar will
@@ -2290,6 +2305,7 @@ class MenuHandle extends _MenuHandleBase {
   @override
   final _MenuHandleBase? _parent;
 
+  /// Returns true if this [MenuHandle]'s menu is open.
   @override
   bool get isOpen => _overlayEntry != null;
 
@@ -2327,15 +2343,14 @@ class MenuHandle extends _MenuHandleBase {
   /// Call this when the menu should be shown to the user.
   ///
   /// The optional `position` argument will update the global coordinate where
-  /// the menu should be opened, taking into account the [_alignmentOffset].
+  /// the menu should be opened, taking into account the `alignmentOffset`, and
+  /// overriding any `globalMenuPosition` given to [createMaterialMenu].
   ///
   /// If `position` is not given, and no `globalMenuPosition` was given to
-  /// [createMaterialMenu], the menu appears at the location that is
-  /// [_alignmentOffset] away from the alignment origin specified by
-  /// [MenuStyle.alignment] for the menu.
-  ///
-  /// If `position` is not given and a `globalMenuPosition` was given to
-  /// [createMaterialMenu], then it will appear at that position.
+  /// [createMaterialMenu], the menu will appear at the location that is
+  /// `alignmentOffset` away from the alignment origin specified by the
+  /// combination of the [MenuStyle.alignment] for the menu and the [MenuAnchor]
+  /// for the menu.
   void open(BuildContext context, {Offset? position}) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     if (isOpen && position == _globalMenuPosition) {
@@ -2344,7 +2359,7 @@ class MenuHandle extends _MenuHandleBase {
     }
     assert(_debugMenuInfo(
         'Opening ${this}${_globalMenuPosition != null ? ' at ${position ?? _globalMenuPosition}' : ''}'));
-    final bool somethingWasOpen = _root._descendantIsOpen;
+    final bool somethingWasOpen = _root.isOpen;
     _parent?._closeChildren(); // Close all siblings.
     assert(_overlayEntry == null);
 
@@ -2355,6 +2370,21 @@ class MenuHandle extends _MenuHandleBase {
         'Unable to determine menu position.\n'
         'Menus either need to have a globalMenuPosition set, or there needs to '
         'be a MenuAnchor widget ancestor in the given context: $context');
+    assert(() {
+      if (anchor == null || _globalMenuPosition != null) {
+        return true;
+      }
+      final _MenuHandleMarker? marker = anchor.anchorKey.currentContext!.findAncestorWidgetOfExactType<_MenuHandleMarker>();
+      if (marker != null && marker.handle._root != _root) {
+        return false;
+      }
+      return true;
+    } (), "The anchor's MenuController doesn't match the MenuController given to createMaterialMenu.\n"
+          'If a MenuController is given to a MenuAnchor, then the same MenuController must be given to '
+          'the createMaterialMenu call used to create the menu.\n'
+          'The context where the anchor was created is ${anchor!.anchorKey.currentContext!}\n'
+          'The context opening the menu is $context\n'
+          'The MenuHandle for the menu is $this');
     // The globalMenuPosition should take precedence over the anchor.
     if (anchor != null && _globalMenuPosition == null) {
       final RenderBox renderBox = anchor.anchorKey.currentContext!.findRenderObject()! as RenderBox;
@@ -2370,7 +2400,20 @@ class MenuHandle extends _MenuHandleBase {
     _overlayEntry = OverlayEntry(
       builder: (BuildContext context) {
         final OverlayState overlay = Overlay.of(outerContext);
-        final Widget child = Directionality(
+        Widget child = TapRegion(
+          groupId: _root,
+          child: const _Submenu(),
+        );
+        if (anchor != null && _globalMenuPosition == null) {
+          // Copy any information from the anchor (which might not be in the
+          // overlay) into a new marker in the overlay.
+          child = _MenuAnchorMarker(
+            anchorKey: anchor.anchorKey,
+            link: anchor.link,
+            child: child,
+          );
+        }
+        child = Directionality(
           textDirection: Directionality.of(outerContext),
           child: _MenuHandleMarker(
             handle: this,
@@ -2378,23 +2421,11 @@ class MenuHandle extends _MenuHandleBase {
               // Copy all the themes from the supplied outer context to the
               // overlay.
               outerContext,
-              TapRegion(
-                groupId: _root,
-                child: const _Submenu(),
-              ),
+              child,
               to: overlay.context,
             ),
           ),
         );
-        if (anchor != null && _globalMenuPosition == null) {
-          // Copy any information from the anchor (which might not be in the
-          // overlay) into a new marker in the overlay.
-          return _MenuAnchorMarker(
-            anchorKey: anchor.anchorKey,
-            link: anchor.link,
-            child: child,
-          );
-        }
         return child;
       },
     );
@@ -2704,7 +2735,7 @@ class _MenuDismissAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return controller.menuIsOpen;
+    return controller.isOpen;
   }
 
   @override
@@ -2801,7 +2832,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     }
     final _MenuHandleBase? menu =
         primaryFocus?.context == null ? null : _MenuHandleBase.maybeOf(primaryFocus!.context!);
-    if (menu == null || !menu._root._descendantIsOpen || menu._isRoot || menu is! MenuHandle) {
+    if (menu == null || !menu._root.isOpen || menu._isRoot || menu is! MenuHandle) {
       super.invoke(intent);
       return;
     }
