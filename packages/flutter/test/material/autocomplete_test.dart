@@ -311,13 +311,16 @@ void main() {
     const double desiredWidth = 200.0;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-      body: Autocomplete<String>(
-        optionsMaxWidth: desiredWidth,
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          return kOptions.where((String option) {
-            return option.contains(textEditingValue.text.toLowerCase());
-          });
-        },
+      body: SizedBox(
+        width: desiredWidth,
+        child: Autocomplete<String>(
+          optionsMaxWidth: desiredWidth,
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+        ),
       ),
     )));
 
