@@ -5,7 +5,6 @@
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
