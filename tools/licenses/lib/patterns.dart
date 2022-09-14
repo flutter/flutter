@@ -270,13 +270,13 @@ class LicenseFileReferencePattern {
     this.pattern,
     this.needsCopyright = true
   });
-  final int firstPrefixIndex;
-  final int indentPrefixIndex;
-  final int copyrightIndex;
-  final int authorIndex;
-  final int fileIndex;
+  final int? firstPrefixIndex;
+  final int? indentPrefixIndex;
+  final int? copyrightIndex;
+  final int? authorIndex;
+  final int? fileIndex;
   final bool needsCopyright;
-  final RegExp pattern;
+  final RegExp? pattern;
 }
 
 final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileReferencePattern>[
@@ -632,12 +632,12 @@ class MultipleVersionedLicenseReferencePattern {
     this.pattern
   });
 
-  final int firstPrefixIndex;
-  final int indentPrefixIndex;
-  final List<int> licenseIndices;
+  final int? firstPrefixIndex;
+  final int? indentPrefixIndex;
+  final List<int>? licenseIndices;
   final bool checkLocalFirst;
-  final Map<int, int> versionIndices;
-  final RegExp pattern;
+  final Map<int, int>? versionIndices;
+  final RegExp? pattern;
 }
 
 final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <MultipleVersionedLicenseReferencePattern>[
@@ -2041,10 +2041,10 @@ final List<RegExp> csFallbacks = <RegExp>[
 
 class ForwardReferencePattern {
   ForwardReferencePattern({ this.firstPrefixIndex, this.indentPrefixIndex, this.pattern, this.targetPattern });
-  final int firstPrefixIndex;
-  final int indentPrefixIndex;
-  final RegExp pattern;
-  final RegExp targetPattern;
+  final int? firstPrefixIndex;
+  final int? indentPrefixIndex;
+  final RegExp? pattern;
+  final RegExp? targetPattern;
 }
 
 final List<ForwardReferencePattern> csForwardReferenceLicenses = <ForwardReferencePattern>[
