@@ -174,175 +174,173 @@ void main() {
       Config: () => config,
     });
 
-    //testUsingContext('returns sdkmanager.bat path under cmdline tools for windows', () {
-    //  sdkDir = createSdkDirectory(fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
+    testUsingContext('returns sdkmanager.bat path under cmdline tools for windows', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
 
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-    //  fileSystem.file(
-    //    fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'sdkmanager.bat')
-    //  ).createSync(recursive: true);
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'sdkmanager.bat')
+      ).createSync(recursive: true);
 
-    //  expect(sdk.sdkManagerPath,
-    //    fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'sdkmanager.bat'));
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => FakeProcessManager.any(),
-    //  Platform: () => FakePlatform(operatingSystem: 'windows'),
-    //  Config: () => config,
-    //});
+      expect(sdk.sdkManagerPath,
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'sdkmanager.bat'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      Config: () => config,
+    });
 
-    //testUsingContext('returns sdkmanager version', () {
-    //  sdkDir = createSdkDirectory(fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
-    //  processManager.addCommand(
-    //    const FakeCommand(
-    //        command: <String>[
-    //        '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
-    //        '--version',
-    //      ],
-    //      stdout: '26.1.1\n',
-    //    ),
-    //  );
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+    testUsingContext('returns sdkmanager version', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
+      processManager.addCommand(
+        const FakeCommand(
+            command: <String>[
+            '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
+            '--version',
+          ],
+          stdout: '26.1.1\n',
+        ),
+      );
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-    //  expect(sdk.sdkManagerVersion, '26.1.1');
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => processManager,
-    //  Config: () => config,
-    //  Platform: () => FakePlatform(environment: <String, String>{}),
-    //});
+      expect(sdk.sdkManagerVersion, '26.1.1');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Config: () => config,
+      Platform: () => FakePlatform(environment: <String, String>{}),
+    });
 
-    //testUsingContext('returns validate sdk is well formed', () {
-    //  sdkDir = createBrokenSdkDirectory(
-    //    fileSystem: fileSystem,
-    //  );
-    //  processManager.addCommand(const FakeCommand(command: <String>[
-    //    '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
-    //    '--version',
-    //  ]));
-    //  config.setValue('android-sdk', sdkDir!.path);
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+    testUsingContext('returns validate sdk is well formed', () {
+      final Directory sdkDir = createBrokenSdkDirectory(fileSystem: fileSystem);
+      processManager.addCommand(const FakeCommand(command: <String>[
+        '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
+        '--version',
+      ]));
+      config.setValue('android-sdk', sdkDir.path);
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-    //  final List<String> validationIssues = sdk.validateSdkWellFormed();
-    //  expect(validationIssues.first, 'No valid Android SDK platforms found in'
-    //    ' /.tmp_rand0/flutter_mock_android_sdk.rand0/platforms. Candidates were:\n'
-    //    '  - android-22\n'
-    //    '  - android-23');
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => processManager,
-    //  Config: () => config,
-    //  Platform: () => FakePlatform(),
-    //});
+      final List<String> validationIssues = sdk.validateSdkWellFormed();
+      expect(validationIssues.first, 'No valid Android SDK platforms found in'
+        ' /.tmp_rand0/flutter_mock_android_sdk.rand0/platforms. Candidates were:\n'
+        '  - android-22\n'
+        '  - android-23');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Config: () => config,
+      Platform: () => FakePlatform(),
+    });
 
-    //testUsingContext('does not throw on sdkmanager version check failure', () {
-    //  sdkDir = createSdkDirectory(fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
-    //  processManager.addCommand(
-    //    const FakeCommand(
-    //      command: <String>[
-    //        '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
-    //        '--version',
-    //      ],
-    //      stdout: '\n',
-    //      stderr: 'Mystery error',
-    //      exitCode: 1,
-    //    ),
-    //  );
+    testUsingContext('does not throw on sdkmanager version check failure', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
+            '--version',
+          ],
+          stdout: '\n',
+          stderr: 'Mystery error',
+          exitCode: 1,
+        ),
+      );
 
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-    //  expect(sdk.sdkManagerVersion, isNull);
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => processManager,
-    //  Config: () => config,
-    //  Platform: () => FakePlatform(environment: <String, String>{}),
-    //});
+      expect(sdk.sdkManagerVersion, isNull);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Config: () => config,
+      Platform: () => FakePlatform(environment: <String, String>{}),
+    });
 
-    //testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
-    //  sdkDir = createSdkDirectory(withSdkManager: false, fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
-    //  processManager.excludedExecutables.add('/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager');
-    //  final AndroidSdk? sdk = AndroidSdk.locateAndroidSdk();
+    testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
+      final Directory sdkDir = createSdkDirectory(withSdkManager: false, fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
+      processManager.excludedExecutables.add('/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager');
+      final AndroidSdk? sdk = AndroidSdk.locateAndroidSdk();
 
-    //  expect(() => sdk!.sdkManagerVersion, throwsToolExit());
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => processManager,
-    //  Config: () => config,
-    //  Platform: () => FakePlatform(),
-    //});
+      expect(() => sdk!.sdkManagerVersion, throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Config: () => config,
+      Platform: () => FakePlatform(),
+    });
 
-    //testUsingContext('returns avdmanager path under cmdline tools', () {
-    //  sdkDir = createSdkDirectory(fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
+    testUsingContext('returns avdmanager path under cmdline tools', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
 
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-    //  fileSystem.file(
-    //    fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager')
-    //  ).createSync(recursive: true);
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager')
+      ).createSync(recursive: true);
 
-    //  expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager'));
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => FakeProcessManager.any(),
-    //  Platform: () => FakePlatform(),
-    //  Config: () => config,
-    //});
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(),
+      Config: () => config,
+    });
 
-    //testUsingContext('returns avdmanager path under cmdline tools on windows', () {
-    //  sdkDir = createSdkDirectory(fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
+    testUsingContext('returns avdmanager path under cmdline tools on windows', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
 
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-    //  fileSystem.file(
-    //    fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager.bat')
-    //  ).createSync(recursive: true);
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager.bat')
+      ).createSync(recursive: true);
 
-    //  expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager.bat'));
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => FakeProcessManager.any(),
-    //  Platform: () => FakePlatform(operatingSystem: 'windows'),
-    //  Config: () => config,
-    //});
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager.bat'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      Config: () => config,
+    });
 
-    //testUsingContext("returns avdmanager path under tools if cmdline doesn't exist", () {
-    //  sdkDir = createSdkDirectory(fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
+    testUsingContext("returns avdmanager path under tools if cmdline doesn't exist", () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
 
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-    //  fileSystem.file(
-    //    fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager')
-    //  ).createSync(recursive: true);
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager')
+      ).createSync(recursive: true);
 
-    //  expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager'));
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => FakeProcessManager.any(),
-    //  Platform: () => FakePlatform(),
-    //  Config: () => config,
-    //});
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(),
+      Config: () => config,
+    });
 
-    //testUsingContext("returns avdmanager path under tools if cmdline doesn't exist on windows", () {
-    //  sdkDir = createSdkDirectory(fileSystem: fileSystem);
-    //  config.setValue('android-sdk', sdkDir!.path);
+    testUsingContext("returns avdmanager path under tools if cmdline doesn't exist on windows", () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
 
-    //  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-    //  fileSystem.file(
-    //    fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat')
-    //  ).createSync(recursive: true);
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat')
+      ).createSync(recursive: true);
 
-    //  expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat'));
-    //}, overrides: <Type, Generator>{
-    //  FileSystem: () => fileSystem,
-    //  ProcessManager: () => FakeProcessManager.any(),
-    //  Platform: () => FakePlatform(operatingSystem: 'windows'),
-    //  Config: () => config,
-    //});
+      expect(sdk.avdManagerPath, fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      Config: () => config,
+    });
   });
 }
 
