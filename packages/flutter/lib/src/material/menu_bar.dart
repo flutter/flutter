@@ -1673,29 +1673,32 @@ class _MenuPanelState extends State<_MenuPanel> {
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
-    return ConstraintsTransformBox(
-      constraintsTransform: (BoxConstraints constraints) => constraints.enforce(effectiveConstraints),
-      clipBehavior: Clip.hardEdge,
-      alignment: AlignmentDirectional.centerStart,
-      child: _intrinsicCrossSize(
-        child: Material(
-          elevation: elevation,
-          shape: shape,
-          color: backgroundColor,
-          shadowColor: shadowColor,
-          surfaceTintColor: surfaceTintColor,
-          type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-          clipBehavior: Clip.hardEdge,
-          child: Padding(
-            padding: resolvedPadding,
-            child: SingleChildScrollView(
-              scrollDirection: widget.orientation,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: Directionality.of(context),
-                direction: widget.orientation,
-                mainAxisSize: MainAxisSize.min,
-                children: widget.children,
+    return ConstrainedBox(
+      constraints: effectiveConstraints,
+      child: UnconstrainedBox(
+        constrainedAxis: widget.orientation,
+        clipBehavior: Clip.hardEdge,
+        alignment: AlignmentDirectional.centerStart,
+        child: _intrinsicCrossSize(
+          child: Material(
+            elevation: elevation,
+            shape: shape,
+            color: backgroundColor,
+            shadowColor: shadowColor,
+            surfaceTintColor: surfaceTintColor,
+            type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
+            clipBehavior: Clip.hardEdge,
+            child: Padding(
+              padding: resolvedPadding,
+              child: SingleChildScrollView(
+                scrollDirection: widget.orientation,
+                child: Flex(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  textDirection: Directionality.of(context),
+                  direction: widget.orientation,
+                  mainAxisSize: MainAxisSize.min,
+                  children: widget.children,
+                ),
               ),
             ),
           ),
@@ -1754,49 +1757,44 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
-    return UnconstrainedBox(
-      // Clip menus that overflow.
-      clipBehavior: Clip.hardEdge,
-      alignment: AlignmentDirectional.centerStart,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              if (leadingIcon != null) leadingIcon!,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            if (leadingIcon != null) leadingIcon!,
+            Padding(
+              padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+              child: child,
+            ),
+            if (trailingIcon != null)
               Padding(
-                padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
-                child: child,
+                padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+                child: trailingIcon,
               ),
-              if (trailingIcon != null)
-                Padding(
-                  padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-                  child: trailingIcon,
-                ),
-            ],
+          ],
+        ),
+        if (showDecoration && (shortcut != null || hasSubmenu)) SizedBox(width: horizontalPadding),
+        if (showDecoration && shortcut != null)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: Text(
+              _LocalizedShortcutLabeler.instance.getShortcutLabel(
+                shortcut!,
+                MaterialLocalizations.of(context),
+              ),
+            ),
           ),
-          if (showDecoration && (shortcut != null || hasSubmenu)) SizedBox(width: horizontalPadding),
-          if (showDecoration && shortcut != null)
-            Padding(
-              padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-              child: Text(
-                _LocalizedShortcutLabeler.instance.getShortcutLabel(
-                  shortcut!,
-                  MaterialLocalizations.of(context),
-                ),
-              ),
+        if (showDecoration && hasSubmenu)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: const Icon(
+              Icons.arrow_right, // Automatically switches with text direction.
+              size: _kDefaultSubmenuIconSize,
             ),
-          if (showDecoration && hasSubmenu)
-            Padding(
-              padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-              child: const Icon(
-                Icons.arrow_right, // Automatically switches with text direction.
-                size: _kDefaultSubmenuIconSize,
-              ),
-            ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 

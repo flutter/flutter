@@ -635,11 +635,11 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(124.0, 81.0, 278.0, 95.0)),
+        equals(const Rect.fromLTRB(134.0, 91.0, 288.0, 105.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
-        equals(const Rect.fromLTRB(116.0, 60.0, 346.0, 212.0)),
+        equals(const Rect.fromLTRB(126.0, 70.0, 356.0, 222.0)),
       );
 
       // Close and make sure it goes back where it was.
@@ -690,11 +690,11 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(502.0, 81.0, 656.0, 95.0)),
+        equals(const Rect.fromLTRB(512.0, 91.0, 666.0, 105.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
-        equals(const Rect.fromLTRB(434.0, 60.0, 664.0, 212.0)),
+        equals(const Rect.fromLTRB(444.0, 70.0, 674.0, 222.0)),
       );
 
       // Close and make sure it goes back where it was.

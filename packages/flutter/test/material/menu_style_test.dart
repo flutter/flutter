@@ -84,7 +84,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().first).size, equals(const Size(600.0, 60.0)));
 
       // MenuTheme affects menus.
-      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(104.0, 48.0, 204.0, 148.0)));
+      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(104.0, 54.0, 204.0, 154.0)));
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
@@ -127,7 +127,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().first).size, equals(const Size(250.0, 40.0)));
 
       // MenuTheme affects menus.
-      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(279.0, 40.0, 379.0, 140.0)));
+      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(279.0, 44.0, 379.0, 144.0)));
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
@@ -170,7 +170,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().first).size, equals(const Size(400.0, 60.0)));
 
       // MenuTheme affects menus.
-      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(204.0, 48.0, 504.0, 348.0)));
+      expect(tester.getRect(findMenuPanels().at(1)), equals(const Rect.fromLTRB(204.0, 54.0, 504.0, 354.0)));
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(300.0, 300.0)));
     });
 
