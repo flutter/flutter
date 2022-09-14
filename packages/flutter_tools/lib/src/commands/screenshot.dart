@@ -6,6 +6,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -130,8 +131,7 @@ class ScreenshotCommand extends FlutterCommand {
       'png',
     );
 
-    // Validate and transform path as necessary
-    outputFile = validateOutputFile(outputFile, fs);
+    validateOutputFile(outputFile, fs);
 
     try {
       await device!.takeScreenshot(outputFile);
@@ -194,20 +194,23 @@ class ScreenshotCommand extends FlutterCommand {
   /// Additional error checks below for valid file name
   /// and directory because ios/xcode screenshot binary will
   /// return a 0 exit code even if outputFile is not valid
-  static File validateOutputFile(File outputFile, FileSystem fs) {
+  static void validateOutputFile(File outputFile, FileSystem fs) {
 
-    // Will make sure that if the user passes '-o image.png/' the file
-    // generated will become '$PWD/image.png'
-    outputFile = fs.file(fs.path.join(
-      outputFile.absolute.dirname,
-      outputFile.absolute.basename
-    ));
+    const Platform platform = LocalPlatform();
+
+    // Conditional to check for trailing path separator
+    if (outputFile.path.endsWith(platform.pathSeparator)) {
+      throwToolExit(
+        'The provided path cannot end with a path separator\n'
+        'Path provided: "${outputFile.path}"'
+      );
+    }
 
     // Conditional for validating directory is valid
-    if (!fs.directory(outputFile.absolute.dirname).existsSync()) {
+    if (!fs.directory(outputFile.dirname).existsSync()) {
       throwToolExit(
         'The provided path to file needs to have a directory that exists\n'
-        'Directory: "${outputFile.absolute.dirname}" does not exist'
+        'Directory: "${outputFile.dirname}" does not exist'
       );
     }
 
@@ -218,8 +221,6 @@ class ScreenshotCommand extends FlutterCommand {
         'Filename provided: "${outputFile.basename}"'
       );
     }
-
-    return outputFile;
   }
 
   void _ensureOutputIsNotJsonRpcError(File outputFile) {

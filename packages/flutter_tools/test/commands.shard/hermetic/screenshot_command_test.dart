@@ -74,19 +74,27 @@ void main() {
           returnsNormally);
     });
 
-    testWithoutContext('successful when specifing filename with a trailing directory delimiter', () async {
+    testWithoutContext('successful when writing to sub directory', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
+      fs.directory('sub_dir').createSync();
       expect(
-          () => ScreenshotCommand.validateOutputFile(fs.file('test.png/'), fs),
+          () => ScreenshotCommand.validateOutputFile(fs.file('sub_dir/test.png'), fs),
           returnsNormally);
     });
 
-    testWithoutContext('successful when specifing filename within sub directory and trailing delimiter', () async {
+    testWithoutContext('failed when specifing filename with a trailing path separator', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      expect(
+          () => ScreenshotCommand.validateOutputFile(fs.file('test.png/'), fs),
+          throwsToolExit(message: 'The provided path cannot end with a path separator'));
+    });
+
+    testWithoutContext('failed when specifing filename within sub directory and trailing path separator', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       fs.directory('sub_dir').createSync();
       expect(
           () => ScreenshotCommand.validateOutputFile(fs.file('sub_dir/test.png/'), fs),
-          returnsNormally);
+          throwsToolExit(message: 'The provided path cannot end with a path separator'));
     });
 
     testWithoutContext('failed due to incorrect filename', () async {
