@@ -393,6 +393,9 @@ class BorderRadius extends BorderRadiusGeometry {
 
   /// Creates an [RRect] from the current border radius and a [Rect].
   RRect toRRect(Rect rect) {
+    // Because the current radii could be negative, we must clamp them before
+    // converting them to an RRect to be rendered, since negative radii on
+    // RRects don't make sense.
     return RRect.fromRectAndCorners(
       rect,
       topLeft: topLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
