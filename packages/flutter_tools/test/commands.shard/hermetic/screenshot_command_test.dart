@@ -70,12 +70,20 @@ void main() {
     testWithoutContext('successful in pwd', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       fs.file('test.png').createSync();
+      fs.directory('sub_dir').createSync();
+      fs.file('sub_dir/test.png').createSync();
+
       expect(() => ScreenshotCommand.checkOutput(fs.file('test.png'), fs),
+          returnsNormally);
+      expect(
+          () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs),
           returnsNormally);
     });
 
     testWithoutContext('failed in pwd', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
+      fs.directory('sub_dir').createSync();
+
       expect(
           () => ScreenshotCommand.checkOutput(fs.file('test.png'), fs),
           throwsToolExit(
@@ -92,20 +100,6 @@ void main() {
           () => ScreenshotCommand.checkOutput(fs.file('/'), fs),
           throwsToolExit(
               message: 'File was not created, ensure path is valid'));
-    });
-
-    testWithoutContext('successful in sub directory', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      fs.directory('sub_dir').createSync();
-      fs.file('sub_dir/test.png').createSync();
-      expect(
-          () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs),
-          returnsNormally);
-    });
-
-    testWithoutContext('failed in sub directory', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      fs.directory('sub_dir').createSync();
       expect(
           () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs),
           throwsToolExit(
