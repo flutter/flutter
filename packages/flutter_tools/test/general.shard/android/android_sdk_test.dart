@@ -33,6 +33,10 @@ void main() {
       }
     });
 
+    testUsingContext('reinitialize() handles no matching lines', () {
+      throw UnimplementedError();
+    });
+
     testUsingContext('parse sdk', () {
       sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir!.path);
