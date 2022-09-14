@@ -364,9 +364,9 @@ class SkiaGoldClient {
 
   List<String> _getPixelMatchingArguments({ required bool isFlaky }) {
     if (isFlaky) {
-      return _getNormalPixelMatchingArguments();
-    } else {
       return _getFlakyPixelMatchingArguments();
+    } else {
+      return _getNormalPixelMatchingArguments();
     }
   }
 
