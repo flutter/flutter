@@ -45,6 +45,10 @@ void Op(SkPath* one, SkPath* two, SkPathOp op) {
   Op(*one, *two, op, one);
 }
 
+int GetFillType(SkPath* path) {
+  return static_cast<int>(path->getFillType());
+}
+
 struct PathData* Data(SkPath* path) {
   int point_count = path->countPoints();
   int verb_count = path->countVerbs();
