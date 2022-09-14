@@ -573,7 +573,7 @@ TEST(RasterCache, DisplayListWithSingularMatrixIsNotCached) {
       SkMatrix::Scale(1, 0),
       SkMatrix::Skew(1, 1),
   };
-  int matrixCount = sizeof(matrices) / sizeof(matrices[0]);
+  int matrix_count = sizeof(matrices) / sizeof(matrices[0]);
 
   auto display_list = GetSampleDisplayList();
 
@@ -596,13 +596,13 @@ TEST(RasterCache, DisplayListWithSingularMatrixIsNotCached) {
   for (int i = 0; i < 10; i++) {
     cache.BeginFrame();
 
-    for (int j = 0; j < matrixCount; j++) {
+    for (int j = 0; j < matrix_count; j++) {
       display_list_item.set_matrix(matrices[j]);
       ASSERT_FALSE(RasterCacheItemPrerollAndTryToRasterCache(
           display_list_item, preroll_context, paint_context, matrices[j]));
     }
 
-    for (int j = 0; j < matrixCount; j++) {
+    for (int j = 0; j < matrix_count; j++) {
       dummy_canvas.setMatrix(matrices[j]);
       ASSERT_FALSE(
           display_list_item.Draw(paint_context, &dummy_canvas, &paint));

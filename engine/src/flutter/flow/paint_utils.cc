@@ -47,11 +47,11 @@ void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   canvas->restore();
 
   // Stroke the drawn area
-  SkPaint debugPaint;
-  debugPaint.setStrokeWidth(8);
-  debugPaint.setColor(SkColorSetA(checkerboard_color, 255));
-  debugPaint.setStyle(SkPaint::kStroke_Style);
-  canvas->drawRect(rect, debugPaint);
+  SkPaint debug_paint;
+  debug_paint.setStrokeWidth(8);
+  debug_paint.setColor(SkColorSetA(checkerboard_color, 255));
+  debug_paint.setStyle(SkPaint::kStroke_Style);
+  canvas->drawRect(rect, debug_paint);
 }
 
 }  // namespace flutter

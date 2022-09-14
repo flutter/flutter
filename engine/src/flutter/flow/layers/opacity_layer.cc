@@ -113,21 +113,21 @@ void OpacityLayer::Paint(PaintContext& context) const {
     return;
   }
 
-  // Skia may clip the content with saveLayerBounds (although it's not a
-  // guaranteed clip). So we have to provide a big enough saveLayerBounds. To do
-  // so, we first remove the offset from paint bounds since it's already in the
-  // matrix. Then we round out the bounds.
+  // Skia may clip the content with save_layer_bounds (although it's not a
+  // guaranteed clip). So we have to provide a big enough save_layer_bounds. To
+  // do so, we first remove the offset from paint bounds since it's already in
+  // the matrix. Then we round out the bounds.
   //
   // Note that the following lines are only accessible when the raster cache is
   // not available (e.g., when we're using the software backend in golden
   // tests).
-  SkRect saveLayerBounds;
+  SkRect save_layer_bounds;
   paint_bounds()
       .makeOffset(-offset_.fX, -offset_.fY)
-      .roundOut(&saveLayerBounds);
+      .roundOut(&save_layer_bounds);
 
   Layer::AutoSaveLayer save_layer =
-      Layer::AutoSaveLayer::Create(context, saveLayerBounds, &paint);
+      Layer::AutoSaveLayer::Create(context, save_layer_bounds, &paint);
   context.inherited_opacity = SK_Scalar1;
   PaintChildren(context);
   context.inherited_opacity = inherited_opacity;
