@@ -359,9 +359,9 @@ class AndroidSdk {
               .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
               .whereType<Match>();
 
-          //if (versionMatches.isEmpty) {
-          //  return null;
-          //}
+          if (versionMatches.isEmpty) {
+            return null;
+          }
 
           final String? versionString = versionMatches.first.group(1);
           if (versionString == null) {
