@@ -18,12 +18,12 @@
 //
 //   examples/api/lib/cupertino/baz/foo_bar.2.dart
 //
-// and it's associated test should be in:
+// and its associated test should be in:
 //
 //   examples/api/test/cupertino/baz/foo_bar.2_test.dart
 //
 // The following doc comment should remain, and be a doc comment so that the
-// symbol will be linked in the IDE. Don't put the whole description of the
+// symbol will be linked in the IDE. Don't use the whole description of the
 // example, since that should already be in the API docs where this example is
 // referenced, and we don't want the two descriptions to diverge. If this sample
 // is referenced more than once, link back to the instance the example file is
@@ -33,7 +33,9 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const SampleApp());
+void main() {
+  runApp(const SampleApp());
+}
 
 class SampleApp extends StatelessWidget {
   const SampleApp({super.key});
