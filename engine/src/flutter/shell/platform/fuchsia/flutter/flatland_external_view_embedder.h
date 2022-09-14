@@ -165,7 +165,10 @@ class FlatlandExternalViewEmbedder final
     fuchsia::ui::composition::ContentId viewport_id;
     ViewMutators mutators;
     SkSize size = SkSize::MakeEmpty();
-    fit::callback<void(const SkSize&)> pending_create_viewport_callback;
+    SkRect pending_occlusion_hint = SkRect::MakeEmpty();
+    SkRect occlusion_hint = SkRect::MakeEmpty();
+    fit::callback<void(const SkSize&, const SkRect&)>
+        pending_create_viewport_callback;
   };
 
   struct FlatlandLayer {

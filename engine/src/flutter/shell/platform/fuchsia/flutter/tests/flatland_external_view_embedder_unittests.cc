@@ -187,14 +187,19 @@ Matcher<fuchsia::ui::composition::ImageProperties> IsImageProperties(
 }
 
 Matcher<fuchsia::ui::composition::ViewportProperties> IsViewportProperties(
-    const fuchsia::math::SizeU& logical_size) {
+    const fuchsia::math::SizeU& logical_size,
+    const fuchsia::math::Inset& inset) {
   return AllOf(
       Property("has_logical_size",
                &fuchsia::ui::composition::ViewportProperties::has_logical_size,
                true),
       Property("logical_size",
                &fuchsia::ui::composition::ViewportProperties::logical_size,
-               logical_size));
+               logical_size),
+      Property("has_inset",
+               &fuchsia::ui::composition::ViewportProperties::has_inset, true),
+      Property("inset", &fuchsia::ui::composition::ViewportProperties::inset,
+               inset));
 }
 
 Matcher<FakeGraph> IsEmptyGraph() {
@@ -250,17 +255,18 @@ Matcher<std::shared_ptr<FakeTransform>> IsImageLayer(
 Matcher<std::shared_ptr<FakeTransform>> IsViewportLayer(
     const fuchsia::ui::views::ViewCreationToken& view_token,
     const fuchsia::math::SizeU& view_logical_size,
+    const fuchsia::math::Inset& view_inset,
     const fuchsia::math::Vec& view_transform) {
-  return Pointee(
-      FieldsAre(/* id */ _, view_transform,
-                /*clip_bounds*/ _, FakeTransform::kDefaultOrientation,
-                /*children*/ IsEmpty(),
-                /*content*/
-                Pointee(VariantWith<FakeViewport>(FieldsAre(
-                    /* id */ _, IsViewportProperties(view_logical_size),
-                    /* viewport_token */ GetKoids(view_token).second,
-                    /* child_view_watcher */ _))),
-                /*num_hit_regions*/ 0));
+  return Pointee(FieldsAre(
+      /* id */ _, view_transform,
+      /*clip_bounds*/ _, FakeTransform::kDefaultOrientation,
+      /*children*/ IsEmpty(),
+      /*content*/
+      Pointee(VariantWith<FakeViewport>(FieldsAre(
+          /* id */ _, IsViewportProperties(view_logical_size, view_inset),
+          /* viewport_token */ GetKoids(view_token).second,
+          /* child_view_watcher */ _))),
+      /*num_hit_regions*/ 0));
 }
 
 fuchsia::ui::composition::OnNextFrameBeginValues WithPresentCredits(
@@ -517,8 +523,17 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       child_view_id, []() {},
       [](fuchsia::ui::composition::ContentId,
          fuchsia::ui::composition::ChildViewWatcherHandle) {});
+  const SkRect child_view_occlusion_hint = SkRect::MakeLTRB(1, 2, 3, 4);
+  const fuchsia::math::Inset child_view_inset{
+      static_cast<int32_t>(child_view_occlusion_hint.top()),
+      static_cast<int32_t>(child_view_occlusion_hint.right()),
+      static_cast<int32_t>(child_view_occlusion_hint.bottom()),
+      static_cast<int32_t>(child_view_occlusion_hint.left())};
+  external_view_embedder.SetViewProperties(
+      child_view_id, child_view_occlusion_hint, /*hit_testable=*/false,
+      /*focusable=*/false);
 
-  // Draw the scene.  The scene graph shouldn't change yet.
+  // Draw the scene. The scene graph shouldn't change yet.
   const SkISize frame_size_signed = SkISize::Make(512, 512);
   const fuchsia::math::SizeU frame_size{
       static_cast<uint32_t>(frame_size_signed.width()),
@@ -558,22 +573,24 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
   loop().RunUntilIdle();
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(
-          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-           IsViewportLayer(child_view_token, child_view_size, {0, 0}),
-           IsImageLayer(frame_size, kUpperLayerBlendMode, 1)}));
+      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                     view_ref, /*layers*/
+                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
+                      IsViewportLayer(child_view_token, child_view_size,
+                                      child_view_inset, {0, 0}),
+                      IsImageLayer(frame_size, kUpperLayerBlendMode, 1)}));
 
   // Destroy the view.  The scene graph shouldn't change yet.
   external_view_embedder.DestroyView(
       child_view_id, [](fuchsia::ui::composition::ContentId) {});
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(
-          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-           IsViewportLayer(child_view_token, child_view_size, {0, 0}),
-           IsImageLayer(frame_size, kUpperLayerBlendMode, 1)}));
+      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                     view_ref, /*layers*/
+                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
+                      IsViewportLayer(child_view_token, child_view_size,
+                                      child_view_inset, {0, 0}),
+                      IsImageLayer(frame_size, kUpperLayerBlendMode, 1)}));
 
   // Draw another frame without the view.  The scene graph shouldn't change yet.
   DrawSimpleFrame(
@@ -590,11 +607,12 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       });
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(
-          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-           IsViewportLayer(child_view_token, child_view_size, {0, 0}),
-           IsImageLayer(frame_size, kUpperLayerBlendMode, 1)}));
+      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                     view_ref, /*layers*/
+                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
+                      IsViewportLayer(child_view_token, child_view_size,
+                                      child_view_inset, {0, 0}),
+                      IsImageLayer(frame_size, kUpperLayerBlendMode, 1)}));
 
   // Pump the message loop.  The scene updates should propagate to flatland.
   loop().RunUntilIdle();
@@ -682,7 +700,8 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
           {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-           IsViewportLayer(child_view_token, child_view_size, {0, 0})}));
+           IsViewportLayer(child_view_token, child_view_size,
+                           FakeViewport::kDefaultViewportInset, {0, 0})}));
 
   // Destroy the view.  The scene graph shouldn't change yet.
   external_view_embedder.DestroyView(
@@ -692,7 +711,8 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
           {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-           IsViewportLayer(child_view_token, child_view_size, {0, 0})}));
+           IsViewportLayer(child_view_token, child_view_size,
+                           FakeViewport::kDefaultViewportInset, {0, 0})}));
 
   // Draw another frame without the view.  The scene graph shouldn't change yet.
   DrawSimpleFrame(
@@ -712,7 +732,8 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
           {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-           IsViewportLayer(child_view_token, child_view_size, {0, 0})}));
+           IsViewportLayer(child_view_token, child_view_size,
+                           FakeViewport::kDefaultViewportInset, {0, 0})}));
 
   // Pump the message loop.  The scene updates should propagate to flatland.
   loop().RunUntilIdle();
