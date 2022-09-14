@@ -2115,7 +2115,7 @@ abstract class _MenuHandleBase with DiagnosticableTreeMixin, ChangeNotifier {
 /// controller is required.
 ///
 /// The controller can be listened to for some changes in the state of the menu
-/// bar, to see if [menuIsOpen] has changed, for instance.
+/// bar, to see if [isOpen] has changed, for instance.
 ///
 /// The [dispose] method must be called on the controller when it is no longer
 /// needed.
