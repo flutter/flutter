@@ -130,7 +130,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 ///
 /// {@tool snippet}
 ///
-/// This example defines a `MaterialStateColor` with a const constructor.
+/// This example defines a [MaterialStateColor] with a const constructor.
 ///
 /// ```dart
 /// class MyColor extends MaterialStateColor {

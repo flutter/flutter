@@ -563,7 +563,7 @@ void main() {
     });
     expect(data, isTrue);
     expect(completed, isFalse);
-    result = await binding.testExtension('evict', <String, String>{'value': 'test'});
+    result = await binding.testExtension(ServicesServiceExtensions.evict.name, <String, String>{'value': 'test'});
     expect(result, <String, String>{'value': ''});
     expect(completed, isFalse);
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async {

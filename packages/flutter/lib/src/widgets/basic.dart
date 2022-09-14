@@ -2687,10 +2687,10 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// {@template flutter.widgets.ConstraintsTransformBox.clipBehavior}
-  /// In debug mode, if `clipBehavior` is [Clip.none], and the child overflows
+  /// In debug mode, if [clipBehavior] is [Clip.none], and the child overflows
   /// its constraints, a warning will be printed on the console, and black and
   /// yellow striped areas will appear where the overflow occurs. For other
-  /// values of `clipBehavior`, the contents are clipped accordingly.
+  /// values of [clipBehavior], the contents are clipped accordingly.
   /// {@endtemplate}
   ///
   /// Defaults to [Clip.none].

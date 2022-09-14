@@ -136,7 +136,7 @@ class ChangeNotifier implements Listenable {
   /// disposed.
   ///
   /// {@tool snippet}
-  /// The `debugAssertNotDisposed` function should only be called inside of an
+  /// The [debugAssertNotDisposed] function should only be called inside of an
   /// assert, as in this example.
   ///
   /// ```dart
