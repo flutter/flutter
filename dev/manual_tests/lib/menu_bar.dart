@@ -190,7 +190,7 @@ class _Controls extends StatefulWidget {
 
 class _ControlsState extends State<_Controls> {
   final FocusNode _focusNode = FocusNode(debugLabel: 'Floating');
-  MenuHandle? _menuEntry;
+  MenuHandle? _menuHandle;
 
   @override
   void initState() {
@@ -201,7 +201,7 @@ class _ControlsState extends State<_Controls> {
   @override
   void dispose() {
     _focusNode.dispose();
-    _menuEntry?.dispose();
+    _menuHandle?.dispose();
     super.dispose();
   }
 
@@ -227,10 +227,10 @@ class _ControlsState extends State<_Controls> {
               return TextButton(
                 focusNode: _focusNode,
                 onPressed: () {
-                  if (_menuEntry!.isOpen) {
-                    _menuEntry!.close();
+                  if (_menuHandle!.isOpen) {
+                    _menuHandle!.close();
                   } else {
-                    _menuEntry!.open(context);
+                    _menuHandle!.open(context);
                   }
                 },
                 child: const Text('Open Menu'),
@@ -363,8 +363,8 @@ class _ControlsState extends State<_Controls> {
   }
 
   void _createMenuEntry() {
-    _menuEntry?.dispose();
-    _menuEntry = createMaterialMenu(
+    _menuHandle?.dispose();
+    _menuHandle = createMaterialMenu(
       buttonFocusNode: _focusNode,
       style: const MenuStyle(alignment: AlignmentDirectional.topEnd),
       alignmentOffset: const Offset(0, -8),

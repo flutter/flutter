@@ -53,10 +53,11 @@ class MyContextMenu extends StatefulWidget {
 class _MyContextMenuState extends State<MyContextMenu> {
   MenuEntry? _lastSelection;
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  late MenuHandle _menuHandle;
+  MenuHandle? _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
 
   void _updateMenu() {
+    _menuHandle?.dispose();
     _menuHandle = createMaterialMenu(
       buttonFocusNode: _buttonFocusNode,
       children: <Widget>[
@@ -124,7 +125,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
   @override
   void dispose() {
     _shortcutsEntry?.dispose();
-    _menuHandle.dispose();
+    _menuHandle?.dispose();
     _buttonFocusNode.dispose();
     super.dispose();
   }
@@ -187,7 +188,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
         !HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
       return;
     }
-    _menuHandle.open(context, position: details.globalPosition);
+    _menuHandle!.open(context, position: details.globalPosition);
   }
 
   @override

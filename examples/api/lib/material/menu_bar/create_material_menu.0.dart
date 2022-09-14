@@ -54,7 +54,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   MenuEntry? _lastSelection;
   final MenuController _controller = MenuController();
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  late MenuHandle _menuHandle;
+  MenuHandle? _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
 
   @override
@@ -78,7 +78,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   void dispose() {
     _shortcutsEntry?.dispose();
-    _menuHandle.dispose();
+    _menuHandle?.dispose();
     _controller.dispose();
     _buttonFocusNode.dispose();
     super.dispose();
@@ -139,6 +139,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   }
 
   void _updateMenu() {
+    _menuHandle?.dispose();
     _menuHandle = createMaterialMenu(
       buttonFocusNode: _buttonFocusNode,
       controller: _controller,
@@ -203,12 +204,12 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
             return TextButton(
               focusNode: _buttonFocusNode,
               onPressed: () {
-                if (_menuHandle.isOpen) {
-                  _menuHandle.close();
+                if (_menuHandle!.isOpen) {
+                  _menuHandle!.close();
                 } else {
                   // The context passed to open() must include the desired
                   // MenuAnchor in its ancestors.
-                  _menuHandle.open(context);
+                  _menuHandle!.open(context);
                 }
               },
               child: const Text('OPEN MENU'),

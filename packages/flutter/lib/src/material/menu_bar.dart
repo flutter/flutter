@@ -1526,7 +1526,6 @@ class _SubmenuState extends State<_Submenu> {
     if (anchor != null) {
       child = CompositedTransformFollower(
         link: anchor.link,
-        offset: -(_handle._buttonRect?.topLeft ?? Offset.zero),
         child: child,
       );
     }
@@ -1951,7 +1950,10 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         }
       }
     }
-    return Offset(x, y);
+    if (globalMenuPosition != null){
+      return Offset(x, y);
+    }
+    return Offset(x - absoluteButtonRect.left, y - absoluteButtonRect.top);
   }
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
@@ -2322,7 +2324,6 @@ class MenuHandle extends _MenuHandleBase {
   final Clip _menuClipBehavior;
   final Offset _alignmentOffset;
   final bool _ownsParent;
-  Rect? _buttonRect;
   Offset? _globalMenuPosition;
 
   @protected
@@ -2385,16 +2386,6 @@ class MenuHandle extends _MenuHandleBase {
           'The context where the anchor was created is ${anchor!.anchorKey.currentContext!}\n'
           'The context opening the menu is $context\n'
           'The MenuHandle for the menu is $this');
-    // The globalMenuPosition should take precedence over the anchor.
-    if (anchor != null && _globalMenuPosition == null) {
-      final RenderBox renderBox = anchor.anchorKey.currentContext!.findRenderObject()! as RenderBox;
-      _buttonRect = Rect.fromPoints(
-        renderBox.localToGlobal(Offset.zero),
-        renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-      );
-    } else {
-      _buttonRect = null;
-    }
 
     final BuildContext outerContext = context;
     _overlayEntry = OverlayEntry(
