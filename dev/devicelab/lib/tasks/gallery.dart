@@ -264,7 +264,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
       );
     } else if(deviceOperatingSystem == DeviceOperatingSystem.ios) {
       recursiveCopy(
-        Directory('${galleryDirectory.path}/build/ios/iphoneos/Flutter Gallery.app'),
+        Directory('${galleryDirectory.path}/build/ios/iphoneos'),
         Directory(applicationBinaryPath!),
       );
     }
@@ -386,7 +386,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
         return '$applicationBinaryPath/app-profile.apk';
       }
       else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-        return '$applicationBinaryPath';
+        return '$applicationBinaryPath/Flutter Gallery.app';
       }
     }
 
