@@ -13,28 +13,28 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// A [ButtonStyle] theme that overrides the default appearance of [MenuButton]s
+/// A [ButtonStyle] theme that overrides the default appearance of [SubmenuButton]s
 /// and [MenuItemButton]s when it's used with a [MenuButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.menuTheme].
 ///
-/// The [style]'s properties override [MenuItemButton]'s and [MenuButton]'s
+/// The [style]'s properties override [MenuItemButton]'s and [SubmenuButton]'s
 /// default style, i.e. the [ButtonStyle] returned by
-/// [MenuItemButton.defaultStyleOf] and [MenuButton.defaultStyleOf]. Only the
+/// [MenuItemButton.defaultStyleOf] and [SubmenuButton.defaultStyleOf]. Only the
 /// style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///
 /// See also:
 ///
 ///  * [MenuButtonTheme], the theme which is configured with this class.
-///  * [MenuItemButton.defaultStyleOf] and [MenuButton.defaultStyleOf] which
+///  * [MenuItemButton.defaultStyleOf] and [SubmenuButton.defaultStyleOf] which
 ///    return the default [ButtonStyle]s for menu buttons.
-///  * [MenuItemButton.styleFrom] and [MenuButton.styleFrom], which converts
+///  * [MenuItemButton.styleFrom] and [SubmenuButton.styleFrom], which converts
 ///    simple values into a [ButtonStyle] that's consistent with
 ///    their respective defaults.
 ///  * [MaterialStateProperty.resolve], "resolve" a material state property to a
 ///    simple value based on a set of [MaterialState]s.
 ///  * [ThemeData.menuButtonTheme], which can be used to override the default
-///    [ButtonStyle] for [MenuItemButton]s and [MenuButton]s below the overall
+///    [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///    [Theme].
 @immutable
 class MenuButtonThemeData with Diagnosticable {
@@ -43,10 +43,10 @@ class MenuButtonThemeData with Diagnosticable {
   /// The [style] may be null.
   const MenuButtonThemeData({this.style});
 
-  /// Overrides for [MenuButton] and [MenuItemButton]'s default style.
+  /// Overrides for [SubmenuButton] and [MenuItemButton]'s default style.
   ///
   /// Non-null properties or non-null resolved [MaterialStateProperty] values
-  /// override the [ButtonStyle] returned by [MenuButton.defaultStyleOf] or
+  /// override the [ButtonStyle] returned by [SubmenuButton.defaultStyleOf] or
   /// [MenuItemButton.defaultStyleOf].
   ///
   /// If [style] is null, then this theme doesn't override anything.
@@ -78,19 +78,19 @@ class MenuButtonThemeData with Diagnosticable {
   }
 }
 
-/// Overrides the default [ButtonStyle] of its [MenuItemButton] and [MenuButton]
+/// Overrides the default [ButtonStyle] of its [MenuItemButton] and [SubmenuButton]
 /// descendants.
 ///
 /// See also:
 ///
 ///  * [MenuButtonThemeData], which is used to configure this theme.
-///  * [MenuItemButton.defaultStyleOf] and [MenuButton.defaultStyleOf] which
+///  * [MenuItemButton.defaultStyleOf] and [SubmenuButton.defaultStyleOf] which
 ///    return the default [ButtonStyle]s for menu buttons.
-///  * [MenuItemButton.styleFrom] and [MenuButton.styleFrom], which converts
+///  * [MenuItemButton.styleFrom] and [SubmenuButton.styleFrom], which converts
 ///    simple values into a [ButtonStyle] that's consistent with
 ///    their respective defaults.
 ///  * [ThemeData.menuButtonTheme], which can be used to override the default
-///    [ButtonStyle] for [MenuItemButton]s and [MenuButton]s below the overall
+///    [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///    [Theme].
 class MenuButtonTheme extends InheritedTheme {
   /// Create a [MenuButtonTheme].

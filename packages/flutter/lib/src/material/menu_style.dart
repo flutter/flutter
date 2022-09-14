@@ -41,12 +41,12 @@ import 'theme_data.dart';
 /// focused, disabled, etc.
 ///
 /// These properties can override the default value for just one state or all of
-/// them. For example to create a [MenuButton] whose background color is the
+/// them. For example to create a [SubmenuButton] whose background color is the
 /// color scheme’s primary color with 50% opacity, but only when the menu is
 /// pressed, one could write:
 ///
 /// ```dart
-/// MenuButton(
+/// SubmenuButton(
 ///   menuStyle: MenuStyle(
 ///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
 ///       (Set<MaterialState> states) {
@@ -63,11 +63,11 @@ import 'theme_data.dart';
 /// ```
 ///
 /// In this case the background color for all other menu states would fall back
-/// to the [MenuButton]'s default values. To unconditionally set the menu's
+/// to the [SubmenuButton]'s default values. To unconditionally set the menu's
 /// [backgroundColor] for all states one could write:
 ///
 /// ```dart
-/// const MenuButton(
+/// const SubmenuButton(
 ///   menuStyle: MenuStyle(
 ///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
 ///   ),
@@ -92,7 +92,7 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [MenuButtonTheme], the theme for [MenuButton]s and [MenuItemButton]s.
+///  * [MenuButtonTheme], the theme for [SubmenuButton]s and [MenuItemButton]s.
 ///  * [ButtonStyle], a similar configuration object for button styles.
 @immutable
 class MenuStyle with Diagnosticable {

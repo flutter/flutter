@@ -57,9 +57,9 @@ class MenuBarThemeData extends MenuThemeData {
 ///  * [MenuStyle], a configuration object that holds attributes of a menu used
 ///    by this theme.
 ///  * [MenuTheme], which does the same thing for the menus created by a
-///    [MenuButton] or [createMaterialMenu].
-///  * [MenuButton], a button that manages a submenu that uses these properties.
-///  * [MenuBar], a widget that creates a menu bar that can use [MenuButton]s.
+///    [SubmenuButton] or [createMaterialMenu].
+///  * [SubmenuButton], a button that manages a submenu that uses these properties.
+///  * [MenuBar], a widget that creates a menu bar that can use [SubmenuButton]s.
 class MenuBarTheme extends InheritedTheme {
   /// Creates a theme that controls the configurations for [MenuBar] and
   /// [MenuItemButton] in its widget subtree.

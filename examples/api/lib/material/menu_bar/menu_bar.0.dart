@@ -27,7 +27,7 @@ class MenuEntry {
   static List<Widget> build(List<MenuEntry> selections) {
     Widget buildSelection(MenuEntry selection) {
       if (selection.menuChildren != null) {
-        return MenuButton(
+        return SubmenuButton(
           menuChildren: MenuEntry.build(selection.menuChildren!),
           child: Text(selection.label),
         );

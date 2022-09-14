@@ -887,27 +887,27 @@ void main() {
       await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pumpAndSettle();
 
-      expect(focusedMenu, equals('MenuButton(Text("Menu 0"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 1"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 2"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 0"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 2"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 1"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 0"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       opened.clear();
       closed.clear();
@@ -943,13 +943,13 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 1"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
@@ -959,7 +959,7 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Open the next submenu
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -969,7 +969,7 @@ void main() {
       // Go back, close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Move up, should close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -979,7 +979,7 @@ void main() {
       // Move down, should reopen the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Open the next submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -1000,7 +1000,7 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 2"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
     });
 
     testWidgets('keyboard directional traversal works in RTL mode', (WidgetTester tester) async {
@@ -1029,17 +1029,17 @@ void main() {
       await tester.pump();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      expect(focusedMenu, equals('MenuButton(Text("Menu 1"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 1"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
@@ -1049,7 +1049,7 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Open the next submenu
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
@@ -1059,7 +1059,7 @@ void main() {
       // Go back, close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Move up, should close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -1069,7 +1069,7 @@ void main() {
       // Move down, should reopen the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Open the next submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
@@ -1090,7 +1090,7 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 2"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
     });
 
     testWidgets('hover traversal works', (WidgetTester tester) async {
@@ -1119,21 +1119,21 @@ void main() {
       // Have to open a menu initially to start things going.
       await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 0"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
 
       // Hovering when the menu is already  open does nothing.
       await hoverOver(tester, find.text(TestMenu.mainMenu0.label));
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 0"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
 
       // Hovering over the other main menu items opens them now.
       await hoverOver(tester, find.text(TestMenu.mainMenu2.label));
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 2"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
 
       await hoverOver(tester, find.text(TestMenu.mainMenu1.label));
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Menu 1"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
 
       // Hovering over the menu items focuses them.
       await hoverOver(tester, find.text(TestMenu.subMenu10.label));
@@ -1142,7 +1142,7 @@ void main() {
 
       await hoverOver(tester, find.text(TestMenu.subMenu11.label));
       await tester.pump();
-      expect(focusedMenu, equals('MenuButton(Text("Sub Menu 11"))'));
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       await hoverOver(tester, find.text(TestMenu.subSubMenu110.label));
       await tester.pump();
@@ -1380,7 +1380,7 @@ void main() {
             child: MenuBar(
               controller: controller,
               children: <Widget>[
-                MenuButton(
+                SubmenuButton(
                   menuChildren: <Widget>[
                     MenuItemButton(
                       leadingIcon: const Text('leadingIcon'),
@@ -1409,7 +1409,7 @@ void main() {
             child: MenuBar(
               controller: controller,
               children: <Widget>[
-                MenuButton(
+                SubmenuButton(
                   menuChildren: <Widget>[
                     MenuItemButton(
                       trailingIcon: const Text('trailingIcon'),
@@ -1447,7 +1447,7 @@ void main() {
             child: MenuBar(
               controller: controller,
               children: <Widget>[
-                MenuButton(
+                SubmenuButton(
                   style: style,
                   menuStyle: menuStyle,
                   menuChildren: <Widget>[
@@ -1467,7 +1467,7 @@ void main() {
       await tester.tap(find.text(TestMenu.mainMenu0.label));
       await tester.pump();
 
-      final MenuButton submenu = tester.widget(find.byType(MenuButton));
+      final SubmenuButton submenu = tester.widget(find.byType(SubmenuButton));
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       submenu.debugFillProperties(builder);
 
@@ -1491,7 +1491,7 @@ void main() {
   group('Layout', () {
     List<Rect> collectMenuRects() {
       final List<Rect> menuRects = <Rect>[];
-      final List<Element> candidates = find.byType(MenuButton).evaluate().toList();
+      final List<Element> candidates = find.byType(SubmenuButton).evaluate().toList();
       for (final Element candidate in candidates) {
         final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -1531,7 +1531,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
-      expect(find.byType(MenuButton), findsNWidgets(4));
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
       final List<Rect> menuRects = collectMenuRects();
       expect(menuRects[0], equals(const Rect.fromLTRB(4.0, 0.0, 104.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(104.0, 0.0, 204.0, 48.0)));
@@ -1572,7 +1572,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
-      expect(find.byType(MenuButton), findsNWidgets(4));
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
       final List<Rect> menuRects = collectMenuRects();
       expect(menuRects[0], equals(const Rect.fromLTRB(696.0, 0.0, 796.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(596.0, 0.0, 696.0, 48.0)));
@@ -1611,7 +1611,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
-      expect(find.byType(MenuButton), findsNWidgets(4));
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
       final List<Rect> menuRects = collectMenuRects();
       expect(menuRects[0], equals(const Rect.fromLTRB(4.0, 0.0, 104.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(104.0, 0.0, 204.0, 48.0)));
@@ -1650,7 +1650,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
-      expect(find.byType(MenuButton), findsNWidgets(4));
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
       final List<Rect> menuRects = collectMenuRects();
       expect(menuRects[0], equals(const Rect.fromLTRB(196.0, 0.0, 296.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(96.0, 0.0, 196.0, 48.0)));
@@ -1701,7 +1701,7 @@ void main() {
             child: MenuBar(
               controller: controller,
               children: <Widget>[
-                MenuButton(
+                SubmenuButton(
                   menuChildren: <Widget>[
                     MenuItemButton(
                       shortcut: allModifiers,
@@ -1763,7 +1763,7 @@ List<Widget> createTestMenus({
   bool includeExtraGroups = false,
 }) {
   final List<Widget> result = <Widget>[
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
       menuChildren: <Widget>[
@@ -1785,7 +1785,7 @@ List<Widget> createTestMenus({
       ],
       child: Text(TestMenu.mainMenu0.label),
     ),
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu1) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu1) : null,
       menuChildren: <Widget>[
@@ -1794,7 +1794,7 @@ List<Widget> createTestMenus({
           shortcut: shortcuts[TestMenu.subMenu10],
           child: Text(TestMenu.subMenu10.label),
         ),
-        MenuButton(
+        SubmenuButton(
           onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
           onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
           menuChildren: <Widget>[
@@ -1830,7 +1830,7 @@ List<Widget> createTestMenus({
       ],
       child: Text(TestMenu.mainMenu1.label),
     ),
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
       menuChildren: <Widget>[
@@ -1843,7 +1843,7 @@ List<Widget> createTestMenus({
       child: Text(TestMenu.mainMenu2.label),
     ),
     if (includeExtraGroups)
-      MenuButton(
+      SubmenuButton(
         onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu3) : null,
         onClose: onClose != null ? () => onClose(TestMenu.mainMenu3) : null,
         menuChildren: <Widget>[
@@ -1857,7 +1857,7 @@ List<Widget> createTestMenus({
         child: Text(TestMenu.mainMenu3.label),
       ),
     if (includeExtraGroups)
-      MenuButton(
+      SubmenuButton(
         onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu4) : null,
         onClose: onClose != null ? () => onClose(TestMenu.mainMenu4) : null,
         menuChildren: <Widget>[

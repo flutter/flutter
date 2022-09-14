@@ -79,7 +79,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
           shortcut: MenuEntry.resetMessage.shortcut,
           child: Text(MenuEntry.resetMessage.label),
         ),
-        MenuButton(
+        SubmenuButton(
           menuChildren: <Widget>[
             MenuItemButton(
               onPressed: () => _activate(MenuEntry.colorRed),

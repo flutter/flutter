@@ -82,8 +82,8 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 /// When a menu item with a submenu is clicked on, it toggles the visibility of
 /// the submenu. When the menu item is hovered over, the submenu will open, and
 /// hovering over other items will close the previous menu and open the newly
-/// hovered one. When those open/close transitions occur, [MenuButton.onOpen],
-/// and [MenuButton.onClose] are called on the corresponding [MenuButton] child
+/// hovered one. When those open/close transitions occur, [SubmenuButton.onOpen],
+/// and [SubmenuButton.onClose] are called on the corresponding [SubmenuButton] child
 /// of the menu bar.
 ///
 /// {@template flutter.material.menu_bar.shortcuts_note}
@@ -113,7 +113,7 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 ///
 /// See also:
 ///
-/// * [MenuButton], a menu item which manages a submenu.
+/// * [SubmenuButton], a menu item which manages a submenu.
 /// * [MenuItemButton], a leaf menu item which displays the label, an optional
 ///   shortcut label, and optional leading and trailing icons.
 /// * [createMaterialMenu], a function that creates a [MenuHandle] that allows
@@ -281,7 +281,7 @@ class _MenuBarState extends State<MenuBar> {
 ///   style.
 /// * [createMaterialMenu], a function that creates a [MenuHandle] that allows
 ///   creation and management of a cascading menu anywhere.
-/// * [MenuButton], a menu item similar to this one which manages a submenu.
+/// * [SubmenuButton], a menu item similar to this one which manages a submenu.
 /// * [MenuController], a class that allows controlling and connecting menus.
 /// * [PlatformMenuBar], which creates a menu bar that is rendered by the host
 ///   platform instead of by Flutter (on macOS, for example).
@@ -666,11 +666,11 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 ///   requested.
 /// * [PlatformMenuBar], a widget that renders similar menu bar items from a
 ///   [PlatformMenuItem] using platform-native APIs instead of Flutter.
-class MenuButton extends StatefulWidget {
-  /// Creates a const [MenuButton].
+class SubmenuButton extends StatefulWidget {
+  /// Creates a const [SubmenuButton].
   ///
   /// The [child] attribute is required.
-  const MenuButton({
+  const SubmenuButton({
     super.key,
     this.onHover,
     this.onFocusChange,
@@ -760,7 +760,7 @@ class MenuButton extends StatefulWidget {
   /// The list of widgets that appear in the menu when it is opened.
   ///
   /// These can be any widget, but are typically either [MenuItemButton] or
-  /// [MenuButton] widgets.
+  /// [SubmenuButton] widgets.
   ///
   /// If `menuChildren` is empty, then the button for this menu item will be
   /// disabled.
@@ -832,7 +832,7 @@ class MenuButton extends StatefulWidget {
     return MenuButtonTheme.of(context).style;
   }
 
-  /// A static convenience method that constructs a [MenuButton]'s [ButtonStyle]
+  /// A static convenience method that constructs a [SubmenuButton]'s [ButtonStyle]
   /// given simple values.
   ///
   /// The [foregroundColor] color is used to create a [MaterialStateProperty]
@@ -848,14 +848,14 @@ class MenuButton extends StatefulWidget {
   /// All parameters default to null, by default this method returns a
   /// [ButtonStyle] that doesn't override anything.
   ///
-  /// For example, to override the default foreground color for a [MenuButton],
+  /// For example, to override the default foreground color for a [SubmenuButton],
   /// as well as its overlay color, with all of the standard opacity adjustments
   /// for the pressed, focused, and hovered states, one could write:
   ///
   /// ```dart
-  /// MenuButton(
+  /// SubmenuButton(
   ///   leadingIcon: const Icon(Icons.pets),
-  ///   style: MenuButton.styleFrom(foregroundColor: Colors.green),
+  ///   style: SubmenuButton.styleFrom(foregroundColor: Colors.green),
   ///   menuChildren: const <Widget>[ /* ... */ ],
   ///   child: const Text('Button Label'),
   /// ),
@@ -911,7 +911,7 @@ class MenuButton extends StatefulWidget {
   }
 
   @override
-  State<MenuButton> createState() => _MenuButtonState();
+  State<SubmenuButton> createState() => _SubmenuButtonState();
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
@@ -932,7 +932,7 @@ class MenuButton extends StatefulWidget {
   }
 }
 
-class _MenuButtonState extends State<MenuButton> {
+class _SubmenuButtonState extends State<SubmenuButton> {
   MenuHandle? _handle;
   bool get _enabled => widget.menuChildren.isNotEmpty;
   FocusNode? _internalFocusNode;
@@ -949,7 +949,7 @@ class _MenuButtonState extends State<MenuButton> {
       _internalFocusNode = FocusNode();
       assert(() {
         if (_internalFocusNode != null) {
-          _internalFocusNode!.debugLabel = '$MenuButton(${widget.child})';
+          _internalFocusNode!.debugLabel = '$SubmenuButton(${widget.child})';
         }
         return true;
       }());
@@ -974,7 +974,7 @@ class _MenuButtonState extends State<MenuButton> {
   }
 
   @override
-  void didUpdateWidget(MenuButton oldWidget) {
+  void didUpdateWidget(SubmenuButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.focusNode == null) {
@@ -988,7 +988,7 @@ class _MenuButtonState extends State<MenuButton> {
         _internalFocusNode ??= FocusNode();
         assert(() {
           if (_internalFocusNode != null) {
-            _internalFocusNode!.debugLabel = '$MenuButton(${widget.child})';
+            _internalFocusNode!.debugLabel = '$SubmenuButton(${widget.child})';
           }
           return true;
         }());
@@ -1141,7 +1141,7 @@ class _MenuButtonState extends State<MenuButton> {
 /// [createMaterialMenu], via the `position` argument to [MenuHandle.open]. If a
 /// specific location is provided, then a [MenuAnchor] is not needed.
 ///
-/// When creating a menu with [MenuBar] or a [MenuButton], a [MenuAnchor] is
+/// When creating a menu with [MenuBar] or a [SubmenuButton], a [MenuAnchor] is
 /// also not needed, since it provides its own internally.
 ///
 /// However, if a specific location isn't provided, then [MenuAnchor] is used to
@@ -1360,7 +1360,7 @@ class _MenuAnchorMarker extends InheritedWidget {
 /// [MenuStyle.alignment].
 ///
 /// The `children` attribute is a list of child menu items to place in the menu.
-/// These are typically a tree made up of [MenuButton]s and [MenuItemButton]s,
+/// These are typically a tree made up of [SubmenuButton]s and [MenuItemButton]s,
 /// but can be any [Widget].
 ///
 /// {@tool dartpad}
@@ -1386,7 +1386,7 @@ class _MenuAnchorMarker extends InheritedWidget {
 /// * [MenuHandle], the handle returned from this function.
 /// * [MenuBar], a widget that creates and manages a menu bar with cascading
 ///   menus.
-/// * [MenuButton], a menu button that hosts a submenu.
+/// * [SubmenuButton], a menu button that hosts a submenu.
 /// * [MenuItemButton], a menu button that is a leaf menu item, showing an
 ///   optional shortcut label and leading/trailing icon.
 MenuHandle createMaterialMenu({
@@ -1581,7 +1581,7 @@ class _MenuPanel extends StatefulWidget {
 
   /// The list of widgets to use as children of this menu bar.
   ///
-  /// These are the top level [MenuButton]s.
+  /// These are the top level [SubmenuButton]s.
   final List<Widget> children;
 
   @override
@@ -1707,11 +1707,11 @@ class _MenuPanelState extends State<_MenuPanel> {
 }
 
 /// A label widget that is used as the default label for a [MenuItemButton] or
-/// [MenuButton].
+/// [SubmenuButton].
 ///
-/// It not only shows the [MenuButton.child] or [MenuItemButton.child], but if
+/// It not only shows the [SubmenuButton.child] or [MenuItemButton.child], but if
 /// there is a shortcut associated with the [MenuItemButton], it will display a
-/// mnemonic for the shortcut. For [MenuButton]s, it will display a visual
+/// mnemonic for the shortcut. For [SubmenuButton]s, it will display a visual
 /// indicator that there is a submenu.
 class _MenuItemLabel extends StatelessWidget {
   /// Creates a const [_MenuItemLabel].
@@ -2265,7 +2265,7 @@ class MenuController extends _MenuHandleBase {
 ///   for the controlling widget and the desired menus, and returns a
 ///   `MenuHandle`.
 /// * [MenuBar], a widget that manages its own `MenuHandle` internally.
-/// * [MenuButton], a widget that has a button that manages a submenu.
+/// * [SubmenuButton], a widget that has a button that manages a submenu.
 /// * [MenuItemButton], a widget that draws a menu button with optional shortcut
 ///   labels.
 class MenuHandle extends _MenuHandleBase {
@@ -2510,7 +2510,7 @@ class MenuHandle extends _MenuHandleBase {
 /// [MenuSerializableShortcut] (a subset of the subclasses of
 /// [ShortcutActivator]).
 ///
-/// This helper class is typically used by the [MenuItemButton] and [MenuButton]
+/// This helper class is typically used by the [MenuItemButton] and [SubmenuButton]
 /// classes to display a label for their assigned shortcuts.
 ///
 /// Call [getShortcutLabel] with the [MenuSerializableShortcut] to get a label

@@ -470,7 +470,7 @@ class _TestMenusState extends State<_TestMenus> {
           child: MenuBar(
             controller: widget.menuController,
             children: <Widget>[
-              MenuButton(
+              SubmenuButton(
                 onOpen: () {
                   _openItem(TestMenu.mainMenu1);
                 },
@@ -502,7 +502,7 @@ class _TestMenusState extends State<_TestMenus> {
                 ],
                 child: Text(TestMenu.mainMenu1.label),
               ),
-              MenuButton(
+              SubmenuButton(
                 onOpen: () {
                   _openItem(TestMenu.mainMenu2);
                 },
@@ -530,7 +530,7 @@ class _TestMenusState extends State<_TestMenus> {
                 ],
                 child: Text(TestMenu.mainMenu2.label),
               ),
-              MenuButton(
+              SubmenuButton(
                 onOpen: () {
                   _openItem(TestMenu.mainMenu3);
                 },
@@ -547,7 +547,7 @@ class _TestMenusState extends State<_TestMenus> {
                 ],
                 child: Text(TestMenu.mainMenu3.label),
               ),
-              MenuButton(
+              SubmenuButton(
                 onOpen: () {
                   _openItem(TestMenu.mainMenu4);
                 },
@@ -583,7 +583,7 @@ class _TestMenusState extends State<_TestMenus> {
                       ),
                     ),
                   ),
-                  MenuButton(
+                  SubmenuButton(
                     onOpen: () {
                       _openItem(TestMenu.subMenu5);
                     },

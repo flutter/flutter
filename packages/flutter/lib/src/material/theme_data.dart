@@ -1546,11 +1546,11 @@ class ThemeData with Diagnosticable {
   final MenuBarThemeData menuBarTheme;
 
   /// A theme for customizing the color, shape, elevation, and text style of
-  /// cascading menu buttons created by [MenuButton] or [MenuItemButton].
+  /// cascading menu buttons created by [SubmenuButton] or [MenuItemButton].
   final MenuButtonThemeData menuButtonTheme;
 
   /// A theme for customizing the color, shape, elevation, and other [MenuStyle]
-  /// attributes of menus created by the [MenuButton] widget.
+  /// attributes of menus created by the [SubmenuButton] widget.
   final MenuThemeData menuTheme;
 
   /// A theme for customizing the background color, text style, and icon themes

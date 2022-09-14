@@ -161,7 +161,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
           shortcut: MenuEntry.resetMessage.shortcut,
           child: Text(MenuEntry.resetMessage.label),
         ),
-        MenuButton(
+        SubmenuButton(
           menuChildren: <Widget>[
             MenuItemButton(
               onPressed: () => _activate(MenuEntry.colorRed),
@@ -187,6 +187,8 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
 
   @override
   Widget build(BuildContext context) {
+    // Because some menu entries depend on state in this object, rebuild the
+    // menu whenever the state changes.
     _updateMenu();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

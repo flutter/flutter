@@ -248,7 +248,7 @@ List<Widget> createTestMenus({
     overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color>(itemOverlay) : null,
   );
   final List<Widget> result = <Widget>[
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
       menuChildren: <Widget>[
@@ -260,7 +260,7 @@ List<Widget> createTestMenus({
       ],
       child: Text(TestMenu.mainMenu0.label),
     ),
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu1) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu1) : null,
       menuStyle: menuStyle,
@@ -271,7 +271,7 @@ List<Widget> createTestMenus({
           style: itemStyle,
           child: Text(TestMenu.subMenu10.label),
         ),
-        MenuButton(
+        SubmenuButton(
           onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
           onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
           menuChildren: <Widget>[
@@ -306,7 +306,7 @@ List<Widget> createTestMenus({
       ],
       child: Text(TestMenu.mainMenu1.label),
     ),
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
       menuChildren: <Widget>[

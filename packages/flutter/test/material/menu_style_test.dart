@@ -325,7 +325,7 @@ List<Widget> createTestMenus({
   bool includeExtraGroups = false,
 }) {
   final List<Widget> result = <Widget>[
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,
       menuChildren: <Widget>[
@@ -347,7 +347,7 @@ List<Widget> createTestMenus({
       ],
       child: Text(TestMenu.mainMenu0.label),
     ),
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu1) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu1) : null,
       menuChildren: <Widget>[
@@ -356,7 +356,7 @@ List<Widget> createTestMenus({
           shortcut: shortcuts[TestMenu.subMenu10],
           child: Text(TestMenu.subMenu10.label),
         ),
-        MenuButton(
+        SubmenuButton(
           onOpen: onOpen != null ? () => onOpen(TestMenu.subMenu11) : null,
           onClose: onClose != null ? () => onClose(TestMenu.subMenu11) : null,
           menuChildren: <Widget>[
@@ -392,7 +392,7 @@ List<Widget> createTestMenus({
       ],
       child: Text(TestMenu.mainMenu1.label),
     ),
-    MenuButton(
+    SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu2) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu2) : null,
       menuChildren: <Widget>[
@@ -405,7 +405,7 @@ List<Widget> createTestMenus({
       child: Text(TestMenu.mainMenu2.label),
     ),
     if (includeExtraGroups)
-      MenuButton(
+      SubmenuButton(
         onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu3) : null,
         onClose: onClose != null ? () => onClose(TestMenu.mainMenu3) : null,
         menuChildren: <Widget>[
@@ -419,7 +419,7 @@ List<Widget> createTestMenus({
         child: Text(TestMenu.mainMenu3.label),
       ),
     if (includeExtraGroups)
-      MenuButton(
+      SubmenuButton(
         onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu4) : null,
         onClose: onClose != null ? () => onClose(TestMenu.mainMenu4) : null,
         menuChildren: <Widget>[

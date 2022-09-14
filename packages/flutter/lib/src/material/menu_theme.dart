@@ -12,7 +12,7 @@ import 'theme.dart';
 // Examples can assume:
 // late Widget child;
 
-/// Defines the configuration of the submenus created by the [MenuButton] and
+/// Defines the configuration of the submenus created by the [SubmenuButton] and
 /// [MenuBar] widgets, and the [createMaterialMenu] function.
 ///
 /// Descendant widgets obtain the current [MenuThemeData] object using
@@ -35,7 +35,7 @@ class MenuThemeData with Diagnosticable {
   /// Creates a const set of properties used to configure [MenuTheme].
   const MenuThemeData({this.style});
 
-  /// The [MenuStyle] of a [MenuButton] menu.
+  /// The [MenuStyle] of a [SubmenuButton] menu.
   ///
   /// Any values not set in the [MenuStyle] will use the menu default for that
   /// property.
@@ -68,10 +68,10 @@ class MenuThemeData with Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration in this widget's
-/// descendants for menus created by the [MenuBar] or [MenuButton] widgets, or
+/// descendants for menus created by the [MenuBar] or [SubmenuButton] widgets, or
 /// by [createMaterialMenu].
 ///
-/// Values specified here are used for [MenuButton]'s menu properties that are
+/// Values specified here are used for [SubmenuButton]'s menu properties that are
 /// not given an explicit non-null value.
 ///
 /// See also:
@@ -81,11 +81,11 @@ class MenuThemeData with Diagnosticable {
 ///  * [MenuBarTheme], which does the same thing for the [MenuBar] widget.
 ///  * [MenuBar], a widget that manages [MenuItemButton]s.
 ///  * [MenuItemButton], a widget that is a selectable item in a menu bar menu.
-///  * [MenuButton], a widget that specifies an item with a cascading submenu in
+///  * [SubmenuButton], a widget that specifies an item with a cascading submenu in
 ///    a [MenuBar] menu.
 class MenuTheme extends InheritedTheme {
   /// Creates a const theme that controls the configurations for the menus
-  /// created by the [MenuButton] widget and by [createMaterialMenu].
+  /// created by the [SubmenuButton] widget and by [createMaterialMenu].
   const MenuTheme({
     super.key,
     required this.data,
