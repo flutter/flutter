@@ -428,14 +428,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             showWhenUnlinked: false,
             targetAnchor: Alignment.bottomLeft,
             child: TextFieldTapRegion(
-               child: AutocompleteHighlightedOption(
-                 highlightIndexNotifier: _highlightedOptionIndex,
-                 child: Builder(
-                   builder: (BuildContext context) {
-                     return widget.optionsViewBuilder(context, _select, _options, _fieldWidth ?? double.maxFinite);
-                   }
-                 )
-               ),
+              child: AutocompleteHighlightedOption(
+                highlightIndexNotifier: _highlightedOptionIndex,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return widget.optionsViewBuilder(context, _select, _options, _fieldWidth ?? double.maxFinite);
+                  }
+                )
+              ),
              ),
           );
         },
