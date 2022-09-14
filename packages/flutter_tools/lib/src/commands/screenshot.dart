@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as p;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
@@ -199,7 +198,7 @@ class ScreenshotCommand extends FlutterCommand {
 
     // Will make sure that if the user passes '-o image.png/' the file
     // generated will become '$PWD/image.png'
-    outputFile = fs.file(p.join(
+    outputFile = fs.file(fs.path.join(
       outputFile.absolute.dirname,
       outputFile.absolute.basename
     ));
