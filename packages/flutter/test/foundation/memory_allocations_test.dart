@@ -99,7 +99,7 @@ void main() {
     _checkSdkHandlersNotSet();
 
     expect(ma.hasListeners, isFalse);
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(log, <String>[]);
   });
 
