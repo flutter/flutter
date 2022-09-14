@@ -214,21 +214,21 @@ TEST(TaskRunnerAffineWeakPtrTest, ShouldNotCrashIfRunningOnTheSameTaskRunner) {
   latch2.Wait();
   fml::TaskQueueId qid1 = loop1->GetTaskRunner()->GetTaskQueueId();
   fml::TaskQueueId qid2 = loop2->GetTaskRunner()->GetTaskQueueId();
-  const auto raster_thread_merger_ =
+  const auto raster_thread_merger =
       fml::MakeRefCounted<fml::RasterThreadMerger>(qid1, qid2);
   const size_t kNumFramesMerged = 5;
 
-  raster_thread_merger_->MergeWithLease(kNumFramesMerged);
+  raster_thread_merger->MergeWithLease(kNumFramesMerged);
 
   loop2_task_start_latch.Signal();
   loop2_task_finish_latch.Wait();
 
   for (size_t i = 0; i < kNumFramesMerged; i++) {
-    ASSERT_TRUE(raster_thread_merger_->IsMerged());
-    raster_thread_merger_->DecrementLease();
+    ASSERT_TRUE(raster_thread_merger->IsMerged());
+    raster_thread_merger->DecrementLease();
   }
 
-  ASSERT_FALSE(raster_thread_merger_->IsMerged());
+  ASSERT_FALSE(raster_thread_merger->IsMerged());
   loop2->Terminate();
 
   term1.Signal();
