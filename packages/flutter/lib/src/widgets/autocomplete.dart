@@ -271,8 +271,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   State<RawAutocomplete<T>> createState() => _RawAutocompleteState<T>();
 }
 
-class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
-  final GlobalKey _textFieldKey = GlobalKey();
+class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> with WidgetsBindingObserver {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   late TextEditingController _textEditingController;
@@ -284,9 +283,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
   bool _userHidOptions = false;
-  bool _isOffstage = true;
   String _lastFieldText = '';
-  double? _fieldWidth;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
@@ -503,18 +500,29 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateActions();
     _updateOverlay();
 
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _getFieldWidth());
   }
 
+  bool _isOffstage = true;
+  double? _fieldWidth;
+  final GlobalKey _textFieldKey = GlobalKey();
+
   void _getFieldWidth() {
-    if (_fieldWidth == null) {
-      _fieldWidth = _textFieldKey.currentContext?.size?.width;
-    }
-    if (_fieldWidth != null) {
+    assert(_textFieldKey.currentContext != null, "The fieldKey must be assigned to a TextFormField");
+    if (_textFieldKey.currentContext != null) {
       setState(() {
+        _fieldWidth = _textFieldKey.currentContext?.size?.width;
         _isOffstage = false;
       });
     }
+  }
+
+  @override
+  void didChangeMetrics() {
+    _getFieldWidth();
+    _updateActions();
+    _updateOverlay();
   }
 
   @override
@@ -527,7 +535,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
     _updateActions();
     _updateOverlay();
-    _getFieldWidth();
   }
 
   @override
@@ -542,6 +549,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     _floatingOptions?.remove();
     _floatingOptions = null;
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
