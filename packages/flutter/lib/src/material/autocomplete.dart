@@ -27,7 +27,7 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
- ///
+///
 /// See also:
 ///
 ///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
