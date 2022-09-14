@@ -70,7 +70,7 @@ class _SwitchExampleState extends State<SwitchExample> {
       value: light,
       overlayColor: overlayColor,
       trackColor: trackColor,
-      thumbColor: const MaterialStatePropertyAll<Color>(Colors.black),
+      thumbColor: MaterialStateProperty.all<Color>(Colors.black),
       onChanged: (bool value) {
         // This is called when the user toggles the switch.
         setState(() {
