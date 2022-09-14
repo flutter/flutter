@@ -211,6 +211,14 @@ def to_gn_args(args):
 
   gn_args = {}
 
+  gn_args['is_debug'] = args.unoptimized
+
+  # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
+  # of the Flutter SDK specific arguments are unused.
+  if args.target_os == 'wasm':
+    to_gn_wasm_args(args, gn_args)
+    return gn_args
+
   if args.bitcode:
     if args.target_os != 'ios':
       raise Exception('Bitcode is only supported for iOS')
@@ -237,13 +245,8 @@ def to_gn_args(args):
 
   if args.enable_skshaper:
     gn_args['skia_use_icu'] = True
-    if args.target_os != 'wasm':
-      gn_args['flutter_always_use_skshaper'] = args.always_use_skshaper
-    else:
-      gn_args['skia_use_harfbuzz'] = True
-      gn_args['icu_use_data_file'] = False
+    gn_args['flutter_always_use_skshaper'] = args.always_use_skshaper
   gn_args['is_official_build'] = True  # Disable Skia test utilities.
-  gn_args['is_debug'] = args.unoptimized
   gn_args['android_full_debug'
          ] = args.target_os == 'android' and args.unoptimized
   if args.clang is None:
@@ -253,8 +256,6 @@ def to_gn_args(args):
 
   if args.target_os == 'android' or args.target_os == 'ios':
     gn_args['skia_gl_standard'] = 'gles'
-  elif args.target_os == 'wasm':
-    gn_args['skia_gl_standard'] = 'webgl'
   else:
     # We explicitly don't want to pick GL because we run GLES tests using SwiftShader.
     gn_args['skia_gl_standard'] = ''
@@ -318,36 +319,34 @@ def to_gn_args(args):
     gn_args['dart_debug'] = True
     gn_args['dart_debug_optimization_level'] = '0'
 
-  # Flutter-specific arguments which don't apply for a CanvasKit build.
-  if args.target_os != 'wasm':
-    gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
-    gn_args['flutter_enable_skshaper'] = args.enable_skshaper
-    gn_args['dart_component_kind'
-           ] = 'static_library'  # Always link Dart in statically.
-    gn_args['embedder_for_target'] = args.embedder_for_target
-    gn_args['dart_lib_export_symbols'] = False
-    gn_args['flutter_runtime_mode'] = runtime_mode
-    gn_args['full_dart_sdk'] = args.full_dart_sdk
-    gn_args['dart_version_git_info'] = not args.no_dart_version_git_info
+  gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
+  gn_args['flutter_enable_skshaper'] = args.enable_skshaper
+  gn_args['dart_component_kind'
+         ] = 'static_library'  # Always link Dart in statically.
+  gn_args['embedder_for_target'] = args.embedder_for_target
+  gn_args['dart_lib_export_symbols'] = False
+  gn_args['flutter_runtime_mode'] = runtime_mode
+  gn_args['full_dart_sdk'] = args.full_dart_sdk
+  gn_args['dart_version_git_info'] = not args.no_dart_version_git_info
 
-    gn_args['dart_lib_export_symbols'] = False
-    if runtime_mode == 'debug':
-      gn_args['dart_runtime_mode'] = 'develop'
-    elif runtime_mode == 'jit_release':
-      gn_args['dart_runtime_mode'] = 'release'
-    else:
-      gn_args['dart_runtime_mode'] = runtime_mode
+  gn_args['dart_lib_export_symbols'] = False
+  if runtime_mode == 'debug':
+    gn_args['dart_runtime_mode'] = 'develop'
+  elif runtime_mode == 'jit_release':
+    gn_args['dart_runtime_mode'] = 'release'
+  else:
+    gn_args['dart_runtime_mode'] = runtime_mode
 
-    # Desktop embeddings can have more dependencies than the engine library,
-    # which can be problematic in some build environments (e.g., building on
-    # Linux will bring in pkg-config dependencies at generation time). These
-    # flags allow preventing those those targets from being part of the build
-    # tree.
-    gn_args['enable_desktop_embeddings'] = not args.disable_desktop_embeddings
+  # Desktop embeddings can have more dependencies than the engine library,
+  # which can be problematic in some build environments (e.g., building on
+  # Linux will bring in pkg-config dependencies at generation time). These
+  # flags allow preventing those those targets from being part of the build
+  # tree.
+  gn_args['enable_desktop_embeddings'] = not args.disable_desktop_embeddings
 
-    # Overrides whether Boring SSL is compiled with system as. Only meaningful
-    # on Android.
-    gn_args['bssl_use_clang_integrated_as'] = True
+  # Overrides whether Boring SSL is compiled with system as. Only meaningful
+  # on Android.
+  gn_args['bssl_use_clang_integrated_as'] = True
 
   if args.allow_deprecated_api_calls:
     gn_args['allow_deprecated_api_calls'] = args.allow_deprecated_api_calls
@@ -417,8 +416,7 @@ def to_gn_args(args):
   else:
     gn_args['skia_use_gl'] = args.target_os != 'fuchsia'
 
-  if sys.platform == 'darwin' and args.target_os not in ['android', 'fuchsia',
-                                                         'wasm']:
+  if sys.platform == 'darwin' and args.target_os not in ['android', 'fuchsia']:
     # OpenGL is deprecated on macOS > 10.11.
     # This is not necessarily needed but enabling this until we have a way to
     # build a macOS metal only shell and a gl only shell.
@@ -429,7 +427,7 @@ def to_gn_args(args):
   # Enable Vulkan on all platforms except for Android and iOS. This is just
   # to save on mobile binary size, as there's no reason the Vulkan embedder
   # features can't work on these platforms.
-  if args.target_os not in ['android', 'ios', 'wasm']:
+  if args.target_os not in ['android', 'ios']:
     gn_args['skia_use_vulkan'] = True
     gn_args['skia_vulkan_memory_allocator_dir'
            ] = '//third_party/vulkan_memory_allocator'
@@ -567,6 +565,67 @@ def to_gn_args(args):
            ] = '//third_party/vulkan-deps/vulkan-tools/src'
 
   return gn_args
+
+
+# When building for WASM, almost all GN args used in the Flutter SDK
+# build are unused. This method is used instead.
+def to_gn_wasm_args(args, gn_args):
+  gn_args['is_official_build'] = True
+  gn_args['skia_enable_flutter_defines'] = True
+  gn_args['is_component_build'] = False
+  gn_args['use_clang_static_analyzer'] = False
+  gn_args['is_clang'] = True
+  gn_args['target_os'] = 'wasm'
+  gn_args['target_cpu'] = 'wasm'
+  gn_args['skia_use_angle'] = False
+  gn_args['skia_use_dng_sdk'] = False
+  gn_args['skia_use_expat'] = False
+  gn_args['skia_use_vulkan'] = False
+  gn_args['skia_use_webgpu'] = False
+  gn_args['skia_use_libheif'] = False
+  gn_args['skia_use_libjpeg_turbo_decode'] = True
+  gn_args['skia_use_libjpeg_turbo_encode'] = False
+  gn_args['skia_use_libpng_decode'] = True
+  gn_args['skia_use_libpng_encode'] = True
+  gn_args['skia_use_libwebp_decode'] = True
+  gn_args['skia_use_libwebp_encode'] = False
+  gn_args['skia_use_lua'] = False
+  gn_args['skia_use_wuffs'] = True
+  gn_args['skia_use_zlib'] = True
+  gn_args['skia_gl_standard'] = 'webgl'
+  gn_args['skia_enable_gpu'] = True
+  gn_args['skia_enable_sksl_tracing'] = False
+  gn_args['skia_use_icu'] = True
+  gn_args['icu_use_data_file'] = False
+  gn_args['skia_use_freetype'] = True
+  gn_args['skia_use_harfbuzz'] = True
+  gn_args['skia_use_fontconfig'] = False
+  gn_args['skia_use_libheif'] = False
+  gn_args['skia_enable_fontmgr_custom_directory'] = False
+  gn_args['skia_enable_fontmgr_custom_embedded'] = True
+  gn_args['skia_enable_fontmgr_custom_empty'] = False
+  gn_args['skia_enable_skshaper'] = True
+  gn_args['skia_enable_skparagraph'] = True
+  gn_args['skia_canvaskit_force_tracing'] = False
+  gn_args['skia_canvaskit_enable_skp_serialization'] = True
+  gn_args['skia_canvaskit_enable_effects_deserialization'] = False
+  gn_args['skia_canvaskit_enable_skottie'] = False
+  gn_args['skia_canvaskit_include_viewer'] = False
+  gn_args['skia_canvaskit_enable_particles'] = False
+  gn_args['skia_canvaskit_enable_pathops'] = True
+  gn_args['skia_canvaskit_enable_rt_shader'] = True
+  gn_args['skia_canvaskit_enable_matrix_helper'] = False
+  gn_args['skia_canvaskit_enable_canvas_bindings'] = False
+  gn_args['skia_canvaskit_enable_font'] = True
+  gn_args['skia_canvaskit_enable_embedded_font'] = True
+  gn_args['skia_canvaskit_enable_alias_font'] = True
+  gn_args['skia_canvaskit_legacy_draw_vertices_blend_mode'] = False
+  gn_args['skia_canvaskit_enable_debugger'] = False
+  gn_args['skia_canvaskit_enable_paragraph'] = True
+  gn_args['skia_canvaskit_enable_webgl'] = True
+  gn_args['skia_canvaskit_enable_webgpu'] = False
+  is_profile_build = args.runtime_mode == 'profile' or args.runtime_mode == 'debug'
+  gn_args['skia_canvaskit_profile_build'] = is_profile_build
 
 
 def parse_args(args):
