@@ -54,7 +54,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             onContentCommitted: (CommittedContent data) async {
               if (data.data != null) {
                 setState(() {
-                  bytes = data.data!;
+                  bytes = data.data;
                 });
               }
             },
@@ -62,7 +62,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           if (bytes != null)
             const Text("Here's the most recently inserted content:"),
           if (bytes != null)
-            Image.memory(bytes),
+            Image.memory(bytes!),
         ],
       ),
     );
