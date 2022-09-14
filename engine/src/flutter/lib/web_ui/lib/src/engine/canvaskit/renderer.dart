@@ -303,6 +303,7 @@ class CanvasKitRenderer implements Renderer {
     foreground: foreground as CkPaint?,
     shadows: shadows,
     fontFeatures: fontFeatures,
+    fontVariations: fontVariations,
   );
 
   @override
