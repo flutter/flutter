@@ -398,6 +398,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       }
     } else if (event is PointerUpEvent) {
       if (_dragState == _GestureState.possible) {
+        if (_pastTapTolerance && !_wonArenaForPrimaryPointer) {
+          resolve(GestureDisposition.rejected);
+        }
         // The drag is not accepted yet, so we should call tap up on a `PointerUpEvent`.
         _up = event;
         stopTrackingIfPointerNoLongerDown(event);
@@ -467,7 +470,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       // The `PointerMoveEvent` has not reached the minimum global distance to be accepted as a drag,
       // and it has exceeded the maximum global distance it is allowed to drift from the initial `PointerDownEvent`,
       // to be accepted as a tap. Therefore we reject this recognizer at this point.
-      resolve(GestureDisposition.rejected);
+      // resolve(GestureDisposition.rejected);
     }
   }
 

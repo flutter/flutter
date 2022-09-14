@@ -10304,7 +10304,7 @@ void main() {
     expect(controller.value.selection.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
 
-  testWidgets('force press does not select a word', (WidgetTester tester) async {
+  testWidgets('Force press sets the selection on devices that do not support it', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -10339,11 +10339,11 @@ void main() {
       pressureMin: 0,
     ));
 
-    // We don't want this gesture to select any word on Android.
-    expect(controller.selection, const TextSelection.collapsed(offset: -1));
-
     await gesture.up();
     await tester.pump();
+
+    // We don't want this gesture to select any word on Android.
+    expect(controller.selection, const TextSelection.collapsed(offset: 9));
     expect(find.byType(TextButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
