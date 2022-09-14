@@ -69,7 +69,7 @@ bool isMultiLicenseNotice(Reader reader) {
 }
 
 FileType identifyFile(String name, Reader reader) {
-  List<int> bytes;
+  List<int>? bytes;
   if ((path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/extra/uconv/README') || // This specific ICU README isn't in UTF-8.
       (path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/samples/uresb/sr.txt') || // This specific sample contains non-UTF-8 data (unlike other sr.txt files).
       (path.split(name).reversed.take(2).toList().reversed.join('/') == 'builds/detect.mk') || // This specific freetype sample contains non-UTF-8 data (unlike other .mk files).
@@ -351,7 +351,7 @@ abstract class IoNode {
 
 // interface
 abstract class File extends IoNode {
-  List<int> readBytes();
+  List<int>? readBytes();
 }
 
 // interface
@@ -363,7 +363,7 @@ mixin UTF8TextFile implements TextFile {
   @override
   String readString() {
     try {
-      return cache(UTF8Of(this), () => utf8.decode(readBytes()));
+      return cache(UTF8Of(this), () => utf8.decode(readBytes()!));
     } on FormatException {
       print(fullName);
       rethrow;
@@ -375,13 +375,13 @@ mixin Latin1TextFile implements TextFile {
   @override
   String readString() {
     return cache(Latin1Of(this), () {
-      final List<int> bytes = readBytes();
+      final List<int> bytes = readBytes()!;
       if (bytes.any((int byte) => byte == 0x00)) {
         throw '$fullName contains a U+0000 NULL and is probably not actually encoded as Win1252';
       }
       bool isUTF8 = false;
       try {
-        cache(UTF8Of(this), () => utf8.decode(readBytes()));
+        cache(UTF8Of(this), () => utf8.decode(readBytes()!));
         isUTF8 = true;
       } on FormatException {
         // Exceptions are fine/expected for non-UTF8 text, which we test for
@@ -404,13 +404,13 @@ abstract class Directory extends IoNode {
 abstract class Link extends IoNode { }
 
 mixin ZipFile on File implements Directory {
-  ArchiveDirectory _root;
+  ArchiveDirectory? _root;
 
   @override
   Iterable<IoNode> get walk {
     try {
-      _root ??= ArchiveDirectory.parseArchive(a.ZipDecoder().decodeBytes(readBytes()), fullName);
-      return _root.walk;
+      _root ??= ArchiveDirectory.parseArchive(a.ZipDecoder().decodeBytes(readBytes()!), fullName);
+      return _root!.walk;
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
       rethrow;
@@ -419,13 +419,13 @@ mixin ZipFile on File implements Directory {
 }
 
 mixin TarFile on File implements Directory {
-  ArchiveDirectory _root;
+  ArchiveDirectory? _root;
 
   @override
   Iterable<IoNode> get walk {
     try {
-      _root ??= ArchiveDirectory.parseArchive(a.TarDecoder().decodeBytes(readBytes()), fullName);
-      return _root.walk;
+      _root ??= ArchiveDirectory.parseArchive(a.TarDecoder().decodeBytes(readBytes()!), fullName);
+      return _root!.walk;
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
       rethrow;
@@ -434,15 +434,15 @@ mixin TarFile on File implements Directory {
 }
 
 mixin GZipFile on File implements Directory {
-  InMemoryFile _data;
+  InMemoryFile? _data;
 
   @override
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse('$fullName!$innerName', a.GZipDecoder().decodeBytes(readBytes()));
+      _data ??= InMemoryFile.parse('$fullName!$innerName', a.GZipDecoder().decodeBytes(readBytes()!))!;
       if (_data != null) {
-        yield _data;
+        yield _data!;
       }
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
@@ -452,15 +452,15 @@ mixin GZipFile on File implements Directory {
 }
 
 mixin BZip2File on File implements Directory {
-  InMemoryFile _data;
+  InMemoryFile? _data;
 
   @override
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse('$fullName!$innerName', a.BZip2Decoder().decodeBytes(readBytes()));
+      _data ??= InMemoryFile.parse('$fullName!$innerName', a.BZip2Decoder().decodeBytes(readBytes()!))!;
       if (_data != null) {
-        yield _data;
+        yield _data!;
       }
     } catch (exception) {
       print('failed to parse archive:\n$fullName');
@@ -641,8 +641,8 @@ class ArchiveFile extends IoNode implements File {
   final String fullName;
 
   @override
-  List<int> readBytes() {
-    return _file.content as List<int>;
+  List<int>? readBytes() {
+    return _file.content as List<int>?;
   }
 }
 
@@ -676,18 +676,18 @@ class ArchiveBZip2File extends ArchiveFile with BZip2File {
 class InMemoryFile extends IoNode implements File {
   InMemoryFile(this.fullName, this._bytes);
 
-  static InMemoryFile parse(String fullName, List<int> bytes) {
+  static InMemoryFile? parse(String fullName, List<int> bytes) {
     if (bytes.isEmpty) {
       return null;
     }
     switch (identifyFile(fullName, () => bytes)) {
-      case FileType.binary: return InMemoryFile(fullName, bytes); break;
-      case FileType.zip: return InMemoryZipFile(fullName, bytes); break;
-      case FileType.tar: return InMemoryTarFile(fullName, bytes); break;
-      case FileType.gz: return InMemoryGZipFile(fullName, bytes); break;
-      case FileType.bzip2: return InMemoryBZip2File(fullName, bytes); break;
-      case FileType.text: return InMemoryUTF8TextFile(fullName, bytes); break;
-      case FileType.latin1Text: return InMemoryLatin1TextFile(fullName, bytes); break;
+      case FileType.binary: return InMemoryFile(fullName, bytes);
+      case FileType.zip: return InMemoryZipFile(fullName, bytes);
+      case FileType.tar: return InMemoryTarFile(fullName, bytes);
+      case FileType.gz: return InMemoryGZipFile(fullName, bytes);
+      case FileType.bzip2: return InMemoryBZip2File(fullName, bytes);
+      case FileType.text: return InMemoryUTF8TextFile(fullName, bytes);
+      case FileType.latin1Text: return InMemoryLatin1TextFile(fullName, bytes);
       case FileType.metadata: break; // ignore this file
     }
     assert(false);
