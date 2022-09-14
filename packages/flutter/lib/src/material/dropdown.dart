@@ -1427,7 +1427,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       innerItemsWidget = const SizedBox.shrink();
     } else {
       innerItemsWidget = IndexedStack(
-        index: _selectedIndex ?? hintIndex,
+        index: _selectedIndex ?? hintIndex ?? 0,
         alignment: widget.alignment,
         children: widget.isDense ? items : items.map((Widget item) {
           return widget.itemHeight != null
