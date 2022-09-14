@@ -5,11 +5,11 @@
 #include "solid_color_contents.h"
 
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/solid_fill_utils.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 
@@ -50,22 +50,6 @@ bool SolidColorContents::ShouldRender(
   return cover_ || Contents::ShouldRender(entity, stencil_coverage);
 }
 
-VertexBuffer SolidColorContents::CreateSolidFillVertices(const Path& path,
-                                                         HostBuffer& buffer) {
-  using VS = SolidFillPipeline::VertexShader;
-
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-
-  auto tesselation_result = Tessellator{}.Tessellate(
-      path.GetFillType(), path.CreatePolyline(),
-      [&vtx_builder](auto point) { vtx_builder.AppendVertex({point}); });
-  if (tesselation_result != Tessellator::Result::kSuccess) {
-    return {};
-  }
-
-  return vtx_builder.CreateVertexBuffer(buffer);
-}
-
 bool SolidColorContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
@@ -78,7 +62,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       renderer.GetSolidFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
 
-  cmd.BindVertices(CreateSolidFillVertices(
+  cmd.BindVertices(CreateSolidFillVertices<VS::PerVertexData>(
       cover_
           ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
           : path_,

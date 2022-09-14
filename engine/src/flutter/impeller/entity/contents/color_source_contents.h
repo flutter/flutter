@@ -23,8 +23,14 @@ class ColorSourceContents : public Contents {
 
   void SetAlpha(Scalar alpha);
 
+  void SetCover(bool cover);
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
+  bool ShouldRender(const Entity& entity,
+                    const std::optional<Rect>& stencil_coverage) const override;
 
  protected:
   const Path& GetPath() const;
@@ -33,10 +39,13 @@ class ColorSourceContents : public Contents {
 
   Scalar GetAlpha() const;
 
+  bool GetCover() const;
+
  private:
   Path path_;
   Matrix inverse_matrix_;
   Scalar alpha_ = 1.0;
+  bool cover_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ColorSourceContents);
 };

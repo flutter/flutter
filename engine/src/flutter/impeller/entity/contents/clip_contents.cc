@@ -7,7 +7,7 @@
 #include "fml/logging.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/solid_color_contents.h"
+#include "impeller/entity/contents/solid_fill_utils.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/formats.h"
@@ -119,7 +119,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   }
 
   cmd.pipeline = renderer.GetClipPipeline(options);
-  cmd.BindVertices(SolidColorContents::CreateSolidFillVertices(
+  cmd.BindVertices(CreateSolidFillVertices<VS::PerVertexData>(
       path_, pass.GetTransientsBuffer()));
 
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *

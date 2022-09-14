@@ -704,5 +704,57 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
+  const flutter::DlColor colors[2] = {
+      flutter::DlColor(0xFFF44336),
+      flutter::DlColor(0xFF2196F3),
+  };
+  const float stops[2] = {0.0, 1.0};
+  flutter::DlPaint paint;
+  flutter::DisplayListBuilder builder;
+  auto clip_bounds = SkRect::MakeWH(300.0, 300.0);
+  builder.save();
+  builder.translate(100, 100);
+  builder.clipRect(clip_bounds, SkClipOp::kIntersect, false);
+  auto linear =
+      flutter::DlColorSource::MakeLinear({0.0, 0.0}, {100.0, 100.0}, 2, colors,
+                                         stops, flutter::DlTileMode::kRepeat);
+  paint.setColorSource(linear);
+  builder.drawPaint(paint);
+  builder.restore();
+
+  builder.save();
+  builder.translate(500, 100);
+  builder.clipRect(clip_bounds, SkClipOp::kIntersect, false);
+  auto radial = flutter::DlColorSource::MakeRadial(
+      {100.0, 100.0}, 100.0, 2, colors, stops, flutter::DlTileMode::kRepeat);
+  paint.setColorSource(radial);
+  builder.drawPaint(paint);
+  builder.restore();
+
+  builder.save();
+  builder.translate(100, 500);
+  builder.clipRect(clip_bounds, SkClipOp::kIntersect, false);
+  auto sweep =
+      flutter::DlColorSource::MakeSweep({100.0, 100.0}, 180.0, 270.0, 2, colors,
+                                        stops, flutter::DlTileMode::kRepeat);
+  paint.setColorSource(sweep);
+  builder.drawPaint(paint);
+  builder.restore();
+
+  builder.save();
+  builder.translate(500, 500);
+  builder.clipRect(clip_bounds, SkClipOp::kIntersect, false);
+  auto texture = CreateTextureForFixture("table_mountain_nx.png");
+  auto image = std::make_shared<flutter::DlImageColorSource>(
+      DlImageImpeller::Make(texture), flutter::DlTileMode::kRepeat,
+      flutter::DlTileMode::kRepeat);
+  paint.setColorSource(image);
+  builder.drawPaint(paint);
+  builder.restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
