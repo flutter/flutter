@@ -18,9 +18,6 @@ import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
 
-// Examples can assume:
-// late BuildContext context;
-
 /// The type of the [RawAutocomplete] callback which computes the list of
 /// optional completions for the widget's field, based on the text the user has
 /// entered so far.
@@ -54,6 +51,7 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   BuildContext context,
   AutocompleteOnSelected<T> onSelected,
   Iterable<T> options,
+  double maxOptionsWidth,
 );
 
 /// The type of the Autocomplete callback which returns the widget that
@@ -67,6 +65,7 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
   TextEditingController textEditingController,
   FocusNode focusNode,
   VoidCallback onFieldSubmitted,
+  GlobalKey fieldKey,
 );
 
 /// The type of the [RawAutocomplete] callback that converts an option value to
@@ -273,6 +272,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 }
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
+  final GlobalKey _textFieldKey = GlobalKey();
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   late TextEditingController _textEditingController;
@@ -284,7 +284,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
   bool _userHidOptions = false;
+  bool _isOffstage = true;
   String _lastFieldText = '';
+  double? _fieldWidth;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
@@ -425,20 +427,18 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             link: _optionsLayerLink,
             showWhenUnlinked: false,
             targetAnchor: Alignment.bottomLeft,
-            child: TextFieldTapRegion(
-              child: AutocompleteHighlightedOption(
-                highlightIndexNotifier: _highlightedOptionIndex,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return widget.optionsViewBuilder(context, _select, _options);
-                  }
-                )
-              ),
+            child: AutocompleteHighlightedOption(
+              highlightIndexNotifier: _highlightedOptionIndex,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return widget.optionsViewBuilder(context, _select, _options, _fieldWidth ?? double.maxFinite);
+                }
+              )
             ),
           );
         },
       );
-      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget)!.insert(newFloatingOptions);
+      Overlay.of(context, rootOverlay: true)!.insert(newFloatingOptions);
       _floatingOptions = newFloatingOptions;
     } else {
       _floatingOptions = null;
@@ -502,6 +502,19 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     };
     _updateActions();
     _updateOverlay();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _getFieldWidth());
+  }
+
+  void _getFieldWidth() {
+    if (_fieldWidth == null) {
+      _fieldWidth = _textFieldKey.currentContext?.size?.width;
+    }
+    if (_fieldWidth != null) {
+      setState(() {
+        _isOffstage = false;
+      });
+    }
   }
 
   @override
@@ -514,6 +527,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
     _updateActions();
     _updateOverlay();
+    _getFieldWidth();
   }
 
   @override
@@ -533,24 +547,26 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   @override
   Widget build(BuildContext context) {
-    return TextFieldTapRegion(
-      child: Container(
-        key: _fieldKey,
-        child: Shortcuts(
-          shortcuts: _shortcuts,
-          child: Actions(
-            actions: _actionMap,
-            child: CompositedTransformTarget(
-              link: _optionsLayerLink,
-              child: widget.fieldViewBuilder == null
-                ? const SizedBox.shrink()
-                : widget.fieldViewBuilder!(
+    return Container(
+      key: _fieldKey,
+      child: Shortcuts(
+        shortcuts: _shortcuts,
+        child: Actions(
+          actions: _actionMap,
+          child: CompositedTransformTarget(
+            link: _optionsLayerLink,
+            child: widget.fieldViewBuilder == null
+              ? const SizedBox.shrink()
+              : Offstage(
+                offstage: _isOffstage,
+                child: widget.fieldViewBuilder!(
                     context,
                     _textEditingController,
                     _focusNode,
                     _onFieldSubmitted,
+                    _textFieldKey,
                   ),
-            ),
+              ),
           ),
         ),
       ),
@@ -596,7 +612,7 @@ class AutocompleteNextOptionIntent extends Intent {
 /// by using the static [of] method:
 ///
 /// ```dart
-/// int highlightedIndex = AutocompleteHighlightedOption.of(context);
+/// final highlightedIndex = AutocompleteHighlightedOption.of(context);
 /// ```
 ///
 /// which can then be used to tell which option should be given a visual
@@ -617,7 +633,7 @@ class AutocompleteHighlightedOption extends InheritedNotifier<ValueNotifier<int>
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// int highlightedIndex = AutocompleteHighlightedOption.of(context);
+  /// final highlightedIndex = AutocompleteHighlightedOption.of(context);
   /// ```
   static int of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<AutocompleteHighlightedOption>()?.notifier?.value ?? 0;

@@ -26,8 +26,6 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/autocomplete/autocomplete.1.dart **
 /// {@end-tool}
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
-///
 /// See also:
 ///
 ///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
@@ -44,8 +42,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxWidth = double.maxFinite,
     this.optionsViewBuilder,
     this.initialValue,
-  }) : assert(displayStringForOption != null),
-       assert(optionsBuilder != null);
+  });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -87,11 +84,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
-  static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+  static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted, GlobalKey fieldKey) {
     return _AutocompleteField(
       focusNode: focusNode,
       textEditingController: textEditingController,
       onFieldSubmitted: onFieldSubmitted,
+      fieldKey: fieldKey,
     );
   }
 
@@ -102,13 +100,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
       fieldViewBuilder: fieldViewBuilder,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
-      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
+      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options, double maxOptionsWidth) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
           maxOptionsHeight: optionsMaxHeight,
-          maxOptionsWidth: optionsMaxWidth,
+          maxOptionsWidth: maxOptionsWidth,
         );
       },
       onSelected: onSelected,
@@ -122,6 +120,7 @@ class _AutocompleteField extends StatelessWidget {
     required this.focusNode,
     required this.textEditingController,
     required this.onFieldSubmitted,
+    required this.fieldKey,
   });
 
   final FocusNode focusNode;
@@ -130,9 +129,12 @@ class _AutocompleteField extends StatelessWidget {
 
   final TextEditingController textEditingController;
 
+  final GlobalKey fieldKey;
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      key: fieldKey,
       controller: textEditingController,
       focusNode: focusNode,
       onFieldSubmitted: (String value) {
@@ -141,6 +143,7 @@ class _AutocompleteField extends StatelessWidget {
     );
   }
 }
+
 
 // The default Material-style Autocomplete options.
 class _AutocompleteOptions<T extends Object> extends StatelessWidget {
@@ -151,6 +154,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.options,
     required this.maxOptionsHeight,
     required this.maxOptionsWidth,
+    this.fieldWidth = double.maxFinite,
   });
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -160,6 +164,8 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final Iterable<T> options;
   final double maxOptionsHeight;
   final double maxOptionsWidth;
+
+  final double fieldWidth;
 
   @override
   Widget build(BuildContext context) {
