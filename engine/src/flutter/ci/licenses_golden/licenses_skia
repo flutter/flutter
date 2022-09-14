@@ -1,4 +1,4 @@
-Signature: 2611423a001301a5f1ea0a1f0142b5bb
+Signature: d7b824b19e370c1f66c77f59867fcd95
 
 UNUSED LICENSES:
 
@@ -809,7 +809,6 @@ FILE: ../../../third_party/skia/infra/bots/jobs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-Release-Android_API26.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-Release-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-Release-Chromebook_GLES.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-Release-Flutter_Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm64-Debug-Android_FrameworkWorkarounds.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm64-Debug-Android_HWASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm64-Release-Android_Wuffs.json
@@ -844,7 +843,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Debug-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Release-NoGPU_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Release-Shared_Docker.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Flutter_Android_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Graphite_Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Graphite_Metal_NoGpu.json
@@ -866,9 +864,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/builder_name_schema.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Debian10-Clang-x86_64-Release-NoDEPS.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/Build-Debian9-Clang-arm-Release-Flutter_Android_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/cross_repo_trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/flutter_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/checkout/examples/full.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/docker/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/doxygen/examples/full.expected/doxygen.json
@@ -958,7 +954,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench_DDLTotal_9x9.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Debian10-Clang-arm-Release-Flutter_Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Debian10-Clang-arm-Release-NoPatch.json
 FILE: ../../../third_party/skia/infra/bots/recipes/sync_and_compile.expected/Build-Win10-Clang-x86_64-Release-NoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel2XL-GPU-Adreno540-arm-Debug-All-Android_ASAN.json
@@ -6587,58 +6582,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/gm/tilemodes_subset.cpp + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/gm/tilemodes_subset.cpp
-FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h
-FILE: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h
-FILE: ../../../third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
-FILE: ../../../third_party/skia/include/gpu/vk/VulkanTypes.h
-FILE: ../../../third_party/skia/include/private/gpu/graphite/VulkanGraphiteTypesPriv.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h
-FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/PietTypes.h
-FILE: ../../../third_party/skia/src/gpu/piet/Render.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/Render.h
-FILE: ../../../third_party/skia/src/gpu/piet/Scene.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/Scene.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/MidpointContourParser.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPosition.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2022 Google LLC.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of the copyright holder nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/config/SkUserConfig.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/config/SkUserConfig.h
@@ -7122,6 +7065,57 @@ distribution.
    * Neither the name of Google Inc. nor the names of its
 contributors may be used to endorse or promote products derived from
 this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h
+FILE: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h
+FILE: ../../../third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
+FILE: ../../../third_party/skia/include/gpu/vk/VulkanTypes.h
+FILE: ../../../third_party/skia/include/private/gpu/graphite/VulkanGraphiteTypesPriv.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp
+FILE: ../../../third_party/skia/src/gpu/piet/PietTypes.h
+FILE: ../../../third_party/skia/src/gpu/piet/Render.cpp
+FILE: ../../../third_party/skia/src/gpu/piet/Render.h
+FILE: ../../../third_party/skia/src/gpu/piet/Scene.cpp
+FILE: ../../../third_party/skia/src/gpu/piet/Scene.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/MidpointContourParser.h
+FILE: ../../../third_party/skia/src/sksl/SkSLPosition.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2022 Google LLC.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
