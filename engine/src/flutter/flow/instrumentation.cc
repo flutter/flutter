@@ -58,11 +58,11 @@ double Stopwatch::UnitFrameInterval(double raster_time_ms) const {
 
 double Stopwatch::UnitHeight(double raster_time_ms,
                              double max_unit_interval) const {
-  double unitHeight = UnitFrameInterval(raster_time_ms) / max_unit_interval;
-  if (unitHeight > 1.0) {
-    unitHeight = 1.0;
+  double unit_height = UnitFrameInterval(raster_time_ms) / max_unit_interval;
+  if (unit_height > 1.0) {
+    unit_height = 1.0;
   }
-  return unitHeight;
+  return unit_height;
 }
 
 fml::TimeDelta Stopwatch::MaxDelta() const {

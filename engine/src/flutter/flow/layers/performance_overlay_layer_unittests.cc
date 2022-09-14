@@ -58,7 +58,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
 
   ASSERT_TRUE(surface != nullptr);
 
-  flutter::PaintContext paintContext = {
+  flutter::PaintContext paint_context = {
       // clang-format off
       .internal_nodes_canvas         = nullptr,
       .leaf_nodes_canvas             = surface->getCanvas(),
@@ -83,7 +83,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
       flutter::GetFontFile().c_str());
   layer.set_paint_bounds(SkRect::MakeWH(1000, 400));
   surface->getCanvas()->clear(SK_ColorTRANSPARENT);
-  layer.Paint(paintContext);
+  layer.Paint(paint_context);
 
   sk_sp<SkImage> snapshot = surface->makeImageSnapshot();
   sk_sp<SkData> snapshot_data = snapshot->encodeToData();
@@ -200,8 +200,8 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
   layer->Preroll(preroll_context(), SkMatrix());
   layer->Paint(paint_context());
   auto data = mock_canvas().draw_calls().front().data;
-  auto imageData = std::get<MockCanvas::DrawImageDataNoPaint>(data);
-  auto first_draw_width = imageData.image->width();
+  auto image_data = std::get<MockCanvas::DrawImageDataNoPaint>(data);
+  auto first_draw_width = image_data.image->width();
 
   // Create a second PerformanceOverlayLayer with different bounds.
   layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
@@ -209,8 +209,8 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
   layer->Preroll(preroll_context(), SkMatrix());
   layer->Paint(paint_context());
   data = mock_canvas().draw_calls().back().data;
-  imageData = std::get<MockCanvas::DrawImageDataNoPaint>(data);
-  auto refreshed_draw_width = imageData.image->width();
+  image_data = std::get<MockCanvas::DrawImageDataNoPaint>(data);
+  auto refreshed_draw_width = image_data.image->width();
 
   EXPECT_NE(first_draw_width, refreshed_draw_width);
 }

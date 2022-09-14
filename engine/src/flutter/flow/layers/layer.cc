@@ -18,10 +18,10 @@ Layer::Layer()
 Layer::~Layer() = default;
 
 uint64_t Layer::NextUniqueID() {
-  static std::atomic<uint64_t> nextID(1);
+  static std::atomic<uint64_t> next_id(1);
   uint64_t id;
   do {
-    id = nextID.fetch_add(1);
+    id = next_id.fetch_add(1);
   } while (id == 0);  // 0 is reserved for an invalid id.
   return id;
 }
