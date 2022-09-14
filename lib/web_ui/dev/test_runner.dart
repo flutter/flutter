@@ -73,6 +73,11 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         help: 'Optional. The path to a local build of CanvasKit to use in '
               'tests. If omitted, the test runner uses the default CanvasKit '
               'build.',
+      )
+      ..addFlag(
+        'use-local-canvaskit',
+        help: 'Optional. Whether or not to use the locally built version of '
+              'CanvasKit in the tests.',
       );
   }
 
@@ -115,6 +120,9 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// Path to a CanvasKit build. Overrides the default CanvasKit.
   String? get overridePathToCanvasKit => argResults!['canvaskit-path'] as String?;
 
+  /// Whether or not to use the locally built version of CanvasKit.
+  bool get useLocalCanvasKit => boolArg('use-local-canvaskit');
+
   @override
   Future<bool> run() async {
     final List<FilePath> testFiles = runAllTests
@@ -123,7 +131,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
       if (isWatchMode) ClearTerminalScreenStep(),
-      CompileTestsStep(testFiles: testFiles),
+      CompileTestsStep(testFiles: testFiles, useLocalCanvasKit: useLocalCanvasKit),
       RunTestsStep(
         browserName: browserName,
         testFiles: testFiles,
