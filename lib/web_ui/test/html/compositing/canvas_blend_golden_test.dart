@@ -57,9 +57,7 @@ Future<void> testMain() async {
           ..color = const Color.fromARGB(128, 255, 0, 0));
     rc.restore();
 
-    await canvasScreenshot(rc, 'canvas_blend_circle_diff_color',
-        maxDiffRatePercent: operatingSystem == OperatingSystem.macOs ? 2.95 :
-            operatingSystem == OperatingSystem.iOs ? 1.0 : 0);
+    await canvasScreenshot(rc, 'canvas_blend_circle_diff_color');
   });
 
   test('Blend circle and text with multiply', () async {
@@ -95,9 +93,7 @@ Future<void> testMain() async {
     rc.drawImage(createTestImage(), const Offset(135.0, 130.0),
         SurfacePaint()..blendMode = BlendMode.multiply);
     rc.restore();
-    await canvasScreenshot(rc, 'canvas_blend_image_multiply',
-        maxDiffRatePercent: operatingSystem == OperatingSystem.macOs ? 2.95 :
-        operatingSystem == OperatingSystem.iOs ? 2.0 : 0);
+    await canvasScreenshot(rc, 'canvas_blend_image_multiply');
   });
 }
 

@@ -514,7 +514,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         await matchGoldenFile(
           'canvaskit_read_back_decoded_image_$mode.png',
           region: const ui.Rect.fromLTRB(0, 0, 150, 150),
-          maxDiffRatePercent: 0,
         );
       }
 
@@ -566,7 +565,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       await matchGoldenFile(
         'canvaskit_cross_gl_context_image_$mode.png',
         region: const ui.Rect.fromLTRB(0, 0, 100, 100),
-        maxDiffRatePercent: 0,
       );
 
       await disposePlatformView(0);
@@ -611,7 +609,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       await matchGoldenFile(
         'canvaskit_picture_texture_toimage',
         region: const ui.Rect.fromLTRB(0, 0, 128, 128),
-        maxDiffRatePercent: 0,
       );
       mandrill.dispose();
       codec.dispose();

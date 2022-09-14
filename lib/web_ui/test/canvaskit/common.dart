@@ -192,7 +192,7 @@ Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
   sb.pushOffset(0, 0);
   sb.addPicture(ui.Offset.zero, picture);
   CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
-  await matchGoldenFile(goldenFile, region: region, maxDiffRatePercent: 0.0);
+  await matchGoldenFile(goldenFile, region: region);
 }
 
 /// Sends a platform message to create a Platform View with the given id and viewType.

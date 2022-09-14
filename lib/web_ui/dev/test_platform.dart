@@ -34,11 +34,9 @@ import 'package:test_core/src/util/io.dart';
 import 'package:test_core/src/util/stack_trace_mapper.dart';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_test_utils/goldens.dart';
 import 'package:web_test_utils/image_compare.dart';
 
 import 'browser.dart';
-import 'common.dart';
 import 'environment.dart' as env;
 
 /// Custom test platform that serves web engine unit tests.
@@ -329,26 +327,16 @@ class BrowserPlatform extends PlatformPlugin {
       return shelf.Response.ok(json.encode('OK'));
     }
 
-    final double maxDiffRate = requestData.containsKey('maxdiffrate')
-        ? (requestData['maxdiffrate'] as num)
-            .toDouble() // can be parsed as either int or double
-        : kMaxDiffRateFailure;
     final Map<String, dynamic> region =
         requestData['region'] as Map<String, dynamic>;
-    final PixelComparison pixelComparison = PixelComparison.values.firstWhere(
-        (PixelComparison value) =>
-            value.toString() == requestData['pixelComparison']);
     final bool isCanvaskitTest = requestData['isCanvaskitTest'] as bool;
-    final String result = await _diffScreenshot(
-        filename, maxDiffRate, region, pixelComparison, isCanvaskitTest);
+    final String result = await _diffScreenshot(filename, region, isCanvaskitTest);
     return shelf.Response.ok(json.encode(result));
   }
 
   Future<String> _diffScreenshot(
     String filename,
-    double maxDiffRateFailure,
     Map<String, dynamic> region,
-    PixelComparison pixelComparison,
     bool isCanvaskitTest,
   ) async {
     final Rectangle<num> regionAsRectange = Rectangle<num>(
@@ -366,8 +354,6 @@ class BrowserPlatform extends PlatformPlugin {
       screenshot,
       doUpdateScreenshotGoldens,
       filename,
-      pixelComparison,
-      maxDiffRateFailure,
       skiaClient,
       isCanvaskitTest: isCanvaskitTest,
     );

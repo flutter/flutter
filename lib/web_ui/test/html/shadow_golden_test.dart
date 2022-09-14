@@ -160,8 +160,6 @@ Future<void> testMain() async {
       await matchGoldenFile(
         'shadows.png',
         region: region,
-        maxDiffRatePercent: 0.23,
-        pixelComparison: PixelComparison.precise,
       );
     },
     testOn: 'chrome',

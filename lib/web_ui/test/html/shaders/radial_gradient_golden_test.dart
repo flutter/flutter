@@ -24,15 +24,13 @@ Future<void> testMain() async {
   Future<void> testGradient(String fileName, Shader shader,
       {Rect paintRect = const Rect.fromLTRB(50, 50, 300, 300),
       Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300),
-      double maxDiffRatePercent = 0,
       Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
     final RecordingCanvas rc = RecordingCanvas(region);
     final SurfacePaint paint = SurfacePaint()..shader = shader;
     final Path path = Path();
     path.addRect(paintRect);
     rc.drawPath(path, paint);
-    await canvasScreenshot(rc, fileName, region: region,
-        maxDiffRatePercent: maxDiffRatePercent);
+    await canvasScreenshot(rc, fileName, region: region);
   }
 
   test('Should draw centered radial gradient.', () async {
@@ -46,8 +44,7 @@ Future<void> testMain() async {
             <Color>[
               const Color.fromARGB(255, 0, 0, 0),
               const Color.fromARGB(255, 0, 0, 255)
-            ]),
-        maxDiffRatePercent: 0.2);
+            ]));
   });
 
   test('Should draw right bottom centered radial gradient.', () async {
@@ -62,7 +59,6 @@ Future<void> testMain() async {
           const Color.fromARGB(255, 0, 0, 255)
         ],
       ),
-      maxDiffRatePercent: 0.3,
     );
   });
 
@@ -81,7 +77,6 @@ Future<void> testMain() async {
         <double>[0.0, 1.0],
       ),
       shaderRect: shaderRect,
-      maxDiffRatePercent: 0.2,
     );
   });
 

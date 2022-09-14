@@ -103,8 +103,7 @@ Future<void> testMain() async {
 
     appendToScene();
 
-    await matchGoldenFile('misaligned_canvas_test.png', region: region,
-      maxDiffRatePercent: 1.0);
+    await matchGoldenFile('misaligned_canvas_test.png', region: region);
   });
 
   test('fill the whole canvas with color even when transformed', () async {
@@ -117,8 +116,7 @@ Future<void> testMain() async {
     appendToScene();
 
     await matchGoldenFile('bitmap_canvas_fills_color_when_transformed.png',
-        region: region,
-        maxDiffRatePercent: 5.0);
+        region: region);
   });
 
   test('fill the whole canvas with paint even when transformed', () async {
@@ -133,8 +131,7 @@ Future<void> testMain() async {
     appendToScene();
 
     await matchGoldenFile('bitmap_canvas_fills_paint_when_transformed.png',
-        region: region,
-        maxDiffRatePercent: 5.0);
+        region: region);
   });
 
   // This test reproduces text blurriness when two pieces of text appear inside
@@ -186,8 +183,6 @@ Future<void> testMain() async {
     await matchGoldenFile(
       'bitmap_canvas_draws_high_quality_text.png',
       region: canvasSize,
-      maxDiffRatePercent: 0.0,
-      pixelComparison: PixelComparison.precise,
     );
   }, testOn: 'chrome');
 
@@ -264,8 +259,6 @@ Future<void> testMain() async {
     await matchGoldenFile(
       'bitmap_canvas_draws_text_on_top_of_canvas.png',
       region: canvasSize,
-      maxDiffRatePercent: 1.0,
-      pixelComparison: PixelComparison.precise,
     );
   });
 

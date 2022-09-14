@@ -350,7 +350,6 @@ Future<void> testMain() async {
     await canvasScreenshot(
       rc,
       'draw_text_composite_order_below',
-      maxDiffRatePercent: 1.1,
       region: const Rect.fromLTWH(0, 0, 350, 300),
     );
   });
@@ -381,7 +380,7 @@ Future<void> testMain() async {
       sceneElement.append(builder.build().webOnlyRootElement!);
       domDocument.body!.append(sceneElement);
       await matchGoldenFile('draw_nine_slice.png',
-          region: region, maxDiffRatePercent: 0);
+          region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
@@ -420,7 +419,7 @@ Future<void> testMain() async {
       sceneElement.append(builder.build().webOnlyRootElement!);
       domDocument.body!.append(sceneElement);
       await matchGoldenFile('draw_nine_slice_empty_center.png',
-          region: region, maxDiffRatePercent: 0);
+          region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
@@ -446,7 +445,7 @@ Future<void> testMain() async {
       ..close());
     canvas.drawImage(createNineSliceImage(), Offset.zero, SurfacePaint());
     await canvasScreenshot(canvas, 'draw_clipped_and_transformed_image',
-        region: region, maxDiffRatePercent: 1.0);
+        region: region);
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/61245
@@ -462,7 +461,6 @@ Future<void> testMain() async {
     canvas.drawImage(createTestImage(), const Offset(0, 100), SurfacePaint());
     await canvasScreenshot(canvas, 'draw_3d_image',
         region: region,
-        maxDiffRatePercent: 6.0,
         setupPerspective: true);
   });
 
@@ -483,7 +481,6 @@ Future<void> testMain() async {
     canvas.drawRect(const Rect.fromLTWH(50, 150, 50, 20), SurfacePaint()..color = const Color(0x80000000));
     await canvasScreenshot(canvas, 'draw_3d_image_clipped',
         region: region,
-        maxDiffRatePercent: 5.0,
         setupPerspective: true);
   });
 
@@ -507,7 +504,6 @@ Future<void> testMain() async {
         SurfacePaint()..color = const Color(0x80E010E0));
     await canvasScreenshot(canvas, 'draw_3d_rect_clipped',
         region: region,
-        maxDiffRatePercent: 1.0,
         setupPerspective: true);
   });
 
@@ -532,7 +528,6 @@ Future<void> testMain() async {
     canvas.drawCircle(const Offset(360, 370), 30, SurfacePaint()..color = const Color(0x80E010E0));
     await canvasScreenshot(canvas, 'draw_3d_oval_clipped',
         region: region,
-        maxDiffRatePercent: 1.0,
         setupPerspective: true);
   });
 
@@ -564,7 +559,6 @@ Future<void> testMain() async {
     canvas.drawCircle(const Offset(100, 50), 4, SurfacePaint()..color = const Color(0xFF000000));
     await canvasScreenshot(canvas, 'draw_3d_path',
         region: region,
-        maxDiffRatePercent: 1.0,
         setupPerspective: true);
   });
 
@@ -597,7 +591,6 @@ Future<void> testMain() async {
     canvas.drawCircle(const Offset(100, 50), 4, SurfacePaint()..color = const Color(0xFF000000));
     await canvasScreenshot(canvas, 'draw_3d_path_clipped',
         region: region,
-        maxDiffRatePercent: 1.0,
         setupPerspective: true);
   });
 }
