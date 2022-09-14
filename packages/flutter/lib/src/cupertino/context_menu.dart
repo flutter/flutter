@@ -267,12 +267,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
         if(widget.previewBuilder == null) {
-          // borderRadius value comes from overlapping the CupertinoContextMenu
-          // with a context menu from iOS 16.0 in the XCode iphone simulator
           return FittedBox(
             fit: BoxFit.cover,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
+              borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
+                      ?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
               child: widget.child,
             ),
           );
@@ -478,18 +477,14 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
           borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
                       ?.borderRadius ??
                   BorderRadius.circular(0),
-          // boxShadow: ((widget.child as Container?)?.decoration as BoxDecoration?)
-          //             ?.boxShadow ??
-          //         const <BoxShadow>[],
+          boxShadow: const <BoxShadow>[],
       ),
       end: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
                     ?.borderRadius ??
                 BorderRadius.circular(0),
-        // boxShadow: ((widget.child as Container?)?.decoration as BoxDecoration?)
-        //             ?.boxShadow ??
-        //         endBoxShadow,
+        boxShadow: endBoxShadow,
       ),
     ).animate(widget.controller);
   }
@@ -503,6 +498,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     return Positioned.fromRect(
       rect: _rect.value!,
       child: Container(
+        key: const Key('context-decoy-container'),
         decoration: _boxDecoration.value, 
         child: widget.child,
       ),
