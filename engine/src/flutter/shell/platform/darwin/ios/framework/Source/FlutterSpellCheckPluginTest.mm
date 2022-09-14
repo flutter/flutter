@@ -161,11 +161,11 @@
   XCTAssertTrue(capturedResult.count == 2);
   NSDictionary* suggestionsJSON1 = capturedResult.firstObject;
   XCTAssertEqualObjects(suggestionsJSON1[@"startIndex"], @0);
-  XCTAssertEqualObjects(suggestionsJSON1[@"endIndex"], @4);
+  XCTAssertEqualObjects(suggestionsJSON1[@"endIndex"], @5);
   XCTAssertEqualObjects(suggestionsJSON1[@"suggestions"], suggestions1);
   NSDictionary* suggestionsJSON2 = capturedResult[1];
   XCTAssertEqualObjects(suggestionsJSON2[@"startIndex"], @5);
-  XCTAssertEqualObjects(suggestionsJSON2[@"endIndex"], @9);
+  XCTAssertEqualObjects(suggestionsJSON2[@"endIndex"], @10);
   XCTAssertEqualObjects(suggestionsJSON2[@"suggestions"], suggestions2);
   [self.mockTextChecker reset];
   [textCheckerClassMock stopMocking];
@@ -198,11 +198,11 @@
   XCTAssertTrue(capturedResult.count == 2);
   NSDictionary* suggestionsJSON1 = capturedResult.firstObject;
   XCTAssertEqualObjects(suggestionsJSON1[@"startIndex"], @0);
-  XCTAssertEqualObjects(suggestionsJSON1[@"endIndex"], @4);
+  XCTAssertEqualObjects(suggestionsJSON1[@"endIndex"], @5);
   XCTAssertEqualObjects(suggestionsJSON1[@"suggestions"], suggestions1);
   NSDictionary* suggestionsJSON2 = capturedResult[1];
   XCTAssertEqualObjects(suggestionsJSON2[@"startIndex"], @6);
-  XCTAssertEqualObjects(suggestionsJSON2[@"endIndex"], @9);
+  XCTAssertEqualObjects(suggestionsJSON2[@"endIndex"], @10);
   XCTAssertEqualObjects(suggestionsJSON2[@"suggestions"], suggestions2);
   [self.mockTextChecker reset];
   [textCheckerClassMock stopMocking];
@@ -228,7 +228,7 @@
   XCTAssertTrue(capturedResult.count == 1);
   NSDictionary* suggestionsJSON1 = capturedResult.firstObject;
   XCTAssertEqualObjects(suggestionsJSON1[@"startIndex"], @0);
-  XCTAssertEqualObjects(suggestionsJSON1[@"endIndex"], @4);
+  XCTAssertEqualObjects(suggestionsJSON1[@"endIndex"], @5);
   XCTAssertEqualObjects(suggestionsJSON1[@"suggestions"], suggestions1);
   [self.mockTextChecker reset];
   [textCheckerClassMock stopMocking];
@@ -267,6 +267,29 @@
                                   capturedResult = result;
                                 }];
   XCTAssertNil(capturedResult);
+  [textCheckerClassMock stopMocking];
+}
+
+- (void)testSupportSubLanguage {
+  self.partialMockPlugin = OCMPartialMock(self.plugin);
+  OCMStub([self.partialMockPlugin textChecker]).andReturn(self.mockTextChecker);
+  id textCheckerClassMock = OCMClassMock([UITextChecker class]);
+  [[[textCheckerClassMock stub] andReturn:@[ @"en_us" ]] availableLanguages];
+  NSArray* suggestions1 = @[ @"suggestion 1", @"suggestion 2" ];
+
+  [self mockUITextCheckerWithExpectedMisspelledWordRange:NSMakeRange(0, 5)
+                                           startingIndex:0
+                                             suggestions:suggestions1];
+  __block NSArray* capturedResult;
+  [self.mockMethodChannel invokeMethod:@"SpellCheck.initiateSpellCheck"
+                             arguments:@[ @"en-us", @"hejjo" ]
+                                result:^(id _Nullable result) {
+                                  capturedResult = result;
+                                }];
+  NSDictionary* suggestionsJSON1 = capturedResult.firstObject;
+  XCTAssertEqualObjects(suggestionsJSON1[@"startIndex"], @0);
+  XCTAssertEqualObjects(suggestionsJSON1[@"endIndex"], @5);
+  XCTAssertEqualObjects(suggestionsJSON1[@"suggestions"], suggestions1);
   [textCheckerClassMock stopMocking];
 }
 
