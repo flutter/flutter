@@ -17,8 +17,7 @@ void main() {
     await tester.pump();
 
     expect(find.text(example.MenuEntry.about.label), findsOneWidget);
-    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
-    expect(find.text(example.MenuEntry.resetMessage.label), findsOneWidget);
+    expect(find.text('Show/Hide Message'), findsOneWidget);
     expect(find.text('Background Color'), findsOneWidget);
     expect(find.text(example.MenuEntry.colorRed.label), findsNothing);
     expect(find.text(example.MenuEntry.colorGreen.label), findsNothing);
@@ -31,8 +30,7 @@ void main() {
     await tester.pump();
 
     expect(find.text(example.MenuEntry.about.label), findsOneWidget);
-    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
-    expect(find.text(example.MenuEntry.resetMessage.label), findsOneWidget);
+    expect(find.text('Show/Hide Message'), findsOneWidget);
     expect(find.text('Background Color'), findsOneWidget);
 
     await tester.tap(find.text('Background Color'));
@@ -64,11 +62,12 @@ void main() {
 
     expect(find.text(example.MenuApp.kMessage), findsOneWidget);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
     expect(find.text(example.MenuApp.kMessage), findsNothing);
-    expect(find.text('Last Selected: ${example.MenuEntry.resetMessage.label}'), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyR);

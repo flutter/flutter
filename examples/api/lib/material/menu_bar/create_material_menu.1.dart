@@ -16,7 +16,6 @@ void main() => runApp(const ContextMenuApp());
 enum MenuEntry {
   about('About'),
   showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  resetMessage('Reset Message', SingleActivator(LogicalKeyboardKey.escape)),
   hideMessage('Hide Message'),
   colorMenu('Color Menu'),
   colorRed('Red Background', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
@@ -53,11 +52,16 @@ class MyContextMenu extends StatefulWidget {
 class _MyContextMenuState extends State<MyContextMenu> {
   MenuEntry? _lastSelection;
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  MenuHandle? _menuHandle;
+  late MenuHandle _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
 
-  void _updateMenu() {
-    _menuHandle?.dispose();
+  @override
+  void initState() {
+    super.initState();
+    _createMenu();
+  }
+
+  void _createMenu() {
     _menuHandle = createMaterialMenu(
       buttonFocusNode: _buttonFocusNode,
       children: <Widget>[
@@ -69,16 +73,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
         MenuItemButton(
           onPressed: () => _activate(MenuEntry.showMessage),
           shortcut: MenuEntry.showMessage.shortcut,
-          child: Text(
-            showingMessage ? MenuEntry.hideMessage.label : MenuEntry.showMessage.label,
-          ),
-        ),
-        // Hides the message, but is only enabled if the message isn't already
-        // hidden.
-        MenuItemButton(
-          onPressed: showingMessage ? () => _activate(MenuEntry.resetMessage) : null,
-          shortcut: MenuEntry.resetMessage.shortcut,
-          child: Text(MenuEntry.resetMessage.label),
+          child: const Text('Show/Hide Message'),
         ),
         SubmenuButton(
           menuChildren: <Widget>[
@@ -125,7 +120,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
   @override
   void dispose() {
     _shortcutsEntry?.dispose();
-    _menuHandle?.dispose();
+    _menuHandle.dispose();
     _buttonFocusNode.dispose();
     super.dispose();
   }
@@ -165,7 +160,6 @@ class _MyContextMenuState extends State<MyContextMenu> {
       case MenuEntry.showMessage:
         showingMessage = !showingMessage;
         break;
-      case MenuEntry.resetMessage:
       case MenuEntry.hideMessage:
         showingMessage = false;
         break;
@@ -188,12 +182,11 @@ class _MyContextMenuState extends State<MyContextMenu> {
         !HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
       return;
     }
-    _menuHandle!.open(context, position: details.globalPosition);
+    _menuHandle.open(context, position: details.globalPosition);
   }
 
   @override
   Widget build(BuildContext context) {
-    _updateMenu();
     return GestureDetector(
       onTapDown: _handleTapDown,
       child: Container(

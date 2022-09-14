@@ -167,7 +167,7 @@ class MenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   /// The list of menu items that are the top level children of the [MenuBar].
   ///
-  /// A Widget in Flutter is immutable, so directly modifying the `children`
+  /// A Widget in Flutter is immutable, so directly modifying the [children]
   /// with [List] APIs such as `someMenuBarWidget.menus.add(...)` will result in
   /// incorrect behaviors. Whenever the menus list is modified, a new list
   /// object must be provided.
@@ -589,8 +589,8 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     // each type of style exists. Each "*StyleOf" function is only called once.
     final ButtonStyle mergedStyle =
         widget.style?.merge(widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))) ??
-            widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
-            widget.defaultStyleOf(context);
+        widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
+        widget.defaultStyleOf(context);
 
     return TextButton(
       onPressed: widget.enabled ? _handleSelect : null,
@@ -762,7 +762,7 @@ class SubmenuButton extends StatefulWidget {
   /// These can be any widget, but are typically either [MenuItemButton] or
   /// [SubmenuButton] widgets.
   ///
-  /// If `menuChildren` is empty, then the button for this menu item will be
+  /// If [menuChildren] is empty, then the button for this menu item will be
   /// disabled.
   final List<Widget> menuChildren;
 
@@ -1179,11 +1179,15 @@ class MenuAnchor extends StatefulWidget {
 }
 
 class _MenuAnchorState extends State<MenuAnchor> {
-  // This links the anchor's region with the menu's location in the overlay.
+  // This links the anchor's region with the menu's location in the overlay so
+  // that when the view is scrolled or resized, the menu stays where it is
+  // relative to the anchor. It is given to a CompositedTransformFollower in the
+  // overlay entry's build function, and to the CompositedTransformTarget here
+  // in the MenuAnchor.
   final LayerLink _link = LayerLink();
   // This is the global key that is used later to determine the bounding rect
   // for the anchor's region that the custom layout uses to determine where to
-  // place the menu.
+  // place the menu on the screen and to avoid the view's edges.
   final GlobalKey _anchorKey = GlobalKey(debugLabel: kReleaseMode ? null : 'MenuAnchor');
   bool _controllerChangeScheduled = false;
   bool _disposed = false;
@@ -1293,7 +1297,7 @@ class _MenuAnchorMarker extends InheritedWidget {
 
 /// Creates a new cascading menu.
 ///
-/// Calling `createMaterialMenu` creates a new cascading menu that can be
+/// Calling [createMaterialMenu] creates a new cascading menu that can be
 /// controlled through the [MenuHandle] returned by this function. The menu is
 /// created in a closed state, and [MenuHandle.open] must be called for the menu
 /// to be shown.
@@ -1364,7 +1368,7 @@ class _MenuAnchorMarker extends InheritedWidget {
 /// but can be any [Widget].
 ///
 /// {@tool dartpad}
-/// This example shows a menu created with `createMaterialMenu` that contains a
+/// This example shows a menu created with [createMaterialMenu] that contains a
 /// single top level menu containing several items, including one submenu. The
 /// items are identified with an enhanced enum value.
 ///
@@ -1372,7 +1376,7 @@ class _MenuAnchorMarker extends InheritedWidget {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows a context menu created with `createMaterialMenu` that
+/// This example shows a context menu created with [createMaterialMenu] that
 /// contains a single top level menu containing several items, including one
 /// submenu. The items are identified with an enhanced enum value. The context
 /// menu is opened by pressing "Ctrl" while clicking on the background of the
@@ -1480,6 +1484,16 @@ class _SubmenuState extends State<_Submenu> {
 
     final _MenuAnchorMarker? anchor = _handle._globalMenuPosition == null ? _MenuAnchorMarker.maybeOf(context) : null;
 
+    // Even though we use a CompositedTransformFollower below to keep the menu
+    // in place when things scroll or move, we still need the button rect
+    // because the custom layout below needs to be able to position the menu by
+    // looking at the global coordinates of the menu button: it needs to know if
+    // the menu is too close to the edge of the view or not. The
+    // CompositedTransformFollower takes care of when the view is resized or
+    // scrolled after it is positioned, but it doesn't know if the menu is near
+    // an edge or not. If you have a menu up and scroll and get the menu too
+    // close to an edge, it won't relocate the menu (it'll just scroll off the
+    // edge).
     Widget child = CustomSingleChildLayout(
       delegate: _MenuLayout(
         buttonRect: anchor != null ? _getMenuButtonRect(anchor.anchorKey.currentContext!) : null,
@@ -2104,21 +2118,28 @@ abstract class _MenuHandleBase with DiagnosticableTreeMixin, ChangeNotifier {
 /// A controller that allows control of a [MenuBar] from other places in the
 /// widget hierarchy.
 ///
-/// Typically, it's not necessary to create a `MenuController` to use a
+/// Typically, it's not necessary to create a [MenuController] to use a
 /// [MenuBar], but if open menus need to be closed with the [closeAll] method in
-/// response to an event, a `MenuController` can be created and passed to the
+/// response to an event, a [MenuController] can be created and passed to the
 /// [MenuBar].
 ///
 /// If a [MenuAnchor] is used with [createMaterialMenu], then the same
 /// controller that was given to the [MenuAnchor] must also be given to
-/// [createMaterialMenu]. If a specific menu position is given, then no
-/// controller is required.
+/// [createMaterialMenu]. If a specific menu position is given with the
+/// `globalMenuPosition` argument to [createMaterialMenu], then no controller is
+/// required.
 ///
-/// The controller can be listened to for some changes in the state of the menu
-/// bar, to see if [isOpen] has changed, for instance.
+/// The controller can be listened to for some changes in the state of the
+/// associated menus, to see if [isOpen] has changed, for instance.
 ///
 /// The [dispose] method must be called on the controller when it is no longer
-/// needed.
+/// needed, and may not be used after [dispose] is called.
+///
+/// See also:
+///
+///  * [createMaterialMenu], a function used to create a menu that takes an
+///    optional [MenuController].
+///  * [MenuHandle], a handle used to control an individual menu created by [createMaterialMenu].
 class MenuController extends _MenuHandleBase {
   /// Creates a [MenuController] that can be used with a [MenuBar] or
   /// [createMaterialMenu].
@@ -2251,10 +2272,11 @@ class MenuController extends _MenuHandleBase {
 
 /// A handle to a menu created by [createMaterialMenu].
 ///
-/// A `MenuHandle` can only be created by calling [createMaterialMenu].
+/// A [MenuHandle] can only be created by calling [createMaterialMenu].
 ///
-/// `MenuHandle` is used to control and interrogate a menu after it has been
-/// created, with methods such as [open] and [close], and state like [isOpen].
+/// A [MenuHandle] is used to control and interrogate a menu after it has been
+/// created, with methods such as [open] and [close], and state accessors like
+/// [isOpen].
 ///
 /// The [dispose] method must be called when the menu handle is no longer
 /// needed. The object shouldn't be used after [dispose] is called.
@@ -2263,8 +2285,11 @@ class MenuController extends _MenuHandleBase {
 ///
 /// * [createMaterialMenu], the function that creates a menu given a focus node
 ///   for the controlling widget and the desired menus, and returns a
-///   `MenuHandle`.
-/// * [MenuBar], a widget that manages its own `MenuHandle` internally.
+///   [MenuHandle].
+/// * [MenuController], a controller that allows collecting menus together so
+///   that they can all be closed as one, and be traversed with the keyboard
+///   when open.
+/// * [MenuBar], a widget that manages its own [MenuHandle] internally.
 /// * [SubmenuButton], a widget that has a button that manages a submenu.
 /// * [MenuItemButton], a widget that draws a menu button with optional shortcut
 ///   labels.

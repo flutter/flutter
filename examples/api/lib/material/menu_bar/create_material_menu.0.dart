@@ -16,7 +16,6 @@ void main() => runApp(const MenuApp());
 enum MenuEntry {
   about('About'),
   showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  resetMessage('Reset Message', SingleActivator(LogicalKeyboardKey.escape)),
   hideMessage('Hide Message'),
   colorMenu('Color Menu'),
   colorRed('Red Background', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
@@ -54,8 +53,14 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   MenuEntry? _lastSelection;
   final MenuController _controller = MenuController();
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  MenuHandle? _menuHandle;
+  late MenuHandle _menuHandle;
   ShortcutRegistryEntry? _shortcutsEntry;
+
+  @override
+  void initState() {
+    super.initState();
+    _createMenu();
+  }
 
   @override
   void didChangeDependencies() {
@@ -78,7 +83,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   void dispose() {
     _shortcutsEntry?.dispose();
-    _menuHandle?.dispose();
+    _menuHandle.dispose();
     _controller.dispose();
     _buttonFocusNode.dispose();
     super.dispose();
@@ -120,7 +125,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
       case MenuEntry.showMessage:
         showingMessage = !showingMessage;
         break;
-      case MenuEntry.resetMessage:
       case MenuEntry.hideMessage:
         showingMessage = false;
         break;
@@ -138,8 +142,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     }
   }
 
-  void _updateMenu() {
-    _menuHandle?.dispose();
+  void _createMenu() {
     _menuHandle = createMaterialMenu(
       buttonFocusNode: _buttonFocusNode,
       controller: _controller,
@@ -152,15 +155,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
         MenuItemButton(
           onPressed: () => _activate(MenuEntry.showMessage),
           shortcut: MenuEntry.showMessage.shortcut,
-          child: Text(
-            showingMessage ? MenuEntry.hideMessage.label : MenuEntry.showMessage.label,
-          ),
-        ),
-        // Hides the message, but is only enabled if the message isn't already hidden.
-        MenuItemButton(
-          onPressed: showingMessage ? () => _activate(MenuEntry.resetMessage) : null,
-          shortcut: MenuEntry.resetMessage.shortcut,
-          child: Text(MenuEntry.resetMessage.label),
+          child: const Text('Show/Hide Message'),
         ),
         SubmenuButton(
           menuChildren: <Widget>[
@@ -188,9 +183,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
 
   @override
   Widget build(BuildContext context) {
-    // Because some menu entries depend on state in this object, rebuild the
-    // menu whenever the state changes.
-    _updateMenu();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -204,12 +196,12 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
             return TextButton(
               focusNode: _buttonFocusNode,
               onPressed: () {
-                if (_menuHandle!.isOpen) {
-                  _menuHandle!.close();
+                if (_menuHandle.isOpen) {
+                  _menuHandle.close();
                 } else {
                   // The context passed to open() must include the desired
                   // MenuAnchor in its ancestors.
-                  _menuHandle!.open(context);
+                  _menuHandle.open(context);
                 }
               },
               child: const Text('OPEN MENU'),
