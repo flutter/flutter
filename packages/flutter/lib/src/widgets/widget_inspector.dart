@@ -129,6 +129,17 @@ class _MulticastCanvas implements Canvas {
 
   @override
   void drawDRRect(RRect outer, RRect inner, Paint paint) {
+    // Clamp the inner border's radii to zero, until deflate does this
+    // automatically, so that we can start asserting non-negative values
+    // in the engine without breaking the framework.
+    // TODO(gspencergoog): Remove this once https://github.com/flutter/engine/pull/36062 rolls into the framework.
+    inner = RRect.fromLTRBAndCorners(
+      inner.left, inner.top, inner.right, inner.bottom,
+      topLeft: inner.tlRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: inner.trRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft: inner.blRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: inner.brRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+    );
     _main.drawDRRect(outer, inner, paint);
     _screenshot.drawDRRect(outer, inner, paint);
   }
