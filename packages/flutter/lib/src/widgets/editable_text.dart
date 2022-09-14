@@ -2148,7 +2148,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return configuration.copyWith(spellCheckService: spellCheckService);
   }
 
-  // TODO(justinmc): Still need to update all usages of this.
   /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
   @Deprecated(
     'Use `contextMenuBuilder` instead of `toolbarOptions`. '
@@ -5262,5 +5261,3 @@ _Throttled<T> _throttle<T>({
     return timer!;
   };
 }
-
-// TODO(justinmc): Rename canCopy etc. to copyEnabled etc.
