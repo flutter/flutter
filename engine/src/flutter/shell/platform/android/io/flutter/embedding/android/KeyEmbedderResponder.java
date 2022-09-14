@@ -122,7 +122,7 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
   // the current event in consideration.
   //
   // Events that should be synthesized before the main event are synthesized
-  // immediately, while events that should be syntehsized after the main event are appended to
+  // immediately, while events that should be synthesized after the main event are appended to
   // `postSynchronize`.
   //
   // Although Android KeyEvent defined bitmasks for sided modifiers (SHIFT_LEFT_ON and
@@ -133,6 +133,7 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
       PressingGoal goal,
       boolean truePressed,
       long eventLogicalKey,
+      long eventPhysicalKey,
       KeyEvent event,
       ArrayList<Runnable> postSynchronize) {
     // During an incoming event, there might be a synthesized Flutter event for each key of each
@@ -151,8 +152,8 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
     // 2. Derive the pre-event state of the event key (if applicable.)
     for (int keyIdx = 0; keyIdx < goal.keys.length; keyIdx += 1) {
       final KeyboardMap.KeyPair key = goal.keys[keyIdx];
-      nowStates[keyIdx] = pressingRecords.containsKey(goal.keys[keyIdx].physicalKey);
-      if (goal.keys[keyIdx].logicalKey == eventLogicalKey) {
+      nowStates[keyIdx] = pressingRecords.containsKey(key.physicalKey);
+      if (key.logicalKey == eventLogicalKey) {
         switch (getEventType(event)) {
           case kDown:
             preEventStates[keyIdx] = false;
@@ -161,7 +162,7 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
               postSynchronize.add(
                   () ->
                       synthesizeEvent(
-                          false, key.logicalKey, key.physicalKey, event.getEventTime()));
+                          false, key.logicalKey, eventPhysicalKey, event.getEventTime()));
             }
             break;
           case kUp:
@@ -273,7 +274,12 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
     final ArrayList<Runnable> postSynchronizeEvents = new ArrayList<>();
     for (final PressingGoal goal : KeyboardMap.pressingGoals) {
       synchronizePressingKey(
-          goal, (event.getMetaState() & goal.mask) != 0, logicalKey, event, postSynchronizeEvents);
+          goal,
+          (event.getMetaState() & goal.mask) != 0,
+          logicalKey,
+          physicalKey,
+          event,
+          postSynchronizeEvents);
     }
 
     for (final TogglingGoal goal : togglingGoals.values()) {
