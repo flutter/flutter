@@ -68,7 +68,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 // iPad Mini 6th Gen according to ios-resolution.com.
 const double _kIPadWidth = 1488.0;
 
-/// The default mime types to be used when [contentCommitMimeTypes] is not provided.
+/// The default mime types to be used when contentCommitMimeTypes is not provided.
 /// The default value supports inserting images of any format.
 const List<String> kDefaultContentCommitMimeTypes = <String>[
   'image/png',
