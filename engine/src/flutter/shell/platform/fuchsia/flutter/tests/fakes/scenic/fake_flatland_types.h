@@ -28,6 +28,12 @@ inline bool operator==(const fuchsia::math::SizeU& a,
   return a.width == b.width && a.height == b.height;
 }
 
+inline bool operator==(const fuchsia::math::Inset& a,
+                       const fuchsia::math::Inset& b) {
+  return a.top == b.top && a.left == b.left && a.right == b.right &&
+         a.bottom == b.bottom;
+}
+
 inline bool operator==(const fuchsia::math::Vec& a,
                        const fuchsia::math::Vec& b) {
   return a.x == b.x && a.y == b.y;
@@ -129,6 +135,7 @@ struct FakeViewport {
   bool operator==(const FakeViewport& other) const;
 
   constexpr static fuchsia::math::SizeU kDefaultViewportLogicalSize{};
+  constexpr static fuchsia::math::Inset kDefaultViewportInset{};
 
   fuchsia::ui::composition::ContentId id{kInvalidContentId};
 
