@@ -46,7 +46,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;
 
-  /// Whether or not to apply the image filter opation to the child of this
+  /// Whether or not to apply the image filter operation to the child of this
   /// widget.
   ///
   /// Prefer setting enabled to `false` instead of creating a "no-op" filter

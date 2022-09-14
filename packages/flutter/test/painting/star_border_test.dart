@@ -132,6 +132,34 @@ void main() {
         const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
+  testWidgets("StarBorder doesn't try to scale an infinite scale matrix", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Stack(
+              children: <Widget> [
+                Positioned.fromRelativeRect(
+                  rect: const RelativeRect.fromLTRB(100, 100, 100, 100),
+                  child: Container(
+                    decoration: const ShapeDecoration(
+                      color: Colors.green,
+                      shape: StarBorder(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('StarBorder lerped with StarBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
     const ShapeBorder otherBorder = StarBorder(

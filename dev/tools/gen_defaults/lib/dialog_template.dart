@@ -27,9 +27,14 @@ class _${blockName}DefaultsM3 extends DialogTheme {
   @override
   Color? get iconColor => _colors.secondary;
 
-  // TODO(darrenaustin): overlay should be handled by Material widget: https://github.com/flutter/flutter/issues/9160
   @override
-  Color? get backgroundColor => ElevationOverlay.colorWithOverlay(${componentColor("md.comp.dialog.container")}, _colors.primary, ${elevation("md.comp.dialog.container")});
+  Color? get backgroundColor => ${componentColor("md.comp.dialog.container")};
+
+  @override
+  Color? get shadowColor => ${colorOrTransparent("md.comp.dialog.container.shadow-color")};
+
+  @override
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.dialog.container.surface-tint-layer.color")};
 
   @override
   TextStyle? get titleTextStyle => ${textStyle("md.comp.dialog.headline")};

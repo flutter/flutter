@@ -37,6 +37,7 @@ export 'src/services/raw_keyboard_macos.dart';
 export 'src/services/raw_keyboard_web.dart';
 export 'src/services/raw_keyboard_windows.dart';
 export 'src/services/restoration.dart';
+export 'src/services/service_extensions.dart';
 export 'src/services/spell_check.dart';
 export 'src/services/system_channels.dart';
 export 'src/services/system_chrome.dart';
