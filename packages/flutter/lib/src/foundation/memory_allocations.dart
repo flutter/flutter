@@ -12,8 +12,8 @@ const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocation
 
 /// If true, Flutter objects dispatch the memory allocation events.
 ///
-/// By default, the constant is true for profile and debug mode and false
-/// for release mode, for app size optimization goals.
+/// By default, the constant is true for debug mode and false
+/// for profile and release modes.
 /// To enable the dispatching for release mode, pass the compilation flag
 /// `--dart-define=flutter.memory_allocations=true`.
 const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
