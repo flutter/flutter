@@ -783,7 +783,8 @@ void main() {
       );
     });
 
-    test('Allows inconsistent modifier for iOS', () async {
+    testWidgets('Allows inconsistent modifier for iOS', (WidgetTester _) async {
+      // Use `testWidgets` for clean-ups.
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
       addTearDown(() {
@@ -810,7 +811,8 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
     });
 
-    test('Allows inconsistent modifier for Android', () async {
+    testWidgets('Allows inconsistent modifier for Android', (WidgetTester _) async {
+      // Use `testWidgets` for clean-ups.
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
       addTearDown(() {
