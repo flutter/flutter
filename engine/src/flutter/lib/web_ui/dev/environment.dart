@@ -25,8 +25,8 @@ class Environment {
         io.Directory(pathlib.join(engineSrcDir.path, 'out'));
     final io.Directory hostDebugUnoptDir =
         io.Directory(pathlib.join(outDir.path, 'host_debug_unopt'));
-    final io.Directory canvasKitOutDir =
-        io.Directory(pathlib.join(outDir.path, 'wasm_debug'));
+    final io.Directory wasmReleaseOutDir =
+        io.Directory(pathlib.join(outDir.path, 'wasm_release'));
     final io.Directory dartSdkDir =
         io.Directory(pathlib.join(hostDebugUnoptDir.path, 'dart-sdk'));
     final io.Directory webUiRootDir = io.Directory(
@@ -44,6 +44,7 @@ class Environment {
       }
     }
 
+
     return Environment._(
       self: self,
       webUiRootDir: webUiRootDir,
@@ -51,7 +52,7 @@ class Environment {
       engineToolsDir: engineToolsDir,
       outDir: outDir,
       hostDebugUnoptDir: hostDebugUnoptDir,
-      canvasKitOutDir: canvasKitOutDir,
+      wasmReleaseOutDir: wasmReleaseOutDir,
       dartSdkDir: dartSdkDir,
     );
   }
@@ -63,7 +64,7 @@ class Environment {
     required this.engineToolsDir,
     required this.outDir,
     required this.hostDebugUnoptDir,
-    required this.canvasKitOutDir,
+    required this.wasmReleaseOutDir,
     required this.dartSdkDir,
   });
 
@@ -84,11 +85,13 @@ class Environment {
   /// This is where you'll find the ninja output, such as the Dart SDK.
   final io.Directory outDir;
 
-  /// The "host_debug_unopt" build of the Dart SDK.
+  /// The output directory for the host_debug_unopt build.
   final io.Directory hostDebugUnoptDir;
 
-  /// The output directory for the build of CanvasKit.
-  final io.Directory canvasKitOutDir;
+  /// The output directory for the wasm_release build.
+  ///
+  /// We build CanvasKit in release mode to reduce code size.
+  final io.Directory wasmReleaseOutDir;
 
   /// The root of the Dart SDK.
   final io.Directory dartSdkDir;
