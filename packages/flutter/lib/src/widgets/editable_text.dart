@@ -1906,13 +1906,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
 
   @override
-  /*
-  @Deprecated(
-    'Use `TextSelectionToolbarButtonItemsBuilder.canCut` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
-  */
   bool get cutEnabled {
     if (widget.selectionControls is! TextSelectionHandleControls) {
       return widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
@@ -1923,13 +1916,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  /*
-  @Deprecated(
-    'Use `TextSelectionToolbarButtonItemsBuilder.canCopy` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
-  */
   bool get copyEnabled {
     if (widget.selectionControls is! TextSelectionHandleControls) {
       return widget.toolbarOptions.copy && !widget.obscureText;
@@ -1938,15 +1924,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && !textEditingValue.selection.isCollapsed;
   }
 
-  // TODO(justinmc): Remove these commented out lines around here.
   @override
-  /*
-  @Deprecated(
-    'Use `TextSelectionToolbarButtonItemsBuilder.canPaste` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
-  */
   bool get pasteEnabled {
     if (widget.selectionControls is! TextSelectionHandleControls) {
       return widget.toolbarOptions.paste && !widget.readOnly;
@@ -1957,13 +1935,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  /*
-  @Deprecated(
-    'Use `TextSelectionToolbarButtonItemsBuilder.canSelectAll` instead, or `contextMenuBuilder` to change the toolbar. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
-  */
   bool get selectAllEnabled {
     return getSelectAllEnabled(defaultTargetPlatform);
   }
