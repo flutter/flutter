@@ -35,6 +35,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Could potentially break color scheme tests on upgrade,
   // so pin and manually update as needed.
   'material_color_utilities': '0.2.0',
+  // https://github.com/flutter/flutter/issues/111304
+  'url_launcher_android': '6.0.17',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

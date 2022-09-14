@@ -1060,11 +1060,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// framework might not schedule a [build] and the user interface for this
   /// subtree might not be updated to reflect the new state.
   ///
-  /// Generally it is recommended that the `setState` method only be used to
+  /// Generally it is recommended that the [setState] method only be used to
   /// wrap the actual changes to the state, not any computation that might be
   /// associated with the change. For example, here a value used by the [build]
   /// function is incremented, and then the change is written to disk, but only
-  /// the increment is wrapped in the `setState`:
+  /// the increment is wrapped in the [setState]:
   ///
   /// ```dart
   /// Future<void> _incrementCounter() async {

@@ -85,7 +85,6 @@
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf__e2e_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/openpay_benchmarks__scroll_perf.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/spell_check_test.dart @camsim99 @flutter/android
 
 ## Windows Android DeviceLab tests

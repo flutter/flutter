@@ -3126,17 +3126,26 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
       final String lintName = lineComponents.removeLast();
       final String location = lineComponents.removeLast();
       return '$location: $lintName';
-      // Add debugging for https://github.com/flutter/flutter/issues/111272
     } on RangeError catch (err) {
-      fail('Received "$err" while trying to parse:\n\n$line');
+      throw RangeError('Received "$err" while trying to parse: "$line".');
     }
   }
-  final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
+  final String stdout = exec.stdout.toString();
+  final List<String> errors;
+  try {
+    errors = const LineSplitter().convert(stdout)
       .where((String line) {
         return line.trim().isNotEmpty &&
             !line.startsWith('Analyzing') &&
-            !line.contains('flutter pub get');
+            !line.contains('flutter pub get') &&
+            !line.contains('Resolving dependencies') &&
+            !line.contains('Got dependencies');
       }).map(lineParser).toList();
+
+    // Add debugging for https://github.com/flutter/flutter/issues/111272
+  } on RangeError catch (err) {
+    fail('$err\n\nComplete STDOUT was:\n\n$stdout');
+  }
   expect(errors, unorderedEquals(expectedFailures));
 }
 

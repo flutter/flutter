@@ -986,7 +986,7 @@ class SelectionOverlay {
       _magnifierOverlayInfoBearer,
     );
 
-    if (builtMagnifier == null || _handles == null) {
+    if (builtMagnifier == null) {
       return;
     }
 
@@ -994,7 +994,7 @@ class SelectionOverlay {
         context: context,
         below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
             ? null
-            : _handles!.first,
+            : _handles?.first,
         builder: (_) => builtMagnifier);
   }
 

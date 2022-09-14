@@ -1429,6 +1429,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     if (newHour != null) {
       _selectedTime.value = TimeOfDay(hour: newHour, minute: _selectedTime.value.minute);
       widget.onChanged(_selectedTime.value);
+      FocusScope.of(context).requestFocus();
     }
   }
 
@@ -1445,6 +1446,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     if (newMinute != null) {
       _selectedTime.value = TimeOfDay(hour: _selectedTime.value.hour, minute: int.parse(value!));
       widget.onChanged(_selectedTime.value);
+      FocusScope.of(context).unfocus();
     }
   }
 
@@ -1521,6 +1523,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                             selectedTime: _selectedTime.value,
                             style: hourMinuteStyle,
                             autofocus: widget.autofocusHour,
+                            inputAction: TextInputAction.next,
                             validator: _validateHour,
                             onSavedSubmitted: _handleHourSavedSubmitted,
                             onChanged: _handleHourChanged,
@@ -1554,6 +1557,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                             selectedTime: _selectedTime.value,
                             style: hourMinuteStyle,
                             autofocus: widget.autofocusMinute,
+                            inputAction: TextInputAction.done,
                             validator: _validateMinute,
                             onSavedSubmitted: _handleMinuteSavedSubmitted,
                             minuteLabelText: widget.minuteLabelText,
@@ -1602,6 +1606,7 @@ class _HourTextField extends StatelessWidget {
     required this.selectedTime,
     required this.style,
     required this.autofocus,
+    required this.inputAction,
     required this.validator,
     required this.onSavedSubmitted,
     required this.onChanged,
@@ -1612,6 +1617,7 @@ class _HourTextField extends StatelessWidget {
   final TimeOfDay selectedTime;
   final TextStyle style;
   final bool? autofocus;
+  final TextInputAction inputAction;
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String> onChanged;
@@ -1625,6 +1631,7 @@ class _HourTextField extends StatelessWidget {
       selectedTime: selectedTime,
       isHour: true,
       autofocus: autofocus,
+      inputAction: inputAction,
       style: style,
       semanticHintText: hourLabelText ??  MaterialLocalizations.of(context).timePickerHourLabel,
       validator: validator,
@@ -1639,6 +1646,7 @@ class _MinuteTextField extends StatelessWidget {
     required this.selectedTime,
     required this.style,
     required this.autofocus,
+    required this.inputAction,
     required this.validator,
     required this.onSavedSubmitted,
     required this.minuteLabelText,
@@ -1648,6 +1656,7 @@ class _MinuteTextField extends StatelessWidget {
   final TimeOfDay selectedTime;
   final TextStyle style;
   final bool? autofocus;
+  final TextInputAction inputAction;
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
   final String? minuteLabelText;
@@ -1660,6 +1669,7 @@ class _MinuteTextField extends StatelessWidget {
       selectedTime: selectedTime,
       isHour: false,
       autofocus: autofocus,
+      inputAction: inputAction,
       style: style,
       semanticHintText: minuteLabelText ?? MaterialLocalizations.of(context).timePickerMinuteLabel,
       validator: validator,
@@ -1673,6 +1683,7 @@ class _HourMinuteTextField extends StatefulWidget {
     required this.selectedTime,
     required this.isHour,
     required this.autofocus,
+    required this.inputAction,
     required this.style,
     required this.semanticHintText,
     required this.validator,
@@ -1684,6 +1695,7 @@ class _HourMinuteTextField extends StatefulWidget {
   final TimeOfDay selectedTime;
   final bool isHour;
   final bool? autofocus;
+  final TextInputAction inputAction;
   final TextStyle style;
   final String semanticHintText;
   final FormFieldValidator<String> validator;
@@ -1799,6 +1811,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
             ],
             focusNode: focusNode,
             textAlign: TextAlign.center,
+            textInputAction: widget.inputAction,
             keyboardType: TextInputType.number,
             style: widget.style.copyWith(color: timePickerTheme.hourMinuteTextColor ?? colorScheme.onSurface),
             controller: controller.value,

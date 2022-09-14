@@ -513,7 +513,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// use [canRequestFocus].
   ///
   /// If any descendants are focused when this is set to false, they will be
-  /// unfocused. When `descendantsAreFocusable` is set to true again, they will
+  /// unfocused. When [descendantsAreFocusable] is set to true again, they will
   /// not be refocused, although they will be able to accept focus again.
   ///
   /// Does not affect the value of [canRequestFocus] on the descendants.
@@ -531,7 +531,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///   traversal for a subtree.
   /// * [Focus], a widget that exposes this setting as a parameter.
   /// * [FocusTraversalGroup], a widget used to group together and configure
-  ///   the focus traversal policy for a widget subtree that also has an
+  ///   the focus traversal policy for a widget subtree that also has a
   ///   `descendantsAreFocusable` parameter that prevents its children from
   ///   being focused.
   bool get descendantsAreFocusable => _descendantsAreFocusable;
@@ -827,7 +827,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// If you want this node to lose focus and the focus to move to the next or
   /// previous node in the enclosing [FocusTraversalGroup], call [nextFocus] or
-  /// [previousFocus] instead of calling `unfocus`.
+  /// [previousFocus] instead of calling [unfocus].
   ///
   /// {@tool dartpad}
   /// This example shows the difference between the different [UnfocusDisposition]

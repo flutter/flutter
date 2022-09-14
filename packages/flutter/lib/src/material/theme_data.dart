@@ -2578,10 +2578,9 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   /// returned [CupertinoThemeData]. No derived attributes from iOS defaults or
   /// from cascaded Material theme attributes are copied.
   ///
-  /// [MaterialBasedCupertinoThemeData.copyWith] cannot change the base
-  /// Material [ThemeData]. To change the base Material [ThemeData], create a
-  /// new Material [Theme] and use `copyWith` on the Material [ThemeData]
-  /// instead.
+  /// This [copyWith] cannot change the base Material [ThemeData]. To change the
+  /// base Material [ThemeData], create a new Material [Theme] and use
+  /// [ThemeData.copyWith] on the Material [ThemeData] instead.
   @override
   MaterialBasedCupertinoThemeData copyWith({
     Brightness? brightness,
