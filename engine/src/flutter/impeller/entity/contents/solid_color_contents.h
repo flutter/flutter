@@ -27,9 +27,6 @@ class SolidColorContents final : public Contents {
 
   static std::unique_ptr<SolidColorContents> Make(Path path, Color color);
 
-  static VertexBuffer CreateSolidFillVertices(const Path& path,
-                                              HostBuffer& buffer);
-
   void SetPath(Path path);
 
   void SetCover(bool cover);

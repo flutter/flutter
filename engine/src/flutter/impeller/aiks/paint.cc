@@ -15,6 +15,7 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
     auto contents = source();
     contents->SetPath(std::move(path));
     contents->SetAlpha(color.alpha);
+    contents->SetCover(cover);
     return contents;
   }
 

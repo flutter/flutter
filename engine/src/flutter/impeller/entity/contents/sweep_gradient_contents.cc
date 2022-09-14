@@ -7,10 +7,11 @@
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/gradient_generator.h"
+#include "impeller/entity/contents/solid_fill_utils.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
-#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 
@@ -55,24 +56,6 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
   using VS = SweepGradientFillPipeline::VertexShader;
   using FS = SweepGradientFillPipeline::FragmentShader;
 
-  auto vertices_builder = VertexBufferBuilder<VS::PerVertexData>();
-  {
-    auto result = Tessellator{}.Tessellate(GetPath().GetFillType(),
-                                           GetPath().CreatePolyline(),
-                                           [&vertices_builder](Point point) {
-                                             VS::PerVertexData vtx;
-                                             vtx.position = point;
-                                             vertices_builder.AppendVertex(vtx);
-                                           });
-
-    if (result == Tessellator::Result::kInputError) {
-      return true;
-    }
-    if (result == Tessellator::Result::kTessellationError) {
-      return false;
-    }
-  }
-
   auto gradient_texture =
       CreateGradientTexture(colors_, stops_, renderer.GetContext());
   if (gradient_texture == nullptr) {
@@ -98,8 +81,11 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetSweepGradientFillPipeline(
       OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(
-      vertices_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+  cmd.BindVertices(CreateSolidFillVertices<VS::PerVertexData>(
+      GetCover()
+          ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
+          : GetPath(),
+      pass.GetTransientsBuffer()));
   cmd.primitive_type = PrimitiveType::kTriangle;
   FS::BindGradientInfo(
       cmd, pass.GetTransientsBuffer().EmplaceUniform(gradient_info));
