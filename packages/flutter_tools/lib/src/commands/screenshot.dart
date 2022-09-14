@@ -131,16 +131,22 @@ class ScreenshotCommand extends FlutterCommand {
       'png',
     );
 
-    validateOutputFile(outputFile, fs);
-
     try {
       await device!.takeScreenshot(outputFile);
     } on Exception catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
 
-    _showOutputFileInfo(outputFile);
+    checkOutput(outputFile, fs);
 
+    try {
+      _showOutputFileInfo(outputFile);
+    } on Exception catch (error) {
+      throwToolExit(
+        'Error with provided file path: "${outputFile.path}"\n'
+        'Error: $error'
+      );
+    }
   }
 
   Future<bool> runSkia(File? outputFile) async {
@@ -191,34 +197,11 @@ class ScreenshotCommand extends FlutterCommand {
     return true;
   }
 
-  /// Additional error checks below for valid file name
-  /// and directory because ios/xcode screenshot binary will
-  /// return a 0 exit code even if outputFile is not valid
-  static void validateOutputFile(File outputFile, FileSystem fs) {
-
-    const Platform platform = LocalPlatform();
-
-    // Conditional to check for trailing path separator
-    if (outputFile.path.endsWith(platform.pathSeparator)) {
+  static void checkOutput(File outputFile, FileSystem fs) {
+    if (!fs.file(outputFile.path).existsSync()) {
       throwToolExit(
-        'The provided path cannot end with a path separator\n'
-        'Path provided: "${outputFile.path}"'
-      );
-    }
-
-    // Conditional for validating directory is valid
-    if (!fs.directory(outputFile.dirname).existsSync()) {
-      throwToolExit(
-        'The provided path to file needs to have a directory that exists\n'
-        'Directory: "${outputFile.dirname}" does not exist'
-      );
-    }
-
-    // Conditional for validating filename
-    if (outputFile.basename.isEmpty || outputFile.basename == '.') {
-      throwToolExit(
-        'Please provide a non-empty file name\n'
-        'Filename provided: "${outputFile.basename}"'
+          'File was not created, ensure path is valid\n'
+          'Path provided: "${outputFile.path}"'
       );
     }
   }

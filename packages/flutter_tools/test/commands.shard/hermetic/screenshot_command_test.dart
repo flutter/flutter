@@ -67,50 +67,49 @@ void main() {
   });
 
   group('Screenshot file validation', () {
-    testWithoutContext('successful when specifing filename', () async {
+    testWithoutContext('successful in pwd', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
-      expect(
-          () => ScreenshotCommand.validateOutputFile(fs.file('test.png'), fs),
+      fs.file('test.png').createSync();
+      expect(() => ScreenshotCommand.checkOutput(fs.file('test.png'), fs),
           returnsNormally);
     });
 
-    testWithoutContext('successful when writing to sub directory', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      fs.directory('sub_dir').createSync();
-      expect(
-          () => ScreenshotCommand.validateOutputFile(fs.file('sub_dir/test.png'), fs),
-          returnsNormally);
-    });
-
-    testWithoutContext('failed when specifing filename with a trailing path separator', () async {
+    testWithoutContext('failed in pwd', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       expect(
-          () => ScreenshotCommand.validateOutputFile(fs.file('test.png/'), fs),
-          throwsToolExit(message: 'The provided path cannot end with a path separator'));
-    });
-
-    testWithoutContext('failed when specifing filename within sub directory and trailing path separator', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      fs.directory('sub_dir').createSync();
-      expect(
-          () => ScreenshotCommand.validateOutputFile(fs.file('sub_dir/test.png/'), fs),
-          throwsToolExit(message: 'The provided path cannot end with a path separator'));
-    });
-
-    testWithoutContext('failed due to incorrect filename', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      expect(() => ScreenshotCommand.validateOutputFile(fs.file('.'), fs),
-          throwsToolExit(message: 'Please provide a non-empty file name'));
-    });
-
-    testWithoutContext('failed due to invalid directory', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      expect(
-          () => ScreenshotCommand.validateOutputFile(
-              fs.file('test/test.png'), fs),
+          () => ScreenshotCommand.checkOutput(fs.file('test.png'), fs),
           throwsToolExit(
-              message:
-                  'The provided path to file needs to have a directory that exists'));
+              message: 'File was not created, ensure path is valid'));
+      expect(
+          () => ScreenshotCommand.checkOutput(fs.file('../'), fs),
+          throwsToolExit(
+              message: 'File was not created, ensure path is valid'));
+      expect(
+          () => ScreenshotCommand.checkOutput(fs.file('.'), fs),
+          throwsToolExit(
+              message: 'File was not created, ensure path is valid'));
+      expect(
+          () => ScreenshotCommand.checkOutput(fs.file('/'), fs),
+          throwsToolExit(
+              message: 'File was not created, ensure path is valid'));
+    });
+
+    testWithoutContext('successful in sub directory', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      fs.directory('sub_dir').createSync();
+      fs.file('sub_dir/test.png').createSync();
+      expect(
+          () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs),
+          returnsNormally);
+    });
+
+    testWithoutContext('failed in sub directory', () async {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      fs.directory('sub_dir').createSync();
+      expect(
+          () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs),
+          throwsToolExit(
+              message: 'File was not created, ensure path is valid'));
     });
   });
 }
