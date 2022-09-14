@@ -2093,7 +2093,7 @@ typedef ElementVisitor = void Function(Element element);
 ///   Widget build(BuildContext context) {
 ///     return OutlinedButton(
 ///       onPressed: () async {
-///         await Future.delayed(const Duration(seconds: 1));
+///         await Future<void>.delayed(const Duration(seconds: 1));
 ///         if (context.mounted) {
 ///           Navigator.of(context).pop();
 ///         }
