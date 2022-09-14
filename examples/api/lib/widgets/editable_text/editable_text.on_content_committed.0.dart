@@ -54,7 +54,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             onContentCommitted: (CommittedContent data) async {
               if (data.data != null) {
                 setState(() {
-                  bytes = data.data;
+                  bytes = data.data!;
                 });
               }
             },
