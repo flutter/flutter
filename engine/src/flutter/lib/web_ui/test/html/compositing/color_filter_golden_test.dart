@@ -45,8 +45,7 @@ Future<void> testMain() async {
 
     // TODO(ferhat): update golden for this test after canvas sandwich detection is
     // added to RecordingCanvas.
-    await matchGoldenFile('color_filter_blendMode_color.png', region: region,
-        maxDiffRatePercent: 12.0);
+    await matchGoldenFile('color_filter_blendMode_color.png', region: region);
   });
 
   test('Should apply matrix color filter to image', () async {
@@ -65,8 +64,7 @@ Future<void> testMain() async {
     builder.addPicture(Offset.zero, circles1);
     builder.pop();
     domDocument.body!.append(builder.build().webOnlyRootElement!);
-    await matchGoldenFile('color_filter_matrix.png', region: region,
-        maxDiffRatePercent: 12.0);
+    await matchGoldenFile('color_filter_matrix.png', region: region);
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/85733
@@ -83,8 +81,7 @@ Future<void> testMain() async {
     builder.addPicture(Offset.zero, circles1);
     builder.pop();
     domDocument.body!.append(builder.build().webOnlyRootElement!);
-    await matchGoldenFile('color_filter_mode.png', region: region,
-        maxDiffRatePercent: 12.0);
+    await matchGoldenFile('color_filter_mode.png', region: region);
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/59451.
@@ -113,8 +110,7 @@ Future<void> testMain() async {
     domDocument.body!.append(builder2.build().webOnlyRootElement!);
 
     await matchGoldenFile('color_filter_blendMode_overlay.png',
-        region: region,
-        maxDiffRatePercent: 12.0);
+        region: region);
   });
 }
 

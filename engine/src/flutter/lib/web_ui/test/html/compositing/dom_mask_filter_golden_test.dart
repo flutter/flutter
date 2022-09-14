@@ -29,7 +29,6 @@ Future<void> testMain() async {
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma.toDouble());
       rc.drawRect(Rect.fromLTWH(15.0, 15.0 + blurSigma * 40, 200, 20), paint);
     }
-    await canvasScreenshot(rc, 'dom_mask_filter_blur',
-        maxDiffRatePercent: 0.01);
+    await canvasScreenshot(rc, 'dom_mask_filter_blur');
   });
 }

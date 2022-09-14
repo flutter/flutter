@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:test/test.dart';
 // ignore: implementation_imports
-import 'package:ui/src/engine.dart' show OperatingSystem, operatingSystem, renderer;
+import 'package:ui/src/engine.dart' show renderer;
 // ignore: implementation_imports
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/ui.dart';
@@ -47,8 +47,7 @@ enum PixelComparison {
 ///
 /// [pixelComparison] determines the algorithm used to compare pixels. Uses
 /// fuzzy comparison by default.
-Future<void> matchGoldenFile(String filename,
-    {Rect? region, double? maxDiffRatePercent, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
+Future<void> matchGoldenFile(String filename, {Rect? region}) async {
   final Map<String, dynamic> serverParams = <String, dynamic>{
     'filename': filename,
     'region': region == null
@@ -59,7 +58,6 @@ Future<void> matchGoldenFile(String filename,
             'width': region.width,
             'height': region.height
           },
-    'pixelComparison': pixelComparison.toString(),
     // We use the renderer tag here rather than `renderer is CanvasKitRenderer`
     // because these unit tests operate on the post-transformed (sdk_rewriter)
     // sdk where the internal classes like `CanvasKitRenderer` are no longer
@@ -67,16 +65,6 @@ Future<void> matchGoldenFile(String filename,
     'isCanvaskitTest': renderer.rendererTag == 'canvaskit',
   };
 
-  // Chrome on macOS renders slightly differently from Linux, so allow it an
-  // extra 1% to deviate from the golden files.
-  if (maxDiffRatePercent != null) {
-    if (operatingSystem == OperatingSystem.macOs) {
-      maxDiffRatePercent += 1.0;
-    }
-    serverParams['maxdiffrate'] = maxDiffRatePercent / 100;
-  } else if (operatingSystem == OperatingSystem.macOs) {
-    serverParams['maxdiffrate'] = 0.01;
-  }
   final String response = await _callScreenshotServer(serverParams) as String;
   if (response == 'OK') {
     // Pass

@@ -17,7 +17,6 @@ import 'safari_macos.dart';
 const int kDevtoolsPort = 12345;
 const int kMaxScreenshotWidth = 1024;
 const int kMaxScreenshotHeight = 1024;
-const double kMaxDiffRateFailure = 0.28 / 100; // 0.28%
 
 abstract class PlatformBinding {
   static PlatformBinding get instance {

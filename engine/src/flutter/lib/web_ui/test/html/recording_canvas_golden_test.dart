@@ -701,8 +701,6 @@ Future<void> testMain() async {
       await matchGoldenFile(
         'paint_spread_bounds.png',
         region: const Rect.fromLTRB(0, 0, 250, 600),
-        maxDiffRatePercent: 0.21,
-        pixelComparison: PixelComparison.precise,
       );
     } finally {
       sceneElement.remove();

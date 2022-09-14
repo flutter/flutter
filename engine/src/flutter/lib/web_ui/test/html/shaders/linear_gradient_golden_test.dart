@@ -35,8 +35,7 @@ Future<void> testMain() async {
         const <Color>[Color(0xFFcfdfd2), Color(0xFF042a85)]);
     rc.drawRect(shaderRect, paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
-    await canvasScreenshot(rc, 'linear_gradient_rect',
-        maxDiffRatePercent: 0.01);
+    await canvasScreenshot(rc, 'linear_gradient_rect');
   });
 
   test('Should blend linear gradient with alpha channel correctly.', () async {
@@ -55,8 +54,7 @@ Future<void> testMain() async {
         const <Color>[Color(0x00000000), Color(0xFF0000FF)]);
     rc.drawRect(shaderRect, paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
-    await canvasScreenshot(rc, 'linear_gradient_rect_alpha',
-        maxDiffRatePercent: 0.01);
+    await canvasScreenshot(rc, 'linear_gradient_rect_alpha');
   });
 
   test('Should draw linear gradient with transform.', () async {
@@ -87,8 +85,7 @@ Future<void> testMain() async {
       yOffset += 120;
     }
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
-    await canvasScreenshot(rc, 'linear_gradient_oval_matrix',
-        maxDiffRatePercent: 0.2);
+    await canvasScreenshot(rc, 'linear_gradient_oval_matrix');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/50010
@@ -102,8 +99,7 @@ Future<void> testMain() async {
         const <Color>[Color(0xFFcfdfd2), Color(0xFF042a85)]);
     rc.drawRRect(RRect.fromRectAndRadius(shaderRect, const Radius.circular(16)), paint);
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
-    await canvasScreenshot(rc, 'linear_gradient_rounded_rect',
-        maxDiffRatePercent: 0.1);
+    await canvasScreenshot(rc, 'linear_gradient_rounded_rect');
   });
 
   test('Should draw tiled repeated linear gradient with transform.', () async {
