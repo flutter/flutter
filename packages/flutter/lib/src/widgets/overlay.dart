@@ -145,20 +145,20 @@ class OverlayEntry implements Listenable {
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
   /// The [OverlayEntry] notifies its listeners when this value changes.
-  bool get mounted => _overlayStateMounted.value != null;
+  bool get mounted => _overlayEntryStateNotifier.value != null;
 
   /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
-  final ValueNotifier<_OverlayEntryWidgetState?> _overlayStateMounted = ValueNotifier<_OverlayEntryWidgetState?>(null);
+  final ValueNotifier<_OverlayEntryWidgetState?> _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
 
   @override
   void addListener(VoidCallback listener) {
     assert(!_disposedByOwner);
-    _overlayStateMounted.addListener(listener);
+    _overlayEntryStateNotifier.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    _overlayStateMounted.removeListener(listener);
+    _overlayEntryStateNotifier.removeListener(listener);
   }
 
   OverlayState? _overlay;
@@ -204,7 +204,7 @@ class OverlayEntry implements Listenable {
   void _didUnmount() {
     assert(!mounted);
     if (_disposedByOwner) {
-      _overlayStateMounted.dispose();
+      _overlayEntryStateNotifier.dispose();
     }
   }
 
@@ -227,7 +227,7 @@ class OverlayEntry implements Listenable {
     assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
     _disposedByOwner = true;
     if (!mounted) {
-      _overlayStateMounted.dispose();
+      _overlayEntryStateNotifier.dispose();
     }
   }
 
@@ -262,10 +262,9 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   @override
   void initState() {
     super.initState();
-    widget.entry._overlayStateMounted.value = this;
+    widget.entry._overlayEntryStateNotifier.value = this;
     _theatre = context.findAncestorRenderObjectOfType<_RenderTheatre>()!;
-    overlayEntryTopChildModel?._dispose();
-    overlayEntryTopChildModel = null;
+    assert(overlayEntryTopChildModel == null);
   }
 
   @override
@@ -273,8 +272,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
     super.didUpdateWidget(oldWidget);
     // OverlayState's build method always returns a RenderObjectWidget _Theatre,
     // so it's safe to assume that state equality implies render object equality.
+    assert(oldWidget.entry == widget.entry);
     if (oldWidget.overlayState != widget.overlayState) {
-      assert(oldWidget.entry == widget.entry);
       _theatre = context.findAncestorRenderObjectOfType<_RenderTheatre>()!;
       overlayEntryTopChildModel?._dispose();
       overlayEntryTopChildModel = null;
@@ -283,7 +282,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   void dispose() {
-    widget.entry._overlayStateMounted.value = null;
+    widget.entry._overlayEntryStateNotifier.value = null;
     widget.entry._didUnmount();
     overlayEntryTopChildModel?._dispose();
     super.dispose();
@@ -843,7 +842,7 @@ class _TheatreParentData extends StackParentData {
   // _overlayStateMounted is set to null in _OverlayEntryWidgetState's dispose
   // method. This property is only accessed during layout, paint and hit-test so
   // the `value!` should be safe.
-  _RenderTheatreChildModel? get topmostChildModel => overlayEntry._overlayStateMounted.value!.overlayEntryTopChildModel;
+  _RenderTheatreChildModel? get topmostChildModel => overlayEntry._overlayEntryStateNotifier.value!.overlayEntryTopChildModel;
 }
 
 class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheatreMixin {
@@ -1070,11 +1069,11 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   _ChildIterator _hitTestOrderIterator() {
     RenderBox? child = _lastOnstageChild;
-    _ChildIterator? innerIterator;
-    int index = 0;
-    return () {
+    _ChildIterator? innerIterator = (child?.parentData as _TheatreParentData?)?.topmostChildModel?._hitTestOrderIterator();
+    int overlayEntryIndex = 0;
+    RenderBox? iterator() {
       final RenderBox? localChild = child;
-      if (localChild == null || index >= _onstageChildCount)  {
+      if (localChild == null || overlayEntryIndex >= _onstageChildCount)  {
         return null;
       }
 
@@ -1083,15 +1082,19 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
         return iteratorChild;
       }
 
-      if (index > 0) {
+      if (overlayEntryIndex == 0) {
+        overlayEntryIndex += 1;
+        return localChild;
+      } else {
         final _TheatreParentData childParentData = localChild.parentData! as _TheatreParentData;
         child = childParentData.previousSibling;
       }
-      index += 1;
+      overlayEntryIndex += 1;
       final _TheatreParentData? childParentData = child?.parentData as _TheatreParentData?;
       innerIterator = childParentData?.topmostChildModel?._hitTestOrderIterator();
       return innerIterator?.call() ?? child;
-    };
+    }
+    return iterator;
   }
 
   @override
@@ -1377,9 +1380,10 @@ class OverlayPortalController {
 /// This widget requires an [Overlay] ancestor in the widget tree when its
 /// overlay child is showing. The overlay child will be painted in front of the
 /// [OverlayEntry] closest to this widget in the widget tree (which is usually
-/// the enclosing [Route]). When there are more than one [OverlayPortal]s
-/// targets the same [OverlayEntry], the overlay child of the last
-/// [OverlayPortal] to have called `show` appears in the front.
+/// the enclosing [Route]). When there are more than one [OverlayPortal] targets
+/// the same [OverlayEntry], the overlay child of the last [OverlayPortal] to
+/// have called `show` appears in the front, regardless of their locations in
+/// the widget tree, or the order in which they were added to the [Overlay].
 ///
 /// When [OverlayPortalController.hide] is called, the widget built using
 /// [overlayChildBuilder] will be removed from the widget tree the next time the
@@ -1427,7 +1431,7 @@ class OverlayPortal extends StatefulWidget {
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
-    required this.child,
+    this.child,
   });
 
   /// The controller to show, hide and bring to top the overlay child.
@@ -1634,7 +1638,7 @@ class _RenderTheatreMarker extends InheritedWidget {
 
   static InheritedElement _topRenderTheatre(InheritedElement inheritedElement) {
     assert(inheritedElement.widget is _RenderTheatreMarker);
-    InheritedElement? ancestor;
+    InheritedElement? ancestor = inheritedElement;
     inheritedElement.visitAncestorElements((Element element) {
       assert(ancestor == null);
       ancestor = element.getElementForInheritedWidgetOfExactType<_RenderTheatreMarker>();
@@ -1646,8 +1650,7 @@ class _RenderTheatreMarker extends InheritedWidget {
   }
 }
 
-// An interface for storing render children of a _RenderTheatre that should be
-// painted together.
+// A subset of _RenderTheatre's children that should be painted together.
 abstract class _RenderTheatreChildModel {
   // Returns an iterator that traverse the children in the child model in paint
   // order (from farthest to the user to the closest to the user).
@@ -2007,18 +2010,19 @@ class _OverlayPortalElement extends RenderObjectElement {
   void activate() {
     super.activate();
     final _OverlayChild? overlayChild = _overlayChild;
-    final _RenderDeferredLayoutBox? box = _overlayChild?.element.renderObject as _RenderDeferredLayoutBox?;
-    if (overlayChild != null && box != null) {
-      assert(!box.attached);
-      assert(renderObject._deferredLayoutChild == box);
-      overlayChild.slot._activate(box);
+    if (overlayChild != null) {
+      final _RenderDeferredLayoutBox? box = overlayChild.element.renderObject as _RenderDeferredLayoutBox?;
+      if (box != null) {
+        assert(!box.attached);
+        assert(renderObject._deferredLayoutChild == box);
+        overlayChild.slot._activate(box);
+      }
     }
   }
 
   @override
   void deactivate() {
     final _OverlayChild? overlayChild = _overlayChild;
-    final _RenderDeferredLayoutBox? box = _overlayChild?.element.renderObject as _RenderDeferredLayoutBox?;
     // Instead of just detaching the render objects, removing them from the
     // render subtree entirely such that if the widget gets reparented to a
     // different overlay entry, the overlay child is inserted in the right
@@ -2026,8 +2030,11 @@ class _OverlayPortalElement extends RenderObjectElement {
     //
     // This is also a workaround for the !renderObject.attached assert in the
     // `RenderObjectElement.deactive()` method.
-    if (overlayChild != null && box != null) {
-      overlayChild.slot._deactivate(box);
+    if (overlayChild != null) {
+      final _RenderDeferredLayoutBox? box = overlayChild.element.renderObject as _RenderDeferredLayoutBox?;
+      if (box != null) {
+        overlayChild.slot._deactivate(box);
+      }
     }
     super.deactivate();
   }
