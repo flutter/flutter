@@ -4,6 +4,8 @@
 
 /// Flutter code sample for EditableText.onContentCommitted
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
