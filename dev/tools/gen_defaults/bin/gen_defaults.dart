@@ -20,6 +20,7 @@ import 'dart:io';
 import 'package:gen_defaults/app_bar_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
+import 'package:gen_defaults/checkbox_template.dart';
 import 'package:gen_defaults/chip_action_template.dart';
 import 'package:gen_defaults/chip_filter_template.dart';
 import 'package:gen_defaults/chip_input_template.dart';
@@ -30,6 +31,7 @@ import 'package:gen_defaults/input_decorator_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
+import 'package:gen_defaults/switch_template.dart';
 import 'package:gen_defaults/text_field_template.dart';
 import 'package:gen_defaults/typography_template.dart';
 
@@ -108,6 +110,7 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.outlined-button', 'OutlinedButton', '$materialLib/outlined_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
+  CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
   ChipActionTemplate('ActionChip', '$materialLib/chip_action.dart', tokens).updateFile();
   ChipFilterTemplate('FilterChip', '$materialLib/chip_filter.dart', tokens).updateFile();
   ChipFilterTemplate('FilterChip', '$materialLib/chip_choice.dart', tokens).updateFile();
@@ -119,6 +122,7 @@ Future<void> main(List<String> args) async {
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();
   NavigationRailTemplate('NavigationRail', '$materialLib/navigation_rail.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
+  SwitchTemplate('Switch', '$materialLib/switch.dart', tokens).updateFile();
   TextFieldTemplate('TextField', '$materialLib/text_field.dart', tokens).updateFile();
   TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();
 }
