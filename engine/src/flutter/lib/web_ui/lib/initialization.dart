@@ -81,11 +81,8 @@ Future<void> webOnlyWarmupEngine({
 
   // Should the app "autoStart"?
   bool autoStart = true;
-  try {
+  if (engine.flutter != null && engine.loader != null) {
     autoStart = engine.didCreateEngineInitializer == null;
-  } catch (e) {
-    // Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'loader')
-    autoStart = true;
   }
   if (autoStart) {
     // The user does not want control of the app, bootstrap immediately.
