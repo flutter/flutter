@@ -51,6 +51,9 @@ class SampleApp extends StatelessWidget {
 
 /// Include comments about each class, and make them dartdoc comments, so that
 /// links (e.g. [Placeholder]) are active in IDEs.
+///
+/// Name the classes appropriately for the example (don't leave it as
+/// "PlaceholderExample"!).
 class PlaceholderExample extends StatelessWidget {
   const PlaceholderExample({super.key});
 
@@ -60,8 +63,7 @@ class PlaceholderExample extends StatelessWidget {
     // both a newcomer and an experienced user might want to know.
     //
     // TRY THIS: Prefix things with "TRY THIS" in places in the example that
-    // might be interesting to modify when exploring what the widget/function
-    // does.
+    // might be interesting to modify when exploring what the code does.
     return const Placeholder();
   }
 }
