@@ -29,12 +29,13 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'service_extensions.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
 typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-/// Signature for a  method that registers the service extension `callback` with
+/// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
 ///
 /// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
@@ -128,6 +129,17 @@ class _MulticastCanvas implements Canvas {
 
   @override
   void drawDRRect(RRect outer, RRect inner, Paint paint) {
+    // Clamp the inner border's radii to zero, until deflate does this
+    // automatically, so that we can start asserting non-negative values
+    // in the engine without breaking the framework.
+    // TODO(gspencergoog): Remove this once https://github.com/flutter/engine/pull/36062 rolls into the framework.
+    inner = RRect.fromLTRBAndCorners(
+      inner.left, inner.top, inner.right, inner.bottom,
+      topLeft: inner.tlRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: inner.trRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft: inner.blRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: inner.brRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+    );
     _main.drawDRRect(outer, inner, paint);
     _screenshot.drawDRRect(outer, inner, paint);
   }
@@ -1007,7 +1019,7 @@ mixin WidgetInspectorService {
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     _registerBoolServiceExtension(
-      name: 'structuredErrors',
+      name: WidgetInspectorServiceExtensions.structuredErrors.name,
       getter: () async => FlutterError.presentError == _reportStructuredError,
       setter: (bool value) {
         FlutterError.presentError = value ? _reportStructuredError : defaultExceptionHandler;
@@ -1016,7 +1028,7 @@ mixin WidgetInspectorService {
     );
 
     _registerBoolServiceExtension(
-      name: 'show',
+      name: WidgetInspectorServiceExtensions.show.name,
       getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
       setter: (bool value) {
         if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
@@ -1031,7 +1043,7 @@ mixin WidgetInspectorService {
       // Service extensions that are only supported if widget creation locations
       // are tracked.
       _registerBoolServiceExtension(
-        name: 'trackRebuildDirtyWidgets',
+        name: WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
         getter: () async => _trackRebuildDirtyWidgets,
         setter: (bool value) async {
           if (value == _trackRebuildDirtyWidgets) {
@@ -1054,7 +1066,7 @@ mixin WidgetInspectorService {
       );
 
       _registerBoolServiceExtension(
-        name: 'trackRepaintWidgets',
+        name: WidgetInspectorServiceExtensions.trackRepaintWidgets.name,
         getter: () async => _trackRepaintWidgets,
         setter: (bool value) async {
           if (value == _trackRepaintWidgets) {
@@ -1081,92 +1093,92 @@ mixin WidgetInspectorService {
     }
 
     _registerSignalServiceExtension(
-      name: 'disposeAllGroups',
+      name: WidgetInspectorServiceExtensions.disposeAllGroups.name,
       callback: () async {
         disposeAllGroups();
         return null;
       },
     );
     _registerObjectGroupServiceExtension(
-      name: 'disposeGroup',
+      name: WidgetInspectorServiceExtensions.disposeGroup.name,
       callback: (String name) async {
         disposeGroup(name);
         return null;
       },
     );
     _registerSignalServiceExtension(
-      name: 'isWidgetTreeReady',
+      name: WidgetInspectorServiceExtensions.isWidgetTreeReady.name,
       callback: isWidgetTreeReady,
     );
     _registerServiceExtensionWithArg(
-      name: 'disposeId',
+      name: WidgetInspectorServiceExtensions.disposeId.name,
       callback: (String? objectId, String objectGroup) async {
         disposeId(objectId, objectGroup);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'setPubRootDirectories',
+      name: WidgetInspectorServiceExtensions.setPubRootDirectories.name,
       callback: (List<String> args) async {
         setPubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'addPubRootDirectories',
+      name: WidgetInspectorServiceExtensions.addPubRootDirectories.name,
       callback: (List<String> args) async {
         addPubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'removePubRootDirectories',
+      name: WidgetInspectorServiceExtensions.removePubRootDirectories.name,
       callback: (List<String> args) async {
         removePubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionWithArg(
-      name: 'setSelectionById',
+      name: WidgetInspectorServiceExtensions.setSelectionById.name,
       callback: setSelectionById,
     );
     _registerServiceExtensionWithArg(
-      name: 'getParentChain',
+      name: WidgetInspectorServiceExtensions.getParentChain.name,
       callback: _getParentChain,
     );
     _registerServiceExtensionWithArg(
-      name: 'getProperties',
+      name: WidgetInspectorServiceExtensions.getProperties.name,
       callback: _getProperties,
     );
     _registerServiceExtensionWithArg(
-      name: 'getChildren',
+      name: WidgetInspectorServiceExtensions.getChildren.name,
       callback: _getChildren,
     );
 
     _registerServiceExtensionWithArg(
-      name: 'getChildrenSummaryTree',
+      name: WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
       callback: _getChildrenSummaryTree,
     );
 
     _registerServiceExtensionWithArg(
-      name: 'getChildrenDetailsSubtree',
+      name: WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
       callback: _getChildrenDetailsSubtree,
     );
 
     _registerObjectGroupServiceExtension(
-      name: 'getRootWidget',
+      name: WidgetInspectorServiceExtensions.getRootWidget.name,
       callback: _getRootWidget,
     );
     _registerObjectGroupServiceExtension(
-      name: 'getRootRenderObject',
+      name: WidgetInspectorServiceExtensions.getRootRenderObject.name,
       callback: _getRootRenderObject,
     );
     _registerObjectGroupServiceExtension(
-      name: 'getRootWidgetSummaryTree',
+      name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
     );
     registerServiceExtension(
-      name: 'getDetailsSubtree',
+      name: WidgetInspectorServiceExtensions.getDetailsSubtree.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
         final String? subtreeDepth = parameters['subtreeDepth'];
@@ -1180,24 +1192,24 @@ mixin WidgetInspectorService {
       },
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedRenderObject',
+      name: WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
       callback: _getSelectedRenderObject,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
       callback: _getSelectedWidget,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedSummaryWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
       callback: _getSelectedSummaryWidget,
     );
 
     _registerSignalServiceExtension(
-      name: 'isWidgetCreationTracked',
+      name: WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
       callback: isWidgetCreationTracked,
     );
     registerServiceExtension(
-      name: 'screenshot',
+      name: WidgetInspectorServiceExtensions.screenshot.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('id'));
         assert(parameters.containsKey('width'));
@@ -1531,7 +1543,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns JSON representing the chain of [DiagnosticsNode] instances from
-  /// root of thee tree to the [Element] or [RenderObject] matching `id`.
+  /// root of the tree to the [Element] or [RenderObject] matching `id`.
   ///
   /// The JSON contains all information required to display a tree view with
   /// all nodes other than nodes along the path collapsed.
@@ -2778,6 +2790,13 @@ class _InspectorOverlayLayer extends Layer {
   double? _textPainterMaxWidth;
 
   @override
+  void dispose() {
+    _textPainter?.dispose();
+    _textPainter = null;
+    super.dispose();
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder) {
     if (!selection.active) {
       return;
@@ -2878,6 +2897,7 @@ class _InspectorOverlayLayer extends Layer {
     final TextSpan? textSpan = _textPainter?.text as TextSpan?;
     if (_textPainter == null || textSpan!.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
+      _textPainter?.dispose();
       _textPainter = TextPainter()
         ..maxLines = _kMaxTooltipLines
         ..ellipsis = '...'
@@ -3270,7 +3290,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// Service used by GUI tools to interact with the [WidgetInspector].
   final WidgetInspectorService service;
 
-  /// Optional `groupName` parameter which indicates that the json should
+  /// Optional [groupName] parameter which indicates that the json should
   /// contain live object ids.
   ///
   /// Object ids returned as part of the json will remain live at least until

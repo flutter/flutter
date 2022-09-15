@@ -4,6 +4,7 @@
 
 import 'package:package_config/package_config_types.dart';
 
+import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -562,14 +563,40 @@ enum AndroidArch {
 
 /// The default set of iOS device architectures to build for.
 List<DarwinArch> defaultIOSArchsForEnvironment(
-    EnvironmentType environmentType) {
-  if (environmentType == EnvironmentType.simulator) {
+  EnvironmentType environmentType,
+  Artifacts artifacts,
+) {
+  // Handle single-arch local engines.
+  if (artifacts is LocalEngineArtifacts) {
+    final String localEngineName = artifacts.localEngineName;
+    if (localEngineName.contains('_arm64')) {
+      return <DarwinArch>[ DarwinArch.arm64 ];
+    }
+    if (localEngineName.contains('_sim')) {
+      return <DarwinArch>[ DarwinArch.x86_64 ];
+    }
+  } else if (environmentType == EnvironmentType.simulator) {
     return <DarwinArch>[
       DarwinArch.x86_64,
       DarwinArch.arm64,
     ];
   }
   return <DarwinArch>[
+    DarwinArch.arm64,
+  ];
+}
+
+/// The default set of macOS device architectures to build for.
+List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
+  // Handle single-arch local engines.
+  if (artifacts is LocalEngineArtifacts) {
+    if (artifacts.localEngineName.contains('_arm64')) {
+      return <DarwinArch>[ DarwinArch.arm64 ];
+    }
+    return <DarwinArch>[ DarwinArch.x86_64 ];
+  }
+  return <DarwinArch>[
+    DarwinArch.x86_64,
     DarwinArch.arm64,
   ];
 }
@@ -696,7 +723,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
     // For backward-compatibility and also for Tester, where it must match
     // host platform name (HostPlatform.darwin_x64)
     case 'darwin-x64':
-    case 'darwin-arm':
+    case 'darwin-arm64':
       return TargetPlatform.darwin;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
@@ -1034,8 +1061,8 @@ String getNameForHostPlatformArch(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'x64';
-    case HostPlatform.darwin_arm:
-      return 'arm';
+    case HostPlatform.darwin_arm64:
+      return 'arm64';
     case HostPlatform.linux_x64:
       return 'x64';
     case HostPlatform.linux_arm64:

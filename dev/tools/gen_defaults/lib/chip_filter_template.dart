@@ -31,10 +31,10 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => ${componentColor("$tokenGroup$variant.container")};
 
   @override
-  Color? get shadowColor => ${color("$tokenGroup.container.shadow-color")};
+  Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
 
   @override
-  @override Color? get surfaceTintColor => ${color("$tokenGroup.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
   Color? get selectedColor => isEnabled
@@ -42,7 +42,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
     : ${componentColor("$tokenGroup$variant.disabled.selected.container")};
 
   @override
-  Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get checkmarkColor => ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")};
 
   @override
   Color? get disabledColor => isSelected
@@ -50,7 +50,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
    : ${componentColor("$tokenGroup$variant.disabled.unselected.container")};
 
   @override
-  Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
 
   @override
   BorderSide? get side => !isSelected
@@ -63,7 +63,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
       ? ${color("$tokenGroup.with-icon.icon.color")}
-      : ${color("$tokenGroup.with-icon.disabled.icon.color")},
+      : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
     size: ${tokens["$tokenGroup.with-icon.icon.size"]},
   );
 
