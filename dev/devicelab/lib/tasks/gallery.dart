@@ -285,7 +285,9 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
       return <String>[
         'ios',
-        '--no-codesign',
+        // Testing with codesign arg.
+        // '--no-codesign',
+        '--codesign',
         '--profile',
         '-t',
         'test_driver/$testFile.dart',
