@@ -441,9 +441,6 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   @override
   void initState() {
     super.initState();
-    final Rect midRect = widget.beginRect!.deflate(
-      widget.beginRect!.width * (_kOpenScale - 1.0) / 2,
-    );
     // The timming on the animation was eyeballed from the XCode iOS simulater
     // running iOS 16.0
     _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
