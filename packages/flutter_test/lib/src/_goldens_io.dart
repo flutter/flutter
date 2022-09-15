@@ -97,6 +97,8 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     );
 
     if (isFlaky) {
+      // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
+      // ignore: avoid_print
       print('Golden $golden is marked as flaky and will not fail the test.');
     }
 
@@ -105,8 +107,9 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       if (!isFlaky) {
         throw FlutterError(error);
       } else {
-        // The test was marked as flaky. Simply print the error to console, but
-        // do not fail the test.
+        // The test was marked as flaky. Do not fail the test.
+        // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
+        // ignore: avoid_print
         print(error);
       }
     }
@@ -293,7 +296,7 @@ ByteData _invert(ByteData imageBytes) {
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
   @override
-  Future<bool> compare(double width, double height, Uri golden) {
+  Future<bool> compare(double width, double height, Uri golden, { bool isFlaky = false }) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 

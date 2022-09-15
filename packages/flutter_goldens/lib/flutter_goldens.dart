@@ -536,6 +536,8 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     );
 
     if (isFlaky) {
+      // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
+      // ignore: avoid_print
       print('Golden $golden is marked as flaky and will not fail the test.');
     }
 
@@ -547,8 +549,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     if (!isFlaky) {
       throw FlutterError(error);
     } else {
-      // The test was marked as flaky. Simply print the error to console, but
-      // do not fail the test.
+      // The test was marked as flaky. Do not fail the test.
+      // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
+      // ignore: avoid_print
       print(error);
     }
 

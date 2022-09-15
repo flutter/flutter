@@ -31,16 +31,23 @@ const bool canCaptureImage = false;
 /// test is running in a web browser using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  const MatchesGoldenFile(this.key, this.version);
+  const MatchesGoldenFile(this.key, this.version, { this.isFlaky = false});
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(String path, this.version, { this.isFlaky = false}) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
 
   /// The [version] of the golden image.
   final int? version;
+
+  /// Whether this matcher allows goldens that do not match the master golden to pass.
+  ///
+  /// If set to true, the underlying implementation of [goldenFileComparator]
+  /// should produce a screenshot and make it available for human review but not
+  /// fail the test.
+  final bool isFlaky;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
@@ -70,7 +77,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
-        final bool success = await webGoldenComparator.compare(size.width, size.height, key);
+        final bool success = await webGoldenComparator.compare(size.width, size.height, key, isFlaky: isFlaky);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;

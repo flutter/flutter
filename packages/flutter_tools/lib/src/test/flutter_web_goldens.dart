@@ -98,14 +98,14 @@ class TestGoldenComparator {
     return _processManager!.start(command, environment: environment);
   }
 
-  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
+  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens, bool isFlaky) async {
     final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
     final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
     if (process == null) {
       return 'process was null';
     }
 
-    process.sendCommand(imageFile, goldenKey, updateGoldens);
+    process.sendCommand(imageFile, goldenKey, updateGoldens, isFlaky);
 
     final Map<String, dynamic> result = await process.getResponse();
 
@@ -152,11 +152,12 @@ class TestGoldenComparatorProcess {
     await process.exitCode;
   }
 
-  void sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens) {
+  void sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens, bool isFlaky) {
     final Object command = jsonEncode(<String, dynamic>{
       'imageFile': imageFile.path,
       'key': goldenKey.toString(),
       'update': updateGoldens,
+      'isFlaky': isFlaky,
     });
     _logger.printTrace('Preparing to send command: $command');
     process.stdin.writeln(command);
@@ -193,6 +194,7 @@ void main() async {
       File imageFile = File(command['imageFile'] as String);
       Uri goldenKey = Uri.parse(command['key'] as String);
       bool update = command['update'] as bool;
+      bool isFlaky = command['isFlaky']! as bool;
 
       final bytes = await File(imageFile.path).readAsBytes();
       if (update) {
@@ -200,8 +202,8 @@ void main() async {
         print(jsonEncode({'success': true}));
       } else {
         try {
-          bool success = await goldenFileComparator.compare(bytes, goldenKey);
-          print(jsonEncode({'success': success}));
+          bool success = await goldenFileComparator.compare(bytes, goldenKey, isFlaky: isFlaky);
+          print(jsonEncode({'success': success || isFlaky}));
         } on Exception catch (ex) {
           print(jsonEncode({'success': false, 'message': '\$ex'}));
         }

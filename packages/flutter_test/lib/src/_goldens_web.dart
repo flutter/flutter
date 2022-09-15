@@ -56,7 +56,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Uri testUri;
 
   @override
-  Future<bool> compare(double width, double height, Uri golden) async {
+  Future<bool> compare(double width, double height, Uri golden, { bool isFlaky = false }) async {
     final String key = golden.toString();
     final html.HttpRequest request = await html.HttpRequest.request(
       'flutter_goldens',
@@ -66,6 +66,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
         'key': key,
         'width': width.round(),
         'height': height.round(),
+        'isFlaky': isFlaky,
       }),
     );
     final String response = request.response as String;

@@ -57,7 +57,8 @@ class MatchesGoldenFile extends AsyncMatcher {
   /// Whether this matcher allows goldens that do not match the master golden to pass.
   ///
   /// If set to true, the underlying implementation of [goldenFileComparator]
-  /// should
+  /// should produce a screenshot and make it available for human review but not
+  /// fail the test.
   final bool isFlaky;
 
   @override
@@ -76,7 +77,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
-        final bool success = await goldenFileComparator.compare(buffer, testNameUri);
+        final bool success = await goldenFileComparator.compare(buffer, testNameUri, isFlaky: isFlaky);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
@@ -114,7 +115,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri, isFlaky: isFlaky);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;

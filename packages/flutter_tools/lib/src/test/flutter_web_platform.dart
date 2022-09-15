@@ -349,6 +349,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       final Uri testUri = Uri.parse(body['testUri']! as String);
       final num width = body['width']! as num;
       final num height = body['height']! as num;
+      final bool isFlaky = body['isFlaky']! as bool;
       Uint8List bytes;
 
       try {
@@ -383,7 +384,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.ok('Unknown error, bytes is null');
       }
 
-      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
+      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens, isFlaky);
       return shelf.Response.ok(errorMessage ?? 'true');
     } else {
       return shelf.Response.notFound('Not Found');
