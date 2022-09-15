@@ -64,6 +64,8 @@ bool LinearGradientContents::Render(const ContentContext& renderer,
   gradient_info.texture_sampler_y_coord_scale =
       gradient_texture->GetYCoordScale();
   gradient_info.alpha = GetAlpha();
+  gradient_info.half_texel = Vector2(0.5 / gradient_texture->GetSize().width,
+                                     0.5 / gradient_texture->GetSize().height);
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
