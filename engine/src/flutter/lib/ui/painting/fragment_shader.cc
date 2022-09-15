@@ -20,12 +20,12 @@ namespace flutter {
 
 // Since _FragmentShader is a private class, we can't use
 // IMPLEMENT_WRAPPERTYPEINFO
-static const tonic::DartWrapperInfo kDartWrapperInfo_ui_FragmentShader = {
+static const tonic::DartWrapperInfo kDartWrapperInfoUIFragmentShader = {
     "ui",
     "_FragmentShader",
 };
 const tonic::DartWrapperInfo& FragmentShader::dart_wrapper_info_ =
-    kDartWrapperInfo_ui_FragmentShader;
+    kDartWrapperInfoUIFragmentShader;
 
 std::shared_ptr<DlColorSource> FragmentShader::shader(
     DlImageSampling sampling) {
