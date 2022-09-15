@@ -488,6 +488,20 @@ class RecordingCanvas {
         drawRRect(rrect, paint);
         return;
       }
+      // Use drawRect for straight line paths painted with a zero strokeWidth
+      final ui.Rect? line = sPath.toStraightLine();
+      if (line != null && paint.strokeWidth == 0) {
+        final double left = math.min(line.left, line.right);
+        final double top = math.min(line.top, line.bottom);
+        final double width = line.width.abs();
+        final double height = line.height.abs();
+        final double inflatedHeight = line.height == 0 ? 1 : height;
+        final double inflatedWidth = line.width == 0 ? 1 : width;
+        final ui.Size inflatedSize = ui.Size(inflatedWidth, inflatedHeight);
+        paint.style = ui.PaintingStyle.fill;
+        drawRect(ui.Offset(left, top) & inflatedSize, paint);
+        return;
+      }
     }
     final SurfacePath sPath = path as SurfacePath;
     if (!sPath.pathRef.isEmpty) {
