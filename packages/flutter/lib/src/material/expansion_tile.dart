@@ -257,10 +257,10 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final Color? collapsedTextColor;
 
-  /// Tile's border shape when the sublist is expanded.
+  /// The tile's border shape when the sublist is expanded.
   ///
   /// If this property is null then [ExpansionTileThemeData.shape] is used. If that
-  /// is also null then a [Border] with vertical direction sides default to [ThemeData.dividerColor] is used
+  /// is also null then a [Border] with vertical sides default to [ThemeData.dividerColor] is used
   ///
   /// See also:
   ///
@@ -268,10 +268,10 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final ShapeBorder? shape;
 
-  /// Tile's border shape when the sublist is collapsed.
+  /// The tile's border shape when the sublist is collapsed.
   ///
   /// If this property is null then [ExpansionTileThemeData.collapsedShape] is used. If that
-  /// is also null then a [Border] with vertical direction sides default to Color [Colors.transparent] is used
+  /// is also null then a [Border] with vertical sides default to Color [Colors.transparent] is used
   ///
   /// See also:
   ///
@@ -386,7 +386,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final ShapeBorder expansionTileBorder = _border.value ?? const Border();
+    final ShapeBorder expansionTileBorder = _border.value ?? const Border(
+            top: BorderSide(color: Colors.transparent),
+            bottom: BorderSide(color: Colors.transparent),
+          );
 
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -435,7 +438,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         ?? expansionTileTheme.collapsedShape
         ?? const Border(
           top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent)
+          bottom: BorderSide(color: Colors.transparent),
         )
       ..end = widget.shape
         ?? expansionTileTheme.collapsedShape
