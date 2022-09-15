@@ -256,6 +256,17 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       _childHidden = true;
     });
 
+    BorderRadiusGeometry getBorderRadius(Animation<double> animation) {
+      switch(widget.child.runtimeType) {
+        case Container:
+          return ((widget.child as Container).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
+        case DecoratedBox:
+          return ((widget.child as DecoratedBox).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
+        default:
+          return BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
+      }
+    }
+
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
       barrierLabel: 'Dismiss',
@@ -270,8 +281,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           return FittedBox(
             fit: BoxFit.cover,
             child: ClipRRect(
-              borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
-                      ?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
+              borderRadius: getBorderRadius(animation),
               child: widget.child,
             ),
           );
@@ -438,6 +448,17 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   late Animation<Rect?> _rect;
   late Animation<Decoration> _boxDecoration;
 
+  BorderRadiusGeometry getBorderRadius() {
+    switch(widget.child.runtimeType) {
+      case Container:
+        return ((widget.child as Container?)?.decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(0);
+      case DecoratedBox:
+        return ((widget.child as DecoratedBox?)?.decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(0);
+      default:
+        return BorderRadius.circular(0);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -471,16 +492,12 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     _boxDecoration = DecorationTween(
       begin: BoxDecoration(
           color: const Color(0xFFFFFFFF),
-          borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
-                      ?.borderRadius ??
-                  BorderRadius.circular(0),
+          borderRadius: getBorderRadius(),
           boxShadow: const <BoxShadow>[],
       ),
       end: BoxDecoration(
         color: const Color(0xFFFFFFFF),
-        borderRadius: ((widget.child as Container?)?.decoration as BoxDecoration?)
-                    ?.borderRadius ??
-                BorderRadius.circular(0),
+        borderRadius: getBorderRadius(),
         boxShadow: endBoxShadow,
       ),
     ).animate(widget.controller);
