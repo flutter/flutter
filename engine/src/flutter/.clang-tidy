@@ -31,6 +31,8 @@ CheckOptions:
     value:  'CamelCase'
   - key:    readability-identifier-naming.EnumConstantPrefix
     value:  'k'
+  - key:    readability-identifier-naming.GlobalConstantCase
+    value:  'CamelCase'
   - key:    readability-identifier-naming.GlobalConstantPrefix
     value:  'k'
   - key:    readability-identifier-naming.PrivateMemberCase
