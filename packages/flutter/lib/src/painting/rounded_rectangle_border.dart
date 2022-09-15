@@ -132,7 +132,18 @@ class RoundedRectangleBorder extends OutlinedBorder {
           final Paint paint = Paint()
             ..color = side.color;
           final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner = borderRect.deflate(side.strokeInset);
+          RRect inner = borderRect.deflate(side.strokeInset);
+          // Clamp the inner border's radii to zero, until deflate does this
+          // automatically, so that we can start asserting non-negative values
+          // in the engine without breaking the framework.
+          // TODO(gspencergoog): Remove this once https://github.com/flutter/engine/pull/36062 rolls into the framework.
+          inner = RRect.fromLTRBAndCorners(
+            inner.left, inner.top, inner.right, inner.bottom,
+            topLeft: inner.tlRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+            topRight: inner.trRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+            bottomLeft: inner.blRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+            bottomRight: inner.brRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+          );
           final RRect outer = borderRect.inflate(side.strokeOutset);
           canvas.drawDRRect(outer, inner, paint);
         }
