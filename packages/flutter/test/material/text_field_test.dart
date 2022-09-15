@@ -8786,6 +8786,55 @@ void main() {
     });
 
   testWidgets(
+    'double tap + drag selects word by word on touch devices',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+      final Offset hPos = textOffsetToPosition(tester, testValue.indexOf('h'));
+
+      // Tap on text field to gain focus, and set selection to '|e'.
+      final TestGesture gesture = await tester.startGesture(ePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, testValue.indexOf('e'));
+
+      // Here we tap on '|e' again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(ePos);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      // Drag, right after the double tap, to select word by word.
+      // Moving to the position of 'h', will extend the selection to 'ghi'.
+      await gesture.moveTo(hPos);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, testValue.indexOf('d'));
+      expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
+    });
+
+  testWidgets(
     'double tap on top of cursor also selects word',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
