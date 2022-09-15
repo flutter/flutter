@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 // On Fuchsia, in lieu of the ELF dynamic symbol table consumed through dladdr,
 // the Dart VM profiler consumes symbols produced by this tool, which have the
 // format
@@ -42,11 +40,11 @@ Options:
 ${parser.usage};
 """;
 
-  String buildIdDir;
-  String buildIdScript;
-  String nm;
-  String binary;
-  String output;
+  String? buildIdDir;
+  String? buildIdScript;
+  String? nm;
+  String? binary;
+  String? output;
 
   try {
     final options = parser.parse(args);
@@ -82,9 +80,11 @@ class Symbol {
   int offset;
   int size;
   String name;
+
+  Symbol({required this.offset, required this.size, required this.name});
 }
 
-Future<void> run(String buildIdDir, String buildIdScript, String nm,
+Future<void> run(String? buildIdDir, String? buildIdScript, String nm,
   String binary, String output) async {
   final unstrippedFile = binary;
   final args = ["--demangle", "--numeric-sort", "--print-size", unstrippedFile];
@@ -95,7 +95,7 @@ Future<void> run(String buildIdDir, String buildIdScript, String nm,
     throw "Command failed: $nm $args";
   }
 
-  var symbols = new List();
+  var symbols = [];
 
   var regex = new RegExp("([0-9A-Za-z]+) ([0-9A-Za-z]+) (t|T|w|W) (.*)");
   for (final line in result.stdout.split("\n")) {
@@ -104,12 +104,10 @@ Future<void> run(String buildIdDir, String buildIdScript, String nm,
       continue; // Ignore non-text symbols.
     }
 
-    final symbol = new Symbol();
-
     // Note that capture groups start at 1.
-    symbol.offset = int.parse(match[1], radix: 16);
-    symbol.size = int.parse(match[2], radix: 16);
-    symbol.name = match[4].split("(")[0];
+    final symbol = new Symbol(offset: int.parse(match[1]!, radix: 16),
+                              size: int.parse(match[2]!, radix: 16),
+                              name: match[4]!.split("(")[0]);
 
     if (symbol.name.startsWith("\$")) {
       continue; // Ignore compiler/assembler temps.
