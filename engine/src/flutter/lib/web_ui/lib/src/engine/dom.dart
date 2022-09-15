@@ -1276,8 +1276,7 @@ class DomStyleSheet {}
 class DomCSSStyleSheet extends DomStyleSheet {}
 
 extension DomCSSStyleSheetExtension on DomCSSStyleSheet {
-  List<DomCSSRule> get cssRules =>
-      js_util.getProperty<List<Object?>>(this, 'cssRules').cast<DomCSSRule>();
+  external DomCSSRuleList get cssRules;
   int insertRule(String rule, [int? index]) => js_util
       .callMethod(this, 'insertRule', <Object>[rule, if (index != null) index]);
 }
@@ -1379,6 +1378,14 @@ class DomMessageChannel {}
 extension DomMessageChannelExtension on DomMessageChannel {
   external DomMessagePort get port1;
   external DomMessagePort get port2;
+}
+
+@JS()
+@staticInterop
+class DomCSSRuleList {}
+
+extension DomCSSRuleListExtension on DomCSSRuleList {
+  external int get length;
 }
 
 DomMessageChannel createDomMessageChannel() =>
