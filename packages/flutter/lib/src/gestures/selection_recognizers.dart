@@ -466,11 +466,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _start = event;
       _dragState = _GestureState.accepted;
       resolve(GestureDisposition.accepted);
-    } else if (!_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop) && _pastTapTolerance) {
-      // The `PointerMoveEvent` has not reached the minimum global distance to be accepted as a drag,
-      // and it has exceeded the maximum global distance it is allowed to drift from the initial `PointerDownEvent`,
-      // to be accepted as a tap. Therefore we reject this recognizer at this point.
-      // resolve(GestureDisposition.rejected);
     }
   }
 
