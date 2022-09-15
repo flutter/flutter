@@ -14,7 +14,13 @@ import 'js_promise.dart';
 /// programmer can control the initialization sequence.
 typedef DidCreateEngineInitializerFn = void Function(FlutterEngineInitializer);
 
-// A JS-interop representation of `_flutter?.loader?.didCreateEngineInitializer?`:
+// Both `flutter`, `loader`(_flutter.loader), must be checked for null before
+// `didCreateEngineInitializer` can be safely accessed.
+@JS('_flutter')
+external Object? get flutter;
+
+@JS('_flutter.loader')
+external Object? get loader;
 
 @JS('_flutter.loader.didCreateEngineInitializer')
 external DidCreateEngineInitializerFn? get didCreateEngineInitializer;
