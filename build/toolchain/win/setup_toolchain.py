@@ -56,7 +56,8 @@ def _SetupScript(target_cpu, sdk_dir):
   environment."""
   # Check if we are running in the SDK command line environment and use
   # the setup script from the SDK if so.
-  assert target_cpu in ('x86', 'x64', 'arm64')
+  accepted_cpus = ('x86', 'x64', 'arm64')
+  assert target_cpu in accepted_cpus, '%s not in accepted cpus %s' % (target_cpu, accepted_cpus)
   if bool(int(os.environ.get('DEPOT_TOOLS_WIN_TOOLCHAIN', 1))) and sdk_dir:
     return [os.path.normpath(os.path.join(sdk_dir, 'Bin/SetEnv.Cmd')),
             '/' + target_cpu]
