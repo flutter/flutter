@@ -4442,7 +4442,7 @@ targets:
         ["devicelab", "hostonly"]
       task_name: windows_startup_test
 
-  - name: Windows flutter_tool_startup
+  - name: Windows flutter_tool_startup__windows
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4452,7 +4452,7 @@ targets:
         ["devicelab", "hostonly"]
       task_name: flutter_tool_startup__windows
 
-  - name: Linux flutter_tool_startup
+  - name: Linux flutter_tool_startup__linux
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4462,7 +4462,7 @@ targets:
         ["devicelab", "hostonly"]
       task_name: flutter_tool_startup__linux
 
-  - name: Mac flutter_tool_startup
+  - name: Mac flutter_tool_startup__mac
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
