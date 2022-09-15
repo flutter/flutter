@@ -932,7 +932,8 @@ class _LargeTitleNavigationBarSliverDelegate
 
 /// The large title of the navigation bar.
 ///
-/// Magnifies when overscrolled.
+/// Magnifies on over-scroll when [strech] parameter
+/// of the [CupertinoSliverNavigationBar] is true.
 class _LargeTitle extends SingleChildRenderObjectWidget {
   const _LargeTitle({
     required this.constraints,
@@ -982,6 +983,7 @@ class _RenderLargeTitle extends RenderProxyBox {
     }
     _navBarConstraints = value;
 
+    markNeedsLayout();
     markNeedsPaint();
   }
 
@@ -993,6 +995,7 @@ class _RenderLargeTitle extends RenderProxyBox {
     }
     _maxExtent = value;
 
+    markNeedsLayout();
     markNeedsPaint();
   }
 
@@ -1004,6 +1007,7 @@ class _RenderLargeTitle extends RenderProxyBox {
     }
     _textDirection = value;
 
+    markNeedsLayout();
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -1042,24 +1046,41 @@ class _RenderLargeTitle extends RenderProxyBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    transform = _effectiveTransform;
+  void performLayout() {
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
 
-    if (child != null) {
-      context.pushTransform(
-        needsCompositing,
-        offset,
-        transform!,
-        super.paint,
-      );
-    } else {
-      return;
-    }
+    transform = _effectiveTransform;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.pushTransform(
+      needsCompositing,
+      offset,
+      transform!,
+      super.paint,
+    );
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.multiply(_effectiveTransform!);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    if (size.isEmpty || (child?.size.isEmpty ?? false)) {
+      return false;
+    }
+
+    return result.addWithPaintTransform(
+      transform: _effectiveTransform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 }
 
