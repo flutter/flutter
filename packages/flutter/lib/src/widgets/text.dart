@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextHeightBehavior;
+import 'dart:ui' show TextHeightBehavior;
 
 import 'package:flutter/rendering.dart';
 
@@ -152,7 +152,7 @@ class DefaultTextStyle extends InheritedTheme {
   final TextWidthBasis textWidthBasis;
 
   /// {@macro dart.ui.textHeightBehavior}
-  final ui.TextHeightBehavior? textHeightBehavior;
+  final TextHeightBehavior? textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -202,7 +202,7 @@ class DefaultTextStyle extends InheritedTheme {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
-    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -273,7 +273,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -529,7 +529,7 @@ class Text extends StatelessWidget {
   final TextWidthBasis? textWidthBasis;
 
   /// {@macro dart.ui.textHeightBehavior}
-  final ui.TextHeightBehavior? textHeightBehavior;
+  final TextHeightBehavior? textHeightBehavior;
 
   /// The color to use when painting the selection.
   final Color? selectionColor;
@@ -598,7 +598,7 @@ class Text extends StatelessWidget {
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
-    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
+import 'dart:ui' show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -515,7 +515,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
   /// blur effect.
-  final ui.ImageFilter filter;
+  final ImageFilter filter;
 
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
@@ -5654,7 +5654,7 @@ class RichText extends MultiChildRenderObjectWidget {
   final TextWidthBasis textWidthBasis;
 
   /// {@macro dart.ui.textHeightBehavior}
-  final ui.TextHeightBehavior? textHeightBehavior;
+  final TextHeightBehavior? textHeightBehavior;
 
   /// The [SelectionRegistrar] this rich text is subscribed to.
   final SelectionRegistrar? selectionRegistrar;
@@ -5761,7 +5761,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// Since a [RawImage] is stateless, it does not ever dispose this image.
   /// Creators of a [RawImage] are expected to call [Image.dispose] on this
   /// image handle when the [RawImage] will no longer be needed.
-  final ui.Image? image;
+  final Image? image;
 
   /// A string identifying the source of the image.
   final String? debugImageLabel;
@@ -5952,7 +5952,7 @@ class RawImage extends LeafRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ui.Image>('image', image));
+    properties.add(DiagnosticsProperty<Image>('image', image));
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
