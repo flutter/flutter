@@ -17,7 +17,7 @@ import 'colors.dart';
 const double _kOpenScale = 1.1;
 
 // The ratio for the borderRadius of the context menu preview image. This value
-// was eyeballed by overlapping the CupertinoContextMenu with a context menu 
+// was eyeballed by overlapping the CupertinoContextMenu with a context menu
 // from iOS 16.0 in the XCode iphone simulator
 const double _previewBorderRadiusRatio = 12.0;
 
@@ -444,7 +444,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     final Rect midRect = widget.beginRect!.deflate(
       widget.beginRect!.width * (_kOpenScale - 1.0) / 2,
     );
-    // The timming on the animation was eyeballed from the XCode iOS simulater 
+    // The timming on the animation was eyeballed from the XCode iOS simulater
     // running iOS 16.0
     _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
       TweenSequenceItem<Rect?>(
@@ -499,7 +499,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       rect: _rect.value!,
       child: Container(
         key: const Key('context-decoy-container'),
-        decoration: _boxDecoration.value, 
+        decoration: _boxDecoration.value,
         child: widget.child,
       ),
     );
