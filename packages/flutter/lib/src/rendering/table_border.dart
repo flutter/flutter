@@ -271,18 +271,7 @@ class TableBorder {
       paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
     } else {
       final RRect outer = borderRadius.toRRect(rect);
-      RRect inner = outer.deflate(top.width);
-      // Clamp the inner border's radii to zero, until deflate does this
-      // automatically, so that we can start asserting non-negative values
-      // in the engine without breaking the framework.
-      // TODO(gspencergoog): Remove this once https://github.com/flutter/engine/pull/36062 rolls into the framework.
-      inner = RRect.fromLTRBAndCorners(
-        inner.left, inner.top, inner.right, inner.bottom,
-        topLeft: inner.tlRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-        topRight: inner.trRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-        bottomLeft: inner.blRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-        bottomRight: inner.brRadius.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      );
+      final RRect inner = outer.deflate(top.width);
       final Paint paint = Paint()..color = top.color;
       canvas.drawDRRect(outer, inner, paint);
     }
