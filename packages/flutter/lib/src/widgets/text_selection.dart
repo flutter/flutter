@@ -2006,7 +2006,7 @@ class TextSelectionGestureDetectorBuilder {
   // For a shift + tap + drag gesture, the TextSelection at the point of the
   // tap. Mac uses this value to reset to the original selection when an
   // inversion of the base and offset happens.
-  TextSelection? _shiftTapDragSelection;
+  TextSelection? _dragStartSelection;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -2434,6 +2434,8 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
 
+    _dragStartSelection = renderEditable.selection;
+
     if (status.isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -2447,7 +2449,6 @@ class TextSelectionGestureDetectorBuilder {
           _extendSelection(details.globalPosition, SelectionChangedCause.drag);
           break;
       }
-      _shiftTapDragSelection = renderEditable.selection;
     } else {
       renderEditable.selectPositionAt(
         from: details.globalPosition,
@@ -2516,13 +2517,12 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.unknown:
               if(renderEditable.hasFocus
                   && editableText.textEditingValue.selection.isCollapsed
-                  && _lastTapWasOnSelection(details.globalPosition, editableText.textEditingValue.selection)
+                  && _lastTapWasOnSelection(dragStartGlobalPosition, _dragStartSelection)
               ) {
                 return renderEditable.selectPositionAt(
                   from: details.globalPosition,
                   cause: SelectionChangedCause.drag,
                 );
-              } else {
               }
               break;
             case null:
@@ -2566,7 +2566,7 @@ class TextSelectionGestureDetectorBuilder {
       }
     }
 
-    if (_shiftTapDragSelection!.isCollapsed
+    if (_dragStartSelection!.isCollapsed
         || (defaultTargetPlatform != TargetPlatform.iOS
             && defaultTargetPlatform != TargetPlatform.macOS)) {
       return _extendSelection(details.globalPosition, SelectionChangedCause.drag);
@@ -2577,27 +2577,27 @@ class TextSelectionGestureDetectorBuilder {
     final TextSelection selection = editableText.textEditingValue.selection;
     final TextPosition nextExtent = renderEditable.getPositionForPoint(details.globalPosition);
     final bool isShiftTapDragSelectionForward =
-        _shiftTapDragSelection!.baseOffset < _shiftTapDragSelection!.extentOffset;
+        _dragStartSelection!.baseOffset < _dragStartSelection!.extentOffset;
     final bool isInverted = isShiftTapDragSelectionForward
-        ? nextExtent.offset < _shiftTapDragSelection!.baseOffset
-        : nextExtent.offset > _shiftTapDragSelection!.baseOffset;
-    if (isInverted && selection.baseOffset == _shiftTapDragSelection!.baseOffset) {
+        ? nextExtent.offset < _dragStartSelection!.baseOffset
+        : nextExtent.offset > _dragStartSelection!.baseOffset;
+    if (isInverted && selection.baseOffset == _dragStartSelection!.baseOffset) {
       editableText.userUpdateTextEditingValue(
         editableText.textEditingValue.copyWith(
           selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.extentOffset,
+            baseOffset: _dragStartSelection!.extentOffset,
             extentOffset: nextExtent.offset,
           ),
         ),
         SelectionChangedCause.drag,
       );
     } else if (!isInverted
-        && nextExtent.offset != _shiftTapDragSelection!.baseOffset
-        && selection.baseOffset != _shiftTapDragSelection!.baseOffset) {
+        && nextExtent.offset != _dragStartSelection!.baseOffset
+        && selection.baseOffset != _dragStartSelection!.baseOffset) {
       editableText.userUpdateTextEditingValue(
         editableText.textEditingValue.copyWith(
           selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.baseOffset,
+            baseOffset: _dragStartSelection!.baseOffset,
             extentOffset: nextExtent.offset,
           ),
         ),
@@ -2620,7 +2620,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDragSelectionEnd(DragEndDetails details, TapStatus status) {
     if (status.isShiftPressed) {
-      _shiftTapDragSelection = null;
+      _dragStartSelection = null;
     }
   }
 
