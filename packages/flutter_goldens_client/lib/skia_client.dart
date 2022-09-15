@@ -386,9 +386,10 @@ class SkiaGoldClient {
 
     // The maximum acceptable difference per pixel.
     //
-    // The chosen number - 1 billion - indicates that a flaky test should pass
-    // no matter how far the new pixels deviate from the master golden.
-    const int pixelDeltaThreshold = 1000 * 1000 * 1000;
+    // The chosen number - 1020 - is the maximum supported pixel delta and
+    // indicates that a flaky test should pass no matter how far the new pixels
+    // deviate from the master golden.
+    const int pixelDeltaThreshold = 1020;
 
     return <String>[
       '--add-test-optional-key', 'image_matching_algorithm:$algorithm',
