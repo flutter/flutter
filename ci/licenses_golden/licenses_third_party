@@ -1,4 +1,4 @@
-Signature: 6fe4ae17b3d11dfba99dc18dbeeac1a3
+Signature: 3c24bc14f9fb38a741c60ca29883d0b2
 
 UNUSED LICENSES:
 
@@ -5976,7 +5976,57 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-LIBRARY: dart
+ORIGIN: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha256-armv8.S + ../../../third_party/boringssl/src/LICENSE
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha256-armv8.S
+FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha512-armv8.S
+FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/sha256-armv8.S
+FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/sha512-armv8.S
+FILE: ../../../third_party/boringssl/win-aarch64/crypto/fipsmodule/sha256-armv8.S
+FILE: ../../../third_party/boringssl/win-aarch64/crypto/fipsmodule/sha512-armv8.S
+----------------------------------------------------------------------------------------------------
+Copyright 2014-2016 The OpenSSL Project Authors. All Rights Reserved.
+
+Licensed under the OpenSSL license (the "License").  You may not use
+this file except in compliance with the License.  You can obtain a copy
+in the file LICENSE in the source distribution or at
+https://www.openssl.org/source/license.html
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/bsaes-armv7.S + ../../../third_party/boringssl/src/LICENSE
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/bsaes-armv7.S
+FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/bsaes-armv7.S
+----------------------------------------------------------------------------------------------------
+Copyright 2012-2016 The OpenSSL Project Authors. All Rights Reserved.
+
+Licensed under the OpenSSL license (the "License").  You may not use
+this file except in compliance with the License.  You can obtain a copy
+in the file LICENSE in the source distribution or at
+https://www.openssl.org/source/license.html
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/sha256-armv4.S + ../../../third_party/boringssl/src/LICENSE
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/sha256-armv4.S
+FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/sha512-armv4.S
+FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/sha256-armv4.S
+FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/sha512-armv4.S
+----------------------------------------------------------------------------------------------------
+Copyright 2007-2016 The OpenSSL Project Authors. All Rights Reserved.
+
+Licensed under the OpenSSL license (the "License").  You may not use
+this file except in compliance with the License.  You can obtain a copy
+in the file LICENSE in the source distribution or at
+https://www.openssl.org/source/license.html
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/LICENSE
 TYPE: LicenseType.openssl
 FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha256-armv8.S
@@ -6141,7 +6191,6 @@ FILE: ../../../third_party/boringssl/src/util/fipstools/cavp/run_cavp.go
 FILE: ../../../third_party/boringssl/src/util/fipstools/delocate/delocate.peg.go
 FILE: ../../../third_party/boringssl/win-aarch64/crypto/fipsmodule/sha256-armv8.S
 FILE: ../../../third_party/boringssl/win-aarch64/crypto/fipsmodule/sha512-armv8.S
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
 OpenSSL License
 
@@ -6327,57 +6376,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha256-armv8.S + ../../../third_party/boringssl/src/LICENSE
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha256-armv8.S
-FILE: ../../../third_party/boringssl/ios-aarch64/crypto/fipsmodule/sha512-armv8.S
-FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/sha256-armv8.S
-FILE: ../../../third_party/boringssl/linux-aarch64/crypto/fipsmodule/sha512-armv8.S
-FILE: ../../../third_party/boringssl/win-aarch64/crypto/fipsmodule/sha256-armv8.S
-FILE: ../../../third_party/boringssl/win-aarch64/crypto/fipsmodule/sha512-armv8.S
-----------------------------------------------------------------------------------------------------
-Copyright 2014-2016 The OpenSSL Project Authors. All Rights Reserved.
-
-Licensed under the OpenSSL license (the "License").  You may not use
-this file except in compliance with the License.  You can obtain a copy
-in the file LICENSE in the source distribution or at
-https://www.openssl.org/source/license.html
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/bsaes-armv7.S + ../../../third_party/boringssl/src/LICENSE
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/bsaes-armv7.S
-FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/bsaes-armv7.S
-----------------------------------------------------------------------------------------------------
-Copyright 2012-2016 The OpenSSL Project Authors. All Rights Reserved.
-
-Licensed under the OpenSSL license (the "License").  You may not use
-this file except in compliance with the License.  You can obtain a copy
-in the file LICENSE in the source distribution or at
-https://www.openssl.org/source/license.html
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/sha256-armv4.S + ../../../third_party/boringssl/src/LICENSE
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/sha256-armv4.S
-FILE: ../../../third_party/boringssl/ios-arm/crypto/fipsmodule/sha512-armv4.S
-FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/sha256-armv4.S
-FILE: ../../../third_party/boringssl/linux-arm/crypto/fipsmodule/sha512-armv4.S
-----------------------------------------------------------------------------------------------------
-Copyright 2007-2016 The OpenSSL Project Authors. All Rights Reserved.
-
-Licensed under the OpenSSL license (the "License").  You may not use
-this file except in compliance with the License.  You can obtain a copy
-in the file LICENSE in the source distribution or at
-https://www.openssl.org/source/license.html
 ====================================================================================================
 
 ====================================================================================================
@@ -13183,17 +13181,6 @@ In addition, the following condition applies:
 
 All redistributions must retain an intact copy of this copyright notice
 and disclaimer.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
-ORIGIN: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart + ../../../third_party/boringssl/src/LICENSE
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
-----------------------------------------------------------------------------------------------------
-Copyright 2009 The Go Authors. All rights reserved.
-Use of this source code is governed by a BSD-style
-license that can be found in the LICENSE file
 ====================================================================================================
 
 ====================================================================================================
@@ -27973,4 +27960,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 418
+Total license count: 417
