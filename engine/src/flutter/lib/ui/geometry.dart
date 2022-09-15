@@ -1087,8 +1087,16 @@ class Radius {
 class RRect {
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and the same radii along its horizontal axis and its vertical axis.
-  const RRect.fromLTRBXY(double left, double top, double right, double bottom,
-                   double radiusX, double radiusY) : this._raw(
+  ///
+  /// Will assert in debug mode if `radiusX` or `radiusY` are negative.
+  const RRect.fromLTRBXY(
+    double left,
+    double top,
+    double right,
+    double bottom,
+    double radiusX,
+    double radiusY,
+  ) : this._raw(
     top: top,
     left: left,
     right: right,
@@ -1105,8 +1113,15 @@ class RRect {
 
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and the same radius in each corner.
-  RRect.fromLTRBR(double left, double top, double right, double bottom,
-                  Radius radius)
+  ///
+  /// Will assert in debug mode if the `radius` is negative in either x or y.
+  RRect.fromLTRBR(
+    double left,
+    double top,
+    double right,
+    double bottom,
+    Radius radius,
+  )
     : this._raw(
         top: top,
         left: left,
@@ -1124,6 +1139,8 @@ class RRect {
 
   /// Construct a rounded rectangle from its bounding box and the same radii
   /// along its horizontal axis and its vertical axis.
+  ///
+  /// Will assert in debug mode if `radiusX` or `radiusY` are negative.
   RRect.fromRectXY(Rect rect, double radiusX, double radiusY)
     : this._raw(
         top: rect.top,
@@ -1142,6 +1159,8 @@ class RRect {
 
   /// Construct a rounded rectangle from its bounding box and a radius that is
   /// the same in each corner.
+  ///
+  /// Will assert in debug mode if the `radius` is negative in either x or y.
   RRect.fromRectAndRadius(Rect rect, Radius radius)
     : this._raw(
         top: rect.top,
@@ -1161,7 +1180,8 @@ class RRect {
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and topLeft, topRight, bottomRight, and bottomLeft radii.
   ///
-  /// The corner radii default to [Radius.zero], i.e. right-angled corners.
+  /// The corner radii default to [Radius.zero], i.e. right-angled corners. Will
+  /// assert in debug mode if any of the radii are negative in either x or y.
   RRect.fromLTRBAndCorners(
     double left,
     double top,
@@ -1189,7 +1209,8 @@ class RRect {
   /// Construct a rounded rectangle from its bounding box and and topLeft,
   /// topRight, bottomRight, and bottomLeft radii.
   ///
-  /// The corner radii default to [Radius.zero], i.e. right-angled corners
+  /// The corner radii default to [Radius.zero], i.e. right-angled corners. Will
+  /// assert in debug mode if any of the radii are negative in either x or y.
   RRect.fromRectAndCorners(
     Rect rect,
     {
@@ -1237,7 +1258,15 @@ class RRect {
        assert(brRadiusX != null),
        assert(brRadiusY != null),
        assert(blRadiusX != null),
-       assert(blRadiusY != null);
+       assert(blRadiusY != null),
+       assert(tlRadiusX >= 0),
+       assert(tlRadiusY >= 0),
+       assert(trRadiusX >= 0),
+       assert(trRadiusY >= 0),
+       assert(brRadiusX >= 0),
+       assert(brRadiusY >= 0),
+       assert(blRadiusX >= 0),
+       assert(blRadiusY >= 0);
 
   Float32List _getValue32()  {
     final Float32List result = Float32List(12);
@@ -1333,14 +1362,14 @@ class RRect {
       top: top - delta,
       right: right + delta,
       bottom: bottom + delta,
-      tlRadiusX: tlRadiusX + delta,
-      tlRadiusY: tlRadiusY + delta,
-      trRadiusX: trRadiusX + delta,
-      trRadiusY: trRadiusY + delta,
-      blRadiusX: blRadiusX + delta,
-      blRadiusY: blRadiusY + delta,
-      brRadiusX: brRadiusX + delta,
-      brRadiusY: brRadiusY + delta,
+      tlRadiusX: math.max(0, tlRadiusX + delta),
+      tlRadiusY: math.max(0, tlRadiusY + delta),
+      trRadiusX: math.max(0, trRadiusX + delta),
+      trRadiusY: math.max(0, trRadiusY + delta),
+      blRadiusX: math.max(0, blRadiusX + delta),
+      blRadiusY: math.max(0, blRadiusY + delta),
+      brRadiusX: math.max(0, brRadiusX + delta),
+      brRadiusY: math.max(0, brRadiusY + delta),
     );
   }
 
@@ -1503,6 +1532,7 @@ class RRect {
     scale = _getMin(scale, tlRadiusX, trRadiusX, width);
     scale = _getMin(scale, trRadiusY, brRadiusY, height);
     scale = _getMin(scale, brRadiusX, blRadiusX, width);
+    assert(scale >= 0);
 
     if (scale < 1.0) {
       return RRect._raw(
@@ -1621,14 +1651,14 @@ class RRect {
           top: a.top * k,
           right: a.right * k,
           bottom: a.bottom * k,
-          tlRadiusX: a.tlRadiusX * k,
-          tlRadiusY: a.tlRadiusY * k,
-          trRadiusX: a.trRadiusX * k,
-          trRadiusY: a.trRadiusY * k,
-          brRadiusX: a.brRadiusX * k,
-          brRadiusY: a.brRadiusY * k,
-          blRadiusX: a.blRadiusX * k,
-          blRadiusY: a.blRadiusY * k,
+          tlRadiusX: math.max(0, a.tlRadiusX * k),
+          tlRadiusY: math.max(0, a.tlRadiusY * k),
+          trRadiusX: math.max(0, a.trRadiusX * k),
+          trRadiusY: math.max(0, a.trRadiusY * k),
+          brRadiusX: math.max(0, a.brRadiusX * k),
+          brRadiusY: math.max(0, a.brRadiusY * k),
+          blRadiusX: math.max(0, a.blRadiusX * k),
+          blRadiusY: math.max(0, a.blRadiusY * k),
         );
       }
     } else {
@@ -1638,14 +1668,14 @@ class RRect {
           top: b.top * t,
           right: b.right * t,
           bottom: b.bottom * t,
-          tlRadiusX: b.tlRadiusX * t,
-          tlRadiusY: b.tlRadiusY * t,
-          trRadiusX: b.trRadiusX * t,
-          trRadiusY: b.trRadiusY * t,
-          brRadiusX: b.brRadiusX * t,
-          brRadiusY: b.brRadiusY * t,
-          blRadiusX: b.blRadiusX * t,
-          blRadiusY: b.blRadiusY * t,
+          tlRadiusX: math.max(0, b.tlRadiusX * t),
+          tlRadiusY: math.max(0, b.tlRadiusY * t),
+          trRadiusX: math.max(0, b.trRadiusX * t),
+          trRadiusY: math.max(0, b.trRadiusY * t),
+          brRadiusX: math.max(0, b.brRadiusX * t),
+          brRadiusY: math.max(0, b.brRadiusY * t),
+          blRadiusX: math.max(0, b.blRadiusX * t),
+          blRadiusY: math.max(0, b.blRadiusY * t),
         );
       } else {
         return RRect._raw(
@@ -1653,14 +1683,14 @@ class RRect {
           top: _lerpDouble(a.top, b.top, t),
           right: _lerpDouble(a.right, b.right, t),
           bottom: _lerpDouble(a.bottom, b.bottom, t),
-          tlRadiusX: _lerpDouble(a.tlRadiusX, b.tlRadiusX, t),
-          tlRadiusY: _lerpDouble(a.tlRadiusY, b.tlRadiusY, t),
-          trRadiusX: _lerpDouble(a.trRadiusX, b.trRadiusX, t),
-          trRadiusY: _lerpDouble(a.trRadiusY, b.trRadiusY, t),
-          brRadiusX: _lerpDouble(a.brRadiusX, b.brRadiusX, t),
-          brRadiusY: _lerpDouble(a.brRadiusY, b.brRadiusY, t),
-          blRadiusX: _lerpDouble(a.blRadiusX, b.blRadiusX, t),
-          blRadiusY: _lerpDouble(a.blRadiusY, b.blRadiusY, t),
+          tlRadiusX: math.max(0, _lerpDouble(a.tlRadiusX, b.tlRadiusX, t)),
+          tlRadiusY: math.max(0, _lerpDouble(a.tlRadiusY, b.tlRadiusY, t)),
+          trRadiusX: math.max(0, _lerpDouble(a.trRadiusX, b.trRadiusX, t)),
+          trRadiusY: math.max(0, _lerpDouble(a.trRadiusY, b.trRadiusY, t)),
+          brRadiusX: math.max(0, _lerpDouble(a.brRadiusX, b.brRadiusX, t)),
+          brRadiusY: math.max(0, _lerpDouble(a.brRadiusY, b.brRadiusY, t)),
+          blRadiusX: math.max(0, _lerpDouble(a.blRadiusX, b.blRadiusX, t)),
+          blRadiusY: math.max(0, _lerpDouble(a.blRadiusY, b.blRadiusY, t)),
         );
       }
     }
