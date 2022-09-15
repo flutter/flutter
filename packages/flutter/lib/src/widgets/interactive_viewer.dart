@@ -87,7 +87,8 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     required Widget this.child,
-  }) : assert(panAxis != null),
+  }) : assert(alignPanAxis != null),
+       assert(panAxis != null),
        assert(child != null),
        assert(constrained != null),
        assert(minScale != null),
@@ -187,7 +188,7 @@ class InteractiveViewer extends StatefulWidget {
   )
   final bool alignPanAxis;
 
-  /// When set to [PanAxis.aligned] panning is only allowed in the horizontal
+  /// When set to [PanAxis.aligned], panning is only allowed in the horizontal
   /// axis or the vertical axis, diagonal panning is not allowed.
   ///
   /// When set to [PanAxis.vertical] or [PanAxis.horizontal] panning is only
@@ -536,7 +537,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   final GlobalKey _parentKey = GlobalKey();
   Animation<Offset>? _animation;
   late AnimationController _controller;
-  Axis? _panAxis; // Used with alignPanAxis.
+  Axis? _currentAxis; // Used with panAxis.
   Offset? _referenceFocalPoint; // Point where the current gesture began.
   double? _scaleStart; // Scale value at start of scaling gesture.
   double? _rotationStart = 0.0; // Rotation at start of rotation gesture.
@@ -597,7 +598,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     late final Offset alignedTranslation;
 
-    if (_panAxis != null) {
+    if (_currentAxis != null) {
       switch(widget.panAxis){
         case PanAxis.horizontal:
           alignedTranslation = _alignAxis(translation, Axis.horizontal);
@@ -606,7 +607,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           alignedTranslation = _alignAxis(translation, Axis.vertical);
           break;
         case PanAxis.aligned:
-          alignedTranslation = _alignAxis(translation, _panAxis!);
+          alignedTranslation = _alignAxis(translation, _currentAxis!);
           break;
         case PanAxis.free:
           alignedTranslation = translation;
@@ -780,7 +781,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     _gestureType = null;
-    _panAxis = null;
+    _currentAxis = null;
     _scaleStart = _transformationController!.value.getMaxScaleOnAxis();
     _referenceFocalPoint = _transformationController!.toScene(
       details.localFocalPoint,
@@ -871,7 +872,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           widget.onInteractionUpdate?.call(details);
           return;
         }
-        _panAxis ??= _getPanAxis(_referenceFocalPoint!, focalPointScene);
+        _currentAxis ??= _getPanAxis(_referenceFocalPoint!, focalPointScene);
         // Translate so that the same point in the scene is underneath the
         // focal point before and after the movement.
         final Offset translationChange = focalPointScene - _referenceFocalPoint!;
@@ -899,13 +900,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _controller.reset();
 
     if (!_gestureIsSupported(_gestureType)) {
-      _panAxis = null;
+      _currentAxis = null;
       return;
     }
 
     // If the scale ended with enough velocity, animate inertial movement.
     if (_gestureType != _GestureType.pan || details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
-      _panAxis = null;
+      _currentAxis = null;
       return;
     }
 
@@ -993,7 +994,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle inertia drag animation.
   void _onAnimate() {
     if (!_controller.isAnimating) {
-      _panAxis = null;
+      _currentAxis = null;
       _animation?.removeListener(_onAnimate);
       _animation = null;
       _controller.reset();
