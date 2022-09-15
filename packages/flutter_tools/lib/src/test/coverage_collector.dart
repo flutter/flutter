@@ -117,7 +117,9 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverage(TestDevice testDevice, {@visibleForTesting Future<FlutterVmService> Function(Uri?)? connector}) async {
+  Future<void> collectCoverage(TestDevice testDevice, {
+    @visibleForTesting FlutterVmService? serviceOverride,
+  }) async {
     final Stopwatch? totalTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageTotal);
 
     late Map<String, dynamic> data;
@@ -134,7 +136,7 @@ class CoverageCollector extends TestWatcher {
     final Future<void> collectionComplete = testDevice.observatoryUri
       .then((Uri? observatoryUri) {
         _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri!, libraryNames)
+        return collect(observatoryUri!, libraryNames, serviceOverride: serviceOverride)
           .then<void>((Map<String, dynamic> result) {
             if (result == null) {
               throw Exception('Failed to collect coverage.');
@@ -144,13 +146,14 @@ class CoverageCollector extends TestWatcher {
           });
       });
 
-    await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
+    await Future.wait<void>(<Future<void>>[ processComplete, collectionComplete ]);
 
     testTimeRecorder?.stop(TestTimePhases.CoverageCollect, collectTestTimeRecorderStopwatch!);
 
     _logMessage('Merging coverage data...');
     final Stopwatch? parseTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageParseJson);
-    final Map<String, coverage.HitMap> hitmap = coverage.HitMap.parseJsonSync(
+
+   final Map<String, coverage.HitMap> hitmap = coverage.HitMap.parseJsonSync(
         data['coverage'] as List<Map<String, dynamic>>,
         checkIgnoredLines: true,
         resolver: resolver ?? await CoverageCollector.getResolver(packageDirectory),
@@ -250,6 +253,7 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String>? libraryNames, 
   bool waitPaused = false,
   String? debugName,
   @visibleForTesting bool forceSequential = false,
-}) async {
-  return await coverage.collect(serviceUri, false, false, false, libraryNames);
+  @visibleForTesting FlutterVmService? serviceOverride,
+}) {
+  return coverage.collect(serviceUri, false, false, false, libraryNames, serviceOverrideForTesting: serviceOverride?.service);
 }
