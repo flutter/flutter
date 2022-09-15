@@ -2170,7 +2170,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
               if(renderEditable.hasFocus
-                  && editableText.textEditingValue.selection.isCollapsed
+                  && _dragStartSelection!.isCollapsed
                   && _lastTapWasOnSelection(dragStartGlobalPosition, _dragStartSelection)
               ) {
                 return renderEditable.selectPositionAt(
