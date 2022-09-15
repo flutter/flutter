@@ -285,7 +285,6 @@ Future<bool> compileUnitTest(FilePath input, {required bool forCanvasKit, requir
     '--no-minify',
     '--disable-inlining',
     '--enable-asserts',
-    '--no-sound-null-safety',
 
     // We do not want to auto-select a renderer in tests. As of today, tests
     // are designed to run in one specific mode. So instead, we specify the
