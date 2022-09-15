@@ -1447,8 +1447,7 @@ class RawScrollbar extends StatefulWidget {
 /// scrollbar track.
 class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
   Offset? _dragScrollbarAxisOffset;
-  late double? _thumbPressVertical;
-  late double? _thumbPressHorizontal;
+  double? _thumbPress;
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
@@ -1787,8 +1786,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
     _dragScrollbarAxisOffset = localPosition;
-    _thumbPressVertical = localPosition.dy - scrollbarPainter._thumbOffset;
-    _thumbPressHorizontal = localPosition.dx - scrollbarPainter._thumbOffset;
+    _thumbPress = direction == Axis.vertical
+      ? localPosition.dy - scrollbarPainter._thumbOffset
+      : localPosition.dx - scrollbarPainter._thumbOffset;
   }
 
   /// Handler called when a currently active long press gesture moves.
@@ -1809,13 +1809,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     switch (position.axisDirection) {
       case AxisDirection.up:
       case AxisDirection.down:
-        if (_canDragThumb(_dragScrollbarAxisOffset!.dy, position.viewportDimension, _thumbPressVertical!)) {
+        if (_canDragThumb(_dragScrollbarAxisOffset!.dy, position.viewportDimension, _thumbPress!)) {
           _updateScrollPosition(localPosition);
         }
         break;
       case AxisDirection.left:
       case AxisDirection.right:
-        if (_canDragThumb(_dragScrollbarAxisOffset!.dx, position.viewportDimension, _thumbPressHorizontal!)) {
+        if (_canDragThumb(_dragScrollbarAxisOffset!.dx, position.viewportDimension, _thumbPress!)) {
           _updateScrollPosition(localPosition);
         }
         break;
