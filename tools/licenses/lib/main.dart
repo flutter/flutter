@@ -2382,6 +2382,8 @@ class _RepositoryDartDirectory extends _RepositoryDirectory {
         && entry.name != 'build' // not shipped in binary
         && entry.name != 'tools' // not shipped in binary
         && entry.name != 'samples-dev' // not shipped in binary
+        && entry.name != 'benchmarks' // not shipped in binary
+        && entry.name != 'benchmarks-internal' // not shipped in binary
         && super.shouldRecurse(entry);
   }
 
