@@ -1,4 +1,4 @@
-Signature: 9d7c93559655e4f309766cea1dbb7e22
+Signature: 640372296da717028e5e5f51b5e8f529
 
 UNUSED LICENSES:
 
@@ -10767,6 +10767,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/hash_factories.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/identical_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/internal_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/isolate_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_util_patch.dart
