@@ -52,7 +52,7 @@ class ScrollbarThemeData with Diagnosticable {
     this.isAlwaysShown,
     @Deprecated(
       'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-      'This feature was deprecated after 3.4.0-19.0.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     this.showTrackOnHover,
   }) : assert(
@@ -82,7 +82,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// descendant [Scrollbar] widgets.
   @Deprecated(
     'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-    'This feature was deprecated after 3.4.0-19.0.pre.',
+    'This feature was deprecated after v3.4.0-19.0.pre.',
   )
   final bool? showTrackOnHover;
 
