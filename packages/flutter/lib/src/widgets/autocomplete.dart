@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'container.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
