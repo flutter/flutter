@@ -3421,7 +3421,7 @@ int AXPlatformNodeWin::MSAARole() {
       return ROLE_SYSTEM_TITLEBAR;
 
     case ax::mojom::Role::kToggleButton:
-      return ROLE_SYSTEM_PUSHBUTTON;
+      return ROLE_SYSTEM_CHECKBUTTON;
 
     case ax::mojom::Role::kTextField:
     case ax::mojom::Role::kSearchBox:

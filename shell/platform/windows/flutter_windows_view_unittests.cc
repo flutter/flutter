@@ -685,7 +685,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
     VARIANT varchild = {};
     varchild.vt = VT_I4;
 
-    // Verify the checkbox is checked.
+    // Verify the checkbox is unchecked.
     varchild.lVal = CHILDID_SELF;
     VARIANT native_state = {};
     ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
@@ -716,11 +716,108 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
     VARIANT varchild = {};
     varchild.vt = VT_I4;
 
-    // Verify the checkbox is checked.
+    // Verify the checkbox is mixed.
     varchild.lVal = CHILDID_SELF;
     VARIANT native_state = {};
     ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
     EXPECT_TRUE(native_state.lVal & STATE_SYSTEM_MIXED);
+  }
+}
+
+// Ensure that switches have their toggle status set apropriately
+TEST(FlutterWindowsViewTest, SwitchNativeState) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  // Enable semantics to instantiate accessibility bridge.
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  ASSERT_TRUE(bridge);
+
+  FlutterSemanticsNode root{sizeof(FlutterSemanticsNode), 0};
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 0;
+  root.custom_accessibility_actions_count = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsToggled);
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  bridge->CommitUpdates();
+
+  {
+    auto root_node = bridge
+                         ->GetFlutterPlatformNodeDelegateFromID(
+                             AccessibilityBridge::kRootNodeId)
+                         .lock();
+    EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kToggleButton);
+    EXPECT_EQ(root_node->GetData().GetCheckedState(),
+              ax::mojom::CheckedState::kTrue);
+
+    // Get the IAccessible for the root node.
+    IAccessible* native_view = root_node->GetNativeViewAccessible();
+    ASSERT_TRUE(native_view != nullptr);
+
+    // Look up against the node itself (not one of its children).
+    VARIANT varchild = {};
+    varchild.vt = VT_I4;
+
+    varchild.lVal = CHILDID_SELF;
+    VARIANT varrole = {};
+
+    // Verify the role of the switch is CHECKBUTTON
+    ASSERT_EQ(native_view->get_accRole(varchild, &varrole), S_OK);
+    ASSERT_EQ(varrole.lVal, ROLE_SYSTEM_CHECKBUTTON);
+
+    // Verify the switch is pressed.
+    VARIANT native_state = {};
+    ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
+    EXPECT_TRUE(native_state.lVal & STATE_SYSTEM_PRESSED);
+  }
+
+  // Test unpressed too.
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState);
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->CommitUpdates();
+
+  {
+    auto root_node = bridge
+                         ->GetFlutterPlatformNodeDelegateFromID(
+                             AccessibilityBridge::kRootNodeId)
+                         .lock();
+    EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kToggleButton);
+    EXPECT_EQ(root_node->GetData().GetCheckedState(),
+              ax::mojom::CheckedState::kFalse);
+
+    // Get the IAccessible for the root node.
+    IAccessible* native_view = root_node->GetNativeViewAccessible();
+    ASSERT_TRUE(native_view != nullptr);
+
+    // Look up against the node itself (not one of its children).
+    VARIANT varchild = {};
+    varchild.vt = VT_I4;
+
+    // Verify the switch is not pressed.
+    varchild.lVal = CHILDID_SELF;
+    VARIANT native_state = {};
+    ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
+    EXPECT_FALSE(native_state.lVal & STATE_SYSTEM_PRESSED);
   }
 }
 
