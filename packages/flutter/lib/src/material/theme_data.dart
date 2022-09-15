@@ -1252,7 +1252,7 @@ class ThemeData with Diagnosticable {
   ///   * Typography: `typography` (see table above)
   ///
   /// ### Components
-  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton]
+  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
   ///   * FAB: [FloatingActionButton]
   ///   * Extended FAB: [FloatingActionButton.extended]
   ///   * Cards: [Card]
@@ -1261,10 +1261,12 @@ class ThemeData with Diagnosticable {
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
+  ///   * Checkbox: [Checkbox]
   ///   * Dialogs: [Dialog], [AlertDialog]
   ///   * Lists: [ListTile]
   ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
   ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * Switch: [Switch]
   ///   * Top app bar: [AppBar]
   ///
   /// In addition, this flag enables features introduced in Android 12.
@@ -2576,10 +2578,9 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   /// returned [CupertinoThemeData]. No derived attributes from iOS defaults or
   /// from cascaded Material theme attributes are copied.
   ///
-  /// [MaterialBasedCupertinoThemeData.copyWith] cannot change the base
-  /// Material [ThemeData]. To change the base Material [ThemeData], create a
-  /// new Material [Theme] and use `copyWith` on the Material [ThemeData]
-  /// instead.
+  /// This [copyWith] cannot change the base Material [ThemeData]. To change the
+  /// base Material [ThemeData], create a new Material [Theme] and use
+  /// [ThemeData.copyWith] on the Material [ThemeData] instead.
   @override
   MaterialBasedCupertinoThemeData copyWith({
     Brightness? brightness,

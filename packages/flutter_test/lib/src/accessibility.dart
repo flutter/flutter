@@ -331,61 +331,79 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     if (shouldSkipNode(data)) {
       return result;
     }
+    final String text = data.label.isEmpty ? data.value : data.label;
+    final Iterable<Element> elements = find.text(text).hitTestable().evaluate();
+    for (final Element element in elements) {
+      result += await _evaluateElement(node, element, tester, image, byteData);
+    }
+    return result;
+  }
 
+  Future<Evaluation> _evaluateElement(
+    SemanticsNode node,
+    Element element,
+    WidgetTester tester,
+    ui.Image image,
+    ByteData byteData,
+  ) async {
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
     double? fontSize;
 
-    final String text = data.label.isEmpty ? data.value : data.label;
-    final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
     late final Rect paintBounds;
+    late final Rect paintBoundsWithOffset;
 
-    if (elements.length == 1) {
-      final Element element = elements.single;
-      final RenderObject? renderBox = element.renderObject;
-      if (renderBox is! RenderBox) {
-        throw StateError('Unexpected renderObject type: $renderBox');
-      }
+    final RenderObject? renderBox = element.renderObject;
+    if (renderBox is! RenderBox) {
+      throw StateError('Unexpected renderObject type: $renderBox');
+    }
 
-      const Offset offset = Offset(4.0, 4.0);
-      paintBounds = Rect.fromPoints(
-        renderBox.localToGlobal(renderBox.paintBounds.topLeft - offset),
-        renderBox.localToGlobal(renderBox.paintBounds.bottomRight + offset),
-      );
-      final Widget widget = element.widget;
-      final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
-      if (widget is Text) {
-        final TextStyle? style = widget.style;
-        final TextStyle effectiveTextStyle = style == null || style.inherit
-            ? defaultTextStyle.style.merge(widget.style)
-            : style;
-        isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
-        fontSize = effectiveTextStyle.fontSize;
-      } else if (widget is EditableText) {
-        isBold = widget.style.fontWeight == FontWeight.bold;
-        fontSize = widget.style.fontSize;
-      } else {
-        throw StateError('Unexpected widget type: ${widget.runtimeType}');
-      }
-    } else if (elements.length > 1) {
-      return Evaluation.fail(
-        'Multiple nodes with the same label: ${data.label}\n',
-      );
+    const Offset offset = Offset(4.0, 4.0);
+    paintBoundsWithOffset = Rect.fromPoints(
+      renderBox.localToGlobal(renderBox.paintBounds.topLeft - offset),
+      renderBox.localToGlobal(renderBox.paintBounds.bottomRight + offset),
+    );
+
+    paintBounds = Rect.fromPoints(
+      renderBox.localToGlobal(renderBox.paintBounds.topLeft),
+      renderBox.localToGlobal(renderBox.paintBounds.bottomRight),
+    );
+
+    final Offset? nodeOffset = node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null;
+
+    final Rect nodeBounds = node.rect.shift(nodeOffset ?? Offset.zero);
+    final Rect intersection = nodeBounds.intersect(paintBounds);
+    if (intersection.width <= 0 || intersection.height <= 0) {
+      // Skip this element since it doesn't correspond to the given semantic
+      // node.
+      return const Evaluation.pass();
+    }
+
+    final Widget widget = element.widget;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
+    if (widget is Text) {
+      final TextStyle? style = widget.style;
+      final TextStyle effectiveTextStyle = style == null || style.inherit
+          ? defaultTextStyle.style.merge(widget.style)
+          : style;
+      isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
+      fontSize = effectiveTextStyle.fontSize;
+    } else if (widget is EditableText) {
+      isBold = widget.style.fontWeight == FontWeight.bold;
+      fontSize = widget.style.fontSize;
     } else {
-      // If we can't find the text node then assume the label does not
-      // correspond to actual text.
-      return result;
+      throw StateError('Unexpected widget type: ${widget.runtimeType}');
     }
 
-    if (isNodeOffScreen(paintBounds, tester.binding.window)) {
-      return result;
+    if (isNodeOffScreen(paintBoundsWithOffset, tester.binding.window)) {
+      return const Evaluation.pass();
     }
 
-    final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
+    final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBoundsWithOffset, image.width, image.height);
 
     // Node was too far off screen.
     if (colorHistogram.isEmpty) {
-      return result;
+      return const Evaluation.pass();
     }
 
     final _ContrastReport report = _ContrastReport(colorHistogram);
@@ -394,19 +412,18 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final double targetContrastRatio = this.targetContrastRatio(fontSize, bold: isBold);
 
     if (contrastRatio - targetContrastRatio >= _tolerance) {
-      return result + const Evaluation.pass();
+      return const Evaluation.pass();
     }
-    return result +
-        Evaluation.fail(
-          '$node:\n'
-          'Expected contrast ratio of at least $targetContrastRatio '
-          'but found ${contrastRatio.toStringAsFixed(2)} '
-          'for a font size of $fontSize.\n'
-          'The computed colors was:\n'
-          'light - ${report.lightColor}, dark - ${report.darkColor}\n'
-          'See also: '
-          'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
-        );
+    return Evaluation.fail(
+      '$node:\n'
+      'Expected contrast ratio of at least $targetContrastRatio '
+      'but found ${contrastRatio.toStringAsFixed(2)} '
+      'for a font size of $fontSize.\n'
+      'The computed colors was:\n'
+      'light - ${report.lightColor}, dark - ${report.darkColor}\n'
+      'See also: '
+      'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+    );
   }
 
   /// Returns whether node should be skipped.

@@ -1184,6 +1184,30 @@ void main() {
     painter.dispose();
     expect(painter.debugDisposed, true);
   });
+
+  test('TextPainter computeWidth', () {
+    const InlineSpan text = TextSpan(text: 'foobar');
+    final TextPainter painter = TextPainter(text: text, textDirection: TextDirection.ltr);
+    painter.layout();
+    expect(painter.width, TextPainter.computeWidth(text: text, textDirection: TextDirection.ltr));
+
+    painter.layout(minWidth: 500);
+    expect(painter.width, TextPainter.computeWidth(text: text, textDirection: TextDirection.ltr, minWidth: 500));
+
+    painter.dispose();
+  });
+
+  test('TextPainter computeMaxIntrinsicWidth', () {
+    const InlineSpan text = TextSpan(text: 'foobar');
+    final TextPainter painter = TextPainter(text: text, textDirection: TextDirection.ltr);
+    painter.layout();
+    expect(painter.maxIntrinsicWidth, TextPainter.computeMaxIntrinsicWidth(text: text, textDirection: TextDirection.ltr));
+
+    painter.layout(minWidth: 500);
+    expect(painter.maxIntrinsicWidth, TextPainter.computeMaxIntrinsicWidth(text: text, textDirection: TextDirection.ltr, minWidth: 500));
+
+    painter.dispose();
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {

@@ -3315,12 +3315,43 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Toggles the visibility of the toolbar.
-  void toggleToolbar([bool hideHandles = true]) {
+  void toggleToolbar() {
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
-      hideToolbar(hideHandles);
+      hideToolbar();
     } else {
       showToolbar();
+    }
+  }
+
+  /// Shows the magnifier at the position given by `positionToShow`,
+  /// if there is no magnifier visible.
+  ///
+  /// Updates the magnifier to the position given by `positionToShow`,
+  /// if there is a magnifier visible.
+  ///
+  /// Does nothing if a magnifier couldn't be shown, such as when the selection
+  /// overlay does not currently exist.
+  void showMagnifier(Offset positionToShow) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.updateMagnifier(positionToShow);
+    } else {
+      _selectionOverlay!.showMagnifier(positionToShow);
+    }
+  }
+
+  /// Hides the magnifier if it is visible.
+  void hideMagnifier({required bool shouldShowToolbar}) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.hideMagnifier(shouldShowToolbar: shouldShowToolbar);
     }
   }
 

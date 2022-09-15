@@ -80,7 +80,7 @@ class OutlinedButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
-    required Widget super.child,
+    required super.child,
   });
 
   /// Create a text button from a pair of widgets that serve as the button's
@@ -451,7 +451,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_127
 
 class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   _OutlinedButtonDefaultsM3(this.context)

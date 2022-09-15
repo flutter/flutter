@@ -2248,17 +2248,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
-  - name: Linux_samsung_a02 openpay_benchmarks__scroll_perf
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      openpay: "true"
-      tags: >
-        ["devicelab", "android", "linux", "openpay", "samsung", "a02"]
-      task_name: openpay_benchmarks__scroll_perf
-
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -2364,10 +2353,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: build_tests
       subshard: "1_4"
       tags: >
@@ -2386,10 +2371,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: build_tests
       subshard: "2_4"
@@ -2410,10 +2391,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: build_tests
       subshard: "3_4"
       tags: >
@@ -2432,10 +2409,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: build_tests
       subshard: "4_4"
@@ -2528,6 +2501,16 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: flutter_gallery_macos__start_up
+
+  - name: Mac flutter_view_macos__start_up
+    bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: flutter_view_macos__start_up
 
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -2702,10 +2685,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: module_test_ios
@@ -2729,6 +2708,20 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac platform_view_macos__start_up
+    bringup: true # New target https://github.com/flutter/flutter/issues/109633
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: platform_view_macos__start_up
+
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2739,10 +2732,6 @@ targets:
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       tags: >
         ["devicelab", "hostonly"]
@@ -2761,10 +2750,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       tags: >
         ["devicelab", "hostonly"]
@@ -2822,10 +2807,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       tags: >
         ["devicelab", "hostonly"]
       task_name: plugin_test_ios
@@ -2844,10 +2825,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: tool_host_cross_arch_tests
       tags: >
@@ -2872,10 +2849,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: tool_integration_tests
       subshard: "1_4"
@@ -2902,10 +2875,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: tool_integration_tests
       subshard: "2_4"
       tags: >
@@ -2931,10 +2900,6 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
-        ]
       shard: tool_integration_tests
       subshard: "3_4"
       tags: >
@@ -2959,10 +2924,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      runtime_versions: >-
-        [
-          "ios-16-0_14a5294e"
         ]
       shard: tool_integration_tests
       subshard: "4_4"
@@ -3117,6 +3078,7 @@ targets:
 
   - name: Mac_android microbenchmarks
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/111482
     presubmit: false
     timeout: 60
     properties:
@@ -3752,6 +3714,25 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: native_ui_tests_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac channels_integration_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "13f17a"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: channels_integration_test_macos
     runIf:
       - dev/**
       - packages/flutter_tools/**

@@ -41,11 +41,23 @@ import 'tooltip.dart';
 ///
 /// {@tool dartpad}
 /// This example shows a [NavigationBar] as it is used within a [Scaffold]
-/// widget. The [NavigationBar] has three [NavigationDestination] widgets
-/// and the [selectedIndex] is set to index 0. The `onDestinationSelected` callback
-/// changes the selected item's index and displays a corresponding widget in the body of the [Scaffold].
+/// widget. The [NavigationBar] has three [NavigationDestination] widgets and
+/// the initial [selectedIndex] is set to index 0. The [onDestinationSelected]
+/// callback changes the selected item's index and displays a corresponding
+/// widget in the body of the [Scaffold].
 ///
-/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.dart **
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a [NavigationBar] as it is used within a [Scaffold]
+/// widget when there are nested navigators that provide local navigation. The
+/// [NavigationBar] has four [NavigationDestination] widgets with different
+/// color schemes. The [onDestinationSelected] callback changes the selected
+/// item's index and displays a corresponding page with its own local navigator
+/// in the body of a [Scaffold].
+///
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.1.dart **
 /// {@end-tool}
 /// See also:
 ///
@@ -1245,7 +1257,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_127
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)

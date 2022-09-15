@@ -646,7 +646,7 @@ class TextStyle with Diagnosticable {
   /// layout.
   ///
   /// Defaults to null, which defers to the paragraph's
-  /// `ParagraphStyle.textHeightBehavior`'s `leadingDistribution`.
+  /// `ParagraphStyle.textHeightBehavior`'s [leadingDistribution].
   final ui.TextLeadingDistribution? leadingDistribution;
 
   /// The locale used to select region-specific glyphs.

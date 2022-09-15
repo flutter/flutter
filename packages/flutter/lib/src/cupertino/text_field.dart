@@ -102,6 +102,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   @override
   void onSingleTapUp(TapUpDetails details) {
+    editableText.hideToolbar();
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -140,7 +141,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// {@tool dartpad}
-/// This example shows how to set the initial value of the `CupertinoTextField` using
+/// This example shows how to set the initial value of the [CupertinoTextField] using
 /// a [controller] that already contains some text.
 ///
 /// ** See code in examples/api/lib/cupertino/text_field/cupertino_text_field.0.dart **
