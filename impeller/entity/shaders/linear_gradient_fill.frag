@@ -12,6 +12,7 @@ uniform GradientInfo {
   float tile_mode;
   float texture_sampler_y_coord_scale;
   float alpha;
+  vec2 half_texel;
 } gradient_info;
 
 in vec2 v_position;
@@ -25,11 +26,11 @@ void main() {
     gradient_info.end_point - gradient_info.start_point
   );
   float t = dot / (len * len);
-  frag_color = IPSampleWithTileMode(
+  frag_color = IPSampleLinearWithTileMode(
     texture_sampler,
     vec2(t, 0.5),
     gradient_info.texture_sampler_y_coord_scale,
-    gradient_info.tile_mode,
+    gradient_info.half_texel,
     gradient_info.tile_mode);
   frag_color = vec4(frag_color.xyz * frag_color.a, frag_color.a) * gradient_info.alpha;
 }
