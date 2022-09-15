@@ -245,7 +245,7 @@ class ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-      return _bouncingPhysics;
+        return _bouncingPhysics;
       case TargetPlatform.macOS:
         return _bouncingDesktopPhysics;
       case TargetPlatform.android:

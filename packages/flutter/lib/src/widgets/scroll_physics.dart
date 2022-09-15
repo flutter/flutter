@@ -638,10 +638,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// as more of the area past the edge is dragged in (represented by an increasing
   /// `overscrollFraction` which starts at 0 when there is no overscroll).
   double frictionFactor(double overscrollFraction) {
-    if (decelerationRate == ScrollDecelerationRate.fast) {
-      return 0.07 * math.pow(1 - overscrollFraction, 2);
+    switch (decelerationRate) {
+      case ScrollDecelerationRate.fast:
+        return 0.07 * math.pow(1 - overscrollFraction, 2);
+      case ScrollDecelerationRate.normal:
+        return 0.52 * math.pow(1 - overscrollFraction, 2);
     }
-    return 0.52 * math.pow(1 - overscrollFraction, 2);
   }
 
   @override
@@ -689,6 +691,15 @@ class BouncingScrollPhysics extends ScrollPhysics {
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
+      double constantDeceleration;
+      switch (decelerationRate) {
+        case ScrollDecelerationRate.fast:
+          constantDeceleration = 1400;
+          break;
+        case ScrollDecelerationRate.normal:
+          constantDeceleration = 0;
+          break;
+      }
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
@@ -696,7 +707,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
-        constantDeceleration: decelerationRate == ScrollDecelerationRate.fast ? 1400 : 0
+        constantDeceleration: constantDeceleration
       );
     }
     return null;
@@ -734,22 +745,26 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   @override
   double get maxFlingVelocity {
-    if (decelerationRate == ScrollDecelerationRate.fast) {
-      return kMaxFlingVelocity * 8.0;
+    switch (decelerationRate) {
+      case ScrollDecelerationRate.fast:
+        return kMaxFlingVelocity * 8.0;
+      case ScrollDecelerationRate.normal:
+        return super.maxFlingVelocity;
     }
-    return super.maxFlingVelocity;
   }
 
   @override
   SpringDescription get spring {
-    if (decelerationRate == ScrollDecelerationRate.fast) {
-      return SpringDescription.withDampingRatio(
-        mass: 0.3,
-        stiffness: 75.0,
-        ratio: 1.3,
-      );
+    switch (decelerationRate) {
+      case ScrollDecelerationRate.fast:
+        return SpringDescription.withDampingRatio(
+          mass: 0.3,
+          stiffness: 75.0,
+          ratio: 1.3,
+        );
+      case ScrollDecelerationRate.normal:
+        return super.spring;
     }
-    return super.spring;
   }
 }
 

@@ -10,18 +10,20 @@ import 'simulation.dart';
 
 export 'tolerance.dart' show Tolerance;
 
+/// Numerically determine the input value which produces output value [target]
+/// for a function [f], given its first-derivative [df].
 double _newtonsMethod({
-  required double guess,
+  required double initialGuess,
   required double target,
   required double Function(double) f,
   required double Function(double) df,
   required int iterations
 }) {
-  double g = guess;
+  double guess = initialGuess;
   for (int i = 0; i < iterations; i++) {
-    g = g - (f(g) - target) / df(g);
+    guess = guess - (f(guess) - target) / df(guess);
   }
-  return g;
+  return guess;
 }
 
 /// A simulation that applies a drag to slow a particle down.
@@ -47,7 +49,7 @@ class FrictionSimulation extends Simulation {
        _v = velocity,
        _constantDeceleration = constantDeceleration * velocity.sign {
       _finalTime = _newtonsMethod(
-        guess: 0,
+        initialGuess: 0,
         target: 0,
         f: dx,
         df: (double time) => (_v * math.pow(_drag, time) * _dragLog) - _constantDeceleration,
@@ -136,7 +138,7 @@ class FrictionSimulation extends Simulation {
     }
     return _newtonsMethod(
       target: x,
-      guess: 0,
+      initialGuess: 0,
       f: this.x,
       df: dx,
       iterations: 10

@@ -378,7 +378,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 /// scroll view's velocity estimation strategy.
 ///
 /// The estimated velocity reported by this class is a close approximation of
-/// the velocity an macOS scroll view would report with the same
+/// the velocity a macOS scroll view would report with the same
 /// [PointerMoveEvent]s, when the touch that initiates a fling is released.
 ///
 /// This class differs from the [VelocityTracker] class in that it uses weighted
@@ -397,7 +397,7 @@ class MacOSScrollViewFlingVelocityTracker extends IOSScrollViewFlingVelocityTrac
   @override
   VelocityEstimate getVelocityEstimate() {
     // The velocity estimated using this expression is an approximation of the
-    // scroll velocity of an macOS scroll view at the moment the user touch was
+    // scroll velocity of a macOS scroll view at the moment the user touch was
     // released.
     final Offset estimatedVelocity = _previousVelocityAt(-2) * 0.15
                                    + _previousVelocityAt(-1) * 0.65
