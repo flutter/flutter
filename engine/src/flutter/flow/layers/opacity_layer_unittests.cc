@@ -8,6 +8,7 @@
 #include "flutter/flow/layers/image_filter_layer.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/transform_layer.h"
+#include "flutter/flow/raster_cache_util.h"
 #include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
@@ -660,6 +661,44 @@ TEST_F(OpacityLayerDiffTest, FractionalTranslationWithRasterCache) {
   auto damage = DiffLayerTree(tree1, MockLayerTree(), SkIRect::MakeEmpty(), 0,
                               0, /*use_raster_cache=*/true);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(11, 11, 61, 61));
+}
+
+TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
+  use_mock_raster_cache();  // Ensure non-fractional alignment.
+
+  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
+  const SkMatrix layer_transform =
+      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
+  const SkPaint child_paint = SkPaint(SkColors::kGreen);
+  const SkRect expected_layer_bounds =
+      layer_transform.mapRect(child_path.getBounds());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
+  auto layer = std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, layer_offset);
+  layer->Add(mock_layer);
+  layer->Preroll(preroll_context(), initial_transform);
+
+  const SkPaint opacity_paint = SkPaint(SkColors::kBlack);  // A = 1.0f
+  SkRect opacity_bounds;
+  expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
+      .roundOut(&opacity_bounds);
+  auto expected_draw_calls = std::vector(
+      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::SetMatrixData{SkM44(
+                  RasterCacheUtil::GetIntegralTransCTM(layer_transform))}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::SaveLayerData{opacity_bounds, opacity_paint, nullptr,
+                                        2}},
+       MockCanvas::DrawCall{2,
+                            MockCanvas::DrawPathData{child_path, child_paint}},
+       MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
+  layer->Paint(paint_context());
+  EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
 
 }  // namespace testing
