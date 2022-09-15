@@ -385,6 +385,13 @@ void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
             : flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked
                 ? ax::mojom::CheckedState::kTrue
                 : ax::mojom::CheckedState::kFalse));
+  } else if (node_data.role == ax::mojom::Role::kToggleButton) {
+    node_data.AddIntAttribute(
+        ax::mojom::IntAttribute::kCheckedState,
+        static_cast<int32_t>(
+            flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsToggled
+                ? ax::mojom::CheckedState::kTrue
+                : ax::mojom::CheckedState::kFalse));
   }
 }
 
