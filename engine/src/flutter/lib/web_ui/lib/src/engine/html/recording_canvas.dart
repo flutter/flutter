@@ -23,16 +23,8 @@ import 'shaders/image_shader.dart';
 /// Enable this to print every command applied by a canvas.
 const bool _debugDumpPaintCommands = false;
 
-// Returns the squared length of the x, y (of a border radius)
-// It normalizes x, y values before working with them, by
-// assuming anything < 0 to be 0, because flutter may pass
-// negative radii (which Skia assumes to be 0), see:
-// https://skia.org/user/api/SkRRect_Reference#SkRRect_inset
-double _measureBorderRadius(double x, double y) {
-  final double clampedX = x < 0 ? 0 : x;
-  final double clampedY = y < 0 ? 0 : y;
-  return clampedX * clampedX + clampedY * clampedY;
-}
+// Returns the squared length of the x, y (of a border radius).
+double _measureBorderRadius(double x, double y) => x*x + y*y;
 
 /// Records canvas commands to be applied to a [EngineCanvas].
 ///

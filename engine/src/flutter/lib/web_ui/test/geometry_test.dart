@@ -157,4 +157,138 @@ void testMain() {
     expect(rrectMix2.trRadius, equals(const Radius.elliptical(10, 6)));
     expect(rrectMix2.blRadius, equals(const Radius.elliptical(10, 6)));
   });
+  test('RRect asserts when corner radii are negative', () {
+    bool assertsEnabled = false;
+    assert(() {
+      assertsEnabled = true;
+      return true;
+    }());
+    if (!assertsEnabled) {
+      return;
+    }
+
+    expect(() {
+      RRect.fromRectAndCorners(
+        const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        topLeft: const Radius.circular(-1),
+      );
+    }, throwsA(isA<AssertionError>()));
+
+    expect(() {
+      RRect.fromRectAndCorners(
+        const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        topRight: const Radius.circular(-2),
+      );
+    }, throwsA(isA<AssertionError>()));
+
+    expect(() {
+      RRect.fromRectAndCorners(
+        const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        bottomLeft: const Radius.circular(-3),
+      );
+    }, throwsA(isA<AssertionError>()));
+
+    expect(() {
+      RRect.fromRectAndCorners(
+        const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        bottomRight: const Radius.circular(-4),
+      );
+    }, throwsA(isA<AssertionError>()));
+  });
+  test('RRect.inflate clamps when deflating past zero', () {
+    RRect rrect = RRect.fromRectAndCorners(
+      const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),
+      topLeft: const Radius.circular(1),
+      topRight: const Radius.circular(2),
+      bottomLeft: const Radius.circular(3),
+      bottomRight: const Radius.circular(4),
+    ).inflate(-1);
+
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 1);
+    expect(rrect.trRadiusY, 1);
+    expect(rrect.blRadiusX, 2);
+    expect(rrect.blRadiusY, 2);
+    expect(rrect.brRadiusX, 3);
+    expect(rrect.brRadiusY, 3);
+
+    rrect = rrect.inflate(-1);
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 0);
+    expect(rrect.trRadiusY, 0);
+    expect(rrect.blRadiusX, 1);
+    expect(rrect.blRadiusY, 1);
+    expect(rrect.brRadiusX, 2);
+    expect(rrect.brRadiusY, 2);
+
+    rrect = rrect.inflate(-1);
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 0);
+    expect(rrect.trRadiusY, 0);
+    expect(rrect.blRadiusX, 0);
+    expect(rrect.blRadiusY, 0);
+    expect(rrect.brRadiusX, 1);
+    expect(rrect.brRadiusY, 1);
+
+    rrect = rrect.inflate(-1);
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 0);
+    expect(rrect.trRadiusY, 0);
+    expect(rrect.blRadiusX, 0);
+    expect(rrect.blRadiusY, 0);
+    expect(rrect.brRadiusX, 0);
+    expect(rrect.brRadiusY, 0);
+  });
+  test('RRect.deflate clamps when deflating past zero', () {
+    RRect rrect = RRect.fromRectAndCorners(
+      const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0),
+      topLeft: const Radius.circular(1),
+      topRight: const Radius.circular(2),
+      bottomLeft: const Radius.circular(3),
+      bottomRight: const Radius.circular(4),
+    ).deflate(1);
+
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 1);
+    expect(rrect.trRadiusY, 1);
+    expect(rrect.blRadiusX, 2);
+    expect(rrect.blRadiusY, 2);
+    expect(rrect.brRadiusX, 3);
+    expect(rrect.brRadiusY, 3);
+
+    rrect = rrect.deflate(1);
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 0);
+    expect(rrect.trRadiusY, 0);
+    expect(rrect.blRadiusX, 1);
+    expect(rrect.blRadiusY, 1);
+    expect(rrect.brRadiusX, 2);
+    expect(rrect.brRadiusY, 2);
+
+    rrect = rrect.deflate(1);
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 0);
+    expect(rrect.trRadiusY, 0);
+    expect(rrect.blRadiusX, 0);
+    expect(rrect.blRadiusY, 0);
+    expect(rrect.brRadiusX, 1);
+    expect(rrect.brRadiusY, 1);
+
+    rrect = rrect.deflate(1);
+    expect(rrect.tlRadiusX, 0);
+    expect(rrect.tlRadiusY, 0);
+    expect(rrect.trRadiusX, 0);
+    expect(rrect.trRadiusY, 0);
+    expect(rrect.blRadiusX, 0);
+    expect(rrect.blRadiusY, 0);
+    expect(rrect.brRadiusX, 0);
+    expect(rrect.brRadiusY, 0);
+  });
 }
