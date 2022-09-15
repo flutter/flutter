@@ -17,7 +17,7 @@
 
 version: 1
 transforms:
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
     element:
@@ -28,7 +28,7 @@ transforms:
       - kind: 'rename'
         newName: 'trackVisibility'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
     element:
@@ -40,7 +40,7 @@ transforms:
         oldName: 'showTrackOnHover'
         newName: 'trackVisibility'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
     element:
@@ -51,7 +51,7 @@ transforms:
       - kind: 'rename'
         newName: 'trackVisibility'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-09-15
     element:
@@ -63,7 +63,7 @@ transforms:
         oldName: 'showTrackOnHover'
         newName: 'trackVisibility'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
     element:
