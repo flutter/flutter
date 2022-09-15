@@ -291,13 +291,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _initialButtons = event.buttons;
       _dragState = _GestureState.possible;
       _down = event;
+      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
 
       if (_isShiftPressed) {
         _isShiftTapping = true;
-      }
-
-      if (dragStartBehavior == DragStartBehavior.down) {
-        _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
       }
     }
   }
@@ -439,6 +436,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   void _acceptDrag(PointerMoveEvent event) {
     _checkTapCancel();
+    if (dragStartBehavior == DragStartBehavior.start) {
+      _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
+    }
     _checkStart(event);
     if (event.localDelta != Offset.zero) {
       final Matrix4? localToGlobal = event.transform != null ? Matrix4.tryInvert(event.transform!) : null;
@@ -549,10 +549,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   }
 
   void _checkStart(PointerMoveEvent event) {
-    if (dragStartBehavior == DragStartBehavior.start) {
-      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-    }
-
     final DragStartDetails details = DragStartDetails(
       sourceTimeStamp: event.timeStamp,
       globalPosition: _initialPosition.global,
