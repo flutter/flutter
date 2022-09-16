@@ -293,19 +293,15 @@ class BuildInfo {
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
-    if (map.isNotEmpty) {
-      environmentMap.forEach((String key, String value) {
-        if (map.containsKey(key)) {
-          globals.printWarning(
-              'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
-        }
-        // System priority is greater than user priority
-        map[key] = value;
-      });
-      return map;
-    } else {
-      return environmentMap;
-    }
+    map.forEach((String key, String value) {
+      if (environmentMap.containsKey(key)) {
+        globals.printWarning(
+            'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
+      }
+      // System priority is greater than user priority
+      environmentMap[key] = value;
+    });
+    return environmentMap;
   }
 
   /// Convert this config to a series of project level arguments to be passed

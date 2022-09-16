@@ -582,7 +582,7 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesDartDefineOption({ bool enableDartDefineConfigJsonFileOption = true}) {
+  void usesDartDefineOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefinesOption,
       aliases: <String>[ kDartDefines ], // supported for historical reasons
@@ -593,9 +593,7 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    if (enableDartDefineConfigJsonFileOption) {
-      useDartDefineConfigJsonFileOption();
-    }
+    useDartDefineConfigJsonFileOption();
   }
 
   void useDartDefineConfigJsonFileOption() {
