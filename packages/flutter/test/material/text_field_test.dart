@@ -7551,88 +7551,10 @@ void main() {
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
 
-      // Toolbar shows on iOS.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(2) : findsNothing);
+      // No toolbar.
+      expect(find.byType(CupertinoButton), findsNothing);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
-  );
-
-  testWidgets(
-    'Tapping on a non-collapsed selection toggles the toolbar and retains the selection',
-    (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
-      final Offset ePos = textOffsetToPosition(tester, 35) + const Offset(7.0, 0.0); // Index of 'Bonaventure|' + Offset(7.0,0), which taps slightly to the right of the end of the text.
-      final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'.
-
-      // This tap just puts the cursor somewhere different than where the double
-      // tap will occur to test that the double tap moves the existing cursor first.
-      await tester.tapAt(wPos);
-      await tester.pump(const Duration(milliseconds: 500));
-
-      await tester.tapAt(vPos);
-      await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
-      expect(controller.selection.isCollapsed, true);
-      expect(
-        controller.selection.baseOffset,
-        35,
-      );
-      await tester.tapAt(vPos);
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
-
-      // Second tap selects the word around the cursor.
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 24, extentOffset: 35),
-      );
-
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-
-      // Tap the selected word to hide the toolbar and retain the selection.
-      await tester.tapAt(vPos);
-      await tester.pumpAndSettle();
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 24, extentOffset: 35),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      // Tap the selected word to show the toolbar and retain the selection.
-      await tester.tapAt(vPos);
-      await tester.pumpAndSettle();
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 24, extentOffset: 35),
-      );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
-
-      // Tap past the selected word to move the cursor and hide the toolbar.
-      await tester.tapAt(ePos);
-      await tester.pumpAndSettle();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 35),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
   testWidgets(
@@ -9023,13 +8945,11 @@ void main() {
       // Double tap selecting the same word somewhere else is fine.
       await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap hides the toolbar and retains the selection.
+      // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection(baseOffset: 0, extentOffset: 7),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
-      expect(find.byType(CupertinoButton), findsNothing);
-      // Second tap shows the toolbar and retains the selection.
       await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
       await tester.pumpAndSettle();
       expect(
@@ -9040,12 +8960,11 @@ void main() {
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor and hides the toolbar.
+      // First tap moved the cursor.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8),
       );
-      expect(find.byType(CupertinoButton), findsNothing);
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pumpAndSettle();
       expect(
