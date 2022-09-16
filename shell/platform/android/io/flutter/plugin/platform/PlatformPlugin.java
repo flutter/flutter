@@ -224,19 +224,29 @@ public class PlatformPlugin {
         new View.OnSystemUiVisibilityChangeListener() {
           @Override
           public void onSystemUiVisibilityChange(int visibility) {
-            if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-              // The system bars are visible. Make any desired adjustments to
-              // your UI, such as showing the action bar or other navigational
-              // controls. Another common action is to set a timer to dismiss
-              // the system bars and restore the fullscreen mode that was
-              // previously enabled.
-              platformChannel.systemChromeChanged(false);
-            } else {
-              // The system bars are NOT visible. Make any desired adjustments
-              // to your UI, such as hiding the action bar or other
-              // navigational controls.
-              platformChannel.systemChromeChanged(true);
-            }
+            // `platformChannel.systemChromeChanged` may trigger a callback that eventually results
+            // in a call to `setSystemUiVisibility`.
+            // `setSystemUiVisibility` must not be called in the same frame as when
+            // `onSystemUiVisibilityChange` is received though.
+            //
+            // As such, post `platformChannel.systemChromeChanged` to the view handler to ensure
+            // that downstream callbacks are trigged on the next frame.
+            decorView.post(
+                () -> {
+                  if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                    // The system bars are visible. Make any desired adjustments to
+                    // your UI, such as showing the action bar or other navigational
+                    // controls. Another common action is to set a timer to dismiss
+                    // the system bars and restore the fullscreen mode that was
+                    // previously enabled.
+                    platformChannel.systemChromeChanged(false);
+                  } else {
+                    // The system bars are NOT visible. Make any desired adjustments
+                    // to your UI, such as hiding the action bar or other
+                    // navigational controls.
+                    platformChannel.systemChromeChanged(true);
+                  }
+                });
           }
         });
   }
