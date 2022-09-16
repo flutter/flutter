@@ -7,7 +7,6 @@ uniform sampler2D glyph_atlas_sampler;
 uniform FragInfo {
   vec2 atlas_size;
   vec4 text_color;
-  float font_has_color;
 } frag_info;
 
 in vec2 v_unit_vertex;
