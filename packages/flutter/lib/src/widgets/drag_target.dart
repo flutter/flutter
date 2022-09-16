@@ -86,7 +86,7 @@ typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildC
 /// If feedback is identical to the child, then this means the feedback will
 /// exactly overlap the original child when the drag starts.
 ///
-/// This is the default [DragAnchorStrategy] and replaces [DragAnchor.child].
+/// This is the default [DragAnchorStrategy].
 ///
 /// See also:
 ///
@@ -109,8 +109,6 @@ Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context
 /// finger down makes the touch feedback appear above the finger. (It feels
 /// weird for it to appear offset from the original child if it's anchored to
 /// the child and not the finger.)
-///
-/// This replaces [DragAnchor.pointer], which has been deprecated.
 ///
 /// See also:
 ///
@@ -169,7 +167,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.axis,
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
-    this.dragAnchorStrategy,
+    this.dragAnchorStrategy = childDragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -185,7 +183,8 @@ class Draggable<T extends Object> extends StatefulWidget {
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
        assert(ignoringFeedbackPointer != null),
-       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
+       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
+       assert(dragAnchorStrategy != null);
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -256,10 +255,8 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///  * [pointerDragAnchorStrategy], which displays the feedback anchored at the
   ///    position of the touch that started the drag.
   ///
-  /// Defaults to [childDragAnchorStrategy] if the deprecated [dragAnchor]
-  /// property is set to [DragAnchor.child], and [pointerDragAnchorStrategy] if
-  /// the [dragAnchor] is set to [DragAnchor.pointer].
-  final DragAnchorStrategy? dragAnchorStrategy;
+  /// Defaults to [childDragAnchorStrategy].
+  final DragAnchorStrategy dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
@@ -486,7 +483,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       return null;
     }
     final Offset dragStartPoint;
-    dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
+    dragStartPoint = widget.dragAnchorStrategy(widget, context, position);
     setState(() {
       _activeCount += 1;
     });
