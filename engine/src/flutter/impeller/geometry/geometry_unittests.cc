@@ -964,6 +964,26 @@ TEST(GeometryTest, ColorLerp) {
   }
 }
 
+TEST(GeometryTest, ColorMakeRGBA8) {
+  {
+    Color a = Color::MakeRGBA8(0, 0, 0, 0);
+    Color b = Color::BlackTransparent();
+    ASSERT_COLOR_NEAR(a, b);
+  }
+
+  {
+    Color a = Color::MakeRGBA8(255, 255, 255, 255);
+    Color b = Color::White();
+    ASSERT_COLOR_NEAR(a, b);
+  }
+
+  {
+    Color a = Color::MakeRGBA8(63, 127, 191, 127);
+    Color b(0.247059, 0.498039, 0.74902, 0.498039);
+    ASSERT_COLOR_NEAR(a, b);
+  }
+}
+
 TEST(GeometryTest, CanConvertBetweenDegressAndRadians) {
   {
     auto deg = Degrees{90.0};
