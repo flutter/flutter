@@ -40,6 +40,7 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
   ASSERT_TRUE(blob);
   auto atlas = context->CreateGlyphAtlas(TextFrameFromTextBlob(blob));
   ASSERT_NE(atlas, nullptr);
+  ASSERT_FALSE(atlas->ContainsColorGlyph());
   OpenPlaygroundHere([](RenderTarget&) { return true; });
 }
 
