@@ -322,7 +322,7 @@ class RenderUiKitView extends RenderBox {
   UiKitViewController _viewController;
   set viewController(UiKitViewController viewController) {
     assert(viewController != null);
-    if (_viewController == controller) {
+    if (_viewController == viewController) {
       return;
     }
     final bool needsSemanticsUpdate = _viewController.id != viewController.id;

@@ -271,22 +271,29 @@ void main() {
         return /*textureId=*/ 0;
       });
 
-      // TODO
-      final UiKitViewController viewController =
-          await PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
-      final RenderUiKitView renderBox = RenderUiKitView(
-        viewController: viewController,
-        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
-      );
+      bool futureCallbackRan = false;
 
-      layout(renderBox);
-      pumpFrame(phase: EnginePhase.paint);
-      expect(renderBox.debugNeedsPaint, isFalse);
+      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((viewController) {
+        final RenderUiKitView renderBox = RenderUiKitView(
+          viewController: viewController,
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+        );
 
-      renderBox.viewController = viewController;
+        layout(renderBox);
+        pumpFrame(phase: EnginePhase.paint);
+        expect(renderBox.debugNeedsPaint, isFalse);
 
-      expect(renderBox.debugNeedsPaint, isFalse);
+        renderBox.viewController = viewController;
+
+        expect(renderBox.debugNeedsPaint, isFalse);
+
+        futureCallbackRan = true;
+      });
+
+      viewCreation.complete();
+      async.flushMicrotasks();
+      expect(futureCallbackRan, true);
     });
   });
 }
