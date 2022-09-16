@@ -694,4 +694,11 @@ void main() {
   themeData = ThemeData(bottomAppBarColor: Colors.green);
   themeData = ThemeData.raw(bottomAppBarColor: Colors.green);
   themeData = ThemeData.copyWith(bottomAppBarColor: Colors.green);
+
+  // Changes made in https://github.com/flutter/flutter/pull/111706
+  Scrollbar scrollbar = Scrollbar(showTrackOnHover: true);
+  bool nowShowing = scrollbar.showTrackOnHover;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
+  scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
+  scrollbarTheme.showTrackOnHover;
 }
