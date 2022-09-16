@@ -344,7 +344,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
-      final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
+      final Map<String, Object> body = json.decode(await request.readAsString()) as Map<String, Object>;
       final Uri goldenKey = Uri.parse(body['key']! as String);
       final Uri testUri = Uri.parse(body['testUri']! as String);
       final num width = body['width']! as num;
@@ -352,9 +352,9 @@ class FlutterWebPlatform extends PlatformPlugin {
       Uint8List bytes;
 
       try {
-        final ChromeTab chromeTab = (await _browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
+        final ChromeTab chromeTab = await (_browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
           return tab.url.contains(_browserManager!._browser.url!);
-        }))!;
+        }) as FutureOr<ChromeTab>);
         final WipConnection connection = await chromeTab.connect();
         final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
           // Clip the screenshot to include only the element.

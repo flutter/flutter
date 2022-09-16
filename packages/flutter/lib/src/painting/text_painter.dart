@@ -217,6 +217,90 @@ class TextPainter {
        _textWidthBasis = textWidthBasis,
        _textHeightBehavior = textHeightBehavior;
 
+  /// Computes the width of a configured [TextPainter].
+  ///
+  /// This is a convenience method that creates a text painter with the supplied
+  /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
+  /// returns its [TextPainter.width] making sure to dispose the underlying
+  /// resources. Doing this operation is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the
+  /// text or get other information about it.
+  static double computeWidth({
+    required InlineSpan text,
+    required TextDirection textDirection,
+    TextAlign textAlign = TextAlign.start,
+    double textScaleFactor = 1.0,
+    int? maxLines,
+    String? ellipsis,
+    Locale? locale,
+    StrutStyle? strutStyle,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    ui.TextHeightBehavior? textHeightBehavior,
+    double minWidth = 0.0,
+    double maxWidth = double.infinity,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: text,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      textScaleFactor: textScaleFactor,
+      maxLines: maxLines,
+      ellipsis: ellipsis,
+      locale: locale,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+    )..layout(minWidth: minWidth, maxWidth: maxWidth);
+
+    try {
+      return painter.width;
+    } finally {
+      painter.dispose();
+    }
+  }
+
+  /// Computes the max intrinsic width of a configured [TextPainter].
+  ///
+  /// This is a convenience method that creates a text painter with the supplied
+  /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
+  /// returns its [TextPainter.maxIntrinsicWidth] making sure to dispose the
+  /// underlying resources. Doing this operation is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the
+  /// text or get other information about it.
+  static double computeMaxIntrinsicWidth({
+    required InlineSpan text,
+    required TextDirection textDirection,
+    TextAlign textAlign = TextAlign.start,
+    double textScaleFactor = 1.0,
+    int? maxLines,
+    String? ellipsis,
+    Locale? locale,
+    StrutStyle? strutStyle,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    ui.TextHeightBehavior? textHeightBehavior,
+    double minWidth = 0.0,
+    double maxWidth = double.infinity,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: text,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      textScaleFactor: textScaleFactor,
+      maxLines: maxLines,
+      ellipsis: ellipsis,
+      locale: locale,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+    )..layout(minWidth: minWidth, maxWidth: maxWidth);
+
+    try {
+      return painter.maxIntrinsicWidth;
+    } finally {
+      painter.dispose();
+    }
+  }
+
   // _paragraph being null means the text needs layout because of style changes.
   // Setting _paragraph to null invalidates all the layout cache.
   //
