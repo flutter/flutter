@@ -773,17 +773,30 @@ TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
 
 TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
   auto settings = CreateSettingsForFixture();
+
+  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
+
   fml::AutoResetWaitableEvent end_frame_latch;
   bool end_frame_called = false;
+  std::vector<int64_t> visited_platform_views;
+  MutatorsStack stack_50;
+  MutatorsStack stack_75;
   auto end_frame_callback =
       [&](bool should_resubmit_frame,
           fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+        if (end_frame_called)
+          return;
         ASSERT_TRUE(raster_thread_merger.get() == nullptr);
         ASSERT_FALSE(should_resubmit_frame);
         end_frame_called = true;
+        visited_platform_views =
+            external_view_embedder->GetVisitedPlatformViews();
+        stack_50 = external_view_embedder->GetStack(50);
+        stack_75 = external_view_embedder->GetStack(75);
         end_frame_latch.Signal();
       };
-  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
+
+  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
       end_frame_callback, PostPrerollResult::kResubmitFrame, false);
   auto shell = CreateShell(settings, GetTaskRunnersForFixture(), false,
                            external_view_embedder);
@@ -811,12 +824,9 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
 
   PumpOneFrame(shell.get(), 100, 100, builder);
   end_frame_latch.Wait();
-  ASSERT_EQ(external_view_embedder->GetVisitedPlatformViews().size(),
-            (const unsigned long)2);
-  ASSERT_EQ(external_view_embedder->GetVisitedPlatformViews()[0], 50);
-  ASSERT_EQ(external_view_embedder->GetVisitedPlatformViews()[1], 75);
-  ASSERT_TRUE(external_view_embedder->GetStack(75).is_empty());
-  ASSERT_FALSE(external_view_embedder->GetStack(50).is_empty());
+  ASSERT_EQ(visited_platform_views, (std::vector<int64_t>{50, 75}));
+  ASSERT_TRUE(stack_75.is_empty());
+  ASSERT_FALSE(stack_50.is_empty());
 
   auto filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
   auto mutator = *external_view_embedder->GetStack(50).Begin();
