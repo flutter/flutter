@@ -531,7 +531,7 @@ class _RadioDefaultsM2 extends RadioThemeData {
   VisualDensity get visualDensity => _theme.visualDensity;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES - Radio
+// BEGIN GENERATED TOKEN PROPERTIES - Radio<T>
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -604,3 +604,5 @@ class _RadioDefaultsM3 extends RadioThemeData {
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
 }
+
+// END GENERATED TOKEN PROPERTIES - Radio<T>

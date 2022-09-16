@@ -11,8 +11,8 @@ class RadioTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-class _${blockName}DefaultsM3 extends RadioThemeData {
-  _${blockName}DefaultsM3(BuildContext context)
+class _RadioDefaultsM3 extends RadioThemeData {
+  _RadioDefaultsM3(BuildContext context)
     : _theme = Theme.of(context),
       _colors = Theme.of(context).colorScheme;
 
@@ -63,7 +63,7 @@ class _${blockName}DefaultsM3 extends RadioThemeData {
         return ${componentColor('md.comp.radio-button.unselected.hover.state-layer')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${componentColor('md.comp.radio-button.unselected.hover.state-layer')};
+        return ${componentColor('md.comp.radio-button.unselected.focus.state-layer')};
       }
       return Colors.transparent;
     });
