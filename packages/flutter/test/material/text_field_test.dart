@@ -2172,7 +2172,7 @@ void main() {
     expect(controller.selection.extentOffset, 8);
 
     // Tiny movement shouldn't cause text selection to change.
-    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await gesture.moveTo(gPos + const Offset(2.0, 0.0));
     await tester.pumpAndSettle();
     expect(selectionChangedCount, 0);
 
@@ -3372,10 +3372,7 @@ void main() {
     final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
     final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
     final Offset middleStringPos = textOffsetToPosition(tester, testValue.indexOf('irst'));
-    expect(firstPos.dx, 0);
-    expect(secondPos.dx, 0);
-    expect(thirdPos.dx, 0);
-    expect(middleStringPos.dx, 34);
+    expect(firstPos.dx, lessThan(middleStringPos.dx));
     expect(firstPos.dx, secondPos.dx);
     expect(firstPos.dx, thirdPos.dx);
     expect(firstPos.dy, lessThan(secondPos.dy));
@@ -3457,8 +3454,6 @@ void main() {
     // Check that the last line of text is not displayed.
     final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
     final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
-    expect(firstPos.dx, 0);
-    expect(fourthPos.dx, 0);
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
@@ -8397,10 +8392,10 @@ void main() {
         ),
       ),
     );
-
+    final Size screenSize = MediaQuery.of(tester.element(find.byType(TextField))).size;
     // Just testing the test and making sure that the last character is off
     // the right side of the screen.
-    expect(textOffsetToPosition(tester, 66).dx, 1056);
+    expect(textOffsetToPosition(tester, 66).dx, greaterThan(screenSize.width));
 
     final TestGesture gesture =
         await tester.startGesture(
@@ -8448,7 +8443,7 @@ void main() {
     );
 
     // The first character is now offscreen to the left.
-    expect(textOffsetToPosition(tester, 0).dx, moreOrLessEquals(-257.0, epsilon: 1));
+    expect(textOffsetToPosition(tester, 0).dx, lessThan(-100.0));
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('keyboard selection change scrolls the field', (WidgetTester tester) async {
@@ -8485,7 +8480,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 56),
+      const TextSelection.collapsed(offset: 56, affinity: TextAffinity.upstream),
     );
 
     // Keep moving out.
@@ -8495,7 +8490,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 62),
+      const TextSelection.collapsed(offset: 62, affinity: TextAffinity.upstream),
     );
     for (int i = 0; i < (66 - 62); i += 1) {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -8503,7 +8498,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66),
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
     ); // We're at the edge now.
 
     await tester.pumpAndSettle();
