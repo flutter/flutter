@@ -2429,6 +2429,8 @@ class Path extends NativeFieldWrapperClass1 {
   /// Adds a quadratic bezier segment that curves from the current
   /// point to the given point (x2,y2), using the control point
   /// (x1,y1).
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_quadratic_to.png)
   @FfiNative<Void Function(Pointer<Void>, Float, Float, Float, Float)>('Path::quadraticBezierTo', isLeaf: true)
   external void quadraticBezierTo(double x1, double y1, double x2, double y2);
 
@@ -2443,6 +2445,8 @@ class Path extends NativeFieldWrapperClass1 {
   /// Adds a cubic bezier segment that curves from the current point
   /// to the given point (x3,y3), using the control points (x1,y1) and
   /// (x2,y2).
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_cubic_to.png)
   @FfiNative<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Float)>('Path::cubicTo', isLeaf: true)
   external void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3);
 
@@ -2458,6 +2462,8 @@ class Path extends NativeFieldWrapperClass1 {
   /// weight w. If the weight is greater than 1, then the curve is a
   /// hyperbola; if the weight equals 1, it's a parabola; and if it is
   /// less than 1, it is an ellipse.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_conic_to.png)
   @FfiNative<Void Function(Pointer<Void>, Float, Float, Float, Float, Float)>('Path::conicTo', isLeaf: true)
   external void conicTo(double x1, double y1, double x2, double y2, double w);
 
@@ -4863,6 +4869,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
   ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/clip_rect.png)
+  ///
   /// If [doAntiAlias] is true, then the clip will be anti-aliased.
   ///
   /// If multiple draw commands intersect with the clip boundary, this can result
@@ -4884,6 +4892,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.
   ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/clip_rrect.png)
+  ///
   /// If [doAntiAlias] is true, then the clip will be anti-aliased.
   ///
   /// If multiple draw commands intersect with the clip boundary, this can result
@@ -4900,6 +4910,8 @@ class Canvas extends NativeFieldWrapperClass1 {
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/clip_path.png)
   ///
   /// If [doAntiAlias] is true, then the clip will be anti-aliased.
   ///
@@ -5015,6 +5027,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// stroked, the value of the [Paint.style] is ignored for this call.
   ///
   /// The `p1` and `p2` arguments are interpreted as offsets from the origin.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_line.png)
   void drawLine(Offset p1, Offset p2, Paint paint) {
     assert(_offsetIsValid(p1));
     assert(_offsetIsValid(p2));
@@ -5039,6 +5053,8 @@ class Canvas extends NativeFieldWrapperClass1 {
 
   /// Draws a rectangle with the given [Paint]. Whether the rectangle is filled
   /// or stroked (or both) is controlled by [Paint.style].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rect.png)
   void drawRect(Rect rect, Paint paint) {
     assert(_rectIsValid(rect));
     assert(paint != null);
@@ -5050,6 +5066,8 @@ class Canvas extends NativeFieldWrapperClass1 {
 
   /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
   /// filled or stroked (or both) is controlled by [Paint.style].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rrect.png)
   void drawRRect(RRect rrect, Paint paint) {
     assert(_rrectIsValid(rrect));
     assert(paint != null);
@@ -5077,6 +5095,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
   /// controlled by [Paint.style].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_oval.png)
   void drawOval(Rect rect, Paint paint) {
     assert(_rectIsValid(rect));
     assert(paint != null);
@@ -5090,6 +5110,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// that has the radius given by the second argument, with the [Paint] given in
   /// the third argument. Whether the circle is filled or stroked (or both) is
   /// controlled by [Paint.style].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_circle.png)
   void drawCircle(Offset c, double radius, Paint paint) {
     assert(_offsetIsValid(c));
     assert(paint != null);
