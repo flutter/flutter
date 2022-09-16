@@ -364,3 +364,74 @@ Future<void> toImageSync() async {
   picture2.dispose();
   notifyNative();
 }
+
+@pragma('vm:entry-point')
+Future<void> included() async {
+
+}
+
+Future<void> excluded() async {
+
+}
+
+class IsolateParam {
+  const IsolateParam(this.sendPort, this.rawHandle);
+  final SendPort sendPort;
+  final int rawHandle;
+}
+
+@pragma('vm:entry-point')
+Future<void> runCallback(IsolateParam param) async {
+  try {
+    final Future<dynamic> Function() func = PluginUtilities.getCallbackFromHandle(
+      CallbackHandle.fromRawHandle(param.rawHandle)
+    )! as Future<dynamic> Function();
+    await func.call();
+    param.sendPort.send(true);
+  }
+  on NoSuchMethodError {
+    param.sendPort.send(false);
+  }
+}
+
+@pragma('vm:entry-point')
+void notifyNativeBool(bool value) native 'NotifyNativeBool';
+
+@pragma('vm:entry-point')
+Future<void> testPluginUtilitiesCallbackHandle() async {
+  ReceivePort port = ReceivePort();
+  await Isolate.spawn(
+    runCallback,
+    IsolateParam(
+      port.sendPort,
+      PluginUtilities.getCallbackHandle(included)!.toRawHandle()
+    ),
+    onError: port.sendPort
+  );
+  final dynamic result1 = await port.first;
+  if (result1 != true) {
+    print('Expected $result1 to == true');
+    notifyNativeBool(false);
+    return;
+  }
+  port.close();
+  if (const bool.fromEnvironment('dart.vm.product')) {
+    port = ReceivePort();
+    await Isolate.spawn(
+      runCallback,
+      IsolateParam(
+        port.sendPort,
+        PluginUtilities.getCallbackHandle(excluded)!.toRawHandle()
+      ),
+      onError: port.sendPort
+    );
+    final dynamic result2 = await port.first;
+    if (result2 != false) {
+      print('Expected $result2 to == false');
+      notifyNativeBool(false);
+      return;
+    }
+    port.close();
+  }
+  notifyNativeBool(true);
+}

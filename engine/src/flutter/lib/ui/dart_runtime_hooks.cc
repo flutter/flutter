@@ -259,7 +259,9 @@ Dart_Handle DartRuntimeHooks::GetCallbackHandle(Dart_Handle func) {
 }
 
 Dart_Handle DartRuntimeHooks::GetCallbackFromHandle(int64_t handle) {
-  return DartCallbackCache::GetCallback(handle);
+  Dart_Handle result = DartCallbackCache::GetCallback(handle);
+  PropagateIfError(result);
+  return result;
 }
 
 void DartPluginRegistrant_EnsureInitialized() {

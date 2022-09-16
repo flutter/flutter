@@ -3850,6 +3850,36 @@ TEST_F(ShellTest, PictureToImageSync) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, PluginUtilitiesCallbackHandleErrorHandling) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell =
+      CreateShell(settings, GetTaskRunnersForFixture());
+
+  fml::AutoResetWaitableEvent latch;
+  bool test_passed;
+  AddNativeCallback("NotifyNativeBool", CREATE_NATIVE_ENTRY([&](auto args) {
+                      Dart_Handle exception = nullptr;
+                      test_passed = tonic::DartConverter<bool>::FromArguments(
+                          args, 0, exception);
+                      latch.Signal();
+                    }));
+
+  ASSERT_NE(shell, nullptr);
+  ASSERT_TRUE(shell->IsSetup());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  PlatformViewNotifyCreated(shell.get());
+  configuration.SetEntrypoint("testPluginUtilitiesCallbackHandle");
+  RunEngine(shell.get(), std::move(configuration));
+  PumpOneFrame(shell.get());
+
+  latch.Wait();
+
+  ASSERT_TRUE(test_passed);
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell));
+}
+
 }  // namespace testing
 }  // namespace flutter
 
