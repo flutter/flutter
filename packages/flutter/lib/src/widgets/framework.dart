@@ -1002,7 +1002,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
     if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
+      MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$State',
         object: this,
@@ -1245,7 +1245,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectDisposed(object: this));
+      MemoryAllocations.instance.dispatchObjectEvent(ObjectDisposed(object: this));
     }
   }
 
@@ -3229,7 +3229,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     : assert(widget != null),
       _widget = widget {
     if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
+      MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$Element',
         object: this,
@@ -4153,7 +4153,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(depth != null);
     assert(owner != null);
     if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectDisposed(object: this));
+      MemoryAllocations.instance.dispatchObjectEvent(ObjectDisposed(object: this));
     }
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;

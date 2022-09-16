@@ -140,7 +140,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Creates an instance of Layer.
   Layer() {
     if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
+      MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
         library: _flutterRenderingLibrary,
         className: '$Layer',
         object: this,
@@ -334,7 +334,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectDisposed(object: this));
+      MemoryAllocations.instance.dispatchObjectEvent(ObjectDisposed(object: this));
     }
     _engineLayer?.dispose();
     _engineLayer = null;

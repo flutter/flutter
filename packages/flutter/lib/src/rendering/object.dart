@@ -1379,7 +1379,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Initializes internal fields for subclasses.
   RenderObject() {
     if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
+      MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
         library: _flutterRenderingLibrary,
         className: '$RenderObject',
         object: this,
