@@ -120,34 +120,6 @@ Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext conte
   return Offset.zero;
 }
 
-/// Where the [Draggable] should be anchored during a drag.
-///
-/// This has been replaced by the more configurable [DragAnchorStrategy].
-@Deprecated(
-  'Use dragAnchorStrategy instead. '
-  'This feature was deprecated after v2.1.0-10.0.pre.',
-)
-enum DragAnchor {
-  /// Display the feedback anchored at the position of the original child.
-  ///
-  /// Replaced by [childDragAnchorStrategy].
-  @Deprecated(
-    'Use childDragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.',
-  )
-  child,
-
-  /// Display the feedback anchored at the position of the touch that started
-  /// the drag.
-  ///
-  /// Replaced by [pointerDragAnchorStrategy].
-  @Deprecated(
-    'Use pointerDragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.',
-  )
-  pointer,
-}
-
 /// A widget that can be dragged from to a [DragTarget].
 ///
 /// When a draggable widget recognizes the start of a drag gesture, it displays
@@ -197,13 +169,6 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.axis,
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
-    @Deprecated(
-      'Use dragAnchorStrategy instead. '
-      'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
-      'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
-      'This feature was deprecated after v2.1.0-10.0.pre.',
-    )
-    this.dragAnchor = DragAnchor.child,
     this.dragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
@@ -275,17 +240,6 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// purposes of finding a drag target. It is especially useful if the feedback
   /// is transformed compared to the child.
   final Offset feedbackOffset;
-
-  /// Where this widget should be anchored during a drag.
-  ///
-  /// This property is overridden by the [dragAnchorStrategy] if the latter is provided.
-  ///
-  /// Defaults to [DragAnchor.child].
-  @Deprecated(
-    'Use dragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.',
-  )
-  final DragAnchor dragAnchor;
 
   /// A strategy that is used by this draggable to get the anchor offset when it
   /// is dragged.
@@ -447,13 +401,6 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.axis,
     super.childWhenDragging,
     super.feedbackOffset,
-    @Deprecated(
-      'Use dragAnchorStrategy instead. '
-      'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
-      'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
-      'This feature was deprecated after v2.1.0-10.0.pre.',
-    )
-    super.dragAnchor,
     super.dragAnchorStrategy,
     super.maxSimultaneousDrags,
     super.onDragStarted,
@@ -539,18 +486,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       return null;
     }
     final Offset dragStartPoint;
-    if (widget.dragAnchorStrategy == null) {
-      switch (widget.dragAnchor) {
-        case DragAnchor.child:
-          dragStartPoint = childDragAnchorStrategy(widget, context, position);
-          break;
-        case DragAnchor.pointer:
-          dragStartPoint = pointerDragAnchorStrategy(widget, context, position);
-          break;
-      }
-    } else {
-      dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
-    }
+    dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
     setState(() {
       _activeCount += 1;
     });
