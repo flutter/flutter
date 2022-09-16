@@ -139,7 +139,7 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Creates an instance of Layer.
   Layer() {
-    if (kFlutterMemoryAllocationsEnabled) {
+    if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
       MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
         library: _flutterRenderingLibrary,
         className: '$Layer',
@@ -333,7 +333,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled) {
+    if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
       MemoryAllocations.instance.dispatchObjectEvent(() => ObjectDisposed(object: this));
     }
     _engineLayer?.dispose();

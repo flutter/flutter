@@ -1378,7 +1378,7 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
-    if (kFlutterMemoryAllocationsEnabled) {
+    if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
       MemoryAllocations.instance.dispatchObjectEvent(() => ObjectCreated(
         library: _flutterRenderingLibrary,
         className: '$RenderObject',

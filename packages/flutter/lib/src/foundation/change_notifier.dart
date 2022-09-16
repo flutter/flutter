@@ -214,7 +214,9 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
+    if (kFlutterMemoryAllocationsEnabled
+        && !_creationDispatched
+        && MemoryAllocations.instance.hasListeners) {
       MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
         library: _flutterFoundationLibrary,
         className: '$ChangeNotifier',
@@ -325,7 +327,9 @@ class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
+    if (kFlutterMemoryAllocationsEnabled
+        && _creationDispatched
+        && MemoryAllocations.instance.hasListeners) {
       MemoryAllocations.instance.dispatchObjectEvent(ObjectDisposed(object: this));
     }
     _listeners = _emptyListeners;
@@ -463,7 +467,7 @@ class _MergingListenable extends Listenable {
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
-    if (kFlutterMemoryAllocationsEnabled) {
+    if (kFlutterMemoryAllocationsEnabled && MemoryAllocations.instance.hasListeners) {
       MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
         library: _flutterFoundationLibrary,
         className: '$ValueNotifier',
