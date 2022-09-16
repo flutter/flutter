@@ -23,6 +23,7 @@ import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.util.HandlerCompat;
 import io.flutter.util.PathUtils;
 import io.flutter.util.TraceSection;
 import io.flutter.view.VsyncWaiter;
@@ -385,7 +386,7 @@ public class FlutterLoader {
             Log.e(TAG, "Flutter initialization failed.", e);
             throw new RuntimeException(e);
           }
-          new Handler(Looper.getMainLooper())
+          HandlerCompat.createAsyncHandler(Looper.getMainLooper())
               .post(
                   () -> {
                     ensureInitializationComplete(applicationContext.getApplicationContext(), args);

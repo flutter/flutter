@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -27,7 +28,6 @@ import android.view.WindowManager;
 import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.Brightness;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardContentFormat;
@@ -38,10 +38,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLooper;
 
 @Config(manifest = Config.NONE)
-@RunWith(AndroidJUnit4.class)
+@RunWith(RobolectricTestRunner.class)
 public class PlatformPluginTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
 
@@ -366,6 +369,32 @@ public class PlatformPluginTest {
                   | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                   | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
+  }
+
+  @Test
+  public void setSystemUiModeListener() {
+    ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class);
+    controller.setup();
+    Activity fakeActivity = controller.get();
+
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    // Subscribe to system Ui visibility events.
+    platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
+
+    // Simulate changing of the system ui visibility.
+    fakeActivity.getWindow().getDecorView().dispatchSystemUiVisibilityChanged(0);
+
+    // No events should have been sent to the platform channel yet. They are scheduled for
+    // the next frame.
+    verify(fakePlatformChannel, never()).systemChromeChanged(anyBoolean());
+
+    // Simulate the next frame.
+    ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+    // Now the platform channel should receive the event.
+    verify(fakePlatformChannel).systemChromeChanged(anyBoolean());
   }
 
   @Config(sdk = 28)
