@@ -1341,18 +1341,26 @@ class ThemeData with Diagnosticable {
 
   // COLOR
 
+  /// The default color of the [BottomAppBar].
+    @Deprecated(
+      'Use BottomAppBarTheme.color instead. '
+      'This feature was deprecated after v3.3.0-0.6.pre.',
+    )
+  Color get bottomAppBarColor => _bottomAppBarColor!;
+  final Color? _bottomAppBarColor;
+
   /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
 
   /// The color of [Material] when it is used as a [Card].
   final Color cardColor;
 
-  /// A set of colors that are used to configure the color properties of all
-  /// components.
+  /// A set of twelve colors that can be used to configure the
+  /// color properties of most components.
   ///
   /// This property was added much later than the theme's set of highly
   /// specific colors, like [cardColor], [buttonColor], [canvasColor] etc.
-  /// New components are defined exclusively in terms of [colorScheme].
+  /// New components can be defined exclusively in terms of [colorScheme].
   /// Existing components will gradually migrate to it, to the extent
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
@@ -1400,6 +1408,14 @@ class ThemeData with Diagnosticable {
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
 
+  /// The color used to highlight selected rows.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
+  Color get selectedRowColor => _selectedRowColor!;
+  final Color? _selectedRowColor;
+
   /// The color that the [Material] widget uses to draw elevation shadows.
   ///
   /// Defaults to fully opaque black.
@@ -1416,6 +1432,11 @@ class ThemeData with Diagnosticable {
   /// See also:
   ///  * [splashFactory], which defines the appearance of the splash.
   final Color splashColor;
+
+  /// The color used to highlight the active states of toggleable widgets like
+  /// [Switch], [Radio], and [Checkbox].
+  Color get toggleableActiveColor => _toggleableActiveColor!;
+  final Color? _toggleableActiveColor;
 
   /// The color used for widgets in their inactive (but enabled)
   /// state. For example, an unchecked checkbox. See also [disabledColor].
@@ -1708,19 +1729,6 @@ class ThemeData with Diagnosticable {
   )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
-  /// The color used to highlight the active states of toggleable widgets like
-  /// [Switch], [Radio], and [Checkbox].
-  Color get toggleableActiveColor => _toggleableActiveColor!;
-  final Color? _toggleableActiveColor;
-
-  /// The color used to highlight selected rows.
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  Color get selectedRowColor => _selectedRowColor!;
-  final Color? _selectedRowColor;
-
   /// Obsolete property that was used for input validation errors, e.g. in
   /// [TextField] fields. Use [ColorScheme.error] instead.
   @Deprecated(
@@ -1738,14 +1746,6 @@ class ThemeData with Diagnosticable {
   )
   Color get backgroundColor => _backgroundColor!;
   final Color? _backgroundColor;
-
-  /// Obsolete property that was the default color of the [BottomAppBar].
-  @Deprecated(
-    'Use BottomAppBarTheme.color instead. '
-    'This feature was deprecated after v3.3.0-0.6.pre.',
-  )
-  Color get bottomAppBarColor => _bottomAppBarColor!;
-  final Color? _bottomAppBarColor;
 
   /// Obsolete property that was used as the background color for major parts of
   /// the app (toolbars, tab bars, etc). Use [ColorScheme.primary] instead.
@@ -1919,12 +1919,12 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     @Deprecated(
       'Use colorScheme.error instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Color? errorColor,
     @Deprecated(
       'Use colorScheme.background instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
+      'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Color? backgroundColor,
     @Deprecated(
