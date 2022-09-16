@@ -33,11 +33,30 @@ class GlyphAtlas {
   bool IsValid() const;
 
   //----------------------------------------------------------------------------
+  /// @brief   Whether at least one font-glyph pair has colors.
+  ///
+  bool ContainsColorGlyph() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Set the texture for the glyph atlas.
   ///
   /// @param[in]  texture  The texture
   ///
   void SetTexture(std::shared_ptr<Texture> texture);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Set a callback that determines if a glyph-font pair
+  ///             has color.
+  ///
+  /// @param[in]  callback  The callback
+  ///
+  void SetFontColorCallback(
+      std::function<bool(const FontGlyphPair& pair)> callback);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Whether the provided glyph-font pair contains color.
+  ///
+  bool IsColorFontGlyphPair(const FontGlyphPair& pair) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Get the texture for the glyph atlas.
@@ -86,12 +105,20 @@ class GlyphAtlas {
 
  private:
   std::shared_ptr<Texture> texture_;
+  std::optional<std::function<bool(const FontGlyphPair& pair)>> callback_;
+  bool has_color_glyph = false;
 
   std::unordered_map<FontGlyphPair,
                      Rect,
                      FontGlyphPair::Hash,
                      FontGlyphPair::Equal>
       positions_;
+
+  std::unordered_map<FontGlyphPair,
+                     bool,
+                     FontGlyphPair::Hash,
+                     FontGlyphPair::Equal>
+      colors_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlas);
 };
