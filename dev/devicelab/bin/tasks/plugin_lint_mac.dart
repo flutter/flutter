@@ -25,6 +25,12 @@ Future<void> main() async {
         final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
         final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
 
+        // Update pod repo to get latest remote Flutter pods.
+        await exec(
+          'pod',
+          <String>['repo', 'update'],
+        );
+
         await exec(
           'pod',
           <String>[
@@ -34,9 +40,6 @@ Future<void> main() async {
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
@@ -48,9 +51,6 @@ Future<void> main() async {
             macosintegrationTestPodspec,
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -85,9 +85,6 @@ Future<void> main() async {
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -104,9 +101,6 @@ Future<void> main() async {
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -141,9 +135,6 @@ Future<void> main() async {
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -160,9 +151,6 @@ Future<void> main() async {
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -179,9 +167,6 @@ Future<void> main() async {
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -198,9 +183,6 @@ Future<void> main() async {
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
