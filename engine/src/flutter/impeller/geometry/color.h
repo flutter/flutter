@@ -41,10 +41,15 @@ struct Color {
 
   constexpr Color() {}
 
-  Color(const ColorHSB& hsbColor);
+  explicit Color(const ColorHSB& hsbColor);
 
   constexpr Color(Scalar r, Scalar g, Scalar b, Scalar a)
       : red(r), green(g), blue(b), alpha(a) {}
+
+  static constexpr Color MakeRGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    return Color(static_cast<Scalar>(r) / 255, static_cast<Scalar>(g) / 255,
+                 static_cast<Scalar>(b) / 255, static_cast<Scalar>(a) / 255);
+  }
 
   constexpr bool operator==(const Color& c) const {
     return red == c.red && green == c.green && blue == c.blue &&
