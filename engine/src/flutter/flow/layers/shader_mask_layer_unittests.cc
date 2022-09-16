@@ -7,6 +7,7 @@
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/raster_cache.h"
+#include "flutter/flow/raster_cache_util.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -392,6 +393,47 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
 
   opacity_layer->Paint(display_list_paint_context());
   EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
+}
+
+TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
+  use_mock_raster_cache();  // Ensure non-fractional alignment.
+
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
+  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 6.5f, 6.5f);
+  const SkPath child_path = SkPath().addRect(child_bounds);
+  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  auto layer_filter =
+      SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
+  auto dl_filter = DlColorSource::From(layer_filter);
+  auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
+  auto layer = std::make_shared<ShaderMaskLayer>(dl_filter, layer_bounds,
+                                                 DlBlendMode::kSrc);
+  layer->Add(mock_layer);
+  layer->Preroll(preroll_context(), initial_transform);
+
+  SkPaint filter_paint;
+  filter_paint.setBlendMode(SkBlendMode::kSrc);
+  filter_paint.setShader(layer_filter);
+  layer->Paint(paint_context());
+  EXPECT_EQ(
+      mock_canvas().draw_calls(),
+      std::vector({MockCanvas::DrawCall{0, MockCanvas::SetMatrixData{SkM44(
+                                               SkMatrix::Translate(0.0, 0.0))}},
+                   MockCanvas::DrawCall{
+                       0, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
+                                                    nullptr, 1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path, child_paint}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
+                              layer_bounds.fLeft, layer_bounds.fTop)}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
+                                                       layer_bounds.width(),
+                                                       layer_bounds.height()),
+                                                   filter_paint}},
+                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 }  // namespace testing

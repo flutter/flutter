@@ -41,12 +41,12 @@ void ColorFilterLayer::Preroll(PrerollContext* context,
                                const SkMatrix& matrix) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context, matrix);
-
   SkMatrix child_matrix = matrix;
   if (context->raster_cache) {
     child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
   }
+  AutoCache cache =
+      AutoCache(layer_raster_cache_item_.get(), context, child_matrix);
 
   ContainerLayer::Preroll(context, child_matrix);
   // We always use a saveLayer (or a cached rendering), so we

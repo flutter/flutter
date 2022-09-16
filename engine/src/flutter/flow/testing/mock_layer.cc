@@ -65,18 +65,27 @@ void MockCacheableContainerLayer::Preroll(PrerollContext* context,
                                           const SkMatrix& matrix) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  auto cache = AutoCache(layer_raster_cache_item_.get(), context, matrix);
+  SkMatrix child_matrix = matrix;
+  if (context->raster_cache) {
+    child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
+  }
 
-  ContainerLayer::Preroll(context, matrix);
+  auto cache = AutoCache(layer_raster_cache_item_.get(), context, child_matrix);
+
+  ContainerLayer::Preroll(context, child_matrix);
 }
 
 void MockCacheableLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  auto cache = AutoCache(raster_cache_item_.get(), context, matrix);
+  SkMatrix child_matrix = matrix;
+  if (context->raster_cache) {
+    child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
+  }
+  auto cache = AutoCache(raster_cache_item_.get(), context, child_matrix);
 
-  MockLayer::Preroll(context, matrix);
+  MockLayer::Preroll(context, child_matrix);
 }
 
 }  // namespace testing
