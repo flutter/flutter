@@ -213,6 +213,38 @@ def to_gn_args(args):
 
   gn_args['is_debug'] = args.unoptimized
 
+  goma_dir = os.environ.get('GOMA_DIR')
+  goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
+  depot_tools_bin_dir = os.path.join(args.depot_tools, '.cipd_bin')
+
+  # GOMA has a different default (home) path on gWindows.
+  if not os.path.exists(goma_home_dir) and sys.platform.startswith(
+      ('cygwin', 'win')):
+    goma_home_dir = os.path.join('c:\\', 'src', 'goma', 'goma-win64')
+
+  if args.goma and goma_dir:
+    gn_args['use_goma'] = True
+    gn_args['goma_dir'] = goma_dir
+  elif args.goma and os.path.exists(goma_home_dir):
+    gn_args['use_goma'] = True
+    gn_args['goma_dir'] = goma_home_dir
+  elif args.goma and os.path.exists(depot_tools_bin_dir):
+    gn_args['use_goma'] = True
+    gn_args['goma_dir'] = depot_tools_bin_dir
+  else:
+    if args.goma:
+      print(
+          "GOMA usage was specified but can't be found, falling back to local "
+          'builds. Set the GOMA_DIR environment variable to fix GOMA.'
+      )
+    gn_args['use_goma'] = False
+    gn_args['goma_dir'] = None
+
+  if gn_args['use_goma']:
+    if args.xcode_symlinks or os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS',
+                                        '0') == '1':
+      gn_args['create_xcode_symlinks'] = True
+
   # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
   # of the Flutter SDK specific arguments are unused.
   if args.target_os == 'wasm':
@@ -370,38 +402,6 @@ def to_gn_args(args):
 
   if args.target_triple:
     gn_args['custom_target_triple'] = args.target_triple
-
-  goma_dir = os.environ.get('GOMA_DIR')
-  goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
-  depot_tools_bin_dir = os.path.join(args.depot_tools, '.cipd_bin')
-
-  # GOMA has a different default (home) path on gWindows.
-  if not os.path.exists(goma_home_dir) and sys.platform.startswith(
-      ('cygwin', 'win')):
-    goma_home_dir = os.path.join('c:\\', 'src', 'goma', 'goma-win64')
-
-  if args.goma and goma_dir:
-    gn_args['use_goma'] = True
-    gn_args['goma_dir'] = goma_dir
-  elif args.goma and os.path.exists(goma_home_dir):
-    gn_args['use_goma'] = True
-    gn_args['goma_dir'] = goma_home_dir
-  elif args.goma and os.path.exists(depot_tools_bin_dir):
-    gn_args['use_goma'] = True
-    gn_args['goma_dir'] = depot_tools_bin_dir
-  else:
-    if args.goma:
-      print(
-          "GOMA usage was specified but can't be found, falling back to local "
-          'builds. Set the GOMA_DIR environment variable to fix GOMA.'
-      )
-    gn_args['use_goma'] = False
-    gn_args['goma_dir'] = None
-
-  if gn_args['use_goma']:
-    if args.xcode_symlinks or os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS',
-                                        '0') == '1':
-      gn_args['create_xcode_symlinks'] = True
 
   # Enable Metal on iOS builds.
   if args.target_os == 'ios':
