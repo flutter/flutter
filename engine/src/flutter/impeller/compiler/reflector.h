@@ -23,18 +23,27 @@ struct StructMember {
   std::string base_type;
   std::string name;
   size_t offset = 0u;
+  size_t size = 0u;
   size_t byte_length = 0u;
+  size_t array_elements = 1u;
+  size_t element_padding = 0u;
 
   StructMember(std::string p_type,
                std::string p_base_type,
                std::string p_name,
                size_t p_offset,
-               size_t p_byte_length)
+               size_t p_size,
+               size_t p_byte_length,
+               size_t p_array_elements,
+               size_t p_element_padding)
       : type(std::move(p_type)),
         base_type(std::move(p_base_type)),
         name(std::move(p_name)),
         offset(p_offset),
-        byte_length(p_byte_length) {}
+        size(p_size),
+        byte_length(p_byte_length),
+        array_elements(p_array_elements),
+        element_padding(p_element_padding) {}
 };
 
 class Reflector {
@@ -141,6 +150,17 @@ class Reflector {
       const spirv_cross::TypeID& type_id) const;
 
   uint32_t GetArrayElements(const spirv_cross::SPIRType& type) const;
+
+  template <uint32_t Size>
+  uint32_t GetArrayStride(const spirv_cross::SPIRType& struct_type,
+                          const spirv_cross::SPIRType& member_type,
+                          uint32_t index) const {
+    auto element_count = GetArrayElements(member_type);
+    if (element_count <= 1) {
+      return Size;
+    }
+    return compiler_->type_struct_member_array_stride(struct_type, index);
+  };
 
   FML_DISALLOW_COPY_AND_ASSIGN(Reflector);
 };
