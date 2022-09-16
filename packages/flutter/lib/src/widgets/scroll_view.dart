@@ -1116,7 +1116,7 @@ class ListView extends BoxScrollView {
   /// By returning `null`, the max scroll extent will not be accurate
   /// unless the user reaches the end of the scroll view. This can cause the
   /// scrollbar to grow as the user scrolls.
-  /// If that is an issue, consider specifying `itemCount`.
+  /// For more accurate [ScrollMetrics], consider specifying `itemCount`.
   /// {@endtemplate}
   ///
   /// The `itemBuilder` should always create the widget instances when called.
