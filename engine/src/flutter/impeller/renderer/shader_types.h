@@ -67,6 +67,8 @@ struct ShaderStructMemberMetadata {
   std::string name;
   size_t offset;
   size_t size;
+  size_t byte_length;
+  size_t array_elements;
 };
 
 struct ShaderMetadata {
@@ -120,6 +122,17 @@ template <size_t Size>
 struct Padding {
  private:
   uint8_t pad_[Size];
+};
+
+/// @brief Struct used for padding uniform buffer array elements.
+template <typename T,
+          size_t Size,
+          class = std::enable_if_t<std::is_standard_layout_v<T>>>
+struct Padded {
+  T value;
+  Padding<Size> _PADDING_;
+
+  Padded(T p_value) : value(p_value){};  // NOLINT(google-explicit-constructor)
 };
 
 inline constexpr Vector4 ToVector(Color color) {

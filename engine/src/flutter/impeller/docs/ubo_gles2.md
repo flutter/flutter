@@ -31,6 +31,7 @@ struct ShaderStructMemberMetadata {
   std::string name; // the uniform member name "frame_info.mvp"
   size_t offset;
   size_t size;
+  size_t array_elements;
 };
 ```
 
