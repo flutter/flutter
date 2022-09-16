@@ -21,6 +21,11 @@ integration tests in other repos.
 4. Write your test.
 5. Build and run with `testing/run_tests.py [--type=java] [--java-filter=<test_class_name>]`.
 
+Note that `testing/run_tests.py` does not build the engine binaries; instead they
+should be built prior to running this command and also when the source files
+change. See [Compiling the engine](https://github.com/flutter/flutter/wiki/Compiling-the-engine)
+for details on how to do so.
+
 ## Q&A
 
 ### My new test won't run. There's a "ClassNotFoundException".
