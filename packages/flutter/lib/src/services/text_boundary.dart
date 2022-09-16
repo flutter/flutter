@@ -14,7 +14,9 @@ import 'text_layout_metrics.dart';
 ///
 /// The input [TextPosition] points to a position between 2 code units (which
 /// can be visually represented by the caret if the selection were to collapse
-/// to that position).
+/// to that position). The [TextPosition.affinity] is used to determine which
+/// code unit it points. For example, `TextPosition(i, upstream)` points to
+/// code unit `i - 1` and `TextPosition(i, downstream)` points to code unit `i`.
 abstract class TextBoundary {
   /// A constant constructor to enable subclass override.
   const TextBoundary();
@@ -117,7 +119,6 @@ class WordBoundary extends TextBoundary {
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     return TextPosition(
       offset: _textLayout.getWordBoundary(position).start,
-      // Word boundary seems to always report downstream on many platforms.
       affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
     );
   }
@@ -125,8 +126,7 @@ class WordBoundary extends TextBoundary {
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return TextPosition(
       offset: _textLayout.getWordBoundary(position).end,
-      // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
+      affinity: TextAffinity.upstream,
     );
   }
 }

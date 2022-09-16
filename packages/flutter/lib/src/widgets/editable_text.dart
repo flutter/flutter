@@ -3480,7 +3480,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
     final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
-    return _CollapsedSelectionBoundary(atomicTextBoundary, intent.forward);
+    return _PushTextPosition(atomicTextBoundary, intent.forward);
   }
 
   TextBoundary _nextWordBoundary(DirectionalTextEditingIntent intent) {
@@ -3502,7 +3502,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : _MixedBoundary(boundary, atomicTextBoundary);
     // Use a _MixedBoundary to make sure we don't leave invalid codepoints in
     // the field after deletion.
-    return _CollapsedSelectionBoundary(mixedBoundary, intent.forward);
+    return _PushTextPosition(mixedBoundary, intent.forward);
   }
 
   TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
@@ -3524,8 +3524,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // since the document boundary is unique and the linebreak boundary is
     // already caret-location based.
     return intent.forward
-      ? _MixedBoundary(_CollapsedSelectionBoundary(atomicTextBoundary, true), boundary)
-      : _MixedBoundary(boundary, _CollapsedSelectionBoundary(atomicTextBoundary, false));
+      ? _MixedBoundary(_PushTextPosition(atomicTextBoundary, true), boundary)
+      : _MixedBoundary(boundary, _PushTextPosition(atomicTextBoundary, false));
   }
 
   TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => DocumentBoundary(_value.text);
@@ -4350,13 +4350,23 @@ class _ExpandedTextBoundary extends TextBoundary {
   }
 }
 
-// Force the innerTextBoundary to interpret the input [TextPosition]s as caret
-// locations instead of code unit positions.
-//
-// The innerTextBoundary must be a [_TextBoundary] that interprets the input
-// [TextPosition]s as code unit positions.
-class _CollapsedSelectionBoundary extends TextBoundary {
-  _CollapsedSelectionBoundary(this.innerTextBoundary, this.isForward);
+/// A proxy text boundary that will push input text position forward or backward
+/// one affinity unit before sending it to the [innerTextBoundary].
+///
+/// If the [isForward] is true, this proxy text boundary push the position
+/// forward; otherwise, backward.
+///
+/// To push a text position forward one affinity unit, this proxy converts
+/// affinity to downstream if it is upstream; otherwise it increase the offset
+/// by one with its affinity sets to upstream. For example,
+/// `TextPosition(1, upstream)` becomes `TextPosition(1, downstream)`,
+/// `TextPosition(4, downstream)` becomes `TextPosition(5, upstream)`.
+///
+/// This class is used to kick-start the text position to find the next boundary
+/// determined by [innerTextBoundary] so that it won't be trapped if the input
+/// text position is right at the edge.
+class _PushTextPosition extends TextBoundary {
+  _PushTextPosition(this.innerTextBoundary, this.isForward);
 
   final TextBoundary innerTextBoundary;
   final bool isForward;
