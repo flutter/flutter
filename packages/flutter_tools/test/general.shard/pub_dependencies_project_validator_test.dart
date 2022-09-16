@@ -35,7 +35,7 @@ void main() {
       const String expected = 'All pub dependencies are hosted on https://pub.dartlang.org';
       expect(result.length, 1);
       expect(result[0].value, expected);
-      expect(result[0].status, StatusProjectValidator.success);
+      expect(result[0].status, StatusProjectValidator.info);
     });
 
     testWithoutContext('error when command dart pub deps fails', () async {
@@ -56,7 +56,7 @@ void main() {
       expect(result[0].status, StatusProjectValidator.error);
     });
 
-    testWithoutContext('warning on dependencies not hosted', () async {
+    testWithoutContext('info on dependencies not hosted', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['dart', 'pub', 'deps', '--json'],
@@ -71,7 +71,7 @@ void main() {
       const String expected = 'dep1, dep2 are not hosted';
       expect(result.length, 1);
       expect(result[0].value, expected);
-      expect(result[0].status, StatusProjectValidator.warning);
+      expect(result[0].status, StatusProjectValidator.info);
     });
   });
 }

@@ -425,7 +425,7 @@ class _FocusDemoState extends State<FocusDemo> {
             debugLabel: 'Scope',
             autofocus: true,
             child: DefaultTextStyle(
-              style: textTheme.headline4!,
+              style: textTheme.headlineMedium!,
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Actions Demo'),

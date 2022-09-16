@@ -20,7 +20,7 @@ import 'package:flutter/widgets.dart';
 /// - has some vertical drag resistance; i.e. if a gesture is detected k units below the field,
 ///   then has vertical offset [dragResistance] * k.
 class CupertinoTextMagnifier extends StatefulWidget {
-  /// Construct a [RawMagnifier] in the Cupertino style, positioning with respect to
+  /// Constructs a [RawMagnifier] in the Cupertino style, positioning with respect to
   /// [magnifierOverlayInfoBearer].
   ///
   /// The default constructor parameters and constants were eyeballed on
@@ -266,7 +266,7 @@ class CupertinoMagnifier extends StatelessWidget {
   /// The default size of the magnifier.
   ///
   /// This is public so that positioners can choose to depend on it, although
-  /// it is overrideable.
+  /// it is overridable.
   @visibleForTesting
   static const Size kDefaultSize = Size(80, 47.5);
 

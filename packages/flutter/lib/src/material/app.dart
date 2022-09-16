@@ -19,6 +19,10 @@ import 'scrollbar.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
+// Examples can assume:
+// typedef GlobalWidgetsLocalizations = DefaultWidgetsLocalizations;
+// typedef GlobalMaterialLocalizations = DefaultMaterialLocalizations;
+
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
 /// developers to be intentional about their [DefaultTextStyle].
 ///
@@ -171,7 +175,7 @@ enum ThemeMode {
 /// a [Material] widget that defines its default text style.
 ///
 /// ```dart
-/// MaterialApp(
+/// const MaterialApp(
 ///   title: 'Material App',
 ///   home: Scaffold(
 ///     body: Center(
@@ -513,16 +517,19 @@ class MaterialApp extends StatefulWidget {
   /// and list the [supportedLocales] that the application can handle.
   ///
   /// ```dart
-  /// import 'package:flutter_localizations/flutter_localizations.dart';
-  /// MaterialApp(
-  ///   localizationsDelegates: [
-  ///     // ... app-specific localization delegate[s] here
+  /// // The GlobalMaterialLocalizations and GlobalWidgetsLocalizations
+  /// // classes require the following import:
+  /// // import 'package:flutter_localizations/flutter_localizations.dart';
+  ///
+  /// const MaterialApp(
+  ///   localizationsDelegates: <LocalizationsDelegate<Object>>[
+  ///     // ... app-specific localization delegate(s) here
   ///     GlobalMaterialLocalizations.delegate,
   ///     GlobalWidgetsLocalizations.delegate,
   ///   ],
-  ///   supportedLocales: [
-  ///     const Locale('en', 'US'), // English
-  ///     const Locale('he', 'IL'), // Hebrew
+  ///   supportedLocales: <Locale>[
+  ///     Locale('en', 'US'), // English
+  ///     Locale('he', 'IL'), // Hebrew
   ///     // ... other locales the app supports
   ///   ],
   ///   // ...
@@ -542,33 +549,39 @@ class MaterialApp extends StatefulWidget {
   /// [LocalizationsDelegate<MaterialLocalizations>] whose load methods return
   /// custom versions of [WidgetsLocalizations] or [MaterialLocalizations].
   ///
-  /// For example: to add support to [MaterialLocalizations] for a
-  /// locale it doesn't already support, say `const Locale('foo', 'BR')`,
-  /// one could just extend [DefaultMaterialLocalizations]:
+  /// For example: to add support to [MaterialLocalizations] for a locale it
+  /// doesn't already support, say `const Locale('foo', 'BR')`, one first
+  /// creates a subclass of [MaterialLocalizations] that provides the
+  /// translations:
   ///
   /// ```dart
-  /// class FooLocalizations extends DefaultMaterialLocalizations {
-  ///   FooLocalizations(Locale locale) : super(locale);
+  /// class FooLocalizations extends MaterialLocalizations {
+  ///   FooLocalizations();
   ///   @override
-  ///   String get okButtonLabel {
-  ///     if (locale == const Locale('foo', 'BR'))
-  ///       return 'foo';
-  ///     return super.okButtonLabel;
-  ///   }
+  ///   String get okButtonLabel => 'foo';
+  ///   // ...
+  ///   // lots of other getters and methods to override!
   /// }
-  ///
   /// ```
   ///
-  /// A `FooLocalizationsDelegate` is essentially just a method that constructs
-  /// a `FooLocalizations` object. We return a [SynchronousFuture] here because
-  /// no asynchronous work takes place upon "loading" the localizations object.
+  /// One must then create a [LocalizationsDelegate] subclass that can provide
+  /// an instance of the [MaterialLocalizations] subclass. In this case, this is
+  /// essentially just a method that constructs a `FooLocalizations` object. A
+  /// [SynchronousFuture] is used here because no asynchronous work takes place
+  /// upon "loading" the localizations object.
   ///
   /// ```dart
+  /// // continuing from previous example...
   /// class FooLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   ///   const FooLocalizationsDelegate();
   ///   @override
+  ///   bool isSupported(Locale locale) {
+  ///     return locale == const Locale('foo', 'BR');
+  ///   }
+  ///   @override
   ///   Future<FooLocalizations> load(Locale locale) {
-  ///     return SynchronousFuture(FooLocalizations(locale));
+  ///     assert(locale == const Locale('foo', 'BR'));
+  ///     return SynchronousFuture<FooLocalizations>(FooLocalizations());
   ///   }
   ///   @override
   ///   bool shouldReload(FooLocalizationsDelegate old) => false;
@@ -582,9 +595,10 @@ class MaterialApp extends StatefulWidget {
   /// [localizationsDelegates] list.
   ///
   /// ```dart
-  /// MaterialApp(
-  ///   localizationsDelegates: [
-  ///     const FooLocalizationsDelegate(),
+  /// // continuing from previous example...
+  /// const MaterialApp(
+  ///   localizationsDelegates: <LocalizationsDelegate<Object>>[
+  ///     FooLocalizationsDelegate(),
   ///   ],
   ///   // ...
   /// )

@@ -13,7 +13,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// bool? _throwShotAway = false;
+// late bool? _throwShotAway;
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
@@ -275,7 +275,7 @@ class CheckboxListTile extends StatelessWidget {
   /// This value will surround the [Checkbox], [title], [subtitle], and [secondary]
   /// widgets in [CheckboxListTile].
   ///
-  /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  /// When the value is null, the [contentPadding] is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry? contentPadding;
 
   /// If true the checkbox's [value] can be true, false, or null.

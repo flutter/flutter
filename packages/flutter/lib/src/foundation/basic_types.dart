@@ -115,9 +115,10 @@ class CachingIterable<E> extends IterableBase<E> {
   ///
   /// ```dart
   /// Iterable<int> range(int start, int end) sync* {
-  ///   for (int index = start; index <= end; index += 1)
+  ///   for (int index = start; index <= end; index += 1) {
   ///     yield index;
-  ///  }
+  ///   }
+  /// }
   ///
   /// Iterable<int> i = CachingIterable<int>(range(1, 5).iterator);
   /// print(i.length); // walks the list

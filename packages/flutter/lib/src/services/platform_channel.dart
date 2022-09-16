@@ -268,10 +268,10 @@ class MethodChannel {
   /// [binaryMessenger]'s [BinaryMessenger.send] method.
   ///
   /// If the result is null and `missingOk` is true, this returns null. (This is
-  /// the behaviour of [OptionalMethodChannel.invokeMethod].)
+  /// the behavior of [OptionalMethodChannel.invokeMethod].)
   ///
   /// If the result is null and `missingOk` is false, this throws a
-  /// [MissingPluginException]. (This is the behaviour of
+  /// [MissingPluginException]. (This is the behavior of
   /// [MethodChannel.invokeMethod].)
   ///
   /// Otherwise, the result is decoded using the [codec]'s
@@ -572,7 +572,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// Stream setup requests are encoded into binary before being sent,
 /// and binary events and errors received are decoded into Dart values.
 /// The [MethodCodec] used must be compatible with the one used by the platform
-/// plugin. This can be achieved by creating an `EventChannel` counterpart of
+/// plugin. This can be achieved by creating an [EventChannel] counterpart of
 /// this channel on the platform side. The Dart type of events sent and received
 /// is `dynamic`, but only values supported by the specified [MethodCodec] can
 /// be used.

@@ -631,6 +631,7 @@ void main() {
     try {
       const Color customColor1 = Color(0xcafefeed);
       const Color customColor2 = Color(0xdeadbeef);
+      const Color customColor3 = Color(0xdecaface);
       final ThemeData theme = ThemeData(
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
@@ -647,6 +648,8 @@ void main() {
           overlayColor: Color(0xff000010),
           thumbColor: Color(0xff000011),
           valueIndicatorColor: Color(0xff000012),
+          disabledSecondaryActiveTrackColor: Color(0xff000013),
+          secondaryActiveTrackColor: Color(0xff000014),
         ),
       );
       final SliderThemeData sliderTheme = theme.sliderTheme;
@@ -654,6 +657,7 @@ void main() {
       Widget buildApp({
         Color? activeColor,
         Color? inactiveColor,
+        Color? secondaryActiveColor,
         int? divisions,
         bool enabled = true,
       }) {
@@ -671,10 +675,12 @@ void main() {
                   data: theme,
                   child: Slider(
                     value: value,
+                    secondaryTrackValue: 0.75,
                     label: '$value',
                     divisions: divisions,
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
+                    secondaryActiveColor: secondaryActiveColor,
                     onChanged: onChanged,
                   ),
                 ),
@@ -690,47 +696,61 @@ void main() {
       final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
       // Check default theme for enabled widget.
-      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
+      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(material, paints..shadow(color: const Color(0xff000000)));
       expect(material, paints..circle(color: sliderTheme.thumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
       // Test setting only the activeColor.
       await tester.pumpWidget(buildApp(activeColor: customColor1));
-      expect(material, paints..rrect(color: customColor1)..rrect(color: sliderTheme.inactiveTrackColor));
+      expect(material, paints..rrect(color: customColor1)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(material, paints..shadow(color: Colors.black));
       expect(material, paints..circle(color: customColor1));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor)));
 
       // Test setting only the inactiveColor.
       await tester.pumpWidget(buildApp(inactiveColor: customColor1));
-      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: customColor1));
+      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: customColor1)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(material, paints..shadow(color: Colors.black));
       expect(material, paints..circle(color: sliderTheme.thumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor)));
 
-      // Test setting both activeColor and inactiveColor.
-      await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2));
-      expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2));
+      // Test setting only the secondaryActiveColor.
+      await tester.pumpWidget(buildApp(secondaryActiveColor: customColor1));
+      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: customColor1));
+      expect(material, paints..shadow(color: Colors.black));
+      expect(material, paints..circle(color: sliderTheme.thumbColor));
+      expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor)));
+
+      // Test setting both activeColor, inactiveColor, and secondaryActiveColor.
+      await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, secondaryActiveColor: customColor3));
+      expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2)..rrect(color: customColor3));
       expect(material, paints..shadow(color: Colors.black));
       expect(material, paints..circle(color: customColor1));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor)));
 
       // Test colors for discrete slider.
       await tester.pumpWidget(buildApp(divisions: 3));
-      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
+      expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor)..rrect(color: sliderTheme.secondaryActiveTrackColor));
       expect(
         material,
         paints
@@ -744,14 +764,16 @@ void main() {
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor)));
 
       // Test colors for discrete slider with inactiveColor and activeColor set.
       await tester.pumpWidget(buildApp(
         activeColor: customColor1,
         inactiveColor: customColor2,
+        secondaryActiveColor: customColor3,
         divisions: 3,
       ));
-      expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2));
+      expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2)..rrect(color: customColor3));
       expect(
         material,
         paints
@@ -766,6 +788,7 @@ void main() {
       expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
@@ -776,25 +799,29 @@ void main() {
         material,
         paints
           ..rrect(color: sliderTheme.disabledActiveTrackColor)
-          ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor),
       );
       expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
-      // Test setting the activeColor and inactiveColor for disabled widget.
-      await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
+      // Test setting the activeColor, inactiveColor and secondaryActiveColor for disabled widget.
+      await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, secondaryActiveColor: customColor3, enabled: false));
       expect(
         material,
         paints
           ..rrect(color: sliderTheme.disabledActiveTrackColor)
-          ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledSecondaryActiveTrackColor),
       );
       expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
       // Test that the default value indicator has the right colors.
       await tester.pumpWidget(buildApp(divisions: 3));
@@ -2813,10 +2840,12 @@ void main() {
       activeColor: Colors.blue,
       divisions: 10,
       inactiveColor: Colors.grey,
+      secondaryActiveColor: Colors.blueGrey,
       label: 'Set a value',
       max: 100.0,
       onChanged: null,
       value: 50.0,
+      secondaryTrackValue: 75.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -2825,6 +2854,7 @@ void main() {
 
     expect(description, <String>[
       'value: 50.0',
+      'secondaryTrackValue: 75.0',
       'disabled',
       'min: 0.0',
       'max: 100.0',
@@ -2832,6 +2862,7 @@ void main() {
       'label: "Set a value"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+      'secondaryActiveColor: MaterialColor(primary value: Color(0xff607d8b))',
     ]);
   });
 

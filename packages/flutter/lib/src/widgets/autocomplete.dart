@@ -18,6 +18,9 @@ import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// The type of the [RawAutocomplete] callback which computes the list of
 /// optional completions for the widget's field, based on the text the user has
 /// entered so far.
@@ -435,7 +438,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           );
         },
       );
-      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget)!.insert(newFloatingOptions);
+      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(newFloatingOptions);
       _floatingOptions = newFloatingOptions;
     } else {
       _floatingOptions = null;
@@ -593,7 +596,7 @@ class AutocompleteNextOptionIntent extends Intent {
 /// by using the static [of] method:
 ///
 /// ```dart
-/// final highlightedIndex = AutocompleteHighlightedOption.of(context);
+/// int highlightedIndex = AutocompleteHighlightedOption.of(context);
 /// ```
 ///
 /// which can then be used to tell which option should be given a visual
@@ -614,7 +617,7 @@ class AutocompleteHighlightedOption extends InheritedNotifier<ValueNotifier<int>
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// final highlightedIndex = AutocompleteHighlightedOption.of(context);
+  /// int highlightedIndex = AutocompleteHighlightedOption.of(context);
   /// ```
   static int of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<AutocompleteHighlightedOption>()?.notifier?.value ?? 0;
