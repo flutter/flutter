@@ -225,7 +225,7 @@ void main() {
       expect(appDir.childDirectory('web').existsSync(), false);
 
       projectRoot.deleteSync(recursive: true);
-    });
+    }, skip: true); // [intended] This checks out an old Flutter SDK for which there do not exist engine binaries in the v2 storage bucket
   });
 
   testWithoutContext('conflictsResolved', () async {
