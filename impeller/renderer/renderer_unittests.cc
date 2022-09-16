@@ -5,6 +5,8 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/strings.h"
+#include "impeller/fixtures/array.frag.h"
+#include "impeller/fixtures/array.vert.h"
 #include "impeller/fixtures/box_fade.frag.h"
 #include "impeller/fixtures/box_fade.vert.h"
 #include "impeller/fixtures/colors.frag.h"
@@ -729,6 +731,62 @@ TEST_P(RendererTest, TheImpeller) {
                      pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
     FS::BindBlueNoise(cmd, blue_noise, noise_sampler);
     FS::BindCubeMap(cmd, cube_map, cube_map_sampler);
+
+    pass.AddCommand(cmd);
+    return true;
+  };
+  OpenPlaygroundHere(callback);
+}
+
+TEST_P(RendererTest, ArrayUniforms) {
+  using VS = ArrayVertexShader;
+  using FS = ArrayFragmentShader;
+
+  auto context = GetContext();
+  auto pipeline_descriptor =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_descriptor.has_value());
+  pipeline_descriptor->SetSampleCount(SampleCount::kCount4);
+  auto pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).get();
+  ASSERT_TRUE(pipeline && pipeline->IsValid());
+
+  SinglePassCallback callback = [&](RenderPass& pass) {
+    auto size = pass.GetRenderTargetSize();
+
+    Command cmd;
+    cmd.pipeline = pipeline;
+    cmd.label = "Google Dots";
+    VertexBufferBuilder<VS::PerVertexData> builder;
+    builder.AddVertices({{Point()},
+                         {Point(0, size.height)},
+                         {Point(size.width, 0)},
+                         {Point(size.width, 0)},
+                         {Point(0, size.height)},
+                         {Point(size.width, size.height)}});
+    cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+
+    VS::VertInfo vs_uniform;
+    vs_uniform.mvp =
+        Matrix::MakeOrthographic(size) * Matrix::MakeScale(GetContentScale());
+    VS::BindVertInfo(cmd,
+                     pass.GetTransientsBuffer().EmplaceUniform(vs_uniform));
+
+    auto time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    auto y_pos = [&time](float x) {
+      return 400 + 10 * std::cos(time * 5 + x / 6);
+    };
+
+    FS::FragInfo fs_uniform = {
+        .circle_positions = {Point(430, y_pos(0)), Point(480, y_pos(1)),
+                             Point(530, y_pos(2)), Point(580, y_pos(3))},
+        .colors = {Color::MakeRGBA8(66, 133, 244, 255),
+                   Color::MakeRGBA8(219, 68, 55, 255),
+                   Color::MakeRGBA8(244, 180, 0, 255),
+                   Color::MakeRGBA8(15, 157, 88, 255)},
+    };
+    FS::BindFragInfo(cmd,
+                     pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
 
     pass.AddCommand(cmd);
     return true;

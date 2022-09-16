@@ -8,6 +8,8 @@ import("//flutter/testing/testing.gni")
 impeller_shaders("shader_fixtures") {
   name = "fixtures"
   shaders = [
+    "array.frag",
+    "array.vert",
     "box_fade.frag",
     "box_fade.vert",
     "colors.vert",

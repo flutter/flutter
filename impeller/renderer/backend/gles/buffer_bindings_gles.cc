@@ -5,7 +5,9 @@
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 
 #include <algorithm>
+#include <cstring>
 #include <sstream>
+#include <vector>
 
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
@@ -70,9 +72,13 @@ static std::string NormalizeUniformKey(const std::string& key) {
 }
 
 static std::string CreateUnifiormMemberKey(const std::string& struct_name,
-                                           const std::string& member) {
+                                           const std::string& member,
+                                           bool is_array) {
   std::stringstream stream;
   stream << struct_name << "." << member;
+  if (is_array) {
+    stream << "[0]";
+  }
   return NormalizeUniformKey(stream.str());
 }
 
@@ -112,10 +118,6 @@ bool BufferBindingsGLES::ReadUniformsBindings(const ProcTableGLES& gl,
     }
     if (written_count <= 0) {
       VALIDATION_LOG << "Uniform name could not be read for active uniform.";
-      return false;
-    }
-    if (uniform_var_size != 1) {
-      VALIDATION_LOG << "Array uniform types are not supported.";
       return false;
     }
     uniform_locations_[NormalizeUniformKey(std::string{
@@ -208,51 +210,69 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
       // mappings for these. Keep going.
       continue;
     }
-    const auto member_key =
-        CreateUnifiormMemberKey(metadata->name, member.name);
+
+    const auto member_key = CreateUnifiormMemberKey(metadata->name, member.name,
+                                                    member.array_elements > 1);
     const auto location = uniform_locations_.find(member_key);
     if (location == uniform_locations_.end()) {
       VALIDATION_LOG << "Location for uniform member not known: " << member_key;
       return false;
     }
 
+    size_t element_stride = member.byte_length / member.array_elements;
+
+    auto* buffer_data =
+        reinterpret_cast<const GLfloat*>(buffer_ptr + member.offset);
+
+    std::vector<uint8_t> array_element_buffer;
+    if (member.array_elements > 1) {
+      // When binding uniform arrays, the elements must be contiguous. Copy the
+      // uniforms to a temp buffer to eliminate any padding needed by the other
+      // backends.
+      array_element_buffer.resize(member.size * member.array_elements);
+      for (size_t element_i = 0; element_i < member.array_elements;
+           element_i++) {
+        std::memcpy(array_element_buffer.data() + element_i * member.size,
+                    reinterpret_cast<const char*>(buffer_data) +
+                        element_i * element_stride,
+                    member.size);
+      }
+      buffer_data =
+          reinterpret_cast<const GLfloat*>(array_element_buffer.data());
+    }
+
     switch (member.type) {
       case ShaderType::kFloat:
         switch (member.size) {
           case sizeof(Matrix):
-            gl.UniformMatrix4fv(location->second,  // location
-                                1u,                // count
-                                GL_FALSE,          // normalize
-                                reinterpret_cast<const GLfloat*>(
-                                    buffer_ptr + member.offset)  // data
+            gl.UniformMatrix4fv(location->second,       // location
+                                member.array_elements,  // count
+                                GL_FALSE,               // normalize
+                                buffer_data             // data
             );
             continue;
           case sizeof(Vector4):
-            gl.Uniform4fv(location->second,  // location
-                          1u,                // count
-                          reinterpret_cast<const GLfloat*>(
-                              buffer_ptr + member.offset)  // data
+            gl.Uniform4fv(location->second,       // location
+                          member.array_elements,  // count
+                          buffer_data             // data
             );
             continue;
           case sizeof(Vector3):
-            gl.Uniform3fv(location->second,  // location
-                          1u,                // count
-                          reinterpret_cast<const GLfloat*>(
-                              buffer_ptr + member.offset)  // data
+            gl.Uniform3fv(location->second,       // location
+                          member.array_elements,  // count
+                          buffer_data             // data
             );
             continue;
           case sizeof(Vector2):
-            gl.Uniform2fv(location->second,  // location
-                          1u,                // count
-                          reinterpret_cast<const GLfloat*>(
-                              buffer_ptr + member.offset)  // data
+            gl.Uniform2fv(location->second,       // location
+                          member.array_elements,  // count
+                          buffer_data             // data
             );
             continue;
           case sizeof(Scalar):
-            gl.Uniform1fv(location->second,  // location
-                          1u,                // count
-                          reinterpret_cast<const GLfloat*>(
-                              buffer_ptr + member.offset)  // data
+            gl.Uniform1fv(location->second,       // location
+                          member.array_elements,  // count
+                          buffer_data             // data
             );
             continue;
         }
