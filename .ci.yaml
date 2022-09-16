@@ -4445,3 +4445,33 @@ targets:
       tags: >
         ["devicelab", "hostonly"]
       task_name: windows_startup_test
+
+  - name: Windows flutter_tool_startup__windows
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: flutter_tool_startup__windows
+
+  - name: Linux flutter_tool_startup__linux
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: flutter_tool_startup__linux
+
+  - name: Mac flutter_tool_startup__macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: flutter_tool_startup__macos
