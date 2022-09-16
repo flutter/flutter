@@ -694,4 +694,10 @@ void main() {
   themeData = ThemeData(bottomAppBarColor: Colors.green);
   themeData = ThemeData.raw(bottomAppBarColor: Colors.green);
   themeData = ThemeData.copyWith(bottomAppBarColor: Colors.green);
+
+  // Changes made in https://github.com/flutter/flutter/pull/78588
+  final ScrollBehavior scrollBehavior = ScrollBehavior();
+  scrollBehavior.buildViewportChrome(context, child, axisDirection);
+  final MaterialScrollBehavior materialScrollBehavior = MaterialScrollBehavior();
+  materialScrollBehavior.buildViewportChrome(context, child, axisDirection);
 }
