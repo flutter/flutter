@@ -168,8 +168,8 @@ abstract class WebGoldenComparator {
   /// by [golden].
   ///
   /// If [isFlaky] is false, the returned future completes with a boolean value
-  /// that indicates whether the pixels decoded from [imageBytes] match the
-  /// golden file's pixels.
+  /// that indicates whether the pixels of the screenshot identified by [golden]
+  /// match the golden file's pixels.
   ///
   /// If [isFlaky] is true, the comparison always passes. Implementations should
   /// strive to assist developers with managing flaky golden tests effectively.
