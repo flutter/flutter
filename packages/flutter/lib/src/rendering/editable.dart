@@ -2070,6 +2070,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
+    // When long-pressing past the end of the text, we want a collapsed cursor.
+    if (position.offset >= _plainText.length) {
+      return TextSelection.fromPosition(
+        TextPosition(offset: _plainText.length, affinity: TextAffinity.upstream)
+      );
+    }
+    // If text is obscured, the entire sentence should be treated as one word.
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+    }
     final TextRange word = _textPainter.getWordBoundary(position);
     final int effectiveOffset;
     switch (position.affinity) {
@@ -2081,17 +2091,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         effectiveOffset = position.offset;
         break;
     }
-    // When long-pressing past the end of the text, we want a collapsed cursor.
-    // This also needs to account for cases where user tap at the end of text.
-    // No matter how far the user tap from the end of text, the text position
-    // will always be TextPosition(textLength, TextAffinity.upstream). The
-    // effectiveOffset cannot accurate this case.
-    if (effectiveOffset >= word.end || position.offset == _plainText.length) {
-      return TextSelection.fromPosition(position);
-    }
-    // If text is obscured, the entire sentence should be treated as one word.
-    if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
     // there is neither a previous word nor a next word.
@@ -2099,7 +2099,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(effectiveOffset))
+    if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(effectiveOffset))
         && effectiveOffset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
