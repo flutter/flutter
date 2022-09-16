@@ -703,6 +703,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     required TextBaseline textBaseline,
     required bool isFocused,
     required bool expands,
+    required bool scaleDownContentPadding,
     TextAlignVertical? textAlignVertical,
   }) : assert(decoration != null),
        assert(textDirection != null),
@@ -713,7 +714,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _textBaseline = textBaseline,
        _textAlignVertical = textAlignVertical,
        _isFocused = isFocused,
-       _expands = expands;
+       _expands = expands,
+       _scaleDownContentPadding = scaleDownContentPadding;
 
   static const double subtextGap = 8.0;
 
@@ -828,6 +830,16 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       return;
     }
     _expands = value;
+    markNeedsLayout();
+  }
+
+  bool get scaleDownContentPadding => _scaleDownContentPadding;
+  bool _scaleDownContentPadding;
+  set scaleDownContentPadding(bool value) {
+    if (_scaleDownContentPadding == value) {
+      return;
+    }
+    _scaleDownContentPadding = value;
     markNeedsLayout();
   }
 
@@ -1027,21 +1039,32 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       counterHeight,
       helperErrorHeight,
     );
+
     final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
-    boxToBaseline[input] = _layoutLineBox(
-      input,
-      boxConstraints.deflate(EdgeInsets.only(
-        top: contentPadding.top + topHeight + densityOffset.dy / 2,
-        bottom: contentPadding.bottom + bottomHeight + densityOffset.dy / 2,
-      )).copyWith(
-        minWidth: inputWidth,
-        maxWidth: inputWidth,
-      ),
+    // For single line text, do not enforce the specified vertical content
+    // padding in case there isn't enough vertical space for showing characters.
+    final double maxInputHeightConstraint = math.max(
+      0,
+      boxConstraints.maxHeight - topHeight - bottomHeight
+        - (scaleDownContentPadding ? math.min(contentPadding.vertical, 0) : contentPadding.vertical),
     );
+    final BoxConstraints inputConstraints = boxConstraints.copyWith(
+      minWidth: inputWidth,
+      maxWidth: inputWidth,
+      maxHeight: maxInputHeightConstraint,
+    );
+    boxToBaseline[input] = _layoutLineBox(input, inputConstraints);
+    final double inputDirectHeight = input?.size.height ?? 0;
+    assert(maxInputHeightConstraint >= inputDirectHeight);
+    final double maxVerticalInputPadding = maxInputHeightConstraint - inputDirectHeight;
+
+    final double verticalPaddingScale = maxVerticalInputPadding >= contentPadding.vertical
+      ? 1 // This also accounts for the case where contentPadding.vertical == 0.
+      : maxVerticalInputPadding / contentPadding.vertical;
+    final EdgeInsets verticalContentPadding = contentPadding.copyWith(left: 0, right: 0) * verticalPaddingScale;
 
     // The field can be occupied by a hint or by the input itself
     final double hintHeight = hint?.size.height ?? 0;
-    final double inputDirectHeight = input?.size.height ?? 0;
     final double inputHeight = math.max(hintHeight, inputDirectHeight);
     final double inputInternalBaseline = math.max(
       boxToBaseline[input]!,
@@ -1076,11 +1099,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double contentHeight = math.max(
       fixIconHeight,
       topHeight
-      + contentPadding.top
+      + verticalContentPadding.vertical
       + fixAboveInput
       + inputHeight
       + fixBelowInput
-      + contentPadding.bottom
       + densityOffset.dy,
     );
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
@@ -1110,15 +1132,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double baselineAdjustment = fixAboveInput - overflow * (1 - textAlignVerticalFactor);
 
     // The baselines that will be used to draw the actual input text content.
-    final double topInputBaseline = contentPadding.top
+    final double topInputBaseline = verticalContentPadding.top
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
       + interactiveAdjustment;
-    final double maxContentHeight = containerHeight
-      - contentPadding.top
-      - topHeight
-      - contentPadding.bottom;
+    final double maxContentHeight = containerHeight - verticalContentPadding.vertical - topHeight;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
@@ -1325,12 +1344,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double overallWidth = constraints.maxWidth;
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
+    final RenderBox? container = this.container;
     if (container != null) {
       final BoxConstraints containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
-      container!.layout(containerConstraints, parentUsesSize: true);
+      container.layout(containerConstraints, parentUsesSize: true);
       final double x;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1340,7 +1360,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           x = _boxSize(icon).width;
           break;
        }
-      _boxParentData(container!).offset = Offset(x, 0.0);
+      _boxParentData(container).offset = Offset(x, 0.0);
     }
 
     late double height;
@@ -1612,6 +1632,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
     required this.textBaseline,
     required this.isFocused,
     required this.expands,
+    required this.scaleDownVerticalContentPadding,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
@@ -1623,6 +1644,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
   final TextAlignVertical? textAlignVertical;
   final bool isFocused;
   final bool expands;
+  final bool scaleDownVerticalContentPadding;
 
   @override
   Iterable<_DecorationSlot> get slots => _DecorationSlot.values;
@@ -1664,6 +1686,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
       textAlignVertical: textAlignVertical,
       isFocused: isFocused,
       expands: expands,
+      scaleDownContentPadding: scaleDownVerticalContentPadding,
     );
   }
 
@@ -1675,7 +1698,8 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
      ..isFocused = isFocused
      ..textAlignVertical = textAlignVertical
      ..textBaseline = textBaseline
-     ..textDirection = textDirection;
+     ..textDirection = textDirection
+     ..scaleDownContentPadding = scaleDownVerticalContentPadding;
   }
 }
 
@@ -1744,6 +1768,7 @@ class InputDecorator extends StatefulWidget {
     this.isHovering = false,
     this.expands = false,
     this.isEmpty = false,
+    this.scaleDownVerticalContentPadding = false,
     this.child,
   }) : assert(decoration != null),
        assert(isFocused != null),
@@ -1822,6 +1847,15 @@ class InputDecorator extends StatefulWidget {
   /// Defaults to false.
   final bool expands;
 
+  /// Whether the vertical components of [decoration]'s
+  /// [InputDecoration.contentPadding] can be scaled down when there is not
+  /// enough vertical space for [child].
+  ///
+  /// This parameter is typically set to true to prevent the text in [child]
+  /// from getting vertically clipped (for example, a single-line [EditableText]
+  /// clips its content when not given enough height).
+  final bool scaleDownVerticalContentPadding;
+
   /// Whether the input field is empty.
   ///
   /// Determines the position of the label text and whether to display the hint
@@ -1864,6 +1898,7 @@ class InputDecorator extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('isFocused', isFocused));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('isEmpty', isEmpty));
+    properties.add(DiagnosticsProperty<bool>('scaleDownVerticalContentPadding', scaleDownVerticalContentPadding));
   }
 }
 
@@ -2354,6 +2389,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       textAlignVertical: widget.textAlignVertical,
       isFocused: isFocused,
       expands: widget.expands,
+      scaleDownVerticalContentPadding: widget.scaleDownVerticalContentPadding,
     );
 
     final BoxConstraints? constraints = decoration.constraints ?? themeData.inputDecorationTheme.constraints;
