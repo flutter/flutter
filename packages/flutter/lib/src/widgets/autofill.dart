@@ -53,7 +53,7 @@ enum AutofillContextAction {
 ///
 /// {@tool dartpad}
 /// An example form with autofillable fields grouped into different
-/// `AutofillGroup`s.
+/// [AutofillGroup]s.
 ///
 /// ** See code in examples/api/lib/widgets/autofill/autofill_group.0.dart **
 /// {@end-tool}

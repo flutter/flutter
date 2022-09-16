@@ -274,8 +274,13 @@ class MagnifierController {
   /// for the animation to complete. Then, if [removeFromOverlay]
   /// is true, remove the magnifier from the overlay.
   ///
-  /// In general, [removeFromOverlay] should be true, unless
+  /// In general, `removeFromOverlay` should be true, unless
   /// the magnifier needs to preserve states between shows / hides.
+  ///
+  /// See also:
+  ///
+  ///  * [removeFromOverlay] which removes the [OverlayEntry] from the [Overlay]
+  ///    synchronously.
   Future<void> hide({bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;
@@ -297,7 +302,8 @@ class MagnifierController {
   /// of [OverlayEntry]s with animations.
   ///
   /// To allow the [OverlayEntry] to play its exit animation, consider calling
-  /// [hide] with `removeFromOverlay` true, and optionally awaiting the future
+  /// [hide] instead, with `removeFromOverlay` set to true, and optionally await
+  /// the returned Future.
   @visibleForTesting
   void removeFromOverlay() {
     _overlayEntry?.remove();

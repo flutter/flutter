@@ -669,7 +669,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
 /// {@tool dartpad}
-/// This example demonstrates how to use `showModalBottomSheet` to display a
+/// This example demonstrates how to use [showModalBottomSheet] to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
 /// It also demonstrates how to close the bottom sheet using the [Navigator]
 /// when a user taps on a button inside the bottom sheet.

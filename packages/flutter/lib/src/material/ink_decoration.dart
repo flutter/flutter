@@ -225,7 +225,7 @@ class Ink extends StatefulWidget {
   /// The decoration to paint on the nearest ancestor [Material] widget.
   ///
   /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
+  /// constructor: set the `color` argument instead of the [decoration]
   /// argument.
   ///
   /// A shorthand for specifying just an image is also available using the

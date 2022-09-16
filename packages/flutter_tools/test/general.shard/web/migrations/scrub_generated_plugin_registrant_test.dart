@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -22,13 +20,13 @@ void main() {
 
   group('ScrubGeneratedPluginRegistrant', () {
     // The files this migration deals with
-    File gitignore;
-    File registrant;
+    late File gitignore;
+    late File registrant;
 
     // Environment overrides
-    FileSystem fileSystem;
-    ProcessManager processManager;
-    BuildSystem buildSystem;
+    late FileSystem fileSystem;
+    late ProcessManager processManager;
+    late BuildSystem buildSystem;
 
     setUp(() {
       // Prepare environment overrides

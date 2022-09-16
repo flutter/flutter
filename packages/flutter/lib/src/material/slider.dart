@@ -1342,6 +1342,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     super.detach();
   }
 
+  @override
+  void dispose() {
+    _labelPainter.dispose();
+    super.dispose();
+  }
+
   double _getValueFromVisualPosition(double visualPosition) {
     switch (textDirection) {
       case TextDirection.rtl:

@@ -258,12 +258,12 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
-  /// When [ThemeData.useMaterial3] is true, and this is null, then no drop
-  /// shadow will be rendered for this material. If it is non-null, then this
-  /// color will be used to render a drop shadow below the material.
+  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
+  /// [ColorScheme.shadow] will be used. If [ThemeData.useMaterial3] is false
+  /// then [ThemeData.shadowColor] will be used.
   ///
-  /// When [ThemeData.useMaterial3] is false, and this is null, then
-  /// [ThemeData.shadowColor] is used, which defaults to fully opaque black.
+  /// To remove the drop shadow when [elevation] is greater than 0, set
+  /// [shadowColor] to [Colors.transparent].
   ///
   /// See also:
   ///  * [ThemeData.useMaterial3], which determines the default value for this
@@ -282,9 +282,9 @@ class Material extends StatefulWidget {
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is not used.
   ///
-  /// If [ThemeData.useMaterial3] is true and [surfaceTintColor] is not null,
-  /// then it will be used to overlay the base [color] with an opacity based
-  /// on the [elevation].
+  /// If [ThemeData.useMaterial3] is true and [surfaceTintColor] is not null and
+  /// not [Colors.transparent], then it will be used to overlay the base [color]
+  /// with an opacity based on the [elevation].
   ///
   /// Otherwise, no surface tint will be applied.
   ///
@@ -404,7 +404,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color? backgroundColor = _getBackgroundColor(context);
-    final Color? modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? null : theme.shadowColor);
+    final Color modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
     // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
     final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
     assert(
@@ -458,7 +458,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         clipBehavior: widget.clipBehavior,
         elevation: modelElevation,
         color: color,
-        shadowColor: modelShadowColor ?? const Color(0x00000000),
+        shadowColor: modelShadowColor,
         animateColor: false,
         child: contents,
       );

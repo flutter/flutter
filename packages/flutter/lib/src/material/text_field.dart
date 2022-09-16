@@ -65,7 +65,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
+      final TargetPlatform targetPlatform = Theme.of(_state.context).platform;
+
+      switch (targetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -84,11 +86,24 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           );
           break;
       }
+
+      switch (targetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+          editableText.showMagnifier(details.globalPosition);
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          break;
+      }
     }
   }
 
   @override
   void onSingleTapUp(TapUpDetails details) {
+    editableText.hideToolbar();
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();
@@ -97,7 +112,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
+      final TargetPlatform targetPlatform = Theme.of(_state.context).platform;
+
+      switch (targetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
@@ -111,6 +128,18 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
         case TargetPlatform.windows:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
+          break;
+      }
+
+      switch (targetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+          editableText.showMagnifier(details.globalPosition);
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
           break;
       }
     }
@@ -404,9 +433,9 @@ class TextField extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
-  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier] on
-  /// Android, and builds nothing on all other platforms. If it is desired to supress
-  /// the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
+  /// on Android, and builds nothing on all other platforms. If it is desired to
+  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// Controls the text being edited.
@@ -1449,9 +1478,9 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_127
 
-// Generated version v0_101
+// Generated version v0_127
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 

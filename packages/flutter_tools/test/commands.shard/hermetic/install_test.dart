@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -27,7 +25,7 @@ void main() {
       Cache.disableLocking();
     });
 
-    FileSystem fileSystem;
+    late FileSystem fileSystem;
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       fileSystem.file('pubspec.yaml').createSync(recursive: true);
@@ -114,7 +112,7 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   final ApplicationPackage app;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
     return app;
   }
 }
@@ -131,13 +129,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   Future<bool> isAppInstalled(
     IOSApp app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
     IOSApp app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 }
 
@@ -151,12 +149,12 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   Future<bool> isAppInstalled(
     AndroidApk app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
     AndroidApk app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 }

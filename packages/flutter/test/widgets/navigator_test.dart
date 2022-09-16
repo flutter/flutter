@@ -3775,72 +3775,71 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('Navigator does not request focus if requestFocus is false',
-          (WidgetTester tester) async {
-        final GlobalKey navigatorKey = GlobalKey();
-        final GlobalKey innerKey = GlobalKey();
-        final Map<String, Widget> routes = <String, Widget>{
-          '/': const Text('A'),
-          '/second': Text('B', key: innerKey),
-        };
-        late final NavigatorState navigator =
-        navigatorKey.currentState! as NavigatorState;
-        final FocusScopeNode focusNode = FocusScopeNode();
+  testWidgets('Navigator does not request focus if requestFocus is false', (WidgetTester tester) async {
+    final GlobalKey navigatorKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    final Map<String, Widget> routes = <String, Widget>{
+      '/': const Text('A'),
+      '/second': Text('B', key: innerKey),
+    };
+    late final NavigatorState navigator =
+    navigatorKey.currentState! as NavigatorState;
+    final FocusScopeNode focusNode = FocusScopeNode();
 
-        await tester.pumpWidget(Column(
-          children: <Widget>[
-            FocusScope(node: focusNode, child: Container()),
-            Expanded(
-              child: MaterialApp(
-                home: Navigator(
-                  key: navigatorKey,
-                  onGenerateRoute: (RouteSettings settings) {
-                    return PageRouteBuilder<void>(
-                      settings: settings,
-                      pageBuilder: (BuildContext _, Animation<double> __,
-                          Animation<double> ___) {
-                        return routes[settings.name!]!;
-                      },
-                    );
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        FocusScope(node: focusNode, child: Container()),
+        Expanded(
+          child: MaterialApp(
+            home: Navigator(
+              key: navigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext _, Animation<double> __,
+                      Animation<double> ___) {
+                    return routes[settings.name!]!;
                   },
-                  requestFocus: false,
-                ),
-              ),
+                );
+              },
+              requestFocus: false,
             ),
-          ],
-        ));
-        expect(find.text('A'), findsOneWidget);
-        expect(find.text('B', skipOffstage: false), findsNothing);
-        expect(focusNode.hasFocus, false);
+          ),
+        ),
+      ],
+    ));
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, false);
 
-        focusNode.requestFocus();
-        await tester.pumpAndSettle();
-        expect(focusNode.hasFocus, true);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
 
-        navigator.pushNamed('/second');
-        await tester.pumpAndSettle();
-        expect(find.text('A', skipOffstage: false), findsOneWidget);
-        expect(find.text('B'), findsOneWidget);
-        expect(focusNode.hasFocus, true);
+    navigator.pushNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, true);
 
-        navigator.pop();
-        await tester.pumpAndSettle();
-        expect(find.text('A'), findsOneWidget);
-        expect(find.text('B', skipOffstage: false), findsNothing);
-        expect(focusNode.hasFocus, true);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, true);
 
-        navigator.pushReplacementNamed('/second');
-        await tester.pumpAndSettle();
-        expect(find.text('A', skipOffstage: false), findsNothing);
-        expect(find.text('B'), findsOneWidget);
-        expect(focusNode.hasFocus, true);
+    navigator.pushReplacementNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, true);
 
-        ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
-          LocalHistoryEntry(),
-        );
-        await tester.pumpAndSettle();
-        expect(focusNode.hasFocus, true);
-      });
+    ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
+      LocalHistoryEntry(),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+  });
 
   testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
     final _MockNavigatorObserver observer = _MockNavigatorObserver();
@@ -3872,6 +3871,49 @@ void main() {
     observer._checkInvocations(<Symbol>[#navigator, #didPush]);
     await tester.pumpWidget(Container(child: build(key)));
     observer._checkInvocations(<Symbol>[#navigator, #navigator]);
+  });
+
+  testWidgets("Navigator doesn't override FocusTraversalPolicy of ancestors", (WidgetTester tester) async {
+    FocusTraversalPolicy? policy;
+    await tester.pumpWidget(
+      TestDependencies(
+        child: FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
+          child: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                settings: settings,
+                pageBuilder: (BuildContext context, Animation<double> __, Animation<double> ___) {
+                  policy = FocusTraversalGroup.of(context);
+                  return const SizedBox();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    expect(policy, isA<WidgetOrderTraversalPolicy>());
+  });
+
+  testWidgets('Navigator inserts ReadingOrderTraversalPolicy if no ancestor has a policy', (WidgetTester tester) async {
+    FocusTraversalPolicy? policy;
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext context, Animation<double> __, Animation<double> ___) {
+                policy = FocusTraversalGroup.of(context);
+                return const SizedBox();
+              },
+            );
+          },
+        ),
+      ),
+    );
+    expect(policy, isA<ReadingOrderTraversalPolicy>());
   });
 }
 

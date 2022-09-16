@@ -97,15 +97,27 @@ abstract class TokenTemplate {
   /// If there is a value for the given token, this will return
   /// the value prepended with [colorSchemePrefix].
   ///
-  /// Otherwise it will return 'null'.
+  /// Otherwise it will return [defaultValue].
   ///
   /// See also:
   ///   * [componentColor], that provides support for an optional opacity.
-  String color(String colorToken) {
+  String color(String colorToken, [String defaultValue = 'null']) {
     return tokens.containsKey(colorToken)
       ? '$colorSchemePrefix${tokens[colorToken]}'
-      : 'null';
+      : defaultValue;
   }
+
+  /// Generate a [ColorScheme] color name for the given token or a transparent
+  /// color if there is no value for the token.
+  ///
+  /// If there is a value for the given token, this will return
+  /// the value prepended with [colorSchemePrefix].
+  ///
+  /// Otherwise it will return 'Colors.transparent'.
+  ///
+  /// See also:
+  ///   * [componentColor], that provides support for an optional opacity.
+  String? colorOrTransparent(String token) => color(token, 'Colors.transparent');
 
   /// Generate a [ColorScheme] color name for the given component's color
   /// with opacity if available.
@@ -154,18 +166,18 @@ abstract class TokenTemplate {
   /// Currently supports family:
   ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
   ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
-  String shape(String componentToken) {
+  String shape(String componentToken, [String prefix = 'const ']) {
     final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
-        return 'const RoundedRectangleBorder(borderRadius: '
+        return '${prefix}RoundedRectangleBorder(borderRadius: '
             'BorderRadius.only('
             'topLeft: Radius.circular(${shape['topLeft']}), '
             'topRight: Radius.circular(${shape['topRight']}), '
             'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
             'bottomRight: Radius.circular(${shape['bottomRight']})))';
       case 'SHAPE_FAMILY_CIRCULAR':
-        return 'const StadiumBorder()';
+        return '${prefix}StadiumBorder()';
     }
     print('Unsupported shape family type: ${shape['family']} for $componentToken');
     return '';
