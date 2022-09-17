@@ -1160,7 +1160,7 @@ mixin TextInputClient {
   ///
   ///  * [TextInputControl.hide], a method to hide the old input control.
   ///  * [TextInputControl.show], a method to show the new input control.
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl);
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {}
 
   /// Requests that the client show the editing toolbar, for example when the
   /// platform changes the selection through a non-flutter method such as
