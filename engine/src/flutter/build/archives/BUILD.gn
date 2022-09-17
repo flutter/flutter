@@ -76,14 +76,18 @@ if (build_engine_artifacts) {
         destination = "flutter_tester$exe"
       },
       {
-        source = "$root_out_dir/impellerc$exe"
-        destination = "impellerc$exe"
-      },
-      {
         source = "$root_out_dir/libtessellator$dll"
         destination = "libtessellator$dll"
       },
     ]
+    if (flutter_runtime_mode == "debug") {
+      files += [
+        {
+          source = "$root_out_dir/impellerc$exe"
+          destination = "impellerc$exe"
+        },
+      ]
+    }
     if (host_os == "mac") {
       deps += [ ":artifacts_entitlement_config" ]
       files += [
