@@ -2133,7 +2133,7 @@ class TextInput {
 ///    platform text input control.
 ///  * [TextInput.updateEditingValue], a method to send user input to
 ///    the framework.
-abstract class TextInputControl {
+mixin TextInputControl {
   /// Requests the text input control to attach to the given input client.
   ///
   /// This method is called when a text input client is attached. The input
@@ -2218,7 +2218,7 @@ abstract class TextInputControl {
 }
 
 /// Provides access to the platform text input control.
-class _PlatformTextInputControl extends TextInputControl {
+class _PlatformTextInputControl with TextInputControl {
   _PlatformTextInputControl._();
 
   /// The shared instance of [_PlatformTextInputControl].

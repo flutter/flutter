@@ -999,7 +999,7 @@ class FakeTextInputClient with TextInputClient {
   }
 }
 
-class FakeTextInputControl extends TextInputControl {
+class FakeTextInputControl with TextInputControl {
   final List<String> methodCalls = <String>[];
   late TextInputType inputType;
 

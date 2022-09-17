@@ -118,7 +118,7 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
   }
 }
 
-class MyTextInputControl extends TextInputControl {
+class MyTextInputControl with TextInputControl {
   TextEditingValue _editingState = TextEditingValue.empty;
   final ValueNotifier<bool> _visible = ValueNotifier<bool>(false);
 
