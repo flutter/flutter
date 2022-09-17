@@ -25,12 +25,6 @@ Future<void> main() async {
         final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
         final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
 
-        // Update pod repo to get latest remote Flutter pods.
-        await exec(
-          'pod',
-          <String>['repo', 'update'],
-        );
-
         await exec(
           'pod',
           <String>[
