@@ -273,7 +273,7 @@ void main() {
 
       bool futureCallbackRan = false;
 
-      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((viewController) {
+      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((UiKitViewController viewController) {
         final RenderUiKitView renderBox = RenderUiKitView(
           viewController: viewController,
           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
