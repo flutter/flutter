@@ -222,6 +222,11 @@ class AccessibilityBridge
   std::unique_ptr<AccessibilityBridgeDelegate> delegate_;
 
   void InitAXTree(const ui::AXTreeUpdate& initial_state);
+
+  // Create an update that removes any nodes that will be reparented by
+  // pending_semantics_updates_. Returns std::nullopt if none are reparented.
+  std::optional<ui::AXTreeUpdate> CreateRemoveReparentedNodesUpdate();
+
   void GetSubTreeList(SemanticsNode target, std::vector<SemanticsNode>& result);
   void ConvertFlutterUpdate(const SemanticsNode& node,
                             ui::AXTreeUpdate& tree_update);
