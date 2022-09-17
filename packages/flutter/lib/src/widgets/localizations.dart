@@ -6,13 +6,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'container.dart';
 import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
 // class Intl { Intl._(); static String message(String s, { String? name, String? locale }) => ''; }
 // Future<void> initializeMessages(String locale) => Future<void>.value();
+// late BuildContext context;
+// class Foo { }
+// const Widget myWidget = Placeholder();
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
@@ -92,6 +94,9 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
 /// [WidgetsApp] and configured with the app's `localizationsDelegates`
 /// parameter (a list of delegates). The delegate's [type] is used to identify
 /// the object created by an individual delegate's [load] method.
+///
+/// An example of a class used as the value of `T` here would be
+/// MaterialLocalizations.
 abstract class LocalizationsDelegate<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -106,9 +111,9 @@ abstract class LocalizationsDelegate<T> {
   /// Start loading the resources for `locale`. The returned future completes
   /// when the resources have finished loading.
   ///
-  /// It's assumed that the this method will return an object that contains
-  /// a collection of related resources (typically defined with one method per
-  /// resource). The object will be retrieved with [Localizations.of].
+  /// It's assumed that this method will return an object that contains a
+  /// collection of related string resources (typically defined with one method
+  /// per resource). The object will be retrieved with [Localizations.of].
   Future<T> load(Locale locale);
 
   /// Returns true if the resources for this delegate should be loaded
@@ -125,8 +130,9 @@ abstract class LocalizationsDelegate<T> {
   /// [LocalizationsDelegate] from the [Localizations] inherited widget.
   /// For example the object loaded by `LocalizationsDelegate<Foo>` would
   /// be retrieved with:
+  ///
   /// ```dart
-  /// Foo foo = Localizations.of<Foo>(context, Foo);
+  /// Foo foo = Localizations.of<Foo>(context, Foo)!;
   /// ```
   ///
   /// It's rarely necessary to override this getter.
@@ -245,60 +251,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// Defines the [Locale] for its `child` and the localized resources that the
 /// child depends on.
 ///
-/// Localized resources are loaded by the list of [LocalizationsDelegate]
-/// `delegates`. Each delegate is essentially a factory for a collection
-/// of localized resources. There are multiple delegates because there are
-/// multiple sources for localizations within an app.
-///
-/// Delegates are typically simple subclasses of [LocalizationsDelegate] that
-/// override [LocalizationsDelegate.load]. For example a delegate for the
-/// `MyLocalizations` class defined below would be:
-///
-/// ```dart
-/// class _MyDelegate extends LocalizationsDelegate<MyLocalizations> {
-///   @override
-///   Future<MyLocalizations> load(Locale locale) => MyLocalizations.load(locale);
-///
-///   @override
-///   bool shouldReload(MyLocalizationsDelegate old) => false;
-/// }
-/// ```
-///
-/// Each delegate can be viewed as a factory for objects that encapsulate a
-/// a set of localized resources. These objects are retrieved with
-/// by runtime type with [Localizations.of].
-///
-/// The [WidgetsApp] class creates a `Localizations` widget so most apps
-/// will not need to create one. The widget app's `Localizations` delegates can
-/// be initialized with [WidgetsApp.localizationsDelegates]. The [MaterialApp]
-/// class also provides a `localizationsDelegates` parameter that's just
-/// passed along to the [WidgetsApp].
-///
-/// Apps should retrieve collections of localized resources with
-/// `Localizations.of<MyLocalizations>(context, MyLocalizations)`,
-/// where MyLocalizations is an app specific class defines one function per
-/// resource. This is conventionally done by a static `.of` method on the
-/// MyLocalizations class.
-///
-/// For example, using the `MyLocalizations` class defined below, one would
-/// lookup a localized title string like this:
-/// ```dart
-/// MyLocalizations.of(context).title()
-/// ```
-/// If `Localizations` were to be rebuilt with a new `locale` then
-/// the widget subtree that corresponds to [BuildContext] `context` would
-/// be rebuilt after the corresponding resources had been loaded.
-///
-/// This class is effectively an [InheritedWidget]. If it's rebuilt with
-/// a new `locale` or a different list of delegates or any of its
-/// delegates' [LocalizationsDelegate.shouldReload()] methods returns true,
-/// then widgets that have created a dependency by calling
-/// `Localizations.of(context)` will be rebuilt after the resources
-/// for the new locale have been loaded.
-///
-/// The `Localizations` widget also instantiates [Directionality] in order to
-/// support the appropriate [Directionality.textDirection] of the localized
-/// resources.
+/// ## Defining localized resources
 ///
 /// {@tool snippet}
 ///
@@ -336,6 +289,76 @@ class _LocalizationsScope extends InheritedWidget {
 ///
 /// One could choose another approach for loading localized resources and looking them up while
 /// still conforming to the structure of this example.
+///
+/// ## Loading localized resources
+///
+/// Localized resources are loaded by the list of [LocalizationsDelegate]
+/// `delegates`. Each delegate is essentially a factory for a collection
+/// of localized resources. There are multiple delegates because there are
+/// multiple sources for localizations within an app.
+///
+/// Delegates are typically simple subclasses of [LocalizationsDelegate] that
+/// override [LocalizationsDelegate.load]. For example a delegate for the
+/// `MyLocalizations` class defined above would be:
+///
+/// ```dart
+/// // continuing from previous example...
+/// class _MyDelegate extends LocalizationsDelegate<MyLocalizations> {
+///   @override
+///   Future<MyLocalizations> load(Locale locale) => MyLocalizations.load(locale);
+///
+///   @override
+///   bool isSupported(Locale locale) {
+///     // in a real implementation this would only return true for
+///     // locales that are definitely supported.
+///     return true;
+///   }
+///
+///   @override
+///   bool shouldReload(_MyDelegate old) => false;
+/// }
+/// ```
+///
+/// Each delegate can be viewed as a factory for objects that encapsulate a
+/// a set of localized resources. These objects are retrieved with
+/// by runtime type with [Localizations.of].
+///
+/// The [WidgetsApp] class creates a [Localizations] widget so most apps
+/// will not need to create one. The widget app's [Localizations] delegates can
+/// be initialized with [WidgetsApp.localizationsDelegates]. The [MaterialApp]
+/// class also provides a `localizationsDelegates` parameter that's just
+/// passed along to the [WidgetsApp].
+///
+/// ## Obtaining localized resources for use in user interfaces
+///
+/// Apps should retrieve collections of localized resources with
+/// `Localizations.of<MyLocalizations>(context, MyLocalizations)`,
+/// where MyLocalizations is an app specific class defines one function per
+/// resource. This is conventionally done by a static `.of` method on the
+/// custom localized resource class (`MyLocalizations` in the example above).
+///
+/// For example, using the `MyLocalizations` class defined above, one would
+/// lookup a localized title string like this:
+///
+/// ```dart
+/// // continuing from previous example...
+/// MyLocalizations.of(context).title()
+/// ```
+///
+/// If [Localizations] were to be rebuilt with a new `locale` then
+/// the widget subtree that corresponds to [BuildContext] `context` would
+/// be rebuilt after the corresponding resources had been loaded.
+///
+/// This class is effectively an [InheritedWidget]. If it's rebuilt with
+/// a new `locale` or a different list of delegates or any of its
+/// delegates' [LocalizationsDelegate.shouldReload()] methods returns true,
+/// then widgets that have created a dependency by calling
+/// `Localizations.of(context)` will be rebuilt after the resources
+/// for the new locale have been loaded.
+///
+/// The [Localizations] widget also instantiates [Directionality] in order to
+/// support the appropriate [Directionality.textDirection] of the localized
+/// resources.
 class Localizations extends StatefulWidget {
   /// Create a widget from which localizations (like translated strings) can be obtained.
   Localizations({
@@ -463,7 +486,7 @@ class Localizations extends StatefulWidget {
   ///
   /// ```dart
   /// static MaterialLocalizations of(BuildContext context) {
-  ///    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+  ///   return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!;
   /// }
   /// ```
   static T? of<T>(BuildContext context, Type type) {
@@ -574,7 +597,7 @@ class _LocalizationsState extends State<Localizations> {
   @override
   Widget build(BuildContext context) {
     if (_locale == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     return Semantics(
       textDirection: _textDirection,

@@ -184,9 +184,10 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 /// Example:
 ///
 /// ```dart
-///   assert(rightmostButton(0x1) == 0x1);
-///   assert(rightmostButton(0x11) == 0x1);
-///   assert(rightmostButton(0) == 0);
+/// assert(smallestButton(0x01) == 0x01);
+/// assert(smallestButton(0x11) == 0x01);
+/// assert(smallestButton(0x10) == 0x10);
+/// assert(smallestButton(0) == 0);
 /// ```
 ///
 /// See also:

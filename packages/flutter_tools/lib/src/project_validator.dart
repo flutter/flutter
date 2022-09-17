@@ -153,24 +153,21 @@ class PubDependenciesProjectValidator extends ProjectValidator {
       }
     }
 
+    final String value;
     if (dependencies.isNotEmpty) {
       final String verb = dependencies.length == 1 ? 'is' : 'are';
-      result.add(
-        ProjectValidatorResult(
-          name: name,
-          value: '${dependencies.join(', ')} $verb not hosted',
-          status: StatusProjectValidator.warning,
-        )
-      );
+      value = '${dependencies.join(', ')} $verb not hosted';
     } else {
-      result.add(
-        const ProjectValidatorResult(
-          name: name,
-          value: 'All pub dependencies are hosted on https://pub.dartlang.org',
-          status: StatusProjectValidator.success,
-        )
-      );
+      value = 'All pub dependencies are hosted on https://pub.dartlang.org';
     }
+
+    result.add(
+       ProjectValidatorResult(
+        name: name,
+        value: value,
+        status: StatusProjectValidator.info,
+      )
+    );
 
     return result;
   }

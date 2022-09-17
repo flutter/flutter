@@ -11,7 +11,6 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'basic_types.dart';
 import 'borders.dart';
 import 'circle_border.dart';
-import 'edge_insets.dart';
 import 'rounded_rectangle_border.dart';
 import 'stadium_border.dart';
 
@@ -123,7 +122,7 @@ class StarBorder extends OutlinedBorder {
   /// and a value of one means that the entire point or corner is a portion of a
   /// circle.
   ///
-  /// Defaults to zero. The sum of `pointRounding` and [valleyRounding] must be
+  /// Defaults to zero. The sum of [pointRounding] and [valleyRounding] must be
   /// less than or equal to one.
   final double pointRounding;
 
@@ -134,7 +133,7 @@ class StarBorder extends OutlinedBorder {
   /// means no rounding (sharp corners), and a value of one means that the
   /// entire corner is a portion of a circle.
   ///
-  /// Defaults to zero. The sum of [pointRounding] and `valleyRounding` must be
+  /// Defaults to zero. The sum of [pointRounding] and [valleyRounding] must be
   /// less than or equal to one. For polygons created with [StarBorder.polygon],
   /// this will always be zero.
   final double valleyRounding;
@@ -150,33 +149,21 @@ class StarBorder extends OutlinedBorder {
 
   /// How much of the aspect ratio of the attached widget to take on.
   ///
-  /// If `squash` is non-zero, the border will match the aspect ratio of the
+  /// If [squash] is non-zero, the border will match the aspect ratio of the
   /// bounding box of the widget that it is attached to, which can give a
   /// squashed appearance.
   ///
-  /// The `squash` parameter lets you control how much of that aspect ratio this
+  /// The [squash] parameter lets you control how much of that aspect ratio this
   /// border takes on.
   ///
   /// A value of zero means that the border will be drawn with a square aspect
   /// ratio at the size of the shortest side of the bounding rectangle, ignoring
   /// the aspect ratio of the widget, and a value of one means it will be drawn
-  /// with the aspect ratio of the widget. The value of `squash` has no effect
+  /// with the aspect ratio of the widget. The value of [squash] has no effect
   /// if the widget is square to begin with.
   ///
   /// Defaults to zero, and must be between zero and one, inclusive.
   final double squash;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        return EdgeInsets.all(side.width);
-      case StrokeAlign.center:
-        return EdgeInsets.all(side.width / 2);
-      case StrokeAlign.outside:
-        return EdgeInsets.zero;
-    }
-  }
 
   @override
   ShapeBorder scale(double t) {
@@ -388,18 +375,7 @@ class StarBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    final Rect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = rect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = rect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = rect;
-        break;
-    }
+    final Rect adjustedRect = rect.deflate(side.strokeInset);
     return _StarGenerator(
       points: points,
       rotation: _rotationRadians,
@@ -428,18 +404,7 @@ class StarBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Rect adjustedRect;
-        switch (side.strokeAlign) {
-          case StrokeAlign.inside:
-            adjustedRect = rect.deflate(side.width / 2);
-            break;
-          case StrokeAlign.center:
-            adjustedRect = rect;
-            break;
-          case StrokeAlign.outside:
-            adjustedRect = rect.inflate(side.width / 2);
-            break;
-        }
+        final Rect adjustedRect = rect.inflate(side.strokeOffset / 2);
         final Path path = _StarGenerator(
           points: points,
           rotation: _rotationRadians,
@@ -549,7 +514,6 @@ class _StarGenerator {
     } else {
       scale = Offset(squash * scale.dx + (1 - squash) * scale.dy, scale.dy);
     }
-
     // Scale the border so that it matches the size of the widget rectangle, so
     // that "rotation" of the shape doesn't affect how much of the rectangle it
     // covers.
@@ -645,10 +609,12 @@ class _StarGenerator {
     }
 
     // The rounding added to the valley radius can sometimes push it outside of
-    // the rounding of the point, since the rounding amount can be different, so
-    // we have to evaluate both the valley and the point radii, and pick the
-    // largest.
-    return math.max(valleyRadius, pointRadius);
+    // the rounding of the point, since the rounding amount can be different
+    // between the points and the valleys, so we have to evaluate both the
+    // valley and the point radii, and pick the largest. Also, since this value
+    // is used later to determine the scale, we need to keep it finite and
+    // non-zero.
+    return clampDouble(math.max(valleyRadius, pointRadius), double.minPositive, double.maxFinite);
   }
 
   void _drawPoints(Path path, List<_PointInfo> points) {

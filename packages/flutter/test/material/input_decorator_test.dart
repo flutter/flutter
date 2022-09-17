@@ -1657,6 +1657,30 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
 
+  testWidgets('InputDecorator iconColor/prefixIconColor/suffixIconColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            decoration: InputDecoration(
+              icon: Icon(Icons.cabin),
+              prefixIcon: Icon(Icons.sailing),
+              suffixIcon: Icon(Icons.close),
+              iconColor: Colors.amber,
+              prefixIconColor: Colors.green,
+              suffixIconColor: Colors.red,
+              filled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, Colors.amber);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.sailing).first).data.color, Colors.green);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.close).first).data.color, Colors.red);
+  });
+
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
     const Key pKey = Key('p');
     const Key sKey = Key('s');
@@ -2111,7 +2135,7 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 100dps because the prefix icon's  size
+    // Overall height for this InputDecorator is 100dps because the prefix icon's size
     // is 100x100 and the rest of the elements only require 40dps:
      //   12 - top padding
      //   16 - input text (ahem font size 16dps)
@@ -4597,7 +4621,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(getBorderColor(tester), theme.errorColor);
+    expect(getBorderColor(tester), theme.colorScheme.error);
 
     // Disabled
     await tester.pumpWidget(
@@ -4968,6 +4992,70 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
+ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/78855
+    const String labelText = 'Flutter';
+
+    // Overall height for this InputDecorator is 56dps:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    const double inputDecoratorHeight = 56.0;
+    const double inputDecoratorWidth = 800.0;
+    const double borderWidth = 4.0;
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: true,
+        decoration: const InputDecoration(
+          filled: false,
+          labelText: labelText,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.zero,
+            borderSide: BorderSide(width: borderWidth, color: Colors.red),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(labelText), findsOneWidget);
+    expect(findBorderPainter(), paints
+      ..save()
+      ..path(
+        includes: const <Offset>[
+          // Corner points in the middle of the border line should be in the path.
+          // The path is not filled and borderWidth is 4.0 so Offset(2.0, 2.0) is in the path and Offset(1.0, 1.0) is not.
+          // See Skia SkPath::contains method.
+
+          // Top-left
+          Offset(borderWidth / 2, borderWidth / 2),
+          // Top-right
+          Offset(inputDecoratorWidth - 1 - borderWidth / 2, borderWidth / 2),
+          // Bottom-left
+          Offset(borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
+          // Bottom-right
+          Offset(inputDecoratorWidth - 1 - borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
+        ],
+        excludes: const <Offset>[
+          // The path is not filled and borderWidth is 4.0 so the path should not contains the corner points.
+          // See Skia SkPath::contains method.
+
+          // Top-left
+          Offset.zero,
+          // // Top-right
+          Offset(inputDecoratorWidth - 1, 0),
+          // // Bottom-left
+          Offset(0, inputDecoratorHeight - 1),
+          // // Bottom-right
+          Offset(inputDecoratorWidth - 1, inputDecoratorHeight - 1),
+        ],
+      )
+      ..restore(),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+
   testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/23982
     const Key key = Key('textField');
@@ -5060,7 +5148,6 @@ void main() {
     expect(underlineInputBorder, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)));
     expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
   });
-
 
   test('InputBorder hashCodes', () {
     // OutlineInputBorder's hashCode is defined by the borderRadius, borderSide, & gapPadding

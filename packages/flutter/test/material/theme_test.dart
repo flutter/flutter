@@ -387,12 +387,12 @@ void main() {
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
-        bodyText2: fallback.primaryTextTheme.bodyText2!.copyWith(
+        bodyMedium: fallback.primaryTextTheme.bodyMedium!.copyWith(
           fontSize: kMagicFontSize,
         ),
       ),
     );
-    expect(customTheme.primaryTextTheme.bodyText2!.fontSize, kMagicFontSize);
+    expect(customTheme.primaryTextTheme.bodyMedium!.fontSize, kMagicFontSize);
 
     late double actualFontSize;
     await tester.pumpWidget(Directionality(
@@ -401,10 +401,10 @@ void main() {
         data: customTheme,
         child: Builder(builder: (BuildContext context) {
           final ThemeData theme = Theme.of(context);
-          actualFontSize = theme.primaryTextTheme.bodyText2!.fontSize!;
+          actualFontSize = theme.primaryTextTheme.bodyMedium!.fontSize!;
           return Text(
             'A',
-            style: theme.primaryTextTheme.bodyText2,
+            style: theme.primaryTextTheme.bodyMedium,
           );
         }),
       ),

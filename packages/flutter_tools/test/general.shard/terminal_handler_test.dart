@@ -177,6 +177,12 @@ void main() {
       await terminalHandler.processTerminalInput('a');
     });
 
+    testWithoutContext('j unsupported jank metrics for web', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], web: true);
+      await terminalHandler.processTerminalInput('j');
+      expect(terminalHandler.logger.warningText.contains('Unable to get jank metrics for web'), true);
+    });
+
     testWithoutContext('a - debugToggleProfileWidgetBuilds without service protocol is skipped', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
 

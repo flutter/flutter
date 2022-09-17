@@ -96,15 +96,15 @@ class WebDriverService extends DriverService {
     );
 
     bool isAppStarted = false;
-    await Future.any<Object>(<Future<Object>>[
+    await Future.any(<Future<Object?>>[
       runFuture.then((int? result) {
         _runResult = result;
         return null;
-      } as FutureOr<Object> Function(int?)),
+      }),
       appStartedCompleter.future.then((_) {
         isAppStarted = true;
         return null;
-      } as FutureOr<Object> Function(void)),
+      }),
     ]);
 
     if (_runResult != null) {
