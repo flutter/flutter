@@ -1048,7 +1048,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       boxConstraints.maxHeight - topHeight - bottomHeight
         - (scaleDownContentPadding ? math.min(contentPadding.vertical, 0) : contentPadding.vertical),
     );
-    final BoxConstraints inputConstraints = boxConstraints.copyWith(
+    final BoxConstraints inputConstraints = BoxConstraints(
       minWidth: inputWidth,
       maxWidth: inputWidth,
       maxHeight: maxInputHeightConstraint,
@@ -1058,9 +1058,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     assert(maxInputHeightConstraint >= inputDirectHeight);
     final double maxVerticalInputPadding = maxInputHeightConstraint - inputDirectHeight;
 
-    final double verticalPaddingScale = maxVerticalInputPadding >= contentPadding.vertical
-      ? 1 // This also accounts for the case where contentPadding.vertical == 0.
-      : maxVerticalInputPadding / contentPadding.vertical;
+    final double verticalPaddingScale = scaleDownContentPadding && maxVerticalInputPadding < contentPadding.vertical
+      ? maxVerticalInputPadding / contentPadding.vertical
+      : 1; // This also accounts for the case where contentPadding.vertical == 0.
     final EdgeInsets verticalContentPadding = contentPadding.copyWith(left: 0, right: 0) * verticalPaddingScale;
 
     // The field can be occupied by a hint or by the input itself

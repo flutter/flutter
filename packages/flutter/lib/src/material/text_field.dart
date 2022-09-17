@@ -1409,6 +1409,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
             expands: widget.expands,
+            scaleDownVerticalContentPadding: widget.maxLines == 1,
             child: child,
           );
         },
