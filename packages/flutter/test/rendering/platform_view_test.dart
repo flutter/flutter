@@ -260,7 +260,7 @@ void main() {
       expect(renderBox.debugLayer, isNull);
     });
   });
-  
+
   test('markNeedsPaint does not get called when setting the same viewController', () {
     FakeAsync().run((FakeAsync async) {
       final Completer<void> viewCreation = Completer<void>();
