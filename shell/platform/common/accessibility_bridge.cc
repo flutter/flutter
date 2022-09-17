@@ -43,7 +43,30 @@ void AccessibilityBridge::AddFlutterSemanticsCustomActionUpdate(
 }
 
 void AccessibilityBridge::CommitUpdates() {
+  // AXTree cannot move a node in a single update.
+  // This must be split across two updates:
+  //
+  // * Update 1: remove nodes from their old parents.
+  // * Update 2: re-add nodes (including their children) to their new parents.
+  //
+  // First, start by removing nodes if necessary.
+  std::optional<ui::AXTreeUpdate> remove_reparented =
+      CreateRemoveReparentedNodesUpdate();
+  if (remove_reparented.has_value()) {
+    tree_.Unserialize(remove_reparented.value());
+
+    std::string error = tree_.error();
+    if (!error.empty()) {
+      FML_LOG(ERROR) << "Failed to update ui::AXTree, error: " << error;
+      assert(false);
+      return;
+    }
+  }
+
+  // Second, apply the pending node updates. This also moves reparented nodes to
+  // their new parents if needed.
   ui::AXTreeUpdate update{.tree_data = tree_.data()};
+
   // Figure out update order, ui::AXTree only accepts update in tree order,
   // where parent node must come before the child node in
   // ui::AXTreeUpdate.nodes. We start with picking a random node and turn the
@@ -73,7 +96,7 @@ void AccessibilityBridge::CommitUpdates() {
 
   std::string error = tree_.error();
   if (!error.empty()) {
-    BASE_LOG() << "Failed to update ui::AXTree, error: " << error;
+    FML_LOG(ERROR) << "Failed to update ui::AXTree, error: " << error;
     return;
   }
   // Handles accessibility events as the result of the semantics update.
@@ -175,6 +198,62 @@ void AccessibilityBridge::OnAtomicUpdateFinished(
     node->SetLocation(offset_container_id, data.relative_bounds.bounds,
                       data.relative_bounds.transform.get());
   }
+}
+
+std::optional<ui::AXTreeUpdate>
+AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
+  std::unordered_map<int32_t, ui::AXNodeData> updates;
+
+  for (auto node_update : pending_semantics_node_updates_) {
+    for (int32_t child_id : node_update.second.children_in_traversal_order) {
+      // Skip nodes that don't exist or have a parent in the current tree.
+      ui::AXNode* child = tree_.GetFromId(child_id);
+      if (!child) {
+        continue;
+      }
+
+      // Flutter's root node should never be reparented.
+      assert(child->parent());
+
+      // Skip nodes whose parents are unchanged.
+      if (child->parent()->id() == node_update.second.id) {
+        continue;
+      }
+
+      // This pending update moves the current child node.
+      // That new child must have a corresponding pending update.
+      assert(pending_semantics_node_updates_.find(child_id) !=
+             pending_semantics_node_updates_.end());
+
+      // Create an update to remove the child from its previous parent.
+      int32_t parent_id = child->parent()->id();
+      if (updates.find(parent_id) == updates.end()) {
+        updates[parent_id] = tree_.GetFromId(parent_id)->data();
+      }
+
+      ui::AXNodeData* parent = &updates[parent_id];
+      auto iter = std::find(parent->child_ids.begin(), parent->child_ids.end(),
+                            child_id);
+
+      assert(iter != parent->child_ids.end());
+      parent->child_ids.erase(iter);
+    }
+  }
+
+  if (updates.empty()) {
+    return std::nullopt;
+  }
+
+  ui::AXTreeUpdate update{
+      .tree_data = tree_.data(),
+      .nodes = std::vector<ui::AXNodeData>(),
+  };
+
+  for (std::pair<int32_t, ui::AXNodeData> data : updates) {
+    update.nodes.push_back(std::move(data.second));
+  }
+
+  return update;
 }
 
 // Private method.
