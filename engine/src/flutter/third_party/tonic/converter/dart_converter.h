@@ -582,7 +582,7 @@ struct DartConverter<Dart_Handle> {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Convience wrappers using type inference
+// Convenience wrappers using type inference
 
 template <typename T>
 Dart_Handle ToDart(const T& object) {
