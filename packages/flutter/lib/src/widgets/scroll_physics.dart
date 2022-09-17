@@ -18,9 +18,12 @@ export 'package:flutter/physics.dart' show ScrollSpringSimulation, Simulation, T
 
 /// The rate at which scroll momentum will be decelerated.
 enum ScrollDecelerationRate {
-  /// The standard deceleration expected on touchscreen apps.
+  /// Standard deceleration, aligned with mobile software expectations.
   normal,
-  /// Faster deceleration aligned with desktop software conventions.
+  /// Increased deceleration, aligned with desktop software expectations.
+  ///
+  /// Appropriate for use with input devices more precise than touch screens,
+  /// such as trackpads or mouse wheels.
   fast
 }
 
