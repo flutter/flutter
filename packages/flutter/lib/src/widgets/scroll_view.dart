@@ -1117,9 +1117,9 @@ class ListView extends BoxScrollView {
   /// {@template flutter.widgets.ListView.builder.itemBuilder}
   /// It is legal for `itemBuilder` to return `null`. If it does, the scroll view
   /// will stop calling `itemBuilder`, even if it has yet to reach `itemCount`.
-  /// By returning `null`, the max scroll extent will not be accurate
-  /// unless the user reaches the end of the scroll view. This can cause the
-  /// scrollbar to grow as the user scrolls.
+  /// By returning `null`, the [ScrollPosition.maxScrollExtent]
+  /// will not be accurate unless the user reaches the end of the [ScrollView].
+  /// This can cause the [Scrollbar] to grow as the user scrolls.
   /// For more accurate [ScrollMetrics], consider specifying `itemCount`.
   /// {@endtemplate}
   ///
@@ -1752,7 +1752,7 @@ class GridView extends BoxScrollView {
   /// `itemBuilder` will be called only with indices greater than or equal to
   /// zero and less than `itemCount`.
   ///
-  /// {@template flutter.widgets.ListView.builder.itemBuilder}
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///

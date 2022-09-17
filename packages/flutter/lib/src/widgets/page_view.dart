@@ -675,7 +675,7 @@ class PageView extends StatefulWidget {
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
   ///
-  /// {@template flutter.widgets.ListView.builder.itemBuilder}
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
   ///
   /// {@template flutter.widgets.PageView.findChildIndexCallback}
   /// The [findChildIndexCallback] corresponds to the
