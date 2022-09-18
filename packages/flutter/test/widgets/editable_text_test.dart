@@ -262,6 +262,30 @@ void main() {
     expect(editableText.textHeightBehavior, isNull);
   });
 
+  testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (WidgetTester tester) async {
+    Widget buildWidget(Color backgroundCursorColor) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: backgroundCursorColor,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(Colors.red));
+    await tester.pumpWidget(buildWidget(Colors.green));
+
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+    expect(render.backgroundCursorColor, Colors.green);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
