@@ -1634,9 +1634,10 @@ void main() {
   });
 
   testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110671.
     // Construct a widget tree that will end up with a fitted box that applies
     // a zero transform because it does not actually draw its children.
-    // Assert that this subtree gets dropped from the
+    // Assert that this subtree gets dropped (the root node has no children).
     await tester.pumpWidget(Column(
       children: <Widget>[
         SizedBox(
