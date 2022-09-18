@@ -4051,6 +4051,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..cursorColor = cursorColor
       ..startHandleLayerLink = startHandleLayerLink
       ..endHandleLayerLink = endHandleLayerLink
+      ..backgroundCursorColor = backgroundCursorColor
       ..showCursor = showCursor
       ..forceLine = forceLine
       ..readOnly = readOnly
