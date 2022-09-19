@@ -4284,13 +4284,13 @@ class _WhitespaceBoundary extends TextBoundary {
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    // Position outside of the right bound.
+    // Handle position outside of the right bound.
     int length = _textEditingValue.text.length;
     if (position.offset > length
         || (position.offset == length && position.affinity == TextAffinity.downstream)) {
       position = TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
     }
-    // Position outside of the left bound.
+    // Handle position outside of the left bound.
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
@@ -4310,12 +4310,12 @@ class _WhitespaceBoundary extends TextBoundary {
 
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    // Position outside of the right bound.
+    // Handle position outside of the right bound.
     int length = _textEditingValue.text.length;
     if (position.offset >= length) {
       return TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
-    // Position outside of the left bound.
+    // Handle position outside of the left bound.
     if (position.offset < 0 || (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
       position = const TextPosition(offset: 0);
     }
