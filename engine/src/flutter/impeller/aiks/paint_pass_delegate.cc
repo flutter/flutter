@@ -23,7 +23,7 @@ std::optional<Rect> PaintPassDelegate::GetCoverageRect() {
 
 // |EntityPassDelgate|
 bool PaintPassDelegate::CanElide() {
-  return paint_.blend_mode == Entity::BlendMode::kDestination;
+  return paint_.blend_mode == BlendMode::kDestination;
 }
 
 // |EntityPassDelgate|

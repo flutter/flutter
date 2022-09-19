@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "impeller/entity/entity.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
@@ -16,10 +17,10 @@ namespace impeller {
 void ContentContextOptions::ApplyToPipelineDescriptor(
     PipelineDescriptor& desc) const {
   auto pipeline_blend = blend_mode;
-  if (blend_mode > Entity::BlendMode::kLastPipelineBlendMode) {
+  if (blend_mode > Entity::kLastPipelineBlendMode) {
     VALIDATION_LOG << "Cannot use blend mode " << static_cast<int>(blend_mode)
                    << " as a pipeline blend.";
-    pipeline_blend = Entity::BlendMode::kSourceOver;
+    pipeline_blend = BlendMode::kSourceOver;
   }
 
   desc.SetSampleCount(sample_count);
@@ -28,89 +29,86 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   color0.alpha_blend_op = BlendOperation::kAdd;
   color0.color_blend_op = BlendOperation::kAdd;
 
-  static_assert(Entity::BlendMode::kLastPipelineBlendMode ==
-                Entity::BlendMode::kModulate);
-
   switch (pipeline_blend) {
-    case Entity::BlendMode::kClear:
+    case BlendMode::kClear:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case Entity::BlendMode::kSource:
+    case BlendMode::kSource:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
-    case Entity::BlendMode::kDestination:
+    case BlendMode::kDestination:
       color0.dst_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOne;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case Entity::BlendMode::kSourceOver:
+    case BlendMode::kSourceOver:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
-    case Entity::BlendMode::kDestinationOver:
+    case BlendMode::kDestinationOver:
       color0.dst_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOne;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case Entity::BlendMode::kSourceIn:
+    case BlendMode::kSourceIn:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
       break;
-    case Entity::BlendMode::kDestinationIn:
+    case BlendMode::kDestinationIn:
       color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case Entity::BlendMode::kSourceOut:
+    case BlendMode::kSourceOut:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case Entity::BlendMode::kDestinationOut:
+    case BlendMode::kDestinationOut:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case Entity::BlendMode::kSourceATop:
+    case BlendMode::kSourceATop:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
       break;
-    case Entity::BlendMode::kDestinationATop:
+    case BlendMode::kDestinationATop:
       color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case Entity::BlendMode::kXor:
+    case BlendMode::kXor:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case Entity::BlendMode::kPlus:
+    case BlendMode::kPlus:
       color0.dst_alpha_blend_factor = BlendFactor::kOne;
       color0.dst_color_blend_factor = BlendFactor::kOne;
       color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
-    case Entity::BlendMode::kModulate:
+    case BlendMode::kModulate:
       // kSourceColor and kDestinationColor override the alpha blend factor.
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kSourceColor;

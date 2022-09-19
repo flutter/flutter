@@ -53,7 +53,7 @@ struct Paint {
   SolidStrokeContents::Join stroke_join = SolidStrokeContents::Join::kMiter;
   Scalar stroke_miter = 4.0;
   Style style = Style::kFill;
-  Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
+  BlendMode blend_mode = BlendMode::kSourceOver;
 
   std::optional<ImageFilterProc> image_filter;
   std::optional<ColorFilterProc> color_filter;

@@ -96,7 +96,7 @@ std::optional<Snapshot> BorderMaskBlurFilterContents::RenderFilter(
     Command cmd;
     cmd.label = "Border Mask Blur Filter";
     auto options = OptionsFromPass(pass);
-    options.blend_mode = Entity::BlendMode::kSource;
+    options.blend_mode = BlendMode::kSource;
     cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);
     cmd.BindVertices(vtx_buffer);
 

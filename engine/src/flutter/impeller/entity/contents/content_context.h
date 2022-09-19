@@ -155,7 +155,7 @@ using ClipPipeline =
 
 struct ContentContextOptions {
   SampleCount sample_count = SampleCount::kCount1;
-  Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
+  BlendMode blend_mode = BlendMode::kSourceOver;
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;
 

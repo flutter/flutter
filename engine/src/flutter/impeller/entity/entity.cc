@@ -4,14 +4,20 @@
 
 #include "impeller/entity/entity.h"
 
+#include <algorithm>
 #include <optional>
 
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/entity_pass.h"
+#include "impeller/geometry/vector.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {
+
+const BlendMode Entity::kLastPipelineBlendMode = BlendMode::kModulate;
+const BlendMode Entity::kLastAdvancedBlendMode = BlendMode::kLuminosity;
 
 Entity::Entity() = default;
 
@@ -69,7 +75,7 @@ void Entity::SetBlendMode(BlendMode blend_mode) {
   blend_mode_ = blend_mode;
 }
 
-Entity::BlendMode Entity::GetBlendMode() const {
+BlendMode Entity::GetBlendMode() const {
   return blend_mode_;
 }
 

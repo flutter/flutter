@@ -207,7 +207,7 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     cmd.label = SPrintF("Gaussian Blur Filter (Radius=%.2f)",
                         transformed_blur_radius_length);
     auto options = OptionsFromPass(pass);
-    options.blend_mode = Entity::BlendMode::kSource;
+    options.blend_mode = BlendMode::kSource;
     cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
     cmd.BindVertices(vtx_buffer);
 
