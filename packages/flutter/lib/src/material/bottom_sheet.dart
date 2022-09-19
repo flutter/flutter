@@ -564,7 +564,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// Defines the bottom sheet's [Material.shape].
   ///
-  /// Defaults to null and falls back to [Material]'s default.
+  /// If this property is not provided, it falls back to [Material]'s default.
   final ShapeBorder? shape;
 
   /// {@macro flutter.material.Material.clipBehavior}
