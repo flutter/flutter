@@ -40,6 +40,7 @@ void main() {
   });
 
   testWidgets('should match golden', (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(300, 300));
     await tester.pumpWidget(const example.MyApp());
 
     final Offset centerOfFlutterLogo = tester.getCenter(find.byType(Positioned));

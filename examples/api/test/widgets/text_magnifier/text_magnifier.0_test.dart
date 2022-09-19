@@ -18,24 +18,16 @@ List<TextSelectionPoint> _globalize(
   }).toList();
 }
 
-RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(
-    GlobalKey<T> key) {
-  final T state = key.currentState!;
-  assert(state is TextSelectionGestureDetectorBuilderDelegate,
-      'State of textFieldKey must conform to TextSelectionGestureDetectorBuilderDelegate');
-  final EditableTextState editableTextState =
-      (state as TextSelectionGestureDetectorBuilderDelegate)
-          .editableTextKey
-          .currentState!;
-  return editableTextState.renderEditable;
+RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester tester) {
+  return (tester.state(find.byType(TextField))
+          as TextSelectionGestureDetectorBuilderDelegate)
+      .editableTextKey
+      .currentState!
+      .renderEditable;
 }
 
-Offset _textOffsetToPosition<T extends State<StatefulWidget>>(
-  // The global key's state must refer to a TextSelectionGestureDetectorBuilderDelegate.
-  GlobalKey<T> textFieldKey,
-  int offset,
-) {
-  final RenderEditable renderEditable = _findRenderEditable(textFieldKey);
+Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester tester, int offset) {
+  final RenderEditable renderEditable = _findRenderEditable(tester);
 
   final List<TextSelectionPoint> endpoints = renderEditable
       .getEndpointsForSelection(
@@ -57,14 +49,7 @@ void main() {
 
     await tester.pumpWidget(const example.MyApp());
 
-    final TextField textField = tester.firstWidget(find.byType(TextField));
-    final GlobalKey<State<StatefulWidget>> textFieldKey =
-        textField.key! as GlobalKey<State<StatefulWidget>>;
-
-    final Offset tapOffset = _textOffsetToPosition(
-      textFieldKey,
-      example.MyApp.textFieldText.indexOf('e'),
-    );
+    final Offset tapOffset = _textOffsetToPosition(tester, example.MyApp.textFieldText.indexOf('e'));
 
     // Double tap 'Magnifier' word to show the selection handles.
     final TestGesture testGesture = await tester.startGesture(tapOffset);
@@ -76,9 +61,9 @@ void main() {
     await testGesture.up();
     await tester.pumpAndSettle();
 
-    final TextSelection selection = textField.controller!.selection;
+    final TextSelection selection = tester.firstWidget<TextField>(find.byType(TextField)).controller!.selection;
 
-    final RenderEditable renderEditable = _findRenderEditable(textFieldKey);
+    final RenderEditable renderEditable = _findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = _globalize(
       renderEditable.getEndpointsForSelection(selection),
       renderEditable,
@@ -89,7 +74,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(handlePos);
 
     await gesture.moveTo(_textOffsetToPosition(
-      textFieldKey,
+      tester,
       example.MyApp.textFieldText.length - 2,
     ));
     await tester.pump();

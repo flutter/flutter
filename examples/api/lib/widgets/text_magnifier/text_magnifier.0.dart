@@ -21,16 +21,11 @@ class MyApp extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 48.0),
           child: Center(
             child: TextField(
-              // Don't worry about the key. Just for testing!
-              key: GlobalKey(),
               // Create a custom magnifier configuration that
               // this `TextField` will use to build a magnifier with.
               magnifierConfiguration: TextMagnifierConfiguration(
-                magnifierBuilder: (BuildContext context,
-                        MagnifierController controller,
-                        ValueNotifier<MagnifierInfo> textSelectionData) =>
-                    CustomMagnifier(
-                  magnifierInfo: textSelectionData,
+                magnifierBuilder: (_, __, ValueNotifier<MagnifierInfo> magnifierInfo) => CustomMagnifier(
+                  magnifierInfo: magnifierInfo,
                 ),
               ),
               controller: TextEditingController(text: textFieldText),
@@ -91,7 +86,7 @@ class CustomMagnifier extends StatelessWidget {
               magnificationScale: 2,
               // The focal point starts at the center of the magnifier.
               // We probably want to point below the magnifier, so
-              // offset the focal poinzzt by half the magnifier height.
+              // offset the focal point by half the magnifier height.
               focalPointOffset: Offset(0, magnifierSize.height / 2),
               // Decorate it however we'd like!
               decoration: const MagnifierDecoration(

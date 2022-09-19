@@ -835,6 +835,7 @@ class SelectionOverlay {
   /// This is NOT the source of truth for if the magnifier is up or not,
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
+  /// {@endtemplate}
   void showMagnifier(MagnifierInfo initalMagnifierInfo) {
     if (_toolbar != null) {
       hideToolbar();
@@ -1299,7 +1300,7 @@ class SelectionOverlay {
   /// because the magnifier may have hidden itself and is looking for a cue to reshow
   /// itself.
   ///
-  /// If there is no magnifier in the overlay, this does nothing,
+  /// If there is no magnifier in the overlay, this does nothing.
   /// {@endtemplate}
   void updateMagnifier(MagnifierInfo magnifierInfo) {
     if (_magnifierController.overlayEntry == null) {

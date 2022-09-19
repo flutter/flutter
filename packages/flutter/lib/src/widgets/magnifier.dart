@@ -388,6 +388,12 @@ class MagnifierDecoration extends ShapeDecoration {
 
 /// A common base class for magnifiers.
 ///
+/// {@tool dartpad}
+/// This sample demonstrates what a magnifier is, and how it can be used.
+///
+/// ** See code in examples/api/lib/widgets/magnifier/magnifier.0.dart **
+/// {@end-tool}
+///
 /// {@template flutter.widgets.magnifier.intro}
 /// This magnifying glass is useful for scenarios on mobile devices where
 /// the user's finger may be covering part of the screen where a granular
