@@ -27,7 +27,7 @@ class VerticesContents final : public Contents {
 
   void SetColor(Color color);
 
-  void SetBlendMode(Entity::BlendMode blend_mode);
+  void SetBlendMode(BlendMode blend_mode);
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
@@ -40,7 +40,7 @@ class VerticesContents final : public Contents {
  public:
   Vertices vertices_;
   Color color_;
-  Entity::BlendMode blend_mode_ = Entity::BlendMode::kSource;
+  BlendMode blend_mode_ = BlendMode::kSource;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VerticesContents);
 };

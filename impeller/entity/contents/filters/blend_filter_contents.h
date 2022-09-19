@@ -22,7 +22,7 @@ class BlendFilterContents : public FilterContents {
 
   ~BlendFilterContents() override;
 
-  void SetBlendMode(Entity::BlendMode blend_mode);
+  void SetBlendMode(BlendMode blend_mode);
 
   /// @brief  Sets a source color which is blended after all of the inputs have
   ///         been blended.
@@ -36,7 +36,7 @@ class BlendFilterContents : public FilterContents {
                                        const Matrix& effect_transform,
                                        const Rect& coverage) const override;
 
-  Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;
+  BlendMode blend_mode_ = BlendMode::kSourceOver;
   AdvancedBlendProc advanced_blend_proc_;
   std::optional<Color> foreground_color_;
 

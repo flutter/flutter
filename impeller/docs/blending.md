@@ -10,10 +10,10 @@ configuration (called "Pipeline Blends"), and those which cannot (called
 All blend modes conform to the
 [W3C Compositing and Blending recommendation](https://www.w3.org/TR/compositing-1/).
 
-Blend operations are driven by the `Entity::BlendMode` enum. In the Aiks layer,
+Blend operations are driven by the `BlendMode` enum. In the Aiks layer,
 all drawing operations conform to the given `Paint::blend_mode`. In the Entities
 layer, all Entities have an associated blend mode, which can be set via
-`Entity::SetBlendMode(Entity::BlendMode)`.
+`Entity::SetBlendMode(BlendMode)`.
 
 ## Glossary of blending terms
 | Term | Definition |

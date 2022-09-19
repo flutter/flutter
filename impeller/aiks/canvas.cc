@@ -46,7 +46,7 @@ void Canvas::Save() {
 
 void Canvas::Save(
     bool create_subpass,
-    Entity::BlendMode blend_mode,
+    BlendMode blend_mode,
     std::optional<EntityPass::BackdropFilterProc> backdrop_filter) {
   auto entry = CanvasStackEntry{};
   entry.xformation = xformation_stack_.back().xformation;
@@ -352,7 +352,7 @@ void Canvas::DrawTextFrame(TextFrame text_frame, Point position, Paint paint) {
 }
 
 void Canvas::DrawVertices(Vertices vertices,
-                          Entity::BlendMode blend_mode,
+                          BlendMode blend_mode,
                           Paint paint) {
   std::shared_ptr<VerticesContents> contents =
       std::make_shared<VerticesContents>(std::move(vertices));
@@ -371,7 +371,7 @@ void Canvas::DrawAtlas(std::shared_ptr<Image> atlas,
                        std::vector<Matrix> transforms,
                        std::vector<Rect> texture_coordinates,
                        std::vector<Color> colors,
-                       Entity::BlendMode blend_mode,
+                       BlendMode blend_mode,
                        SamplerDescriptor sampler,
                        std::optional<Rect> cull_rect,
                        Paint paint) {

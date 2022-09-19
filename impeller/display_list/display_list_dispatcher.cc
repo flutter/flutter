@@ -44,66 +44,66 @@ DisplayListDispatcher::DisplayListDispatcher() = default;
 
 DisplayListDispatcher::~DisplayListDispatcher() = default;
 
-static Entity::BlendMode ToBlendMode(flutter::DlBlendMode mode) {
+static BlendMode ToBlendMode(flutter::DlBlendMode mode) {
   switch (mode) {
     case flutter::DlBlendMode::kClear:
-      return Entity::BlendMode::kClear;
+      return BlendMode::kClear;
     case flutter::DlBlendMode::kSrc:
-      return Entity::BlendMode::kSource;
+      return BlendMode::kSource;
     case flutter::DlBlendMode::kDst:
-      return Entity::BlendMode::kDestination;
+      return BlendMode::kDestination;
     case flutter::DlBlendMode::kSrcOver:
-      return Entity::BlendMode::kSourceOver;
+      return BlendMode::kSourceOver;
     case flutter::DlBlendMode::kDstOver:
-      return Entity::BlendMode::kDestinationOver;
+      return BlendMode::kDestinationOver;
     case flutter::DlBlendMode::kSrcIn:
-      return Entity::BlendMode::kSourceIn;
+      return BlendMode::kSourceIn;
     case flutter::DlBlendMode::kDstIn:
-      return Entity::BlendMode::kDestinationIn;
+      return BlendMode::kDestinationIn;
     case flutter::DlBlendMode::kSrcOut:
-      return Entity::BlendMode::kSourceOut;
+      return BlendMode::kSourceOut;
     case flutter::DlBlendMode::kDstOut:
-      return Entity::BlendMode::kDestinationOut;
+      return BlendMode::kDestinationOut;
     case flutter::DlBlendMode::kSrcATop:
-      return Entity::BlendMode::kSourceATop;
+      return BlendMode::kSourceATop;
     case flutter::DlBlendMode::kDstATop:
-      return Entity::BlendMode::kDestinationATop;
+      return BlendMode::kDestinationATop;
     case flutter::DlBlendMode::kXor:
-      return Entity::BlendMode::kXor;
+      return BlendMode::kXor;
     case flutter::DlBlendMode::kPlus:
-      return Entity::BlendMode::kPlus;
+      return BlendMode::kPlus;
     case flutter::DlBlendMode::kModulate:
-      return Entity::BlendMode::kModulate;
+      return BlendMode::kModulate;
     case flutter::DlBlendMode::kScreen:
-      return Entity::BlendMode::kScreen;
+      return BlendMode::kScreen;
     case flutter::DlBlendMode::kOverlay:
-      return Entity::BlendMode::kOverlay;
+      return BlendMode::kOverlay;
     case flutter::DlBlendMode::kDarken:
-      return Entity::BlendMode::kDarken;
+      return BlendMode::kDarken;
     case flutter::DlBlendMode::kLighten:
-      return Entity::BlendMode::kLighten;
+      return BlendMode::kLighten;
     case flutter::DlBlendMode::kColorDodge:
-      return Entity::BlendMode::kColorDodge;
+      return BlendMode::kColorDodge;
     case flutter::DlBlendMode::kColorBurn:
-      return Entity::BlendMode::kColorBurn;
+      return BlendMode::kColorBurn;
     case flutter::DlBlendMode::kHardLight:
-      return Entity::BlendMode::kHardLight;
+      return BlendMode::kHardLight;
     case flutter::DlBlendMode::kSoftLight:
-      return Entity::BlendMode::kSoftLight;
+      return BlendMode::kSoftLight;
     case flutter::DlBlendMode::kDifference:
-      return Entity::BlendMode::kDifference;
+      return BlendMode::kDifference;
     case flutter::DlBlendMode::kExclusion:
-      return Entity::BlendMode::kExclusion;
+      return BlendMode::kExclusion;
     case flutter::DlBlendMode::kMultiply:
-      return Entity::BlendMode::kMultiply;
+      return BlendMode::kMultiply;
     case flutter::DlBlendMode::kHue:
-      return Entity::BlendMode::kHue;
+      return BlendMode::kHue;
     case flutter::DlBlendMode::kSaturation:
-      return Entity::BlendMode::kSaturation;
+      return BlendMode::kSaturation;
     case flutter::DlBlendMode::kColor:
-      return Entity::BlendMode::kColor;
+      return BlendMode::kColor;
     case flutter::DlBlendMode::kLuminosity:
-      return Entity::BlendMode::kLuminosity;
+      return BlendMode::kLuminosity;
   }
   FML_UNREACHABLE();
 }

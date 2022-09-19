@@ -37,7 +37,7 @@ class FilterContents : public Contents {
   enum class MorphType { kDilate, kErode };
 
   static std::shared_ptr<FilterContents> MakeBlend(
-      Entity::BlendMode blend_mode,
+      BlendMode blend_mode,
       FilterInput::Vector inputs,
       std::optional<Color> foreground_color = std::nullopt);
 
