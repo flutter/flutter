@@ -775,10 +775,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textLayoutLastMinWidth = null;
   }
 
-  /// Returns a plain text version of the text in the painter.
+  /// Returns a plain text version of the text in [TextPainter].
+  ///
+  /// In order to get the styled text as an [InlineSpan] tree, use [text].
   String get plainText => _textPainter.plainText;
 
-  /// The text to display.
+  /// The text to paint in the form of a tree of [InlineSpan]s.
+  ///
+  /// In order to get the plain text representation, use [plainText].
   InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
   AttributedString? _cachedAttributedValue;
