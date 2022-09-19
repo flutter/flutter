@@ -40,7 +40,7 @@ const String _kNoPlatformsMessage = "You've created a plugin project that doesn'
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
-const String _kLintingErrorPattern = r"^\s*(?<type>error|info)(\s*•\s*)(?<desc>[\(\)`@\w\s'-]+)(\s*•\s*)(?<path>[\w\s'-\/:]+)(\s*•\s*)(?<lint>[\w'-]+)$";
+const String _kLintingErrorPattern = r"^\s*(?<type>error|info)(\s*[•|-]\s*)(?<desc>[\(\)`@\w\s'-]+)(\s*[•|-]\s*)(?<path>[\\\w'-\/:]+)(\s*[•|-]\s*)(?<lint>[\w'-]+)$";
 
 // This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
