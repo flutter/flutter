@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 
 #include "flutter/fml/build_config.h"

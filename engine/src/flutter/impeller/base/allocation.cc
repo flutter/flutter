@@ -5,6 +5,7 @@
 #include "impeller/base/allocation.h"
 
 #include <algorithm>
+#include <cstring>
 
 #include "flutter/fml/logging.h"
 #include "impeller/base/validation.h"

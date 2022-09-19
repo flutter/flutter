@@ -4,6 +4,8 @@
 
 #include "impeller/compiler/includer.h"
 
+#include <cstring>
+
 #include "flutter/fml/paths.h"
 
 namespace impeller {
