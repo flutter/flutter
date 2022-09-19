@@ -56,7 +56,7 @@ class CharacterBoundary extends TextBoundary {
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
-    int length = _textEditingValue.text.length;
+    final int length = _textEditingValue.text.length;
     if (position.offset > length ||
         (position.offset == length && position.affinity == TextAffinity.downstream)) {
       return TextPosition(offset: length, affinity: TextAffinity.upstream);
@@ -84,7 +84,7 @@ class CharacterBoundary extends TextBoundary {
         (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
       return const TextPosition(offset: 0);
     }
-    int length = _textEditingValue.text.length;
+    final int length = _textEditingValue.text.length;
     if (position.offset >= length) {
       return TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
