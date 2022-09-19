@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -318,13 +316,23 @@ void main() {
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.rotationZ(math.pi));
+    expect(actualTurns, Matrix4.fromList(<double>[
+     -1.0,  0.0, 0.0, 0.0,
+      0.0, -1.0, 0.0, 0.0,
+      0.0,  0.0, 1.0, 0.0,
+      0.0,  0.0, 0.0, 1.0,
+    ])..transpose());
 
     controller.value = 0.75;
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.rotationZ(math.pi * 1.5));
+    expect(actualTurns, Matrix4.fromList(<double>[
+      0.0, 1.0, 0.0, 0.0,
+     -1.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 1.0,
+    ])..transpose());
   });
 
   testWidgets('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {

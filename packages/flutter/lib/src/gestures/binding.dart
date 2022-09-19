@@ -25,7 +25,7 @@ export 'package:flutter/foundation.dart' show DiagnosticsNode, InformationCollec
 
 export 'arena.dart' show GestureArenaManager;
 export 'events.dart' show PointerEvent;
-export 'hit_test.dart' show HitTestEntry, HitTestTarget, HitTestResult;
+export 'hit_test.dart' show HitTestEntry, HitTestResult, HitTestTarget;
 export 'pointer_router.dart' show PointerRouter;
 export 'pointer_signal_resolver.dart' show PointerSignalResolver;
 
@@ -360,7 +360,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
-      assert(!_hitTests.containsKey(event.pointer));
+      assert(!_hitTests.containsKey(event.pointer), 'Pointer of $event unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {

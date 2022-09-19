@@ -5,6 +5,7 @@
 import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/fingerprint.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -57,29 +58,33 @@ void main() {
       );
       expect(fingerprinter.doesFingerprintMatch(), isFalse);
     });
+
     testWithoutContext('fingerprint does match if identical', () {
       fileSystem.file('a.dart').createSync();
       fileSystem.file('b.dart').createSync();
 
+      const String fingerprintPath = 'path/to/out.fingerprint';
       final Fingerprinter fingerprinter = Fingerprinter(
-        fingerprintPath: 'out.fingerprint',
+        fingerprintPath: fingerprintPath,
         paths: <String>['a.dart', 'b.dart'],
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
       );
       fingerprinter.writeFingerprint();
       expect(fingerprinter.doesFingerprintMatch(), isTrue);
+      expect(fileSystem.file(fingerprintPath), exists);
     });
 
     testWithoutContext('fails to write fingerprint if inputs are missing', () {
+      const String fingerprintPath = 'path/to/out.fingerprint';
       final Fingerprinter fingerprinter = Fingerprinter(
-        fingerprintPath: 'out.fingerprint',
+        fingerprintPath: fingerprintPath,
         paths: <String>['a.dart'],
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
       );
       fingerprinter.writeFingerprint();
-      expect(fileSystem.file('out.fingerprint').existsSync(), isFalse);
+      expect(fileSystem.file(fingerprintPath), isNot(exists));
     });
 
   group('Fingerprint', () {

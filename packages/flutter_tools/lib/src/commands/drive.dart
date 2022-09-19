@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -279,6 +277,7 @@ class DriveCommand extends RunCommandBase {
         packageConfig,
         chromeBinary: stringArgDeprecated('chrome-binary'),
         headless: boolArgDeprecated('headless'),
+        webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
         browserDimension: stringArgDeprecated('browser-dimension')!.split(','),
         browserName: stringArgDeprecated('browser-name'),
         driverPort: stringArgDeprecated('driver-port') != null

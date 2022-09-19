@@ -6,6 +6,8 @@ import 'dart:io';
 import 'assertions.dart';
 import 'platform.dart' as platform;
 
+export 'platform.dart' show TargetPlatform;
+
 /// The dart:io implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   platform.TargetPlatform? result;

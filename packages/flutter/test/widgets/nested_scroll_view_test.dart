@@ -120,6 +120,59 @@ Widget buildTest({
 }
 
 void main() {
+  testWidgets('ScrollDirection test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107101
+    final List<ScrollDirection> receivedResult = <ScrollDirection>[];
+    const List<ScrollDirection> expectedReverseResult = <ScrollDirection>[ScrollDirection.reverse, ScrollDirection.idle];
+    const List<ScrollDirection> expectedForwardResult = <ScrollDirection>[ScrollDirection.forward, ScrollDirection.idle];
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: NotificationListener<UserScrollNotification>(
+          onNotification: (UserScrollNotification notification) {
+            if (notification.depth != 1) {
+              return true;
+            }
+            receivedResult.add(notification.direction);
+            return true;
+          },
+          child: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+              const SliverAppBar(
+                expandedHeight: 250.0,
+                pinned: true,
+              ),
+            ],
+            body: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: 30,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  height: 50,
+                  child: Center(child: Text('Item $index')),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Fling down to trigger ballistic activity
+    await tester.fling(find.text('Item 3'), const Offset(0.0, -250.0), 10000.0);
+    await tester.pumpAndSettle();
+
+    expect(receivedResult, expectedReverseResult);
+
+    receivedResult.clear();
+
+    // Drag forward, without ballistic activity
+    await tester.drag(find.text('Item 29'), const Offset(0.0, 20.0));
+    await tester.pump();
+
+    expect(receivedResult, expectedForwardResult);
+  });
+
   testWidgets('NestedScrollView respects clipBehavior', (WidgetTester tester) async {
     Widget build(NestedScrollView nestedScrollView) {
       return Localizations(
@@ -2163,7 +2216,7 @@ void main() {
       await tester.drag(find.text('Item 49'), const Offset(0.0, -50.0));
       await tester.pump();
       // If handled correctly, the last item should still be visible and
-      // progressing  back down to the bottom edge, instead of jumping further
+      // progressing back down to the bottom edge, instead of jumping further
       // up the list and out of view.
       expect(find.text('Item 49'), findsOneWidget);
       await tester.pumpAndSettle();

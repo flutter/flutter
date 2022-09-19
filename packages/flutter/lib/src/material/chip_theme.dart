@@ -184,6 +184,7 @@ class ChipThemeData with Diagnosticable {
     this.selectedColor,
     this.secondarySelectedColor,
     this.shadowColor,
+    this.surfaceTintColor,
     this.selectedShadowColor,
     this.showCheckmark,
     this.checkmarkColor,
@@ -196,6 +197,7 @@ class ChipThemeData with Diagnosticable {
     this.brightness,
     this.elevation,
     this.pressElevation,
+    this.iconTheme,
   });
 
   /// Generates a ChipThemeData from a brightness, a primary color, and a text
@@ -307,6 +309,14 @@ class ChipThemeData with Diagnosticable {
   /// [FilterChip], [InputChip], [RawChip].
   final Color? shadowColor;
 
+  /// Overrides the default for [ChipAttributes.surfaceTintColor], the
+  /// Color of the chip's surface tint overlay when its elevation is
+  /// greater than 0.
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
+  final Color? surfaceTintColor;
+
   /// Overrides the default for
   /// [SelectableChipAttributes.selectedShadowColor], the Color of the
   /// chip's shadow when its elevation is greater than 0 and the chip
@@ -415,6 +425,13 @@ class ChipThemeData with Diagnosticable {
   /// This property applies to [ActionChip], [InputChip], [RawChip].
   final double? pressElevation;
 
+  /// Overrides the default for [ChipAttributes.iconTheme],
+  /// the theme used for all icons in the chip.
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
+  final IconThemeData? iconTheme;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
@@ -424,6 +441,7 @@ class ChipThemeData with Diagnosticable {
     Color? selectedColor,
     Color? secondarySelectedColor,
     Color? shadowColor,
+    Color? surfaceTintColor,
     Color? selectedShadowColor,
     bool? showCheckmark,
     Color? checkmarkColor,
@@ -436,6 +454,7 @@ class ChipThemeData with Diagnosticable {
     Brightness? brightness,
     double? elevation,
     double? pressElevation,
+    IconThemeData? iconTheme,
   }) {
     return ChipThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -444,6 +463,7 @@ class ChipThemeData with Diagnosticable {
       selectedColor: selectedColor ?? this.selectedColor,
       secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
       shadowColor: shadowColor ?? this.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       selectedShadowColor: selectedShadowColor ?? this.selectedShadowColor,
       showCheckmark: showCheckmark ?? this.showCheckmark,
       checkmarkColor: checkmarkColor ?? this.checkmarkColor,
@@ -456,6 +476,7 @@ class ChipThemeData with Diagnosticable {
       brightness: brightness ?? this.brightness,
       elevation: elevation ?? this.elevation,
       pressElevation: pressElevation ?? this.pressElevation,
+      iconTheme: iconTheme ?? this.iconTheme,
     );
   }
 
@@ -476,6 +497,7 @@ class ChipThemeData with Diagnosticable {
       selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
       secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
       showCheckmark: t < 0.5 ? a?.showCheckmark ?? true : b?.showCheckmark ?? true,
       checkmarkColor: Color.lerp(a?.checkmarkColor, b?.checkmarkColor, t),
@@ -488,6 +510,7 @@ class ChipThemeData with Diagnosticable {
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
+      iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
     );
   }
 
@@ -514,13 +537,14 @@ class ChipThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll(<Object?>[
     backgroundColor,
     deleteIconColor,
     disabledColor,
     selectedColor,
     secondarySelectedColor,
     shadowColor,
+    surfaceTintColor,
     selectedShadowColor,
     showCheckmark,
     checkmarkColor,
@@ -533,7 +557,8 @@ class ChipThemeData with Diagnosticable {
     brightness,
     elevation,
     pressElevation,
-  );
+    iconTheme,
+  ]);
 
   @override
   bool operator ==(Object other) {
@@ -550,6 +575,7 @@ class ChipThemeData with Diagnosticable {
         && other.selectedColor == selectedColor
         && other.secondarySelectedColor == secondarySelectedColor
         && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.selectedShadowColor == selectedShadowColor
         && other.showCheckmark == showCheckmark
         && other.checkmarkColor == checkmarkColor
@@ -561,7 +587,8 @@ class ChipThemeData with Diagnosticable {
         && other.secondaryLabelStyle == secondaryLabelStyle
         && other.brightness == brightness
         && other.elevation == elevation
-        && other.pressElevation == pressElevation;
+        && other.pressElevation == pressElevation
+        && other.iconTheme == iconTheme;
   }
 
   @override
@@ -573,6 +600,7 @@ class ChipThemeData with Diagnosticable {
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showCheckmark', showCheckmark, defaultValue: null));
     properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: null));
@@ -585,5 +613,6 @@ class ChipThemeData with Diagnosticable {
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DoubleProperty('pressElevation', pressElevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
   }
 }

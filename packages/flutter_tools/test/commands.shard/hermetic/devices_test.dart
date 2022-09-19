@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -24,7 +24,7 @@ void main() {
       Cache.disableLocking();
     });
 
-    Cache cache;
+    late Cache cache;
 
     setUp(() {
       cache = Cache.test(processManager: FakeProcessManager.any());
@@ -52,7 +52,7 @@ void main() {
 
     testUsingContext("get devices' platform types", () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
-        await globals.deviceManager.getAllConnectedDevices(),
+        await globals.deviceManager!.getAllConnectedDevices(),
       );
       expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{
@@ -133,14 +133,14 @@ webby (mobile)     • webby     • web-javascript • Web SDK (1.2.4) (emulato
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager();
+  _FakeDeviceManager() : super(logger: testLogger, terminal: Terminal.test(), userMessages: userMessages);
 
   @override
   Future<List<Device>> getAllConnectedDevices() =>
     Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
     getAllConnectedDevices();
 
   @override
@@ -153,11 +153,13 @@ class _FakeDeviceManager extends DeviceManager {
 }
 
 class NoDevicesManager extends DeviceManager {
+  NoDevicesManager() : super(logger: testLogger, terminal: Terminal.test(), userMessages: userMessages);
+
   @override
   Future<List<Device>> getAllConnectedDevices() async => <Device>[];
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
     getAllConnectedDevices();
 
   @override

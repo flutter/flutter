@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show SplayTreeMap, HashMap;
+import 'dart:collection' show HashMap, SplayTreeMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -19,6 +19,8 @@ export 'package:flutter/rendering.dart' show
 
 // Examples can assume:
 // late SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
+// abstract class SomeWidget extends StatefulWidget { const SomeWidget({super.key}); }
+// typedef ChildWidget = Placeholder;
 
 /// A callback which produces a semantic index given a widget and the local index.
 ///
@@ -571,7 +573,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
   /// null.
   ///
-  /// If the order of children` never changes, consider using the constant
+  /// If the order of children never changes, consider using the constant
   /// [SliverChildListDelegate.fixed] constructor.
   SliverChildListDelegate(
     this.children, {
@@ -677,11 +679,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   /// ```dart
   /// class SomeWidgetState extends State<SomeWidget> {
-  ///   List<Widget> _children;
-  ///
-  ///   void initState() {
-  ///     _children = [];
-  ///   }
+  ///   final List<Widget> _children = <Widget>[];
   ///
   ///   void someHandler() {
   ///     setState(() {
@@ -691,6 +689,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///     });
   ///   }
   ///
+  ///   @override
   ///   Widget build(BuildContext context) {
   ///     // Always create a new list of children as a Widget is immutable.
   ///     return PageView(children: List<Widget>.of(_children));
@@ -1639,29 +1638,17 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// For the value 1.0, the sliver child is painted immediately without an
 /// intermediate buffer.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 ///
 /// This example shows a [SliverList] when the `_visible` member field is true,
-/// and hides it when it is false:
+/// and hides it when it is false.
 ///
-/// ```dart
-/// bool _visible = true;
-/// List<Widget> listItems = const <Widget>[
-///   Text('Now you see me,'),
-///   Text("Now you don't!"),
-/// ];
+/// This is more efficient than adding and removing the sliver child widget from
+/// the tree on demand, but it does not affect how much the list scrolls (the
+/// [SliverList] is still present, merely invisible).
 ///
-/// SliverOpacity(
-///   opacity: _visible ? 1.0 : 0.0,
-///   sliver: SliverList(
-///     delegate: SliverChildListDelegate(listItems),
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/widgets/sliver/sliver_opacity.1.dart **
 /// {@end-tool}
-///
-/// This is more efficient than adding and removing the sliver child widget
-/// from the tree on demand.
 ///
 /// See also:
 ///

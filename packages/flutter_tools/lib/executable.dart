@@ -51,6 +51,7 @@ import 'src/globals.dart' as globals;
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/pre_run_validator.dart';
+import 'src/project_validator.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/web_runner.dart';
@@ -126,6 +127,7 @@ Future<void> main(List<String> args) async {
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
+    shutdownHooks: globals.shutdownHooks,
   );
 }
 
@@ -141,6 +143,8 @@ List<FlutterCommand> generateCommands({
     logger: globals.logger,
     terminal: globals.terminal,
     artifacts: globals.artifacts!,
+    // new ProjectValidators should be added here for the --suggestions to run
+    allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
@@ -175,6 +179,8 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
     logger: globals.logger,
+    artifacts: globals.artifacts!,
+    processManager: globals.processManager,
   ),
   InstallCommand(),
   LogsCommand(),
@@ -188,9 +194,9 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(),
+  ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
-  TestCommand(verboseHelp: verboseHelp),
+  TestCommand(verboseHelp: verboseHelp, verbose: verbose),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(
     stdio: globals.stdio,

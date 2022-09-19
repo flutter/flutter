@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Actions
+/// Flutter code sample for [Actions].
 
 import 'package:flutter/material.dart';
 
@@ -155,7 +155,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('${model.data.value}',
-                              style: Theme.of(context).textTheme.headline4),
+                              style: Theme.of(context).textTheme.headlineMedium),
                         );
                       }),
                   IconButton(

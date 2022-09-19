@@ -1427,6 +1427,22 @@ void main() {
     expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
     handle.dispose();
   });
+
+  testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
+    await pumpTest(tester, null);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(const Duration(milliseconds: 200));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(testPointer.hover(tester.getCenter(find.byType(Scrollable))));
+    await tester.sendEventToBinding(testPointer.scrollInertiaCancel()); // Cancel partway through.
+    await tester.pump();
+    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
+    await tester.pump(const Duration(milliseconds: 4800));
+    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
+  });
 }
 
 // ignore: must_be_immutable

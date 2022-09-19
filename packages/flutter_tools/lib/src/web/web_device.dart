@@ -149,6 +149,7 @@ abstract class ChromiumDevice extends Device {
             .childDirectory('chrome-device'),
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
+        webBrowserFlags: debuggingOptions.webBrowserFlags,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
@@ -157,7 +158,7 @@ abstract class ChromiumDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     await _chrome?.close();
@@ -478,7 +479,7 @@ class WebServerDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     return true;

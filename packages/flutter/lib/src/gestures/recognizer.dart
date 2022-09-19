@@ -24,7 +24,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 export 'arena.dart' show GestureDisposition;
 export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEvent;
 export 'gesture_settings.dart' show DeviceGestureSettings;
-export 'pointer_router.dart' show PointerRouter;
+export 'team.dart' show GestureArenaTeam;
 
 /// Generic signature for callbacks passed to
 /// [GestureRecognizer.invokeCallback]. This allows the

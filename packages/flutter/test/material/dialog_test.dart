@@ -48,7 +48,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 
 // What was the AlertDialog's ButtonBar when many of these tests were written,
 // is now a Padding widget with an OverflowBar child. The Padding widget's size
-// and location  match the original ButtonBar's size and location.
+// and location match the original ButtonBar's size and location.
 Finder _findButtonBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
@@ -140,9 +140,13 @@ void main() {
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
+    const Color shadowColor = Color(0xFF000001);
+    const Color surfaceTintColor = Color(0xFF000002);
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
       elevation: customElevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -151,6 +155,8 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
+    expect(materialWidget.shadowColor, shadowColor);
+    expect(materialWidget.surfaceTintColor, surfaceTintColor);
   });
 
   testWidgets('Custom Title Text Style', (WidgetTester tester) async {
@@ -2120,6 +2126,41 @@ void main() {
 
     expect(rootObserver.dialogCount, 0);
     expect(nestedObserver.dialogCount, 1);
+  });
+
+  testWidgets('showDialog throws a friendly user message when context is not active', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/12467
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: Text('Test')),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Test'));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(),
+      ),
+    );
+
+    Object? error;
+    try {
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext innerContext) {
+          return const AlertDialog(title: Text('Title'));
+        },
+      );
+    } catch(exception) {
+      error = exception;
+    }
+
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    if (error is FlutterError) {
+      final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
+      expect(summary.toString(), 'This BuildContext is no longer valid.');
+    }
   });
 
   group('showDialog avoids overlapping display features', () {

@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -237,6 +236,35 @@ class TestScrollPhysics extends ScrollPhysics {
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
+  });
+
+  testWidgets('indicatorPadding update test', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/108102
+    const Tab tab = Tab(text: 'A');
+    const EdgeInsets indicatorPadding = EdgeInsets.only(left: 7.0, right: 7.0);
+
+    await tester.pumpWidget(boilerplate(
+      child: const DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: <Tab>[tab],
+          indicatorPadding: indicatorPadding,
+        ),
+      ),
+    ));
+
+    // Change the indicatorPadding
+    await tester.pumpWidget(boilerplate(
+      child: DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: const <Tab>[tab],
+          indicatorPadding: indicatorPadding + const EdgeInsets.all(7.0),
+        ),
+      ),
+    ), Duration.zero, EnginePhase.build);
+
+    expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
   });
 
   testWidgets('Tab sizing - icon', (WidgetTester tester) async {
@@ -1192,6 +1220,51 @@ void main() {
     expect(controller.indexIsChanging, false);
   });
 
+  testWidgets('TabBar should not throw when animation is disabled in controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102600
+    final List<String> tabs = <String>['A'];
+
+    Widget buildWithTabBarView() {
+      return boilerplate(
+        child: DefaultTabController(
+          animationDuration: Duration.zero,
+          length: tabs.length,
+          child: Column(
+            children: <Widget>[
+              TabBar(
+                tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                isScrollable: true,
+              ),
+              Flexible(
+                child: TabBarView(
+                  children: List<Widget>.generate(
+                    tabs.length,
+                    (int index) => Text('Tab $index'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWithTabBarView());
+    TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 0);
+
+    tabs.add('B');
+    await tester.pumpWidget(buildWithTabBarView());
+    tabs.add('C');
+    await tester.pumpWidget(buildWithTabBarView());
+    await tester.tap(find.text('C'));
+    await tester.pumpAndSettle();
+    controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 2);
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('TabBarView skips animation when disabled in controller', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
     final TabController tabController = TabController(
@@ -1279,6 +1352,108 @@ void main() {
     await tester.tap(find.text('C'));
     await tester.pump();
     expect(position.pixels, 800);
+  });
+
+  testWidgets('TabBarView skips animation when disabled in controller - skip tabs twice', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110970
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: Duration.zero,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 0);
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(position.pixels, 800);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    expect(position.pixels, 0);
+  });
+
+  testWidgets('TabBarView skips animation when disabled in controller - skip tabs followed by single tab navigation', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110970
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: Duration.zero,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 0);
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(position.pixels, 800);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    expect(position.pixels, 400);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    expect(position.pixels, 0);
   });
 
   testWidgets('TabBarView skips animation when disabled in controller - two tabs', (WidgetTester tester) async {
