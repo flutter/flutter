@@ -288,6 +288,29 @@ void testFontVariation() {
   });
 }
 
+void testGetWordBoundary() {
+  test('GetWordBoundary', () async {
+    final Uint8List fontData = await readFile('RobotoSlab-VariableFont_wght.ttf');
+    await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
+
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'RobotoSerif',
+      fontSize: 40.0,
+    ));
+    builder.addText('Hello team');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+
+    TextRange range = paragraph.getWordBoundary(const TextPosition(offset: 5, affinity: TextAffinity.upstream));
+    expect(range.start, 0);
+    expect(range.end, 5);
+
+    range = paragraph.getWordBoundary(const TextPosition(offset: 5));
+    expect(range.start, 5);
+    expect(range.end, 6);
+  });
+}
+
 void main() {
   testFontWeight();
   testParagraphStyle();
@@ -297,4 +320,5 @@ void main() {
   testLoadFontFromList();
   testFontFeatureClass();
   testFontVariation();
+  testGetWordBoundary();
 }

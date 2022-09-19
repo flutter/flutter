@@ -2238,13 +2238,12 @@ enum TextAffinity {
 
 /// A position in a string of text.
 ///
-/// A TextPosition can be used to locate a position in a string in code (using
-/// the [offset] property), and it can also be used to locate the same position
-/// visually in a rendered string of text (using [offset] and, when needed to
-/// resolve ambiguity, [affinity]).
+/// A TextPosition can be used to describe a caret position in between
+/// characters. The [offset] points to the position between `offset - 1` and
+/// `offset` characters of the string, and the [affinity] is used to describe
+/// which character this position affiliates with.
 ///
-/// The location of an offset in a rendered string is ambiguous in two cases.
-/// One happens when rendered text is forced to wrap. In this case, the offset
+/// One use case is when rendered text is forced to wrap. In this case, the offset
 /// where the wrap occurs could visually appear either at the end of the first
 /// line or the beginning of the second line. The second way is with
 /// bidirectional text.  An offset at the interface between two different text
@@ -2829,8 +2828,23 @@ class Paragraph extends NativeFieldWrapperClass1 {
   /// have word breaks on both sides. In such cases, this method will return
   /// [offset, offset+1]. Word boundaries are defined more precisely in Unicode
   /// Standard Annex #29 http://www.unicode.org/reports/tr29/#Word_Boundaries
+  ///
+  /// The [TextPosition] is treated as caret position, its [TextPosition.affinity]
+  /// is used to determine which character this position points to. For example,
+  /// the word boundary at `TextPosition(offset: 5, affinity: TextPosition.upstream)`
+  /// of the `string = 'Hello word'` will return range (0, 5) because the position
+  /// points to the character 'o' instead of the space.
   TextRange getWordBoundary(TextPosition position) {
-    final List<int> boundary = _getWordBoundary(position.offset);
+    final int characterPosition;
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        characterPosition = position.offset - 1;
+        break;
+      case TextAffinity.downstream:
+        characterPosition = position.offset;
+        break;
+    }
+    final List<int> boundary = _getWordBoundary(characterPosition);
     return TextRange(start: boundary[0], end: boundary[1]);
   }
 

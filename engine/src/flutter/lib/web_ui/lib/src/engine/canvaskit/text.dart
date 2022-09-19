@@ -775,7 +775,16 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
     final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
-    final SkTextRange skRange = paragraph.getWordBoundary(position.offset);
+    final int characterPosition;
+    switch (position.affinity) {
+      case ui.TextAffinity.upstream:
+        characterPosition = position.offset - 1;
+        break;
+      case ui.TextAffinity.downstream:
+        characterPosition = position.offset;
+        break;
+    }
+    final SkTextRange skRange = paragraph.getWordBoundary(characterPosition);
     return ui.TextRange(start: skRange.start, end: skRange.end);
   }
 
