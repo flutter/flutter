@@ -199,7 +199,8 @@ void main() {
     return endpoints[0].point;
   }
 
-  Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(0, -2);
+  // Web has a less threshold for downstream/upstream text position.
+  Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
     EditableText.debugDeterministicCursor = false;
@@ -2087,6 +2088,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
+
     expect(controller.value.selection, isNotNull);
     expect(controller.value.selection.baseOffset, 5);
     expect(controller.value.selection.extentOffset, 6);
@@ -3053,7 +3055,7 @@ void main() {
     expect(controller.selection.extentOffset, 8);
 
     // Tiny movement shouldn't cause text selection to change.
-    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await gesture.moveTo(gPos + const Offset(2.0, 0.0));
     await tester.pumpAndSettle();
     expect(selectionChangedCount, 0);
 
