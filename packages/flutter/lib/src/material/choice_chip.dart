@@ -148,7 +148,7 @@ class ChoiceChip extends StatelessWidget
     assert(debugCheckHasMaterial(context));
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _FilterChipDefaultsM3(context, isEnabled, selected)
+      ? _ChoiceChipDefaultsM3(context, isEnabled, selected)
       : null;
     return RawChip(
       defaultProperties: defaults,
@@ -182,17 +182,17 @@ class ChoiceChip extends StatelessWidget
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES - FilterChip
+// BEGIN GENERATED TOKEN PROPERTIES - ChoiceChip
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_127
+// Token database version: v0_132
 
-class _FilterChipDefaultsM3 extends ChipThemeData {
-  const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
+class _ChoiceChipDefaultsM3 extends ChipThemeData {
+  const _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -261,4 +261,4 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   )!;
 }
 
-// END GENERATED TOKEN PROPERTIES - FilterChip
+// END GENERATED TOKEN PROPERTIES - ChoiceChip
