@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Character boundary works', () {
-    const CharacterBoundary boundary = CharacterBoundary(TextEditingValue('abc'));
+    const CharacterBoundary boundary = CharacterBoundary(TextEditingValue(text: 'abc'));
     const TextPosition midPosition = TextPosition(offset: 1);
     expect(boundary.getLeadingTextBoundaryAt(midPosition), const TextPosition(offset: 1));
     expect(boundary.getTrailingTextBoundaryAt(midPosition), const TextPosition(offset: 2, affinity: TextAffinity.upstream));
@@ -23,7 +23,7 @@ void main() {
 
   test('Character boundary works with grapheme', () {
     const String text = 'a❄︎c';
-    const CharacterBoundary boundary = CharacterBoundary(TextEditingValue(text));
+    const CharacterBoundary boundary = CharacterBoundary(TextEditingValue(text: text));
     TextPosition position = const TextPosition(offset: 1);
     expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 1));
     // The `❄` takes two character length.
@@ -58,7 +58,7 @@ void main() {
 
   test('document boundary works', () {
     const String text = 'abcd efg hi\njklmno\npqrstuv';
-    const DocumentBoundary boundary = DocumentBoundary(TextEditingValue(text));
+    const DocumentBoundary boundary = DocumentBoundary(TextEditingValue(text: text));
     const TextPosition position = TextPosition(offset: 10);
     expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
     expect(boundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: text.length, affinity: TextAffinity.upstream));
