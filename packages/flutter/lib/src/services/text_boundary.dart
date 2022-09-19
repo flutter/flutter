@@ -56,20 +56,21 @@ class CharacterBoundary extends TextBoundary {
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset > _textEditingValue.text.length ||
-        (position.offset == _textEditingValue.text.length && position.affinity == TextAffinity.downstream)) {
-      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
+    int length = _textEditingValue.text.length;
+    if (position.offset > length ||
+        (position.offset == length && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
     final int endOffset;
     final int startOffset;
     switch (position.affinity) {
       case TextAffinity.upstream:
-        startOffset = math.min(position.offset - 1, _textEditingValue.text.length);
-        endOffset = math.min(position.offset, _textEditingValue.text.length);
+        startOffset = math.min(position.offset - 1, length);
+        endOffset = math.min(position.offset, length);
         break;
       case TextAffinity.downstream:
-        startOffset = math.min(position.offset, _textEditingValue.text.length);
-        endOffset = math.min(position.offset + 1, _textEditingValue.text.length);
+        startOffset = math.min(position.offset, length);
+        endOffset = math.min(position.offset + 1, length);
         break;
     }
     return TextPosition(
@@ -83,19 +84,20 @@ class CharacterBoundary extends TextBoundary {
         (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset >= _textEditingValue.text.length) {
-      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
+    int length = _textEditingValue.text.length;
+    if (position.offset >= length) {
+      return TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
     final int endOffset;
     final int startOffset;
     switch (position.affinity) {
       case TextAffinity.upstream:
-        startOffset = math.min(position.offset - 1, _textEditingValue.text.length);
-        endOffset = math.min(position.offset, _textEditingValue.text.length);
+        startOffset = math.min(position.offset - 1, length);
+        endOffset = math.min(position.offset, length);
         break;
       case TextAffinity.downstream:
-        startOffset = math.min(position.offset, _textEditingValue.text.length);
-        endOffset = math.min(position.offset + 1, _textEditingValue.text.length);
+        startOffset = math.min(position.offset, length);
+        endOffset = math.min(position.offset + 1, length);
         break;
     }
     final CharacterRange range = CharacterRange.at(_textEditingValue.text, startOffset, endOffset);
