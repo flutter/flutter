@@ -3136,7 +3136,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     bool analyzeLineFound = false;
     const LineSplitter().convert(stdout).forEach((String line) {
       // Conditional to filter out any stdout from `pub get`
-      if (!analyzeLineFound && line.startsWith('Analyzing flutter_project')) {
+      if (!analyzeLineFound && line.startsWith('Analyzing')) {
         analyzeLineFound = true;
         return;
       }
