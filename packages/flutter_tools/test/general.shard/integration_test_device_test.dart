@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
@@ -28,7 +26,6 @@ final vm_service.Isolate isolate = vm_service.Isolate(
       timestamp: 0
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
       id: '1',
@@ -64,8 +61,8 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
 final Uri observatoryUri = Uri.parse('http://localhost:1234');
 
 void main() {
-  FakeVmServiceHost fakeVmServiceHost;
-  TestDevice testDevice;
+  late FakeVmServiceHost fakeVmServiceHost;
+  late TestDevice testDevice;
 
   setUp(() {
     testDevice = IntegrationTestTestDevice(
@@ -133,14 +130,14 @@ void main() {
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      Logger? logger,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -152,14 +149,14 @@ void main() {
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      Logger? logger,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -181,13 +178,13 @@ void main() {
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -209,13 +206,13 @@ void main() {
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -226,14 +223,14 @@ void main() {
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
     VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      Logger? logger,
     }) async => fakeVmServiceHost.vmService,
   });
 }
@@ -242,8 +239,8 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   @override
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
-    BuildInfo buildInfo,
-    File applicationBinary,
+    BuildInfo? buildInfo,
+    File? applicationBinary,
   }) async => FakeApplicationPackage();
 }
 

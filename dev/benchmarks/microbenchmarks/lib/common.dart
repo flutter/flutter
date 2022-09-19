@@ -54,7 +54,7 @@ double _doProbability({required double mean, required double stddev, required do
 
 /// Example:
 ///
-///     BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+///     BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 ///     printer.add(
 ///       description: 'Average frame time',
 ///       value: averageFrameTime,

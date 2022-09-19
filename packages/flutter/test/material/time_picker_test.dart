@@ -1007,11 +1007,30 @@ void _testsInput() {
     expect(find.text(errorInvalidText), findsOneWidget);
   });
 
-  testWidgets('Can toggle to dial entry mode', (WidgetTester tester) async {
+  testWidgets('Can switch from input to dial entry mode', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input);
     await tester.tap(find.byIcon(Icons.access_time));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('Can switch from dial to input entry mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true);
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsWidgets);
+  });
+
+  testWidgets('Can not switch out of inputOnly mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.inputOnly);
+    expect(find.byType(TextField), findsWidgets);
+    expect(find.byIcon(Icons.access_time), findsNothing);
+  });
+
+  testWidgets('Can not switch out of dialOnly mode', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dialOnly);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byIcon(Icons.keyboard), findsNothing);
   });
 
   testWidgets('Switching to dial entry mode triggers entry callback', (WidgetTester tester) async {
@@ -1271,6 +1290,26 @@ void _testsInput() {
     await tester.pump(const Duration(milliseconds: 50));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
+  });
+
+  testWidgets('Can switch between hour/minute fields using keyboard input action', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay? time) { }, entryMode: TimePickerEntryMode.input);
+
+    final Finder hourFinder = find.byType(TextField).first;
+    final TextField hourField = tester.widget(hourFinder);
+    await tester.tap(hourFinder);
+    expect(hourField.focusNode!.hasFocus, isTrue);
+
+    await tester.enterText(find.byType(TextField).first, '08');
+    final Finder minuteFinder = find.byType(TextField).last;
+    final TextField minuteField = tester.widget(minuteFinder);
+    expect(hourField.focusNode!.hasFocus, isFalse);
+    expect(minuteField.focusNode!.hasFocus, isTrue);
+
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(hourField.focusNode!.hasFocus, isFalse);
+    expect(minuteField.focusNode!.hasFocus, isFalse);
   });
 }
 

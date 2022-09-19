@@ -14,7 +14,7 @@ import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 
-export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
+export 'package:flutter/physics.dart' show ScrollSpringSimulation, Simulation, Tolerance;
 
 // Examples can assume:
 // class FooScrollPhysics extends ScrollPhysics {
@@ -47,12 +47,12 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 /// ```
 ///
 /// You can also use `applyTo`, which is useful when you already have
-/// an instance of `ScrollPhysics`:
+/// an instance of [ScrollPhysics]:
 ///
 /// ```dart
 /// ScrollPhysics physics = const BouncingScrollPhysics();
 /// // ...
-/// physics.applyTo(const AlwaysScrollableScrollPhysics())
+/// final ScrollPhysics mergedPhysics = physics.applyTo(const AlwaysScrollableScrollPhysics());
 /// ```
 @immutable
 class ScrollPhysics {
@@ -82,8 +82,15 @@ class ScrollPhysics {
   /// This method is typically used to define [applyTo] methods like:
   ///
   /// ```dart
-  /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
-  ///   return FooScrollPhysics(parent: buildParent(ancestor));
+  /// class MyScrollPhysics extends ScrollPhysics {
+  ///   const MyScrollPhysics({ super.parent });
+  ///
+  ///   @override
+  ///   MyScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  ///     return MyScrollPhysics(parent: buildParent(ancestor));
+  ///   }
+  ///
+  ///   // ...
   /// }
   /// ```
   @protected
@@ -118,7 +125,7 @@ class ScrollPhysics {
   /// ```
   /// {@end-tool}
   ///
-  /// ## Implementing `applyTo`
+  /// ## Implementing [applyTo]
   ///
   /// When creating a custom [ScrollPhysics] subclass, this method
   /// must be implemented. If the physics class has no constructor
@@ -127,8 +134,15 @@ class ScrollPhysics {
   /// [buildParent], as follows:
   ///
   /// ```dart
-  /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
-  ///   return FooScrollPhysics(parent: buildParent(ancestor));
+  /// class MyScrollPhysics extends ScrollPhysics {
+  ///   const MyScrollPhysics({ super.parent });
+  ///
+  ///   @override
+  ///   MyScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  ///     return MyScrollPhysics(parent: buildParent(ancestor));
+  ///   }
+  ///
+  ///   // ...
   /// }
   /// ```
   ///

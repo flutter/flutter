@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'arena.dart' show GestureDisposition;
+export 'events.dart' show PointerDownEvent, PointerEvent;
+export 'velocity_tracker.dart' show Velocity;
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPressDown].
 ///
@@ -246,8 +250,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
     Duration? duration,
-    // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/3349 is fixed.
-    // ignore: avoid_init_to_null
     super.postAcceptSlopTolerance = null,
     @Deprecated(
       'Migrate to supportedDevices. '

@@ -120,7 +120,7 @@ void main() {
       await tester.pump();
       final Object? result = Actions.maybeInvoke(
         containerKey.currentContext!,
-        DoNothingIntent(),
+        const DoNothingIntent(),
       );
       expect(result, isNull);
       expect(invoked, isFalse);
@@ -146,7 +146,7 @@ void main() {
       await tester.pump();
       final Object? result = Actions.maybeInvoke(
         containerKey.currentContext!,
-        DoNothingIntent(),
+        const DoNothingIntent(),
       );
       expect(result, isNull);
       expect(invoked, isFalse);
@@ -1009,8 +1009,13 @@ void main() {
         .toList();
 
       expect(description.length, equals(2));
-      expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
-      expect(description[1], equals('actions: {}'));
+      expect(
+        description,
+        equalsIgnoringHashCodes(<String>[
+          'dispatcher: ActionDispatcher#00000',
+          'actions: {}',
+        ]),
+      );
     });
     testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1032,8 +1037,13 @@ void main() {
           .toList();
 
       expect(description.length, equals(2));
-      expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
-      expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
+      expect(
+        description,
+        equalsIgnoringHashCodes(<String>[
+          'dispatcher: ActionDispatcher#00000',
+          'actions: {TestIntent: TestAction#00000}',
+        ]),
+      );
     });
   });
 

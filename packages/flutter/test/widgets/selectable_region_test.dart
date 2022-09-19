@@ -1099,6 +1099,74 @@ void main() {
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
+
+    group('magnifier', () {
+      late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+      final Widget fakeMagnifier = Container(key: UniqueKey());
+
+      testWidgets('Can drag handles to show, unshow, and update magnifier',
+          (WidgetTester tester) async {
+        const String text = 'Monkies and rabbits in my soup';
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              magnifierConfiguration: TextMagnifierConfiguration(
+                magnifierBuilder: (_,
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierOverlayInfoBearer>
+                        localInfoBearer) {
+                  infoBearer = localInfoBearer;
+                  return fakeMagnifier;
+                },
+              ),
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionControls,
+              child: const Text(text),
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+            find.descendant(
+                of: find.text(text), matching: find.byType(RichText)));
+
+        // Show the selection handles.
+        final TestGesture activateSelectionGesture = await tester
+            .startGesture(textOffsetToPosition(paragraph, text.length ~/ 2));
+        addTearDown(activateSelectionGesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await activateSelectionGesture.up();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        // Drag the handle around so that the magnifier shows.
+        final TextBox selectionBox =
+            paragraph.getBoxesForSelection(paragraph.selections.first).first;
+        final Offset leftHandlePos =
+            globalize(selectionBox.toRect().bottomLeft, paragraph);
+        final TestGesture gesture = await tester.startGesture(leftHandlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, text.length - 2));
+        await tester.pump();
+
+        // Expect the magnifier to show and then store it's position.
+        expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+        final Offset firstDragGesturePosition =
+            infoBearer.value.globalGesturePosition;
+
+        await gesture.moveTo(textOffsetToPosition(paragraph, text.length));
+        await tester.pump();
+
+        // Expect the position the magnifier gets to have moved.
+        expect(firstDragGesturePosition,
+            isNot(infoBearer.value.globalGesturePosition));
+
+        // Lift the pointer and expect the magnifier to disappear.
+        await gesture.up();
+        await tester.pump();
+
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      });
+    });
   });
 
   testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
@@ -1140,6 +1208,43 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
+
+  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+    SelectedContent? content;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Center(
+            child: Text('How are you'),
+          ),
+        ),
+      ),
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 4), kind: PointerDeviceKind.mouse);
+    expect(content, isNull);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    await gesture.moveTo(textOffsetToPosition(paragraph, 7));
+    await gesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are');
+
+    // Backwards selection.
+    await gesture.down(textOffsetToPosition(paragraph, 3));
+    expect(content, isNull);
+    await gesture.moveTo(textOffsetToPosition(paragraph, 0));
+    await gesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How');
+  });
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
@@ -1168,6 +1273,16 @@ class RenderSelectionSpy extends RenderProxyBox
 
   final Set<VoidCallback> listeners = <VoidCallback>{};
   List<SelectionEvent> events = <SelectionEvent>[];
+
+  @override
+  Size get size => _size;
+  Size _size = Size.zero;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    _size = Size(constraints.maxWidth, constraints.maxHeight);
+    return _size;
+  }
 
   @override
   void addListener(VoidCallback listener) => listeners.add(listener);

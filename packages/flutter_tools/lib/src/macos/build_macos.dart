@@ -12,8 +12,11 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/xcode_project_object_version_migration.dart';
+import '../migrations/xcode_script_build_phase_migration.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
+import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
@@ -45,6 +48,9 @@ Future<void> buildMacOS({
       globals.logger,
       globals.flutterUsage,
     ),
+    MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
+    XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
+    XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -78,15 +84,15 @@ Future<void> buildMacOS({
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter!.getInfo(
+  final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
   );
-  final String? scheme = projectInfo.schemeFor(buildInfo);
+  final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {
-    projectInfo.reportFlavorNotFoundAndExit();
+    projectInfo!.reportFlavorNotFoundAndExit();
   }
-  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
+  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }

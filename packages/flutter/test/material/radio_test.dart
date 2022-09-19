@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/gestures/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -441,8 +442,8 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check when the radio isn't selected.
@@ -519,8 +520,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Start hovering
@@ -1114,5 +1115,56 @@ void main() {
     expect(find.byKey(key), findsNothing);
     // Release pointer after widget disappeared.
     await gesture.up();
+  });
+
+  testWidgets('disabled radio shows tooltip', (WidgetTester tester) async {
+    const String longPressTooltip = 'long press tooltip';
+    const String tapTooltip = 'tap tooltip';
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            message: longPressTooltip,
+            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+          ),
+        ),
+      )
+    );
+
+    // Default tooltip shows up after long pressed.
+    final Finder tooltip0 = find.byType(Tooltip);
+    expect(find.text(longPressTooltip), findsNothing);
+
+    await tester.tap(tooltip0);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(longPressTooltip), findsNothing);
+
+    final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip0));
+    await tester.pump();
+    await tester.pump(kLongPressTimeout);
+    await gestureLongPress.up();
+    await tester.pump();
+
+    expect(find.text(longPressTooltip), findsOneWidget);
+
+    // Tooltip shows up after tapping when set triggerMode to TooltipTriggerMode.tap.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            triggerMode: TooltipTriggerMode.tap,
+            message: tapTooltip,
+            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip1 = find.byType(Tooltip);
+    expect(find.text(tapTooltip), findsNothing);
+
+    await tester.tap(tooltip1);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tapTooltip), findsOneWidget);
   });
 }

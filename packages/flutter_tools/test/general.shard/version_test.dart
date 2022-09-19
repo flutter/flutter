@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,8 +22,8 @@ final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAg
 final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
 
 void main() {
-  FakeCache cache;
-  FakeProcessManager processManager;
+  late FakeCache cache;
+  late FakeProcessManager processManager;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -123,7 +121,7 @@ void main() {
         expect(flutterVersion.getBranchName(redactUnknownBranches: true), channel);
 
         expect(testLogger.statusText, isEmpty);
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => processManager,
@@ -323,15 +321,15 @@ void main() {
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
-      VersionCheckError runUpstreamValidator({
-        String versionUpstreamUrl,
-        String flutterGitUrl,
+      VersionCheckError? runUpstreamValidator({
+        String? versionUpstreamUrl,
+        String? flutterGitUrl,
       }){
         final Platform testPlatform = FakePlatform(environment: <String, String> {
           if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl,
         });
         return VersionUpstreamValidator(
-          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
+          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl, channel: 'master'),
           platform: testPlatform,
         ).run();
       }
@@ -339,7 +337,7 @@ void main() {
       testWithoutContext('returns error if repository url is null', () {
         final VersionCheckError error = runUpstreamValidator(
           // repositoryUrl is null by default
-        );
+        )!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -352,7 +350,7 @@ void main() {
       });
 
       testWithoutContext('returns error at non-standard remote url with FLUTTER_GIT_URL unset', () {
-        final VersionCheckError error = runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit);
+        final VersionCheckError error = runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit)!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -375,7 +373,7 @@ void main() {
         final VersionCheckError error = runUpstreamValidator(
             versionUpstreamUrl: flutterStandardUrlDotGit,
             flutterGitUrl: flutterNonStandardUrlDotGit,
-        );
+        )!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -430,7 +428,7 @@ void main() {
     expect(flutterVersion.getBranchName(), 'feature-branch');
     expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
     expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FlutterVersion: () => FlutterVersion(clock: _testClock),
     ProcessManager: () => processManager,
@@ -442,9 +440,9 @@ void main() {
     GitTagVersion gitTagVersion;
 
     // Master channel
-    gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.3.0-0.0.pre.13');
-    expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
+    gitTagVersion = GitTagVersion.parse('1.2.0-4.5.pre-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.0-5.0.pre.13');
+    expect(gitTagVersion.gitTag, '1.2.0-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
 
@@ -545,7 +543,7 @@ void main() {
   });
 
   testUsingContext('determine reports correct git describe version if HEAD is not at a tag', () {
-    const String devTag = '1.2.3-2.0.pre';
+    const String devTag = '1.2.0-2.0.pre';
     const String headRevision = 'abcd1234';
     const String commitsAhead = '12';
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
@@ -567,8 +565,8 @@ void main() {
     final FakePlatform platform = FakePlatform();
 
     final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, platform, workingDirectory: '.');
-    // reported version should increment the y
-    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.3.0-0.0.pre.12');
+    // reported version should increment the m
+    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.0-3.0.pre.12');
   });
 
   testUsingContext('determine does not call fetch --tags', () {
@@ -673,7 +671,7 @@ void main() {
 }
 
 class FakeCache extends Fake implements Cache {
-  String versionStamp;
+  String? versionStamp;
   bool setVersionStamp = false;
 
   @override
@@ -689,7 +687,7 @@ class FakeCache extends Fake implements Cache {
   void checkLockAcquired() { }
 
   @override
-  String getStampFor(String artifactName) {
+  String? getStampFor(String artifactName) {
     if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
       return versionStamp;
     }
@@ -705,11 +703,11 @@ class FakeCache extends Fake implements Cache {
 }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
-  FakeFlutterVersion({this.channel, this.repositoryUrl});
+  FakeFlutterVersion({required this.channel, this.repositoryUrl});
 
   @override
   final String channel;
 
   @override
-  final String repositoryUrl;
+  final String? repositoryUrl;
 }

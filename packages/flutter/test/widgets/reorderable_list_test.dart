@@ -1005,6 +1005,73 @@ void main() {
       expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
     });
   });
+
+  testWidgets('SliverReorderableList properly disposes items', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/105010
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          drawer: Drawer(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverReorderableList(
+                            itemCount: itemCount,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Material(
+                                key: ValueKey<String>('item-$index'),
+                                child: ReorderableDragStartListener(
+                                  index: index,
+                                  child: ListTile(
+                                    title: Text('item ${items[index]}'),
+                                  ),
+                                ),
+                              );
+                            },
+                            onReorder: (int oldIndex, int newIndex) {},
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Scaffold.of(context).closeDrawer();
+                      },
+                      child: const Text('Close drawer'),
+                    ),
+                  ],
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+
+    final Finder item0 = find.text('item 0');
+    expect(item0, findsOneWidget);
+
+    // Start gesture on first item without drag up event.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await drag.moveBy(const Offset(0, 200));
+    await tester.pump();
+
+    await tester.tap(find.text('Close drawer'));
+    await tester.pumpAndSettle();
+
+    expect(item0, findsNothing);
+  });
 }
 
 class TestList extends StatefulWidget {

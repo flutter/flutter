@@ -39,6 +39,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     super.settings,
     this.maintainState = true,
     super.fullscreenDialog,
+    super.allowSnapshotting = true,
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null) {
@@ -157,6 +158,7 @@ class MaterialPage<T> extends Page<T> {
     required this.child,
     this.maintainState = true,
     this.fullscreenDialog = false,
+    this.allowSnapshotting = true,
     super.key,
     super.name,
     super.arguments,
@@ -174,9 +176,12 @@ class MaterialPage<T> extends Page<T> {
   /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
+  /// {@macro flutter.widgets.TransitionRoute.allowSnapshotting}
+  final bool allowSnapshotting;
+
   @override
   Route<T> createRoute(BuildContext context) {
-    return _PageBasedMaterialPageRoute<T>(page: this);
+    return _PageBasedMaterialPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
   }
 }
 
@@ -187,6 +192,7 @@ class MaterialPage<T> extends Page<T> {
 class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
+    super.allowSnapshotting,
   }) : assert(page != null),
        super(settings: page) {
     assert(opaque);

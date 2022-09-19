@@ -20,6 +20,7 @@ class ExpansionTileListDemo extends StatelessWidget {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           children: <Widget>[
             const ListTile(title: Text('Top')),
             ExpansionTile(

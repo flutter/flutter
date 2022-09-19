@@ -208,10 +208,11 @@ class _ListDemoState extends State<ReorderableListDemo> {
       ),
       body: Scrollbar(
         child: ReorderableListView(
+          primary: true,
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline5))
+                  child: Text('Header of the list', style: Theme.of(context).textTheme.headlineSmall))
               : null,
           onReorder: _onReorder,
           reverse: _reverse!,

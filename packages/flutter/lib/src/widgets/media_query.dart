@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +12,9 @@ import 'basic.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Whether in portrait or landscape.
 enum Orientation {
@@ -359,7 +361,7 @@ class MediaQueryData {
   /// For instance, in a television interface, [NavigationMode.directional]
   /// should be set, so that directional navigation is used to navigate away
   /// from a text field using the DPAD. In contrast, on a regular desktop
-  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// application with the [navigationMode] set to [NavigationMode.traditional],
   /// the arrow keys are used to move the cursor instead of navigating away.
   ///
   /// The [NavigationMode] values indicate the type of navigation to be used in

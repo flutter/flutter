@@ -366,6 +366,7 @@ class Context {
       '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
       '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
       '-dEnableBitcode=$bitcodeFlag',
+      '-dAction=${environment['ACTION'] ?? ''}',
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',

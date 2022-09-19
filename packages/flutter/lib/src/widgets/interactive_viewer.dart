@@ -7,13 +7,19 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
+
+// Examples can assume:
+// late BuildContext context;
+// late Offset? _childWasTappedAt;
+// late TransformationController _transformationController;
+// Widget child = const Placeholder();
 
 /// A signature for widget builders that take a [Quad] of the current viewport.
 ///
@@ -61,7 +67,12 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
+    @Deprecated(
+      'Use panAxis instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     this.alignPanAxis = false,
+    this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
@@ -77,6 +88,7 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     required Widget this.child,
   }) : assert(alignPanAxis != null),
+       assert(panAxis != null),
        assert(child != null),
        assert(constrained != null),
        assert(minScale != null),
@@ -108,7 +120,12 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
+    @Deprecated(
+      'Use panAxis instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     this.alignPanAxis = false,
+    this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     // These default scale values were eyeballed as reasonable limits for common
     // use cases.
@@ -122,7 +139,7 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     required InteractiveViewerWidgetBuilder this.builder,
-  }) : assert(alignPanAxis != null),
+  }) : assert(panAxis != null),
        assert(builder != null),
        assert(minScale != null),
        assert(minScale > 0),
@@ -152,6 +169,8 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// This property is deprecated, please use [panAxis] instead.
+  ///
   /// If true, panning is only allowed in the direction of the horizontal axis
   /// or the vertical axis.
   ///
@@ -163,7 +182,24 @@ class InteractiveViewer extends StatefulWidget {
   /// See also:
   ///  * [constrained], which has an example of creating a table that uses
   ///    alignPanAxis.
+  @Deprecated(
+    'Use panAxis instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   final bool alignPanAxis;
+
+  /// When set to [PanAxis.aligned], panning is only allowed in the horizontal
+  /// axis or the vertical axis, diagonal panning is not allowed.
+  ///
+  /// When set to [PanAxis.vertical] or [PanAxis.horizontal] panning is only
+  /// allowed in the specified axis. For example, if set to [PanAxis.vertical],
+  /// panning will only be allowed in the vertical axis. And if set to [PanAxis.horizontal],
+  /// panning will only be allowed in the horizontal axis.
+  ///
+  /// When set to [PanAxis.free] panning is allowed in all directions.
+  ///
+  /// Defaults to [PanAxis.free].
+  final PanAxis panAxis;
 
   /// A margin for the visible boundaries of the child.
   ///
@@ -224,7 +260,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// {@tool dartpad}
   /// This example shows how to create a pannable table. Because the table is
-  /// larger than the entire screen, setting `constrained` to false is necessary
+  /// larger than the entire screen, setting [constrained] to false is necessary
   /// to allow it to be drawn to its full size. The parts of the table that
   /// exceed the screen size can then be panned into view.
   ///
@@ -501,7 +537,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   final GlobalKey _parentKey = GlobalKey();
   Animation<Offset>? _animation;
   late AnimationController _controller;
-  Axis? _panAxis; // Used with alignPanAxis.
+  Axis? _currentAxis; // Used with panAxis.
   Offset? _referenceFocalPoint; // Point where the current gesture began.
   double? _scaleStart; // Scale value at start of scaling gesture.
   double? _rotationStart = 0.0; // Rotation at start of rotation gesture.
@@ -560,9 +596,26 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix.clone();
     }
 
-    final Offset alignedTranslation = widget.alignPanAxis && _panAxis != null
-      ? _alignAxis(translation, _panAxis!)
-      : translation;
+    late final Offset alignedTranslation;
+
+    if (_currentAxis != null) {
+      switch(widget.panAxis){
+        case PanAxis.horizontal:
+          alignedTranslation = _alignAxis(translation, Axis.horizontal);
+          break;
+        case PanAxis.vertical:
+          alignedTranslation = _alignAxis(translation, Axis.vertical);
+          break;
+        case PanAxis.aligned:
+          alignedTranslation = _alignAxis(translation, _currentAxis!);
+          break;
+        case PanAxis.free:
+          alignedTranslation = translation;
+          break;
+      }
+    } else {
+      alignedTranslation = translation;
+    }
 
     final Matrix4 nextMatrix = matrix.clone()..translate(
       alignedTranslation.dx,
@@ -728,7 +781,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     _gestureType = null;
-    _panAxis = null;
+    _currentAxis = null;
     _scaleStart = _transformationController!.value.getMaxScaleOnAxis();
     _referenceFocalPoint = _transformationController!.toScene(
       details.localFocalPoint,
@@ -819,7 +872,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           widget.onInteractionUpdate?.call(details);
           return;
         }
-        _panAxis ??= _getPanAxis(_referenceFocalPoint!, focalPointScene);
+        _currentAxis ??= _getPanAxis(_referenceFocalPoint!, focalPointScene);
         // Translate so that the same point in the scene is underneath the
         // focal point before and after the movement.
         final Offset translationChange = focalPointScene - _referenceFocalPoint!;
@@ -847,13 +900,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _controller.reset();
 
     if (!_gestureIsSupported(_gestureType)) {
-      _panAxis = null;
+      _currentAxis = null;
       return;
     }
 
     // If the scale ended with enough velocity, animate inertial movement.
     if (_gestureType != _GestureType.pan || details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
-      _panAxis = null;
+      _currentAxis = null;
       return;
     }
 
@@ -941,7 +994,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle inertia drag animation.
   void _onAnimate() {
     if (!_controller.isAnimating) {
-      _panAxis = null;
+      _currentAxis = null;
       _animation?.removeListener(_onAnimate);
       _animation = null;
       _controller.reset();
@@ -1141,7 +1194,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///
   /// ```dart
   /// @override
-  /// void build(BuildContext context) {
+  /// Widget build(BuildContext context) {
   ///   return GestureDetector(
   ///     onTapUp: (TapUpDetails details) {
   ///       _childWasTappedAt = _transformationController.toScene(
@@ -1289,4 +1342,21 @@ Axis? _getPanAxis(Offset point1, Offset point2) {
   final double x = point2.dx - point1.dx;
   final double y = point2.dy - point1.dy;
   return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
+}
+
+/// This enum is used to specify the behavior of the [InteractiveViewer] when
+/// the user drags the viewport.
+enum PanAxis{
+  /// The user can only pan the viewport along the horizontal axis.
+  horizontal,
+
+  /// The user can only pan the viewport along the vertical axis.
+  vertical,
+
+  /// The user can pan the viewport along the horizontal and vertical axes
+  /// but not diagonally.
+  aligned,
+
+  /// The user can pan the viewport freely in any direction.
+  free,
 }

@@ -557,9 +557,9 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
         break;
+      case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -998,6 +998,7 @@ void main() {
       ValueChanged<DragEndDetails>? onEndDragEnd,
       VoidCallback? onSelectionHandleTapped,
       TextSelectionControls? selectionControls,
+      TextMagnifierConfiguration? magnifierConfiguration,
     }) async {
       final UniqueKey column = UniqueKey();
       final LayerLink startHandleLayerLink = LayerLink();
@@ -1041,8 +1042,9 @@ void main() {
         clipboardStatus: FakeClipboardStatusNotifier(),
         selectionDelegate: FakeTextSelectionDelegate(),
         selectionControls: selectionControls,
-        selectionEndPoints: const <TextSelectionPoint>[],
+        selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
+        magnifierConfiguration: magnifierConfiguration ?? TextMagnifierConfiguration.disabled,
       );
     }
 
@@ -1055,7 +1057,7 @@ void main() {
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
         ..endHandleType = TextSelectionHandleType.right
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1100,7 +1102,7 @@ void main() {
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.collapsed
         ..endHandleType = TextSelectionHandleType.collapsed
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1122,7 +1124,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1159,7 +1161,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1206,7 +1208,7 @@ void main() {
         ..lineHeightAtStart = 10.0
         ..endHandleType = TextSelectionHandleType.right
         ..lineHeightAtEnd = 11.0
-        ..selectionEndPoints = const <TextSelectionPoint>[
+        ..selectionEndpoints = const <TextSelectionPoint>[
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
@@ -1246,6 +1248,35 @@ void main() {
       await gesture2.up();
       await tester.pump(const Duration(milliseconds: 20));
       expect(endDragEndDetails, isNotNull);
+    });
+
+    testWidgets('can show magnifier when no handles exist', (WidgetTester tester) async {
+      final GlobalKey magnifierKey = GlobalKey();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        magnifierConfiguration: TextMagnifierConfiguration(
+          shouldDisplayHandlesInMagnifier: false,
+          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierOverlayInfoBearer>? notifier) {
+            return SizedBox.shrink(
+              key: magnifierKey,
+            );
+          },
+        ),
+      );
+
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      final MagnifierOverlayInfoBearer info = MagnifierOverlayInfoBearer(
+        globalGesturePosition: Offset.zero,
+        caretRect: Offset.zero & const Size(5.0, 20.0),
+        fieldBounds: Offset.zero & const Size(200.0, 50.0),
+        currentLineBoundaries: Offset.zero & const Size(200.0, 50.0),
+      );
+      selectionOverlay.showMagnifier(info);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(magnifierKey), findsOneWidget);
     });
   });
 

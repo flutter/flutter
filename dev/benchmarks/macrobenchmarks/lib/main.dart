@@ -14,6 +14,7 @@ import 'src/backdrop_filter.dart';
 import 'src/clipper_cache.dart';
 import 'src/color_filter_and_fade.dart';
 import 'src/color_filter_cache.dart';
+import 'src/color_filter_with_unstable_child.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
@@ -28,6 +29,7 @@ import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
 import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
+import 'src/raster_cache_use_memory.dart';
 import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
@@ -63,10 +65,12 @@ class MacrobenchmarksApp extends StatelessWidget {
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
         kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
+        kColorFilterWithUnstableChildName: (BuildContext context) => const ColorFilterWithUnstableChildPage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
+        kRasterCacheUseMemory: (BuildContext context) => const RasterCacheUseMemory(),
         kShaderMaskCacheRouteName: (BuildContext context) => const ShaderMaskCachePage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
@@ -191,6 +195,20 @@ class HomePage extends StatelessWidget {
             child: const Text('Color Filter Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterCacheRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kColorFilterWithUnstableChildName),
+            child: const Text('Color Filter with Ustable Child'),
+            onPressed: () {
+              Navigator.pushNamed(context, kColorFilterWithUnstableChildName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kRasterCacheUseMemory),
+            child: const Text('RasterCache Use Memory'),
+            onPressed: () {
+              Navigator.pushNamed(context, kRasterCacheUseMemory);
             },
           ),
           ElevatedButton(

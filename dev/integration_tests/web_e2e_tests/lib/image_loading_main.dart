@@ -11,9 +11,11 @@ final Completer<void> _assetImageCompleter = Completer<void>();
 final Completer<void> _networkImageCompleter = Completer<void>();
 
 /// Notifies that Image.asset used in the test app loaded the image.
+@visibleForTesting
 Future<void> get whenAssetImageLoads => _assetImageCompleter.future;
 
 /// Notifies that Image.network used in the test app loaded the image.
+@visibleForTesting
 Future<void> get whenNetworkImageLoads => _networkImageCompleter.future;
 
 Future<void> main() async {

@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -21,6 +20,9 @@ const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// Android Material styled text selection controls.
+///
+/// The [materialTextSelectionControls] global variable has a
+/// suitable instance of this class.
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
@@ -205,9 +207,12 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
       ? widget.endpoints[1]
       : widget.endpoints[0];
+    final double topAmountInEditableRegion = startTextSelectionPoint.point.dy - widget.textLineHeight;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top - _kToolbarContentDistance;
+
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
+      anchorTop,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
@@ -245,7 +250,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
     // If there is no option available, build an empty widget.
     if (itemDatas.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return TextSelectionToolbar(

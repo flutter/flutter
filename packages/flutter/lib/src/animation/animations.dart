@@ -11,6 +11,11 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
+export 'dart:ui' show VoidCallback;
+
+export 'animation.dart' show Animation, AnimationStatus, AnimationStatusListener;
+export 'curves.dart' show Curve;
+
 // Examples can assume:
 // late AnimationController controller;
 

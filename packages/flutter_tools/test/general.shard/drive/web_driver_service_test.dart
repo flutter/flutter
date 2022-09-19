@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/src/interface/file_system.dart';
@@ -24,6 +22,18 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const List<String> kChromeArgs = <String>[
+  '--bwsi',
+  '--disable-background-timer-throttling',
+  '--disable-default-apps',
+  '--disable-extensions',
+  '--disable-popup-blocking',
+  '--disable-translate',
+  '--no-default-browser-check',
+  '--no-sandbox',
+  '--no-first-run',
+];
+
 void main() {
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
     final Map<String, dynamic> expected = <String, dynamic>{
@@ -36,15 +46,7 @@ void main() {
       'chromeOptions': <String, dynamic>{
         'w3c': false,
         'args': <String>[
-          '--bwsi',
-          '--disable-background-timer-throttling',
-          '--disable-default-apps',
-          '--disable-extensions',
-          '--disable-popup-blocking',
-          '--disable-translate',
-          '--no-default-browser-check',
-          '--no-sandbox',
-          '--no-first-run',
+          ...kChromeArgs,
           '--headless',
         ],
         'perfLoggingPrefs': <String, String>{
@@ -71,17 +73,7 @@ void main() {
       'chromeOptions': <String, dynamic>{
         'binary': chromeBinary,
         'w3c': false,
-        'args': <String>[
-          '--bwsi',
-          '--disable-background-timer-throttling',
-          '--disable-default-apps',
-          '--disable-extensions',
-          '--disable-popup-blocking',
-          '--disable-translate',
-          '--no-default-browser-check',
-          '--no-sandbox',
-          '--no-first-run',
-        ],
+        'args': kChromeArgs,
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
           'devtools.timeline,'
@@ -91,8 +83,41 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary), expected);
+    expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary: chromeBinary), expected);
 
+  });
+
+  testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
+    const List<String> webBrowserFlags = <String>[
+      '--autoplay-policy=no-user-gesture-required',
+      '--incognito',
+      '--auto-select-desktop-capture-source="Entire screen"',
+    ];
+    final Map<String, dynamic> expected = <String, dynamic>{
+      'acceptInsecureCerts': true,
+      'browserName': 'chrome',
+      'goog:loggingPrefs': <String, String>{
+        sync_io.LogType.browser: 'INFO',
+        sync_io.LogType.performance: 'ALL',
+      },
+      'chromeOptions': <String, dynamic>{
+        'w3c': false,
+        'args': <String>[
+          ...kChromeArgs,
+          '--autoplay-policy=no-user-gesture-required',
+          '--incognito',
+          '--auto-select-desktop-capture-source="Entire screen"',
+        ],
+        'perfLoggingPrefs': <String, String>{
+          'traceCategories':
+          'devtools.timeline,'
+              'v8,blink.console,benchmark,blink,'
+              'blink.user_timing',
+        },
+      },
+    };
+
+    expect(getDesiredCapabilities(Browser.chrome, false, webBrowserFlags: webBrowserFlags), expected);
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
@@ -141,6 +166,36 @@ void main() {
     expect(getDesiredCapabilities(Browser.firefox, false), expected);
   });
 
+  testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
+    const List<String> webBrowserFlags = <String>[
+      '-url=https://example.com',
+      '-private',
+    ];
+    final Map<String, dynamic> expected = <String, dynamic>{
+      'acceptInsecureCerts': true,
+      'browserName': 'firefox',
+      'moz:firefoxOptions' : <String, dynamic>{
+        'args': <String>[
+          '-url=https://example.com',
+          '-private',
+        ],
+        'prefs': <String, dynamic>{
+          'dom.file.createInChild': true,
+          'dom.timeout.background_throttling_max_budget': -1,
+          'media.autoplay.default': 0,
+          'media.gmp-manager.url': '',
+          'media.gmp-provider.enabled': false,
+          'network.captive-portal-service.enabled': false,
+          'security.insecure_field_warning.contextual.enabled': false,
+          'test.currentTimeOffsetSeconds': 11491200,
+        },
+        'log': <String, String>{'level': 'trace'},
+      },
+    };
+
+    expect(getDesiredCapabilities(Browser.firefox, false, webBrowserFlags: webBrowserFlags), expected);
+  });
+
   testWithoutContext('getDesiredCapabilities Edge', () {
     final Map<String, dynamic> expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -169,16 +224,24 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities android chrome', () {
+    const List<String> webBrowserFlags = <String>[
+      '--autoplay-policy=no-user-gesture-required',
+      '--incognito',
+    ];
     final Map<String, dynamic> expected = <String, dynamic>{
       'browserName': 'chrome',
       'platformName': 'android',
       'goog:chromeOptions': <String, dynamic>{
         'androidPackage': 'com.android.chrome',
-        'args': <String>['--disable-fullscreen'],
+        'args': <String>[
+          '--disable-fullscreen',
+          '--autoplay-policy=no-user-gesture-required',
+          '--incognito',
+        ],
       },
     };
 
-    expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
+    expect(getDesiredCapabilities(Browser.androidChrome, false, webBrowserFlags: webBrowserFlags), expected);
   });
 
   testUsingContext('WebDriverService starts and stops an app', () async {
@@ -217,7 +280,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   final bool doResolveToError;
 
   @override
-  ResidentRunner createWebRunner(FlutterDevice device, {String target, bool stayResident, FlutterProject flutterProject, bool ipv6, DebuggingOptions debuggingOptions, UrlTunneller urlTunneller, Logger logger, FileSystem fileSystem, SystemClock systemClock, Usage usage, bool machine = false}) {
+  ResidentRunner createWebRunner(FlutterDevice device, {String? target, bool? stayResident, FlutterProject? flutterProject, bool? ipv6, DebuggingOptions? debuggingOptions, UrlTunneller? urlTunneller, Logger? logger, FileSystem? fileSystem, SystemClock? systemClock, Usage? usage, bool machine = false}) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
@@ -227,12 +290,12 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
   FakeResidentRunner({
-    this.doResolveToError,
+    required this.doResolveToError,
   }) {
     instance = this;
   }
 
-  static FakeResidentRunner instance;
+  static late FakeResidentRunner instance;
 
   final bool doResolveToError;
   final Completer<int> _exitCompleter = Completer<int>();
@@ -243,10 +306,10 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
-    String route,
+    String? route,
   }) async {
     callLog.add('run');
 
@@ -254,7 +317,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
       return Future<int>.error('This is a test error');
     }
 
-    appStartedCompleter.complete();
+    appStartedCompleter?.complete();
     // Emulate stayResident by completing after exitApp is called.
     return _exitCompleter.future;
   }
@@ -262,7 +325,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
   @override
   Future<void> exitApp() async {
     callLog.add('exitApp');
-    _exitCompleter.complete();
+    _exitCompleter.complete(0);
   }
 
   @override
