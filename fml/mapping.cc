@@ -5,6 +5,8 @@
 #include "flutter/fml/mapping.h"
 
 #include <algorithm>
+#include <cstring>
+#include <memory>
 #include <sstream>
 
 namespace fml {

@@ -6,6 +6,8 @@
 
 #if FML_THREAD_LOCAL_PTHREADS
 
+#include <cstring>
+
 #include "flutter/fml/logging.h"
 
 namespace fml {
