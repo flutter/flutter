@@ -510,7 +510,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// A modal bottom sheet route.
   ModalBottomSheetRoute({
-    this.builder,
+    required this.builder,
     required this.capturedThemes,
     this.barrierLabel,
     this.backgroundColor,
@@ -534,16 +534,18 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// The bottom sheet will wrap the widget produced by this builder in a
   /// [Material] widget.
-  final WidgetBuilder? builder;
+  final WidgetBuilder builder;
 
   /// Stores a list of captured [InheritedTheme]s that are wrapped around the
   /// bottom sheet.
   final CapturedThemes capturedThemes;
 
-  /// Specifies whether this is a route fo a bottom sheet that will utilize
-  /// [DraggableScrollableSheet]. Consider setting this parameter to true
-  /// if this bottom sheet has a scrollable child, such as a [ListView] or
-  /// a [GridView], to have the bottom sheet be draggable.
+  /// Specifies whether this is a route for a bottom sheet that will utilize
+  /// [DraggableScrollableSheet].
+  ///
+  /// Consider setting this parameter to true if this bottom sheet has
+  /// a scrollable child, such as a [ListView] or a [GridView],
+  /// to have the bottom sheet be draggable.
   final bool isScrollControlled;
 
   /// The bottom sheet's background color.
@@ -584,9 +586,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
   /// Typically a bottom sheet will cover the entire width of its
-  /// parent. However for large screens you may want to limit the width
-  /// to something smaller and this property provides a way to specify
-  /// a maximum width.
+  /// parent. Consider limiting the width by setting smaller constraints
+  /// for large screens.
   ///
   /// If null, the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
@@ -604,11 +605,17 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Defaults to `Colors.black54` if not provided.
   final Color? modalBarrierColor;
 
+  /// Specifies whether the bottom sheet will be dismissed
+  /// when user taps on the scrim.
+  ///
   /// If true, the bottom sheet will be dismissed when user taps on the scrim.
   ///
   /// Defaults to true.
   final bool isDismissible;
 
+  /// Specifies whether the bottom sheet can be dragged up and down
+  /// and dismissed by swiping downwards.
+  ///
   /// If true, the bottom sheet can be dragged up and down and dismissed by
   /// swiping downwards.
   ///
@@ -626,6 +633,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final Offset? anchorPoint;
 
   /// If useSafeArea is true, a SafeArea is inserted.
+  ///
   /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
   /// and isn't exposed to the top padding of the MediaQuery.
   ///

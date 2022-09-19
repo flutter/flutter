@@ -1378,7 +1378,6 @@ void main() {
     expect(find.byType(BottomSheet), findsNothing);
 
     // Bring up bottom sheet.
-    bool showBottomSheetThenCalled = false;
     final NavigatorState navigator = Navigator.of(savedContext);
     navigator.push(
       ModalBottomSheetRoute<void>(
@@ -1388,12 +1387,9 @@ void main() {
           from: savedContext, to: navigator.context,
         ),
       ),
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
+    );
     await tester.pumpAndSettle();
     expect(find.byType(BottomSheet), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
   });
 
   group('Modal BottomSheet avoids overlapping display features', () {
