@@ -171,8 +171,6 @@ GOTO :after_subroutine
 
     POPD
 
-    ECHO Moving snapshots debug text... 1>&2
-
     REM Move the old snapshot - we can't just overwrite it as the VM might currently have it
     REM memory mapped (e.g. on flutter upgrade), and deleting it might not work if the file
     REM is in use. For downloading a new dart sdk the folder is moved, so we take the same
@@ -180,7 +178,6 @@ GOTO :after_subroutine
     SET /A snapshot_path_suffix=1
     :move_old_snapshot
       IF EXIST "%snapshot_path_old%%snapshot_path_suffix%" (
-        ECHO "%snapshot_path_old%%snapshot_path_suffix% already exists..." 2>&1
         SET /A snapshot_path_suffix+=1
         GOTO move_old_snapshot
       ) ELSE (
@@ -188,8 +185,6 @@ GOTO :after_subroutine
           MOVE "%snapshot_path%" "%snapshot_path_old%%snapshot_path_suffix%" 2> NUL > NUL
         )
       )
-
-    ECHO Compiling flutter tool debug text... 1>&2
 
     IF "%FLUTTER_TOOL_ARGS%" == "" (
       "%dart%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%" > NUL
