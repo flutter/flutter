@@ -3479,7 +3479,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // --------------------------- Text Editing Actions ---------------------------
 
   TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
-    final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
+    final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value);
     return _PushTextPosition(atomicTextBoundary, intent.forward);
   }
 
@@ -3489,10 +3489,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (widget.obscureText) {
       atomicTextBoundary = _CodeUnitBoundary(_value.text);
-      boundary = DocumentBoundary(_value.text);
+      boundary = DocumentBoundary(_value);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
-      atomicTextBoundary = CharacterBoundary(textEditingValue.text);
+      atomicTextBoundary = CharacterBoundary(textEditingValue);
       // This isn't enough. Newline characters.
       boundary = _ExpandedTextBoundary(_WhitespaceBoundary(textEditingValue.text), WordBoundary(renderEditable));
     }
@@ -3511,10 +3511,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (widget.obscureText) {
       atomicTextBoundary = _CodeUnitBoundary(_value.text);
-      boundary = DocumentBoundary(_value.text);
+      boundary = DocumentBoundary(_value);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
-      atomicTextBoundary = CharacterBoundary(textEditingValue.text);
+      atomicTextBoundary = CharacterBoundary(textEditingValue);
       boundary = LineBreak(renderEditable);
     }
 
@@ -4227,24 +4227,24 @@ class _ScribblePlaceholder extends WidgetSpan {
 /// e.g. the obscure string in [EditableText]. If you are handling text that may
 /// include grapheme clusters, consider using [CharacterBoundary].
 class _CodeUnitBoundary extends TextBoundary {
-  const _CodeUnitBoundary(this._text);
+  const _CodeUnitBoundary(this._textEditingValue);
 
-  final String _text;
+  final TextEditingValue _textEditingValue;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset > _text.length ||
-        (position.offset == _text.length && position.affinity == TextAffinity.downstream)) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    if (position.offset > _textEditingValue.text.length ||
+        (position.offset == _textEditingValue.text.length && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
     }
     switch (position.affinity) {
       case TextAffinity.upstream:
-        return TextPosition(offset: math.min(position.offset - 1, _text.length));
+        return TextPosition(offset: math.min(position.offset - 1, _textEditingValue.text.length));
       case TextAffinity.downstream:
-        return TextPosition(offset: math.min(position.offset, _text.length));
+        return TextPosition(offset: math.min(position.offset, _textEditingValue.text.length));
     }
   }
 
@@ -4254,14 +4254,14 @@ class _CodeUnitBoundary extends TextBoundary {
         (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset >= _text.length) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    if (position.offset >= _textEditingValue.text.length) {
+      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
     }
     switch (position.affinity) {
       case TextAffinity.upstream:
-        return TextPosition(offset: math.min(position.offset, _text.length), affinity: TextAffinity.upstream);
+        return TextPosition(offset: math.min(position.offset, _textEditingValue.text.length), affinity: TextAffinity.upstream);
       case TextAffinity.downstream:
-        return TextPosition(offset: math.min(position.offset + 1, _text.length), affinity: TextAffinity.upstream);
+        return TextPosition(offset: math.min(position.offset + 1, _textEditingValue.text.length), affinity: TextAffinity.upstream);
     }
   }
 }
@@ -4276,14 +4276,15 @@ class _CodeUnitBoundary extends TextBoundary {
 /// [unicode separator category](https://www.compart.com/en/unicode/category/Zs).
 class _WhitespaceBoundary extends TextBoundary {
   /// Creates a [_WhitespaceBoundary] with the text.
-  const _WhitespaceBoundary(this._text);
+  const _WhitespaceBoundary(this._textEditingValue);
 
-  final String _text;
+  final TextEditingValue _textEditingValue;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     // Handles outside of right bound.
-    if (position.offset > _text.length || (position.offset == _text.length  && position.affinity == TextAffinity.downstream)) {
+    if (position.offset > _textEditingValue.text.length
+        || (position.offset == _textEditingValue.length && position.affinity == TextAffinity.downstream)) {
       position = TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
     }
     // Handles outside of left bound.
@@ -4291,12 +4292,13 @@ class _WhitespaceBoundary extends TextBoundary {
       return const TextPosition(offset: 0);
     }
     int index = position.offset;
-    if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index)) && position.affinity == TextAffinity.downstream) {
+    if (!TextLayoutMetrics.isWhitespace(_textEditingValue.text.codeUnitAt(index))
+        && position.affinity == TextAffinity.downstream) {
       return position;
     }
 
     for (index -= 1; index >= 0; index -= 1) {
-      if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index))) {
+      if (!TextLayoutMetrics.isWhitespace(_textEditingValue.text.codeUnitAt(index))) {
         return TextPosition(offset: index + 1, affinity: TextAffinity.upstream);
       }
     }
@@ -4306,8 +4308,8 @@ class _WhitespaceBoundary extends TextBoundary {
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     // Handles outside of right bound.
-    if (position.offset >= _text.length) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    if (position.offset >= _textEditingValue.text.length) {
+      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
     }
     // Handles outside of left bound.
     if (position.offset < 0 || (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
@@ -4315,16 +4317,17 @@ class _WhitespaceBoundary extends TextBoundary {
     }
 
     int index = position.offset;
-    if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index)) && position.affinity == TextAffinity.downstream) {
+    if (!TextLayoutMetrics.isWhitespace(_textEditingValue.text.codeUnitAt(index))
+        && position.affinity == TextAffinity.downstream) {
       return position;
     }
 
-    for (index += 1; index < _text.length; index += 1) {
-      if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index))) {
+    for (index += 1; index < _textEditingValue.text.length; index += 1) {
+      if (!TextLayoutMetrics.isWhitespace(_textEditingValue.text.codeUnitAt(index))) {
         return TextPosition(offset: index);
       }
     }
-    return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
   }
 }
 
