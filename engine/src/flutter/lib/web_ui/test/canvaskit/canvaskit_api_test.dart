@@ -1342,6 +1342,22 @@ void _canvasTests() {
     );
   });
 
+  test('Paragraph converts caret position to charactor position', () {
+    final CkParagraphBuilder builder = CkParagraphBuilder(
+      CkParagraphStyle(),
+    );
+    builder.addText('Hello there');
+    final CkParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 100));
+    ui.TextRange range = paragraph.getWordBoundary(const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream));
+    expect(range.start, 0);
+    expect(range.end, 5);
+
+    range = paragraph.getWordBoundary(const ui.TextPosition(offset: 5));
+    expect(range.start, 5);
+    expect(range.end, 6);
+  });
+
   test('Paragraph dispose', () {
     final CkParagraphBuilder builder = CkParagraphBuilder(
       CkParagraphStyle(),
