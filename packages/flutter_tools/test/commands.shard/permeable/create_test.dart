@@ -3143,7 +3143,8 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   } on Exception catch (err) {
     fail('$err\n\nComplete STDOUT was:\n\n$stdout');
   }
-  expect(errors, unorderedEquals(expectedFailures));
+  expect(errors, unorderedEquals(expectedFailures),
+      reason: 'Failed with stdout:\n\n$stdout');
 }
 
 Future<void> _getPackages(Directory workingDir) async {
