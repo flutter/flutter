@@ -299,25 +299,112 @@ Future<void> testMain() async {
     expect(responded, isTrue);
   });
 
-  /// Regression test for https://github.com/flutter/flutter/issues/66128.
-  test("setPreferredOrientation responds even if browser doesn't support api", () async {
-    final DomScreen screen = domWindow.screen!;
-    js_util.setProperty(screen, 'orientation', null);
-
+  // Emulates the framework sending a request for screen orientation lock.
+  Future<bool> sendSetPreferredOrientations(List<dynamic> orientations) {
     final Completer<bool> completer = Completer<bool>();
-    final ByteData inputData = const JSONMethodCodec().encodeMethodCall(const MethodCall(
-        'SystemChrome.setPreferredOrientations',
-        <dynamic>[]))!;
+    final ByteData? inputData = const JSONMethodCodec().encodeMethodCall(MethodCall(
+      'SystemChrome.setPreferredOrientations',
+      orientations,
+    ));
 
     window.sendPlatformMessage(
       'flutter/platform',
-          inputData,
-          (ByteData? outputData) {
-        completer.complete(true);
+      inputData,
+      (ByteData? outputData) {
+        const MethodCodec codec = JSONMethodCodec();
+        completer.complete(codec.decodeEnvelope(outputData!) as bool);
       },
     );
 
-    expect(await completer.future, isTrue);
+    return completer.future;
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/88269
+  test('sets preferred screen orientation', () async {
+    final DomScreen original = domWindow.screen!;
+
+    final List<String> lockCalls = <String>[];
+    int unlockCount = 0;
+    bool simulateError = false;
+
+    // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
+    js_util.setProperty(domWindow, 'screen', js_util.jsify(<Object?, Object?>{
+      'orientation': <Object?, Object?>{
+        'lock': allowInterop((String lockType) {
+          lockCalls.add(lockType);
+          return JsPromise(allowInterop((Function(Object? value) resolve, Function reject) {
+            if (!simulateError) {
+              resolve(null);
+            } else {
+              reject('Simulating error');
+            }
+          }));
+        }),
+        'unlock': allowInterop(() {
+          unlockCount += 1;
+        }),
+      },
+    }));
+
+    // Sanity-check the test setup.
+    expect(lockCalls, <String>[]);
+    expect(unlockCount, 0);
+    await domWindow.screen!.orientation!.lock('hi');
+    domWindow.screen!.orientation!.unlock();
+    expect(lockCalls, <String>['hi']);
+    expect(unlockCount, 1);
+    lockCalls.clear();
+    unlockCount = 0;
+
+    expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.portraitUp']), isTrue);
+    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypePortraitPrimary]);
+    expect(unlockCount, 0);
+    lockCalls.clear();
+    unlockCount = 0;
+
+    expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.portraitDown']), isTrue);
+    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypePortraitSecondary]);
+    expect(unlockCount, 0);
+    lockCalls.clear();
+    unlockCount = 0;
+
+    expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.landscapeLeft']), isTrue);
+    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypeLandscapePrimary]);
+    expect(unlockCount, 0);
+    lockCalls.clear();
+    unlockCount = 0;
+
+    expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.landscapeRight']), isTrue);
+    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypeLandscapeSecondary]);
+    expect(unlockCount, 0);
+    lockCalls.clear();
+    unlockCount = 0;
+
+    expect(await sendSetPreferredOrientations(<dynamic>[]), isTrue);
+    expect(lockCalls, <String>[]);
+    expect(unlockCount, 1);
+    lockCalls.clear();
+    unlockCount = 0;
+
+    simulateError = true;
+    expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.portraitDown']), isFalse);
+    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypePortraitSecondary]);
+    expect(unlockCount, 0);
+
+    js_util.setProperty(domWindow, 'screen', original);
+  });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/66128.
+  test("setPreferredOrientation responds even if browser doesn't support api", () async {
+    final DomScreen original = domWindow.screen!;
+
+    // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
+    js_util.setProperty(domWindow, 'screen', js_util.jsify(<Object?, Object?>{
+      'orientation': null,
+    }));
+    expect(domWindow.screen!.orientation, isNull);
+    expect(await sendSetPreferredOrientations(<dynamic>[]), isFalse);
+    js_util.setProperty(domWindow, 'screen', original);
   });
 
   test('SingletonFlutterWindow implements locale, locales, and locale change notifications', () async {
