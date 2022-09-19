@@ -4222,7 +4222,7 @@ class _ScribblePlaceholder extends WidgetSpan {
 
 /// A text boundary that uses code units as logical boundaries.
 ///
-/// This text boundary treats every character in input string as an utf-16 code
+/// This text boundary treats every character in the input text value as an UTF-16 code
 /// unit. This can be useful when handling text without any grapheme cluster,
 /// e.g. the obscure string in [EditableText]. If you are handling text that may
 /// include grapheme clusters, consider using [CharacterBoundary].
