@@ -577,7 +577,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// top.
   ///
   /// If this property is null, the [BottomSheetThemeData.clipBehavior] of
-  /// [ThemeData.bottomSheetTheme] is used. If that's null then the behavior
+  /// [ThemeData.bottomSheetTheme] is used. If that's null, the behavior defaults to [Clip.none]
   /// will be [Clip.none].
   final Clip? clipBehavior;
 
