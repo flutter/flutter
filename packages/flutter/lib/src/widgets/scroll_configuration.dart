@@ -154,6 +154,8 @@ class ScrollBehavior {
   /// Applies a [GlowingOverscrollIndicator] to the child widget on
   /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -218,6 +220,8 @@ class ScrollBehavior {
   /// [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
   /// Android.
   ScrollPhysics getScrollPhysics(BuildContext context) {
+    // When modifying this function, consider modifying the implementation in
+    // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:

@@ -480,6 +480,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class ScrollBehavior as well.
     return const BouncingScrollPhysics();
   }
 }
