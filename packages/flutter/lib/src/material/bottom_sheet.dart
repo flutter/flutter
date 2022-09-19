@@ -601,7 +601,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Specifies the color of the modal barrier that darkens everything below the
   /// bottom sheet.
   ///
-  /// If `null` the default color `Colors.black54` is used.
+  /// Defaults to `Colors.black54` if not provided.
   final Color? modalBarrierColor;
 
   /// If true, the bottom sheet will be dismissed when user taps on the scrim.
