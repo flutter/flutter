@@ -166,7 +166,7 @@ class LineBreak extends TextBoundary {
 /// position.
 class DocumentBoundary extends TextBoundary {
   /// Creates a [CharacterBoundary] with the text
-  const DocumentBoundary(this._textEditingValue.);
+  const DocumentBoundary(this._textEditingValue);
 
   final TextEditingValue _textEditingValue;
 
