@@ -3479,7 +3479,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // --------------------------- Text Editing Actions ---------------------------
 
   TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
-    final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value);
+    final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value) : CharacterBoundary(_value);
     return _PushTextPosition(atomicTextBoundary, intent.forward);
   }
 
@@ -3488,7 +3488,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextBoundary boundary;
 
     if (widget.obscureText) {
-      atomicTextBoundary = _CodeUnitBoundary(_value.text);
+      atomicTextBoundary = _CodeUnitBoundary(_value);
       boundary = DocumentBoundary(_value);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
@@ -3510,7 +3510,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextBoundary boundary;
 
     if (widget.obscureText) {
-      atomicTextBoundary = _CodeUnitBoundary(_value.text);
+      atomicTextBoundary = _CodeUnitBoundary(_value);
       boundary = DocumentBoundary(_value);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
@@ -4441,8 +4441,8 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     assert(selection.isValid);
     assert(!selection.isCollapsed);
     final TextBoundary atomicBoundary = state.widget.obscureText
-      ? _CodeUnitBoundary(value.text)
-      : CharacterBoundary(value.text);
+      ? _CodeUnitBoundary(value)
+      : CharacterBoundary(value);
 
     return TextRange(
       start: atomicBoundary.getLeadingTextBoundaryAt(TextPosition(offset: selection.start)).offset,
