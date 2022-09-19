@@ -44,7 +44,11 @@ void ShellTestExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+  visited_platform_views_.clear();
+  mutators_stacks_.clear();
+  current_composition_params_.clear();
+}
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PrerollCompositeEmbeddedView(
