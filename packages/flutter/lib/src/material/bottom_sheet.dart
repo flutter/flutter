@@ -550,7 +550,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// Defines the bottom sheet's [Material.color].
   ///
-  /// Defaults to null and falls back to [Material]'s default.
+  /// If this property is not provided, it falls back to [Material]'s default.
   final Color? backgroundColor;
 
   /// The z-coordinate at which to place this material relative to its parent.
