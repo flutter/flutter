@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:characters/characters.dart' show CharacterRange;
 
+import 'text_input.dart' show TextEditingValue;
 import 'text_layout_metrics.dart';
 
 /// An interface for retrieving the logical text boundary (left-closed-right-open)
@@ -42,37 +43,37 @@ abstract class TextBoundary {
 
 /// A text boundary that uses characters as logical boundaries.
 ///
-/// This class takes grapheme clusters into account and avoid creating
-/// boundaries that generate malformed utf-16 characters.
+/// This class takes grapheme clusters into account and avoids creating
+/// boundaries that generate malformed UTF-16 characters.
 class CharacterBoundary extends TextBoundary {
   /// Creates a [CharacterBoundary] with the text.
-  const CharacterBoundary(this._text);
+  const CharacterBoundary(this._textEditingValue);
 
-  final String _text;
+  final TextEditingValue _textEditingValue;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset > _text.length ||
-        (position.offset == _text.length && position.affinity == TextAffinity.downstream)) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    if (position.offset > _textEditingValue.text.length ||
+        (position.offset == _textEditingValue.text.length && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
     }
     final int endOffset;
     final int startOffset;
     switch (position.affinity) {
       case TextAffinity.upstream:
-        startOffset = math.min(position.offset - 1, _text.length);
-        endOffset = math.min(position.offset, _text.length);
+        startOffset = math.min(position.offset - 1, _textEditingValue.text.length);
+        endOffset = math.min(position.offset, _textEditingValue.text.length);
         break;
       case TextAffinity.downstream:
-        startOffset = math.min(position.offset, _text.length);
-        endOffset = math.min(position.offset + 1, _text.length);
+        startOffset = math.min(position.offset, _textEditingValue.text.length);
+        endOffset = math.min(position.offset + 1, _textEditingValue.text.length);
         break;
     }
     return TextPosition(
-      offset: CharacterRange.at(_text, startOffset, endOffset).stringBeforeLength,
+      offset: CharacterRange.at(_textEditingValue.text, startOffset, endOffset).stringBeforeLength,
     );
   }
 
@@ -82,24 +83,24 @@ class CharacterBoundary extends TextBoundary {
         (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset >= _text.length) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    if (position.offset >= _textEditingValue.text.length) {
+      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
     }
     final int endOffset;
     final int startOffset;
     switch (position.affinity) {
       case TextAffinity.upstream:
-        startOffset = math.min(position.offset - 1, _text.length);
-        endOffset = math.min(position.offset, _text.length);
+        startOffset = math.min(position.offset - 1, _textEditingValue.text.length);
+        endOffset = math.min(position.offset, _textEditingValue.text.length);
         break;
       case TextAffinity.downstream:
-        startOffset = math.min(position.offset, _text.length);
-        endOffset = math.min(position.offset + 1, _text.length);
+        startOffset = math.min(position.offset, _textEditingValue.text.length);
+        endOffset = math.min(position.offset + 1, _textEditingValue.text.length);
         break;
     }
-    final CharacterRange range = CharacterRange.at(_text, startOffset, endOffset);
+    final CharacterRange range = CharacterRange.at(_textEditingValue.text, startOffset, endOffset);
     return TextPosition(
-      offset: _text.length - range.stringAfterLength,
+      offset: _textEditingValue.text.length - range.stringAfterLength,
       affinity: TextAffinity.upstream,
     );
   }
@@ -163,16 +164,16 @@ class LineBreak extends TextBoundary {
 /// position.
 class DocumentBoundary extends TextBoundary {
   /// Creates a [CharacterBoundary] with the text
-  const DocumentBoundary(this._text);
+  const DocumentBoundary(this._textEditingValue.);
 
-  final String _text;
+  final TextEditingValue _textEditingValue;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) => const TextPosition(offset: 0);
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return TextPosition(
-      offset: _text.length,
+      offset: _textEditingValue.text.length,
       affinity: TextAffinity.upstream,
     );
   }
