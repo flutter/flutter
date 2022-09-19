@@ -5,6 +5,7 @@
 #include "impeller/renderer/host_buffer.h"
 
 #include <algorithm>
+#include <cstring>
 
 #include "flutter/fml/logging.h"
 
