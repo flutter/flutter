@@ -590,7 +590,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
-  /// is null then the bottom sheet's size will be constrained
+  /// is null, the bottom sheet's size will be constrained
   /// by its parent (usually a [Scaffold]).
   ///
   /// If constraints are specified (either in this property or in the
