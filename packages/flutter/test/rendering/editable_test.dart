@@ -342,10 +342,10 @@ void main() {
     editable.text = const TextSpan(text: '123');
     expect(editable.plainText, '123');
 
-    editable.text = TextSpan(
+    editable.text = const TextSpan(
       children: <TextSpan>[
-        const TextSpan(text: 'abc', style: const TextStyle(fontSize: 1, fontFamily: 'Ahem')),
-        const TextSpan(text: 'def', style: const TextStyle(fontSize: 10, fontFamily: 'Ahem')),
+        TextSpan(text: 'abc', style: const TextStyle(fontSize: 1, fontFamily: 'Ahem')),
+        TextSpan(text: 'def', style: const TextStyle(fontSize: 10, fontFamily: 'Ahem')),
       ],
     );
     expect(editable.plainText, 'abcdef');
