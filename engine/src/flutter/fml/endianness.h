@@ -14,14 +14,14 @@
 #include "flutter/fml/build_config.h"
 
 // Compiler intrinsics for flipping endianness.
-#define FML_BYTESWAP_16(n) __builtin_bswap16(n)
-#define FML_BYTESWAP_32(n) __builtin_bswap32(n)
-#define FML_BYTESWAP_64(n) __builtin_bswap64(n)
-
 #if defined(_MSC_VER)
 #define FML_BYTESWAP_16(n) _byteswap_ushort(n)
 #define FML_BYTESWAP_32(n) _byteswap_ulong(n)
 #define FML_BYTESWAP_64(n) _byteswap_uint64(n)
+#else
+#define FML_BYTESWAP_16(n) __builtin_bswap16(n)
+#define FML_BYTESWAP_32(n) __builtin_bswap32(n)
+#define FML_BYTESWAP_64(n) __builtin_bswap64(n)
 #endif
 
 namespace fml {
