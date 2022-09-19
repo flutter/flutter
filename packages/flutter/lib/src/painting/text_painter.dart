@@ -352,7 +352,8 @@ class TextPainter {
   /// This and [textDirection] must be non-null before you call [layout].
   ///
   /// The [InlineSpan] this provides is in the form of a tree that may contain
-  /// multiple instances of [TextSpan]s and [WidgetSpan]s.
+  /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plain text
+  /// representation of the contents of this [TextPainter], use [plainText].
   InlineSpan? get text => _text;
   InlineSpan? _text;
   set text(InlineSpan? value) {
