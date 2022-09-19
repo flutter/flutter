@@ -11,6 +11,9 @@ import 'package:flutter/widgets.dart';
 import 'navigation_rail.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [NavigationRail]
 /// widgets.
 ///

@@ -255,7 +255,7 @@ ArgParser _createArgsParser() {
       help: 'Show command help.');
   parser.addFlag('verbose', defaultsTo: true,
       help: 'Whether to report all error messages (on) or attempt to '
-          'filter out some known false positives (off).  Shut this off '
+          'filter out some known false positives (off). Shut this off '
           'locally if you want to address Flutter-specific issues.');
   parser.addFlag('checked', abbr: 'c',
       help: 'Run dartdoc in checked mode.');
@@ -433,7 +433,7 @@ void sanityCheckDocs() {
 
   // Check a "snippet" example, any one will do.
   final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
-  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
+  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.colorScheme.background;.*</pre>');
   _sanityCheckExample(snippetExample, snippetRegExp);
 
   // Check a "dartpad" example, any one will do.

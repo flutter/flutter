@@ -1231,6 +1231,7 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 21,
+              affinity: TextAffinity.upstream,
             ));
           }, variant: TargetPlatformVariant.all());
 
@@ -1245,6 +1246,7 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
+              affinity: TextAffinity.upstream,
             ));
           }, variant: allExceptApple);
 
@@ -1355,6 +1357,7 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 46, // After "to".
+              affinity: TextAffinity.upstream,
             ));
 
             // "good" to "come" is selected.
@@ -1367,6 +1370,7 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 28, // After "good".
+              affinity: TextAffinity.upstream,
             ));
           }, variant: allExceptApple);
 
@@ -1731,6 +1735,7 @@ void main() {
 
       expect(controller.selection, const TextSelection.collapsed(
         offset: 10,
+        affinity: TextAffinity.upstream,
       ));
     }, variant: macOSOnly);
 
@@ -1801,6 +1806,7 @@ void main() {
       await tester.pump();
       expect(controller.selection, const TextSelection.collapsed(
         offset: 46, // After "to".
+        affinity: TextAffinity.upstream,
       ));
 
       // "good" to "come" is selected.
@@ -1813,6 +1819,7 @@ void main() {
       await tester.pump();
       expect(controller.selection, const TextSelection.collapsed(
         offset: 28, // After "good".
+        affinity: TextAffinity.upstream,
       ));
     }, variant: macOSOnly);
 

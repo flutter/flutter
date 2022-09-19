@@ -62,9 +62,11 @@ class ImageInfo {
   /// {@tool snippet}
   ///
   /// The following sample shows how to appropriately check whether the
-  /// [ImageInfo] reference refers to new image data or not.
+  /// [ImageInfo] reference refers to new image data or not (in this case in a
+  /// setter).
   ///
   /// ```dart
+  /// ImageInfo? get imageInfo => _imageInfo;
   /// ImageInfo? _imageInfo;
   /// set imageInfo (ImageInfo? value) {
   ///   // If the image reference is exactly the same, do nothing.
@@ -78,9 +80,12 @@ class ImageInfo {
   ///     value.dispose();
   ///     return;
   ///   }
+  ///   // It is a new image. Dispose of the old one and take a reference
+  ///   // to the new one.
   ///   _imageInfo?.dispose();
   ///   _imageInfo = value;
-  ///   // Perform work to determine size, or paint the image.
+  ///   // Perform work to determine size, paint the image, etc.
+  ///   // ...
   /// }
   /// ```
   /// {@end-tool}

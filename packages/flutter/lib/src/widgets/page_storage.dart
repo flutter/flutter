@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A key can be used to persist the widget state in storage after
 /// the destruction and will be restored when recreated.
 ///
@@ -178,7 +181,7 @@ class PageStorage extends StatelessWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// PageStorageBucket bucket = PageStorage.of(context);
+  /// PageStorageBucket bucket = PageStorage.of(context)!;
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).

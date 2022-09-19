@@ -130,7 +130,7 @@ class CategoryView extends StatelessWidget {
                         alignment: AlignmentDirectional.center,
                         child: Text(
                           asset,
-                          style: theme.textTheme.caption,
+                          style: theme.textTheme.bodySmall,
                         ),
                       ),
                     ],
@@ -186,7 +186,7 @@ class BackdropPanel extends StatelessWidget {
               padding: const EdgeInsetsDirectional.only(start: 16.0),
               alignment: AlignmentDirectional.centerStart,
               child: DefaultTextStyle(
-                style: theme.textTheme.subtitle1!,
+                style: theme.textTheme.titleMedium!,
                 child: Tooltip(
                   message: 'Tap to dismiss',
                   child: title,
@@ -213,7 +213,7 @@ class BackdropTitle extends AnimatedWidget {
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
     return DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.headline6!,
+      style: Theme.of(context).primaryTextTheme.titleLarge!,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
       child: Stack(
@@ -365,8 +365,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         children: <Widget>[
           ListTileTheme(
             iconColor: theme.primaryIconTheme.color,
-            textColor: theme.primaryTextTheme.headline6!.color!.withOpacity(0.6),
-            selectedColor: theme.primaryTextTheme.headline6!.color,
+            textColor: theme.primaryTextTheme.titleLarge!.color!.withOpacity(0.6),
+            selectedColor: theme.primaryTextTheme.titleLarge!.color,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(

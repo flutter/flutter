@@ -910,7 +910,7 @@ void main() {
       expect(
         description[0],
         equalsIgnoringHashCodes(
-          'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000}',
+          'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000(direction: right)}',
         ),
       );
     });

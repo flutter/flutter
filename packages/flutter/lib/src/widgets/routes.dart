@@ -26,13 +26,18 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// late RouteObserver<Route<void>> routeObserver;
 // late NavigatorState navigator;
 // late BuildContext context;
 // Future<bool> askTheUserIfTheyAreSure() async { return true; }
 // abstract class MyWidget extends StatefulWidget { const MyWidget({super.key}); }
+// late dynamic _myState, newValue;
+// late StateSetter setState;
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
+///
+/// See also:
+///
+///  * [Route], which documents the meaning of the `T` generic type argument.
 abstract class OverlayRoute<T> extends Route<T> {
   /// Creates a route that knows how to interact with an [Overlay].
   OverlayRoute({
@@ -84,6 +89,10 @@ abstract class OverlayRoute<T> extends Route<T> {
 }
 
 /// A route with entrance and exit transitions.
+///
+/// See also:
+///
+///  * [Route], which documents the meaning of the `T` generic type argument.
 abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
@@ -98,6 +107,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// even starts, as soon as the route is popped.
   Future<T?> get completed => _transitionCompleter.future;
   final Completer<T?> _transitionCompleter = Completer<T?>();
+
+  /// Handle to the performance mode request.
+  ///
+  /// When the route is animating, the performance mode is requested. It is then
+  /// disposed when the animation ends. Requesting [DartPerformanceMode.latency]
+  /// indicates to the engine that the transition is latency sensitive and to delay
+  /// non-essential work while this handle is active.
+  PerformanceModeRequestHandle? _performanceModeRequestHandle;
 
   /// {@template flutter.widgets.TransitionRoute.transitionDuration}
   /// The duration the transition going forwards.
@@ -125,20 +142,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   bool get opaque;
 
-  /// {@template flutter.widgets.TransitionRoute.preferRasterization}
-  /// Whether the route transition will prefer to animate a rasterized
-  /// snapshot of the entering/exiting routes.
+  /// {@template flutter.widgets.TransitionRoute.allowSnapshotting}
+  /// Whether the route transition will prefer to animate a snapshot of the
+  /// entering/exiting routes.
   ///
   /// When this value is true, certain route transitions (such as the Android
-  /// zoom page transition) will rasterize the entering and exiting routes.
-  /// These textures are then animated in place of the underlying widgets to
+  /// zoom page transition) will snapshot the entering and exiting routes.
+  /// These snapshots are then animated in place of the underlying widgets to
   /// improve performance of the transition.
   ///
   /// Generally this means that animations that occur on the entering/exiting
   /// route while the route animation plays may appear frozen - unless they
   /// are a hero animation or something that is drawn in a separate overlay.
   /// {@endtemplate}
-  bool get preferRasterization => true;
+  bool get allowSnapshotting => true;
 
   // This ensures that if we got to the dismissed state while still current,
   // we will still be disposed when we are eventually popped.
@@ -212,12 +229,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = opaque;
         }
+        _performanceModeRequestHandle?.dispose();
+        _performanceModeRequestHandle = null;
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = false;
         }
+        _performanceModeRequestHandle ??=
+          SchedulerBinding.instance
+            .requestPerformanceMode(ui.DartPerformanceMode.latency);
         break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
@@ -227,6 +249,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (!isActive) {
           navigator!.finalizeRoute(this);
           _popFinalized = true;
+          _performanceModeRequestHandle?.dispose();
+          _performanceModeRequestHandle = null;
         }
         break;
     }
@@ -410,7 +434,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// If true, and `nextRoute.canTransitionFrom()` is true, then the
   /// [ModalRoute.buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
-  /// when [nextRoute] is pushed on top of this one.  Similarly, if
+  /// when [nextRoute] is pushed on top of this one. Similarly, if
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
@@ -456,6 +480,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
     _animation?.removeStatusListener(_handleStatusChanged);
+    _performanceModeRequestHandle?.dispose();
+    _performanceModeRequestHandle = null;
     if (willDisposeAnimationController) {
       _controller?.dispose();
     }
@@ -502,10 +528,14 @@ class LocalHistoryEntry {
 /// A mixin used by routes to handle back navigations internally by popping a list.
 ///
 /// When a [Navigator] is instructed to pop, the current route is given an
-/// opportunity to handle the pop internally. A `LocalHistoryRoute` handles the
+/// opportunity to handle the pop internally. A [LocalHistoryRoute] handles the
 /// pop internally if its list of local history entries is non-empty. Rather
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
+///
+/// See also:
+///
+///  * [Route], which documents the meaning of the `T` generic type argument.
 mixin LocalHistoryRoute<T> on Route<T> {
   List<LocalHistoryEntry>? _localHistory;
   int _entriesImpliesAppBarDismissal = 0;
@@ -806,7 +836,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     ];
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -815,7 +845,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
     if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
   }
 
@@ -850,7 +880,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
     if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
-      widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
     setState(fn);
   }
@@ -945,6 +975,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 ///
 /// The `T` type argument is the return value of the route. If there is no
 /// return value, consider using `void` as the return value.
+///
+/// See also:
+///
+///  * [Route], which further documents the meaning of the `T` generic type argument.
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
@@ -987,7 +1021,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// the change in a function that you pass to [setState], as in:
   ///
   /// ```dart
-  /// setState(() { myState = newValue });
+  /// setState(() { _myState = newValue; });
   /// ```
   ///
   /// If you just change the state directly without calling [setState], then the
@@ -1196,7 +1230,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   TickerFuture didPush() {
     if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
-      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
+      navigator!.focusNode.enclosingScope?.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     return super.didPush();
   }
@@ -1204,7 +1238,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didAdd() {
     if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
-      navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
+      navigator!.focusNode.enclosingScope?.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     super.didAdd();
   }
@@ -1302,7 +1336,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
   /// ```
   ///
   /// {@end-tool}
@@ -1441,7 +1475,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
   /// like [showDialog]. The scoped [WillPopCallback] list makes it possible
-  /// for ModalRoute descendants to collectively define the value of `willPop`.
+  /// for ModalRoute descendants to collectively define the value of [willPop].
   ///
   /// See also:
   ///
@@ -1617,7 +1651,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// close button.
   ///
   /// This getter returns true if there is at least one active route below it,
-  /// or there is at least one [LocalHistoryEntry] with `impliesAppBarDismissal`
+  /// or there is at least one [LocalHistoryEntry] with [impliesAppBarDismissal]
   /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
@@ -1732,7 +1766,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   bool get maintainState => true;
 
   @override
-  bool get preferRasterization => false;
+  bool get allowSnapshotting => false;
 }
 
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the
@@ -1766,6 +1800,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
 /// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+///
 /// void main() {
 ///   runApp(MaterialApp(
 ///     home: Container(),
@@ -2035,7 +2070,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// This function takes a `pageBuilder` which is used to build the primary
 /// content of the route (typically a dialog widget). Content below the dialog
 /// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
-/// does not share a context with the location that `showGeneralDialog` is
+/// does not share a context with the location that [showGeneralDialog] is
 /// originally called from. Use a [StatefulBuilder] or a custom
 /// [StatefulWidget] if the dialog needs to update dynamically. The
 /// `pageBuilder` argument can not be null.

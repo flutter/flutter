@@ -863,7 +863,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
 /// painted. In this case, the scrollbar cannot accurately represent the
 /// relative location of the visible area, or calculate the accurate delta to
-/// apply when  dragging on the thumb or tapping on the track.
+/// apply when dragging on the thumb or tapping on the track.
 ///
 /// ### Interaction
 ///
@@ -916,6 +916,28 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [PageView]
 ///   * [NestedScrollView]
 ///   * [DropdownButton]
+///
+/// Default Scrollbars can be disabled for the whole app by setting a
+/// [ScrollBehavior] with `scrollbars` set to false.
+///
+/// {@tool snippet}
+/// ```dart
+/// MaterialApp(
+///   scrollBehavior: const MaterialScrollBehavior()
+///     .copyWith(scrollbars: false),
+///   home: Scaffold(
+///     appBar: AppBar(title: const Text('Home')),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows how to disable the default Scrollbar for a [Scrollable]
+/// widget to avoid duplicate Scrollbars when running on desktop platforms.
+///
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
+/// {@end-tool}
 /// {@endtemplate}
 ///
 /// {@tool dartpad}
@@ -1026,13 +1048,16 @@ class RawScrollbar extends StatefulWidget {
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
   /// {@tool snippet}
-  /// Here is an example of using the `controller` parameter to enable
+  /// Here is an example of using the [controller] attribute to enable
   /// scrollbar dragging for multiple independent ListViews:
   ///
   /// ```dart
+  /// // (e.g. in a stateful widget)
+  ///
   /// final ScrollController controllerOne = ScrollController();
   /// final ScrollController controllerTwo = ScrollController();
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return Column(
   ///     children: <Widget>[
@@ -1091,9 +1116,12 @@ class RawScrollbar extends StatefulWidget {
   /// {@tool snippet}
   ///
   /// ```dart
+  /// // (e.g. in a stateful widget)
+  ///
   /// final ScrollController controllerOne = ScrollController();
   /// final ScrollController controllerTwo = ScrollController();
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   /// return Column(
   ///   children: <Widget>[
@@ -1106,7 +1134,7 @@ class RawScrollbar extends StatefulWidget {
   ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
-  ///              return  Text('item $index');
+  ///              return Text('item $index');
   ///            },
   ///          ),
   ///        ),
@@ -1173,9 +1201,12 @@ class RawScrollbar extends StatefulWidget {
   /// {@tool snippet}
   ///
   /// ```dart
+  /// // (e.g. in a stateful widget)
+  ///
   /// final ScrollController controllerOne = ScrollController();
   /// final ScrollController controllerTwo = ScrollController();
   ///
+  /// @override
   /// Widget build(BuildContext context) {
   /// return Column(
   ///   children: <Widget>[
@@ -1188,7 +1219,7 @@ class RawScrollbar extends StatefulWidget {
   ///            controller: controllerOne,
   ///            itemCount: 120,
   ///            itemBuilder: (BuildContext context, int index) {
-  ///              return  Text('item $index');
+  ///              return Text('item $index');
   ///            },
   ///          ),
   ///        ),
@@ -1416,6 +1447,7 @@ class RawScrollbar extends StatefulWidget {
 /// scrollbar track.
 class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
   Offset? _dragScrollbarAxisOffset;
+  late double? _thumbPress;
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
@@ -1754,6 +1786,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
     _dragScrollbarAxisOffset = localPosition;
+    _thumbPress = direction == Axis.vertical
+      ? localPosition.dy - scrollbarPainter._thumbOffset
+      : localPosition.dx - scrollbarPainter._thumbOffset;
   }
 
   /// Handler called when a currently active long press gesture moves.
@@ -1763,12 +1798,34 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleThumbPressUpdate(Offset localPosition) {
     assert(_debugCheckHasValidScrollPosition());
+    final ScrollPosition position = _currentController!.position;
+    if (!position.physics.shouldAcceptUserOffset(position)) {
+      return;
+    }
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
-    _updateScrollPosition(localPosition);
+    switch (position.axisDirection) {
+      case AxisDirection.up:
+      case AxisDirection.down:
+        if (_canDragThumb(_dragScrollbarAxisOffset!.dy, position.viewportDimension, _thumbPress!)) {
+          _updateScrollPosition(localPosition);
+        }
+        break;
+      case AxisDirection.left:
+      case AxisDirection.right:
+        if (_canDragThumb(_dragScrollbarAxisOffset!.dx, position.viewportDimension, _thumbPress!)) {
+          _updateScrollPosition(localPosition);
+        }
+        break;
+    }
     _dragScrollbarAxisOffset = localPosition;
+  }
+
+  bool _canDragThumb(double dragOffset, double viewport, double thumbPress) {
+    return dragOffset >= thumbPress
+      && dragOffset <= viewport - (scrollbarPainter._thumbExtent - thumbPress);
   }
 
   /// Handler called when a long press has ended.
@@ -1789,6 +1846,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // The Scrollbar should page towards the position of the tap on the track.
     assert(_debugCheckHasValidScrollPosition());
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
+
+    final ScrollPosition position = _currentController!.position;
+    if (!position.physics.shouldAcceptUserOffset(position)) {
+      return;
+    }
 
     double scrollIncrement;
     // Is an increment calculator available?
