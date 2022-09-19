@@ -1208,7 +1208,35 @@ void main() {
 
     painter.dispose();
   });
+
+  test('TextPainter plainText getter', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    expect(painter.plainText, '');
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before\n'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'after'),
+    ]);
+    expect(painter.plainText, 'before\n\uFFFCafter');
+    painter.layout();
+    expect(painter.plainText, 'before\n\uFFFCafter');
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'be\nfo\nre\n'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'af\nter'),
+    ]);
+    expect(painter.plainText, 'be\nfo\nre\n\uFFFCaf\nter');
+    painter.layout();
+    expect(painter.plainText, 'be\nfo\nre\n\uFFFCaf\nter');
+
+    painter.dispose();
+  });
 }
+
 
 class MockCanvas extends Fake implements Canvas {
 
