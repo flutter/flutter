@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -101,35 +102,49 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     try {
       assert(key == this);
 
-      final Uri resolved = Uri.base.resolve(key.url);
+      final RawReceivePort port = RawReceivePort();
+      final Completer<Uint8List> pendingBytes = Completer<Uint8List>();
+      port.handler = (Object? response) {
+        if (response is ImageChunkEvent) {
+          chunkEvents.add(response);
+        } else if (response is Uint8List) {
+          pendingBytes.complete(response);
+        } else {
+          pendingBytes.completeError(response!);
+        }
+      };
 
-      final HttpClientRequest request = await _httpClient.getUrl(resolved);
+      Isolate.spawn((_LoadRequest data) async {
+        final Uri resolved = Uri.base.resolve(data.url);
+        final HttpClientRequest request = await data.client.getUrl(resolved);
 
-      headers?.forEach((String name, String value) {
-        request.headers.add(name, value);
-      });
-      final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok) {
-        // The network may be only temporarily unavailable, or the file will be
-        // added on the server later. Avoid having future calls to resolve
-        // fail to check the network again.
-        await response.drain<List<int>>(<int>[]);
-        throw image_provider.NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
-      }
+        data.headers?.forEach(request.headers.add);
+        final HttpClientResponse response = await request.close();
+        if (response.statusCode != HttpStatus.ok) {
+          // The network may be only temporarily unavailable, or the file will be
+          // added on the server later. Avoid having future calls to resolve
+          // fail to check the network again.
+          await response.drain<List<int>>(<int>[]);
+          Isolate.exit(data.port, image_provider.NetworkImageLoadException(statusCode: response.statusCode, uri: resolved));
+        }
 
-      final Uint8List bytes = await consolidateHttpClientResponseBytes(
-        response,
-        onBytesReceived: (int cumulative, int? total) {
-          chunkEvents.add(ImageChunkEvent(
-            cumulativeBytesLoaded: cumulative,
-            expectedTotalBytes: total,
-          ));
-        },
-      );
-      if (bytes.lengthInBytes == 0) {
-        throw Exception('NetworkImage is an empty file: $resolved');
-      }
+        final Uint8List bytes = await consolidateHttpClientResponseBytes(
+          response,
+          onBytesReceived: (int cumulative, int? total) {
+            data.port.send(ImageChunkEvent(
+              cumulativeBytesLoaded: cumulative,
+              expectedTotalBytes: total,
+            ));
+          },
+        );
+        if (bytes.lengthInBytes == 0) {
+          Isolate.exit(data.port, Exception('NetworkImage is an empty file: $resolved'));
+        }
+        Isolate.exit(data.port, bytes);
+      }, _LoadRequest(key.url, _httpClient, headers, port.sendPort));
 
+
+      final Uint8List bytes = await pendingBytes.future;
       if (decode != null) {
         final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
         return decode(buffer);
@@ -165,4 +180,13 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+}
+
+class _LoadRequest {
+  const _LoadRequest(this.url, this.client, this.headers, this.port);
+
+  final HttpClient client;
+  final String url;
+  final Map<String, String>? headers;
+  final SendPort port;
 }
