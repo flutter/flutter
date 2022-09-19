@@ -887,7 +887,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           );
         },
       );
-      Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
     }
   }
 }
@@ -1340,6 +1340,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _enableAnimation.removeListener(markNeedsPaint);
     _state.positionController.removeListener(markNeedsPaint);
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _labelPainter.dispose();
+    super.dispose();
   }
 
   double _getValueFromVisualPosition(double visualPosition) {

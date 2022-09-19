@@ -1496,7 +1496,7 @@ mixin BaseSliderTrackShape {
   /// [Slider].
   ///
   /// The width is the width of the [Slider] or [RangeSlider], but padded by
-  /// the max  of the overlay and thumb radius. The height is defined by the
+  /// the max of the overlay and thumb radius. The height is defined by the
   /// [SliderThemeData.trackHeight].
   ///
   /// The [Rect] is centered both horizontally and vertically within the slider
@@ -1706,7 +1706,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     assert(thumbCenter != null);
     // If the slider [SliderThemeData.trackHeight] is less than or equal to 0,
     // then it makes no difference whether the track is painted or not,
-    // therefore the painting  can be a no-op.
+    // therefore the painting can be a no-op.
     if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
       return;
     }
@@ -2331,7 +2331,7 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 /// that will not paint any component shape. A static reference is stored in
 /// [SliderTickMarkShape.noThumb] and [SliderTickMarkShape.noOverlay]. When this value
 /// is specified for [SliderThemeData.thumbShape], the thumb painting is
-/// skipped.  When this value is specified for [SliderThemeData.overlayShape],
+/// skipped. When this value is specified for [SliderThemeData.overlayShape],
 /// the overlay painting is skipped.
 class _EmptySliderComponentShape extends SliderComponentShape {
   @override
@@ -3261,7 +3261,7 @@ class _PaddleSliderValueIndicatorPathPainter {
       0,
     );
 
-    // This is the needed extra width for the label.  It is only positive when
+    // This is the needed extra width for the label. It is only positive when
     // the label exceeds the minimum size contained by the round top lobe.
     final double halfWidthNeeded = math.max(
       0.0,

@@ -2,14 +2,55 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
 import 'dart:ui' as ui;
+
+import 'package:js/js.dart';
 
 import 'platform.dart' as platform;
 
 export 'platform.dart' show TargetPlatform;
 
-/// The dart:html implementation of [platform.defaultTargetPlatform].
+/// [DomWindow] interop object.
+@JS()
+@staticInterop
+class DomWindow {}
+
+/// [DomWindow] required extension.
+extension DomWindowExtension on DomWindow {
+  /// Returns a [DomMediaQueryList] of the media that matches [query].
+  external DomMediaQueryList matchMedia(String? query);
+
+  /// Returns the [DomNavigator] associated with this window.
+  external DomNavigator get navigator;
+}
+
+/// The underyling window.
+@JS('window')
+external DomWindow get domWindow;
+
+/// [DomMediaQueryList] interop object.
+@JS()
+@staticInterop
+class DomMediaQueryList {}
+
+/// [DomMediaQueryList] required extension.
+extension DomMediaQueryListExtension on DomMediaQueryList {
+  /// Whether or not the query matched.
+  external bool get matches;
+}
+
+/// [DomNavigator] interop object.
+@JS()
+@staticInterop
+class DomNavigator {}
+
+/// [DomNavigator] required extension.
+extension DomNavigatorExtension on DomNavigator {
+  /// The underyling platform string.
+  external String? get platform;
+}
+
+/// The web implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   // To get a better guess at the targetPlatform we need to be able to reference
   // the window, but that won't be available until we fix the platforms
@@ -39,7 +80,7 @@ final platform.TargetPlatform? _testPlatform = () {
 // 0.20ms. As `defaultTargetPlatform` is routinely called dozens of times per
 // frame this value should be cached.
 final platform.TargetPlatform _browserPlatform = () {
-  final String navigatorPlatform = html.window.navigator.platform?.toLowerCase() ?? '';
+  final String navigatorPlatform = domWindow.navigator.platform?.toLowerCase() ?? '';
   if (navigatorPlatform.startsWith('mac')) {
     return platform.TargetPlatform.macOS;
   }
@@ -59,7 +100,7 @@ final platform.TargetPlatform _browserPlatform = () {
   // indicates that a device has a "fine pointer" (mouse) as the primary
   // pointing device, then we'll assume desktop linux, and otherwise we'll
   // assume Android.
-  if (html.window.matchMedia('only screen and (pointer: fine)').matches) {
+  if (domWindow.matchMedia('only screen and (pointer: fine)').matches) {
     return platform.TargetPlatform.linux;
   }
   return platform.TargetPlatform.android;

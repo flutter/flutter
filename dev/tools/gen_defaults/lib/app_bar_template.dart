@@ -34,7 +34,10 @@ class _${blockName}DefaultsM3 extends AppBarTheme {
   Color? get foregroundColor => ${color('md.comp.top-app-bar.small.headline.color')};
 
   @override
-  Color? get surfaceTintColor => ${componentColor('md.comp.top-app-bar.small.container.surface-tint-layer')};
+  Color? get shadowColor => ${colorOrTransparent('md.comp.top-app-bar.small.container.shadow-color')};
+
+  @override
+  Color? get surfaceTintColor => ${colorOrTransparent('md.comp.top-app-bar.small.container.surface-tint-layer.color')};
 
   @override
   IconThemeData? get iconTheme => IconThemeData(

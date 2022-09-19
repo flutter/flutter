@@ -693,10 +693,12 @@ void main() {
     expect(iconColor(), color);
   });
 
-  testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
+  testWidgets('leading widget extends to edge and is square', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
+    final bool material3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: themeData,
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -706,15 +708,52 @@ void main() {
       ),
     );
 
-    final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), Offset.zero);
-    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
+    // Default IconButton has a size of (48x48) in M3, (56x56) in M2
+    final Finder hamburger = find.byType(IconButton);
+    expect(tester.getTopLeft(hamburger), material3 ? const Offset(4.0, 4.0) : Offset.zero);
+    expect(tester.getSize(hamburger), material3 ? const Size(48.0, 48.0) : const Size(56.0, 56.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: Container(),
+            title: const Text('X'),
+          ),
+        ),
+      ),
+    );
+
+    // Default leading widget has a size of (56x56) for both M2 and M3
+    final Finder leadingBox = find.byType(Container);
+    expect(tester.getTopLeft(leadingBox), Offset.zero);
+    expect(tester.getSize(leadingBox), const Size(56.0, 56.0));
+
+    // The custom leading widget should still be 56x56 even if its size is smaller.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: const SizedBox(height: 36, width: 36,),
+            title: const Text('X'),
+          ), // Doesn't really matter. Triggers a hamburger regardless.
+        ),
+      ),
+    );
+
+    final Finder leading = find.byType(SizedBox);
+    expect(tester.getTopLeft(leading), Offset.zero);
+    expect(tester.getSize(leading), const Size(56.0, 56.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(platform: TargetPlatform.android);
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: theme,
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -737,14 +776,14 @@ void main() {
       ),
     );
 
-    final Finder addButton = find.byTooltip('Add');
+    final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
     expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
-    final Finder shareButton = find.byTooltip('Share');
+    final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
-    expect(tester.getSize(shareButton), const Size(48.0, 56.0));
+    expect(tester.getSize(shareButton), material3 ? const Size(48.0, 48.0) : const Size(48.0, 56.0));
   });
 
   testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
@@ -2874,6 +2913,42 @@ void main() {
 
     expect(leadingIconColor(), foregroundColor);
     expect(actionIconColor(), foregroundColor);
+  });
+
+  testWidgets('Leading, title, and actions show correct default colors', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(
+      colorScheme: const ColorScheme.light(
+        onPrimary: Colors.blue,
+        onSurface: Colors.red,
+        onSurfaceVariant: Colors.yellow),
+    );
+    final bool material3 = themeData.useMaterial3;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: const Icon(Icons.add_circle),
+            title: const Text('title'),
+            actions: const <Widget>[
+              Icon(Icons.ac_unit)
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color!;
+    }
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    // M2 default color are onPrimary, and M3 has onSurface for leading and title,
+    // onSurfaceVariant for actions.
+    expect(textColor(), material3 ? Colors.red : Colors.blue);
+    expect(leadingIconColor(), material3 ? Colors.red : Colors.blue);
+    expect(actionIconColor(), material3 ? Colors.yellow : Colors.blue);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/107305
