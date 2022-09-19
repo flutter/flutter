@@ -76,152 +76,46 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ]
 };
 
-abstract class Node {
-  Node(this.type);
-  ST type;
-}
+class Node {
+  Node(this.type, this.expectedSymbolCount);
 
-class TokenNode extends Node {
-  TokenNode(super.type, this.value);
+  // Token constructors.
+  Node.openBrace(): type = ST.openBrace, value = '{';
+  Node.closeBrace(): type = ST.closeBrace, value = '}';
+  Node.brace(String this.value) {
+    if (value == '{') {
+      type = ST.openBrace;
+    } else if (value == '}') {
+      type = ST.closeBrace;
+    } else {
+      // We should never arrive here.
+      throw Exception('Provided value is not a brace.');
+    }
+    type = ST.openBrace;
+  }
+  Node.equalSign(): type = ST.equalSign, value = '=';
+  Node.comma(): type = ST.comma, value = ',';
+  Node.string(String this.value): type = ST.string;
+  Node.number(String this.value): type = ST.number;
+  Node.identifier(String this.value): type = ST.identifier;
+  Node.pluralKeyword(): type = ST.plural, value = 'plural';
+  Node.selectKeyword(): type = ST.select, value = 'select';
+  Node.otherKeyword(): type = ST.other, value = 'other';
+  Node.empty(): type = ST.empty, value = '';
 
-  String value;
+  String? value;
+  late ST type;
+  List<Node> children = <Node>[];
+  int expectedSymbolCount = 0;
 
   @override String toString() {
-    return 'Token($value)';
+    return 'Node($value, $children)';
   }
 
-  static TokenNode openBrace() {
-    return TokenNode(ST.openBrace, '{');
-  }
-
-  static TokenNode closeBrace() {
-    return TokenNode(ST.closeBrace, '}');
-  }
-
-  static TokenNode brace(String value) {
-    if (value == '{') {
-      return TokenNode(ST.openBrace, '{');
-    } else if (value == '}') {
-      return TokenNode(ST.closeBrace, '}');
-    } else {
-      // we should never arrive here.
-      throw Exception('value is not a brace');
-    }
-  }
-
-  static TokenNode equalSign() {
-    return TokenNode(ST.equalSign, '=');
-  }
-
-  static TokenNode comma() {
-    return TokenNode(ST.comma, ',');
-  }
-
-  static TokenNode string(String value) {
-    return TokenNode(ST.string, value);
-  }
-
-  static TokenNode number(String value) {
-    return TokenNode(ST.number, value);
-  }
-
-  static TokenNode identifier(String value) {
-    return TokenNode(ST.identifier, value);
-  }
-
-  static TokenNode plural() {
-    return TokenNode(ST.plural, 'plural');
-  }
-
-  static TokenNode select() {
-    return TokenNode(ST.select, 'select');
-  }
-
-  static TokenNode other() {
-    return TokenNode(ST.other, 'other');
-  }
-
-  static TokenNode empty() {
-    return TokenNode(ST.empty, '');
+  bool get isFull {
+    return children.length >= expectedSymbolCount;
   }
 }
-
-class NonterminalNode extends Node {
-  NonterminalNode(super.type, this.totalSymbols): children = <Node>[];
-
-  List<Node> children;
-
-  @override
-  String toString() {
-    return 'Node($type, $children)';
-  }
-
-  // Total number of symbols to add.
-  // This is dependent on the production rule.
-  int totalSymbols;
-
-  void addChild(Node childNode) {
-    children.add(childNode);
-  }
-}
-
-// Convert CST to AST
-// class MessageNode extends Node {
-//   MessageNode(Node node) {
-//     assert(node.type == ST.message);
-//     NonterminalNode n = node as NonterminalNode;
-//     while (node.children.length == 2) {
-//       switch (node.children[0].type) {
-//         case ST.string:
-//           messageParts.add(StringNode(node.children[0]));
-//           break;
-//         case ST.placeholderExpr:
-//           messageParts.add(PlaceholderNode(node.children[0]));
-//           break;
-//         case ST.pluralExpr:
-//           messageParts.add(PluralExpr(node.children[0]));
-//       }
-//       node = node.children[1];
-//     }
-//   }
-
-//   List<MessagePartNode> messageParts = <MessagePartNode>[];
-// }
-
-// abstract class MessagePartNode extends Node {
-
-// }
-
-// class StringNode extends MessagePartNode {
-//   StringNode(Node node) {
-//     string = node.
-//   }
-
-//   String string;
-// }
-
-// class PlaceholderNode extends MessagePartNode {
-//   String identifier;
-// }
-
-// enum PluralId {
-//   zero,
-//   one,
-//   two,
-//   many,
-//   few,
-//   other
-// }
-
-// class PluralNode extends MessagePartNode {
-//   String identifier;
-//   List<PluralPartNode> pluralParts;
-// }
-
-// class PluralPartNode extends Node {
-//   String identifier;
-//   MessageNode message;
-// }
 
 RegExp specialCharOrWhitespace = RegExp(r'^[^a-zA-Z0-9]');
 RegExp whitespace = RegExp(r'^\s');
@@ -231,11 +125,11 @@ RegExp numeric = RegExp(r'^[0-9]+');
 RegExp alphanumeric = RegExp(r'^[a-zA-Z0-9]+');
 
 
-List<TokenNode> lex(String message) {
+List<Node> lex(String message) {
   bool isString = true;
   bool isEscaped = false;
   final StringBuffer buffer = StringBuffer();
-  final List<TokenNode> tokens = <TokenNode>[];
+  final List<Node> tokens = <Node>[];
   String? prevChar;
   for (final int rune in message.runes) {
     final String char = String.fromCharCode(rune);   
@@ -254,11 +148,11 @@ List<TokenNode> lex(String message) {
           isEscaped = true;
         } else if (char == '{' || char == '}') { // Here we have an unescaped open brace.
           if(buffer.isNotEmpty) {
-            tokens.add(TokenNode.string(buffer.toString()));
+            tokens.add(Node.string(buffer.toString()));
           }
           buffer.clear();
           isString = false;
-          tokens.add(TokenNode.brace(char));
+          tokens.add(Node.brace(char));
         } else {
           buffer.write(char);
         }
@@ -272,15 +166,15 @@ List<TokenNode> lex(String message) {
         if (value.isEmpty) {
           // skip
         } else if (value == 'plural') {
-          tokens.add(TokenNode.plural());
+          tokens.add(Node.pluralKeyword());
         } else if (value == 'select') {
-          tokens.add(TokenNode.select());
+          tokens.add(Node.selectKeyword());
         } else if (value == 'other') {
-          tokens.add(TokenNode.other());
+          tokens.add(Node.otherKeyword());
         } else if (buffer.toString().contains(numeric)) {
-          tokens.add(TokenNode.number(buffer.toString()));
+          tokens.add(Node.number(buffer.toString()));
         } else if (buffer.toString().contains(alphanumeric)) {
-          tokens.add(TokenNode.identifier(buffer.toString()));
+          tokens.add(Node.identifier(buffer.toString()));
         } else {
           throw Exception('lexing error: identifier $buffer tarts with a number');
         }
@@ -288,11 +182,11 @@ List<TokenNode> lex(String message) {
 
         if (!char.contains(whitespace)) {
           if (char == '=') {
-            tokens.add(TokenNode.equalSign());
+            tokens.add(Node.equalSign());
           } else if (char == ',') {
-            tokens.add(TokenNode.comma());
+            tokens.add(Node.comma());
           } else if (char == '{' || char == '}') {
-            tokens.add(TokenNode.brace(char));
+            tokens.add(Node.brace(char));
             isString = true;
           } else {
             throw Exception('lexing error: unrecognized token $char');
@@ -306,31 +200,28 @@ List<TokenNode> lex(String message) {
   return tokens;
 }
 
-Node parse(List<TokenNode> tokens) {
+Node parse(List<Node> tokens) {
   final List<ST> parsingStack = <ST>[ST.message];
-  final NonterminalNode syntaxTree = NonterminalNode(ST.empty, 1);
-  final List<NonterminalNode> treeTraversalStack = <NonterminalNode>[syntaxTree];
+  final Node syntaxTree = Node(ST.empty, 1);
+  final List<Node> treeTraversalStack = <Node>[syntaxTree];
 
   // Helper function for parsing and constructing tree.
   void parseAndConstructNode(ST nonterminal, int ruleIndex) {
-    print(nonterminal);
-    final NonterminalNode parent = treeTraversalStack.last;
+    final Node parent = treeTraversalStack.last;
     final List<ST> grammarRule = grammar[nonterminal]![ruleIndex];
-    final NonterminalNode node = NonterminalNode(nonterminal, grammarRule.length);
+    final Node node = Node(nonterminal, grammarRule.length);
     parsingStack.addAll(grammarRule.reversed);
 
     // For tree construction, add nodes to the parent until the parent has all
     // all the children it is expecting.
     parent.children.add(node);
-    if (parent.children.length >= parent.totalSymbols) {
+    if (parent.isFull) {
       treeTraversalStack.removeLast();
     }
     treeTraversalStack.add(node);
   }
 
   while (parsingStack.isNotEmpty) {
-    print(parsingStack);
-    print(tokens);
     final ST symbol = parsingStack.removeLast();
 
     // Figure out which production rule to use.
@@ -404,11 +295,11 @@ Node parse(List<TokenNode> tokens) {
       // At this point, we are only handling terminal symbols.
       // ignore: no_default_cases
       default:
-        final NonterminalNode parent = treeTraversalStack.last;
+        final Node parent = treeTraversalStack.last;
         // If we match a terminal symbol, then remove it from tokens and
         // add it to the tree.
         if (symbol == ST.empty) {
-          parent.children.add(TokenNode.empty());
+          parent.children.add(Node.empty());
         } else if (symbol == tokens[0].type) {
           final Node token = tokens.removeAt(0);
           parent.children.add(token);
@@ -416,11 +307,56 @@ Node parse(List<TokenNode> tokens) {
           throw Exception('syntax error: expected $symbol but got token ${tokens[0]}');
         }
 
-        if (parent.children.length >= parent.totalSymbols) {
+        if (parent.isFull) {
           treeTraversalStack.removeLast();
         }
     }
   }
 
   return syntaxTree.children[0];
+}
+
+// Compress the syntax tree, and check extra syntax rules. Note that after
+// parse(lex(message)), the individual parts (ST.string, ST.placeholderExpr, 
+// ST.pluralExpr, and ST.selectExpr) are structured as a linked list See diagram
+// below. This
+// function compresses these parts into a single children array (and does this
+// for ST.pluralParts and ST.selectParts as well). Then it checks extra syntax
+// rules. Essentially, it converts
+//
+//            Message
+//            /     \
+//    PluralExpr  Message
+//                /     \
+//            String  Message
+//                    /     \
+//            SelectExpr   ...
+//
+// to
+//
+//                Message
+//               /   |   \
+//     PluralExpr String SelectExpr ...
+//
+// Keep in mind that this modifies the tree in place and the values of 
+// expectedSymbolCount and isFull is no longer useful after this operation.
+Node compress(Node syntaxTree) {
+  Node node = syntaxTree;
+  final List<Node> children = <Node>[];
+  switch (syntaxTree.type) {
+    case ST.message:
+    case ST.pluralParts:
+    case ST.selectParts:
+      while (node.children.length == 2) {
+        children.add(node.children[0]);
+        compress(node.children[0]);
+        node = node.children[1];
+      }
+      syntaxTree.children = children;
+      break;
+    // ignore: no_default_cases
+    default:
+      node.children.forEach(compress);
+  }
+  return syntaxTree;
 }

@@ -172,6 +172,17 @@ const String pluralHelperTemplate = '''
   }
 ''';
 
+const String selectHelperTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return intl.Intl.selectLogic(
+      @(choice),
+      locale: localeName,
+@(selectLogicArgs),
+    );
+  }
+''';
+
 const String pluralMethodTemplate = '''
   @override
   String @(name)(@(parameters)) {

@@ -179,247 +179,21 @@ String generateNumberFormattingLogic(Message message) {
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
-/// To make it easier to parse plurals or select messages, temporarily replace
-/// each "{placeholder}" parameter with "#placeholder#" for example.
-String _replacePlaceholdersBraces(
-  String translationForMessage,
-  Iterable<Placeholder> placeholders,
-  String replacementBraces,
-) {
-  assert(replacementBraces.length == 2);
-  String easyMessage = translationForMessage;
-  for (final Placeholder placeholder in placeholders) {
-    easyMessage = easyMessage.replaceAll(
-      '{${placeholder.name}}',
-      '${replacementBraces[0]}${placeholder.name}${replacementBraces[1]}',
-    );
-  }
-  return easyMessage;
-}
-
-/// Replaces message with the interpolated variable name of the given placeholders
-/// with the ability to change braces to something other than {...}.
-///
-/// Examples:
-///
-/// * Replacing `{userName}`.
-/// ```dart
-/// final message = 'Hello my name is {userName}';
-/// final transformed = _replacePlaceholdersWithVariables(message, placeholders);
-/// // transformed == 'Hello my name is $userName'
-/// ```
-/// * Replacing `#choice#`.
-/// ```dart
-/// final message = 'I would like to have some #choice#';
-/// final transformed = _replacePlaceholdersWithVariables(message, placeholders, '##');
-/// transformed == 'I would like to have some $choice'
-/// ```
-String _replacePlaceholdersWithVariables(String message, Iterable<Placeholder> placeholders, [String braces = '{}']) {
-  assert(braces.length == 2);
-  String messageWithValues = message;
-  for (final Placeholder placeholder in placeholders) {
-    String variable = placeholder.name;
-    if (placeholder.requiresFormatting) {
-      variable += 'String';
-    }
-    messageWithValues = messageWithValues.replaceAll(
-      '${braces[0]}${placeholder.name}${braces[1]}',
-      _needsCurlyBracketStringInterpolation(messageWithValues, placeholder.name)
-        ? '\${$variable}'
-        : '\$$variable'
-    );
-  }
-  return messageWithValues;
-}
-
-String _generatePluralMethod(Message message, String translationForMessage) {
-  if (message.placeholders.isEmpty) {
-    throw L10nException(
-      'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
-      'Check to see if the plural message is in the proper ICU syntax format '
-      'and ensure that placeholders are properly specified.'
-    );
-  }
-
-  final String easyMessage = _replacePlaceholdersBraces(translationForMessage, message.placeholders, '##');
-
-  final Placeholder countPlaceholder = message.getCountPlaceholder();
-  const Map<String, String> pluralIds = <String, String>{
-    '=0': 'zero',
-    '=1': 'one',
-    '=2': 'two',
-    'few': 'few',
-    'many': 'many',
-    'other': 'other',
-  };
-
-  final List<String> pluralLogicArgs = <String>[];
-  for (final String pluralKey in pluralIds.keys) {
-    final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
-    final RegExpMatch? match = expRE.firstMatch(easyMessage);
-    if (match != null && match.groupCount == 2) {
-      final String argValue = _replacePlaceholdersWithVariables(generateString(match.group(2)!), message.placeholders, '##');
-      pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
-    }
-  }
-
-  final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String? placeholderType = placeholder == countPlaceholder ? 'num' : placeholder.type;
-    return '$placeholderType ${placeholder.name}';
-  }).toList();
-
-  final String comment = message.description ?? 'No description provided in @${message.resourceId}';
-
-  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
-    return pluralMethodTemplate
-      .replaceAll('@(comment)', comment)
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-      .replaceAll('@(parameters)', parameters.join(', '))
-      .replaceAll('@(count)', countPlaceholder.name)
-      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-      .replaceAll('@(none)\n', '');
-  }
-
-  const String variable = 'pluralString';
-  final String string = _replaceWithVariable(translationForMessage, variable);
-  return pluralMethodTemplateInString
-    .replaceAll('@(comment)', comment)
-    .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-    .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-    .replaceAll('@(parameters)', parameters.join(', '))
-    .replaceAll('@(variable)', variable)
-    .replaceAll('@(count)', countPlaceholder.name)
-    .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-    .replaceAll('@(none)\n', '')
-    .replaceAll('@(string)', string);
-}
-
-String _replaceWithVariable(String translation, String variable) {
-  String prefix = generateString(translation.substring(0, translation.indexOf('{')));
-  prefix = prefix.substring(0, prefix.length - 1);
-  String suffix = generateString(translation.substring(translation.lastIndexOf('}') + 1));
-  suffix = suffix.substring(1);
-
-  // escape variable when the suffix can be combined with the variable
-  if (suffix.isNotEmpty && !suffix.startsWith(' ')) {
-    variable = '{$variable}';
-  }
-  return prefix + r'$' + variable + suffix;
-}
-
-String _generateSelectMethod(Message message, String translationForMessage) {
-  if (message.placeholders.isEmpty) {
-    throw L10nException(
-      'Unable to find placeholders for the select message: ${message.resourceId}.\n'
-      'Check to see if the select message is in the proper ICU syntax format '
-      'and ensure that placeholders are properly specified.'
-    );
-  }
-
-  final String easyMessage = _replacePlaceholdersBraces(translationForMessage, message.placeholders, '##');
-
-  final List<String> cases = <String>[];
-
-  final RegExpMatch? selectMatch = LocalizationsGenerator._selectRE.firstMatch(easyMessage);
-  String? choice;
-  if (selectMatch != null && selectMatch.groupCount == 2) {
-    choice = selectMatch.group(1);
-    final String pattern = selectMatch.group(2)!;
-    final RegExp patternRE = RegExp(r'\s*([\w\d]+)\s*\{(.*?)\}');
-    for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
-      if (patternMatch.groupCount == 2) {
-        String value = patternMatch.group(2)!
-          .replaceAll("'", r"\'")
-          .replaceAll('"', r'\"');
-        value = _replacePlaceholdersWithVariables(value, message.placeholders, '##');
-        cases.add(
-          "        '${patternMatch.group(1)}': '$value'",
-        );
-      }
-    }
-  } else {
-    throw L10nException(
-      'Incorrect select message format for: ${message.resourceId}.\n'
-      'Check to see if the select message is in the proper ICU syntax format.'
-    );
-  }
-
-  final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String placeholderType = placeholder.type ?? 'object';
-    return '$placeholderType ${placeholder.name}';
-  }).toList();
-
-  final String description = message.description ?? 'No description provided in @${message.resourceId}';
-
-  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
-    return selectMethodTemplate
-        .replaceAll('@(name)', message.resourceId)
-        .replaceAll('@(parameters)', parameters.join(', '))
-        .replaceAll('@(choice)', choice!)
-        .replaceAll('@(cases)', cases.join(',\n').trim())
-        .replaceAll('@(description)', description);
-  }
-
-  const String variable = 'selectString';
-  final String string = _replaceWithVariable(translationForMessage, variable);
-  return selectMethodTemplateInString
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', parameters.join(', '))
-      .replaceAll('@(variable)', variable)
-      .replaceAll('@(choice)', choice!)
-      .replaceAll('@(cases)', cases.join(',\n').trim())
-      .replaceAll('@(description)', description)
-      .replaceAll('@(string)', string);
-}
-
-bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
-  final int placeholderIndex = messageString.indexOf(placeholder);
-  // This means that this message does not contain placeholders/parameters,
-  // since one was not found in the message.
-  if (placeholderIndex == -1) {
-    return false;
-  }
-
-  final bool isPlaceholderEndOfSubstring = placeholderIndex + placeholder.length + 2 == messageString.length;
-
-  if (placeholderIndex > 2 && !isPlaceholderEndOfSubstring) {
-    // Normal case
-    // Examples:
-    // "'The number of {hours} elapsed is: 44'" // no curly brackets.
-    // "'哈{hours}哈'" // no curly brackets.
-    // "'m#hours#m'" // curly brackets.
-    // "'I have to work _#hours#_' sometimes." // curly brackets.
-    final RegExp commonCaseRE = RegExp('[^a-zA-Z_][#{]$placeholder[#}][^a-zA-Z_]');
-    return !commonCaseRE.hasMatch(messageString);
-  } else if (placeholderIndex == 2) {
-    // Example:
-    // "'{hours} elapsed.'" // no curly brackets
-    // '#placeholder# ' // no curly brackets
-    // '#placeholder#m' // curly brackets
-    final RegExp startOfString = RegExp('[#{]$placeholder[#}][^a-zA-Z_]');
-    return !startOfString.hasMatch(messageString);
-  } else {
-    // Example:
-    // "'hours elapsed: {hours}'"
-    // "'Time elapsed: {hours}'" // no curly brackets
-    // ' #placeholder#' // no curly brackets
-    // 'm#placeholder#' // curly brackets
-    final RegExp endOfString = RegExp('[^a-zA-Z_][#{]$placeholder[#}]');
-    return !endOfString.hasMatch(messageString);
-  }
-}
+Map<String, String> pluralCases = <String, String>{
+  '0': 'zero',
+  '1': 'one',
+  '2': 'two',
+  'zero': 'zero',
+  'one': 'one',
+  'two': 'two',
+  'few': 'few',
+  'many': 'many',
+  'other': 'other',
+};
 
 String _generateMethod(Message message, String translationForMessage) {
-  final NonterminalNode node = parse(lex(translationForMessage)) as NonterminalNode;
-
-  // Do some sanity checks. (i.e. ensure all placeholders are properly defined etc.)
-  // TODO: do this part
-
-  List<String> helperMethods = <String>[];
-
+  final Node node = compress(parse(lex(translationForMessage)));
+  final List<String> helperMethods = <String>[];
   final String parameters = generateMethodParameters(message).join(', ');
 
   // Get a unique helper method name. Should only call after adding all existing
@@ -430,26 +204,19 @@ String _generateMethod(Message message, String translationForMessage) {
 
   // Do a DFS post order traversal, generating dependent 
   // placeholder, plural, select helper methods, and combine these into
-  // one message. Return the name of the method generated for that node
-  String generateHelperMethods(NonterminalNode node) {
+  // one message. Returns the name of the method generated for that node.
+  String generateHelperMethods(Node node) {
+    final String helperMethodName = getHelperMethodName();
     switch (node.type) {
       case ST.message:
-        String messageString = '';
-        // Recall that message nodes are linked lists of string, placeholder, plural, and selects
-        // where node.children[0] is the value and node.children[1] is the next node until
-        // node.children.length == 1.
-        NonterminalNode messageNode = node;
-        while (messageNode.children.length == 2) {
-          final Node child = messageNode.children[0];
+        final String messageString = node.children.map((Node child) {
           if (child.type == ST.string) {
-            messageString += (child as TokenNode).value;
+            return child.value;
           } else {
-            messageString += '\${${generateHelperMethods(child as NonterminalNode)}($parameters)}';
+            final String childMethodName = generateHelperMethods(child);
+            return '\${$childMethodName($parameters)}';
           }
-          assert(messageNode.children[1].type == ST.message);
-          messageNode = messageNode.children[1] as NonterminalNode;
-        }
-        final String helperMethodName = getHelperMethodName();
+        }).join();
         helperMethods.add(messageHelperTemplate
           .replaceAll('@(name)', helperMethodName)
           .replaceAll('@(message)', messageString)
@@ -458,7 +225,7 @@ String _generateMethod(Message message, String translationForMessage) {
 
       case ST.placeholderExpr:
         assert(node.children[1].type == ST.identifier);
-        final String identifier = (node.children[1] as TokenNode).value;
+        final String identifier = node.children[1].value!;
         final String helperMethodName = getHelperMethodName();
         helperMethods.add(placeholderHelperTemplate
           .replaceAll('@(name)', helperMethodName)
@@ -467,58 +234,93 @@ String _generateMethod(Message message, String translationForMessage) {
         return helperMethodName;
 
       case ST.pluralExpr:
+        // Recall that pluralExpr are of the form
+        // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
         assert(node.children[1].type == ST.identifier);
         assert(node.children[5].type == ST.pluralParts);
-        final String identifier = (node.children[1] as TokenNode).value;
-        NonterminalNode pluralParts = (node.children[5] as NonterminalNode);
-        while
+
+        final String identifier = node.children[1].value!;
+        final List<String> pluralLogicArgs = <String>[];
+        final Node pluralParts = node.children[5];
+
+        for (final Node pluralPart in pluralParts.children) {
+          String pluralCase;
+          Node pluralMessage;
+          if (pluralPart.children[0].value == '=') {
+            assert(pluralPart.children[1].type == ST.number);
+            assert(pluralPart.children[3].type == ST.message);
+            pluralCase = pluralPart.children[1].value!;
+            pluralMessage = pluralPart.children[3];
+          } else {
+            assert(pluralPart.children[0].type == ST.identifier || pluralPart.children[0].type == ST.other);
+            assert(pluralPart.children[2].type == ST.message);
+            pluralCase = pluralPart.children[0].value!;
+            pluralMessage = pluralPart.children[2];
+          }
+          final String pluralPartHelperName = generateHelperMethods(pluralMessage);
+          pluralLogicArgs.add('      ${pluralCases[pluralCase]}: $pluralPartHelperName()');
+        }
+        helperMethods.add(pluralHelperTemplate
+          .replaceAll('@(name)', helperMethodName)
+          .replaceAll('@(count)', identifier)
+        );
+        return helperMethodName;
+
+      case ST.selectExpr:
+        // Recall that pluralExpr are of the form
+        // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
+        assert(node.children[1].type == ST.identifier);
+        assert(node.children[5].type == ST.selectParts);
+
+        final String identifier = node.children[1].value!;
+        final List<String> selectLogicArgs = <String>[];
+        final Node selectParts = node.children[5];
+
+        for (final Node selectPart in selectParts.children) {
+          String selectCase;
+          Node selectMessage;
+          assert(selectPart.children[0].type == ST.identifier || selectPart.children[0].type == ST.other);
+          assert(selectPart.children[2].type == ST.message);
+          selectCase = selectPart.children[0].value!;
+          selectMessage = selectPart.children[2];
+          final String selectPartHelperName = generateHelperMethods(selectMessage);
+          selectLogicArgs.add('      ${pluralCases[selectCase]}: $selectPartHelperName()');
+        }
+        helperMethods.add(selectHelperTemplate
+          .replaceAll('@(name)', helperMethodName)
+        );
+        return helperMethodName;
+      // ignore: no_default_cases
+      default:
+        throw Exception('cannot call "generateHelperMethod" on node type ${node.type}');
     }
   }
-  final List<Node> traversalStack = <Node>[node];
-  while (traversalStack.isNotEmpty) {
-
-    traversalStack.addAll(n)
-    if (node.type == ST.placeholderExpr) {
-      helperMethods.add(placeholderHelperTemplate
-        .replaceAll(@name))
-    }
-    if (node.type == ST.string) {
-      
-    }
-  }
-
-  String generateMessage() {
-    return _replacePlaceholdersWithVariables(generateString(translationForMessage), message.placeholders);
-  }
-
-  if (message.isPlural) {
-    return _generatePluralMethod(message, translationForMessage);
-  }
-
-  if (message.isSelect) {
-    return _generateSelectMethod(message, translationForMessage);
-  }
-
-  if (message.placeholdersRequireFormatting) {
-    return formatMethodTemplate
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
-      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-      .replaceAll('@(message)', generateMessage())
-      .replaceAll('@(none)\n', '');
-  }
-
-  if (message.placeholders.isNotEmpty) {
-    return methodTemplate
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
-      .replaceAll('@(message)', generateMessage());
-  }
-
-  return getterTemplate
+  final String messageHelper = generateHelperMethods(node);
+  return methodTemplate
     .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(message)', generateMessage());
+    .replaceAll('@(parameters)', parameters)
+    .replaceAll('@(message)', '$messageHelper($parameters)');
+
+  // if (message.placeholdersRequireFormatting) {
+  //   return formatMethodTemplate
+  //     .replaceAll('@(name)', message.resourceId)
+  //     .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
+  //     .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+  //     .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+  //     .replaceAll('@(message)', generateMessage())
+  //     .replaceAll('@(none)\n', '');
+  // }
+
+  // if (message.placeholders.isNotEmpty) {
+  //   return methodTemplate
+  //     .replaceAll('@(name)', message.resourceId)
+  //     .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
+  //     .replaceAll('@(message)', generateMessage());
+  // }
+
+  // return getterTemplate
+  //   .replaceAll('@(name)', message.resourceId)
+  //   .replaceAll('@(message)', generateMessage());
 }
 
 String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
