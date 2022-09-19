@@ -196,7 +196,6 @@ void main() {
               return OverlayPortal(
                 controller: controller,
                 overlayChildBuilder: (BuildContext context) => target,
-                child: null,
               );
             },
           ),
@@ -887,7 +886,6 @@ void main() {
                           return OverlayPortal(
                             controller: OverlayPortalController(),
                             overlayChildBuilder: (BuildContext context) => child3,
-                            child: null,
                           );
                         },
                         child: child2,
@@ -928,7 +926,6 @@ void main() {
           OverlayPortal(
             controller: controller1,
             overlayChildBuilder: (BuildContext context) => child1,
-            child: null,
           ),
           OverlayPortal(
             key: outerKey,
@@ -941,12 +938,10 @@ void main() {
                 child: child2,
               );
             },
-            child: null,
           ),
           OverlayPortal(
             controller: controller4,
             overlayChildBuilder: (BuildContext context) => child4,
-            child: null,
           ),
         ],
       );
@@ -983,7 +978,6 @@ void main() {
           OverlayPortal(
             controller: controller1,
             overlayChildBuilder: (BuildContext context) => child1,
-            child: null,
           ),
           OverlayPortal(
             key: innerKey,
@@ -996,12 +990,10 @@ void main() {
                 child: child2,
               );
             },
-            child: null,
           ),
           OverlayPortal(
             controller: controller4,
             overlayChildBuilder: (BuildContext context) => child4,
-            child: null,
           ),
         ],
       );
@@ -1324,8 +1316,8 @@ void main() {
               OverlayEntry(builder: (BuildContext context) {
                 return Column(
                   children: <Widget>[
-                    OverlayPortal(controller: controller1, overlayChildBuilder: (BuildContext context) => child1, child: null),
-                    OverlayPortal(controller: controller2, overlayChildBuilder: (BuildContext context) => child2, child: null),
+                    OverlayPortal(controller: controller1, overlayChildBuilder: (BuildContext context) => child1),
+                    OverlayPortal(controller: controller2, overlayChildBuilder: (BuildContext context) => child2),
                   ],
                 );
               }),
@@ -1420,16 +1412,16 @@ void main() {
         ),
       );
 
-      final RenderObject theatre = tester.renderObject<RenderObject>(find.byType(Overlay));
+      final RenderObject theater = tester.renderObject<RenderObject>(find.byType(Overlay));
       final List<RenderObject> childrenVisited = <RenderObject>[];
-      theatre.visitChildren(childrenVisited.add);
+      theater.visitChildren(childrenVisited.add);
       expect(childrenVisited.length, 3);
       expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
       childrenVisited.clear();
 
       setState(() { reparented = true; });
       await tester.pump();
-      theatre.visitChildren(childrenVisited.add);
+      theater.visitChildren(childrenVisited.add);
       // The child list stays the same.
       expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
     });

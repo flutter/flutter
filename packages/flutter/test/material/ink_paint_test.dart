@@ -481,7 +481,6 @@ void main() {
                                   ),
                                 );
                               },
-                              child: null,
                             ),
                           ),
                         ),
