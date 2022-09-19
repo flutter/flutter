@@ -55,7 +55,7 @@ std::optional<Snapshot> ColorMatrixFilterContents::RenderFilter(
     cmd.label = "Color Matrix Filter";
 
     auto options = OptionsFromPass(pass);
-    options.blend_mode = Entity::BlendMode::kSource;
+    options.blend_mode = BlendMode::kSource;
     cmd.pipeline = renderer.GetColorMatrixColorFilterPipeline(options);
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;

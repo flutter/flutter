@@ -186,6 +186,10 @@ struct Vector4 {
     return Vector4(x - v.x, y - v.y, z - v.z, w - v.w);
   }
 
+  constexpr Vector4 operator*(float f) const {
+    return Vector4(x * f, y * f, z * f, w * f);
+  }
+
   std::string ToString() const;
 };
 

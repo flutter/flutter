@@ -45,7 +45,7 @@ void AtlasContents::SetAlpha(Scalar alpha) {
   alpha_ = alpha;
 }
 
-void AtlasContents::SetBlendMode(Entity::BlendMode blend_mode) {
+void AtlasContents::SetBlendMode(BlendMode blend_mode) {
   // TODO(jonahwilliams): blending of colors with texture.
   blend_mode_ = blend_mode;
 }
@@ -100,7 +100,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
   for (size_t i = 0; i < texture_coords_.size(); i++) {
     auto sample_rect = texture_coords_[i];
     auto matrix = transforms_[i];
-    auto color = (colors_.size() > 0 ? colors_[i] : Color::Black());
+    auto color = colors_.size() > 0 ? colors_[i] : Color::Black();
     auto transformed_points =
         Rect::MakeSize(sample_rect.size).GetTransformedPoints(matrix);
 

@@ -5,7 +5,6 @@
 #include "vertices_contents.h"
 
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/entity.h"
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/vertices.vert.h"
 #include "impeller/geometry/color.h"
@@ -29,7 +28,7 @@ void VerticesContents::SetColor(Color color) {
   color_ = color.Premultiply();
 }
 
-void VerticesContents::SetBlendMode(Entity::BlendMode blend_mode) {
+void VerticesContents::SetBlendMode(BlendMode blend_mode) {
   blend_mode_ = blend_mode;
 }
 
@@ -66,13 +65,12 @@ bool VerticesContents::Render(const ContentContext& renderer,
     const auto& positions = vertices_.GetPositions();
     const auto& colors = vertices_.GetColors();
     for (size_t i = 0; i < positions.size(); i++) {
+      auto color = i < colors.size()
+                       ? Color::BlendColor(color_, colors[i], blend_mode_)
+                       : color_;
       vertex_data.push_back(VS::PerVertexData{
           .position = positions[i],
-          // TODO(108047): Blend these colors together when available. Use
-          //               colors[i] as the destination and color_ as the
-          //               source. Always use color_ when vertex colors are not
-          //               supplied.
-          .color = i < colors.size() ? colors[i] : color_,
+          .color = color,
       });
     }
   }

@@ -57,7 +57,7 @@ class EntityPass {
 
   void SetStencilDepth(size_t stencil_depth);
 
-  void SetBlendMode(Entity::BlendMode blend_mode);
+  void SetBlendMode(BlendMode blend_mode);
 
   void SetBackdropFilter(std::optional<BackdropFilterProc> proc);
 
@@ -115,7 +115,7 @@ class EntityPass {
   EntityPass* superpass_ = nullptr;
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
-  Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;
+  BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool cover_whole_screen_ = false;
 
   /// This value is incremented whenever something is added to the pass that

@@ -27,7 +27,7 @@ class AtlasContents final : public Contents {
 
   void SetTransforms(std::vector<Matrix> transforms);
 
-  void SetBlendMode(Entity::BlendMode blend_mode);
+  void SetBlendMode(BlendMode blend_mode);
 
   void SetTextureCoordinates(std::vector<Rect> texture_coords);
 
@@ -54,7 +54,7 @@ class AtlasContents final : public Contents {
   std::vector<Rect> texture_coords_;
   std::vector<Color> colors_;
   std::vector<Matrix> transforms_;
-  Entity::BlendMode blend_mode_;
+  BlendMode blend_mode_;
   std::optional<Rect> cull_rect_;
   Scalar alpha_ = 1.0;
   SamplerDescriptor sampler_descriptor_ = {};
