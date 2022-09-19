@@ -612,7 +612,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// If true, the bottom sheet can be dragged up and down and dismissed by
   /// swiping downwards.
   ///
-  /// Default is true.
+  /// Defaults is true.
   final bool enableDrag;
 
   /// The animation controller that controls the bottom sheet's entrance and
