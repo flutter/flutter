@@ -275,9 +275,12 @@ class _BottomSheetState extends State<BottomSheet> {
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
-    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
+    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;// ?? Colors.red;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
-    final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape;
+    final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top:Radius.circular(20.0)),
+        );
+    final bool hasDragHandle=true;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
 
     Widget bottomSheet = Material(
@@ -288,7 +291,18 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
-        child: widget.builder(context),
+        child: 
+        Column(
+          
+        //  mainAxisAlignment:MainAxisAlignment.
+          children:[
+          
+          SizedBox(height:50),
+          Expanded(child:
+          widget.builder(context),),
+
+          
+          ]),
       ),
     );
 
