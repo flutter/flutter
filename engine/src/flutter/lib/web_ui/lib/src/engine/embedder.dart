@@ -437,12 +437,12 @@ class FlutterViewEmbedder {
   ///
   /// See w3c screen api: https://www.w3.org/TR/screen-orientation/
   Future<bool> setPreferredOrientation(List<dynamic> orientations) {
-    final DomScreen screen = domWindow.screen!;
-    if (!unsafeIsNull(screen)) {
+    final DomScreen? screen = domWindow.screen;
+    if (screen != null) {
       final DomScreenOrientation? screenOrientation = screen.orientation;
-      if (!unsafeIsNull(screenOrientation)) {
+      if (screenOrientation != null) {
         if (orientations.isEmpty) {
-          screenOrientation!.unlock();
+          screenOrientation.unlock();
           return Future<bool>.value(true);
         } else {
           final String? lockType =
@@ -450,7 +450,7 @@ class FlutterViewEmbedder {
           if (lockType != null) {
             final Completer<bool> completer = Completer<bool>();
             try {
-              screenOrientation!.lock(lockType).then((dynamic _) {
+              screenOrientation.lock(lockType).then((dynamic _) {
                 completer.complete(true);
               }).catchError((dynamic error) {
                 // On Chrome desktop an error with 'not supported on this device
@@ -470,13 +470,15 @@ class FlutterViewEmbedder {
   }
 
   // Converts device orientation to w3c OrientationLockType enum.
+  //
+  // See also: https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation/lock
   static String? _deviceOrientationToLockType(String? deviceOrientation) {
     switch (deviceOrientation) {
       case 'DeviceOrientation.portraitUp':
         return orientationLockTypePortraitPrimary;
-      case 'DeviceOrientation.landscapeLeft':
-        return orientationLockTypePortraitSecondary;
       case 'DeviceOrientation.portraitDown':
+        return orientationLockTypePortraitSecondary;
+      case 'DeviceOrientation.landscapeLeft':
         return orientationLockTypeLandscapePrimary;
       case 'DeviceOrientation.landscapeRight':
         return orientationLockTypeLandscapeSecondary;

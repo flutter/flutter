@@ -552,11 +552,6 @@ String blurSigmasToCssString(double sigmaX, double sigmaY) {
   return 'blur(${(sigmaX + sigmaY) * 0.5}px)';
 }
 
-/// Checks if the dynamic [object] is equal to null.
-bool unsafeIsNull(dynamic object) {
-  return object == null;
-}
-
 /// A typed variant of [domWindow.fetch].
 Future<DomResponse> httpFetch(String url) async {
   final Object? result = await domWindow.fetch(url);

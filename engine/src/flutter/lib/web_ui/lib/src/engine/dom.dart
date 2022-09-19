@@ -1298,8 +1298,10 @@ extension DomScreenExtension on DomScreen {
 class DomScreenOrientation extends DomEventTarget {}
 
 extension DomScreenOrientationExtension on DomScreenOrientation {
-  Future<dynamic> lock(String orientation) => js_util
-      .promiseToFuture(js_util.callMethod(this, 'lock', <String>[orientation]));
+  Future<dynamic> lock(String orientation) {
+    final Object jsResult = js_util.callMethod<Object>(this, 'lock', <String>[orientation]);
+    return js_util.promiseToFuture(jsResult);
+  }
   external void unlock();
 }
 

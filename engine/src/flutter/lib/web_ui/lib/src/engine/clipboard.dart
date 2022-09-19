@@ -7,7 +7,6 @@ import 'package:ui/ui.dart' as ui;
 import 'browser_detection.dart';
 import 'dom.dart';
 import 'services.dart';
-import 'util.dart';
 
 /// Handles clipboard related platform messages.
 class ClipboardMessageHandler {
@@ -89,7 +88,7 @@ class ClipboardMessageHandler {
 /// APIs and the browser.
 abstract class CopyToClipboardStrategy {
   factory CopyToClipboardStrategy() {
-    return !unsafeIsNull(domWindow.navigator.clipboard)
+    return domWindow.navigator.clipboard != null
         ? ClipboardAPICopyStrategy()
         : ExecCommandCopyStrategy();
   }
@@ -109,7 +108,7 @@ abstract class CopyToClipboardStrategy {
 abstract class PasteFromClipboardStrategy {
   factory PasteFromClipboardStrategy() {
     return (browserEngine == BrowserEngine.firefox ||
-            unsafeIsNull(domWindow.navigator.clipboard))
+            domWindow.navigator.clipboard == null)
         ? ExecCommandPasteStrategy()
         : ClipboardAPIPasteStrategy();
   }
