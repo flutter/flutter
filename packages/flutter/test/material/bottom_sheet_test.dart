@@ -1383,9 +1383,6 @@ void main() {
       ModalBottomSheetRoute<void>(
         isScrollControlled: false,
         builder: (BuildContext context) => Container(),
-        capturedThemes: InheritedTheme.capture(
-          from: savedContext, to: navigator.context,
-        ),
       ),
     );
     await tester.pumpAndSettle();

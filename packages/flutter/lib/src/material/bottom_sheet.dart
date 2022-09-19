@@ -511,7 +511,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// A modal bottom sheet route.
   ModalBottomSheetRoute({
     required this.builder,
-    required this.capturedThemes,
+    this.capturedThemes,
     this.barrierLabel,
     this.backgroundColor,
     this.elevation,
@@ -538,7 +538,10 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Stores a list of captured [InheritedTheme]s that are wrapped around the
   /// bottom sheet.
-  final CapturedThemes capturedThemes;
+  ///
+  /// Consider setting this attribute when the [ModalBottomSheetRoute]
+  /// is created imperatively.
+  final CapturedThemes? capturedThemes;
 
   /// Specifies whether this is a route for a bottom sheet that will utilize
   /// [DraggableScrollableSheet].
@@ -701,7 +704,11 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
           child: content,
         );
 
-    return capturedThemes.wrap(bottomSheet);
+    if (capturedThemes != null) {
+      return capturedThemes!.wrap(bottomSheet);
+    } else {
+      return bottomSheet;
+    }
   }
 }
 
