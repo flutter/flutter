@@ -39,10 +39,6 @@ void ShaderMaskLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
   SkMatrix child_matrix = matrix;
-  if (context->raster_cache) {
-    child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
-  }
-
   AutoCache cache =
       AutoCache(layer_raster_cache_item_.get(), context, child_matrix);
 
