@@ -1,4 +1,4 @@
-Signature: 446f1dd42ae6ff2bf83b91fbb6bb9527
+Signature: d2fe7ee9c3a8c2f03073d1fd8fc7457c
 
 UNUSED LICENSES:
 
@@ -12881,7 +12881,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/symbol_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/timer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/type.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/uri_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/core/record.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/c_type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/native_finalizer.dart
 FILE: ../../../third_party/dart/sdk/lib/js/js_wasm.dart
