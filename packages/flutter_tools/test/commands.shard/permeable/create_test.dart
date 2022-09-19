@@ -3145,7 +3145,6 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
         errors.add(lineParser(line.trim()));
       }
     });
-    
   } on Exception catch (err) {
     fail('$err\n\nComplete STDOUT was:\n\n$stdout');
   }
