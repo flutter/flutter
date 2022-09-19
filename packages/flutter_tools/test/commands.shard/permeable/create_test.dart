@@ -40,7 +40,6 @@ const String _kNoPlatformsMessage = "You've created a plugin project that doesn'
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
-const String _kLintingErrorPattern = r"^\s*(?<type>error|info)(\s*[•|-]\s*)(?<desc>[\(\)`@\w\s'-]+)(\s*[•|-]\s*)(?<path>[\\\w'-\/:]+)(\s*[•|-]\s*)(?<lint>[\w'-]+)$";
 
 // This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
@@ -3132,14 +3131,20 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     }
   }
   final String stdout = exec.stdout.toString();
-  final List<String> errors;
-  final RegExp regex = RegExp(_kLintingErrorPattern, multiLine: true);
+  final List<String> errors = <String>[];
   try {
-    errors = const LineSplitter()
-        .convert(stdout)
-        .where((String line) => regex.hasMatch(line))
-        .map(lineParser)
-        .toList();
+    bool analyzeLineFound = false;
+    const LineSplitter().convert(stdout).forEach((String line) {
+      if (!analyzeLineFound && line.startsWith('Analyzing flutter_project')) {
+        analyzeLineFound = true;
+        return;
+      }
+
+      if (analyzeLineFound && line.isNotEmpty) {
+        errors.add(lineParser(line));
+      }
+    });
+    
   } on Exception catch (err) {
     fail('$err\n\nComplete STDOUT was:\n\n$stdout');
   }
