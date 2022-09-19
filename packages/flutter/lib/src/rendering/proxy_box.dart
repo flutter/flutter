@@ -2604,8 +2604,7 @@ class RenderTransform extends RenderProxyBox {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform!;
       if (filterQuality == null) {
-        final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
-        if (childOffset == null) {
+        if (!transform.isIdentity()) {
           // if the matrix is singular the children would be compressed to a line or
           // single point, instead short-circuit and paint nothing.
           final double det = transform.determinant();
@@ -2621,7 +2620,7 @@ class RenderTransform extends RenderProxyBox {
             oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
           );
         } else {
-          super.paint(context, offset + childOffset);
+          super.paint(context, offset);
           layer = null;
         }
       } else {

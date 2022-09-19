@@ -308,11 +308,23 @@ void main() {
       ),
     );
 
-    // This should not cause a transform layer to be inserted.
     final List<Layer> layers = tester.layers
       ..retainWhere((Layer layer) => layer is TransformLayer);
-    expect(layers.length, 1); // only the render view
+    expect(layers.length, 2);
     expect(tester.getTopLeft(find.byType(Container)), const Offset(100.0, 50.0));
+  });
+
+  testWidgets('Transform with identity does not insert layers', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform(
+        transform: Matrix4.identity(),
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    final List<Layer> layers = tester.layers
+      ..retainWhere((Layer layer) => layer is TransformLayer);
+    expect(layers.length, 1);
   });
 
   testWidgets('Transform.scale', (WidgetTester tester) async {
