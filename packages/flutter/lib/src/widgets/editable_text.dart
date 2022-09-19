@@ -3494,7 +3494,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
       atomicTextBoundary = CharacterBoundary(textEditingValue);
       // This isn't enough. Newline characters.
-      boundary = _ExpandedTextBoundary(_WhitespaceBoundary(textEditingValue.text), WordBoundary(renderEditable));
+      boundary = _ExpandedTextBoundary(_WhitespaceBoundary(textEditingValue), WordBoundary(renderEditable));
     }
 
     final _MixedBoundary mixedBoundary = intent.forward
@@ -3528,7 +3528,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : _MixedBoundary(boundary, _PushTextPosition(atomicTextBoundary, false));
   }
 
-  TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => DocumentBoundary(_value.text);
+  TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => DocumentBoundary(_value);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
     return Action<T>.overridable(context: context, defaultAction: defaultAction);
@@ -4288,7 +4288,7 @@ class _WhitespaceBoundary extends TextBoundary {
     int length = _textEditingValue.text.length;
     if (position.offset > length
         || (position.offset == length && position.affinity == TextAffinity.downstream)) {
-      position = TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+      position = TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
     // Handle position outside of the left bound.
     if (position.offset <= 0) {
