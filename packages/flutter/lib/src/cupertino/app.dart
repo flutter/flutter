@@ -480,6 +480,9 @@ class CupertinoScrollBehavior extends ScrollBehavior {
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
+    if (getPlatform(context) == TargetPlatform.macOS) {
+      return const BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+    }
     return const BouncingScrollPhysics();
   }
 }
