@@ -2067,9 +2067,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= _plainText.length) {
+    if (position.offset >= plainText.length) {
       return TextSelection.fromPosition(
-        TextPosition(offset: _plainText.length, affinity: TextAffinity.upstream)
+        TextPosition(offset: plainText.length, affinity: TextAffinity.upstream)
       );
     }
     // If text is obscured, the entire sentence should be treated as one word.
