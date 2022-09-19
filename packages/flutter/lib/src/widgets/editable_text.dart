@@ -4236,15 +4236,16 @@ class _CodeUnitBoundary extends TextBoundary {
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset > _textEditingValue.text.length ||
-        (position.offset == _textEditingValue.text.length && position.affinity == TextAffinity.downstream)) {
-      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
+    int length = _textEditingValue.text.length;
+    if (position.offset > length ||
+        (position.offset == length && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
     switch (position.affinity) {
       case TextAffinity.upstream:
-        return TextPosition(offset: math.min(position.offset - 1, _textEditingValue.text.length));
+        return TextPosition(offset: math.min(position.offset - 1, length));
       case TextAffinity.downstream:
-        return TextPosition(offset: math.min(position.offset, _textEditingValue.text.length));
+        return TextPosition(offset: math.min(position.offset, length));
     }
   }
 
@@ -4254,14 +4255,15 @@ class _CodeUnitBoundary extends TextBoundary {
         (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
       return const TextPosition(offset: 0);
     }
-    if (position.offset >= _textEditingValue.text.length) {
-      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
+    int length = _textEditingValue.text.length;
+    if (position.offset >= length) {
+      return TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
     switch (position.affinity) {
       case TextAffinity.upstream:
-        return TextPosition(offset: math.min(position.offset, _textEditingValue.text.length), affinity: TextAffinity.upstream);
+        return TextPosition(offset: math.min(position.offset, length), affinity: TextAffinity.upstream);
       case TextAffinity.downstream:
-        return TextPosition(offset: math.min(position.offset + 1, _textEditingValue.text.length), affinity: TextAffinity.upstream);
+        return TextPosition(offset: math.min(position.offset + 1, length), affinity: TextAffinity.upstream);
     }
   }
 }
@@ -4282,12 +4284,13 @@ class _WhitespaceBoundary extends TextBoundary {
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    // Handles outside of right bound.
-    if (position.offset > _textEditingValue.text.length
-        || (position.offset == _textEditingValue.length && position.affinity == TextAffinity.downstream)) {
+    // Position outside of the right bound.
+    int length = _textEditingValue.text.length;
+    if (position.offset > length
+        || (position.offset == length && position.affinity == TextAffinity.downstream)) {
       position = TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
     }
-    // Handles outside of left bound.
+    // Position outside of the left bound.
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
@@ -4307,11 +4310,12 @@ class _WhitespaceBoundary extends TextBoundary {
 
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    // Handles outside of right bound.
-    if (position.offset >= _textEditingValue.text.length) {
-      return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
+    // Position outside of the right bound.
+    int length = _textEditingValue.text.length;
+    if (position.offset >= length) {
+      return TextPosition(offset: length, affinity: TextAffinity.upstream);
     }
-    // Handles outside of left bound.
+    // Position outside of the left bound.
     if (position.offset < 0 || (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
       position = const TextPosition(offset: 0);
     }
@@ -4322,12 +4326,12 @@ class _WhitespaceBoundary extends TextBoundary {
       return position;
     }
 
-    for (index += 1; index < _textEditingValue.text.length; index += 1) {
+    for (index += 1; index < length; index += 1) {
       if (!TextLayoutMetrics.isWhitespace(_textEditingValue.text.codeUnitAt(index))) {
         return TextPosition(offset: index);
       }
     }
-    return TextPosition(offset: _textEditingValue.text.length, affinity: TextAffinity.upstream);
+    return TextPosition(offset: length, affinity: TextAffinity.upstream);
   }
 }
 
