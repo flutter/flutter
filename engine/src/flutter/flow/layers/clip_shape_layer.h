@@ -8,7 +8,6 @@
 #include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/paint_utils.h"
-#include "flutter/flow/raster_cache_util.h"
 
 namespace flutter {
 
@@ -51,9 +50,6 @@ class ClipShapeLayer : public CacheableContainerLayer {
       context->cull_rect.setEmpty();
     }
     SkMatrix child_matrix = matrix;
-    if (context->raster_cache && uses_save_layer) {
-      child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
-    }
     // We can use the raster_cache for children only when the use_save_layer is
     // true so if use_save_layer is false we pass the layer_raster_item is
     // nullptr which mean we don't do raster cache logic.

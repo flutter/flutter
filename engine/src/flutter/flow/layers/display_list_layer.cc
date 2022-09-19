@@ -100,9 +100,6 @@ void DisplayListLayer::Preroll(PrerollContext* context,
   TRACE_EVENT0("flutter", "DisplayListLayer::Preroll");
   DisplayList* disp_list = display_list();
   SkMatrix child_matrix = matrix;
-  if (context->raster_cache) {
-    child_matrix = RasterCacheUtil::GetIntegralTransCTM(child_matrix);
-  }
 
   AutoCache cache =
       AutoCache(display_list_raster_cache_item_.get(), context, child_matrix);
