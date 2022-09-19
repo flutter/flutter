@@ -180,7 +180,7 @@ GOTO :after_subroutine
     SET snapshot_path_old="%snapshot_path%.old"
     :move_old_snapshot
       IF EXIST "%snapshot_path_old%%snapshot_path_suffix%" (
-        ECHO %snapshot_path_suffix% already exists... 1>&2
+        ECHO "%snapshot_path_old%%snapshot_path_suffix% already exists..." 2>&1
         SET /A snapshot_path_suffix+=1
         GOTO move_old_snapshot
       ) ELSE (
