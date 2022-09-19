@@ -242,15 +242,19 @@ void debugResetBrowserSupportsImageDecoder() {
       _imageDecoderConstructor != null;
 }
 
+/// The signature of the function passed to the constructor of JavaScript `Promise`.
+typedef JsPromiseCallback = void Function(void Function(Object? value) resolve, void Function(Object? error) reject);
+
 /// Corresponds to JavaScript's `Promise`.
 ///
 /// This type doesn't need any members. Instead, it should be first converted
 /// to Dart's [Future] using [promiseToFuture] then interacted with through the
 /// [Future] API.
-@JS()
-@anonymous
+@JS('window.Promise')
 @staticInterop
-class JsPromise {}
+class JsPromise {
+  external factory JsPromise(JsPromiseCallback callback);
+}
 
 /// Corresponds to the browser's `ImageDecoder` type.
 ///
