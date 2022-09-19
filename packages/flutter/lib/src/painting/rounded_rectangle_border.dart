@@ -10,7 +10,6 @@ import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
 import 'circle_border.dart';
-import 'edge_insets.dart';
 
 /// A rectangular border with rounded corners.
 ///
@@ -36,18 +35,6 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   /// The radii for each corner.
   final BorderRadiusGeometry borderRadius;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        return EdgeInsets.all(side.width);
-      case StrokeAlign.center:
-        return EdgeInsets.all(side.width / 2);
-      case StrokeAlign.outside:
-        return EdgeInsets.zero;
-    }
-  }
 
   @override
   ShapeBorder scale(double t) {
@@ -110,18 +97,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-    final RRect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = borderRect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = borderRect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = borderRect;
-        break;
-    }
+    final RRect adjustedRect = borderRect.deflate(side.strokeInset);
     return Path()
       ..addRRect(adjustedRect);
   }
@@ -150,30 +126,17 @@ class RoundedRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final double width = side.width;
-        if (width == 0.0) {
+        if (side.width == 0.0) {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
           final Paint paint = Paint()
             ..color = side.color;
-          if (side.strokeAlign == StrokeAlign.inside) {
-            final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
-            final RRect inner = outer.deflate(width);
-            canvas.drawDRRect(outer, inner, paint);
-          } else {
-            final Rect inner;
-            final Rect outer;
-            if (side.strokeAlign == StrokeAlign.center) {
-              inner = rect.deflate(width / 2);
-              outer = rect.inflate(width / 2);
-            } else {
-              inner = rect;
-              outer = rect.inflate(width);
-            }
-            final BorderRadius borderRadiusResolved = borderRadius.resolve(textDirection);
-            canvas.drawDRRect(borderRadiusResolved.toRRect(outer), borderRadiusResolved.toRRect(inner), paint);
+          final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+          final RRect inner = borderRect.deflate(side.strokeInset);
+          final RRect outer = borderRect.inflate(side.strokeOutset);
+          canvas.drawDRRect(outer, inner, paint);
         }
-      }
+        break;
     }
   }
 
@@ -209,18 +172,6 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   final BorderRadiusGeometry borderRadius;
   final double circleness;
   final double eccentricity;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        return EdgeInsets.all(side.width);
-      case StrokeAlign.center:
-        return EdgeInsets.all(side.width / 2);
-      case StrokeAlign.outside:
-        return EdgeInsets.zero;
-    }
-  }
 
   @override
   ShapeBorder scale(double t) {
@@ -342,18 +293,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     final RRect borderRect = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
-    final RRect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = borderRect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = borderRect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = borderRect;
-        break;
-    }
+    final RRect adjustedRect = borderRect.deflate(ui.lerpDouble(side.width, 0, side.strokeAlign)!);
     return Path()
       ..addRRect(adjustedRect);
   }
@@ -393,25 +333,9 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final double width = side.width;
-        if (width == 0.0) {
-          canvas.drawRRect(_adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect)), side.toPaint());
-        } else {
-          final RRect borderRect = _adjustBorderRadius(rect, textDirection)!.toRRect(_adjustRect(rect));
-          final RRect adjustedRect;
-          switch (side.strokeAlign) {
-            case StrokeAlign.inside:
-              adjustedRect = borderRect.deflate(width / 2);
-              break;
-            case StrokeAlign.center:
-              adjustedRect = borderRect;
-              break;
-            case StrokeAlign.outside:
-              adjustedRect = borderRect.inflate(width / 2);
-              break;
-          }
-          canvas.drawRRect(adjustedRect, side.toPaint());
-        }
+        final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect, textDirection)!;
+        final RRect borderRect = adjustedBorderRadius.toRRect(_adjustRect(rect));
+        canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
     }
   }
 

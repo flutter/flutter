@@ -62,7 +62,7 @@ enum _FloatingActionButtonType {
 ///
 /// {@tool dartpad}
 /// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
+/// [Scaffold], with a pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
@@ -804,7 +804,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_127
 
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)

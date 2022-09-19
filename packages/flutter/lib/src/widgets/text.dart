@@ -356,7 +356,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// This sample demonstrates how to disable selection for a Text under a
 /// SelectionArea.
 ///
-/// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -373,8 +373,9 @@ class Text extends StatelessWidget {
   /// The [data] parameter must not be null.
   ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
-  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
-  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those
+  /// that follow, will not be rendered. Otherwise, it will be shown with the
+  /// given overflow option.
   const Text(
     String this.data, {
     super.key,

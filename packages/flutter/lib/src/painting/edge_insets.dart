@@ -678,7 +678,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   ///
   /// This is equivalent to [EdgeInsets.symmetric], since the inset is the same
   /// with either [TextDirection]. This constructor is just a convenience for
-  /// type compatibilty.
+  /// type compatibility.
   ///
   /// {@tool snippet}
   /// Eight pixel margin above and below, no horizontal margins:

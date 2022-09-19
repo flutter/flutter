@@ -1070,6 +1070,7 @@ void main() {
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
     expect(paragraph.getBoxesForRange(2, 2), isEmpty);
+    paragraph.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/65818

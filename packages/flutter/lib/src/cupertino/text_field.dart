@@ -102,6 +102,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   @override
   void onSingleTapUp(TapUpDetails details) {
+    editableText.hideToolbar();
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -140,7 +141,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// {@tool dartpad}
-/// This example shows how to set the initial value of the `CupertinoTextField` using
+/// This example shows how to set the initial value of the [CupertinoTextField] using
 /// a [controller] that already contains some text.
 ///
 /// ** See code in examples/api/lib/cupertino/text_field/cupertino_text_field.0.dart **
@@ -182,7 +183,7 @@ class CupertinoTextField extends StatefulWidget {
   /// the number of lines. In this mode, the intrinsic height of the widget will
   /// grow as the number of lines of text grows. By default, it is `1`, meaning
   /// this is a single-line text field and will scroll horizontally when
-  /// overflown. [maxLines] must not be zero.
+  /// it overflows. [maxLines] must not be zero.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -351,7 +352,7 @@ class CupertinoTextField extends StatefulWidget {
   /// the number of lines. In this mode, the intrinsic height of the widget will
   /// grow as the number of lines of text grows. By default, it is `1`, meaning
   /// this is a single-line text field and will scroll horizontally when
-  /// overflown. [maxLines] must not be zero.
+  /// it overflows. [maxLines] must not be zero.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -794,7 +795,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
-  /// platforms. If it is desired to supress the magnifier, consider passing
+  /// platforms. If it is desired to suppress the magnifier, consider passing
   /// [TextMagnifierConfiguration.disabled].
   ///
   /// {@tool dartpad}

@@ -198,7 +198,7 @@ class FilterChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_127
 
 class _FilterChipDefaultsM3 extends ChipThemeData {
   const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
@@ -222,7 +222,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Theme.of(context).colorScheme.shadow;
 
   @override
-  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get selectedColor => isEnabled
