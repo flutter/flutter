@@ -12,20 +12,31 @@ class RadioTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _RadioDefaultsM3 extends RadioThemeData {
-  _RadioDefaultsM3(BuildContext context)
-    : _theme = Theme.of(context),
-      _colors = Theme.of(context).colorScheme;
+  _RadioDefaultsM3(this.context);
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
 
   @override
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return ${componentColor('md.comp.radio-button.disabled.selected.icon')};
+        }
         return ${componentColor('md.comp.radio-button.disabled.unselected.icon')};
       }
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('md.comp.radio-button.selected.pressed.icon')};
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return ${componentColor('md.comp.radio-button.selected.hover.icon')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.radio-button.selected.focus.icon')};
+        }
         return ${componentColor('md.comp.radio-button.selected.icon')};
       }
       if (states.contains(MaterialState.pressed)) {

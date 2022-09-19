@@ -488,12 +488,11 @@ class _RadioPainter extends ToggleablePainter {
 
 // Hand coded defaults based on Material Design 2.
 class _RadioDefaultsM2 extends RadioThemeData {
-  _RadioDefaultsM2(BuildContext context)
-    : _theme = Theme.of(context),
-      _colors = Theme.of(context).colorScheme;
+  _RadioDefaultsM2(this.context);
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
 
   @override
   MaterialStateProperty<Color> get fillColor {
@@ -541,20 +540,31 @@ class _RadioDefaultsM2 extends RadioThemeData {
 // Token database version: v0_127
 
 class _RadioDefaultsM3 extends RadioThemeData {
-  _RadioDefaultsM3(BuildContext context)
-    : _theme = Theme.of(context),
-      _colors = Theme.of(context).colorScheme;
+  _RadioDefaultsM3(this.context);
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
 
   @override
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return _colors.onSurface.withOpacity(0.38);
+        }
         return _colors.onSurface.withOpacity(0.38);
       }
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.primary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.primary;
+        }
         return _colors.primary;
       }
       if (states.contains(MaterialState.pressed)) {
