@@ -850,13 +850,13 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
       case _FloatingActionButtonType.small:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
       case _FloatingActionButtonType.large:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
       case _FloatingActionButtonType.extended:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
      }
   }
 

@@ -223,7 +223,7 @@ class _CardDefaultsM3 extends CardTheme {
         clipBehavior: Clip.none,
         elevation: 1.0,
         margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
       );
 
   final BuildContext context;

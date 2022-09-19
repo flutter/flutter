@@ -1396,7 +1396,7 @@ class _DialogDefaultsM3 extends DialogTheme {
     : super(
         alignment: Alignment.center,
         elevation: 6.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
       );
 
   final BuildContext context;
