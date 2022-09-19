@@ -106,6 +106,12 @@ class Scribble {
       return;
     }
 
+    // The methods below are only valid when a client exists, i.e. when a field
+    // is focused.
+    if (_client == null) {
+      return;
+    }
+
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
     switch (method) {
       case 'Scribble.showToolbar':

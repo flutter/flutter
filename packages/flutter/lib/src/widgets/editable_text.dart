@@ -3185,8 +3185,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         return true;
       }).map<SelectionRect>((SelectionRect? selectionRect) => selectionRect!).toList();
-      // TODO(justinmc): Is there a cleaner way to call this?
-      //_textInputConnection!.setSelectionRects(rects);
       Scribble.setSelectionRects(rects);
     }
   }
@@ -4132,9 +4130,11 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
   }
 
   void _updateClient(bool hasFocus) {
-    if (hasFocus && Scribble.client != this) {
-      Scribble.client = this;
-    } else {
+    if (hasFocus) {
+      if (Scribble.client != this) {
+        Scribble.client = this;
+      }
+    } else if (Scribble.client == this) {
       Scribble.client = null;
     }
   }
@@ -4170,7 +4170,9 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
   void dispose() {
     Scribble.unregisterScribbleElement(elementIdentifier);
     widget.focusNode.removeListener(_onFocusChange);
-    Scribble.client = null;
+    if (Scribble.client == this) {
+      Scribble.client = null;
+    }
     super.dispose();
   }
 
