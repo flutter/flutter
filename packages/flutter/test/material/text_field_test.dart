@@ -12182,9 +12182,9 @@ void main() {
                   magnifierBuilder: (
                       _,
                       MagnifierController controller,
-                      ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
-                      infoBearer = localInfoBearer;
+                      magnifierInfo = localMagnifierInfo;
                       return fakeMagnifier;
                     },
                 ),
@@ -12214,7 +12214,7 @@ void main() {
       expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 7 : 5);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
 
-      final Offset firstLongPressGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstLongPressGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       // Move the gesture to 'h' on Android to update the magnifier and select 'ghi'.
       // Move the gesture to 'h' on iOS to update the magnifier and move the cursor to 'h'.
@@ -12224,7 +12224,7 @@ void main() {
       expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 11 : 9);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       // Expect the position the magnifier gets to have moved.
-      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
+      expect(firstLongPressGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
 
       // End the long press to hide the magnifier.
       await gesture.up();

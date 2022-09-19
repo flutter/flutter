@@ -6114,9 +6114,9 @@ void main() {
                 magnifierBuilder: (
                     _,
                     MagnifierController controller,
-                    ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                    ValueNotifier<MagnifierInfo> localMagnifierInfo
                   ) {
-                    infoBearer = localInfoBearer;
+                    magnifierInfo = localMagnifierInfo;
                     return fakeMagnifier;
                   },
               ),
@@ -6144,7 +6144,7 @@ void main() {
       expect(controller.selection.extentOffset, 5);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
 
-      final Offset firstLongPressGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstLongPressGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       // Move the gesture to 'h' to update the magnifier and move the cursor to 'h'.
       await gesture.moveTo(textOffsetToPosition(tester, testValue.indexOf('h')));
@@ -6153,7 +6153,7 @@ void main() {
       expect(controller.selection.extentOffset, 9);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       // Expect the position the magnifier gets to have moved.
-      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
+      expect(firstLongPressGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
 
       // End the long press to hide the magnifier.
       await gesture.up();
