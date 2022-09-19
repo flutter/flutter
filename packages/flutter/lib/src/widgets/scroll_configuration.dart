@@ -201,8 +201,9 @@ class ScrollBehavior {
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind);
+      case TargetPlatform.macOS:
+        return (PointerEvent event) => MacOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -212,6 +213,10 @@ class ScrollBehavior {
   }
 
   static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _bouncingDesktopPhysics = BouncingScrollPhysics(
+    decelerationRate: ScrollDecelerationRate.fast,
+    parent: RangeMaintainingScrollPhysics()
+  );
   static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 
   /// The scroll physics to use for the platform given by [getPlatform].
@@ -224,8 +229,9 @@ class ScrollBehavior {
     // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         return _bouncingPhysics;
+      case TargetPlatform.macOS:
+        return _bouncingDesktopPhysics;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
