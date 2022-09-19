@@ -247,7 +247,9 @@ class PathRef {
     if ((x2 - x3) != width || (y3 - y0) != height) {
       return null;
     }
-    return ui.Rect.fromLTWH(x0, y0, width, height);
+    final double x = math.min(x0, x1);
+    final double y = math.min(y0, y2);
+    return ui.Rect.fromLTWH(x, y, width.abs(), height.abs());
   }
 
   /// Returns horizontal/vertical line bounds or null if not a line.
