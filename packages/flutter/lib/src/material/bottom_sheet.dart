@@ -557,7 +557,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// This controls the size of the shadow below the material.
   ///
-  /// Defaults to 0. The value is non-negative.
+  /// Defaults to 0, must not be negative.
   final double? elevation;
 
   /// The shape of the bottom sheet.
