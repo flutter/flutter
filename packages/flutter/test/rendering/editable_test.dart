@@ -326,6 +326,34 @@ void main() {
     expect(editable.debugNeedsLayout, isTrue);
   });
 
+  test('Can read plain text', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      maxLines: null,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    expect(editable.plainText, '');
+
+    editable.text = const TextSpan(text: '123');
+    expect(editable.plainText, '123');
+
+    editable.text = TextSpan(
+      children: <TextSpan>[
+        const TextSpan(text: 'abc', style: const TextStyle(fontSize: 1, fontFamily: 'Ahem')),
+        const TextSpan(text: 'def', style: const TextStyle(fontSize: 10, fontFamily: 'Ahem')),
+      ],
+    );
+    expect(editable.plainText, 'abcdef');
+
+    editable.layout(const BoxConstraints.tightFor(width: 200));
+    expect(editable.plainText, 'abcdef');
+  });
+
   test('Cursor with ideographic script', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
