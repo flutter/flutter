@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'colors.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -236,7 +237,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
     ? isEnabled
       ? BorderSide(color: Theme.of(context).colorScheme.outline)
       : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
-    : null;
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
