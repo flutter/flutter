@@ -3619,7 +3619,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
-    final double increment = ScrollAction.getIncrement(state!, intent);
+    final double increment = ScrollAction.getDirectionalIncrement(state!, intent);
     final double destination = clampDouble(
       position.pixels + increment,
       position.minScrollExtent,
@@ -3643,9 +3643,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _value.selection.extent,
     );
     final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
-    final double increment = ScrollAction.calculateScrollIncrement(
+    final double increment = ScrollAction.getDirectionalIncrement(
       state!,
-      type: ScrollIncrementType.page,
+      ScrollIntent(
+        direction: intent.forward ? AxisDirection.down : AxisDirection.up,
+        type: ScrollIncrementType.page,
+      ),
     );
     final ScrollPosition position = _scrollController.position;
     if (intent.forward) {
@@ -3668,7 +3671,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return;
       }
       final Offset nextExtentOffset =
-          Offset(extentRect.left, extentRect.top - increment);
+          Offset(extentRect.left, extentRect.top + increment);
       final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
           ? const TextPosition(offset: 0)
           : renderEditable.getPositionForPoint(

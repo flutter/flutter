@@ -1623,7 +1623,7 @@ class ScrollAction extends Action<ScrollIntent> {
   /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
   /// null. The type and state arguments must not be null, and the widget must
   /// have already been laid out so that the position fields are valid.
-  static double calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
+  static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(type != null);
     assert(state.position != null);
     assert(state.position.hasPixels);
@@ -1649,8 +1649,8 @@ class ScrollAction extends Action<ScrollIntent> {
 
   /// Find out how much of an increment to move by, taking the different
   /// directions into account.
-  static double getIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = calculateScrollIncrement(state, type: intent.type);
+  static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
+    final double increment = _calculateScrollIncrement(state, type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
         switch (state.axisDirection) {
@@ -1739,7 +1739,7 @@ class ScrollAction extends Action<ScrollIntent> {
     if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
       return;
     }
-    final double increment = getIncrement(state, intent);
+    final double increment = getDirectionalIncrement(state, intent);
     if (increment == 0.0) {
       return;
     }
