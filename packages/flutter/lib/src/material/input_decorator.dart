@@ -1045,7 +1045,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     // padding in case there isn't enough vertical space for showing characters.
     final double maxInputHeightConstraint = math.max(
       0,
-      boxConstraints.maxHeight - topHeight - bottomHeight
+      boxConstraints.maxHeight - topHeight - bottomHeight - densityOffset.dy
         - (scaleDownContentPadding ? math.min(contentPadding.vertical, 0) : contentPadding.vertical),
     );
     final BoxConstraints inputConstraints = BoxConstraints(
@@ -1136,12 +1136,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
-      + interactiveAdjustment;
-    final double maxContentHeight = containerHeight - verticalContentPadding.vertical - topHeight;
+      + interactiveAdjustment
+      + densityOffset.dy / 2.0;
+    final double maxContentHeight = containerHeight - verticalContentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // The three main alignments for the baseline when an outline is present are
     //

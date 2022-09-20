@@ -1789,45 +1789,49 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// This does not require the layout to be updated.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
+  int _getHardLineBreaks(String text) {
+    int count = 0;
+    for (int index = 0; index < text.length; index += 1) {
+      // TODO(LongCatIsLooong): account for other line terminators, or get it
+      // from ui.paragraph.
+      count += text.codeUnitAt(index) == 0x0A ? 1 : 0;
+    }
+    return count;
+  }
+
   double _preferredHeight(double width) {
-    final int? minLines = this.minLines;
     final int? maxLines = this.maxLines;
-    // Lock height to maxLines if needed.
-    final bool lockedMax = maxLines != null && minLines == null;
-    final bool lockedBoth = minLines != null && minLines == maxLines;
-    final bool singleLine = maxLines == 1;
-
-    if (singleLine || lockedMax || lockedBoth) {
-      return preferredLineHeight * maxLines!;
+    final int? minLines = this.minLines ?? maxLines;
+    // `minHeight` is only an estimate, since lines can be of varying heights.
+    final double minHeight = preferredLineHeight * (minLines ?? 0);
+    if (maxLines == null) {
+      final double estimatedHeight;
+      if (width == double.infinity) {
+        estimatedHeight = preferredLineHeight * (_getHardLineBreaks(_plainText) + 1);
+      } else {
+        _layoutText(maxWidth: width);
+        estimatedHeight = _textPainter.height;
+      }
+      return math.max(estimatedHeight, minHeight);
     }
 
-    // Clamp height to minLines or maxLines if needed.
-    final bool minLimited = minLines != null && minLines > 1;
-    final bool maxLimited = maxLines != null;
-    if (minLimited || maxLimited) {
+    // maxLines == 1 is a special case since it forces the scrollable direction
+    // to be horizontal. Report the real height to prevent the text from getting
+    // clipped.
+    if (maxLines == 1) {
+      // The _layoutText call lays out the paragraph using infinite width when
+      // maxLines == 1.
       _layoutText(maxWidth: width);
-      if (minLimited && _textPainter.height < preferredLineHeight * minLines) {
-        return preferredLineHeight * minLines;
-      }
-      if (maxLimited && _textPainter.height > preferredLineHeight * maxLines) {
-        return preferredLineHeight * maxLines;
-      }
+      return _textPainter.height;
     }
 
-    // Set the height based on the content.
-    if (width == double.infinity) {
-      final String text = _plainText;
-      int lines = 1;
-      for (int index = 0; index < text.length; index += 1) {
-        // Count explicit line breaks.
-        if (text.codeUnitAt(index) == 0x0A) {
-          lines += 1;
-        }
-      }
-      return preferredLineHeight * lines;
+    final double maxHeight = preferredLineHeight * maxLines;
+    assert(minHeight <= maxHeight, '$minHeight <= $maxHeight');
+    if (maxHeight == minHeight) {
+      return minHeight;
     }
     _layoutText(maxWidth: width);
-    return math.max(preferredLineHeight, _textPainter.height);
+    return clampDouble(_textPainter.height, minHeight, maxHeight);
   }
 
   @override
