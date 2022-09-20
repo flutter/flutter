@@ -4420,7 +4420,7 @@ class _SemanticsGeometry {
   /// by this object can be dropped from the semantics tree without losing
   /// semantics information.
   bool get dropFromTree {
-    return _rect.isEmpty;
+    return _rect.isEmpty || _transform.isZero();
   }
 
   /// Whether the [SemanticsNode] annotated with the geometric information
