@@ -45,7 +45,11 @@ class FakePlatformViewController extends PlatformViewController {
 }
 
 class FakeAndroidViewController implements AndroidViewController {
-  FakeAndroidViewController(this.viewId, {this.requiresSize = false});
+  FakeAndroidViewController(
+    this.viewId, {
+    this.requiresSize = false,
+    this.requiresViewComposition = false,
+  });
 
   bool disposed = false;
   bool focusCleared = false;
@@ -55,6 +59,8 @@ class FakeAndroidViewController implements AndroidViewController {
   bool requiresSize;
 
   bool _createCalledSuccessfully = false;
+
+  final List<PlatformViewCreatedCallback> _createdCallbacks = <PlatformViewCreatedCallback>[];
 
   /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
@@ -106,10 +112,13 @@ class FakeAndroidViewController implements AndroidViewController {
   @override
   void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
     created = true;
+    createdCallbacks.add(listener);
   }
 
   @override
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {}
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    createdCallbacks.remove(listener);
+  }
 
   @override
   Future<void> sendMotionEvent(AndroidMotionEvent event) {
@@ -128,10 +137,10 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];
+  List<PlatformViewCreatedCallback> get createdCallbacks => _createdCallbacks;
 
   @override
-  bool get requiresViewComposition => false;
+  bool requiresViewComposition;
 }
 
 class FakeAndroidPlatformViewsController {

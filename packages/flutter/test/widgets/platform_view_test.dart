@@ -1247,6 +1247,63 @@ void main() {
       await tester.pumpWidget(surface);
       expect(controller.pointTransformer, isNotNull);
     });
+
+    testWidgets('AndroidViewSurface defaults to texture-based rendering', (WidgetTester tester) async {
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_TextureBasedAndroidViewSurface',
+      ), findsOneWidget);
+    });
+
+    testWidgets('AndroidViewSurface uses view-based rendering when initially required', (WidgetTester tester) async {
+      controller.requiresViewComposition = true;
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PlatformLayerBasedAndroidViewSurface',
+      ), findsOneWidget);
+    });
+
+    testWidgets('AndroidViewSurface can switch to view-based rendering after creation', (WidgetTester tester) async {
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_TextureBasedAndroidViewSurface',
+      ), findsOneWidget);
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PlatformLayerBasedAndroidViewSurface',
+      ), findsNothing);
+
+      // Simulate a creation-time switch to view composition.
+      controller.requiresViewComposition = true;
+      for (final PlatformViewCreatedCallback callback in controller.createdCallbacks) {
+        callback(controller.viewId);
+      }
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_TextureBasedAndroidViewSurface',
+      ), findsNothing);
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PlatformLayerBasedAndroidViewSurface',
+      ), findsOneWidget);
+    });
   });
 
   group('UiKitView', () {
