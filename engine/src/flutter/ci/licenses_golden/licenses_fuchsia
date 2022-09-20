@@ -1,4 +1,4 @@
-Signature: 04091ff806018188923a415699a08e5f
+Signature: 5411ec3d5169d0f2122aa17cb214bd89
 
 UNUSED LICENSES:
 
@@ -3364,13 +3364,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/audio.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/hid.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/assert.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/compiler.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/audio.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/hid.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/ums.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/listnode.h
@@ -3392,7 +3391,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/assert.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/compiler.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/audio.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/hid.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/ums.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/listnode.h
