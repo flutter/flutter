@@ -73,6 +73,8 @@
   height: 500px;
 }
 
+/* Styles for the deep-link anchor button */
+
 .anchor-container {
   position: relative;
 }
@@ -102,6 +104,7 @@
 }
 
 /* Styles for the copy-to-clipboard button */
+
 .copyable-container {
   position: relative;
 }
@@ -154,9 +157,9 @@
 }
 
 .dark-theme .snippet-container {
-  background-color: #0a3249;
+  background-color: rgb(30, 40, 51);
 }
 
 .light-theme .snippet-container {
-  background-color: #a3d3f4;
+  background-color: rgb(207, 234, 252);
 }

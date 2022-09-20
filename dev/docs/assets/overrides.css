@@ -142,7 +142,7 @@ body.dark-theme {
 .dark-theme pre {
   border: 1px solid #444;
   color: white;
-  background-color:#1c2127;
+  background-color:rgb(23, 32, 43);
 }
 
 .dark-theme .hljs-string {
