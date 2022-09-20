@@ -188,6 +188,7 @@ class FilterChip extends StatelessWidget
       showCheckmark: showCheckmark,
       checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
     );
   }
 }

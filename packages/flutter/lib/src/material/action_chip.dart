@@ -167,6 +167,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       elevation: elevation,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
+      iconTheme: iconTheme,
     );
   }
 }
