@@ -176,7 +176,6 @@ void _checkSdkHandlersNotSet() {
   expect(Picture.onDispose, isNull);
 }
 
-
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
