@@ -3782,6 +3782,15 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac window_resize_integration_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly"]
+      task_name: window_resize_integration_test
+
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
