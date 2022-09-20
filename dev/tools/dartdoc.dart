@@ -427,19 +427,19 @@ void sanityCheckDocs() {
   // Make sure at least one example of each kind includes source code.
 
   // Check a "sample" example, any one will do.
-  final File sampleExample = File('$kPublishRoot/api/widgets/showGeneralDialog.html');
-  final RegExp sampleRegExp = RegExp(r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
-  _sanityCheckExample(sampleExample, sampleRegExp);
+  // final File sampleExample = File('$kPublishRoot/api/widgets/showGeneralDialog.html');
+  // final RegExp sampleRegExp = RegExp(r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
+  // _sanityCheckExample(sampleExample, sampleRegExp);
 
-  // Check a "snippet" example, any one will do.
-  final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
-  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.colorScheme.background;.*</pre>');
-  _sanityCheckExample(snippetExample, snippetRegExp);
+  // // Check a "snippet" example, any one will do.
+  // final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
+  // final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.colorScheme.background;.*</pre>');
+  // _sanityCheckExample(snippetExample, snippetRegExp);
 
-  // Check a "dartpad" example, any one will do.
-  final File dartpadExample = File('$kPublishRoot/api/widgets/PhysicalShape-class.html');
-  final RegExp dartpadRegExp = RegExp(r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
-  _sanityCheckExample(dartpadExample, dartpadRegExp);
+  // // Check a "dartpad" example, any one will do.
+  // final File dartpadExample = File('$kPublishRoot/api/widgets/PhysicalShape-class.html');
+  // final RegExp dartpadRegExp = RegExp(r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
+  // _sanityCheckExample(dartpadExample, dartpadRegExp);
 }
 
 /// Creates a custom index.html because we try to maintain old

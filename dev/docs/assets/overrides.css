@@ -1,35 +1,7 @@
 /* Overrides for dartdoc styles. */
+
 body {
-  font-size: 15px;
-  font-family: Roboto, sans-serif;
-  line-height: 1.5;
-  color: #111;
-  background-color: #fdfdfd;
-  -webkit-font-smoothing: auto;
-}
-
-header {
-  background-color: white;
-  color: #424242;
-}
-
-nav.navbar {
-  min-height: 57px;
-  padding: 6px 0;
-}
-
-header.header-fixed nav.navbar-fixed-top {
-  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
-}
-
-h1 {
-  font-size: 42px !important;
-  letter-spacing: -1px;
-}
-
-h2 {
-  color: #111;
-  font-size: 24px;
+  font-family: "Google Sans", "Roboto", sans-serif;
 }
 
 .markdown h2 {
@@ -42,37 +14,15 @@ section.summary h2 {
   border-bottom: none;
 }
 
-.sidebar ol,
-.sidebar ol li.section-title {
-  font-size: inherit;
-}
-
-@media screen and (max-width: 768px) {
-  .sidebar-offcanvas-left.active {
-    padding: 10px;
-  }
-}
-
-.sidebar-offcanvas-left ol {
-  padding: 0 16px 16px 0;
-}
-
-.sidebar-offcanvas-left h5 {
-  display: none;
-}
-
 pre,
 pre.prettyprint,
 pre > code {
   font-size: 14px;
 }
 
-pre,
-pre.prettyprint {
-  background: #f5f2f0;
+pre {
   margin: 0 0 15px 0;
   padding: 8px 12px;
-  border: 1px solid #cccccc;
   border-radius: 4px;
 }
 
@@ -88,17 +38,12 @@ code {
 }
 
 #search-box {
-  color: #555;
-  background-color: #fff;
-  background-image: none;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-  padding: 4px 6px;
+  height: 24px;
   font-size: 15px;
+  padding-left: 40px;
 }
 
 input.form-control.typeahead {
-  padding: 4px 7px;
   font-size: 15px;
 }
 
@@ -111,7 +56,8 @@ i.md-36 {
   vertical-align: bottom;
 }
 
-/* address a style issue with the background of code sections */
+/* address a style issue with the background of code sections. Without this, the
+   text has a different background from the rest of the code box. */
 code.hljs {
   background: inherit;
 }
@@ -120,6 +66,7 @@ footer {
   font-size: 13px;
   padding: 12px 20px;
 }
+
 /* Override the comment color for highlight.js to make it more
    prominent/readable */
 .hljs-comment {
@@ -131,4 +78,50 @@ footer {
 /* Constrain image width to container */
 img {
   max-width: 100%
+}
+
+/* Light/Dark Theme adjustments */
+
+.light-theme {
+  --main-hyperlinks-color: rgb(19, 137, 253);
+}
+
+body.light-theme {
+  color:rgb(74, 74, 74);
+}
+
+body.dark-theme {
+  color:rgb(200, 200, 200);
+}
+
+.dark-theme .multi-line-signature .name {
+  color: rgb(163, 163, 163);
+}
+
+.dark-theme .parameter-name {
+  color: rgb(163, 163, 163);
+}
+
+.dark-theme .parameter {
+  color: rgb(163, 163, 163);
+}
+
+.light-theme pre {
+  border: 1px solid white;
+  color: #222;
+  background-color:#eee;
+}
+
+.dark-theme pre {
+  border: 1px solid #444;
+  color: white;
+  background-color:#1c2127;
+}
+
+.dark-theme .hljs-string {
+  color:rgb(255, 100, 100);
+}
+
+.dark-theme .hljs-title {
+  color:rgb(192, 184, 255);
 }
