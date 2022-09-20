@@ -2642,6 +2642,16 @@ targets:
         ["devicelab", "hostonly"]
       task_name: hello_world_macos__compile
 
+  - name: Mac integration_ui_test_test_macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "mac"]
+      task_name: integration_ui_test_test_macos
+
   - name: Mac module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
     timeout: 60
