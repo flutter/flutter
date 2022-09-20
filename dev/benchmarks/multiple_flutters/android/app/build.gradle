@@ -16,12 +16,12 @@ android {
     compileSdkVersion 31
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_11
+        targetCompatibility JavaVersion.VERSION_1_11
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '1.11'
     }
 
     defaultConfig {
