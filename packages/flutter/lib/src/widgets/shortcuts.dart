@@ -494,8 +494,8 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether this activator accepts repeat events of the [trigger] key.
   ///
   /// If [includeRepeats] is true, the activator is checked on all
-  /// [RawKeyDownEvent] events for the [trigger] key. If `includeRepeats` is
-  /// false, only the [trigger] key events with a false [RawKeyDownEvent.repeat]
+  /// [RawKeyDownEvent] events for the [trigger] key. If [includeRepeats] is
+  /// false, only [trigger] key events with a false [RawKeyDownEvent.repeat]
   /// attribute will be considered.
   final bool includeRepeats;
 
@@ -626,7 +626,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   /// Whether this activator accepts repeat events of the [character].
   ///
   /// If [includeRepeats] is true, the activator is checked on all
-  /// [RawKeyDownEvent] events for the [character]. If `includeRepeats` is
+  /// [RawKeyDownEvent] events for the [character]. If [includeRepeats] is
   /// false, only the [character] events with a false [RawKeyDownEvent.repeat]
   /// attribute will be considered.
   final bool includeRepeats;
@@ -722,7 +722,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// from being given to any ancestor managers, even if that key doesn't appear
   /// in the [shortcuts] map.
   ///
-  /// The net effect of setting `modal` to true is to return
+  /// The net effect of setting [modal] to true is to return
   /// [KeyEventResult.skipRemainingHandlers] from [handleKeypress] if it does
   /// not exist in the shortcut map, instead of returning
   /// [KeyEventResult.ignored].
@@ -1195,7 +1195,7 @@ class ShortcutRegistry with ChangeNotifier {
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
   /// which most tightly encloses the given [BuildContext].
   ///
-  /// If no [ShortcutRegistrar] widget encloses the context given, `of` will
+  /// If no [ShortcutRegistrar] widget encloses the context given, [of] will
   /// throw an exception in debug mode.
   ///
   /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if
@@ -1230,7 +1230,7 @@ class ShortcutRegistry with ChangeNotifier {
   /// Returns [ShortcutRegistry] of the [ShortcutRegistrar] that most tightly
   /// encloses the given [BuildContext].
   ///
-  /// If no [ShortcutRegistrar] widget encloses the given context, `maybeOf`
+  /// If no [ShortcutRegistrar] widget encloses the given context, [maybeOf]
   /// will return null.
   ///
   /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if

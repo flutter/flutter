@@ -4,9 +4,9 @@
 
 import 'template.dart';
 
-class ChipActionTemplate extends TokenTemplate {
+class ActionChipTemplate extends TokenTemplate {
 
-  const ChipActionTemplate(super.blockName, super.fileName, super.tokens);
+  const ActionChipTemplate(super.blockName, super.fileName, super.tokens);
 
   static const String tokenGroup = 'md.comp.assist-chip';
   static const String variant = '.flat';
@@ -31,10 +31,10 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => ${componentColor("$tokenGroup$variant.container")};
 
   @override
-  Color? get shadowColor => ${color("$tokenGroup.container.shadow-color")};
+  Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
 
   @override
-  @override Color? get surfaceTintColor => ${color("$tokenGroup.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
   Color? get selectedColor => ${componentColor("$tokenGroup$variant.selected.container")};

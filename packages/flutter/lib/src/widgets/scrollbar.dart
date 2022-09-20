@@ -934,7 +934,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// {@tool dartpad}
 /// This sample shows how to disable the default Scrollbar for a [Scrollable]
-/// widget to avoid duplicate Scrollbars when runnung on desktop platforms.
+/// widget to avoid duplicate Scrollbars when running on desktop platforms.
 ///
 /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
 /// {@end-tool}
@@ -1048,7 +1048,7 @@ class RawScrollbar extends StatefulWidget {
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
   /// {@tool snippet}
-  /// Here is an example of using the `controller` parameter to enable
+  /// Here is an example of using the [controller] attribute to enable
   /// scrollbar dragging for multiple independent ListViews:
   ///
   /// ```dart
@@ -1447,6 +1447,7 @@ class RawScrollbar extends StatefulWidget {
 /// scrollbar track.
 class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
   Offset? _dragScrollbarAxisOffset;
+  late double? _thumbPress;
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
@@ -1785,6 +1786,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
     _dragScrollbarAxisOffset = localPosition;
+    _thumbPress = direction == Axis.vertical
+      ? localPosition.dy - scrollbarPainter._thumbOffset
+      : localPosition.dx - scrollbarPainter._thumbOffset;
   }
 
   /// Handler called when a currently active long press gesture moves.
@@ -1802,8 +1806,26 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (direction == null) {
       return;
     }
-    _updateScrollPosition(localPosition);
+    switch (position.axisDirection) {
+      case AxisDirection.up:
+      case AxisDirection.down:
+        if (_canDragThumb(_dragScrollbarAxisOffset!.dy, position.viewportDimension, _thumbPress!)) {
+          _updateScrollPosition(localPosition);
+        }
+        break;
+      case AxisDirection.left:
+      case AxisDirection.right:
+        if (_canDragThumb(_dragScrollbarAxisOffset!.dx, position.viewportDimension, _thumbPress!)) {
+          _updateScrollPosition(localPosition);
+        }
+        break;
+    }
     _dragScrollbarAxisOffset = localPosition;
+  }
+
+  bool _canDragThumb(double dragOffset, double viewport, double thumbPress) {
+    return dragOffset >= thumbPress
+      && dragOffset <= viewport - (scrollbarPainter._thumbExtent - thumbPress);
   }
 
   /// Handler called when a long press has ended.

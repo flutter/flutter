@@ -452,7 +452,6 @@ void main() {
     // is turned on by default, these tests can be removed.
 
     testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
       const String contentText = 'Content';
 
       await tester.pumpWidget(MaterialApp(
@@ -494,11 +493,10 @@ void main() {
       expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
       final Divider divider = tester.widget<Divider>(find.byType(Divider));
-      expect(divider.color, theme.colorScheme.surfaceVariant);
+      expect(divider.color, null);
     });
 
     testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
       const String contentText = 'Content';
       const Key tapTarget = Key('tap-target');
 
@@ -557,7 +555,7 @@ void main() {
       expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
       final Divider divider = tester.widget<Divider>(find.byType(Divider));
-      expect(divider.color, theme.colorScheme.surfaceVariant);
+      expect(divider.color, null);
     });
   });
 }

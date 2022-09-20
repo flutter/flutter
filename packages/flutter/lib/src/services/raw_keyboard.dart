@@ -463,7 +463,7 @@ abstract class RawKeyEvent with Diagnosticable {
   ///
   /// For instance, if you wanted to make a game where the key to the right of
   /// the CAPS LOCK key made the player move left, you would be comparing the
-  /// result of this `physicalKey` with [PhysicalKeyboardKey.keyA], since that
+  /// result of this [physicalKey] with [PhysicalKeyboardKey.keyA], since that
   /// is the key next to the CAPS LOCK key on a QWERTY keyboard. This would
   /// return the same thing even on a French keyboard where the key next to the
   /// CAPS LOCK produces a "Q" when pressed.
@@ -508,7 +508,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// accurately referred to as grapheme clusters) are made up of more than one
   /// code point.
   ///
-  /// The `character` doesn't take into account edits by an input method editor
+  /// The [character] doesn't take into account edits by an input method editor
   /// (IME), or manage the visibility of the soft keyboard on touch devices. For
   /// composing text, use the [TextField] or [CupertinoTextField] widgets, since
   /// those automatically handle many of the complexities of managing keyboard

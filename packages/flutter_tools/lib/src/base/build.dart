@@ -162,7 +162,7 @@ class AOTSnapshotter {
     }
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
+    if (targetingApplePlatform) {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
@@ -181,7 +181,7 @@ class AOTSnapshotter {
     if (targetingApplePlatform) {
       stripAfterBuild = shouldStrip;
       if (stripAfterBuild) {
-        _logger.printTrace('Will strip AOT snapshot manual after build and dSYM generation.');
+        _logger.printTrace('Will strip AOT snapshot manually after build and dSYM generation.');
       }
     } else {
       stripAfterBuild = false;
@@ -331,7 +331,7 @@ class AOTSnapshotter {
 
       if (stripAfterBuild) {
         // See https://www.unix.com/man-page/osx/1/strip/ for arguments
-        final RunResult stripResult = await _xcode.strip(<String>['-S', appLib, '-o', appLib]);
+        final RunResult stripResult = await _xcode.strip(<String>['-x', appLib, '-o', appLib]);
         if (stripResult.exitCode != 0) {
           _logger.printError('Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${stripResult.exitCode}');
           return stripResult.exitCode;

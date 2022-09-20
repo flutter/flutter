@@ -17,6 +17,171 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      method: 'buildViewportChrome'
+      inClass: 'ScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: ['material.dart']
+      method: 'buildViewportChrome'
+      inClass: 'MaterialScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: ['cupertino.dart']
+      method: 'buildViewportChrome'
+      inClass: 'CupertinoScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'showTrackOnHover'
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'showTrackOnHover'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'showTrackOnHover'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'showTrackOnHover'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'showTrackOnHover'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-07
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-07
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111080
+  - title: "Migrate to 'BottomAppBarTheme.color'"
+    date: 2022-09-06
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+      - if: "bottomAppBarColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'bottomAppBarColor'
+          - kind: 'addParameter'
+            index: 73
+            name: 'bottomAppBarTheme'
+            style: optional_named
+            argumentValue:
+              expression: 'BottomAppBarTheme(color: {% bottomAppBarColor %})'
+              requiredIf: "bottomAppBarColor != ''"
+    variables:
+      bottomAppBarColor:
+        kind: 'fragment'
+        value: 'arguments[bottomAppBarColor]'
+
+
+
   # Changes made in https://github.com/flutter/flutter/pull/110162
   - title: "Migrate to 'ColorScheme.background'"
     date: 2022-08-24

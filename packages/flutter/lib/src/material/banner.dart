@@ -443,10 +443,7 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
   Color? get backgroundColor => _theme.colorScheme.surface;
 
   @override
-  Color? get dividerColor => Theme.of(context).colorScheme.surfaceVariant;
-
-  @override
-  TextStyle? get contentTextStyle => _theme.textTheme.bodyText2;
+  TextStyle? get contentTextStyle => _theme.textTheme.bodyMedium;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Banner
@@ -456,7 +453,7 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_132
 
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
   const _BannerDefaultsM3(this.context)
