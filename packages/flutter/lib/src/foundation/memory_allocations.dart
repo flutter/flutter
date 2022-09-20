@@ -258,6 +258,34 @@ class MemoryAllocations {
     _tryDefragmentListeners();
   }
 
+  /// Create [ObjectCreated] and invoke [dispatchObjectEvent] if there are listeners.
+  ///
+  /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
+  void dispatchObjectCreated({
+    required String library,
+    required String className,
+    required Object object,
+  }) {
+    if (!hasListeners) {
+      return;
+    }
+    dispatchObjectEvent(ObjectCreated(
+      library: library,
+      className: className,
+      object: object,
+    ));
+  }
+
+  /// Create [ObjectDisposed] and invoke [dispatchObjectEvent] if there are listeners.
+  ///
+  /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
+  void dispatchObjectDisposed({required Object object}) {
+    if (!hasListeners) {
+      return;
+    }
+    dispatchObjectEvent(ObjectDisposed(object: object));
+  }
+
   void _subscribeToSdkObjects() {
     assert(ui.Image.onCreate == null);
     assert(ui.Image.onDispose == null);
