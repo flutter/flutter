@@ -164,8 +164,8 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
          action == WM_SYSKEYDOWN || action == WM_SYSKEYUP);
 
   auto last_logical_record_iter = pressingRecords_.find(physical_key);
-  const bool had_record = last_logical_record_iter != pressingRecords_.end();
-  const uint64_t last_logical_record =
+  bool had_record = last_logical_record_iter != pressingRecords_.end();
+  uint64_t last_logical_record =
       had_record ? last_logical_record_iter->second : 0;
 
   // The logical key for the current "tap sequence".
@@ -207,6 +207,12 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   // target key's pressed state will be updated immediately after this.
   SynchronizeCritialPressedStates(key, physical_key, is_event_down,
                                   event_key_can_be_repeat);
+
+  // Reassess the last logical record in case pressingRecords_ was modified
+  // by the above synchronization methods.
+  last_logical_record_iter = pressingRecords_.find(physical_key);
+  had_record = last_logical_record_iter != pressingRecords_.end();
+  last_logical_record = had_record ? last_logical_record_iter->second : 0;
 
   // The resulting event's `type`.
   FlutterKeyEventType type;
@@ -264,8 +270,14 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     pressingRecords_[physical_key] = eventual_logical_record;
   } else {
     auto record_iter = pressingRecords_.find(physical_key);
-    assert(record_iter != pressingRecords_.end());
-    pressingRecords_.erase(record_iter);
+    // Assert this in debug mode. But in cases that it doesn't satisfy
+    // (such as due to a bug), make sure the `erase` is only called
+    // with a valid value to avoid crashing.
+    if (record_iter != pressingRecords_.end()) {
+      pressingRecords_.erase(record_iter);
+    } else {
+      assert(false);
+    }
   }
 
   FlutterKeyEvent key_data{
@@ -299,6 +311,14 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   pending_responses_[response_id] = std::move(pending_ptr);
   SendEvent(key_data, KeyboardKeyEmbedderHandler::HandleResponse,
             reinterpret_cast<void*>(pending_responses_[response_id].get()));
+
+  // Post-event synchronization. It is useful in cases where the true pressing
+  // state does not match the event type. For example, a CapsLock down event is
+  // received despite that GetKeyState says that CapsLock is not pressed. In
+  // such case, post-event synchronization will synthesize a CapsLock up event
+  // after the main event.
+  SynchronizeCritialPressedStates(key, physical_key, is_event_down,
+                                  event_key_can_be_repeat);
 }
 
 void KeyboardKeyEmbedderHandler::KeyboardHook(
