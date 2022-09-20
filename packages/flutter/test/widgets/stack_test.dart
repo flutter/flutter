@@ -259,6 +259,7 @@ void main() {
         child: IndexedStack(
           alignment: Alignment.topLeft,
           index: index,
+          hiddenChildrenAreOnstage: false,
           children: items,
         ),
       );

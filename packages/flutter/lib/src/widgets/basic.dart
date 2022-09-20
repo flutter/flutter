@@ -3953,11 +3953,32 @@ class IndexedStack extends Stack {
     super.clipBehavior,
     StackFit sizing = StackFit.loose,
     this.index = 0,
+    this.hiddenChildrenAreOnstage = true,
     super.children,
   }) : super(fit: sizing);
 
   /// The index of the child to show.
   final int? index;
+
+  /// Whether children hidden by this [IndexedStack] (that is, widgets in
+  /// [children] at an index not equal to [index]), are considered onstage.
+  ///
+  /// When this field is set to `false` (it defaults to `true`), these hidden
+  /// children are not reported by [Element.debugVisitOnstageChildren] and,
+  /// in particular, can't be found by the default [Finder] objects in Flutter
+  /// tests.
+  ///
+  /// By default, hidden children _are_ considered onstage, meaning that they
+  /// are visible to the default [Finder] objects in Flutter tests.
+  ///
+  /// See also:
+  ///
+  ///  - [Offstage], a widget that always hides its children. Note that an
+  ///    [IndexedStack] will also omit hidden children from being painted or
+  ///    hit-tested. However, it does report them as onstage children by default.
+  ///    Setting this parameter to `false` will make the behavior of an
+  ///    [IndexedStack] consistent with that of an [Offstage] widget.
+  final bool hiddenChildrenAreOnstage;
 
   @override
   RenderIndexedStack createRenderObject(BuildContext context) {
@@ -3984,7 +4005,10 @@ class IndexedStack extends Stack {
 
   @override
   MultiChildRenderObjectElement createElement() {
-    return _IndexedStackElement(this);
+    if (hiddenChildrenAreOnstage) {
+      return super.createElement();
+    } else {
+      return _IndexedStackElement(this);}
   }
 }
 
@@ -3996,6 +4020,8 @@ class _IndexedStackElement extends MultiChildRenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
+    assert(!widget.hiddenChildrenAreOnstage);
+
     final int? index = widget.index;
     if (index == null) {
       return super.debugVisitOnstageChildren(visitor);
