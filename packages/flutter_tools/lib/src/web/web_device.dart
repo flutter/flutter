@@ -454,7 +454,7 @@ class WebServerDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Flutter Tools';
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage package, {
+  Future<LaunchResult> startApp(ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
