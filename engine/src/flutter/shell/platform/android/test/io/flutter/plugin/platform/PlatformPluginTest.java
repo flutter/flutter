@@ -372,7 +372,36 @@ public class PlatformPluginTest {
   }
 
   @Test
-  public void setSystemUiModeListener() {
+  public void setSystemUiModeListener_overlaysAreHidden() {
+    ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class);
+    controller.setup();
+    Activity fakeActivity = controller.get();
+
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    // Subscribe to system UI visibility events.
+    platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
+
+    // Simulate system UI changed to full screen.
+    fakeActivity
+        .getWindow()
+        .getDecorView()
+        .dispatchSystemUiVisibilityChanged(View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+    // No events should have been sent to the platform channel yet. They are scheduled for
+    // the next frame.
+    verify(fakePlatformChannel, never()).systemChromeChanged(anyBoolean());
+
+    // Simulate the next frame.
+    ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+    // Now the platform channel should receive the event.
+    verify(fakePlatformChannel).systemChromeChanged(false);
+  }
+
+  @Test
+  public void setSystemUiModeListener_overlaysAreVisible() {
     ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class);
     controller.setup();
     Activity fakeActivity = controller.get();
@@ -383,7 +412,7 @@ public class PlatformPluginTest {
     // Subscribe to system Ui visibility events.
     platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
 
-    // Simulate changing of the system ui visibility.
+    // Simulate system UI changed to *not* full screen.
     fakeActivity.getWindow().getDecorView().dispatchSystemUiVisibilityChanged(0);
 
     // No events should have been sent to the platform channel yet. They are scheduled for
@@ -394,7 +423,7 @@ public class PlatformPluginTest {
     ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
     // Now the platform channel should receive the event.
-    verify(fakePlatformChannel).systemChromeChanged(anyBoolean());
+    verify(fakePlatformChannel).systemChromeChanged(true);
   }
 
   @Config(sdk = 28)
