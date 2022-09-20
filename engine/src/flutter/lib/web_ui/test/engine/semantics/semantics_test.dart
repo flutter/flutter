@@ -832,8 +832,11 @@ void _testVerticalScrolling() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle; touch-action: none; overflow-y: scroll">
+<flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
 </sem>''');
 
+    final DomElement? scrollable = findScrollable();
+    expect(scrollable!.scrollTop, isPositive);
     semantics().semanticsEnabled = false;
   });
 
@@ -861,6 +864,7 @@ void _testVerticalScrolling() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle; touch-action: none; overflow-y: scroll">
+<flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
   <sem-c>
     <sem></sem>
   </sem-c>
@@ -870,8 +874,8 @@ void _testVerticalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral scrollTop
-    // is 0.
-    expect(scrollable!.scrollTop, 0);
+    // is still a positive number.
+    expect(scrollable!.scrollTop, isPositive);
 
     semantics().semanticsEnabled = false;
   });
@@ -925,6 +929,7 @@ void _testVerticalScrolling() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle; touch-action: none; overflow-y: scroll">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
   <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
@@ -982,6 +987,7 @@ void _testHorizontalScrolling() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle; touch-action: none; overflow-x: scroll">
+<flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -1011,6 +1017,7 @@ void _testHorizontalScrolling() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle; touch-action: none; overflow-x: scroll">
+<flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
   <sem-c>
     <sem></sem>
   </sem-c>
@@ -1020,8 +1027,8 @@ void _testHorizontalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral
-    // scrollLeft is 0.
-    expect(scrollable!.scrollLeft, 0);
+    // scrollLeft is still a positive number.
+    expect(scrollable!.scrollLeft, isPositive);
 
     semantics().semanticsEnabled = false;
   });
@@ -1056,6 +1063,7 @@ void _testHorizontalScrolling() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle; touch-action: none; overflow-x: scroll">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
   <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
