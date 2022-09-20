@@ -350,6 +350,24 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
+  testWidgets('InputChip respects Avatar and IconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: InputChip(
+            onPressed: () { },
+            label: const Text('input chip'),
+            avatar: const Icon(Icons.cabin),
+            iconTheme: const IconThemeData(color: Color(0xff332211)),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, const Color(0xff332211));
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('Input chip has correct selected color when enabled - M3 defaults', (WidgetTester tester) async {
     final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
     await pumpCheckmarkChip(

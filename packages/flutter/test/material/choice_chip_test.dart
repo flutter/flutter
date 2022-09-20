@@ -570,6 +570,24 @@ void main() {
     expect(rawChip.checkmarkColor, checkmarkColor);
   });
 
+  testWidgets('Choice Chip respects Avatar and IconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ChoiceChip(
+            selected: false,
+            onSelected: (bool newValue) { },
+            label: const Text('choice chip'),
+            avatar: const Icon(Icons.cabin),
+            iconTheme: const IconThemeData(color: Color(0xffeeaadd)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, const Color(0xffeeaadd));
+    expect(tester.takeException(), null);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

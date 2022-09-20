@@ -36,6 +36,15 @@ DefaultTextStyle getLabelStyle(WidgetTester tester) {
   );
 }
 
+IconTheme getIconTheme(WidgetTester tester) {
+  return tester.widget<IconTheme>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(IconTheme),
+    ),
+  );
+}
+
 void main() {
   test('ChipThemeData copyWith, ==, hashCode basics', () {
     expect(const ChipThemeData(), const ChipThemeData().copyWith());
@@ -70,6 +79,7 @@ void main() {
     expect(themeData.brightness, null);
     expect(themeData.elevation, null);
     expect(themeData.pressElevation, null);
+    expect(themeData.iconTheme, null);
   });
 
   testWidgets('Default ChipThemeData debugFillProperties', (WidgetTester tester) async {
@@ -86,6 +96,7 @@ void main() {
 
   testWidgets('ChipThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const IconThemeData customIconTheme = IconThemeData(color: Color(0xff112233));
     const ChipThemeData(
       color: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
       backgroundColor: Color(0xfffffff1),
@@ -107,6 +118,7 @@ void main() {
       brightness: Brightness.dark,
       elevation: 5,
       pressElevation: 6,
+      iconTheme: customIconTheme,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -135,6 +147,7 @@ void main() {
       'brightness: dark',
       'elevation: 5.0',
       'pressElevation: 6.0',
+      'iconTheme: $customIconTheme',
     ]);
   });
 
@@ -153,13 +166,12 @@ void main() {
         theme: ThemeData.light(useMaterial3: false).copyWith(
           chipTheme: chipTheme,
         ),
-        home: Directionality(
+        home: const Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: RawChip(
                 label: const SizedBox(width: 100, height: 100),
-                onSelected: (bool newValue) { },
               ),
             ),
           ),
@@ -170,10 +182,95 @@ void main() {
     final RenderBox materialBox = getMaterialBox(tester);
     expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
     expect(getMaterial(tester).elevation, chipTheme.elevation);
-    expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
+    expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // icon + label + padding + labelPadding
     expect(getMaterial(tester).shape, chipTheme.shape);
     expect(getLabelStyle(tester).style.fontSize, 32);
   });
+
+  testWidgets('Chip with Avatar Icon uses ClipThemeData icon theme', (WidgetTester tester) async {
+    const IconThemeData customIconTheme = IconThemeData(color: Color(0xff112233));
+    const ChipThemeData chipTheme = ChipThemeData(
+      backgroundColor: Color(0xff112233),
+      elevation: 4,
+      padding: EdgeInsets.all(50),
+      labelPadding: EdgeInsets.all(25),
+      shape: RoundedRectangleBorder(),
+      labelStyle: TextStyle(fontSize: 32),
+      iconTheme: customIconTheme,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          chipTheme: chipTheme,
+        ),
+        home: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: Chip(
+                label: SizedBox(width: 100, height: 100),
+                avatar: Icon(Icons.ac_unit),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
+    expect(getMaterial(tester).elevation, chipTheme.elevation);
+    expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
+    expect(getMaterial(tester).shape, chipTheme.shape);
+    expect(getLabelStyle(tester).style.fontSize, 32);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.ac_unit).first).data.color, customIconTheme.color);
+    expect(getIconTheme(tester).data.color, customIconTheme.color );
+  });
+
+  testWidgets('Chip with Avatar Icon using overridden IconTheme from ThemeData chip theme', (WidgetTester tester) async {
+    const IconThemeData shadowedIconTheme = IconThemeData(color: Color(0xff112233));
+    const ChipThemeData chipTheme = ChipThemeData(
+      backgroundColor: Color(0xff112233),
+      elevation: 4,
+      padding: EdgeInsets.all(50),
+      labelPadding: EdgeInsets.all(25),
+      shape: RoundedRectangleBorder(),
+      iconTheme: shadowedIconTheme,
+    );
+
+    const IconThemeData customIconTheme = IconThemeData( size: 30, color: Color(0xff332211) );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          chipTheme: chipTheme,
+        ),
+        home: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: Chip(
+                label: SizedBox(width: 100, height: 100),
+                avatar: Icon(Icons.ac_unit),
+                iconTheme: customIconTheme,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
+    expect(getMaterial(tester).elevation, chipTheme.elevation);
+    expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
+    expect(getMaterial(tester).shape, chipTheme.shape);
+    expect(getLabelStyle(tester).style.fontSize,14);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.ac_unit).first).data.color, customIconTheme.color);
+    expect(getIconTheme(tester).data.color, customIconTheme.color );
+  });
+
 
   testWidgets('Chip uses ChipTheme', (WidgetTester tester) async {
     const ChipThemeData chipTheme = ChipThemeData(
@@ -203,13 +300,12 @@ void main() {
           data: chipTheme,
           child: Builder(
             builder: (BuildContext context) {
-              return Directionality(
+              return const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Material(
                   child: Center(
-                    child: RawChip(
+                    child: Chip(
                       label: const SizedBox(width: 100, height: 100),
-                      onSelected: (bool newValue) { },
                     ),
                   ),
                 ),
@@ -222,10 +318,72 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
     expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
-    expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // label + padding + labelPadding
+    expect(tester.getSize(find.byType(RawChip)), const Size(250, 250)); // icon + label + padding + labelPadding
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(getMaterial(tester).shape, chipTheme.shape);
     expect(getLabelStyle(tester).style.fontSize, 32);
+  });
+
+  testWidgets('Chip with Avatar Icon custom iconTheme and uses ChipTheme', (WidgetTester tester) async {
+    const IconThemeData shadowedClipThemeIconTheme = IconThemeData(color: Color(0xffbbeeff));
+    const ChipThemeData chipTheme = ChipThemeData(
+      backgroundColor: Color(0xff112233),
+      elevation: 4,
+      padding: EdgeInsets.all(50),
+      labelPadding: EdgeInsets.all(25),
+      labelStyle: TextStyle(fontSize: 32),
+      shape: RoundedRectangleBorder(),
+      iconTheme: shadowedClipThemeIconTheme,
+    );
+
+    const IconThemeData shadowedCustomIconTheme = IconThemeData(color: Color(0xff332211));
+    const ChipThemeData shadowedChipTheme = ChipThemeData(
+      backgroundColor: Color(0xff332211),
+      elevation: 3,
+      padding: EdgeInsets.all(5),
+      labelPadding: EdgeInsets.all(10),
+      labelStyle: TextStyle(fontSize: 64),
+      shape: CircleBorder(),
+      iconTheme: shadowedCustomIconTheme,
+    );
+
+    const IconThemeData customIconTheme = IconThemeData(color: Color(0xff112233));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          chipTheme: shadowedChipTheme,
+        ),
+        home: ChipTheme(
+          data: chipTheme,
+          child: Builder(
+            builder: (BuildContext context) {
+              return const Directionality(
+                textDirection: TextDirection.ltr,
+                child: Material(
+                  child: Center(
+                    child: Chip(
+                      label: const SizedBox(width: 100, height: 100),
+                      avatar: const Icon(Icons.ac_unit),
+                      iconTheme: customIconTheme,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
+    expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
+    expect(getMaterial(tester).elevation, chipTheme.elevation);
+    expect(getMaterial(tester).shape, chipTheme.shape);
+    expect(getLabelStyle(tester).style.fontSize, 32);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.ac_unit).first).data.color, customIconTheme.color);
+    expect(getIconTheme(tester).data.color,customIconTheme.color,reason:'Chip Icon Theme does not reflect custom iconTheme color.');
   });
 
   testWidgets('Chip uses constructor parameters', (WidgetTester tester) async {
@@ -250,11 +408,11 @@ void main() {
           data: shadowedChipTheme,
           child: Builder(
             builder: (BuildContext context) {
-              return Directionality(
+              return const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Material(
                   child: Center(
-                    child: RawChip(
+                    child: Chip(
                       backgroundColor: backgroundColor,
                       elevation: elevation,
                       padding: const EdgeInsets.all(50),
@@ -262,7 +420,6 @@ void main() {
                       labelStyle: const TextStyle(fontSize: fontSize),
                       shape: shape,
                       label: const SizedBox(width: 100, height: 100),
-                      onSelected: (bool newValue) { },
                     ),
                   ),
                 ),
@@ -279,6 +436,64 @@ void main() {
     expect(getMaterial(tester).elevation, elevation);
     expect(getMaterial(tester).shape, shape);
     expect(getLabelStyle(tester).style.fontSize, 32);
+  });
+
+testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (WidgetTester tester) async {
+    const IconThemeData shadowedCustomIconTheme = IconThemeData(color: Color(0xff332211));
+    const ChipThemeData shadowedChipTheme = ChipThemeData(
+      backgroundColor: Color(0xff112233),
+      elevation: 4,
+      padding: EdgeInsets.all(5),
+      labelPadding: EdgeInsets.all(2),
+      labelStyle: TextStyle(),
+      shape: RoundedRectangleBorder(),
+      iconTheme: shadowedCustomIconTheme,
+    );
+
+    const Color backgroundColor = Color(0xff332211);
+    const double elevation = 3;
+    const double fontSize = 32;
+    const OutlinedBorder shape = CircleBorder();
+    const IconThemeData customIconTheme = IconThemeData(color: Color(0xff112233));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChipTheme(
+          data: shadowedChipTheme,
+          child: Builder(
+            builder: (BuildContext context) {
+              return const Directionality(
+                textDirection: TextDirection.ltr,
+                child: Material(
+                  child: Center(
+                    child: Chip(
+                      avatar: const Icon(Icons.cabin),
+                      backgroundColor: backgroundColor,
+                      elevation: elevation,
+                      padding: const EdgeInsets.all(50),
+                      labelPadding:const EdgeInsets.all(25),
+                      labelStyle: const TextStyle(fontSize: fontSize),
+                      shape: shape,
+                      label: const SizedBox(width: 100, height: 100),
+                      iconTheme: customIconTheme,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..circle(color: backgroundColor));
+    expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
+    expect(getMaterial(tester).elevation, elevation);
+    expect(getMaterial(tester).shape, shape);
+    expect(getLabelStyle(tester).style.fontSize, 32);
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, customIconTheme.color);
+    expect(getIconTheme(tester).data.color,customIconTheme.color,reason:'Chip Icon Theme does not reflect custom iconTheme color.');
   });
 
   testWidgets('ChipTheme.fromDefaults', (WidgetTester tester) async {

@@ -345,4 +345,23 @@ void main() {
     await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () { })));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
+
+  testWidgets('ActionChip respects Avatar and IconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ActionChip(
+            onPressed: () { },
+            label: const Text('action chip'),
+            avatar: const Icon(Icons.cabin),
+            iconTheme: const IconThemeData(color: Color(0xff112233)),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, const Color(0xff112233));
+    expect(tester.takeException(), null);
+  });
+
 }

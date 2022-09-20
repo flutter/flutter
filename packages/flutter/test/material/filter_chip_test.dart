@@ -682,4 +682,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(FilterChip)).width, expectedWidth);
   });
+
+  
+  testWidgets('FilterChip respects Avatar and IconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: FilterChip(
+            onSelected: (bool newValue) { },
+            label: const Text('filter chip'),
+            avatar: const Icon(Icons.cabin),
+            iconTheme: const IconThemeData(color: Color(0xffaaddee)),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, const Color(0xffaaddee));
+    expect(tester.takeException(), null);
+  });
 }
