@@ -80,7 +80,7 @@ abstract class Repository {
         assert(upstreamRemote.url.isNotEmpty);
 
   final String name;
-  final Remote upstreamRemote;
+  Remote upstreamRemote;
 
   /// Branches that must exist locally in this [Repository].
   ///

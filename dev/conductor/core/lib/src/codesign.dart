@@ -41,6 +41,10 @@ class CodesignCommand extends Command<void> {
         processManager = checkouts.processManager {
     if (framework != null) {
       _framework = framework;
+      _framework!.upstreamRemote = const Remote(
+        name: RemoteName.upstream,
+        url: FrameworkRepository.defaultUpstream,
+      );
     }
     argParser.addFlag(
       kVerify,

@@ -25,6 +25,7 @@ void main() {
     late FakePlatform platform;
     late TestStdio stdio;
     late FakeProcessManager processManager;
+    late FakeCodesignCommand command;
     const List<String> binariesWithEntitlements = <String>[
       '$flutterCache/dart-sdk/bin/dart',
       '$flutterCache/dart-sdk/bin/dartaotruntime',
@@ -52,7 +53,7 @@ void main() {
         processManager: processManager,
         stdio: stdio,
       );
-      final FakeCodesignCommand command = FakeCodesignCommand(
+      command = FakeCodesignCommand(
         checkouts: checkouts,
         binariesWithEntitlements: Future<List<String>>.value(binariesWithEntitlements),
         binariesWithoutEntitlements: Future<List<String>>.value(binariesWithoutEntitlements),
@@ -61,6 +62,32 @@ void main() {
       runner = CommandRunner<void>('codesign-test', '')
         ..addCommand(command);
     }
+
+    test('ensures framework upstream ref is updated', () async {
+      createRunner(operatingSystem: 'linux');
+      expect(
+        () async => runner.run(<String>['codesign']),
+        throwsExceptionWith('Error! Expected operating system "macos"'),
+      );
+      expect(command.framework.upstreamRemote.url, FrameworkRepository.defaultUpstream);
+      const String invalidUrl = 'file:///opt/s/w/ir/x/w/flutter sdk/';
+      final FakeCodesignCommand inheritedCommand = FakeCodesignCommand(
+          checkouts: checkouts,
+          binariesWithEntitlements: Future<List<String>>.value(binariesWithEntitlements),
+          binariesWithoutEntitlements: Future<List<String>>.value(binariesWithoutEntitlements),
+          flutterRoot: fileSystem.directory(flutterRoot),
+          framework: FrameworkRepository(
+            checkouts,
+            upstreamRemote: const Remote(
+              name: RemoteName.upstream,
+              url: invalidUrl,
+            ),
+          ));
+      expect(
+        inheritedCommand.framework.upstreamRemote.url,
+        FrameworkRepository.defaultUpstream,
+      );
+    });
 
     test('throws exception if not run from macos', () async {
       createRunner(operatingSystem: 'linux');
@@ -605,6 +632,7 @@ class FakeCodesignCommand extends CodesignCommand {
     required this.binariesWithEntitlements,
     required this.binariesWithoutEntitlements,
     required super.flutterRoot,
+    super.framework,
   });
 
   @override
