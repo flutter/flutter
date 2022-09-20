@@ -2506,7 +2506,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -2584,7 +2584,7 @@ void main() {
               backgroundCursorColor: Colors.grey,
               controller: TextEditingController(),
               focusNode: focusNode,
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -2630,7 +2630,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -2667,7 +2667,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -2707,7 +2707,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -2747,7 +2747,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -2786,7 +2786,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         maxLines: 3,
         onEditingComplete: () {
@@ -2822,7 +2822,7 @@ void main() {
       Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           focusNode: focusNode,
           controller: controller,
@@ -2846,7 +2846,7 @@ void main() {
       widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           focusNode: focusNode,
           controller: controller,
@@ -2887,7 +2887,7 @@ void main() {
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           focusNode: focusNode,
           controller: controller,
@@ -2963,7 +2963,7 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           autocorrectionTextRectColor: rectColor,
           showCursor: false,
@@ -3031,7 +3031,7 @@ void main() {
                       focusNode: focusNode,
                       style: Typography.material2018()
                           .black
-                          .subtitle1!,
+                          .titleMedium!,
                       cursorColor: Colors.blue,
                       selectionControls: materialTextSelectionControls,
                       keyboardType: TextInputType.text,
@@ -4374,7 +4374,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -4404,7 +4404,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -4448,7 +4448,7 @@ void main() {
                 key: ValueKey<String>(controller1.text),
                 controller: controller1,
                 focusNode: FocusNode(),
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),
@@ -4457,7 +4457,7 @@ void main() {
                 key: ValueKey<String>(controller2.text),
                 controller: controller2,
                 focusNode: FocusNode(),
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 minLines: 10,
@@ -4574,7 +4574,7 @@ void main() {
                 key: ValueKey<String>(controller.text),
                 controller: controller,
                 focusNode: FocusNode(),
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),
@@ -4614,7 +4614,7 @@ void main() {
                 key: ValueKey<String>(controller.text),
                 controller: controller,
                 focusNode: FocusNode(),
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 scribbleEnabled: false,
@@ -4964,7 +4964,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardAppearance: Brightness.dark,
@@ -5041,7 +5041,7 @@ void main() {
             showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5110,7 +5110,7 @@ void main() {
             showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5285,7 +5285,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5422,7 +5422,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5832,6 +5832,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 3,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -5941,6 +5942,7 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 10,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6183,7 +6185,7 @@ void main() {
               controller: controller,
               autofocus: true,
               focusNode: FocusNode(),
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -6363,7 +6365,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -6398,6 +6400,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6422,6 +6425,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6464,6 +6468,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6514,7 +6519,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -6549,6 +6554,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6573,6 +6579,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6615,6 +6622,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6675,7 +6683,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -6710,6 +6718,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6734,6 +6743,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6776,6 +6786,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6837,7 +6848,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -6872,6 +6883,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6917,6 +6929,7 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6927,6 +6940,7 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7031,7 +7045,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -7060,6 +7074,7 @@ void main() {
       controller.selection,
       equals(const TextSelection.collapsed(
         offset: 4,
+        affinity: TextAffinity.upstream,
       )),
     );
 
@@ -7143,7 +7158,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -7208,7 +7223,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -7243,6 +7258,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7266,6 +7282,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7323,6 +7340,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7400,7 +7418,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -7435,6 +7453,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7458,6 +7477,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7515,6 +7535,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7591,7 +7612,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -7626,6 +7647,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
     );
@@ -7693,7 +7715,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -7759,7 +7781,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -7844,7 +7866,7 @@ void main() {
             showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1!,
+            style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: cupertinoTextSelectionControls,
@@ -8020,7 +8042,7 @@ void main() {
             maxLines: 2,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+            style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -8279,7 +8301,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -8377,7 +8399,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
       inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
       onChanged: (String s) => controller.text += ' onChanged',
@@ -8477,7 +8499,7 @@ void main() {
               focusNode: FocusNode(),
               cursorColor: Colors.red,
               backgroundCursorColor: Colors.blue,
-              style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+              style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
               keyboardType: TextInputType.text,
               inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
             ),
@@ -8521,7 +8543,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -8570,7 +8592,7 @@ void main() {
         focusNode: FocusNode(),
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
-        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
         keyboardType: TextInputType.text,
       );
 
@@ -8581,7 +8603,7 @@ void main() {
         focusNode: FocusNode(),
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
-        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
         keyboardType: TextInputType.text,
       );
 
@@ -8633,7 +8655,7 @@ void main() {
         focusNode: focusNode1,
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
-        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
         keyboardType: TextInputType.text,
       );
 
@@ -8645,7 +8667,7 @@ void main() {
         focusNode: focusNode2,
         cursorColor: Colors.red,
         backgroundCursorColor: Colors.blue,
-        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
         keyboardType: TextInputType.text,
       );
 
@@ -8683,7 +8705,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -8732,7 +8754,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -9188,7 +9210,7 @@ void main() {
         home: EditableText(
           controller: controller,
           focusNode: FocusNode(),
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
         ),
@@ -9250,7 +9272,7 @@ void main() {
         showSelectionHandles: true,
         autofocus: true,
         focusNode: FocusNode(),
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         backgroundCursorColor: Colors.grey,
         selectionControls: materialTextSelectionControls,
@@ -9524,7 +9546,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
-        style: Typography.material2018().black.subtitle1!,
+        style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -10090,7 +10112,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           selectionControls: materialTextSelectionControls,
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
@@ -10117,7 +10139,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onChanged: (String text) {
             throw FlutterError(errorText);
@@ -10143,7 +10165,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onEditingComplete: () {
             throw FlutterError(errorText);
@@ -10174,7 +10196,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onSubmitted: (String text) {
             throw FlutterError(errorText);
@@ -10210,7 +10232,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
         ),
       ));
@@ -10289,7 +10311,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: focusNode,
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -10345,7 +10367,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -10383,7 +10405,6 @@ void main() {
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 7);
     expect(controller.selection.extentOffset, 10);
-
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
@@ -10484,7 +10505,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -10648,7 +10669,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -10744,7 +10765,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -10982,7 +11003,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -11075,7 +11096,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: focusNode,
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -11124,7 +11145,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: focusNode,
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -11165,7 +11186,7 @@ void main() {
                 setState = setter;
                 return EditableText(
                   focusNode: focusNode,
-                  style: Typography.material2018().black.subtitle1!,
+                  style: Typography.material2018().black.titleMedium!,
                   cursorColor: Colors.blue,
                   backgroundCursorColor: Colors.grey,
                   selectionControls: enableInteractiveSelection ? materialTextSelectionControls : null,
@@ -11287,7 +11308,7 @@ void main() {
                 child: EditableText(
                   key: key,
                   focusNode: focusNode,
-                  style: Typography.material2018().black.subtitle1!,
+                  style: Typography.material2018().black.titleMedium!,
                   cursorColor: Colors.blue,
                   backgroundCursorColor: Colors.grey,
                   controller: controller,
@@ -12200,7 +12221,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: FocusNode(),
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -12281,7 +12302,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: FocusNode(),
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -12347,7 +12368,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: FocusNode(),
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -12427,7 +12448,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: FocusNode(),
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 selectionControls: materialTextSelectionControls,
@@ -12526,7 +12547,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: FocusNode(),
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 selectionControls: materialTextSelectionControls,
@@ -12603,7 +12624,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: FocusNode(),
-              style: Typography.material2018().black.subtitle1!,
+              style: Typography.material2018().black.titleMedium!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -12808,7 +12829,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -13141,7 +13162,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
               child: EditableText(
                 controller: TextEditingController(),
                 focusNode: FocusNode(),
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),

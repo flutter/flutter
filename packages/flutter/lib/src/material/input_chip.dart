@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'theme.dart';
@@ -248,13 +249,13 @@ class InputChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_132
 
 class _InputChipDefaultsM3 extends ChipThemeData {
   const _InputChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 
@@ -268,10 +269,10 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => null;
+  Color? get shadowColor => Colors.transparent;
 
   @override
-  @override Color? get surfaceTintColor => null;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get selectedColor => Theme.of(context).colorScheme.secondaryContainer;

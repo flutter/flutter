@@ -391,9 +391,8 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, VoidCallback? onChanged)
-    : assert(_decoration != null),
-      super(onChanged);
+  _BoxDecorationPainter(this._decoration, super.onChanged)
+    : assert(_decoration != null);
 
   final BoxDecoration _decoration;
 

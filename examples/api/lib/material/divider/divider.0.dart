@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Divider
+/// Flutter code sample for [Divider].
 
 import 'package:flutter/material.dart';
 
@@ -56,7 +56,7 @@ class MyStatelessWidget extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 'Subheader',
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.start,
               ),
             ),

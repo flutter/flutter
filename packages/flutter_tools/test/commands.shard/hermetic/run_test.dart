@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -31,7 +29,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -47,8 +44,8 @@ void main() {
   });
 
   group('run', () {
-    FakeDeviceManager mockDeviceManager;
-    FileSystem fileSystem;
+    late FakeDeviceManager mockDeviceManager;
+    late FileSystem fileSystem;
 
     setUp(() {
       mockDeviceManager = FakeDeviceManager();
@@ -142,10 +139,10 @@ void main() {
     });
 
     group('run app', () {
-      MemoryFileSystem fs;
-      Artifacts artifacts;
-      TestUsage usage;
-      FakeAnsiTerminal fakeTerminal;
+      late MemoryFileSystem fs;
+      late Artifacts artifacts;
+      late TestUsage usage;
+      late FakeAnsiTerminal fakeTerminal;
 
       setUpAll(() {
         Cache.disableLocking();
@@ -555,8 +552,8 @@ void main() {
     });
 
     group('Fatal Logs', () {
-      TestRunCommandWithFakeResidentRunner command;
-      MemoryFileSystem fs;
+      late TestRunCommandWithFakeResidentRunner command;
+      late MemoryFileSystem fs;
 
       setUp(() {
         command = TestRunCommandWithFakeResidentRunner()
@@ -666,7 +663,7 @@ void main() {
   });
 
   group('dart-defines and web-renderer options', () {
-    List<String> dartDefines;
+    late List<String> dartDefines;
 
     setUp(() {
       dartDefines = <String>[];
@@ -707,7 +704,7 @@ void main() {
   });
 
   group('terminal', () {
-    FakeAnsiTerminal fakeTerminal;
+    late FakeAnsiTerminal fakeTerminal;
 
     setUp(() {
       fakeTerminal = FakeAnsiTerminal();
@@ -877,7 +874,7 @@ void main() {
     expect(options.webLaunchUrl, 'http://flutter.dev');
 
     final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
-    expect(pattern.hasMatch(options.webLaunchUrl), true);
+    expect(pattern.hasMatch(options.webLaunchUrl!), true);
   }, overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.any(),
     Logger: () => BufferLogger.test(),
@@ -889,7 +886,7 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   List<Device> targetDevices = <Device>[];
 
   @override
-  String specifiedDeviceId;
+  String? specifiedDeviceId;
 
   @override
   bool hasSpecifiedAllDevices = false;
@@ -903,7 +900,7 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, {Duration timeout}) async {
+  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout}) async {
     return targetDevices;
   }
 
@@ -950,7 +947,7 @@ class FakeDevice extends Fake implements Device {
   @override
   String get id => 'fake_device';
 
-  void _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
+  Never _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
 
   @override
   Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
@@ -987,7 +984,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   DeviceLogReader getLogReader({
-    ApplicationPackage app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) {
     return FakeDeviceLogReader();
@@ -1002,27 +999,27 @@ class FakeDevice extends Fake implements Device {
   @override
   PlatformType get platformType => _platformType;
 
-  bool startAppSuccess;
+  late bool startAppSuccess;
 
   @override
-  DevFSWriter createDevFSWriter(
-    covariant ApplicationPackage app,
-    String userIdentifier,
+  DevFSWriter? createDevFSWriter(
+    covariant ApplicationPackage? app,
+    String? userIdentifier,
   ) {
     return null;
   }
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     if (startAppSuccess == false) {
       return LaunchResult.failed();
@@ -1045,19 +1042,18 @@ class FakeDevice extends Fake implements Device {
       }
       _throwToolExit(kSuccess);
     }
-    return null;
   }
 }
 
 class TestRunCommandWithFakeResidentRunner extends RunCommand {
-  FakeResidentRunner fakeResidentRunner;
+  late FakeResidentRunner fakeResidentRunner;
 
   @override
   Future<ResidentRunner> createRunner({
-    @required bool hotMode,
-    @required List<FlutterDevice> flutterDevices,
-    @required String applicationBinaryPath,
-    @required FlutterProject flutterProject,
+    required bool hotMode,
+    required List<FlutterDevice> flutterDevices,
+    required String? applicationBinaryPath,
+    required FlutterProject flutterProject,
   }) async {
     return fakeResidentRunner;
   }
@@ -1077,26 +1073,26 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
-  RPCError rpcError;
+  RPCError? rpcError;
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
-    String route,
+    String? route,
   }) async {
     await null;
     if (rpcError != null) {
-      throw rpcError;
+      throw rpcError!;
     }
     return 0;
   }
 }
 
 class DaemonCapturingRunCommand extends RunCommand {
-  /*late*/ Daemon daemon;
-  /*late*/ CapturingAppDomain appDomain;
+  late Daemon daemon;
+  late CapturingAppDomain appDomain;
 
   @override
   Daemon createMachineDaemon() {
@@ -1108,29 +1104,29 @@ class DaemonCapturingRunCommand extends RunCommand {
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(Daemon daemon) : super(daemon);
+  CapturingAppDomain(super.daemon);
 
-  bool /*?*/ multidexEnabled;
-  String /*?*/ userIdentifier;
+  bool? multidexEnabled;
+  String? userIdentifier;
 
   @override
   Future<AppInstance> startApp(
     Device device,
     String projectDirectory,
     String target,
-    String route,
+    String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    File applicationBinary,
-    @required bool trackWidgetCreation,
-    String projectRootPath,
-    String packagesFilePath,
-    String dillOutputPath,
+    File? applicationBinary,
+    required bool trackWidgetCreation,
+    String? projectRootPath,
+    String? packagesFilePath,
+    String? dillOutputPath,
     bool ipv6 = false,
     bool multidexEnabled = false,
-    String isolateFilter,
+    String? isolateFilter,
     bool machine = true,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;

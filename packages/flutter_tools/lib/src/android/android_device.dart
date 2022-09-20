@@ -20,7 +20,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-
 import 'android.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
@@ -313,7 +312,7 @@ class AndroidDevice extends Device {
     try {
       // If the server is automatically restarted, then we get irrelevant
       // output lines like this, which we want to ignore:
-      //   adb server is out of date.  killing..
+      //   adb server is out of date. killing..
       //   * daemon started successfully *
       await _processUtils.run(
         <String>[adbPath, 'start-server'],
