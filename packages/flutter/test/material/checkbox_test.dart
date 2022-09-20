@@ -553,7 +553,7 @@ void main() {
         ..drrect(
           color: material3 ? theme.colorScheme.onSurface : const Color(0x8a000000),
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(1.0)),
-          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.circular(-1.0)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
         ),
     );
 
@@ -568,7 +568,7 @@ void main() {
         ..drrect(
           color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000),
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(1.0)),
-          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.circular(-1.0)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
         ),
     );
   });
@@ -1420,7 +1420,7 @@ void main() {
         ..drrect(
           color: borderColor,
           outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
-          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
         ),
       );
     }
@@ -1479,7 +1479,7 @@ void main() {
         ..drrect(
           color: borderColor,
           outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
-          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
         ),
       );
     }

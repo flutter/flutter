@@ -413,7 +413,7 @@ class ThemeData with Diagnosticable {
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after v2.13.0-0.4.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     Color? toggleableActiveColor,
     @Deprecated(
@@ -846,7 +846,7 @@ class ThemeData with Diagnosticable {
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after v2.13.0-0.4.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     Color? toggleableActiveColor,
     @Deprecated(
@@ -1420,11 +1420,6 @@ class ThemeData with Diagnosticable {
   ///  * [splashFactory], which defines the appearance of the splash.
   final Color splashColor;
 
-  /// The color used to highlight the active states of toggleable widgets like
-  /// [Switch], [Radio], and [Checkbox].
-  Color get toggleableActiveColor => _toggleableActiveColor!;
-  final Color? _toggleableActiveColor;
-
   /// The color used for widgets in their inactive (but enabled)
   /// state. For example, an unchecked checkbox. See also [disabledColor].
   final Color unselectedWidgetColor;
@@ -1734,6 +1729,17 @@ class ThemeData with Diagnosticable {
   Color get backgroundColor => _backgroundColor!;
   final Color? _backgroundColor;
 
+  /// The color used to highlight the active states of toggleable widgets like
+  /// [Switch], [Radio], and [Checkbox].
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+    'This feature was deprecated after v3.4.0-19.0.pre.',
+  )
+  Color get toggleableActiveColor => _toggleableActiveColor!;
+  final Color? _toggleableActiveColor;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1874,7 +1880,7 @@ class ThemeData with Diagnosticable {
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after v2.13.0-0.4.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     Color? toggleableActiveColor,
     @Deprecated(

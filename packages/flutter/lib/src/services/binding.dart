@@ -19,7 +19,7 @@ import 'service_extensions.dart';
 import 'system_channels.dart';
 import 'text_input.dart';
 
-export 'dart:ui' show ChannelBuffers;
+export 'dart:ui' show ChannelBuffers, RootIsolateToken;
 
 export 'binary_messenger.dart' show BinaryMessenger;
 export 'hardware_keyboard.dart' show HardwareKeyboard, KeyEventManager;
@@ -90,7 +90,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
   /// [RootIsolateToken] as its argument. The value `null` is returned when
   /// executed from background isolates.
-  ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
+  static ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on

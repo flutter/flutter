@@ -281,6 +281,7 @@ abstract class Domain {
       return null;
     }).catchError((Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
+      return null;
     });
   }
 
