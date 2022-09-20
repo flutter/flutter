@@ -159,8 +159,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  // These are shortcuts are shared between most platforms except macOS for it
-  // uses different modifier keys as the line/word modifier.
+  // These shortcuts are shared between all platforms except Apple platforms,
+  // because they use different modifier keys as the line/word modifier.
   static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     for (final bool pressShift in const <bool>[true, false])
@@ -200,9 +200,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
-
-    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionByPageIntent(forward: false),
-    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionByPageIntent(forward: true),
 
     const SingleActivator(LogicalKeyboardKey.keyX, control: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
@@ -552,11 +549,10 @@ Intent? intentForMacOSSelector(String selectorName) {
     'scrollToBeginningOfDocument:': ScrollToDocumentBoundaryIntent(forward: false),
     'scrollToEndOfDocument:': ScrollToDocumentBoundaryIntent(forward: true),
 
-    // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
-    'scrollPageUp:': ScrollToDocumentBoundaryIntent(forward: false),
-    'scrollPageDown:': ScrollToDocumentBoundaryIntent(forward: true),
-    'pageUpAndModifySelection': ExpandSelectionToDocumentBoundaryIntent(forward: false),
-    'pageDownAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
+    'scrollPageUp:': const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    'scrollPageDown:': const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    'pageUpAndModifySelection': const ExtendSelectionByPageIntent(forward: false),
+    'pageDownAndModifySelection:': const ExtendSelectionByPageIntent(forward: true),
 
     // Escape key when there's no IME selection popup.
     'cancelOperation:': DismissIntent(),
