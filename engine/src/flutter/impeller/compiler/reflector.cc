@@ -731,7 +731,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           size,                                  // size
           stride * array_elements,               // byte_length
           array_elements,                        // array_elements
-          0,                                     // element_padding
+          element_padding,                       // element_padding
       });
       current_byte_offset += stride * array_elements;
       continue;
