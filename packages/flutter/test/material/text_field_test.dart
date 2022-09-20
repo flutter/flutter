@@ -2954,11 +2954,11 @@ void main() {
     final Widget testWidget = MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Test'),
+          title: const Text('Test'),
           actions: <Widget>[
             PopupMenuButton<String>(
               itemBuilder: (BuildContext context) {
-                return {'About'}.map((String value) {
+                return <String>{'About'}.map((String value) {
                   return PopupMenuItem<String>(
                     value: value,
                     child: Text(value),
