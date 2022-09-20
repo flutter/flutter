@@ -205,6 +205,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
         },
       )
+      ..addOption('file-reporter',
+        help: 'Enable an additional reporter writing test results to a file.\n'
+          'Should be in the form <reporter>:<filepath>, '
+          'Example: "json:reports/tests.json"'
+      )
       ..addOption('timeout',
         help: 'The default test timeout, specified either '
               'in seconds (e.g. "60s"), '
@@ -457,6 +462,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       web: stringArgDeprecated('platform') == 'chrome',
       randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),
       reporter: stringArgDeprecated('reporter'),
+      fileReporter: stringArg('file-reporter'),
       timeout: stringArgDeprecated('timeout'),
       runSkipped: boolArgDeprecated('run-skipped'),
       shardIndex: shardIndex,
