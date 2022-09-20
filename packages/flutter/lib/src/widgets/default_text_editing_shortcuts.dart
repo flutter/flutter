@@ -549,10 +549,10 @@ Intent? intentForMacOSSelector(String selectorName) {
     'scrollToBeginningOfDocument:': ScrollToDocumentBoundaryIntent(forward: false),
     'scrollToEndOfDocument:': ScrollToDocumentBoundaryIntent(forward: true),
 
-    'scrollPageUp:': const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    'scrollPageDown:': const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
-    'pageUpAndModifySelection': const ExtendSelectionByPageIntent(forward: false),
-    'pageDownAndModifySelection:': const ExtendSelectionByPageIntent(forward: true),
+    'scrollPageUp:': ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    'scrollPageDown:': ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    'pageUpAndModifySelection': ExtendSelectionByPageIntent(forward: false),
+    'pageDownAndModifySelection:': ExtendSelectionByPageIntent(forward: true),
 
     // Escape key when there's no IME selection popup.
     'cancelOperation:': DismissIntent(),
