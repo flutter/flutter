@@ -334,6 +334,7 @@ targets:
   - name: Mac iOS Engine
     recipe: engine/engine
     properties:
+      add_recipes_cq: "true"
       build_ios: "true"
       ios_debug: "true"
       jazzy_version: "0.14.1"
