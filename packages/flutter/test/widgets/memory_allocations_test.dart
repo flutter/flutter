@@ -40,6 +40,8 @@ void main() {
     ma.addListener(listener);
 
     await tester.pumpWidget(const _TestStatefulWidget());
+    expect(stateCreated, isTrue);
+    expect(stateDisposed, isFalse);
     await tester.pumpWidget(const SizedBox.shrink());
 
     expect(stateCreated, isTrue);
