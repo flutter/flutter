@@ -7,20 +7,13 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 
-import '_background_isolate_binary_messenger_io.dart'
-  if (dart.library.html) '_background_isolate_binary_messenger_web.dart';
-
 import 'binary_messenger.dart';
 import 'binding.dart';
 import 'debug.dart' show debugProfilePlatformChannels;
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
-export '_background_isolate_binary_messenger_io.dart'
-  if (dart.library.html) '_background_isolate_binary_messenger_web.dart';
-
 export 'binary_messenger.dart' show BinaryMessenger;
-export 'binding.dart' show RootIsolateToken;
 export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 
 bool _debugProfilePlatformChannelsIsRunning = false;
@@ -130,12 +123,6 @@ void _debugRecordDownStream(String channelTypeName, String name,
   _debugLaunchProfilePlatformChannels();
 }
 
-BinaryMessenger _findBinaryMessenger() {
-  return !kIsWeb && ServicesBinding.rootIsolateToken == null
-      ? BackgroundIsolateBinaryMessenger.instance
-      : ServicesBinding.instance.defaultBinaryMessenger;
-}
-
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
 ///
@@ -173,14 +160,10 @@ class BasicMessageChannel<T> {
   /// The message codec used by this channel, not null.
   final MessageCodec<T> codec;
 
-  /// The messenger which sends the bytes for this channel.
-  ///
-  /// On the root isolate or web, this defaults to the
-  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
-  /// value is a [BackgroundIsolateBinaryMessenger] from
-  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
+  /// The messenger which sends the bytes for this channel, not null.
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
+    final BinaryMessenger result =
+        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
     return !kReleaseMode && debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
@@ -263,14 +246,12 @@ class MethodChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger which sends the bytes for this channel.
+  /// The messenger used by this channel to send platform messages.
   ///
-  /// On the root isolate or web, this defaults to the
-  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
-  /// value is a [BackgroundIsolateBinaryMessenger] from
-  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
+  /// The messenger may not be null.
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
+    final BinaryMessenger result =
+        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
     return !kReleaseMode && debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
@@ -619,14 +600,8 @@ class EventChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger which sends the bytes for this channel.
-  ///
-  /// On the root isolate or web, this defaults to the
-  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
-  /// value is a [BackgroundIsolateBinaryMessenger] from
-  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
-  BinaryMessenger get binaryMessenger =>
-      _binaryMessenger ?? _findBinaryMessenger();
+  /// The messenger used by this channel to send platform messages, not null.
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.

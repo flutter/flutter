@@ -114,18 +114,7 @@ const UInt8 PAIR = 129;
     [FlutterMethodChannel methodChannelWithName:@"std-method"
                                 binaryMessenger:flutterController
                                           codec:[FlutterStandardMethodCodec codecWithReaderWriter:extendedReaderWriter]]];
-
-  [[FlutterBasicMessageChannel
-      messageChannelWithName:@"std-echo"
-             binaryMessenger:flutterController
-                       codec:[FlutterStandardMessageCodec
-                                 codecWithReaderWriter:extendedReaderWriter]]
-      setMessageHandler:^(id message, FlutterReply reply) {
-        reply(message);
-      }];
-
-  return [super application:application
-      didFinishLaunchingWithOptions:launchOptions];
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 - (void)setupMessagingHandshakeOnChannel:(FlutterBasicMessageChannel*)channel {
