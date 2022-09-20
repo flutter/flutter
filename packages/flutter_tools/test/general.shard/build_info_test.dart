@@ -294,6 +294,18 @@ void main() {
       expect(testLogger.warningText, contains('The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
     });
 
+    testUsingContext('toEnvironmentConfig repeated variable with DART_DEFINES not set', () async {
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+          treeShakeIcons: true,
+          trackWidgetCreation: true,
+          dartDefineConfigJsonMap: <String, Object>{ 'DART_DEFINES' : 'Define a variable, but it occupies the variable name of the system'},
+          dartObfuscation: true,
+      );
+      buildInfo.toEnvironmentConfig();
+      expect(testLogger.warningText, contains('The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
+
+    });
+
     testUsingContext('toGradleConfig repeated variable', () async {
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
           treeShakeIcons: true,
@@ -303,7 +315,30 @@ void main() {
           dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system!'));
+      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+    });
+
+    testUsingContext('toGradleConfig repeated variable with not set', () async {
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+          treeShakeIcons: true,
+          trackWidgetCreation: true,
+          dartDefineConfigJsonMap: <String,Object>{ 'dart-defines' : 'Define a variable, but it occupies the variable name of the system'},
+          dartObfuscation: true,
+      );
+      buildInfo.toGradleConfig();
+      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+    });
+
+    testUsingContext('toGradleConfig with androidProjectArgs override gradle project variant', () async {
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+          treeShakeIcons: true,
+          trackWidgetCreation: true,
+          androidProjectArgs: <String>['applicationId=com.google'],
+          dartDefineConfigJsonMap: <String,Object>{ 'applicationId' : 'override applicationId'},
+          dartObfuscation: true,
+      );
+      buildInfo.toGradleConfig();
+      expect(testLogger.warningText, contains('The key: [applicationId] already exists, you cannot use gradle variables that have been used'));
     });
 
   });
