@@ -192,7 +192,7 @@ Map<String, String> pluralCases = <String, String>{
 };
 
 String _generateMethod(Message message, String translationForMessage) {
-  final Node node = compress(parse(lex(translationForMessage)));
+  final Node node = compress(parse(translationForMessage));
   final List<String> helperMethods = <String>[];
   final String parameters = generateMethodParameters(message).join(', ');
 
