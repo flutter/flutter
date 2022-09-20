@@ -232,11 +232,12 @@ class SnackBar extends StatefulWidget {
   /// Typically a [Text] widget.
   final Widget content;
 
-  /// The snack bar's background color. If not specified it will use
-  /// [SnackBarThemeData.backgroundColor] of [ThemeData.snackBarTheme]. If that
-  /// is not specified it will default to a dark variation of
-  /// [ColorScheme.surface] for light themes, or [ColorScheme.onSurface] for
-  /// dark themes.
+  /// The snack bar's background color.
+  ///
+  /// If not specified, it will use [SnackBarThemeData.backgroundColor] of
+  /// [ThemeData.snackBarTheme]. If that is not specified it will default to a
+  /// dark variation of [ColorScheme.surface] for light themes, or
+  /// [ColorScheme.onSurface] for dark themes.
   final Color? backgroundColor;
 
   /// The z-coordinate at which to place the snack bar. This controls the size
@@ -467,7 +468,7 @@ class _SnackBarState extends State<SnackBar> {
       ),
     );
 
-    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.subtitle1;
+    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.titleMedium;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     assert((){
       // Whether the behavior is set through the constructor or the theme,

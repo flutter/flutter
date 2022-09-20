@@ -39,7 +39,7 @@ HostPlatform _identifyMacBinaryArch(String path) {
     case 'x86_64':
       return HostPlatform.darwin_x64;
     case 'arm64':
-      return HostPlatform.darwin_arm;
+      return HostPlatform.darwin_arm64;
     default:
       fail('Unexpected architecture ${match.group(1)}');
   }

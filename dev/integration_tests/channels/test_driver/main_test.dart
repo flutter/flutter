@@ -18,6 +18,7 @@ void main() {
       final SerializableFinder statusField = find.byValueKey('status');
       int step = 0;
       while (await driver.getText(statusField) == 'ok') {
+        print('Tapping for step $step...');
         await driver.tap(stepButton);
         step++;
       }

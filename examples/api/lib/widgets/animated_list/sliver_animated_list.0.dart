@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SliverAnimatedList
+/// Flutter code sample for [SliverAnimatedList].
 
 import 'package:flutter/material.dart';
 
@@ -224,7 +224,7 @@ class CardItem extends StatelessWidget {
               child: Center(
                 child: Text(
                   'Item $item',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
             ),
