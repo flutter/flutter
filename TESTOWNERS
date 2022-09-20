@@ -219,10 +219,10 @@
 /dev/devicelab/bin/tasks/flutter_gallery_macos__start_up.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
-/dev/devicelab/bin/tasks/flutter_view_macos__start_up.dart @a-wallen @flutter/desktop
-/dev/devicelab/bin/tasks/flutter_tool_startup__windows.dart @jensjoha @flutter/tool
 /dev/devicelab/bin/tasks/flutter_tool_startup__linux.dart @jensjoha @flutter/tool
 /dev/devicelab/bin/tasks/flutter_tool_startup__macos.dart @jensjoha @flutter/tool
+/dev/devicelab/bin/tasks/flutter_tool_startup__windows.dart @jensjoha @flutter/tool
+/dev/devicelab/bin/tasks/flutter_view_macos__start_up.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_view_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
@@ -251,6 +251,7 @@
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_html.dart @yjbanov @flutter/web
+/dev/devicelab/bin/tasks/window_resize_integration_test.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
