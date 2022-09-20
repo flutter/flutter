@@ -8161,7 +8161,7 @@ void main() {
     expect(controller.value.selection.baseOffset, 0);
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: TargetPlatformVariant.all(),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets('shift + pageup/pagedown keys in a one line field', (WidgetTester tester) async {
