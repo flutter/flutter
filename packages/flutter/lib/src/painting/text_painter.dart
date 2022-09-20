@@ -387,8 +387,8 @@ class TextPainter {
   ///
   /// This uses [InlineSpan.toPlainText] to get the full contents of all nodes in the tree.
   String get plainText {
-    _cachedPlainText ??= _text!.toPlainText(includeSemanticsLabels: false);
-    return _cachedPlainText!;
+    _cachedPlainText ??= _text?.toPlainText(includeSemanticsLabels: false);
+    return _cachedPlainText ?? '';
   }
   String? _cachedPlainText;
 
