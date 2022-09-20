@@ -1120,6 +1120,7 @@ class ListView extends BoxScrollView {
   /// By returning `null`, the [ScrollPosition.maxScrollExtent] will not be accurate
   /// unless the user has reached the end of the [ScrollView]. This can also cause the
   /// [Scrollbar] to grow as the user scrolls.
+  ///
   /// For more accurate [ScrollMetrics], consider specifying `itemCount`.
   /// {@endtemplate}
   ///
