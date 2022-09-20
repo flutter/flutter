@@ -27,31 +27,22 @@ class BackButtonIcon extends StatelessWidget {
   /// the current platform (as obtained from the [Theme]).
   const BackButtonIcon({ super.key });
 
-  @override
-  Widget build(BuildContext context) {
-    final String? semanticsLabel;
-    final IconData data;
-    switch (Theme.of(context).platform) {
+  /// Returns the appropriate "back" icon for the given `platform`.
+  static IconData _getIconData(TargetPlatform platform) {
+    switch (platform) {
       case TargetPlatform.android:
-        // Android uses semantics label to annotate the back button.
-        semanticsLabel = MaterialLocalizations.of(context).backButtonTooltip;
-        data = Icons.arrow_back;
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        semanticsLabel = null;
-        data = Icons.arrow_back;
-        break;
+        return Icons.arrow_back;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        data = Icons.arrow_back_ios;
-        semanticsLabel = null;
-        break;
+        return Icons.arrow_back_ios;
     }
-
-    return Icon(data, semanticLabel: semanticsLabel);
   }
+
+  @override
+  Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context).platform));
 }
 
 /// A Material Design back button.
@@ -158,22 +149,8 @@ class CloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final String? semanticsLabel;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-        // Android uses semantics label to annotate the close button.
-        semanticsLabel = MaterialLocalizations.of(context).closeButtonTooltip;
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsLabel = null;
-        break;
-    }
     return IconButton(
-      icon: Icon(Icons.close, semanticLabel: semanticsLabel),
+      icon: const Icon(Icons.close),
       color: color,
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {

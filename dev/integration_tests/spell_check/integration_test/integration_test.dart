@@ -147,7 +147,7 @@ Future<void> main() async {
 
     await tester.pumpWidget(const MyApp());
 
-    await tester.enterText(find.byType(EditableText), 'Hey wrororld! Hey!');
+    await tester.enterText(find.byType(EditableText), 'Hey cfabiueqqocnakoef! Hey!');
     await tester.pumpAndSettle();
 
     final RenderEditable renderEditable = findRenderEditable(tester, EditableText);
@@ -157,7 +157,7 @@ Future<void> main() async {
         style: style,
         children: <TextSpan>[
           TextSpan(style: style, text: 'Hey '),
-          TextSpan(style: misspelledTextStyle, text: 'wrororld'),
+          TextSpan(style: misspelledTextStyle, text: 'cfabiueqqocnakoef'),
           TextSpan(style: style, text: '! Hey!'),
         ]);
 

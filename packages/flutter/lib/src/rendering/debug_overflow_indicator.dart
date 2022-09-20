@@ -114,6 +114,14 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     TextPainter(textDirection: TextDirection.ltr), // This label is in English.
   );
 
+  @override
+  void dispose() {
+    for (final TextPainter painter in _indicatorLabel) {
+      painter.dispose();
+    }
+    super.dispose();
+  }
+
   // Set to true to trigger a debug message in the console upon
   // the next paint call. Will be reset after each paint.
   bool _overflowReportNeeded = true;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -28,7 +26,7 @@ import '../../src/fake_http_client.dart';
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
 void main() {
-  int firstExitCode;
+  int? firstExitCode;
 
   group('runner', () {
     setUp(() {
@@ -59,7 +57,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(
+      unawaited(runZoned<Future<void>?>(
         () {
           unawaited(runner.run(
             <String>['crash'],
@@ -112,7 +110,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(
+      unawaited(runZoned<Future<void>?>(
         () {
           unawaited(runner.run(
             <String>['crash'],
@@ -160,7 +158,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(
+      unawaited(runZoned<Future<void>?>(
         () {
           unawaited(runner.run(
             <String>['crash'],
@@ -197,7 +195,7 @@ void main() {
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
       expect(logContents, contains('[!] Flutter'));
 
-      final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
+      final CrashDetails sentDetails = (globals.crashReporter! as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error.toString(), 'Exception: an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
@@ -222,15 +220,15 @@ void main() {
 class CrashingFlutterCommand extends FlutterCommand {
   CrashingFlutterCommand({
     bool asyncCrash = false,
-    Completer<void> completer,
+    Completer<void>? completer,
   }) :  _asyncCrash = asyncCrash,
         _completer = completer;
 
   final bool _asyncCrash;
-  final Completer<void> _completer;
+  final Completer<void>? _completer;
 
   @override
-  String get description => null;
+  String get description => '';
 
   @override
   String get name => 'crash';
@@ -249,7 +247,7 @@ class CrashingFlutterCommand extends FlutterCommand {
     });
 
     await completer.future;
-    _completer.complete();
+    _completer!.complete();
 
     return FlutterCommandResult.success();
   }
@@ -298,16 +296,16 @@ class CrashingUsage implements Usage {
   String get clientId => _impl.clientId;
 
   @override
-  void sendCommand(String command, {CustomDimensions parameters}) =>
+  void sendCommand(String command, {CustomDimensions? parameters}) =>
       _impl.sendCommand(command, parameters: parameters);
 
   @override
   void sendEvent(
     String category,
     String parameter, {
-    String label,
-    int value,
-    CustomDimensions parameters,
+    String? label,
+    int? value,
+    CustomDimensions? parameters,
   }) => _impl.sendEvent(
     category,
     parameter,
@@ -321,7 +319,7 @@ class CrashingUsage implements Usage {
     String category,
     String variableName,
     Duration duration, {
-    String label,
+    String? label,
   }) => _impl.sendTiming(category, variableName, duration, label: label);
 
   @override
@@ -347,7 +345,7 @@ class WaitingCrashReporter implements CrashReporter {
   WaitingCrashReporter(Future<void> future) : _future = future;
 
   final Future<void> _future;
-  CrashDetails _details;
+  late CrashDetails _details;
 
   @override
   Future<void> informUser(CrashDetails details, File crashFile) {
