@@ -330,7 +330,7 @@ class InteractiveViewer extends StatefulWidget {
   /// than maxScale.
   final double minScale;
 
-  /// Changes the scrolling behavior after end of a gesture.
+  /// Changes the deceleration behavior after a gesture.
   ///
   /// Defaults to 0.0000135.
   ///
