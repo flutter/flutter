@@ -65,8 +65,10 @@ std::shared_ptr<FakeTransform> CloneFakeTransform(
       transform.get(), std::make_shared<FakeTransform>(FakeTransform{
                            .id = transform->id,
                            .translation = transform->translation,
-                           .clip_bounds = transform->clip_bounds,
+                           .scale = transform->scale,
                            .orientation = transform->orientation,
+                           .clip_bounds = transform->clip_bounds,
+                           .opacity = transform->opacity,
                            .children = CloneFakeTransformVector(
                                transform->children, transform_cache),
                            .content = CloneFakeContent(transform->content),
