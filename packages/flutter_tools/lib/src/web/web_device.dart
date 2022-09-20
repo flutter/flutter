@@ -118,7 +118,7 @@ abstract class ChromiumDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant WebApplicationPackage package, {
+    WebApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
