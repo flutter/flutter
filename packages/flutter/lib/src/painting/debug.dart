@@ -36,6 +36,12 @@ typedef HttpClientProvider = HttpClient Function();
 /// This value is ignored in non-debug builds.
 HttpClientProvider? debugNetworkImageHttpClientProvider;
 
+/// If a background isolate was used to decode an image, this will contain
+/// a reference to that http client. This may be a distinct instance from
+/// the client specified in [debugNetworkImageHttpClientProvider] or in
+/// [HttpOverrides].
+HttpClient? debugLastHttpClientUsed;
+
 /// Called when the framework is about to paint an [Image] to a [Canvas] with an
 /// [ImageSizeInfo] that contains the decoded size of the image as well as its
 /// output size.

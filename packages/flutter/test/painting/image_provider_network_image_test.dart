@@ -51,10 +51,12 @@ void main() {
     expect(imageCache.pendingImageCount, 1);
     expect(imageCache.statusForKey(imageProvider).pending, true);
 
-    result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-    }, onError: (dynamic error, StackTrace? stackTrace) {
-      caughtError.complete(error);
-    }));
+    result.addListener(ImageStreamListener(
+      (ImageInfo info, bool syncCall) { },
+      onError: (dynamic error, StackTrace? stackTrace) {
+        caughtError.complete(error);
+      },
+    ));
 
     final dynamic err = await caughtError.future;
 
@@ -67,7 +69,8 @@ void main() {
         .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
         .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
     );
-    expect(httpClient.request.response.drained, true);
+    final _FakeHttpClient lastClient = debugLastHttpClientUsed! as _FakeHttpClient;
+    expect(lastClient.request.response.drained, true);
   }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
 
   test('Uses the HttpClient provided by debugNetworkImageHttpClientProvider if set', () async {
@@ -76,14 +79,16 @@ void main() {
 
     Future<void> loadNetworkImage() async {
       final NetworkImage networkImage = NetworkImage(nonconst('foo'));
+      final Completer<void> loadCompleter = Completer<void>();
       final ImageStreamCompleter completer = networkImage.loadBuffer(networkImage, basicDecoder);
       completer.addListener(ImageStreamListener(
         (ImageInfo image, bool synchronousCall) { },
         onError: (dynamic error, StackTrace? stackTrace) {
           capturedErrors.add(error);
+          loadCompleter.complete();
         },
       ));
-      await Future<void>.value();
+      await loadCompleter.future;
     }
 
     await loadNetworkImage();

@@ -11,27 +11,36 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 
 void main() {
-  final MockHttpClient client = MockHttpClient();
-
   testWidgets('Headers', (WidgetTester tester) async {
-    HttpOverrides.runZoned<Future<void>>(() async {
-      await tester.pumpWidget(Image.network(
-        'https://www.example.com/images/frame.png',
-        headers: const <String, String>{'flutter': 'flutter'},
-      ));
-
-      expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
-
-    }, createHttpClient: (SecurityContext? _) {
+    final MockHttpClient client = MockHttpClient();
+    debugNetworkImageHttpClientProvider = () {
       return client;
+    };
+
+    await tester.runAsync(() async {
+      const NetworkImage image = NetworkImage(
+        'https://www.example.com/images/frame.png',
+        headers: <String, String>{'flutter': 'flutter'},
+      );
+      final Completer<bool> completer = Completer<bool>();
+      image.resolve(ImageConfiguration.empty).addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        completer.complete(true);
+      }));
+      await completer.future;
     });
+
+    final MockHttpClient lastClient = debugLastHttpClientUsed! as MockHttpClient;
+    expect(lastClient.request.headers.headers['flutter'], <String>['flutter']);
+    debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
 }
 
 class MockHttpClient extends Fake implements HttpClient {
+  final MockHttpClientRequest request = MockHttpClientRequest();
+
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
-    return MockHttpClientRequest();
+    return request;
   }
 
   @override
@@ -70,7 +79,7 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
 }
 
 class MockHttpHeaders extends Fake implements HttpHeaders {
-  static final Map<String, List<String>> headers = <String, List<String>>{};
+  final Map<String, List<String>> headers = <String, List<String>>{};
 
   @override
   void add(String key, Object value, { bool preserveHeaderCase = false }) {
