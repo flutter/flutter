@@ -750,6 +750,7 @@ TEST_F(FlatlandPlatformViewTests, EnableWireframeTest) {
 // "flutter/platform_views" channel for Createview.
 TEST_F(FlatlandPlatformViewTests, CreateViewTest) {
   MockPlatformViewDelegate delegate;
+  const uint64_t view_id = 42;
   flutter::TaskRunners task_runners =
       flutter::TaskRunners("test_runners",  // label
                            flutter_runner::CreateFMLTaskRunner(
@@ -784,25 +785,41 @@ TEST_F(FlatlandPlatformViewTests, CreateViewTest) {
   EXPECT_TRUE(base_view);
 
   // JSON for the message to be passed into the PlatformView.
-  const uint8_t txt[] =
-      "{"
-      "    \"method\":\"View.create\","
-      "    \"args\": {"
-      "       \"viewId\":42,"
-      "       \"hitTestable\":true,"
-      "       \"focusable\":true"
-      "    }"
-      "}";
+  std::ostringstream create_view_message;
+  create_view_message << "{"
+                      << "  \"method\":\"View.create\","
+                      << "  \"args\":{"
+                      << "    \"viewId\":" << view_id << ","
+                      << "    \"hitTestable\":true,"
+                      << "    \"focusable\":true"
+                      << "  }"
+                      << "}";
 
+  std::string create_view_call = create_view_message.str();
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
-          "flutter/platform_views", fml::MallocMapping::Copy(txt, sizeof(txt)),
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(create_view_call.c_str(),
+                                   create_view_call.size()),
           fml::RefPtr<flutter::PlatformMessageResponse>());
   base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
   EXPECT_TRUE(create_view_called);
+
+  // Platform view forwards the 'View.viewConnected' message on the
+  // 'flutter/platform_views' channel when a view gets created.
+  std::ostringstream view_connected_expected_out;
+  view_connected_expected_out << "{"
+                              << "\"method\":\"View.viewConnected\","
+                              << "\"args\":{"
+                              << "  \"viewId\":" << view_id << "  }"
+                              << "}";
+
+  ASSERT_NE(delegate.message(), nullptr);
+  EXPECT_EQ(view_connected_expected_out.str(),
+            ToString(delegate.message()->data()));
 }
 
 // This test makes sure that the PlatformView forwards messages on the
@@ -924,6 +941,8 @@ TEST_F(FlatlandPlatformViewTests, UpdateViewTest) {
 // "flutter/platform_views" channel for DestroyView.
 TEST_F(FlatlandPlatformViewTests, DestroyViewTest) {
   MockPlatformViewDelegate delegate;
+  const uint64_t view_id = 42;
+
   flutter::TaskRunners task_runners =
       flutter::TaskRunners("test_runners",  // label
                            flutter_runner::CreateFMLTaskRunner(
@@ -970,7 +989,7 @@ TEST_F(FlatlandPlatformViewTests, DestroyViewTest) {
   create_message << "{"
                  << "    \"method\":\"View.create\","
                  << "    \"args\": {"
-                 << "       \"viewId\":42,"
+                 << "       \"viewId\":" << view_id << ","
                  << "       \"hitTestable\":true,"
                  << "       \"focusable\":true"
                  << "    }"
@@ -981,24 +1000,41 @@ TEST_F(FlatlandPlatformViewTests, DestroyViewTest) {
       "flutter/platform_views", create_message.str()));
   RunLoopUntilIdle();
 
-  // JSON for the message to be passed into the PlatformView.
-  const uint8_t txt[] =
-      "{"
-      "    \"method\":\"View.dispose\","
-      "    \"args\": {"
-      "       \"viewId\":42"
-      "    }"
-      "}";
+  delegate.Reset();
 
+  // JSON for the message to be passed into the PlatformView.
+  std::ostringstream dispose_message;
+  dispose_message << "{"
+                  << "    \"method\":\"View.dispose\","
+                  << "    \"args\": {"
+                  << "       \"viewId\":" << view_id << "    }"
+                  << "}";
+
+  std::string dispose_view_call = dispose_message.str();
   std::unique_ptr<flutter::PlatformMessage> message =
       std::make_unique<flutter::PlatformMessage>(
-          "flutter/platform_views", fml::MallocMapping::Copy(txt, sizeof(txt)),
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(dispose_view_call.c_str(),
+                                   dispose_view_call.size()),
           fml::RefPtr<flutter::PlatformMessageResponse>());
   base_view->HandlePlatformMessage(std::move(message));
 
   RunLoopUntilIdle();
 
   EXPECT_TRUE(destroy_view_called);
+
+  // Platform view forwards the 'View.viewDisconnected' message on the
+  // 'flutter/platform_views' channel when a view gets destroyed.
+  std::ostringstream view_disconnected_expected_out;
+  view_disconnected_expected_out << "{"
+                                 << "\"method\":\"View.viewDisconnected\","
+                                 << "\"args\":{"
+                                 << "  \"viewId\":" << view_id << "  }"
+                                 << "}";
+
+  ASSERT_NE(delegate.message(), nullptr);
+  EXPECT_EQ(view_disconnected_expected_out.str(),
+            ToString(delegate.message()->data()));
 }
 
 // This test makes sure that the PlatformView forwards messages on the
