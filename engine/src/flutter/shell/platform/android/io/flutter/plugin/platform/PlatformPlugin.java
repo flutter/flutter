@@ -239,12 +239,12 @@ public class PlatformPlugin {
                     // controls. Another common action is to set a timer to dismiss
                     // the system bars and restore the fullscreen mode that was
                     // previously enabled.
-                    platformChannel.systemChromeChanged(false);
+                    platformChannel.systemChromeChanged(true);
                   } else {
                     // The system bars are NOT visible. Make any desired adjustments
                     // to your UI, such as hiding the action bar or other
                     // navigational controls.
-                    platformChannel.systemChromeChanged(true);
+                    platformChannel.systemChromeChanged(false);
                   }
                 });
           }
