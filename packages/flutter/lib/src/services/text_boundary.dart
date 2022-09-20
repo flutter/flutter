@@ -242,7 +242,7 @@ class WhitespaceBoundary extends TextBoundary {
 /// Gets the boundary by calling the [outer] and pipe the result to
 /// [inner].
 ///
-/// This class is useful if one wants to ignore characters before finding the
+/// This class is useful if one wants to ignore certain text before finding the
 /// text boundary. For example, use [WhitespaceBoundary] as the
 /// [outer] to ignores any white space before finding the boundary
 /// of [inner] if the input position happens to be a whitespace
@@ -256,7 +256,7 @@ class ExpandedTextBoundary extends TextBoundary {
 
   /// The outer boundary to call with the input position.
   ///
-  /// The result is piped to the [inner] before returning the the caller.
+  /// The result is piped to the [inner] before returning to the caller.
   final TextBoundary outer;
 
   @override
