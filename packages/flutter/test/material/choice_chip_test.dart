@@ -120,4 +120,23 @@ void main() {
     await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
+
+  testWidgets('Choice Chip respects Avatar and IconTheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ChoiceChip(
+            selected: false,
+            onSelected: (bool newValue) { },
+            label: const Text('choice chip'),
+            avatar: const Icon(Icons.cabin),
+            iconTheme: const IconThemeData(color: Color(0xffeeaadd)),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, const Color(0xffeeaadd));
+    expect(tester.takeException(), null);
+  });
 }
