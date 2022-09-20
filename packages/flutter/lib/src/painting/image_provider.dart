@@ -728,7 +728,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       // Hot reload/restart could change whether an asset bundle or key in a
       // bundle are available, or if it is a network backed bundle.
       try {
-        buffer = await key.bundle.loadBuffer(key.name);
+        buffer = await key.bundle.loadBuffer(Uri.decodeFull(key.name));
       } on FlutterError {
         PaintingBinding.instance.imageCache.evict(key);
         rethrow;

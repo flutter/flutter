@@ -269,7 +269,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
     bool debugUsePlatformChannel = false;
     assert(() {
       // dart:io is safe to use here since we early return for web
-      // above. If that code is changed, this needs to be gaurded on
+      // above. If that code is changed, this needs to be guarded on
       // web presence. Override how assets are loaded in tests so that
       // the old loader behavior that allows tests to load assets from
       // the current package using the package prefix.
