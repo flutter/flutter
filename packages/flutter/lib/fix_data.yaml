@@ -17,6 +17,39 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      method: 'buildViewportChrome'
+      inClass: 'ScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: ['material.dart']
+      method: 'buildViewportChrome'
+      inClass: 'MaterialScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: ['cupertino.dart']
+      method: 'buildViewportChrome'
+      inClass: 'CupertinoScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
   # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15

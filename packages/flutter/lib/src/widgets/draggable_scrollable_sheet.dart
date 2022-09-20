@@ -663,6 +663,10 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void didUpdateWidget(covariant DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?._detach();
+      widget.controller?._attach(_scrollController);
+    }
     _replaceExtent(oldWidget);
   }
 
@@ -715,7 +719,9 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _scrollController.extent = _extent;
     // If an external facing controller was provided, let it know that the
     // extent has been replaced.
-    widget.controller?._onExtentReplaced(previousExtent);
+    if (widget.controller == oldWidget.controller) {
+      widget.controller?._onExtentReplaced(previousExtent);
+    }
     if (widget.snap
         && (widget.snap != oldWidget.snap || widget.snapSizes != oldWidget.snapSizes)
         && _scrollController.hasClients
