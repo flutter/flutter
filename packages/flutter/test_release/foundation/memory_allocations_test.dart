@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -43,104 +41,39 @@ void main() {
 }
 
 void _checkSdkHandlersNotSet() {
-  expect(ui.Image.onCreate, isNull);
-  expect(ui.Picture.onCreate, isNull);
-  expect(ui.Image.onDispose, isNull);
-  expect(ui.Picture.onDispose, isNull);
-}
-
-class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _TestRenderObject();
-  }
-}
-
-class _TestElement extends RootRenderObjectElement{
-  _TestElement(): super(_TestLeafRenderObjectWidget());
-
-  void makeInactive() {
-    assignOwner(BuildOwner(focusManager: FocusManager()));
-    mount(null, null);
-    deactivate();
-  }
-}
-
-class _TestRenderObject extends RenderObject {
-  @override
-  void debugAssertDoesMeetConstraints() {}
-
-  @override
-  Rect get paintBounds => throw UnimplementedError();
-
-  @override
-  void performLayout() {}
-
-  @override
-  void performResize() {}
-
-  @override
-  Rect get semanticBounds => throw UnimplementedError();
-}
-
-class _MyStateFulWidget extends StatefulWidget {
-  const _MyStateFulWidget();
-
-  @override
-  State<_MyStateFulWidget> createState() => _MyStateFulWidgetState();
-}
-
-class _MyStateFulWidgetState extends State<_MyStateFulWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-class _TestLayer extends Layer{
-  @override
-  void addToScene(ui.SceneBuilder builder) {}
+  expect(Image.onCreate, isNull);
+  expect(Picture.onCreate, isNull);
+  expect(Image.onDispose, isNull);
+  expect(Picture.onDispose, isNull);
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<void> _activateFlutterObjects(WidgetTester tester) async {
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {});
-  final ui.Picture picture = _createPicture();
-  final _TestElement element = _TestElement();
-  final RenderObject renderObject = _TestRenderObject();
-  final Layer layer = _TestLayer();
+  final Picture picture = _createPicture();
 
   valueNotifier.dispose();
   changeNotifier.dispose();
   picture.dispose();
-  element.makeInactive(); element.unmount();
-  renderObject.dispose();
-  // It is ok to use protected members for testing.
-  // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-  layer.dispose();
 
   // TODO(polina-c): Remove the condition after
   // https://github.com/flutter/flutter/issues/110599 is fixed.
   if (!kIsWeb) {
-    final ui.Image image = await _createImage();
+    final Image image = await _createImage();
     image.dispose();
   }
-
-  // Create and dispose State:
-  await tester.pumpWidget(const _MyStateFulWidget());
-  await tester.pumpWidget(const SizedBox.shrink());
 }
 
-Future<ui.Image> _createImage() async {
-  final ui.Picture picture = _createPicture();
-  final ui.Image result = await picture.toImage(10, 10);
+Future<Image> _createImage() async {
+  final Picture picture = _createPicture();
+  final Image result = await picture.toImage(10, 10);
   picture.dispose();
   return result;
 }
 
-ui.Picture _createPicture() {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
+Picture _createPicture() {
+  final PictureRecorder recorder = PictureRecorder();
   final Canvas canvas = Canvas(recorder);
   const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
