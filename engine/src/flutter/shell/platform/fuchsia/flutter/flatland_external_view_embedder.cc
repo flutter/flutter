@@ -213,20 +213,28 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
           }
         }
 
-        // TODO(fxbug.dev/64201): Handle clips.
-
         // Set transform for the viewport.
-        // TODO(fxbug.dev/94000): Handle scaling.
         if (view_mutators.transform != viewport.mutators.transform) {
           flatland_->flatland()->SetTranslation(
               viewport.transform_id,
               {static_cast<int32_t>(view_mutators.transform.getTranslateX()),
                static_cast<int32_t>(view_mutators.transform.getTranslateY())});
+
+          flatland_->flatland()->SetScale(
+              viewport.transform_id, {view_mutators.transform.getScaleX(),
+                                      view_mutators.transform.getScaleY()});
           viewport.mutators.transform = view_mutators.transform;
         }
 
         // TODO(fxbug.dev/94000): Set HitTestBehavior.
-        // TODO(fxbug.dev/94000): Set opacity.
+        // TODO(fxbug.dev/94000): Set ClipRegions.
+
+        // Set opacity.
+        if (view_mutators.opacity != viewport.mutators.opacity) {
+          flatland_->flatland()->SetOpacity(viewport.transform_id,
+                                            view_mutators.opacity);
+          viewport.mutators.opacity = view_mutators.opacity;
+        }
 
         // Set size and occlusion hint.
         if (view_size != viewport.size ||

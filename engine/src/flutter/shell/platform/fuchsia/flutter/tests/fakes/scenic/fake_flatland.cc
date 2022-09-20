@@ -211,6 +211,39 @@ void FakeFlatland::SetTranslation(
   transform->translation = translation;
 }
 
+void FakeFlatland::SetScale(fuchsia::ui::composition::TransformId transform_id,
+                            fuchsia::math::VecF scale) {
+  if (transform_id.value == 0) {
+    // TODO(fxb/85619): Raise a FlatlandError here
+    FML_CHECK(false) << "FakeFlatland::SetScale: TransformId 0 is invalid.";
+    return;
+  }
+
+  auto found_transform = pending_graph_.transform_map.find(transform_id.value);
+  if (found_transform == pending_graph_.transform_map.end()) {
+    // TODO(fxb/85619): Raise a FlatlandError here
+    FML_CHECK(false) << "FakeFlatland::SetScale: TransformId "
+                     << transform_id.value << " does not exist.";
+    return;
+  }
+
+  if (scale.x == 0.f || scale.y == 0.f) {
+    FML_CHECK(false) << "SetScale failed, zero values not allowed (" << scale.x
+                     << ", " << scale.y << " ).";
+    return;
+  }
+
+  if (isinf(scale.x) || isinf(scale.y) || isnan(scale.x) || isnan(scale.y)) {
+    FML_CHECK(false) << "SetScale failed, invalid scale values (" << scale.x
+                     << ", " << scale.y << " ).";
+    return;
+  }
+
+  auto& transform = found_transform->second;
+  FML_CHECK(transform);
+  transform->scale = scale;
+}
+
 void FakeFlatland::SetOrientation(
     fuchsia::ui::composition::TransformId transform_id,
     fuchsia::ui::composition::Orientation orientation) {
@@ -232,6 +265,32 @@ void FakeFlatland::SetOrientation(
   auto& transform = found_transform->second;
   FML_CHECK(transform);
   transform->orientation = orientation;
+}
+
+void FakeFlatland::SetOpacity(
+    fuchsia::ui::composition::TransformId transform_id,
+    float value) {
+  if (transform_id.value == 0) {
+    // TODO(fxb/85619): Raise a FlatlandError here
+    FML_CHECK(false) << "FakeFlatland::SetOpacity: TransformId 0 is invalid.";
+    return;
+  }
+
+  auto found_transform = pending_graph_.transform_map.find(transform_id.value);
+  if (found_transform == pending_graph_.transform_map.end()) {
+    // TODO(fxb/85619): Raise a FlatlandError here
+    FML_CHECK(false) << "FakeFlatland::SetOpacity: TransformId "
+                     << transform_id.value << " does not exist.";
+    return;
+  }
+
+  if (value < 0.f || value > 1.f) {
+    FML_CHECK(false) << "FakeFlatland::SetOpacity: Invalid opacity value.";
+  }
+
+  auto& transform = found_transform->second;
+  FML_CHECK(transform);
+  transform->opacity = value;
 }
 
 void FakeFlatland::SetClipBoundary(
