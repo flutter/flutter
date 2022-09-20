@@ -124,7 +124,7 @@ void main() {
       );
       await tester.tap(find.byType(CupertinoSearchTextField));
       await tester.showKeyboard(find.byType(CupertinoSearchTextField));
-      expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.text'));
+      expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.number'));
     },
   );
 
