@@ -25,6 +25,8 @@ class PlatformMessageHandlerIos : public PlatformMessageHandler {
 
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 
+  bool DoesHandlePlatformMessageOnPlatformThread() const override { return false; }
+
   void InvokePlatformMessageResponseCallback(int response_id,
                                              std::unique_ptr<fml::Mapping> mapping) override;
 

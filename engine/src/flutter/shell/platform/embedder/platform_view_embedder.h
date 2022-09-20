@@ -100,9 +100,15 @@ class PlatformViewEmbedder final : public PlatformView {
   // |PlatformView|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 
+  // |PlatformView|
+  std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
+      const override;
+
  private:
+  class EmbedderPlatformMessageHandler;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::unique_ptr<EmbedderSurface> embedder_surface_;
+  std::shared_ptr<EmbedderPlatformMessageHandler> platform_message_handler_;
   PlatformDispatchTable platform_dispatch_table_;
 
   // |PlatformView|

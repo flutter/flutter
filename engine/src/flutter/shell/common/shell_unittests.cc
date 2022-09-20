@@ -145,6 +145,7 @@ class MockPlatformMessageHandler : public PlatformMessageHandler {
  public:
   MOCK_METHOD1(HandlePlatformMessage,
                void(std::unique_ptr<PlatformMessage> message));
+  MOCK_CONST_METHOD0(DoesHandlePlatformMessageOnPlatformThread, bool());
   MOCK_METHOD2(InvokePlatformMessageResponseCallback,
                void(int response_id, std::unique_ptr<fml::Mapping> mapping));
   MOCK_METHOD1(InvokePlatformMessageEmptyResponseCallback,
