@@ -549,13 +549,10 @@ class _RadioDefaultsM3 extends RadioThemeData {
   @override
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.disabled)) {
           return _colors.onSurface.withOpacity(0.38);
         }
-        return _colors.onSurface.withOpacity(0.38);
-      }
-      if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.primary;
         }
@@ -566,6 +563,9 @@ class _RadioDefaultsM3 extends RadioThemeData {
           return _colors.primary;
         }
         return _colors.primary;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
       }
       if (states.contains(MaterialState.pressed)) {
         return _colors.onSurface;

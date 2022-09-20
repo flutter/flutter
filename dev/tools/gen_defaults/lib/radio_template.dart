@@ -21,13 +21,10 @@ class _RadioDefaultsM3 extends RadioThemeData {
   @override
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.disabled)) {
           return ${componentColor('md.comp.radio-button.disabled.selected.icon')};
         }
-        return ${componentColor('md.comp.radio-button.disabled.unselected.icon')};
-      }
-      if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor('md.comp.radio-button.selected.pressed.icon')};
         }
@@ -38,6 +35,9 @@ class _RadioDefaultsM3 extends RadioThemeData {
           return ${componentColor('md.comp.radio-button.selected.focus.icon')};
         }
         return ${componentColor('md.comp.radio-button.selected.icon')};
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return ${componentColor('md.comp.radio-button.disabled.unselected.icon')};
       }
       if (states.contains(MaterialState.pressed)) {
         return ${componentColor('md.comp.radio-button.unselected.pressed.icon')};
